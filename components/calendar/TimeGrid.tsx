@@ -12,15 +12,22 @@ import {
 
 interface TimeGridProps {
   children: React.ReactNode;
-  columnCount?: number; // 1 for day view, 7 for week view
+  columnCount?: number;
   showCurrentTime?: boolean;
+  gridScrollRef?: React.RefObject<HTMLDivElement | null>;
+  onHorizontalScroll?: () => void;
+  isMobile?: boolean;
+  contentMinWidth?: string;
 }
 
-function TimeGrid({ children, columnCount = 7, showCurrentTime = true }: TimeGridProps) {
+function TimeGrid({ children, columnCount = 7, showCurrentTime = true, gridScrollRef, onHorizontalScroll, isMobile = false, contentMinWidth }: TimeGridProps) {
   const timeSlots = generateTimeSlots();
-  const gridRef = useRef<HTMLDivElement>(null);
+  const internalGridRef = useRef<HTMLDivElement>(null);
   const timeLabelsRef = useRef<HTMLDivElement>(null);
   const [currentTimePosition, setCurrentTimePosition] = useState(getCurrentTimePosition());
+
+  // Use external ref if provided, otherwise internal
+  const effectiveGridRef = gridScrollRef || internalGridRef;
 
   // Update current time indicator every minute
   useEffect(() => {
@@ -28,46 +35,46 @@ function TimeGrid({ children, columnCount = 7, showCurrentTime = true }: TimeGri
 
     const interval = setInterval(() => {
       setCurrentTimePosition(getCurrentTimePosition());
-    }, 60000); // Update every minute
+    }, 60000);
 
     return () => clearInterval(interval);
   }, [showCurrentTime]);
 
-  // Scroll to current time on mount and sync both containers
+  // Scroll to current time on mount
   useEffect(() => {
-    if (gridRef.current && isCurrentTimeVisible()) {
+    const el = effectiveGridRef.current;
+    if (el && isCurrentTimeVisible()) {
       const scrollPosition = Math.max(0, currentTimePosition - 100);
-      gridRef.current.scrollTop = scrollPosition;
-      // Also sync time labels
+      el.scrollTop = scrollPosition;
       if (timeLabelsRef.current) {
         timeLabelsRef.current.scrollTop = scrollPosition;
       }
     }
   }, []);
 
-  // Sync time labels scroll with grid scroll
+  // Sync time labels scroll with grid scroll + call horizontal scroll handler
   const handleGridScroll = useCallback(() => {
-    if (gridRef.current && timeLabelsRef.current) {
-      timeLabelsRef.current.scrollTop = gridRef.current.scrollTop;
+    const el = effectiveGridRef.current;
+    if (el && timeLabelsRef.current) {
+      timeLabelsRef.current.scrollTop = el.scrollTop;
     }
-  }, []);
+    onHorizontalScroll?.();
+  }, [effectiveGridRef, onHorizontalScroll]);
 
   const totalHours = END_HOUR - START_HOUR + 1;
   const gridHeight = totalHours * HOUR_HEIGHT;
 
   return (
     <div className="flex flex-1 overflow-hidden bg-white">
-      {/* Time labels column - Apple Calendar style: clean, no background */}
+      {/* Time labels column */}
       <div className="flex w-[52px] flex-shrink-0 flex-col">
-        {/* Time labels - hidden scrollbar, synced with grid */}
         <div
           ref={timeLabelsRef}
           className="relative flex-1 overflow-hidden"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}
         >
           <div style={{ height: gridHeight }}>
             {timeSlots.map((time, index) => {
-              // Only show labels from 6:00 onwards (first labeled hour)
               const hour = parseInt(time.split(':')[0], 10);
               const showLabel = hour >= 6;
 
@@ -91,14 +98,14 @@ function TimeGrid({ children, columnCount = 7, showCurrentTime = true }: TimeGri
 
       {/* Main grid area */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Grid content with scroll */}
         <div
-          ref={gridRef}
+          ref={effectiveGridRef as React.RefObject<HTMLDivElement>}
           className="relative flex-1 overflow-auto"
           onScroll={handleGridScroll}
+          style={isMobile ? { WebkitOverflowScrolling: 'touch' } as React.CSSProperties : undefined}
         >
-          <div className="relative" style={{ height: gridHeight, minWidth: '100%' }}>
-            {/* Horizontal hour lines - Apple Calendar style: subtle, clean */}
+          <div className="relative" style={{ height: gridHeight, minWidth: contentMinWidth || '100%' }}>
+            {/* Horizontal hour lines */}
             {timeSlots.map((time, index) => (
               <div
                 key={time}
@@ -111,7 +118,7 @@ function TimeGrid({ children, columnCount = 7, showCurrentTime = true }: TimeGri
               />
             ))}
 
-            {/* Half-hour lines - Apple Calendar style: barely visible */}
+            {/* Half-hour lines */}
             {timeSlots.slice(0, -1).map((time, index) => (
               <div
                 key={`${time}-half`}
@@ -124,7 +131,7 @@ function TimeGrid({ children, columnCount = 7, showCurrentTime = true }: TimeGri
               />
             ))}
 
-            {/* Current time indicator - Apple Calendar style: red line with dot */}
+            {/* Current time indicator */}
             {showCurrentTime && isCurrentTimeVisible() && (
               <div
                 className="pointer-events-none absolute left-0 right-0 z-20 flex items-center"

@@ -247,10 +247,6 @@ export function AppBar() {
             ))}
           </nav>
 
-          {/* Current page - mobile only */}
-          <span className="md:hidden text-sm font-semibold text-gray-900 truncate">
-            {currentPage}
-          </span>
         </div>
 
         {/* ----------------------------------------------------------------- */}

@@ -166,12 +166,11 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
           {/* Date circle - only number, no day name above */}
           <div className="flex flex-col items-center">
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-[#1A1F36]`}
+              className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold ${isCurrentDay ? '' : 'text-[#1A1F36]'}`}
               style={isCurrentDay ? {
-                border: '2px solid transparent',
-                backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                backgroundOrigin: 'border-box',
-                backgroundClip: 'padding-box, border-box',
+                background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
               } : undefined}
             >
               {currentDate.getDate()}

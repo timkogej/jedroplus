@@ -647,7 +647,7 @@ export default function OsebjePage() {
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 to-pink-50/30">
+      <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
           <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

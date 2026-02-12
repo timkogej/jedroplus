@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef, useCallback, useEffect, useState } from 'react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
 import TimeGrid from './TimeGrid';
@@ -102,11 +102,42 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
 }
 
 function WeekView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick, showAllDays = true }: WeekViewProps) {
+  const [isMobile, setIsMobile] = useState(false);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
+  const gridScrollRef = useRef<HTMLDivElement>(null);
+  const isSyncing = useRef(false);
+
+  // Detect mobile
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // Sync horizontal scroll between header and grid
+  const handleHeaderScroll = useCallback(() => {
+    if (isSyncing.current) return;
+    isSyncing.current = true;
+    if (headerScrollRef.current && gridScrollRef.current) {
+      gridScrollRef.current.scrollLeft = headerScrollRef.current.scrollLeft;
+    }
+    requestAnimationFrame(() => { isSyncing.current = false; });
+  }, []);
+
+  const handleGridHorizontalScroll = useCallback(() => {
+    if (isSyncing.current) return;
+    isSyncing.current = true;
+    if (headerScrollRef.current && gridScrollRef.current) {
+      headerScrollRef.current.scrollLeft = gridScrollRef.current.scrollLeft;
+    }
+    requestAnimationFrame(() => { isSyncing.current = false; });
+  }, []);
+
   // Get all week days, then filter if showAllDays is false
   const allWeekDays = useMemo(() => getWeekDays(currentDate), [currentDate]);
   const weekDays = useMemo(() => {
     if (showAllDays) return allWeekDays;
-    // Filter to only show weekdays (Mon-Fri), exclude Saturday (6) and Sunday (0)
     return allWeekDays.filter(day => {
       const dayOfWeek = day.getDay();
       return dayOfWeek !== 0 && dayOfWeek !== 6;
@@ -115,8 +146,8 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
 
   const columnCount = weekDays.length;
 
-  // Log absences for debugging
-  console.log('[WeekView] Received absences:', absences.length, absences);
+  // Mobile column width: show 4 days at a time
+  const mobileColWidth = `calc((100vw - 52px) / 4)`;
 
   // Get absences for a specific day
   const getAbsencesForDay = useMemo(() => {
@@ -126,19 +157,15 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
       const dayEnd = new Date(day);
       dayEnd.setHours(23, 59, 59, 999);
 
-      const filtered = absences.filter((absence) => {
+      return absences.filter((absence) => {
         const absenceStart = new Date(absence.start_at);
         const absenceEnd = new Date(absence.end_at);
-        // Check if absence overlaps with this day
-        const overlaps = absenceStart <= dayEnd && absenceEnd >= dayStart;
-        console.log('[WeekView] Checking absence:', absence.id, 'start:', absence.start_at, '→', absenceStart, 'end:', absence.end_at, '→', absenceEnd, 'day:', day.toISOString(), 'overlaps:', overlaps);
-        return overlaps;
+        return absenceStart <= dayEnd && absenceEnd >= dayStart;
       });
-      return filtered;
     };
   }, [absences]);
 
-  // Group appointments by day using local date keys to avoid timezone issues
+  // Group appointments by day
   const appointmentsByDay = useMemo(() => {
     const grouped = new Map<string, AppointmentWithDetails[]>();
 
@@ -159,71 +186,103 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
     return grouped;
   }, [weekDays, appointments]);
 
+  // Grid template for columns - fixed width on mobile, flexible on desktop
+  const gridTemplateColumns = isMobile
+    ? weekDays.map(() => mobileColWidth).join(' ')
+    : `repeat(${columnCount}, minmax(0, 1fr))`;
+
+  // Content min-width for TimeGrid so horizontal lines span full scrollable width
+  const contentMinWidth = isMobile ? `calc(${columnCount} * (100vw - 52px) / 4)` : undefined;
+
+  // Auto-scroll to current day on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const todayIndex = weekDays.findIndex(day => isToday(day));
+    if (todayIndex === -1) return;
+
+    const colWidth = (window.innerWidth - 52) / 4;
+    const maxScroll = Math.max(0, (columnCount - 4) * colWidth);
+    const targetScroll = Math.max(0, Math.min((todayIndex - 1) * colWidth, maxScroll));
+
+    requestAnimationFrame(() => {
+      if (gridScrollRef.current) {
+        gridScrollRef.current.scrollLeft = targetScroll;
+      }
+      if (headerScrollRef.current) {
+        headerScrollRef.current.scrollLeft = targetScroll;
+      }
+    });
+  }, [isMobile, weekDays, columnCount]);
+
   return (
     <div className="flex h-full flex-col">
-      {/* Day headers - Apple Calendar style */}
-      <div className="flex bg-white">
+      {/* Day headers */}
+      <div className="flex bg-white flex-shrink-0">
         {/* Time column spacer */}
         <div className="w-[52px] flex-shrink-0" />
 
-        {/* Day headers */}
-        <div className="grid flex-1" style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}>
-          {weekDays.map((day, index) => {
-            const isCurrentDay = isToday(day);
-            const dayAbsences = getAbsencesForDay(day);
-            const hasAbsence = dayAbsences.length > 0;
-            return (
-              <div
-                key={index}
-                className={`flex flex-col items-center py-2.5
-                           ${hasAbsence ? 'bg-amber-50/50' : ''}`}
-              >
-                {/* Day abbreviation - same style for all days */}
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-                  {DAYS_SHORT[day.getDay()]}
-                </span>
-                {/* Date number - gradient border ring for today */}
-                <button
-                  type="button"
-                  onClick={() => onDateClick?.(day)}
-                  className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold
-                             transition-all duration-200 text-[#1A1F36] hover:bg-gray-100
-                             ${isCurrentDay ? 'font-bold' : ''}`}
-                  style={isCurrentDay ? {
-                    border: '2px solid transparent',
-                    backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                    backgroundOrigin: 'border-box',
-                    backgroundClip: 'padding-box, border-box',
-                  } : undefined}
+        {/* Day headers - horizontally scrollable on mobile */}
+        <div
+          ref={headerScrollRef}
+          onScroll={handleHeaderScroll}
+          className={`flex-1 ${isMobile ? 'overflow-x-auto' : ''}`}
+          style={isMobile ? { scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties : undefined}
+        >
+          <div className="grid" style={{ gridTemplateColumns }}>
+            {weekDays.map((day, index) => {
+              const isCurrentDay = isToday(day);
+              const dayAbsences = getAbsencesForDay(day);
+              const hasAbsence = dayAbsences.length > 0;
+              return (
+                <div
+                  key={index}
+                  className={`flex flex-col items-center py-2.5
+                             ${hasAbsence ? 'bg-amber-50/50' : ''}`}
                 >
-                  {day.getDate()}
-                </button>
-                {/* Show absences with employee name and reason */}
-                {hasAbsence && (
-                  <div className="mt-1 flex flex-col gap-0.5 w-full px-1">
-                    {dayAbsences.slice(0, 2).map((absence) => (
-                      <span
-                        key={absence.id}
-                        className="text-[9px] font-medium text-amber-700 truncate text-center"
-                        title={`${absence.employee_name || 'Vsi'}${absence.reason ? ` - ${absence.reason}` : ''}`}
-                      >
-                        {absence.employee_name || 'Vsi'}{absence.reason ? `: ${absence.reason}` : ''}
-                      </span>
-                    ))}
-                    {dayAbsences.length > 2 && (
-                      <span className="text-[9px] text-amber-600 text-center">
-                        +{dayAbsences.length - 2} več
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                    {DAYS_SHORT[day.getDay()]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onDateClick?.(day)}
+                    className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold
+                               transition-all duration-200 hover:bg-gray-100
+                               ${isCurrentDay ? 'font-bold' : 'text-[#1A1F36]'}`}
+                    style={isCurrentDay ? {
+                      background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    } : undefined}
+                  >
+                    {day.getDate()}
+                  </button>
+                  {hasAbsence && !isMobile && (
+                    <div className="mt-1 flex flex-col gap-0.5 w-full px-1">
+                      {dayAbsences.slice(0, 2).map((absence) => (
+                        <span
+                          key={absence.id}
+                          className="text-[9px] font-medium text-amber-700 truncate text-center"
+                          title={`${absence.employee_name || 'Vsi'}${absence.reason ? ` - ${absence.reason}` : ''}`}
+                        >
+                          {absence.employee_name || 'Vsi'}{absence.reason ? `: ${absence.reason}` : ''}
+                        </span>
+                      ))}
+                      {dayAbsences.length > 2 && (
+                        <span className="text-[9px] text-amber-600 text-center">
+                          +{dayAbsences.length - 2} več
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Separator line - Apple Calendar style: subtle gradient line */}
+      {/* Separator line */}
       <div
         className="flex-shrink-0"
         style={{
@@ -233,14 +292,20 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
       />
 
       {/* Time grid with appointments */}
-      <TimeGrid columnCount={columnCount} showCurrentTime>
-        <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}>
+      <TimeGrid
+        columnCount={columnCount}
+        showCurrentTime
+        gridScrollRef={gridScrollRef}
+        onHorizontalScroll={handleGridHorizontalScroll}
+        isMobile={isMobile}
+        contentMinWidth={contentMinWidth}
+      >
+        <div className="grid h-full" style={{ gridTemplateColumns }}>
           {weekDays.map((day, dayIndex) => {
             const dateKey = getLocalDateKey(day);
             const dayAppointments = appointmentsByDay.get(dateKey) || [];
             const layout = calculateAppointmentLayout(dayAppointments);
             const isCurrentDay = isToday(day);
-
             const dayAbsencesForGrid = getAbsencesForDay(day);
 
             return (
@@ -260,26 +325,21 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
                   const dayEnd = new Date(day);
                   dayEnd.setHours(23, 59, 59, 999);
 
-                  // Calculate visible time range for this day
                   const visibleStart = absenceStart < dayStart ? dayStart : absenceStart;
                   const visibleEnd = absenceEnd > dayEnd ? dayEnd : absenceEnd;
 
-                  // Get hours and minutes
                   const startHour = visibleStart.getHours();
                   const startMin = visibleStart.getMinutes();
                   const endHour = visibleEnd.getHours();
                   const endMin = visibleEnd.getMinutes();
 
-                  // Calculate position (relative to START_HOUR)
                   const startMinutes = startHour * 60 + startMin;
                   const endMinutes = endHour * 60 + endMin;
 
-                  // Skip if completely outside visible range
                   if (endMinutes <= START_HOUR * 60 || startMinutes >= END_HOUR * 60) {
                     return null;
                   }
 
-                  // Clamp to visible range
                   const clampedStart = Math.max(startMinutes, START_HOUR * 60);
                   const clampedEnd = Math.min(endMinutes, END_HOUR * 60);
 
@@ -314,7 +374,6 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
                 {dayAppointments.map((apt) => {
                   const startMinutes = parseTimeToMinutes(apt.cas_zacetek);
 
-                  // Skip if outside visible range
                   if (startMinutes < START_HOUR * 60 || startMinutes >= END_HOUR * 60) {
                     return null;
                   }

@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef, useEffect } from 'react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
 import AppointmentCard from './AppointmentCard';
@@ -25,6 +25,14 @@ interface MonthViewProps {
 function MonthView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick }: MonthViewProps) {
   const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const monthDays = useMemo(() => getMonthGrid(currentDate), [currentDate]);
+  const todayRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to today's date when the view mounts or month changes
+  useEffect(() => {
+    if (todayRef.current) {
+      todayRef.current.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
+  }, [currentDate]);
 
   // Group appointments by day using local date keys to avoid timezone issues
   const appointmentsByDay = useMemo(() => {
@@ -98,6 +106,7 @@ function MonthView({ currentDate, appointments, absences = [], services = [], on
           return (
             <div
               key={index}
+              ref={isCurrentDay ? todayRef : undefined}
               className={`group relative flex min-h-[140px] flex-col overflow-hidden p-2 transition-colors cursor-pointer
                          ${!isCurrentMonth ? 'bg-gray-50/30' : 'bg-white hover:bg-gray-50/50'}
                          ${hasAbsence ? 'bg-amber-50/30' : ''}`}
@@ -117,16 +126,15 @@ function MonthView({ currentDate, appointments, absences = [], services = [], on
                              transition-all
                              ${!isCurrentMonth ? 'text-gray-300' : ''}
                              ${isCurrentDay
-                               ? 'font-bold text-[#1A1F36]'
+                               ? 'font-bold'
                                : isCurrentMonth
                                  ? 'text-[#1A1F36] hover:bg-gray-100'
                                  : ''
                              }`}
                   style={isCurrentDay ? {
-                    border: '2px solid transparent',
-                    backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                    backgroundOrigin: 'border-box',
-                    backgroundClip: 'padding-box, border-box',
+                    background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
                   } : undefined}
                 >
                   {day.getDate()}

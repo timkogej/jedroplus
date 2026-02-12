@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
 
   return (
     <ProtectedLayout>
-      <main className="mx-auto w-full max-w-[1800px] px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1800px] px-4 py-8 sm:px-6 lg:px-8 bg-white min-h-screen">
         {/* Header with Time Filters */}
         <AnalyticsHeader
           timePeriod={timePeriod}

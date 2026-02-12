@@ -1320,9 +1320,9 @@ function Calendar({ companyId }: CalendarProps) {
       {/* Main calendar area - takes available space */}
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex items-center justify-between border-b border-gray-100 bg-white/80 backdrop-blur-sm px-6 py-4">
+        <header className="flex items-center justify-between border-b border-gray-100 bg-white/80 backdrop-blur-sm px-3 py-2 md:px-6 md:py-4 flex-shrink-0">
           {/* Left: Navigation and View Toggle */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Navigation buttons */}
             <div className="flex items-center gap-1">
               <motion.button
@@ -1330,7 +1330,7 @@ function Calendar({ companyId }: CalendarProps) {
                 onClick={handlePrev}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#1A1F36]
+                className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-white text-[#1A1F36]
                            shadow-sm ring-1 ring-gray-100 transition-all hover:shadow-md"
                 aria-label="Nazaj"
               >
@@ -1341,7 +1341,7 @@ function Calendar({ companyId }: CalendarProps) {
                 onClick={handleNext}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-[#1A1F36]
+                className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-white text-[#1A1F36]
                            shadow-sm ring-1 ring-gray-100 transition-all hover:shadow-md"
                 aria-label="Naprej"
               >
@@ -1349,34 +1349,34 @@ function Calendar({ companyId }: CalendarProps) {
               </motion.button>
             </div>
 
-            {/* View Toggle - moved more left */}
+            {/* View Toggle */}
             <ViewToggle currentView={currentView} onViewChange={handleViewChange} />
 
             {/* Title */}
-            <h1 className="text-lg font-semibold text-[#1A1F36]">
+            <h1 className="text-sm md:text-lg font-semibold text-[#1A1F36]">
               {headerTitle}
             </h1>
           </div>
 
           {/* Right side: Filter button */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {/* Filter button - icon only */}
             <motion.button
               type="button"
               onClick={handleToggleSidebar}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#1A1F36]
+              className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-xl bg-white text-[#1A1F36]
                          shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-violet-300"
               aria-label="Filtri"
             >
-              <Faders className="h-5 w-5" weight="bold" />
+              <Faders className="h-4 w-4 md:h-5 md:w-5" weight="bold" />
             </motion.button>
           </div>
         </header>
 
         {/* Calendar content */}
-        <div className="flex-1 overflow-hidden p-4">
+        <div className="flex-1 overflow-hidden p-2 md:p-4">
           {loading ? (
             <div className="flex h-full items-center justify-center">
               <div className="flex flex-col items-center gap-3">

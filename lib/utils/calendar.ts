@@ -265,17 +265,26 @@ export function formatDateResponsive(date: Date, view: ViewMode, isMobile = fals
   switch (view) {
     case 'day':
       if (isMobile) {
-        // Mobile: "2. 2. 2026" (month as number)
-        return `${day}. ${month + 1}. ${year}`;
+        // Mobile: "12. Februar"
+        return `${day}. ${MONTHS_FULL[month]}`;
       }
       // Desktop: "Ponedeljek, 2. februar 2026"
       return `${DAYS_FULL[dayOfWeek]}, ${day}. ${MONTHS_FULL[month]} ${year}`;
     case 'week':
-      return formatWeekRange(date, isMobile);
+      if (isMobile) {
+        // Mobile: "Februar" or "Februar - Marec"
+        const start = startOfWeek(date);
+        const end = endOfWeek(date);
+        if (start.getMonth() === end.getMonth()) {
+          return `${MONTHS_FULL[start.getMonth()]}`;
+        }
+        return `${MONTHS_FULL[start.getMonth()]} - ${MONTHS_FULL[end.getMonth()]}`;
+      }
+      return formatWeekRange(date, false);
     case 'month':
       if (isMobile) {
-        // Mobile: "2. 2026" (month as number)
-        return `${month + 1}. ${year}`;
+        // Mobile: "Februar"
+        return `${MONTHS_FULL[month]}`;
       }
       // Desktop: "Februar 2026"
       return `${MONTHS_FULL[month]} ${year}`;

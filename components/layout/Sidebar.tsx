@@ -670,38 +670,12 @@ export function Sidebar() {
                             )}
                           >
                             {active ? (
-                              useGradient ? (
-                                <span
-                                  className="w-5 h-5"
-                                  style={{
-                                    background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                  }}
-                                >
-                                  <Icon className="w-5 h-5" weight="fill" />
-                                </span>
-                              ) : (
-                                <Icon className="w-5 h-5 text-gray-900" weight="fill" />
-                              )
+                              <Icon className="w-5 h-5 text-gray-900" weight="fill" />
                             ) : (
                               <Icon className="w-5 h-5 text-gray-500" weight="regular" />
                             )}
                             {active ? (
-                              useGradient ? (
-                                <span
-                                  className="flex-1 font-semibold"
-                                  style={{
-                                    background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                  }}
-                                >
-                                  {item.name}
-                                </span>
-                              ) : (
-                                <span className="flex-1 font-semibold text-gray-900">{item.name}</span>
-                              )
+                              <span className="flex-1 font-semibold text-gray-900">{item.name}</span>
                             ) : (
                               <span className="flex-1 font-medium">{item.name}</span>
                             )}
