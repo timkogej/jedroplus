@@ -1,0 +1,107 @@
+// TypeScript types for calendar appointments
+
+export interface Termin {
+  id: string;
+  datum: string; // ISO date string (timestamp)
+  cas_zacetek: string; // Time in HH:MM format
+  cas_konec: string; // Time in HH:MM format
+  stranka_ime: string; // Client name/description
+  storitev_id: string; // Foreign key to Storitve
+  zaposleni_id: string; // Foreign key to Zaposleni
+  status: TerminStatus;
+}
+
+export type TerminStatus =
+  | 'scheduled'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled'
+  | 'no_show'
+  // Slovenian variants (from database)
+  | 'Odpovedan'
+  | 'Ni prišel'
+  | 'Zaključen'
+  | 'zaključen';
+
+export interface Storitev {
+  id: string;
+  naziv: string; // Service name
+  barva: string; // HEX color code or gradient CSS string
+  trajanje: number; // Duration in minutes
+  skupni_cas?: number; // Total time including buffers (optional for backward compat)
+  cena?: number | null; // Price (optional for backward compat)
+}
+
+export interface Zaposleni {
+  id: string;
+  ime: string; // First name
+  priimek: string; // Last name
+  email: string;
+  barva?: string; // Full gradient CSS string e.g. "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)"
+  storitve?: string[] | null; // Array of service IDs this employee can perform (null = all services)
+}
+
+// Combined appointment with related data for display
+export interface AppointmentWithDetails {
+  id: string;
+  datum: string;
+  cas_zacetek: string;
+  cas_konec: string;
+  stranka_id?: string;
+  stranka_ime: string;
+  stranka_email?: string;
+  stranka_telefon?: string;
+  stranka_barva?: string; // Client color - gradient CSS string
+  storitev_id?: string;
+  storitev_id_2?: string; // Second service ID (from "ID storitev 2" column)
+  storitev_id_3?: string; // Third service ID (from "ID storitev 3" column)
+  zaposleni_id?: string;
+  status: TerminStatus;
+  opombe?: string;
+  // Pricing fields
+  cena?: number | null; // Base price
+  popust?: number | null; // Discount amount
+  popust_tip?: 'eur' | 'percent' | null; // Discount type
+  koncna_cena?: number | null; // Final price after discount
+  // Service details
+  storitev: {
+    id: string;
+    naziv: string;
+    barva: string;
+    trajanje: number;
+    cena?: number | null;
+  } | null;
+  // Employee details
+  zaposleni: {
+    id: string;
+    ime: string;
+    priimek: string;
+    email: string;
+    initials: string; // Computed: e.g., "JN" for Jana Novak
+    barva?: string; // Full gradient CSS string e.g. "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)"
+  } | null;
+}
+
+// Calendar view state
+export interface CalendarState {
+  currentMonth: Date;
+  selectedDate: Date | null;
+  selectedAppointment: AppointmentWithDetails | null;
+  filterEmployeeId: string | null;
+  searchQuery: string;
+}
+
+// Day cell data for calendar grid
+export interface CalendarDay {
+  date: Date;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  appointments: AppointmentWithDetails[];
+}
+
+// Filter options
+export interface CalendarFilters {
+  employeeId: string | null;
+  searchQuery: string;
+  status: TerminStatus | null;
+}
