@@ -201,13 +201,12 @@ function CalendarSidebar({
                         whileTap={{ scale: 0.95 }}
                         className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-all
                                    ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-200'}
-                                   ${isCurrentDay ? 'font-bold text-[#1A1F36]' : ''}
+                                   ${isCurrentDay ? 'font-bold' : ''}
                                    ${isSelected && !isCurrentDay ? 'bg-gray-200 font-semibold' : ''}`}
                         style={isCurrentDay ? {
-                          border: '2px solid transparent',
-                          backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                          backgroundOrigin: 'border-box',
-                          backgroundClip: 'padding-box, border-box',
+                          background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
                         } : undefined}
                       >
                         {day.getDate()}
