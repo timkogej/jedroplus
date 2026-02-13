@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Envelope,
   PaperPlaneTilt,
   Users,
   CheckCircle,
@@ -18,148 +17,44 @@ import AIMessageGenerator from '@/components/komunikacija/AIMessageGenerator';
 import MessageComposer from '@/components/komunikacija/MessageComposer';
 import MessagePreview from '@/components/komunikacija/MessagePreview';
 import SendSection from '@/components/komunikacija/SendSection';
+import { useCompany } from '@/app/company-context';
+import { useAuth } from '@/app/auth-context';
+import { fetchTableRows } from '@/lib/companyScope';
+import { TABLES } from '@/lib/data';
+import { detectBookingSchema, pickFirst, safeDate, combineDateAndTime } from '@/lib/dashboardHelpers';
+import { callN8nAction } from '@/src/lib/n8nClient';
 
 // ============================================================================
-// Mock data
+// Customer type for this page
 // ============================================================================
 
-const mockCustomers = [
-  {
-    id: '1',
-    name: 'Janez Novak',
-    email: 'janez.novak@email.com',
-    phone: '+386 41 123 456',
-    nextAppointment: '2025-02-15T14:00:00',
-    lastVisit: '2025-02-08',
-    tags: ['VIP', 'Redna stranka'],
-  },
-  {
-    id: '2',
-    name: 'Maja Horvat',
-    email: 'maja.horvat@email.com',
-    phone: '+386 40 987 654',
-    nextAppointment: null,
-    lastVisit: '2024-12-20',
-    tags: ['Nova stranka'],
-  },
-  {
-    id: '3',
-    name: 'Luka Krajnc',
-    email: 'luka.krajnc@email.com',
-    phone: '+386 31 456 789',
-    nextAppointment: '2025-02-11T10:00:00',
-    lastVisit: '2025-02-04',
-    tags: ['Redna stranka'],
-  },
-  {
-    id: '4',
-    name: 'Ana Zupan',
-    email: 'ana.zupan@email.com',
-    phone: '+386 51 234 567',
-    nextAppointment: '2025-02-12T16:30:00',
-    lastVisit: '2025-01-28',
-    tags: ['VIP'],
-  },
-  {
-    id: '5',
-    name: 'Marko Potočnik',
-    email: 'marko.potocnik@email.com',
-    phone: '+386 41 876 543',
-    nextAppointment: '2025-02-14T09:00:00',
-    lastVisit: '2025-02-01',
-    tags: [],
-  },
-  {
-    id: '6',
-    name: 'Nina Kovač',
-    email: 'nina.kovac@email.com',
-    phone: '+386 40 112 233',
-    nextAppointment: null,
-    lastVisit: '2024-11-15',
-    tags: ['Neaktivna'],
-  },
-  {
-    id: '7',
-    name: 'Tomaž Vidmar',
-    email: 'tomaz.vidmar@email.com',
-    phone: '+386 31 998 877',
-    nextAppointment: '2025-02-11T11:30:00',
-    lastVisit: '2025-02-07',
-    tags: ['Redna stranka'],
-  },
-  {
-    id: '8',
-    name: 'Eva Kavčič',
-    email: 'eva.kavcic@email.com',
-    phone: '+386 51 445 566',
-    nextAppointment: '2025-02-13T13:00:00',
-    lastVisit: '2025-01-20',
-    tags: ['Nova stranka'],
-  },
-  {
-    id: '9',
-    name: 'Gregor Mlakar',
-    email: 'gregor.mlakar@email.com',
-    phone: '+386 41 667 788',
-    nextAppointment: null,
-    lastVisit: '2025-01-10',
-    tags: [],
-  },
-  {
-    id: '10',
-    name: 'Petra Kos',
-    email: 'petra.kos@email.com',
-    phone: '+386 40 334 455',
-    nextAppointment: '2025-02-18T15:00:00',
-    lastVisit: '2025-02-05',
-    tags: ['VIP', 'Redna stranka'],
-  },
-  {
-    id: '11',
-    name: 'Rok Oblak',
-    email: 'rok.oblak@email.com',
-    phone: '+386 31 221 334',
-    nextAppointment: '2025-02-12T10:00:00',
-    lastVisit: '2025-01-30',
-    tags: ['Redna stranka'],
-  },
-  {
-    id: '12',
-    name: 'Tina Šuštar',
-    email: 'tina.sustar@email.com',
-    phone: '+386 51 778 899',
-    nextAppointment: null,
-    lastVisit: '2024-12-05',
-    tags: ['Neaktivna'],
-  },
-  {
-    id: '13',
-    name: 'Matej Bizjak',
-    email: 'matej.bizjak@email.com',
-    phone: '+386 41 556 677',
-    nextAppointment: '2025-02-11T14:30:00',
-    lastVisit: '2025-02-06',
-    tags: [],
-  },
-  {
-    id: '14',
-    name: 'Klara Turk',
-    email: 'klara.turk@email.com',
-    phone: '+386 40 889 990',
-    nextAppointment: '2025-02-16T11:00:00',
-    lastVisit: '2025-01-25',
-    tags: ['Nova stranka'],
-  },
-  {
-    id: '15',
-    name: 'Simon Golob',
-    email: 'simon.golob@email.com',
-    phone: '+386 31 112 223',
-    nextAppointment: '2025-02-19T09:30:00',
-    lastVisit: '2025-02-03',
-    tags: ['Redna stranka'],
-  },
-];
+interface KomunikacijaCustomer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  nextAppointment: string | null;
+  lastVisit: string;
+  tags: string[];
+}
+
+// ============================================================================
+// Helpers for parsing Supabase data
+// ============================================================================
+
+function detectClientSchema(row: Record<string, unknown>) {
+  const keys = Object.keys(row);
+  const pickField = (candidates: string[]) =>
+    candidates.find((c) => keys.includes(c));
+
+  return {
+    idField: pickField(['ID stranke', 'id', 'client_id', 'ID']),
+    firstNameField: pickField(['Ime', 'ime', 'first_name', 'firstName']),
+    lastNameField: pickField(['Priimek', 'priimek', 'last_name', 'lastName']),
+    emailField: pickField(['Email', 'email', 'e-mail', 'E-mail']),
+    phoneField: pickField(['Telefon', 'telefon', 'phone', 'Phone', 'Telefonska številka']),
+  };
+}
 
 const mockQuota = {
   used: 847,
@@ -219,6 +114,9 @@ type MobileView = 'customers' | 'composer';
 // ============================================================================
 
 export default function KomunikacijaPage() {
+  const { companyId, companySettings } = useCompany();
+  const { user } = useAuth();
+
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -232,33 +130,185 @@ export default function KomunikacijaPage() {
   // Mobile view
   const [mobileView, setMobileView] = useState<MobileView>('customers');
 
+  // Customer data from Supabase
+  const [customers, setCustomers] = useState<KomunikacijaCustomer[]>([]);
+  const [loadingCustomers, setLoadingCustomers] = useState(true);
+
+  // Sending state
+  const [isSending, setIsSending] = useState(false);
+
+  const companyName = (companySettings?.['Naziv Podjetja'] as string) || 'Moje Podjetje';
+  const actor = user?.email || 'unknown';
+  const companyPayload = companySettings ? { ...companySettings } : {};
+
+  // Fetch customers and their appointments from Supabase
+  useEffect(() => {
+    if (!companyId) return;
+
+    const fetchData = async () => {
+      setLoadingCustomers(true);
+      try {
+        const [bookingsRes, clientsRes] = await Promise.all([
+          fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
+          fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),
+        ]);
+
+        const bookings = bookingsRes.data ?? [];
+        const clients = clientsRes.data ?? [];
+
+        // Build map of client ID -> nearest future appointment ISO string
+        const now = new Date();
+        const clientNextAppointment = new Map<string, string>();
+
+        for (const row of bookings) {
+          const schema = detectBookingSchema(row);
+          const clientId = schema.clientIdField
+            ? String(row[schema.clientIdField] ?? '')
+            : String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
+
+          if (!clientId) continue;
+
+          // Parse the booking date
+          let bookingDate: Date | null = null;
+
+          // Try start_at first (ISO timestamp)
+          if (schema.startAtField && row[schema.startAtField]) {
+            bookingDate = safeDate(row[schema.startAtField]);
+          }
+
+          // Try date + time combination
+          if (!bookingDate && schema.dateField) {
+            bookingDate = combineDateAndTime(
+              row[schema.dateField],
+              schema.startTimeField ? row[schema.startTimeField] : null
+            );
+          }
+
+          if (!bookingDate || bookingDate < now) continue;
+
+          const isoDate = bookingDate.toISOString();
+          const existing = clientNextAppointment.get(clientId);
+          if (!existing || isoDate < existing) {
+            clientNextAppointment.set(clientId, isoDate);
+          }
+        }
+
+        // Build customer objects from Stranke table
+        const customerList: KomunikacijaCustomer[] = [];
+
+        if (clients.length > 0) {
+          const clientSchema = detectClientSchema(clients[0]);
+
+          for (const row of clients) {
+            const id = clientSchema.idField ? String(row[clientSchema.idField] ?? '') : '';
+            if (!id) continue;
+
+            const ime = clientSchema.firstNameField ? String(row[clientSchema.firstNameField] ?? '') : '';
+            const priimek = clientSchema.lastNameField ? String(row[clientSchema.lastNameField] ?? '') : '';
+            const name = `${ime} ${priimek}`.trim() || 'Neznana stranka';
+            const email = clientSchema.emailField ? String(row[clientSchema.emailField] ?? '') : '';
+            const phone = clientSchema.phoneField ? String(row[clientSchema.phoneField] ?? '') : '';
+
+            customerList.push({
+              id,
+              name,
+              email,
+              phone,
+              nextAppointment: clientNextAppointment.get(id) || null,
+              lastVisit: '',
+              tags: [],
+            });
+          }
+        }
+
+        customerList.sort((a, b) => a.name.localeCompare(b.name));
+        setCustomers(customerList);
+      } catch (err) {
+        console.error('Error fetching communication data:', err);
+      } finally {
+        setLoadingCustomers(false);
+      }
+    };
+
+    fetchData();
+  }, [companyId]);
+
   // Handlers
   const handleAIGenerate = useCallback((generatedMessage: string) => {
     setMessage(generatedMessage);
   }, []);
 
-  const handleSend = useCallback(() => {
-    console.log('Sending email to:', Array.from(selectedIds));
-    console.log('Subject:', subject);
-    console.log('Message:', message);
+  const handleSend = useCallback(async () => {
+    if (isSending) return;
+    setIsSending(true);
 
-    setToast({
-      message: `Sporočilo uspešno poslano ${selectedIds.size} strankam!`,
-      type: 'success',
-    });
+    try {
+      // Build selected clients payload
+      const selectedClients = customers
+        .filter((c) => selectedIds.has(c.id))
+        .map((c) => ({ id: c.id, name: c.name, email: c.email }));
 
-    // Reset form
-    setTimeout(() => {
-      setSelectedIds(new Set());
-      setSubject('');
-      setMessage('');
-    }, 500);
-  }, [selectedIds, subject, message]);
+      const result = await callN8nAction({
+        event: 'POSLJI_SPOROCILO',
+        entity: 'communication',
+        data: {
+          subject,
+          message,
+          client_ids: Array.from(selectedIds),
+          clients: selectedClients,
+          company_id: companyId || '',
+          company_profile: companyPayload,
+        },
+        company_id: companyId || '',
+        actor,
+        timestamp: new Date().toISOString(),
+        meta: { app: 'Integrate' as const, version: '1.0' as const },
+      });
+
+      if (result.ok) {
+        setToast({
+          message: `Sporočilo uspešno poslano ${selectedIds.size} strankam!`,
+          type: 'success',
+        });
+
+        // Reset form
+        setTimeout(() => {
+          setSelectedIds(new Set());
+          setSubject('');
+          setMessage('');
+        }, 500);
+      } else {
+        setToast({
+          message: result.error || 'Napaka pri pošiljanju sporočila',
+          type: 'error',
+        });
+      }
+    } catch (err) {
+      console.error('Send error:', err);
+      setToast({
+        message: 'Napaka pri pošiljanju sporočila',
+        type: 'error',
+      });
+    } finally {
+      setIsSending(false);
+    }
+  }, [selectedIds, subject, message, customers, companyId, actor, companyPayload, isSending]);
 
   const remaining = mockQuota.total - mockQuota.used;
 
   return (
     <ProtectedLayout>
+      {/* SVG gradient definition for button icons */}
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <defs>
+          <linearGradient id="btn-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#8B5CF6" />
+            <stop offset="50%" stopColor="#3B82F6" />
+            <stop offset="100%" stopColor="#06B6D4" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       <main className="min-h-screen bg-[#F7F8FA]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
           {/* Page Header */}
@@ -266,19 +316,14 @@ export default function KomunikacijaPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-3 mb-1"
+              className="mb-1"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 shadow-md shadow-violet-500/20">
-                <Envelope className="h-5 w-5 text-white" weight="fill" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F36]">
-                  Komunikacija
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Pošljite sporočila svojim strankam hitro in enostavno
-                </p>
-              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F36]">
+                Komunikacija
+              </h1>
+              <p className="text-sm text-gray-500">
+                Pošljite sporočila svojim strankam hitro in enostavno
+              </p>
             </motion.div>
           </div>
 
@@ -302,18 +347,30 @@ export default function KomunikacijaPage() {
               <button
                 type="button"
                 onClick={() => setMobileView('customers')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                   mobileView === 'customers'
-                    ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-md'
+                    ? 'bg-white shadow-md'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
+                style={mobileView === 'customers' ? {
+                  background: 'white',
+                } : undefined}
               >
-                <Users className="h-4 w-4" weight={mobileView === 'customers' ? 'fill' : 'regular'} />
-                Stranke
+                <span
+                  className="flex items-center gap-2"
+                  style={mobileView === 'customers' ? {
+                    backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  } : undefined}
+                >
+                  <Users className="h-4 w-4" weight={mobileView === 'customers' ? 'fill' : 'regular'} />
+                  Stranke
+                </span>
                 {selectedIds.size > 0 && (
                   <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
                     mobileView === 'customers'
-                      ? 'bg-white/20'
+                      ? 'bg-violet-50 text-violet-600'
                       : 'bg-violet-50 text-violet-600'
                   }`}>
                     {selectedIds.size}
@@ -323,14 +380,23 @@ export default function KomunikacijaPage() {
               <button
                 type="button"
                 onClick={() => setMobileView('composer')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                   mobileView === 'composer'
-                    ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-md'
+                    ? 'bg-white shadow-md'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                <PaperPlaneTilt className="h-4 w-4" weight={mobileView === 'composer' ? 'fill' : 'regular'} />
-                Sporočilo
+                <span
+                  className="flex items-center gap-2"
+                  style={mobileView === 'composer' ? {
+                    backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  } : undefined}
+                >
+                  <PaperPlaneTilt className="h-4 w-4" weight={mobileView === 'composer' ? 'fill' : 'regular'} />
+                  Sporočilo
+                </span>
               </button>
             </div>
           </div>
@@ -352,9 +418,10 @@ export default function KomunikacijaPage() {
                   </h2>
                 </div>
                 <CustomerList
-                  customers={mockCustomers}
+                  customers={customers}
                   selectedIds={selectedIds}
                   onSelectionChange={setSelectedIds}
+                  loading={loadingCustomers}
                 />
               </div>
 
@@ -368,10 +435,19 @@ export default function KomunikacijaPage() {
                     animate={{ opacity: 1, y: 0 }}
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
-                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 text-white font-semibold text-sm shadow-lg shadow-violet-500/20 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-xl bg-white border border-gray-200 font-semibold text-sm shadow-sm hover:shadow-md flex items-center justify-center gap-2"
                   >
-                    Nadaljuj s {selectedIds.size} {selectedIds.size === 1 ? 'stranko' : 'strankami'}
-                    <PaperPlaneTilt className="h-4 w-4" weight="fill" />
+                    <span
+                      className="flex items-center gap-2"
+                      style={{
+                        backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}
+                    >
+                      Nadaljuj s {selectedIds.size} {selectedIds.size === 1 ? 'stranko' : 'strankami'}
+                      <PaperPlaneTilt className="h-4 w-4" weight="fill" style={{ fill: 'url(#btn-icon-grad)' }} />
+                    </span>
                   </motion.button>
                 </div>
               )}
@@ -406,7 +482,12 @@ export default function KomunikacijaPage() {
 
                   {/* AI Generator */}
                   <div className="mb-6">
-                    <AIMessageGenerator onGenerate={handleAIGenerate} />
+                    <AIMessageGenerator
+                      onGenerate={handleAIGenerate}
+                      companyId={companyId || undefined}
+                      actor={actor}
+                      companyPayload={companyPayload}
+                    />
                   </div>
 
                   {/* Message Composer */}
@@ -422,7 +503,7 @@ export default function KomunikacijaPage() {
                 <MessagePreview
                   subject={subject}
                   message={message}
-                  senderName="Moje Podjetje"
+                  senderName={companyName}
                 />
 
                 {/* Send Section */}
@@ -432,6 +513,7 @@ export default function KomunikacijaPage() {
                   hasMessage={message.trim().length > 0}
                   hasSubject={subject.trim().length > 0}
                   onSend={handleSend}
+                  sending={isSending}
                 />
               </div>
             </motion.div>

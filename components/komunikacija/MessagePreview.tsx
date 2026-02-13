@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Eye, CaretDown, EnvelopeSimple } from '@phosphor-icons/react';
+import { Eye, CaretDown } from '@phosphor-icons/react';
 
 interface MessagePreviewProps {
   subject: string;
@@ -34,7 +34,7 @@ export default function MessagePreview({ subject, message, senderName }: Message
         className="flex items-center justify-between w-full p-4 bg-white hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <Eye className="w-5 h-5 text-gray-500" weight="duotone" />
+          <Eye className="w-5 h-5 text-[#1A1F36]" weight="regular" />
           <span className="text-sm font-medium text-[#1A1F36]">Predogled sporočila</span>
         </div>
         <CaretDown
@@ -58,11 +58,17 @@ export default function MessagePreview({ subject, message, senderName }: Message
                 {/* Email header */}
                 <div className="px-5 py-4 bg-white border-b border-gray-100">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-500">
-                      <EnvelopeSimple className="h-4 w-4 text-white" weight="fill" />
-                    </div>
                     <div>
-                      <p className="text-sm font-semibold text-[#1A1F36]">{senderName}</p>
+                      <p
+                        className="text-sm font-semibold"
+                        style={{
+                          backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}
+                      >
+                        {senderName}
+                      </p>
                       <p className="text-xs text-gray-400">info@podjetje.si</p>
                     </div>
                   </div>
@@ -89,7 +95,7 @@ export default function MessagePreview({ subject, message, senderName }: Message
               </div>
 
               <p className="mt-2 text-center text-xs text-gray-400">
-                Spremenljivke so nadomeščene s podatki stranke Janez Novak
+                Spremenljivke so nadomeščene s podatki stranke
               </p>
             </div>
           </motion.div>

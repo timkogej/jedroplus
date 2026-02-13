@@ -20,15 +20,17 @@ interface CustomerListProps {
   customers: Customer[];
   selectedIds: Set<string>;
   onSelectionChange: (ids: Set<string>) => void;
+  loading?: boolean;
 }
 
 export default function CustomerList({
   customers,
   selectedIds,
   onSelectionChange,
+  loading = false,
 }: CustomerListProps) {
   const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState('today');
   const [selectedService, setSelectedService] = useState('Vse storitve');
 
   // Filter customers based on search and active filter
@@ -184,7 +186,20 @@ export default function CustomerList({
 
       {/* Customer list */}
       <div className="space-y-2 max-h-[calc(100vh-480px)] overflow-y-auto custom-scrollbar pr-1">
-        {filteredCustomers.length > 0 ? (
+        {loading ? (
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 animate-pulse">
+                <div className="w-5 h-5 rounded-full bg-gray-200" />
+                <div className="flex-shrink-0 w-8 h-4 rounded bg-gray-200" />
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-3.5 w-28 rounded bg-gray-200" />
+                  <div className="h-3 w-40 rounded bg-gray-100" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredCustomers.length > 0 ? (
           filteredCustomers.map((customer, index) => (
             <CustomerListItem
               key={customer.id}

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { PaperPlaneTilt, Warning } from '@phosphor-icons/react';
+import { PaperPlaneTilt, Warning, CircleNotch } from '@phosphor-icons/react';
 
 interface SendSectionProps {
   selectedCount: number;
@@ -9,6 +9,7 @@ interface SendSectionProps {
   hasMessage: boolean;
   hasSubject: boolean;
   onSend: () => void;
+  sending?: boolean;
 }
 
 export default function SendSection({
@@ -17,8 +18,9 @@ export default function SendSection({
   hasMessage,
   hasSubject,
   onSend,
+  sending = false,
 }: SendSectionProps) {
-  const canSend = selectedCount > 0 && hasMessage && hasSubject && remainingQuota >= selectedCount;
+  const canSend = !sending && selectedCount > 0 && hasMessage && hasSubject && remainingQuota >= selectedCount;
   const exceedsQuota = selectedCount > remainingQuota;
 
   return (
@@ -33,7 +35,14 @@ export default function SendSection({
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-500">Preostala kvota</span>
-          <span className={`text-sm font-semibold ${remainingQuota < 50 ? 'text-amber-500' : 'text-emerald-600'}`}>
+          <span
+            className="text-sm font-semibold"
+            style={{
+              backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
             {remainingQuota} emailov
           </span>
         </div>
@@ -69,12 +78,25 @@ export default function SendSection({
         whileTap={{ scale: canSend ? 0.99 : 1 }}
         className={`w-full py-3.5 rounded-xl flex items-center justify-center gap-2.5 font-semibold text-sm transition-all duration-200 ${
           canSend
-            ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30'
-            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300'
+            : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent'
         }`}
       >
-        <PaperPlaneTilt className="h-5 w-5" weight="fill" />
-        Pošlji sporočilo
+        <span
+          className="flex items-center gap-2.5"
+          style={canSend || sending ? {
+            backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          } : undefined}
+        >
+          {sending ? (
+            <CircleNotch className="h-5 w-5 animate-spin" weight="bold" style={{ fill: 'url(#btn-icon-grad)' }} />
+          ) : (
+            <PaperPlaneTilt className="h-5 w-5" weight="fill" style={canSend ? { fill: 'url(#btn-icon-grad)' } : undefined} />
+          )}
+          {sending ? 'Pošiljam...' : 'Pošlji sporočilo'}
+        </span>
       </motion.button>
 
       <p className="text-center text-xs text-gray-400">

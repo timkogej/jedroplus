@@ -173,15 +173,10 @@ export interface AllSettings {
   receptionist: ReceptionistSettings;
 }
 
-// Settings section type for navigation - Updated
+// Settings section type for navigation
 export type SettingsSection =
   | 'splosno'
-  | 'podjetje'
-  | 'rezervacije'
-  | 'chatbot'
-  | 'opomniki'
-  | 'lost-leads'
-  | 'receptionist';
+  | 'podjetje';
 
 // Default values
 export const defaultGeneralSettings: GeneralSettings = {

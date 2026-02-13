@@ -227,18 +227,19 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
           ref={headerScrollRef}
           onScroll={handleHeaderScroll}
           className={`flex-1 ${isMobile ? 'overflow-x-auto' : ''}`}
-          style={isMobile ? { scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' } as React.CSSProperties : undefined}
+          style={isMobile ? { scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity' } as React.CSSProperties : undefined}
         >
           <div className="grid" style={{ gridTemplateColumns }}>
-            {weekDays.map((day, index) => {
+            {weekDays.map((day) => {
               const isCurrentDay = isToday(day);
               const dayAbsences = getAbsencesForDay(day);
               const hasAbsence = dayAbsences.length > 0;
               return (
                 <div
-                  key={index}
+                  key={getLocalDateKey(day)}
                   className={`flex flex-col items-center py-2.5
                              ${hasAbsence ? 'bg-amber-50/50' : ''}`}
+                  style={isMobile ? { scrollSnapAlign: 'start' } as React.CSSProperties : undefined}
                 >
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                     {DAYS_SHORT[day.getDay()]}
@@ -310,7 +311,7 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
 
             return (
               <div
-                key={dayIndex}
+                key={dateKey}
                 className={`relative
                            ${isCurrentDay ? 'bg-[#1A1F36]/[0.015]' : ''}
                            ${dayIndex < weekDays.length - 1 ? 'border-r' : ''}`}

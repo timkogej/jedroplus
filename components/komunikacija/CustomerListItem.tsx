@@ -68,9 +68,9 @@ export default function CustomerListItem({
       {/* Checkbox */}
       <div className="flex-shrink-0">
         <div
-          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
+          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
             selected
-              ? 'bg-gradient-to-r from-violet-500 to-cyan-500 border-transparent'
+              ? 'bg-cyan-500 border-transparent'
               : 'border-gray-300 bg-white'
           }`}
         >
@@ -94,13 +94,18 @@ export default function CustomerListItem({
         </div>
       </div>
 
-      {/* Avatar */}
+      {/* Avatar - gradient text initials */}
       <div className="flex-shrink-0">
-        <div className="w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-br from-violet-500 to-cyan-500">
-          <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-            <span className="text-xs font-semibold text-gray-700">{initials}</span>
-          </div>
-        </div>
+        <span
+          className="text-sm font-bold"
+          style={{
+            backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          {initials}
+        </span>
       </div>
 
       {/* Info */}

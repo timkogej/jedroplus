@@ -2,38 +2,69 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkle, MagicWand, CircleNotch } from '@phosphor-icons/react';
+import { Robot, MagicWand, CircleNotch } from '@phosphor-icons/react';
+import { callN8nAction } from '@/src/lib/n8nClient';
 
 interface AIMessageGeneratorProps {
   onGenerate: (message: string) => void;
+  companyId?: string;
+  actor?: string;
+  companyPayload?: Record<string, unknown>;
 }
 
-export default function AIMessageGenerator({ onGenerate }: AIMessageGeneratorProps) {
+export default function AIMessageGenerator({ onGenerate, companyId, actor, companyPayload }: AIMessageGeneratorProps) {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) return;
 
     setIsGenerating(true);
 
-    // Simulate AI generation
-    setTimeout(() => {
-      const generatedMessage = `Spoštovani {ime},\n\nZ veseljem vas obveščamo o posebni ponudbi, ki smo jo pripravili samo za vas!\n\n${prompt.includes('popust') ? 'Ta vikend vam ponujamo 20% popust na vse naše storitve. To je odlična priložnost, da poskrbite zase in uživate v naših premium storitvah po ugodni ceni.' : 'Pripravljamo nekaj posebnega in želimo, da ste med prvimi, ki bodo izvedeli za to.'}\n\nZa rezervacijo termina nas pokličite ali odgovorite na to sporočilo.\n\nVeselimo se vašega obiska!\n\nLep pozdrav,\nVaša ekipa`;
+    try {
+      const result = await callN8nAction({
+        event: 'GENERIRAJ_SPOROCILO',
+        entity: 'communication',
+        data: {
+          prompt: prompt.trim(),
+          company_id: companyId || '',
+          company_profile: companyPayload || {},
+        },
+        company_id: companyId || '',
+        actor: actor || 'unknown',
+        timestamp: new Date().toISOString(),
+        meta: { app: 'Integrate' as const, version: '1.0' as const },
+      });
 
-      onGenerate(generatedMessage);
+      if (result.ok && result.data) {
+        const responseData = result.data as Record<string, unknown>;
+        const generatedMessage = (responseData.message || responseData.sporocilo || responseData.text || JSON.stringify(result.data)) as string;
+        onGenerate(generatedMessage);
+      } else {
+        console.error('AI generation failed:', result.error);
+      }
+    } catch (err) {
+      console.error('AI generation error:', err);
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
   return (
     <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/60 to-cyan-50/40 p-5">
       <div className="flex items-center gap-3 mb-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 shadow-md shadow-violet-500/20">
-          <Sparkle className="h-5 w-5 text-white" weight="fill" />
-        </div>
+        <Robot className="h-6 w-6 text-[#1A1F36]" weight="regular" />
         <div>
-          <h3 className="font-semibold text-[#1A1F36]">AI Asistent</h3>
+          <h3
+            className="font-semibold"
+            style={{
+              backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Asistent+
+          </h3>
           <p className="text-xs text-gray-500">Opiši, kaj želiš sporočiti strankam</p>
         </div>
       </div>
@@ -53,7 +84,7 @@ export default function AIMessageGenerator({ onGenerate }: AIMessageGeneratorPro
         whileTap={{ scale: prompt.trim() && !isGenerating ? 0.99 : 1 }}
         className={`mt-3 w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-all duration-200 ${
           prompt.trim() && !isGenerating
-            ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-lg shadow-violet-500/20 hover:shadow-xl hover:shadow-violet-500/30'
+            ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
         }`}
       >
@@ -66,8 +97,16 @@ export default function AIMessageGenerator({ onGenerate }: AIMessageGeneratorPro
               exit={{ opacity: 0 }}
               className="flex items-center gap-2"
             >
-              <CircleNotch className="h-5 w-5 animate-spin" weight="bold" />
-              <span>Generiram...</span>
+              <CircleNotch className="h-5 w-5 animate-spin" weight="bold" style={{ fill: 'url(#btn-icon-grad)' }} />
+              <span
+                style={{
+                  backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                Generiram...
+              </span>
             </motion.div>
           ) : (
             <motion.div
@@ -76,8 +115,13 @@ export default function AIMessageGenerator({ onGenerate }: AIMessageGeneratorPro
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="flex items-center gap-2"
+              style={prompt.trim() ? {
+                backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              } : undefined}
             >
-              <MagicWand className="h-5 w-5" weight="bold" />
+              <MagicWand className="h-5 w-5" weight="bold" style={prompt.trim() ? { fill: 'url(#btn-icon-grad)' } : undefined} />
               <span>Generiraj sporočilo</span>
             </motion.div>
           )}

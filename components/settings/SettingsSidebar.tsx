@@ -6,38 +6,28 @@ import { motion } from 'motion/react';
 import {
   Gear,
   Buildings,
-  CalendarBlank,
-  Robot,
-  Bell,
-  TrendDown,
-  Phone,
 } from '@phosphor-icons/react';
 import type { SettingsSection } from '@/types/settings';
 
-interface SidebarItem {
+interface TabItem {
   id: SettingsSection;
   label: string;
   icon: React.ElementType;
   path: string;
 }
 
-const settingsSections: SidebarItem[] = [
+const settingsTabs: TabItem[] = [
   { id: 'splosno', label: 'Splošno', icon: Gear, path: '/nastavitve/splosno' },
   { id: 'podjetje', label: 'Podjetje', icon: Buildings, path: '/nastavitve/podjetje' },
-  { id: 'rezervacije', label: 'Rezervacije', icon: CalendarBlank, path: '/nastavitve/rezervacije' },
-  { id: 'chatbot', label: 'Chatbot+', icon: Robot, path: '/nastavitve/chatbot' },
-  { id: 'opomniki', label: 'Opomniki', icon: Bell, path: '/nastavitve/opomniki' },
-  { id: 'lost-leads', label: 'Lost Leads', icon: TrendDown, path: '/nastavitve/lost-leads' },
-  { id: 'receptionist', label: 'Receptionist+', icon: Phone, path: '/nastavitve/receptionist' },
 ];
 
 export function SettingsSidebar() {
   const pathname = usePathname();
 
   const getCurrentSection = (): SettingsSection | null => {
-    for (const section of settingsSections) {
-      if (pathname.includes(section.path)) {
-        return section.id;
+    for (const tab of settingsTabs) {
+      if (pathname.includes(tab.path)) {
+        return tab.id;
       }
     }
     return null;
@@ -46,37 +36,35 @@ export function SettingsSidebar() {
   const currentSection = getCurrentSection();
 
   return (
-    <nav className="w-full lg:w-64 bg-gray-50/50 lg:min-h-screen p-4 lg:sticky lg:top-0">
-      <div className="space-y-1">
-        {settingsSections.map((section) => {
-          const isActive = currentSection === section.id;
-          const Icon = section.icon;
+    <div className="flex gap-1 p-1 rounded-xl bg-gray-100 w-full">
+      {settingsTabs.map((tab) => {
+        const isActive = currentSection === tab.id;
+        const Icon = tab.icon;
 
-          return (
-            <Link
-              key={section.id}
-              href={section.path}
-              className={`
-                relative flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-                ${isActive
-                  ? 'bg-white shadow-sm text-gray-900'
-                  : 'text-gray-600 hover:bg-white/60 hover:text-gray-900'
-                }
-              `}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="sidebar-indicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-r-full"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-              <Icon className="w-5 h-5" weight={isActive ? 'fill' : 'regular'} />
-              <span className="font-medium text-sm">{section.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+        return (
+          <Link
+            key={tab.id}
+            href={tab.path}
+            className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+              isActive
+                ? 'text-[#1A1F36]'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {isActive && (
+              <motion.div
+                layoutId="settings-tab-bg"
+                className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <span className="relative flex items-center gap-2">
+              <Icon className="w-4 h-4" weight={isActive ? 'fill' : 'regular'} />
+              {tab.label}
+            </span>
+          </Link>
+        );
+      })}
+    </div>
   );
 }

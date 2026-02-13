@@ -577,9 +577,9 @@ export default function ClientsPage() {
                              text-sm font-medium text-gray-700 shadow-sm transition-all
                              hover:bg-gray-50 hover:shadow-md"
                 >
-                  <UploadSimple className="h-4 w-4" weight="bold" />
-                  Import CRM
-                  <CaretDown className={`h-3 w-3 transition-transform ${importDropdownOpen ? 'rotate-180' : ''}`} weight="bold" />
+                  <DownloadSimple className="h-4 w-4" weight="bold" />
+                  <span className="hidden md:inline">Import CRM</span>
+                  <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${importDropdownOpen ? 'rotate-180' : ''}`} weight="bold" />
                 </motion.button>
 
                 <AnimatePresence>
@@ -641,9 +641,9 @@ export default function ClientsPage() {
                              text-sm font-medium text-gray-700 shadow-sm transition-all
                              hover:bg-gray-50 hover:shadow-md"
                 >
-                  <DownloadSimple className="h-4 w-4" weight="bold" />
-                  Export CRM
-                  <CaretDown className={`h-3 w-3 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} weight="bold" />
+                  <UploadSimple className="h-4 w-4" weight="bold" />
+                  <span className="hidden md:inline">Export CRM</span>
+                  <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} weight="bold" />
                 </motion.button>
 
                 <AnimatePresence>
@@ -701,8 +701,8 @@ export default function ClientsPage() {
                            text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
                            hover:shadow-xl hover:shadow-cyan-500/30"
               >
-                <Plus className="h-5 w-5" weight="bold" />
-                Nova stranka
+                <Plus className="h-5 w-5 flex-shrink-0" weight="bold" />
+                <span className="whitespace-nowrap">Nova stranka</span>
               </motion.button>
             </div>
           </div>

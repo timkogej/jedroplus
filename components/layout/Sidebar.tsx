@@ -77,7 +77,7 @@ const navigationSections: NavSection[] = [
   {
     label: 'Komunikacija',
     items: [
-      { name: 'Pošlji sporočilo', href: '/komunikacija', icon: Envelope },
+      { name: 'Komunikacija', href: '/komunikacija', icon: Envelope },
       { name: 'Opomniki', href: '/reminders', icon: Bell },
       { name: 'Rezervacije', href: '/rezervacije', icon: CalendarCheck },
       { name: 'Lost Leads', href: '/lost-leads', icon: TrendDown },

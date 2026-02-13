@@ -227,7 +227,7 @@ function AppointmentDetailModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+        className="relative w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Colored header with client name and close button */}
@@ -250,8 +250,8 @@ function AppointmentDetailModal({
           </motion.button>
         </div>
 
-        {/* Content */}
-        <div className="p-5 space-y-4">
+        {/* Content - scrollable */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Status */}
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-gray-500">Status</span>

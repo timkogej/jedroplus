@@ -11,26 +11,40 @@ export default function SettingsLayout({
 }) {
   return (
     <ProtectedLayout>
-      <div className="flex h-full min-h-screen w-full">
-        {/* Settings Sidebar */}
-        <div className="w-64 bg-white border-r border-gray-200 flex-shrink-0">
-          <div className="sticky top-0 p-5">
-            <motion.h2
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-lg font-bold text-gray-900 mb-6 px-3"
-            >
+      <div className="min-h-screen bg-[#F7F8FA]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F36]">
               Nastavitve
-            </motion.h2>
-            <SettingsSidebar />
-          </div>
-        </div>
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Upravljajte nastavitve vašega podjetja
+            </p>
+          </motion.div>
 
-        {/* Settings Content Area */}
-        <div className="flex-1 overflow-auto bg-gray-50/50">
-          <div className="max-w-4xl mx-auto px-8 py-8">
+          {/* Tab Switcher */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="mb-6"
+          >
+            <SettingsSidebar />
+          </motion.div>
+
+          {/* Content */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
             {children}
-          </div>
+          </motion.div>
         </div>
       </div>
     </ProtectedLayout>

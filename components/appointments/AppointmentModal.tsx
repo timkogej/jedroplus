@@ -648,7 +648,7 @@ function AppointmentModal({
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
             {/* Client search - First field */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">

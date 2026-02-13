@@ -10,7 +10,6 @@ interface FilterOption {
 }
 
 const quickFilters: FilterOption[] = [
-  { id: 'all', label: 'Vsi' },
   { id: 'today', label: 'Danes' },
   { id: 'tomorrow', label: 'Jutri' },
   { id: 'this-week', label: 'Ta teden' },
@@ -45,6 +44,9 @@ export default function CustomerFilters({
 
   return (
     <div className="space-y-3">
+      {/* Section label */}
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Termini</p>
+
       {/* Quick filter pills */}
       <div className="flex flex-wrap gap-2">
         {quickFilters.map((filter) => {
