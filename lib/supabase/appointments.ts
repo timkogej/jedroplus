@@ -733,7 +733,7 @@ export async function fetchAbsences(
 
     // Fetch absences from the absences table
     // Only show confirmed absences
-    const { data: absencesData, error: absencesError } = await supabase
+    let { data: absencesData, error: absencesError } = await supabase
       .from('absences')
       .select('*')
       .eq('company_id', companyId)
@@ -743,6 +743,30 @@ export async function fetchAbsences(
 
     if (absencesError) {
       throw absencesError;
+    }
+
+    // If no absences found with the string company_id, try with the UUID from companies table
+    if (!absencesData?.length) {
+      try {
+        const { data: companyRow } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('company_id', companyId)
+          .single();
+        if (companyRow?.id) {
+          const uuidResult = await supabase
+            .from('absences')
+            .select('*')
+            .eq('company_id', companyRow.id)
+            .eq('status', 'CONFIRMED');
+          if (!uuidResult.error && uuidResult.data?.length) {
+            absencesData = uuidResult.data;
+            console.log('[fetchAbsences] Found absences using UUID fallback:', absencesData.length);
+          }
+        }
+      } catch (uuidErr) {
+        console.warn('[fetchAbsences] UUID fallback failed:', uuidErr);
+      }
     }
 
     // Fetch employees to get their names (with error handling)

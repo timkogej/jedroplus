@@ -110,7 +110,7 @@ export default function CustomerListItem({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-[#1A1F36] truncate">{customer.name}</p>
+        <p className="text-sm font-normal text-[#1A1F36] truncate">{customer.name}</p>
         <p className="text-xs text-gray-400 truncate">{customer.email}</p>
       </div>
 

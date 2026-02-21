@@ -416,9 +416,9 @@ function CalendarAppointmentModal({
                         placeholder="Izberi storitev"
                         disabled={isViewMode}
                       >
-                        {filteredServices.map(service => (
+                        {filteredServices.map((service, idx) => (
                           <SelectOption
-                            key={service.id}
+                            key={`svc-${idx}-${service.id}`}
                             value={service.id}
                             colorDot={service.barva || '#6366F1'}
                             description={`${service.trajanje || service.skupni_cas || 60} min`}
@@ -443,8 +443,8 @@ function CalendarAppointmentModal({
                         placeholder="Izberi zaposlenega"
                         disabled={isViewMode}
                       >
-                        {filteredEmployees.map(employee => (
-                          <SelectOption key={employee.id} value={employee.id}>
+                        {filteredEmployees.map((employee, idx) => (
+                          <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
                             {employee.ime} {employee.priimek}
                           </SelectOption>
                         ))}

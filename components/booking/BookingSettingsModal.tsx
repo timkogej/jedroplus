@@ -32,6 +32,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const [rezervacijeLink, setRezervacijeLink] = useState('');
   const [bookingPrimary, setBookingPrimary] = useState('#7C75FC');
   const [bookingSecondary, setBookingSecondary] = useState('#44D0C6');
+  const [bookingBgFrom, setBookingBgFrom] = useState('#7C75FC');
+  const [bookingBgTo, setBookingBgTo] = useState('#44D0C6');
 
   const [copiedLink, setCopiedLink] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -73,6 +75,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           setRezervacijeLink(String(data['rezervacije_link'] ?? data['Rezervacije_link'] ?? ''));
           setBookingPrimary(String(data['Booking_primary'] ?? data['booking_primary'] ?? '#7C75FC'));
           setBookingSecondary(String(data['Booking_secondary'] ?? data['booking_secondary'] ?? '#44D0C6'));
+          setBookingBgFrom(String(data['Booking_bg_from'] ?? data['booking_bg_from'] ?? data['Booking_primary'] ?? data['booking_primary'] ?? '#7C75FC'));
+          setBookingBgTo(String(data['Booking_bg_to'] ?? data['booking_bg_to'] ?? data['Booking_secondary'] ?? data['booking_secondary'] ?? '#44D0C6'));
         }
       } catch (error) {
         console.error('Error loading booking settings:', error);
@@ -101,9 +105,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           'Potrdilo online rez': potrdiloOnline ? 'yes' : 'no',
           'Booking_primary': bookingPrimary,
           'Booking_secondary': bookingSecondary,
+          'Booking_bg_from': bookingBgFrom,
+          'Booking_bg_to': bookingBgTo,
           colors: {
             primary: bookingPrimary,
             secondary: bookingSecondary,
+            bg_from: bookingBgFrom,
+            bg_to: bookingBgTo,
           },
           time_slot_duration: koledarUre,
           send_confirmation: potrdiloReservation,
@@ -301,13 +309,53 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                       </div>
                     </SettingRow>
 
+                    <SettingRow
+                      label="Ozadje gradient (začetek)"
+                      description="Začetna barva gradient ozadja (stolpec Booking_bg_from)"
+                    >
+                      <div className="flex gap-3 items-center">
+                        <input
+                          type="color"
+                          value={bookingBgFrom}
+                          onChange={(e) => setBookingBgFrom(e.target.value)}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                        />
+                        <Input
+                          value={bookingBgFrom}
+                          onChange={(e) => setBookingBgFrom(e.target.value)}
+                          placeholder="#7C75FC"
+                          className="w-32"
+                        />
+                      </div>
+                    </SettingRow>
+
+                    <SettingRow
+                      label="Ozadje gradient (konec)"
+                      description="Končna barva gradient ozadja (stolpec Booking_bg_to)"
+                    >
+                      <div className="flex gap-3 items-center">
+                        <input
+                          type="color"
+                          value={bookingBgTo}
+                          onChange={(e) => setBookingBgTo(e.target.value)}
+                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                        />
+                        <Input
+                          value={bookingBgTo}
+                          onChange={(e) => setBookingBgTo(e.target.value)}
+                          placeholder="#44D0C6"
+                          className="w-32"
+                        />
+                      </div>
+                    </SettingRow>
+
                     {/* Gradient Preview */}
                     <div className="mt-6">
-                      <p className="text-sm font-medium text-gray-700 mb-3">Predogled:</p>
+                      <p className="text-sm font-medium text-gray-700 mb-3">Predogled ozadja:</p>
                       <div
                         className="w-full p-8 rounded-xl border-2 border-gray-200"
                         style={{
-                          background: `linear-gradient(135deg, ${bookingPrimary}20 0%, ${bookingSecondary}20 100%)`,
+                          background: `linear-gradient(135deg, ${bookingBgFrom} 0%, ${bookingBgTo} 100%)`,
                         }}
                       >
                         <div className="text-center">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   CreditCard,
   SpinnerGap,
@@ -10,12 +10,14 @@ import {
   Warning,
   ChatCircleText,
   EnvelopeSimple,
+  X,
 } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { getCustomerPortal, startCheckout, getBillingStatus } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
 import ProtectedLayout from '@/components/ProtectedLayout';
+import { sendWebhook } from '@/components/utils/webhookUtils';
 
 interface PlanData {
   id: string;
@@ -29,10 +31,10 @@ interface Plan {
   price: string;
   period: string;
   description: string;
+  tagline: string;
   features: string[];
   popular?: boolean;
   isEnterprise?: boolean;
-  note?: string;
 }
 
 const PLANS: Plan[] = [
@@ -41,15 +43,17 @@ const PLANS: Plan[] = [
     name: 'Jedro Plus',
     price: '19 €',
     period: '/ mesec',
-    description: 'Osnovni paket za urejene termine in komunikacijo.',
+    description: 'Za podjetja, ki želijo urejen sistem in jasen pregled',
+    tagline: 'Koledar, baze in opomniki, ki brez zapletov uredijo vsakdan.',
     features: [
-      'baza strank',
-      'baza terminov',
-      'baza storitev in osebja',
-      'personalizirani opomniki pred in po terminu',
-      'email pošiljanje',
-      'celotna analitika',
-      'booking link',
+      'Baza strank in terminov',
+      'Baza storitev in osebja',
+      'Personalizirani opomniki pred in po terminu',
+      'Email pošiljanje',
+      'Celotna analitika',
+      'Spletno Naročanje',
+      'Različni dizajni spletnega naročanja',
+      'Asistent+',
     ],
   },
   {
@@ -57,14 +61,16 @@ const PLANS: Plan[] = [
     name: 'Jedro Pro',
     price: '39 €',
     period: '/ mesec',
-    description: 'Napredne AI funkcije in Lost Leads za več zasedenosti.',
+    description: 'Za podjetja, ki želijo več zasedenosti in manj praznih terminov',
+    tagline: 'Vključuje AI pomočnike, Lost Leads in SMS opomnike.',
     popular: true,
     features: [
-      'vse iz Jedro Plus',
-      'Asistent+',
+      'Vse iz Jedro Plus',
+      'Chatbot+',
       'Lost Leads sistem',
-      'sms pošiljanje',
-      'email pošiljanje',
+      'SMS pošiljanje',
+      'Email pošiljanje',
+      'Dodatni dizajni spletnega naročanja',
     ],
   },
   {
@@ -72,13 +78,15 @@ const PLANS: Plan[] = [
     name: 'Jedro Premium',
     price: '99 €',
     period: '/ mesec',
-    description: 'Največ avtomatizacije in AI funkcij.',
+    description: 'Za podjetja, ki želijo maksimalno avtomatizacijo',
+    tagline: 'Celoten nabor AI funkcij za rast in komunikacijo.',
     features: [
-      'vse iz Jedro Pro',
+      'Vse iz Jedro Pro',
       'Receptionist+',
-      'Chatbot+',
       'SMS pošiljanje (višja kvota)',
       'Email pošiljanje (višja kvota)',
+      'Premium dizajn spletnega naročanja',
+      'Premium chatbot dizajn',
     ],
   },
   {
@@ -86,17 +94,235 @@ const PLANS: Plan[] = [
     name: 'Enterprise',
     price: 'po dogovoru',
     period: '',
-    description: 'Prilagoditve funkcij in AI po meri podjetja.',
+    description: 'Za podjetja s posebnimi zahtevami in prilagoditvami',
+    tagline: 'Prilagoditve funkcij, AI in booking okolja po meri.',
     isEnterprise: true,
-    note: 'Za Enterprise pripravimo ponudbo po meri.',
     features: [
       'Custom AI funkcije prilagojene podjetju',
       'Premium booking page',
-      'SMS in Email pošiljanje po meri',
-      'Integracije z drugimi orodji',
+      'Različni booking linki',
+      'Dodatne zahteve po meri',
     ],
   },
 ];
+
+interface EnterpriseFormData {
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+  companyName: string;
+  employeeCount: string;
+  requirements: string;
+}
+
+function EnterpriseModal({
+  isOpen,
+  onClose,
+  companyId,
+  userEmail,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  companyId: string | null;
+  userEmail: string;
+}) {
+  const [form, setForm] = useState<EnterpriseFormData>({
+    contactName: '',
+    contactEmail: userEmail,
+    contactPhone: '',
+    companyName: '',
+    employeeCount: '',
+    requirements: '',
+  });
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!companyId) return;
+    setSending(true);
+
+    try {
+      await sendWebhook({
+        event: 'ENTERPRISE_PAKET',
+        entity: 'billing',
+        company_id: companyId,
+        actor: userEmail || 'unknown',
+        timestamp: new Date().toISOString(),
+        data: {
+          inquiry: {
+            contact_name: form.contactName,
+            contact_email: form.contactEmail,
+            contact_phone: form.contactPhone,
+            company_name: form.companyName,
+            employee_count: form.employeeCount,
+            requirements: form.requirements,
+          },
+        },
+      });
+      setSent(true);
+    } catch (err) {
+      console.error('Error sending enterprise inquiry:', err);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleClose = () => {
+    setSent(false);
+    setForm({ contactName: '', contactEmail: userEmail, contactPhone: '', companyName: '', employeeCount: '', requirements: '' });
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={handleClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Enterprise povpraševanje</h2>
+                <p className="text-sm text-gray-500 mt-0.5">Pošljite nam vaše zahteve in se vam oglasimo</p>
+              </div>
+              <button onClick={handleClose} className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <X className="w-5 h-5 text-gray-500" weight="bold" />
+              </button>
+            </div>
+
+            {sent ? (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Povpraševanje poslano!</h3>
+                <p className="text-gray-500 mb-6">Kontaktirali vas bomo v najkrajšem možnem času.</p>
+                <button
+                  onClick={handleClose}
+                  className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-medium hover:bg-gray-800 transition-colors"
+                >
+                  Zapri
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ime in priimek *</label>
+                    <input
+                      type="text"
+                      required
+                      value={form.contactName}
+                      onChange={(e) => setForm(f => ({ ...f, contactName: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      placeholder="Jan Novak"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input
+                      type="email"
+                      required
+                      value={form.contactEmail}
+                      onChange={(e) => setForm(f => ({ ...f, contactEmail: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      placeholder="jan@podjetje.si"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+                    <input
+                      type="tel"
+                      value={form.contactPhone}
+                      onChange={(e) => setForm(f => ({ ...f, contactPhone: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      placeholder="+386 40 123 456"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ime podjetja *</label>
+                    <input
+                      type="text"
+                      required
+                      value={form.companyName}
+                      onChange={(e) => setForm(f => ({ ...f, companyName: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      placeholder="Podjetje d.o.o."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Število zaposlenih</label>
+                  <input
+                    type="text"
+                    value={form.employeeCount}
+                    onChange={(e) => setForm(f => ({ ...f, employeeCount: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    placeholder="npr. 10–50"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Vaše zahteve in potrebe *</label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={form.requirements}
+                    onChange={(e) => setForm(f => ({ ...f, requirements: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 resize-none"
+                    placeholder="Opišite vaše specifične potrebe, integracije, prilagoditve..."
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors text-sm"
+                  >
+                    Prekliči
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={sending}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-medium hover:shadow-lg transition-all text-sm disabled:opacity-50"
+                  >
+                    {sending ? (
+                      <>
+                        <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                        Pošiljam...
+                      </>
+                    ) : (
+                      'Pošlji povpraševanje'
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 
 function BillingPageContent() {
   const router = useRouter();
@@ -107,8 +333,8 @@ function BillingPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [currentPlanData, setCurrentPlanData] = useState<PlanData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showEnterpriseModal, setShowEnterpriseModal] = useState(false);
 
-  // Fetch current plan from n8n billing status endpoint
   useEffect(() => {
     const fetchCurrentPlan = async () => {
       if (!companyId) {
@@ -117,10 +343,7 @@ function BillingPageContent() {
       }
 
       try {
-        // Use n8n billing status endpoint which has proper access
         const result = await getBillingStatus(false);
-
-        console.log('Billing status result:', result);
 
         if (result.ok && result.plan) {
           setCurrentPlanData({
@@ -129,7 +352,6 @@ function BillingPageContent() {
             name: result.plan.name || 'Brezplačni',
           });
         } else {
-          // Default to FREE if no subscription found
           setCurrentPlanData({ id: '', code: 'FREE', name: 'Brezplačni' });
         }
       } catch (err) {
@@ -163,8 +385,8 @@ function BillingPageContent() {
   };
 
   const handleSelectPlan = async (planCode: string) => {
-    // Enterprise button does nothing for now
     if (planCode === 'ENTERPRISE') {
+      setShowEnterpriseModal(true);
       return;
     }
 
@@ -173,22 +395,15 @@ function BillingPageContent() {
       return;
     }
 
-    // If selecting free plan, no checkout needed
-    if (planCode === 'FREE') {
-      return;
-    }
+    if (planCode === 'FREE') return;
 
-    // If already on this plan, don't do anything
     const currentCode = currentPlanData?.code || contextPlanCode;
-    if (planCode === currentCode && isPlanActive) {
-      return;
-    }
+    if (planCode === currentCode && isPlanActive) return;
 
     setLoadingPlan(planCode);
     setError(null);
 
     try {
-      // Fetch the long UUID from companies table using short company_id
       const { data: companyData, error: companyError } = await supabase
         .from('companies')
         .select('id')
@@ -196,7 +411,6 @@ function BillingPageContent() {
         .single();
 
       if (companyError || !companyData?.id) {
-        console.error('Failed to fetch company UUID:', companyError);
         setError('Napaka pri pridobivanju podatkov podjetja');
         setLoadingPlan(null);
         return;
@@ -208,7 +422,6 @@ function BillingPageContent() {
       if (result.ok && result.checkout_url) {
         const checkoutUrl = result.checkout_url;
         if (!checkoutUrl.startsWith('http')) {
-          console.error('Invalid checkout URL received:', checkoutUrl);
           setError('Neveljaven URL za plačilo. Prosimo, poskusite znova.');
           setLoadingPlan(null);
           return;
@@ -225,34 +438,22 @@ function BillingPageContent() {
   };
 
   const currentCode = currentPlanData?.code || contextPlanCode || 'FREE';
+  const isCurrentPlan = (code: string) => code === currentCode && isPlanActive;
 
-  const isCurrentPlan = (code: string) => {
-    return code === currentCode && isPlanActive;
-  };
-
-  // Get display name for current plan
   const getCurrentPlanDisplayName = () => {
     switch (currentCode) {
-      case 'FREE':
-        return 'FREE';
-      case 'JEDRO_PLUS':
-        return 'JEDRO PLUS';
-      case 'JEDRO_PRO':
-        return 'JEDRO PRO';
-      case 'JEDRO_PREMIUM':
-        return 'JEDRO PREMIUM';
-      case 'ENTERPRISE':
-        return 'ENTERPRISE';
-      default:
-        return currentCode;
+      case 'FREE': return 'FREE';
+      case 'JEDRO_PLUS': return 'JEDRO PLUS';
+      case 'JEDRO_PRO': return 'JEDRO PRO';
+      case 'JEDRO_PREMIUM': return 'JEDRO PREMIUM';
+      case 'ENTERPRISE': return 'ENTERPRISE';
+      default: return currentCode;
     }
   };
 
-  // Determine styling based on current plan
   const isPremium = currentCode === 'JEDRO_PREMIUM';
   const isGradientPlan = currentCode === 'JEDRO_PLUS' || currentCode === 'JEDRO_PRO';
 
-  // Format date
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return '-';
     return new Date(dateString).toLocaleDateString('sl-SI', {
@@ -267,7 +468,7 @@ function BillingPageContent() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Paketi in kvote</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Paketi in kvote</h1>
         </div>
 
         {/* Error Toast */}
@@ -282,12 +483,7 @@ function BillingPageContent() {
               <p className="text-red-800 font-medium">Napaka</p>
               <p className="text-red-600 text-sm">{error}</p>
             </div>
-            <button
-              onClick={() => setError(null)}
-              className="text-red-400 hover:text-red-600"
-            >
-              &times;
-            </button>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">&times;</button>
           </motion.div>
         )}
 
@@ -310,31 +506,25 @@ function BillingPageContent() {
                   : { border: '1px solid #E5E7EB' }
             }
           >
-            {/* Top section - Current Plan Name (white background) */}
+            {/* Top section */}
             <div className="p-6 bg-white border-b border-gray-200">
               <p className="text-sm text-black font-medium mb-1">Trenutni paket</p>
               {loading ? (
                 <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
               ) : (
-                <h2
-                  className={`text-2xl font-bold ${
-                    isPremium
-                      ? 'text-amber-500'
-                      : 'bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent'
-                  }`}
-                >
+                <h2 className="text-2xl font-bold text-gray-900">
                   {getCurrentPlanDisplayName()}
                 </h2>
               )}
             </div>
 
-            {/* Bottom section - Details (light gray background) */}
+            {/* Bottom section */}
             <div className="p-6 bg-gray-50">
               <div className="grid sm:grid-cols-3 gap-6">
                 {/* Subscription Details */}
                 <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <CalendarBlank className="h-5 w-5 text-violet-500" />
+                    <CalendarBlank className="h-5 w-5 text-black" />
                     Podrobnosti naročnine
                   </h3>
                   {subscription ? (
@@ -362,39 +552,35 @@ function BillingPageContent() {
                 {/* SMS Quota */}
                 <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <ChatCircleText className="h-5 w-5 text-violet-500" />
+                    <ChatCircleText className="h-5 w-5 text-black" />
                     SMS kvota
                   </h3>
-                  {smsQuota ? (
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Porabljeno</span>
-                        <span className="font-medium text-gray-900">
-                          {smsQuota.used_current_month} / {smsQuota.quota_effective}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Preostalo</span>
-                        <span className="font-medium text-gray-900">{smsQuota.remaining}</span>
-                      </div>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Porabljeno</span>
+                      <span className="font-semibold text-gray-900 text-lg">0</span>
                     </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">SMS ni vključen</p>
-                  )}
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Preostalo</span>
+                      <span className="font-semibold text-gray-900 text-lg">0</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Email Quota */}
                 <div className="space-y-3">
                   <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <EnvelopeSimple className="h-5 w-5 text-violet-500" />
+                    <EnvelopeSimple className="h-5 w-5 text-black" />
                     Email kvota
                   </h3>
                   <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Status</span>
-                      <span className="font-medium text-gray-900">
-                        {currentCode !== 'FREE' ? 'Vključeno' : 'Ni vključeno'}
-                      </span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Porabljeno</span>
+                      <span className="font-semibold text-gray-900 text-lg">0</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Preostalo</span>
+                      <span className="font-semibold text-gray-900 text-lg">0</span>
                     </div>
                   </div>
                 </div>
@@ -434,7 +620,7 @@ function BillingPageContent() {
             transition={{ delay: 0.1 }}
           >
             <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
                 {PLANS.map((plan, index) => {
                   const isCurrent = isCurrentPlan(plan.code);
                   const isLoading = loadingPlan === plan.code;
@@ -445,7 +631,7 @@ function BillingPageContent() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className={`relative bg-white rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                      className={`relative bg-white rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col ${
                         plan.popular
                           ? 'border-2 border-violet-500 ring-4 ring-violet-500/10'
                           : 'border border-gray-100'
@@ -459,29 +645,29 @@ function BillingPageContent() {
                       )}
 
                       {/* Plan Name */}
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        {plan.name}
-                      </h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
 
                       {/* Price */}
-                      <div className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent mb-3">
-                        {plan.price}
-                        {plan.period && <span className="text-lg font-normal text-gray-500"> {plan.period}</span>}
+                      <div className="mb-2">
+                        <span className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                          {plan.price}
+                        </span>
+                        {plan.period && (
+                          <span className="text-base font-normal text-gray-500 ml-1">{plan.period}</span>
+                        )}
                       </div>
 
                       {/* Description */}
-                      <p className="text-gray-600 mb-6">
-                        {plan.description}
-                      </p>
+                      <p className="text-sm text-gray-700 font-medium mb-1">{plan.description}</p>
+
+                      {/* Tagline */}
+                      <p className="text-xs text-gray-500 italic mb-5">&ldquo;{plan.tagline}&rdquo;</p>
 
                       {/* Features */}
-                      <ul className="space-y-2 mb-8">
+                      <ul className="space-y-2 mb-6 flex-1">
                         {plan.features.map((feature, featureIndex) => (
-                          <li
-                            key={featureIndex}
-                            className="flex items-start gap-2 text-sm text-gray-600"
-                          >
-                            <span>•</span>
+                          <li key={featureIndex} className="flex items-start gap-2 text-sm text-gray-600">
+                            <span className="text-gray-400 flex-shrink-0 mt-0.5">•</span>
                             <span>{feature}</span>
                           </li>
                         ))}
@@ -493,7 +679,7 @@ function BillingPageContent() {
                         whileTap={{ scale: isCurrent ? 1 : 0.98 }}
                         onClick={() => handleSelectPlan(plan.code)}
                         disabled={isCurrent || isLoading}
-                        className={`w-full rounded-xl px-6 py-3 font-semibold transition-all ${
+                        className={`w-full rounded-xl px-6 py-3 font-semibold transition-all text-sm ${
                           plan.isEnterprise
                             ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white hover:shadow-lg'
                             : isCurrent
@@ -515,18 +701,11 @@ function BillingPageContent() {
                             Trenutni paket
                           </span>
                         ) : plan.isEnterprise ? (
-                          'Pošlji povpraševanje'
+                          'Pošlji Povpraševanje'
                         ) : (
                           'Izberi paket'
                         )}
                       </motion.button>
-
-                      {/* Enterprise Note */}
-                      {plan.note && (
-                        <p className="text-xs text-gray-500 mt-4 text-center">
-                          {plan.note}
-                        </p>
-                      )}
                     </motion.div>
                   );
                 })}
@@ -534,7 +713,7 @@ function BillingPageContent() {
             </div>
           </motion.div>
 
-          {/* FAQ Link */}
+          {/* Footer note */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -543,16 +722,21 @@ function BillingPageContent() {
           >
             <p className="text-gray-600">
               Imate vprašanja? Kontaktirajte nas na{' '}
-              <a
-                href="mailto:podpora@jedroplus.com"
-                className="text-violet-600 hover:text-violet-700 font-medium"
-              >
+              <a href="mailto:podpora@jedroplus.com" className="text-violet-600 hover:text-violet-700 font-medium">
                 podpora@jedroplus.com
               </a>
             </p>
           </motion.div>
         </div>
       </div>
+
+      {/* Enterprise Inquiry Modal */}
+      <EnterpriseModal
+        isOpen={showEnterpriseModal}
+        onClose={() => setShowEnterpriseModal(false)}
+        companyId={companyId}
+        userEmail={user?.email || ''}
+      />
     </div>
   );
 }

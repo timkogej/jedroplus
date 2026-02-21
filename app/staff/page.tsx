@@ -59,13 +59,11 @@ const STAT_GRADIENTS = [
   'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', // Amber-Red
 ];
 
-// Stats Card Component - no icon circles, icons on right, gradient borders
+// Stats Card Component - matches Storitve page style
 function StatCard({
   icon: Icon,
   label,
   value,
-  trend,
-  gradientIndex = 0,
 }: {
   icon: React.ElementType;
   label: string;
@@ -73,45 +71,19 @@ function StatCard({
   trend?: { value: number; positive: boolean };
   gradientIndex?: number;
 }) {
-  const gradient = STAT_GRADIENTS[gradientIndex % STAT_GRADIENTS.length];
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative"
+      className="group relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 transition-all hover:shadow-md hover:ring-gray-200"
     >
-      {/* Gradient border */}
-      <div
-        className="absolute inset-0 rounded-2xl p-[2px]"
-        style={{ background: gradient }}
-      >
-        <div className="h-full w-full rounded-2xl bg-white" />
-      </div>
-
-      {/* Content */}
-      <div className="relative rounded-2xl bg-white p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
-            <p className="text-sm font-medium text-gray-600">{label}</p>
-            {trend && (
-              <div className="mt-2 flex items-center gap-1">
-                <ArrowRight
-                  className={`h-3 w-3 ${trend.positive ? 'rotate-[-45deg] text-emerald-500' : 'rotate-45 text-red-500'}`}
-                  weight="bold"
-                />
-                <span
-                  className={`text-xs font-medium ${trend.positive ? 'text-emerald-600' : 'text-red-600'}`}
-                >
-                  {trend.value}% ta teden
-                </span>
-              </div>
-            )}
-          </div>
-          <div className="text-black flex-shrink-0">
-            <Icon className="h-7 w-7" weight="regular" />
-          </div>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+          <p className="text-sm font-medium text-gray-600">{label}</p>
+        </div>
+        <div className="text-black flex-shrink-0">
+          <Icon className="h-6 w-6" weight="bold" />
         </div>
       </div>
     </motion.div>
@@ -650,7 +622,7 @@ export default function OsebjePage() {
       <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
-          <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold text-[#1A1F36]">Osebje</h1>
               <p className="mt-1 text-gray-500">

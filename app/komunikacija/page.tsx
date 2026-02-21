@@ -318,7 +318,7 @@ export default function KomunikacijaPage() {
               animate={{ opacity: 1, y: 0 }}
               className="mb-1"
             >
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F36]">
+              <h1 className="text-2xl font-bold text-[#1A1F36]">
                 Komunikacija
               </h1>
               <p className="text-sm text-gray-500">
@@ -364,7 +364,7 @@ export default function KomunikacijaPage() {
                     WebkitTextFillColor: 'transparent',
                   } : undefined}
                 >
-                  <Users className="h-4 w-4" weight={mobileView === 'customers' ? 'fill' : 'regular'} />
+                  <Users className="h-4 w-4" weight="regular" />
                   Stranke
                 </span>
                 {selectedIds.size > 0 && (
@@ -394,7 +394,7 @@ export default function KomunikacijaPage() {
                     WebkitTextFillColor: 'transparent',
                   } : undefined}
                 >
-                  <PaperPlaneTilt className="h-4 w-4" weight={mobileView === 'composer' ? 'fill' : 'regular'} />
+                  <PaperPlaneTilt className="h-4 w-4" weight="regular" />
                   Sporočilo
                 </span>
               </button>

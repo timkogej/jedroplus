@@ -230,9 +230,9 @@ function AppointmentFilters({
                   setValue={(value) => updateFilter('employeeId', value || null)}
                   placeholder="Vsi zaposleni"
                 >
-                  <SelectOption value="">Vsi zaposleni</SelectOption>
-                  {employees.map((employee) => (
-                    <SelectOption key={employee.id} value={employee.id}>
+                  <SelectOption key="all-employees" value="">Vsi zaposleni</SelectOption>
+                  {employees.map((employee, idx) => (
+                    <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
                       {employee.ime} {employee.priimek}
                     </SelectOption>
                   ))}
@@ -249,10 +249,10 @@ function AppointmentFilters({
                   setValue={(value) => updateFilter('serviceId', value || null)}
                   placeholder="Vse storitve"
                 >
-                  <SelectOption value="">Vse storitve</SelectOption>
-                  {services.map((service) => (
+                  <SelectOption key="all-services" value="">Vse storitve</SelectOption>
+                  {services.map((service, idx) => (
                     <SelectOption
-                      key={service.id}
+                      key={`svc-${idx}-${service.id}`}
                       value={service.id}
                       colorDot={service.barva || '#6366F1'}
                     >

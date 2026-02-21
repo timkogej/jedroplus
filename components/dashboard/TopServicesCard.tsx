@@ -62,7 +62,7 @@ export function TopServicesCard({ services }: TopServicesCardProps) {
                   </div>
                 </div>
                 {/* Progress bar */}
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: service.color + '33' }}>
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${service.percentage}%` }}

@@ -267,11 +267,11 @@ function AbsenceModal({
                 {/* Individual employees */}
                 {!allEmployees && (
                   <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-                    {employees.map((employee) => {
+                    {employees.map((employee, idx) => {
                       const isSelected = selectedEmployeeIds.includes(employee.id);
                       return (
                         <motion.button
-                          key={employee.id}
+                          key={`emp-${idx}-${employee.id}`}
                           type="button"
                           onClick={() => toggleEmployee(employee.id)}
                           whileHover={{ scale: 1.02 }}

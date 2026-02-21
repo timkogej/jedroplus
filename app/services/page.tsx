@@ -625,25 +625,25 @@ export default function StoritvePage() {
           {stats && (
             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
-                icon={<Briefcase className="h-7 w-7" weight="regular" />}
+                icon={<Briefcase className="h-7 w-7" weight="bold" />}
                 value={stats.total}
                 label="Skupaj storitev"
                 delay={0}
               />
               <StatCard
-                icon={<ChartLineUp className="h-7 w-7" weight="regular" />}
+                icon={<ChartLineUp className="h-7 w-7" weight="bold" />}
                 value={stats.active}
                 label="Aktivnih storitev"
                 delay={1}
               />
               <StatCard
-                icon={<Clock className="h-7 w-7" weight="regular" />}
+                icon={<Clock className="h-7 w-7" weight="bold" />}
                 value={`${stats.averageDuration} min`}
                 label="Povprečno trajanje"
                 delay={2}
               />
               <StatCard
-                icon={<CurrencyEur className="h-7 w-7" weight="regular" />}
+                icon={<CurrencyEur className="h-7 w-7" weight="bold" />}
                 value={stats.highestPrice > 0 ? `€${stats.highestPrice.toFixed(2)}` : '-'}
                 label="Najdražja storitev"
                 delay={3}
@@ -662,7 +662,7 @@ export default function StoritvePage() {
             <div className="relative flex-1 min-w-[280px] max-w-md">
               <MagnifyingGlass
                 className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
-                weight="regular"
+                weight="bold"
               />
               <input
                 type="text"

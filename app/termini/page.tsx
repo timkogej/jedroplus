@@ -680,12 +680,12 @@ export default function TerminiPage() {
                          transition-shadow hover:shadow-xl hover:shadow-cyan-500/30"
             >
               <Plus className="h-4 w-4" weight="bold" />
-              <span className="font-bold">Nov termin</span>
+              <span>Nov termin</span>
             </motion.button>
           </motion.div>
 
           {/* Stats cards */}
-          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
               icon={<CalendarBlank className="h-6 w-6" weight="bold" />}
               value={appointments.length}
@@ -703,12 +703,6 @@ export default function TerminiPage() {
               value={upcomingCount}
               label="Prihajajoči"
               delay={2}
-            />
-            <StatCard
-              icon={<ListChecks className="h-6 w-6" weight="bold" />}
-              value={filteredAppointments.length}
-              label="Filtrirani"
-              delay={3}
             />
           </div>
 

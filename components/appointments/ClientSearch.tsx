@@ -218,6 +218,7 @@ function ClientSearch({
             <AnimatePresence>
               {isOpen && (query.trim() || results.length > 0) && (
                 <motion.div
+                  key="dropdown"
                   variants={dropdownVariants}
                   initial="hidden"
                   animate="visible"
@@ -227,34 +228,54 @@ function ClientSearch({
                 >
                   <div className="max-h-64 overflow-y-auto p-1.5 custom-scrollbar">
                     {results.length > 0 ? (
-                      results.map((client, index) => (
-                        <motion.button
-                          key={client.id}
-                          type="button"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03 }}
-                          onClick={() => handleSelect(client)}
-                          onMouseEnter={() => setHighlightedIndex(index)}
-                          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left
-                                     transition-colors
-                                     ${highlightedIndex === index ? 'bg-[#1A1F36]/5' : ''}
-                                     hover:bg-[#1A1F36]/5`}
-                        >
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full
-                                          bg-gradient-to-br from-gray-200 to-gray-300 text-gray-600">
-                            <User className="h-4 w-4" weight="regular" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-[#1A1F36]">
-                              {client.ime} {client.priimek}
-                            </p>
-                            <p className="text-xs text-gray-500 truncate">
-                              {client.email || client.telefon || 'Ni podatkov'}
-                            </p>
-                          </div>
-                        </motion.button>
-                      ))
+                      <>
+                        {results.map((client, index) => (
+                          <motion.button
+                            key={`cs-${index}-${client.id}`}
+                            type="button"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.03 }}
+                            onClick={() => handleSelect(client)}
+                            onMouseEnter={() => setHighlightedIndex(index)}
+                            className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left
+                                       transition-colors
+                                       ${highlightedIndex === index ? 'bg-[#1A1F36]/5' : ''}
+                                       hover:bg-[#1A1F36]/5`}
+                          >
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full
+                                            bg-gradient-to-br from-gray-200 to-gray-300 text-gray-600">
+                              <User className="h-4 w-4" weight="regular" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-[#1A1F36]">
+                                {client.ime} {client.priimek}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">
+                                {client.email || client.telefon || 'Ni podatkov'}
+                              </p>
+                            </div>
+                          </motion.button>
+                        ))}
+                        {/* Always show "Add new client" at the bottom of results */}
+                        {onCreateNew && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsOpen(false);
+                              onCreateNew();
+                            }}
+                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left
+                                       transition-colors hover:bg-violet-50 border-t border-gray-100 mt-1 pt-2.5"
+                          >
+                            <div className="flex h-9 w-9 items-center justify-center rounded-full
+                                            bg-gradient-to-r from-violet-500 to-cyan-500 text-white">
+                              <Plus className="h-4 w-4" weight="bold" />
+                            </div>
+                            <p className="text-sm font-medium text-violet-600">Dodaj novo stranko</p>
+                          </button>
+                        )}
+                      </>
                     ) : query.trim() && !isLoading ? (
                       <div className="px-3 py-4 text-center">
                         <p className="text-sm text-gray-500">Ni rezultatov za "{query}"</p>

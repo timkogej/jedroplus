@@ -438,10 +438,16 @@ async function fetchStats(companyId: string): Promise<DashboardStats> {
       }
 
       // Calculate revenue for this month (owner only)
-      if (isOwner && bookingDateStr >= monthStart && bookingDateStr <= monthEnd) {
-        const finalPrice = pickFirst(row, ['Final cena', 'final_cena', 'koncna_cena', 'final_total_price', 'price']);
-        if (finalPrice !== undefined) {
-          revenueThisMonth = (revenueThisMonth ?? 0) + (parseFloat(String(finalPrice)) || 0);
+      // only completed appointments, using Final cena / cena / Cena / price fields
+      const isCompletedStatus =
+        status.includes('zaključen') ||
+        status.includes('zakljucen') ||
+        status.includes('completed') ||
+        status.includes('done');
+      if (isOwner && isCompletedStatus && bookingDateStr >= monthStart && bookingDateStr <= monthEnd) {
+        const price = pickFirst(row, ['Final cena', 'final_cena', 'cena', 'Cena', 'price']);
+        if (price !== undefined) {
+          revenueThisMonth = (revenueThisMonth ?? 0) + (parseFloat(String(price)) || 0);
         }
       }
     }

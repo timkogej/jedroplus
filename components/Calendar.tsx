@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useCallback, useState, useEffect, useId } from 'react';
+import { memo, useMemo, useCallback, useState, useEffect, useId, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   CaretLeft,
@@ -25,10 +25,12 @@ import {
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import type { ViewMode } from '@/lib/utils/calendar';
 import ViewToggle from './calendar/ViewToggle';
+import DateStrip from './calendar/DateStrip';
 import CalendarSidebar from './calendar/CalendarSidebar';
 import WeekView from './calendar/WeekView';
 import DayView from './calendar/DayView';
 import MonthView from './calendar/MonthView';
+import TwoDayView from './calendar/TwoDayView';
 import AppointmentModal, { type AppointmentFormData } from './appointments/AppointmentModal';
 import DeleteConfirmation from './appointments/DeleteConfirmation';
 import AbsenceModal, { type AbsenceFormData } from './calendar/AbsenceModal';
@@ -144,11 +146,11 @@ function AppointmentDetailModal({
   appointment: AppointmentWithDetails;
   services: Storitev[];
   onClose: () => void;
-  onEdit: () => void;
-  onComplete?: () => void;
-  onNoShow?: () => void;
-  onCancel?: () => void;
-  onDelete?: () => void;
+  onEdit: (appointment: AppointmentWithDetails) => void;
+  onComplete?: (appointment: AppointmentWithDetails) => void;
+  onNoShow?: (appointment: AppointmentWithDetails) => void;
+  onCancel?: (appointment: AppointmentWithDetails) => void;
+  onDelete?: (appointment: AppointmentWithDetails) => void;
 }) {
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
@@ -442,7 +444,7 @@ function AppointmentDetailModal({
             {!isTerminated && onComplete && (
               <motion.button
                 type="button"
-                onClick={onComplete}
+                onClick={() => onComplete(appointment)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
@@ -455,7 +457,7 @@ function AppointmentDetailModal({
             {/* Edit */}
             <motion.button
               type="button"
-              onClick={onEdit}
+              onClick={() => onEdit(appointment)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
@@ -464,62 +466,60 @@ function AppointmentDetailModal({
               <NotePencil className="h-4.5 w-4.5" weight="regular" />
             </motion.button>
 
-            {/* Three dots menu - No Show, Cancel, Delete */}
-            {!isTerminated && (
-              <div className="relative">
-                <motion.button
-                  type="button"
-                  onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                  title="Več možnosti"
-                >
-                  <DotsThreeVertical className="h-4.5 w-4.5" weight="bold" />
-                </motion.button>
+            {/* Three dots menu - No Show, Cancel, Delete - always visible like Termini */}
+            <div className="relative">
+              <motion.button
+                type="button"
+                onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                title="Več možnosti"
+              >
+                <DotsThreeVertical className="h-4.5 w-4.5" weight="bold" />
+              </motion.button>
 
-                <AnimatePresence>
-                  {actionsMenuOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 bottom-full z-50 mb-1 w-36 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-gray-200"
-                    >
-                      {onNoShow && (
-                        <button
-                          type="button"
-                          onClick={() => { onNoShow(); setActionsMenuOpen(false); }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-amber-50 hover:text-amber-700"
-                        >
-                          <WarningCircle className="h-4 w-4" weight="regular" />
-                          Ni prišel
-                        </button>
-                      )}
-                      {onCancel && (
-                        <button
-                          type="button"
-                          onClick={() => { onCancel(); setActionsMenuOpen(false); }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
-                        >
-                          <XCircle className="h-4 w-4" weight="regular" />
-                          Odpoved
-                        </button>
-                      )}
+              <AnimatePresence>
+                {actionsMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 bottom-full z-50 mb-1 w-36 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-gray-200"
+                  >
+                    {onNoShow && (
                       <button
                         type="button"
-                        onClick={() => { onDelete?.(); setActionsMenuOpen(false); }}
+                        onClick={() => { onNoShow(appointment); setActionsMenuOpen(false); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                      >
+                        <WarningCircle className="h-4 w-4" weight="regular" />
+                        Ni prišel
+                      </button>
+                    )}
+                    {onCancel && (
+                      <button
+                        type="button"
+                        onClick={() => { onCancel(appointment); setActionsMenuOpen(false); }}
                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
                       >
-                        <Trash className="h-4 w-4" weight="regular" />
-                        Izbriši
+                        <XCircle className="h-4 w-4" weight="regular" />
+                        Odpoved
                       </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => { onDelete?.(appointment); setActionsMenuOpen(false); }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
+                    >
+                      <Trash className="h-4 w-4" weight="regular" />
+                      Izbriši
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -575,10 +575,19 @@ function Calendar({ companyId }: CalendarProps) {
   // Show all days filter (true = all 7 days, false = only weekdays Mon-Fri)
   const [showAllDays, setShowAllDays] = useState(true);
 
-  // Detect mobile screen size
+  // Detect mobile screen size and auto-switch views
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      // On mobile, 'week' view isn't available — switch to 'day'
+      if (mobile) {
+        setCurrentView(prev => prev === 'week' ? 'day' : prev);
+      }
+      // On desktop, '2day' view isn't available — switch to 'day'
+      if (!mobile) {
+        setCurrentView(prev => prev === '2day' ? 'day' : prev);
+      }
     };
 
     checkMobile();
@@ -693,6 +702,30 @@ function Calendar({ companyId }: CalendarProps) {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
+    // For 2day view, check if it spans two months
+    if (currentView === '2day') {
+      const nextDay = addDays(currentDate, 1);
+      if (nextDay.getMonth() !== month || nextDay.getFullYear() !== year) {
+        const [result1, result2] = await Promise.all([
+          fetchAppointmentsForMonth(companyId, year, month),
+          fetchAppointmentsForMonth(companyId, nextDay.getFullYear(), nextDay.getMonth()),
+        ]);
+        if (result1.error) {
+          setError(result1.error.message);
+        } else if (result2.error) {
+          setError(result2.error.message);
+        } else {
+          const allAppointments = [...(result1.data || []), ...(result2.data || [])];
+          const uniqueAppointments = allAppointments.filter(
+            (apt, index, self) => index === self.findIndex((a) => a.id === apt.id)
+          );
+          setAppointments(uniqueAppointments);
+        }
+        setLoading(false);
+        return;
+      }
+    }
+
     // For week view, check if the week spans two months
     // If so, we need to load appointments from both months
     if (currentView === 'week') {
@@ -775,6 +808,8 @@ function Calendar({ companyId }: CalendarProps) {
       switch (currentView) {
         case 'day':
           return addDays(prev, -1);
+        case '2day':
+          return addDays(prev, -2);
         case 'week':
           return addWeeks(prev, -1);
         case 'month':
@@ -790,6 +825,8 @@ function Calendar({ companyId }: CalendarProps) {
       switch (currentView) {
         case 'day':
           return addDays(prev, 1);
+        case '2day':
+          return addDays(prev, 2);
         case 'week':
           return addWeeks(prev, 1);
         case 'month':
@@ -820,6 +857,33 @@ function Calendar({ companyId }: CalendarProps) {
     }
   }, [currentView, handleViewChange]);
 
+  // ── Touch swipe for mobile navigation ──────────────────────────────────────
+  const swipeTouchStartX = useRef<number | null>(null);
+  const swipeTouchStartY = useRef<number | null>(null);
+
+  const handleSwipeTouchStart = useCallback((e: React.TouchEvent) => {
+    swipeTouchStartX.current = e.touches[0].clientX;
+    swipeTouchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleSwipeTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (swipeTouchStartX.current === null || swipeTouchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - swipeTouchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - swipeTouchStartY.current;
+    swipeTouchStartX.current = null;
+    swipeTouchStartY.current = null;
+
+    // Only trigger if the swipe is clearly horizontal (deltaX dominant) and long enough
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
+
+    if (deltaX < 0) {
+      handleNext(); // swipe left → forward
+    } else {
+      handlePrev(); // swipe right → backward
+    }
+  }, [handleNext, handlePrev]);
+  // ────────────────────────────────────────────────────────────────────────────
+
   const handleAppointmentClick = useCallback((appointment: AppointmentWithDetails) => {
     setSelectedAppointment(appointment);
   }, []);
@@ -828,21 +892,18 @@ function Calendar({ companyId }: CalendarProps) {
     setSelectedAppointment(null);
   }, []);
 
-  const handleEditFromDetail = useCallback(() => {
-    if (selectedAppointment) {
-      setEditingAppointment(selectedAppointment);
-      setModalMode('edit');
-      setIsModalOpen(true);
-      setSelectedAppointment(null);
-    }
-  }, [selectedAppointment]);
-
-  // Action handlers for appointment detail modal
-  const handleCompleteAppointment = useCallback(() => {
-    if (!selectedAppointment) return;
-    setCompleteTarget(selectedAppointment);
+  const handleEditFromDetail = useCallback((appointment: AppointmentWithDetails) => {
+    setEditingAppointment(appointment);
+    setModalMode('edit');
+    setIsModalOpen(true);
     setSelectedAppointment(null);
-  }, [selectedAppointment]);
+  }, []);
+
+  // Action handlers for appointment detail modal - accept appointment as parameter (like Termini)
+  const handleCompleteAppointment = useCallback((appointment: AppointmentWithDetails) => {
+    setCompleteTarget(appointment);
+    setSelectedAppointment(null);
+  }, []);
 
   // Confirm complete - identical to Termini page
   const handleConfirmComplete = useCallback(async () => {
@@ -903,9 +964,8 @@ function Calendar({ companyId }: CalendarProps) {
     }
   }, [completeTarget, completionNotes, companyId, actor, companyPayload, buildPayload, loadAppointments]);
 
-  const handleNoShowAppointment = useCallback(async () => {
-    if (!selectedAppointment) return;
-
+  const handleNoShowAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
+    setSelectedAppointment(null); // Close detail modal first (like Termini)
     setIsDeleting(true);
     setActionError(null);
 
@@ -915,17 +975,17 @@ function Calendar({ companyId }: CalendarProps) {
           'NO_SHOW_TERMINA',
           'appointments',
           {
-            appointment_id: selectedAppointment.id,
-            booking_id: selectedAppointment.id,
+            appointment_id: appointment.id,
+            booking_id: appointment.id,
             company_id: companyId,
             user_email: actor,
             company_profile: companyPayload,
             status: 'no_show',
-            previous_status: selectedAppointment.status,
-            stranka_ime: selectedAppointment.stranka_ime,
-            stranka_id: selectedAppointment.stranka_id,
-            datum: selectedAppointment.datum,
-            cas_zacetek: selectedAppointment.cas_zacetek,
+            previous_status: appointment.status,
+            stranka_ime: appointment.stranka_ime,
+            stranka_id: appointment.stranka_id,
+            datum: appointment.datum,
+            cas_zacetek: appointment.cas_zacetek,
           }
         )
       );
@@ -939,17 +999,15 @@ function Calendar({ companyId }: CalendarProps) {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
       await loadAppointments();
-      setSelectedAppointment(null);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Napaka pri No Show');
     } finally {
       setIsDeleting(false);
     }
-  }, [selectedAppointment, companyId, actor, companyPayload, buildPayload, loadAppointments]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments]);
 
-  const handleCancelAppointment = useCallback(async () => {
-    if (!selectedAppointment) return;
-
+  const handleCancelAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
+    setSelectedAppointment(null); // Close detail modal first (like Termini)
     setIsDeleting(true);
     setActionError(null);
 
@@ -959,17 +1017,17 @@ function Calendar({ companyId }: CalendarProps) {
           'ODPOVED_TERMINA',
           'appointments',
           {
-            appointment_id: selectedAppointment.id,
-            booking_id: selectedAppointment.id,
+            appointment_id: appointment.id,
+            booking_id: appointment.id,
             company_id: companyId,
             user_email: actor,
             company_profile: companyPayload,
             status: 'cancelled',
-            previous_status: selectedAppointment.status,
-            stranka_ime: selectedAppointment.stranka_ime,
-            stranka_id: selectedAppointment.stranka_id,
-            datum: selectedAppointment.datum,
-            cas_zacetek: selectedAppointment.cas_zacetek,
+            previous_status: appointment.status,
+            stranka_ime: appointment.stranka_ime,
+            stranka_id: appointment.stranka_id,
+            datum: appointment.datum,
+            cas_zacetek: appointment.cas_zacetek,
           }
         )
       );
@@ -983,20 +1041,18 @@ function Calendar({ companyId }: CalendarProps) {
 
       await new Promise((resolve) => setTimeout(resolve, 500));
       await loadAppointments();
-      setSelectedAppointment(null);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Napaka pri odpovedi');
     } finally {
       setIsDeleting(false);
     }
-  }, [selectedAppointment, companyId, actor, companyPayload, buildPayload, loadAppointments]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments]);
 
   // Delete handler - opens DeleteConfirmation dialog (identical to Termini)
-  const handleDeleteAppointment = useCallback(() => {
-    if (!selectedAppointment) return;
-    setDeleteTarget(selectedAppointment);
+  const handleDeleteAppointment = useCallback((appointment: AppointmentWithDetails) => {
+    setDeleteTarget(appointment);
     setSelectedAppointment(null);
-  }, [selectedAppointment]);
+  }, []);
 
   const handleConfirmDelete = useCallback(async () => {
     if (!deleteTarget) return;
@@ -1281,10 +1337,10 @@ function Calendar({ companyId }: CalendarProps) {
     }
   }, [companyId, actor, companyPayload, handleCloseAbsenceModal, refreshAbsences]);
 
-  // Get header title based on view - responsive for mobile
+  // Header title: always "Month Year" (Apple Calendar style – date strip shows specific day)
   const headerTitle = useMemo(() => {
-    return formatDateResponsive(currentDate, currentView, isMobile);
-  }, [currentView, currentDate, isMobile]);
+    return `${MONTHS_FULL[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+  }, [currentDate]);
 
   // Calculate visible appointments count based on current view
   const visibleAppointmentsCount = useMemo(() => {
@@ -1295,6 +1351,13 @@ function Calendar({ companyId }: CalendarProps) {
       return filteredAppointments.filter(apt => {
         const aptDateKey = getLocalDateKey(new Date(apt.datum));
         return aptDateKey === currentDateKey;
+      }).length;
+    } else if (currentView === '2day') {
+      // Count appointments for current day and next day
+      const nextDateKey = getLocalDateKey(addDays(currentDate, 1));
+      return filteredAppointments.filter(apt => {
+        const aptDateKey = getLocalDateKey(new Date(apt.datum));
+        return aptDateKey === currentDateKey || aptDateKey === nextDateKey;
       }).length;
     } else if (currentView === 'week') {
       // Count appointments for current week
@@ -1319,64 +1382,77 @@ function Calendar({ companyId }: CalendarProps) {
     <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-slate-50">
       {/* Main calendar area - takes available space */}
       <main className="flex flex-1 flex-col overflow-hidden">
-        {/* Header */}
-        <header className="flex items-center justify-between border-b border-gray-100 bg-white/80 backdrop-blur-sm px-3 py-2 md:px-6 md:py-4 flex-shrink-0">
-          {/* Left: Navigation and View Toggle */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Navigation buttons */}
-            <div className="flex items-center gap-1">
+        {/* Header – Apple Calendar style */}
+        <header className="flex flex-col border-b border-gray-100 bg-white/90 backdrop-blur-md flex-shrink-0">
+          {/* Top row: month/year navigation + view toggle + filter */}
+          <div className="flex items-center justify-between px-3 py-2.5 md:px-5 md:py-3">
+
+            {/* Left: prev arrow · month-year title · next arrow */}
+            <div className="flex items-center gap-0.5">
               <motion.button
                 type="button"
                 onClick={handlePrev}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-white text-[#1A1F36]
-                           shadow-sm ring-1 ring-gray-100 transition-all hover:shadow-md"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#1A1F36]
+                           transition-colors hover:bg-gray-100 active:bg-gray-200"
                 aria-label="Nazaj"
               >
-                <CaretLeft className="h-4 w-4" weight="bold" />
+                <CaretLeft className="h-[14px] w-[14px] md:h-4 md:w-4" weight="bold" />
               </motion.button>
+
+              <h1 className="w-[140px] text-center text-[15px] font-semibold text-[#1A1F36]
+                             md:w-[170px] md:text-[17px]">
+                {headerTitle}
+              </h1>
+
               <motion.button
                 type="button"
                 onClick={handleNext}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-lg bg-white text-[#1A1F36]
-                           shadow-sm ring-1 ring-gray-100 transition-all hover:shadow-md"
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#1A1F36]
+                           transition-colors hover:bg-gray-100 active:bg-gray-200"
                 aria-label="Naprej"
               >
-                <CaretRight className="h-4 w-4" weight="bold" />
+                <CaretRight className="h-[14px] w-[14px] md:h-4 md:w-4" weight="bold" />
               </motion.button>
             </div>
 
-            {/* View Toggle */}
-            <ViewToggle currentView={currentView} onViewChange={handleViewChange} />
+            {/* Right: view toggle + filter */}
+            <div className="flex items-center gap-2 md:gap-3">
+              <ViewToggle currentView={currentView} onViewChange={handleViewChange} isMobile={isMobile} />
 
-            {/* Title */}
-            <h1 className="text-sm md:text-lg font-semibold text-[#1A1F36]">
-              {headerTitle}
-            </h1>
+              <motion.button
+                type="button"
+                onClick={handleToggleSidebar}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#6B7280]
+                           transition-colors hover:bg-gray-100 hover:text-[#1A1F36] active:bg-gray-200"
+                aria-label="Filtri"
+              >
+                <Faders className="h-[17px] w-[17px] md:h-[18px] md:w-[18px]" weight="bold" />
+              </motion.button>
+            </div>
           </div>
 
-          {/* Right side: Filter button */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Filter button - icon only */}
-            <motion.button
-              type="button"
-              onClick={handleToggleSidebar}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex h-8 w-8 md:h-10 md:w-10 items-center justify-center rounded-xl bg-white text-[#1A1F36]
-                         shadow-sm ring-1 ring-gray-200 transition-all hover:shadow-md hover:ring-violet-300"
-              aria-label="Filtri"
-            >
-              <Faders className="h-4 w-4 md:h-5 md:w-5" weight="bold" />
-            </motion.button>
-          </div>
+          {/* Date strip – hidden in month and week view (week grid already shows all day headers) */}
+          {currentView !== 'month' && currentView !== 'week' && (
+            <DateStrip
+              currentDate={currentDate}
+              currentView={currentView}
+              onDateSelect={handleDateSelect}
+            />
+          )}
         </header>
 
-        {/* Calendar content */}
-        <div className="flex-1 overflow-hidden p-2 md:p-4">
+        {/* Calendar content – swipe left/right to navigate */}
+        <div
+          className="flex-1 overflow-hidden p-2 md:p-4"
+          onTouchStart={handleSwipeTouchStart}
+          onTouchEnd={handleSwipeTouchEnd}
+        >
           {loading ? (
             <div className="flex h-full items-center justify-center">
               <div className="flex flex-col items-center gap-3">
@@ -1418,6 +1494,16 @@ function Calendar({ companyId }: CalendarProps) {
               )}
               {currentView === 'month' && (
                 <MonthView
+                  currentDate={currentDate}
+                  appointments={filteredAppointments}
+                  absences={absences}
+                  services={services}
+                  onAppointmentClick={handleAppointmentClick}
+                  onDateClick={handleDateClick}
+                />
+              )}
+              {currentView === '2day' && (
+                <TwoDayView
                   currentDate={currentDate}
                   appointments={filteredAppointments}
                   absences={absences}

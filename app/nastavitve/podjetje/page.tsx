@@ -50,12 +50,21 @@ export default function CompanySettingsPage() {
 
   // Helper to convert legacy format to new interval format
   const convertToIntervalFormat = (urnikData: unknown): Record<string, WorkingHoursDay> => {
-    if (!urnikData || typeof urnikData !== 'object') {
+    // Parse JSON string if needed
+    let parsed = urnikData;
+    if (typeof urnikData === 'string') {
+      try {
+        parsed = JSON.parse(urnikData);
+      } catch {
+        return defaultWorkingHoursDay;
+      }
+    }
+    if (!parsed || typeof parsed !== 'object') {
       return defaultWorkingHoursDay;
     }
 
     const result: Record<string, WorkingHoursDay> = {};
-    const data = urnikData as Record<string, unknown>;
+    const data = parsed as Record<string, unknown>;
 
     for (const day of DAYS_OF_WEEK) {
       const dayData = data[day];
@@ -398,7 +407,7 @@ export default function CompanySettingsPage() {
                         className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-violet-600 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
                       >
                         <Plus className="w-4 h-4" weight="bold" />
-                        + interval
+                        Interval
                       </motion.button>
                     </div>
                   )}

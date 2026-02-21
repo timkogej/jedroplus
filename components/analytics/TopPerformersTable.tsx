@@ -93,7 +93,7 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
             </div>
           ) : (
             <div className="space-y-3">
-              {topServices.map((service, index) => (
+              {topServices.slice(0, 3).map((service, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
@@ -132,7 +132,7 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
             </div>
           ) : (
             <div className="space-y-3">
-              {topEmployees.map((employee, index) => (
+              {topEmployees.slice(0, 3).map((employee, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: 20 }}

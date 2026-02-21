@@ -1,6 +1,6 @@
 // Calendar utility functions for date/time operations
 
-export type ViewMode = 'day' | 'week' | 'month';
+export type ViewMode = 'day' | 'week' | 'month' | '2day';
 
 // Get date key in local timezone (YYYY-MM-DD format)
 // This avoids timezone issues with toISOString() which converts to UTC
@@ -281,6 +281,21 @@ export function formatDateResponsive(date: Date, view: ViewMode, isMobile = fals
         return `${MONTHS_FULL[start.getMonth()]} - ${MONTHS_FULL[end.getMonth()]}`;
       }
       return formatWeekRange(date, false);
+    case '2day': {
+      const nextDay = addDays(date, 1);
+      const nextDayOfMonth = nextDay.getDate();
+      const nextMonth = nextDay.getMonth();
+      if (isMobile) {
+        if (month === nextMonth) {
+          return `${day}. - ${nextDayOfMonth}. ${MONTHS_FULL[month]}`;
+        }
+        return `${day}. ${MONTHS_SHORT[month]} - ${nextDayOfMonth}. ${MONTHS_SHORT[nextMonth]}`;
+      }
+      if (month === nextMonth) {
+        return `${DAYS_FULL[dayOfWeek]}, ${day}. - ${nextDayOfMonth}. ${MONTHS_FULL[month]} ${year}`;
+      }
+      return `${day}. ${MONTHS_SHORT[month]} - ${nextDayOfMonth}. ${MONTHS_SHORT[nextMonth]} ${year}`;
+    }
     case 'month':
       if (isMobile) {
         // Mobile: "Februar"
@@ -321,7 +336,7 @@ export function saveViewPreference(view: ViewMode): void {
 export function loadViewPreference(): ViewMode {
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem(VIEW_STORAGE_KEY);
-    if (saved === 'day' || saved === 'week' || saved === 'month') {
+    if (saved === 'day' || saved === 'week' || saved === 'month' || saved === '2day') {
       return saved;
     }
   }

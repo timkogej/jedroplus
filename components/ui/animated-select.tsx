@@ -230,6 +230,7 @@ export function Select({
         <AnimatePresence>
           {isOpen && (
             <motion.div
+              key="dropdown"
               ref={optionsRef}
               variants={dropdownVariants}
               initial="hidden"

@@ -29,8 +29,6 @@ export default function GeneralSettingsPage() {
 
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(false);
-  const [soundNotifications, setSoundNotifications] = useState(false);
 
   // Copy states
   const [copiedId, setCopiedId] = useState(false);
@@ -87,8 +85,6 @@ export default function GeneralSettingsPage() {
           new_values: {
             userName,
             emailNotifications,
-            pushNotifications,
-            soundNotifications,
           },
         },
       });
@@ -99,7 +95,7 @@ export default function GeneralSettingsPage() {
     } finally {
       setSaving(false);
     }
-  }, [companyId, userEmail, userName, emailNotifications, pushNotifications, soundNotifications]);
+  }, [companyId, userEmail, userName, emailNotifications]);
 
   // Debounced save trigger
   const triggerSave = useCallback(() => {
@@ -162,16 +158,18 @@ export default function GeneralSettingsPage() {
         <SettingsSection title="Račun & Profil" description="Vaši osebni podatki">
           <SettingRow
             label="Ime uporabnika"
-            description="Vaše polno ime kot se prikazuje v aplikaciji"
+            description="Ime se ne more spreminjati"
           >
-            <Input
-              value={userName}
-              onChange={(e) => {
-                setUserName(e.target.value);
-                triggerSave();
-              }}
-              placeholder="Vnesi ime"
-            />
+            <div className="flex items-center gap-3">
+              <Input
+                value={userName}
+                disabled
+                className="bg-gray-50 cursor-not-allowed"
+              />
+              <div className="flex items-center gap-1 text-gray-400">
+                <Lock className="h-4 w-4" weight="bold" />
+              </div>
+            </div>
           </SettingRow>
 
           <SettingRow
@@ -274,35 +272,10 @@ export default function GeneralSettingsPage() {
             />
           </SettingRow>
 
-          <SettingRow
-            label="Push obvestila"
-            description="Obvestila v brskalniku"
-          >
-            <Switch
-              checked={pushNotifications}
-              onChange={(checked) => {
-                setPushNotifications(checked);
-                triggerSave();
-              }}
-            />
-          </SettingRow>
-
-          <SettingRow
-            label="Zvočna obvestila"
-            description="Predvajaj zvok ob novem terminu"
-          >
-            <Switch
-              checked={soundNotifications}
-              onChange={(checked) => {
-                setSoundNotifications(checked);
-                triggerSave();
-              }}
-            />
-          </SettingRow>
         </SettingsSection>
 
-        {/* Company ID & Join Code - New Section with Gradient */}
-        <SettingsSection title="Podatki podjetja" description="ID podjetja in Join Code za dodajanje uporabnikov">
+        {/* Company ID & Codes - New Section with Gradient */}
+        <SettingsSection title="Podatki podjetja" description="ID podjetja in kode za dodajanje uporabnikov">
           <div className="relative p-[2px] rounded-xl bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500">
             <div className="bg-white rounded-xl p-6 space-y-6">
               {/* Company ID */}
@@ -330,10 +303,10 @@ export default function GeneralSettingsPage() {
               {/* Divider */}
               <div className="border-t border-gray-200" />
 
-              {/* Join Code */}
+              {/* Admin Code */}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-1">Join Code</p>
+                  <p className="text-sm text-gray-600 mb-1">Admin code</p>
                   <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
                     {joinCode || '—'}
                   </div>
@@ -357,10 +330,23 @@ export default function GeneralSettingsPage() {
               {/* Divider */}
               <div className="border-t border-gray-200" />
 
+              {/* Employee Code */}
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-1">Employee code</p>
+                  <div className="text-2xl font-bold text-gray-300">
+                    —
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200" />
+
               {/* Explanation */}
               <div className="text-sm text-gray-600">
-                <strong>Join Code</strong> uporabljajte za dodajanje novih uporabnikov v vaše podjetje.
-                Delite ga z osebami, ki se želijo pridružiti vašemu podjetju v sistemu Jedro+.
+                <strong>Admin code</strong> je za dodajanje administratorjev v vaše podjetje.
+                <strong> Employee code</strong> pa je za dodajanje zaposlenih.
               </div>
             </div>
           </div>

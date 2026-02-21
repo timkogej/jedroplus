@@ -5,9 +5,21 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Clock, CalendarBlank, NotePencil, LockSimple, Plus, Minus } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import ClientSearch from './ClientSearch';
+import ClientModal from '@/components/clients/ClientModal';
 import StatusBadge, { type AppointmentStatus, getStatusConfig } from './StatusBadge';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import type { Client } from '@/lib/supabase/clients';
+import type { ClientFormData } from '@/types/clients';
+import { useCompany } from '@/app/company-context';
+import { useAuth } from '@/app/auth-context';
+import { callN8nAction } from '@/src/lib/n8nClient';
+import {
+  buildClientCreateData,
+  getPodatkiPodjetja,
+} from '@/lib/webhookPayloadBuilders';
+import { getNextClientId } from '@/src/lib/idGenerators';
+import { getCompanyColumnForTable } from '@/lib/companyScope';
+import { TABLES } from '@/lib/data';
 
 type ModalMode = 'view' | 'edit' | 'create';
 
@@ -20,7 +32,6 @@ interface AppointmentModalProps {
   employees: Zaposleni[];
   onSave: (data: AppointmentFormData) => Promise<void>;
   isSaving?: boolean;
-  onCreateClient?: () => void;
 }
 
 export interface AppointmentFormData {
@@ -113,8 +124,14 @@ function AppointmentModal({
   employees,
   onSave,
   isSaving = false,
-  onCreateClient,
 }: AppointmentModalProps) {
+  const { companyId, companySettings } = useCompany();
+  const { user } = useAuth();
+
+  // Inline client creation state
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [isClientSaving, setIsClientSaving] = useState(false);
+
   const [formData, setFormData] = useState<AppointmentFormData>({
     datum: '',
     cas_zacetek: '',
@@ -401,28 +418,36 @@ function AppointmentModal({
     return employee.storitve.includes(serviceId);
   }, []);
 
-  // Get filtered employees based on selected service
+  // Get filtered employees based on selected service (deduplicated by ID)
   const filteredEmployees = useMemo(() => {
-    if (!formData.storitev_id) {
-      return employees;
-    }
-    return employees.filter(emp => canPerformService(emp, formData.storitev_id));
+    const base = !formData.storitev_id
+      ? employees
+      : employees.filter(emp => canPerformService(emp, formData.storitev_id));
+    const seen = new Set<string>();
+    return base.filter(emp => {
+      if (!emp.id) return false;
+      if (seen.has(emp.id)) return false;
+      seen.add(emp.id);
+      return true;
+    });
   }, [employees, formData.storitev_id, canPerformService]);
 
-  // Get filtered services based on selected employee
+  // Get filtered services based on selected employee (deduplicated by ID)
   const filteredServices = useMemo(() => {
-    if (!formData.zaposleni_id) {
-      return services;
-    }
-    const employee = employees.find(e => e.id === formData.zaposleni_id);
-    if (!employee) return services;
-
-    // If employee can do all services (null or empty storitve)
-    if (!employee.storitve || employee.storitve.length === 0) {
-      return services;
-    }
-
-    return services.filter(s => employee.storitve?.includes(s.id));
+    const base = (() => {
+      if (!formData.zaposleni_id) return services;
+      const employee = employees.find(e => e.id === formData.zaposleni_id);
+      if (!employee) return services;
+      if (!employee.storitve || employee.storitve.length === 0) return services;
+      return services.filter(s => employee.storitve?.includes(s.id));
+    })();
+    const seen = new Set<string>();
+    return base.filter(s => {
+      if (!s.id) return false;
+      if (seen.has(s.id)) return false;
+      seen.add(s.id);
+      return true;
+    });
   }, [services, employees, formData.zaposleni_id]);
 
   // Handle service change - check if current employee can still do the new service
@@ -530,6 +555,104 @@ function AppointmentModal({
       setErrors((prev) => ({ ...prev, stranka_ime: undefined }));
     }
   };
+
+  // Open inline client creation modal (identical form as Stranke page)
+  const handleOpenCreateClient = useCallback(() => {
+    setShowClientModal(true);
+  }, []);
+
+  // Save new client - IDENTICAL logic to Stranke page (same endpoint, same payload)
+  const handleSaveNewClient = useCallback(async (data: ClientFormData) => {
+    if (!companyId) return;
+
+    setIsClientSaving(true);
+    try {
+      const actor = user?.email ?? 'unknown';
+      const companyPayload = getPodatkiPodjetja(companySettings ?? undefined);
+      const companyColumn = await getCompanyColumnForTable(TABLES.clients, companyId);
+
+      // Create new client with 7-digit unique ID (same as Stranke page)
+      const clientId = await getNextClientId(companyId);
+      const newRow: Record<string, unknown> = {
+        'ID stranke': clientId,
+        Ime: data.ime,
+        Priimek: data.priimek,
+        Spol: data.spol,
+        Email: data.email,
+        Telefon: data.telefon,
+        Opombe: data.opombe,
+        'Interne opombe': data.interne_opombe,
+        [companyColumn]: companyId,
+      };
+
+      // Build payload - IDENTICAL to Stranke page
+      const payload = {
+        event: 'NOVA_STRANKA',
+        entity: 'clients',
+        data: buildClientCreateData({
+          companyId,
+          userEmail: actor,
+          companyProfile: companyPayload,
+          clientRow: newRow,
+        }),
+        company_id: companyId,
+        actor,
+        timestamp: new Date().toISOString(),
+        meta: { app: 'Integrate' as const, version: '1.0' as const },
+      };
+
+      // Send to same n8n endpoint with retry logic for duplicate IDs
+      const result = await callN8nAction(payload, async () => {
+        const nextId = await getNextClientId(companyId);
+        return {
+          ...payload,
+          data: buildClientCreateData({
+            companyId,
+            userEmail: actor,
+            companyProfile: companyPayload,
+            clientRow: { ...newRow, 'ID stranke': nextId },
+          }),
+        };
+      });
+
+      if (!result.ok) {
+        throw new Error('Napaka pri ustvarjanju stranke');
+      }
+
+      // Close client modal
+      setShowClientModal(false);
+
+      // Wait 0.8 seconds for system to process
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      // Auto-select the newly created client in the appointment form
+      const newClient: Client = {
+        id: clientId,
+        ime: data.ime,
+        priimek: data.priimek,
+        email: data.email,
+        telefon: data.telefon,
+      };
+      setSelectedClient(newClient);
+      setFormData((prev) => ({
+        ...prev,
+        stranka_id: clientId,
+        stranka_ime: `${data.ime} ${data.priimek}`.trim(),
+        stranka_email: data.email,
+        stranka_telefon: data.telefon,
+      }));
+
+      // Clear any client validation errors
+      if (errors.stranka_ime) {
+        setErrors((prev) => ({ ...prev, stranka_ime: undefined }));
+      }
+    } catch (err) {
+      console.error('Error creating client inline:', err);
+      throw err; // Re-throw so ClientModal can handle the error display
+    } finally {
+      setIsClientSaving(false);
+    }
+  }, [companyId, companySettings, user, errors.stranka_ime]);
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof AppointmentFormData, string>> = {};
@@ -671,7 +794,7 @@ function AppointmentModal({
                   <ClientSearch
                     selectedClient={selectedClient}
                     onSelect={handleClientSelect}
-                    onCreateNew={onCreateClient}
+                    onCreateNew={handleOpenCreateClient}
                   />
                   {errors.stranka_ime && (
                     <p className="mt-1 text-xs text-red-500">{errors.stranka_ime}</p>
@@ -761,9 +884,9 @@ function AppointmentModal({
                       setValue={(value) => handleServiceChange(value, 1)}
                       placeholder="Izberi storitev"
                     >
-                      {filteredServices.map((service) => (
+                      {filteredServices.map((service, idx) => (
                         <SelectOption
-                          key={service.id}
+                          key={`svc-${idx}-${service.id}`}
                           value={service.id}
                           colorDot={service.barva || '#6366F1'}
                           description={`${service.trajanje} min`}
@@ -800,9 +923,9 @@ function AppointmentModal({
                       >
                         {filteredServices
                           .filter((s) => s.id !== formData.storitev_id)
-                          .map((service) => (
+                          .map((service, idx) => (
                             <SelectOption
-                              key={service.id}
+                              key={`svc2-${idx}-${service.id}`}
                               value={service.id}
                               colorDot={service.barva || '#6366F1'}
                               description={`${service.trajanje} min`}
@@ -837,9 +960,9 @@ function AppointmentModal({
                       >
                         {filteredServices
                           .filter((s) => s.id !== formData.storitev_id && s.id !== formData.storitev_id_2)
-                          .map((service) => (
+                          .map((service, idx) => (
                             <SelectOption
-                              key={service.id}
+                              key={`svc3-${idx}-${service.id}`}
                               value={service.id}
                               colorDot={service.barva || '#6366F1'}
                               description={`${service.trajanje} min`}
@@ -909,8 +1032,8 @@ function AppointmentModal({
                     setValue={handleEmployeeChange}
                     placeholder="Izberi osebje"
                   >
-                    {filteredEmployees.map((employee) => (
-                      <SelectOption key={employee.id} value={employee.id}>
+                    {filteredEmployees.map((employee, idx) => (
+                      <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
                         {employee.ime} {employee.priimek}
                       </SelectOption>
                     ))}
@@ -1371,6 +1494,18 @@ function AppointmentModal({
           </form>
         </motion.div>
       </div>
+
+      {/* Inline Client Creation Modal - IDENTICAL to Stranke page */}
+      {companyId && (
+        <ClientModal
+          isOpen={showClientModal}
+          onClose={() => setShowClientModal(false)}
+          mode="create"
+          companyId={companyId}
+          onSave={handleSaveNewClient}
+          isSaving={isClientSaving}
+        />
+      )}
     </AnimatePresence>
   );
 }

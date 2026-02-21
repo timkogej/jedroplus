@@ -9,6 +9,7 @@ const COMPANY_COLUMN_CANDIDATES = [
 ];
 
 const columnCache = new Map<string, string>();
+const columnPending = new Map<string, Promise<string>>();
 
 type CompanyScopedResult<T> = {
   data: T[] | null;
@@ -35,26 +36,40 @@ export async function getCompanyColumnForTable(
     return cached;
   }
 
-  let lastError: string | null = null;
-  for (const candidate of COMPANY_COLUMN_CANDIDATES) {
-    const { error } = await supabaseReadOnly
-      .from(tableName)
-      .select("*")
-      .eq(candidate, companyId)
-      .limit(1);
-
-    if (!error) {
-      columnCache.set(tableName, candidate);
-      return candidate;
-    }
-
-    lastError = error.message;
-    if (!isMissingColumnError(error)) {
-      throw new Error(error.message);
-    }
+  // Deduplicate concurrent detections for the same table
+  const pending = columnPending.get(tableName);
+  if (pending) {
+    return pending;
   }
 
-  throw new Error(lastError ?? "Company column not found.");
+  const detection = (async () => {
+    let lastError: string | null = null;
+    for (const candidate of COMPANY_COLUMN_CANDIDATES) {
+      const { error } = await supabaseReadOnly
+        .from(tableName)
+        .select("*")
+        .eq(candidate, companyId)
+        .limit(1);
+
+      if (!error) {
+        columnCache.set(tableName, candidate);
+        columnPending.delete(tableName);
+        return candidate;
+      }
+
+      lastError = error.message;
+      if (!isMissingColumnError(error)) {
+        columnPending.delete(tableName);
+        throw new Error(error.message);
+      }
+    }
+
+    columnPending.delete(tableName);
+    throw new Error(lastError ?? "Company column not found.");
+  })();
+
+  columnPending.set(tableName, detection);
+  return detection;
 }
 
 export function resolveCompanyTables(settings?: Record<string, unknown> | null) {

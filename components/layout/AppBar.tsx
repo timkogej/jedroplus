@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
+  Plus,
   List,
   X,
   MagnifyingGlass,
@@ -173,29 +174,29 @@ export function AppBar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggle}
-            className="md:hidden p-2 -ml-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors"
+            className="md:hidden p-1 -ml-1 transition-colors"
             aria-label={isOpen ? 'Zapri meni' : 'Odpri meni'}
           >
             <AnimatePresence mode="wait" initial={false}>
               {isOpen ? (
                 <motion.div
                   key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
+                  initial={{ opacity: 0, rotate: -90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: 90 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <X className="w-5 h-5 text-gray-700" weight="bold" />
+                  <X className="w-6 h-6 text-gray-700" weight="bold" />
                 </motion.div>
               ) : (
                 <motion.div
-                  key="menu"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
+                  key="open"
+                  initial={{ opacity: 0, rotate: 90 }}
+                  animate={{ opacity: 1, rotate: 0 }}
+                  exit={{ opacity: 0, rotate: -90 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <List className="w-5 h-5 text-gray-700" weight="bold" />
+                  <List className="w-6 h-6 text-gray-700" weight="bold" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -290,7 +291,7 @@ export function AppBar() {
               className="relative p-2 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 transition-colors cursor-pointer"
               aria-label="Obvestila"
             >
-              <Bell className="w-5 h-5 text-gray-600" />
+              <Bell className="w-5 h-5 text-gray-600" weight="regular" />
 
               {/* Notification badge */}
               {notificationCount > 0 && (

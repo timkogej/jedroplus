@@ -1,6 +1,7 @@
 import { supabaseReadOnly } from "@/src/lib/supabaseReadOnly";
 
 const columnExistsCache = new Map<string, boolean>();
+const columnExistsPending = new Map<string, Promise<boolean>>();
 const detectedColumnCache = new Map<string, string | null>();
 
 const quoteColumn = (column: string) => `"${column.replace(/"/g, '""')}"`;
@@ -16,31 +17,43 @@ export async function checkColumnExists(tableName: string, column: string) {
   const cached = columnExistsCache.get(cacheKey);
   if (cached !== undefined) return cached;
 
-  try {
-    const { error } = await supabaseReadOnly
-      .from(tableName)
-      .select(quoteColumn(column))
-      .limit(1);
+  // Deduplicate concurrent checks for the same column
+  const pending = columnExistsPending.get(cacheKey);
+  if (pending) return pending;
 
-    if (!error) {
-      columnExistsCache.set(cacheKey, true);
-      return true;
-    }
+  const check = (async () => {
+    try {
+      const { error } = await supabaseReadOnly
+        .from(tableName)
+        .select(quoteColumn(column))
+        .limit(1);
 
-    if (isMissingColumnError(error)) {
+      columnExistsPending.delete(cacheKey);
+
+      if (!error) {
+        columnExistsCache.set(cacheKey, true);
+        return true;
+      }
+
+      if (isMissingColumnError(error)) {
+        columnExistsCache.set(cacheKey, false);
+        return false;
+      }
+
+      // Log but don't throw - assume column doesn't exist
+      console.warn(`[tableIntrospection] Error checking column ${column} in ${tableName}:`, error.message);
+      columnExistsCache.set(cacheKey, false);
+      return false;
+    } catch (err) {
+      columnExistsPending.delete(cacheKey);
+      console.warn(`[tableIntrospection] Exception checking column ${column} in ${tableName}:`, err);
       columnExistsCache.set(cacheKey, false);
       return false;
     }
+  })();
 
-    // Log but don't throw - assume column doesn't exist
-    console.warn(`[tableIntrospection] Error checking column ${column} in ${tableName}:`, error.message);
-    columnExistsCache.set(cacheKey, false);
-    return false;
-  } catch (err) {
-    console.warn(`[tableIntrospection] Exception checking column ${column} in ${tableName}:`, err);
-    columnExistsCache.set(cacheKey, false);
-    return false;
-  }
+  columnExistsPending.set(cacheKey, check);
+  return check;
 }
 
 export async function detectColumnForTable(

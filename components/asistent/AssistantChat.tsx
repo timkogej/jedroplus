@@ -3,16 +3,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  PaperPlaneRight,
   CircleNotch,
-  User,
-  Robot,
+  ArrowUp,
   Microphone,
+  CalendarBlank,
+  ChartBar,
+  CalendarPlus,
+  MagnifyingGlass,
+  PaperPlaneTilt,
+  SquaresFour,
 } from '@phosphor-icons/react';
 import { supabase } from '@/lib/supabaseClient';
 import { useCompany } from '@/app/company-context';
 import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface Message {
   message_id: string;
@@ -36,7 +44,24 @@ interface QuickAction {
   value: string;
 }
 
+// ============================================================================
+// Constants
+// ============================================================================
+
 const FALLBACK_MESSAGE = 'Oprostite, nisem mogel obdelati vašega sporočila.';
+
+const QUICK_ACTIONS = [
+  { label: 'Kateri termini so danes?', icon: CalendarBlank },
+  { label: 'Prikaži statistike', icon: ChartBar },
+  { label: 'Najdi stranko', icon: MagnifyingGlass },
+  { label: 'Dodaj nov termin', icon: CalendarPlus },
+  { label: 'Pošlji sporočilo', icon: PaperPlaneTilt },
+  { label: 'Današnji pregled', icon: SquaresFour },
+];
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
 
 const normalizeContentValue = (value: unknown): string | null => {
   if (typeof value === 'string') return value;
@@ -93,7 +118,6 @@ const extractMessageContent = (result: unknown): string => {
   return FALLBACK_MESSAGE;
 };
 
-// Generate unique IDs
 function generateId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
@@ -110,43 +134,513 @@ function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
-// Smart suggestions for empty state
-const SMART_SUGGESTIONS = [
-  { label: 'Kateri termini so danes?', value: 'termini_danes' },
-  { label: 'Prikaži statistike', value: 'statistike' },
-  { label: 'Najdi stranko', value: 'najdi_stranko' },
-];
+// ============================================================================
+// Gradient Defs — hidden SVG paint server referenced by all icons
+// ============================================================================
 
-export function AssistantChat({ sessionId }: { sessionId: string }) {
+function GradientDefs() {
+  return (
+    <svg
+      width="0"
+      height="0"
+      style={{ position: 'absolute', overflow: 'hidden', pointerEvents: 'none' }}
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="asistentIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#8B5CF6" />
+          <stop offset="50%" stopColor="#3B82F6" />
+          <stop offset="100%" stopColor="#06B6D4" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+// ============================================================================
+// Avatar components
+// ============================================================================
+
+function AssistantAvatar() {
+  return (
+    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center">
+      <span
+        className="text-base font-bold leading-none"
+        style={{
+          background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+        }}
+      >
+        A
+      </span>
+    </div>
+  );
+}
+
+function UserAvatar({ initials }: { initials: string }) {
+  return (
+    <div
+      className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center"
+      style={{
+        border: '2px solid transparent',
+        backgroundImage:
+          'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+        backgroundOrigin: 'border-box',
+        backgroundClip: 'padding-box, border-box',
+      }}
+    >
+      <span
+        className="text-xs font-semibold leading-none"
+        style={{
+          background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+        }}
+      >
+        {initials}
+      </span>
+    </div>
+  );
+}
+
+// ============================================================================
+// Quick Action Chip
+// ============================================================================
+
+function QuickActionChip({
+  label,
+  icon: Icon,
+  delay = 0,
+  onClick,
+}: {
+  label: string;
+  icon: React.ElementType;
+  delay?: number;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <motion.button
+      onClick={onClick}
+      initial={{ opacity: 0, scale: 0.92 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay, type: 'spring', stiffness: 400, damping: 28 }}
+      whileHover={{ scale: 1.03, y: -2 }}
+      whileTap={{ scale: 0.97 }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-medium text-gray-700 transition-shadow"
+      style={{
+        background: hovered ? 'rgba(139, 92, 246, 0.06)' : 'rgba(255, 255, 255, 0.85)',
+        border: hovered
+          ? '1px solid rgba(139, 92, 246, 0.35)'
+          : '1px solid rgba(139, 92, 246, 0.2)',
+        backdropFilter: 'blur(10px)',
+        boxShadow: hovered
+          ? '0 4px 16px rgba(139, 92, 246, 0.14)'
+          : '0 2px 8px rgba(0,0,0,0.05)',
+      }}
+    >
+      {/* Phosphor icon using the shared SVG gradient paint server */}
+      <Icon size={17} color="url(#asistentIconGrad)" weight="fill" />
+      <span>{label}</span>
+    </motion.button>
+  );
+}
+
+// ============================================================================
+// Message Bubble
+// ============================================================================
+
+function MessageBubble({
+  message,
+  onQuickAction,
+  delay = 0,
+  userInitials,
+}: {
+  message: Message;
+  onQuickAction: (action: QuickAction) => void;
+  delay?: number;
+  userInitials: string;
+}) {
+  const isUser = message.role === 'user';
+  const contentText = extractMessageContent(message.content);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 30, delay }}
+      className={`flex items-end gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
+    >
+      {/* Avatar */}
+      {isUser ? <UserAvatar initials={userInitials} /> : <AssistantAvatar />}
+
+      {/* Message content */}
+      <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[75%] gap-1`}>
+        {/* Bubble */}
+        <div
+          className={`inline-block px-4 py-3 ${
+            isUser ? 'rounded-2xl rounded-br-md' : 'rounded-2xl rounded-bl-md'
+          }`}
+          style={
+            isUser
+              ? {
+                  background:
+                    'linear-gradient(135deg, #8B5CF6 0%, #6366F1 35%, #3B82F6 65%, #06B6D4 100%)',
+                  boxShadow: '0 4px 15px rgba(139, 92, 246, 0.3)',
+                }
+              : {
+                  background: 'white',
+                  border: '1px solid rgba(139, 92, 246, 0.1)',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                }
+          }
+        >
+          <div className={`text-[15px] leading-relaxed ${isUser ? 'text-white' : 'text-gray-900'}`}>
+            {contentText.split('\n').map((line, i) => (
+              <p key={i} className={i > 0 ? 'mt-1.5' : ''}>
+                {line.split('**').map((part, j) =>
+                  j % 2 === 1 ? (
+                    <strong
+                      key={j}
+                      className="font-semibold"
+                      style={
+                        !isUser
+                          ? {
+                              background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                              backgroundClip: 'text',
+                            }
+                          : undefined
+                      }
+                    >
+                      {part}
+                    </strong>
+                  ) : (
+                    <span key={j}>{part}</span>
+                  )
+                )}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* Data Cards */}
+        {!isUser && message.cards && message.cards.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: delay + 0.2 }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full mt-1"
+          >
+            {message.cards.map((card, idx) => (
+              <DataCardComponent key={idx} card={card} delay={delay + 0.25 + idx * 0.05} />
+            ))}
+          </motion.div>
+        )}
+
+        {/* Follow-up action chips from assistant */}
+        {!isUser && message.actions && message.actions.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: delay + 0.3 }}
+            className="flex flex-wrap gap-2 mt-1"
+          >
+            {message.actions.map((action, idx) => (
+              <motion.button
+                key={idx}
+                onClick={() => onQuickAction(action)}
+                whileHover={{ scale: 1.03, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                className="px-3 py-1.5 text-xs font-medium text-white rounded-full"
+                style={{
+                  background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
+                  boxShadow: '0 2px 8px rgba(139, 92, 246, 0.25)',
+                }}
+              >
+                {action.label}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+
+
+        {/* Timestamp */}
+        <div className={`text-[11px] text-gray-400 ${isUser ? 'mr-1' : 'ml-1'}`}>
+          {format(new Date(message.created_at), 'HH:mm', { locale: sl })}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================================================
+// Data Card
+// ============================================================================
+
+function DataCardComponent({ card, delay = 0 }: { card: DataCard; delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay }}
+      whileHover={{ scale: 1.02, y: -2 }}
+      className="p-3 rounded-xl cursor-default"
+      style={{
+        background:
+          'linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(6, 182, 212, 0.06) 100%)',
+        border: '1px solid rgba(139, 92, 246, 0.15)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+      }}
+    >
+      <div className="text-[10px] font-semibold text-violet-600 uppercase tracking-wide mb-1">
+        {card.title}
+      </div>
+      <div className="text-sm text-gray-800 font-medium">{card.value}</div>
+    </motion.div>
+  );
+}
+
+// ============================================================================
+// Typing Indicator
+// ============================================================================
+
+function TypingIndicator() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex items-end gap-3"
+    >
+      <AssistantAvatar />
+      <div
+        className="px-4 py-3 rounded-2xl rounded-bl-md"
+        style={{
+          background: 'white',
+          border: '1px solid rgba(139, 92, 246, 0.1)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        }}
+      >
+        <div className="flex items-center gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <motion.div
+              key={i}
+              className="w-2 h-2 rounded-full"
+              style={{
+                background: i === 0 ? '#8B5CF6' : i === 1 ? '#3B82F6' : '#06B6D4',
+              }}
+              animate={{ y: [0, -6, 0] }}
+              transition={{
+                duration: 0.6,
+                repeat: Infinity,
+                delay: i * 0.15,
+                ease: 'easeInOut',
+              }}
+            />
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================================================
+// Shared Input Field
+// ============================================================================
+
+function ChatInput({
+  value,
+  onChange,
+  onKeyDown,
+  onFocus,
+  onBlur,
+  onSend,
+  loading,
+  focused,
+  textareaRef,
+  pill = false,
+}: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onFocus: () => void;
+  onBlur: () => void;
+  onSend: () => void;
+  loading: boolean;
+  focused: boolean;
+  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  pill?: boolean;
+}) {
+  const borderRadius = pill ? '9999px' : '16px';
+
+  return (
+    <div
+      className="flex items-end gap-3 px-4 py-3 transition-all duration-200"
+      style={{
+        background: 'rgba(255, 255, 255, 0.95)',
+        border: focused
+          ? '2px solid rgba(139, 92, 246, 0.4)'
+          : '2px solid rgba(139, 92, 246, 0.15)',
+        borderRadius,
+        boxShadow: focused
+          ? '0 0 0 4px rgba(139, 92, 246, 0.08), 0 4px 20px rgba(139, 92, 246, 0.12)'
+          : '0 4px 20px rgba(139, 92, 246, 0.08)',
+      }}
+    >
+      {/* Mic (disabled) */}
+      <button
+        type="button"
+        disabled
+        className="flex items-center justify-center text-gray-300 cursor-not-allowed flex-shrink-0 self-end mb-0.5"
+        style={{ width: 32, height: 32 }}
+        title="Glasovno sporočilo (kmalu na voljo)"
+      >
+        <Microphone className="w-4 h-4" weight="fill" />
+      </button>
+
+      {/* Textarea */}
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        placeholder="Vprašajte me karkoli..."
+        className="flex-1 resize-none bg-transparent outline-none text-base text-gray-800 placeholder:text-gray-400 leading-relaxed self-center"
+        rows={1}
+        disabled={loading}
+        style={{ minHeight: '28px', maxHeight: '200px' }}
+      />
+
+      {/* Send button */}
+      <motion.button
+        onClick={onSend}
+        disabled={!value.trim() || loading}
+        whileHover={value.trim() && !loading ? { scale: 1.1 } : {}}
+        whileTap={value.trim() && !loading ? { scale: 0.9 } : {}}
+        className="flex items-center justify-center rounded-xl transition-all flex-shrink-0 self-end"
+        style={{
+          width: 40,
+          height: 40,
+          background:
+            value.trim() && !loading
+              ? 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)'
+              : '#E5E7EB',
+          boxShadow:
+            value.trim() && !loading ? '0 4px 12px rgba(139, 92, 246, 0.35)' : 'none',
+        }}
+      >
+        {loading ? (
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+          >
+            <CircleNotch className="w-4 h-4" weight="bold" style={{ color: '#9CA3AF' }} />
+          </motion.div>
+        ) : (
+          <ArrowUp
+            className="w-4 h-4"
+            weight="bold"
+            style={{ color: value.trim() ? 'white' : '#9CA3AF' }}
+          />
+        )}
+      </motion.button>
+    </div>
+  );
+}
+
+// ============================================================================
+// Main AssistantChat Component
+// ============================================================================
+
+export function AssistantChat({
+  sessionId,
+  onNewSession,
+  onShowInfo,
+}: {
+  sessionId: string;
+  onNewSession?: () => void;
+  onShowInfo?: () => void;
+}) {
   const { companyId, companySettings } = useCompany();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
+  const [userInitials, setUserInitials] = useState('U');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Track if user has interacted (to hide welcome state)
-  const hasMessages = messages.length > 0;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!companyId) return;
-    // Simply finish loading - no welcome message added to messages array
     setInitialLoading(false);
   }, [companyId, sessionId]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
+
+  // Derive user initials from Supabase auth
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const name = (user.user_metadata?.full_name as string) || user.email || '';
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        setUserInitials((parts[0][0] + parts[parts.length - 1][0]).toUpperCase());
+      } else if (parts[0]?.length > 0) {
+        setUserInitials(parts[0].slice(0, 2).toUpperCase());
+      }
+    });
+  }, []);
+
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    adjustTextareaHeight();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || input.trim();
     if (!textToSend || loading || !companyId) return;
 
     setInput('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+
+    // Expand on first message
+    if (!isExpanded) {
+      setIsExpanded(true);
+    }
+
     setLoading(true);
 
     try {
-      // Create user message
       const userMsg: Message = {
         message_id: generateId(),
         role: 'user',
@@ -154,13 +648,10 @@ export function AssistantChat({ sessionId }: { sessionId: string }) {
         created_at: new Date().toISOString(),
       };
 
-      // Add to UI immediately
       setMessages((prev) => [...prev, userMsg]);
 
-      // Call AI API
       const assistantResponse = await getAIResponse(textToSend);
 
-      // Create assistant message
       const assistantMsg: Message = {
         message_id: generateId(),
         role: 'assistant',
@@ -171,12 +662,9 @@ export function AssistantChat({ sessionId }: { sessionId: string }) {
         created_at: new Date().toISOString(),
       };
 
-      // Add to UI
       setMessages((prev) => [...prev, assistantMsg]);
-
     } catch (error) {
       console.error('Error sending message:', error);
-      // Add error message
       const errorMsg: Message = {
         message_id: generateId(),
         role: 'assistant',
@@ -198,16 +686,13 @@ export function AssistantChat({ sessionId }: { sessionId: string }) {
     meta: Record<string, unknown> | null;
   }> => {
     try {
-      // Prepare context data for the AI
       const companyName = companySettings?.['Naziv Podjetja'] || 'Podjetje';
       const chatInstructions = companySettings?.['chat_instructions'] || '';
       const chatTone = companySettings?.['chat_tone'] || 'prijazen in profesionalen';
 
-      // Fetch relevant context based on the query
       let contextData: Record<string, unknown> = {};
       const lowerMessage = userMessage.toLowerCase();
 
-      // Fetch appointments if relevant
       if (
         lowerMessage.includes('termin') ||
         lowerMessage.includes('danes') ||
@@ -227,7 +712,6 @@ export function AssistantChat({ sessionId }: { sessionId: string }) {
         contextData.appointments = appointments || [];
       }
 
-      // Fetch clients if relevant
       if (
         lowerMessage.includes('stranka') ||
         lowerMessage.includes('kontakt') ||
@@ -243,7 +727,6 @@ export function AssistantChat({ sessionId }: { sessionId: string }) {
         contextData.clients = clients || [];
       }
 
-      // Fetch services if relevant
       if (
         lowerMessage.includes('storitev') ||
         lowerMessage.includes('cena') ||
@@ -258,7 +741,6 @@ export function AssistantChat({ sessionId }: { sessionId: string }) {
         contextData.services = services || [];
       }
 
-      // Fetch statistics if relevant
       if (
         lowerMessage.includes('statistik') ||
         lowerMessage.includes('prihodek') ||
@@ -280,13 +762,11 @@ export function AssistantChat({ sessionId }: { sessionId: string }) {
         };
       }
 
-      // Get chat history for context
       const recentMessages = messages.slice(-10).map((m) => ({
         role: m.role,
         content: m.content,
       }));
 
-      // Build the prompt payload
       const promptPayload = {
         system: `Ti si AI asistent za podjetje ${companyName}.
 ${chatInstructions}
@@ -307,12 +787,9 @@ PRAVILA:
         },
       };
 
-      // Send to n8n webhook
       const response = await fetch('https://tikej.app.n8n.cloud/webhook/asistent', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: promptPayload,
           session_id: sessionId,
@@ -326,7 +803,6 @@ PRAVILA:
 
       const result = await response.json();
 
-      // Parse the response from n8n
       return {
         content: extractMessageContent(result),
         cards: result.cards || null,
@@ -335,8 +811,6 @@ PRAVILA:
       };
     } catch (error) {
       console.error('AI Response error:', error);
-
-      // Fallback to local mock responses if webhook fails
       return getFallbackResponse(userMessage);
     }
   };
@@ -351,7 +825,6 @@ PRAVILA:
   }> => {
     const lowerMessage = userMessage.toLowerCase();
 
-    // Check for appointment queries
     if (
       lowerMessage.includes('termin') ||
       lowerMessage.includes('danes') ||
@@ -377,24 +850,19 @@ PRAVILA:
         return {
           content: `Danes imate **${appointments.length} termin${appointments.length > 1 ? 'ov' : ''}**:`,
           cards,
-          actions: [
-            { type: 'quick_reply', label: 'Termini za jutri', value: 'termini_jutri' },
-          ],
+          actions: [{ type: 'quick_reply', label: 'Termini za jutri', value: 'termini_jutri' }],
           meta: { intent: 'appointments_today', count: appointments.length },
         };
       } else {
         return {
           content: 'Danes nimate nobenih terminov.',
           cards: null,
-          actions: [
-            { type: 'quick_reply', label: 'Termini za jutri', value: 'termini_jutri' },
-          ],
+          actions: [{ type: 'quick_reply', label: 'Termini za jutri', value: 'termini_jutri' }],
           meta: { intent: 'appointments_today', count: 0 },
         };
       }
     }
 
-    // Check for statistics queries
     if (
       lowerMessage.includes('statistik') ||
       lowerMessage.includes('prihodek') ||
@@ -421,7 +889,6 @@ PRAVILA:
       };
     }
 
-    // Default response
     return {
       content: `Razumem vaše vprašanje. Kako vam lahko pomagam?`,
       cards: null,
@@ -433,380 +900,242 @@ PRAVILA:
     };
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const handleSuggestionClick = (suggestion: { label: string; value: string }) => {
-    sendMessage(suggestion.label);
-  };
-
+  // ── Loading skeleton ──────────────────────────────────────────────────────
   if (initialLoading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        >
+      <div className="flex-1 flex items-center justify-center">
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
           <CircleNotch className="w-8 h-8 text-violet-500" weight="bold" />
         </motion.div>
       </div>
     );
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="h-full min-h-0 flex flex-col">
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto overscroll-contain px-6 py-6 space-y-4">
-        {/* Welcome State - Only show when no messages */}
-        <AnimatePresence>
-          {!hasMessages && !loading && (
+    <div className="w-full h-full relative overflow-hidden">
+      {/* Hidden SVG gradient definitions for icons */}
+      <GradientDefs />
+
+      <AnimatePresence mode="wait">
+        {/* ── STATE 1: Initial centered minimal ── */}
+        {!isExpanded && (
+          <motion.div
+            key="initial"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{
+              opacity: 0,
+              y: -32,
+              scale: 0.97,
+              transition: { duration: 0.22, ease: 'easeIn' },
+            }}
+            transition={{ duration: 0.35, ease: 'easeOut' }}
+            className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-8"
+          >
+            {/* Title */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              className="text-center mb-8"
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="flex flex-col items-center justify-center h-full py-12"
+              transition={{ delay: 0.08 }}
             >
-              {/* Assistant Avatar with Online Indicator */}
-              <div className="relative mb-6">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                  className="w-16 h-16 rounded-2xl p-[2px] shadow-xl shadow-violet-500/30"
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <h1
+                  className="text-4xl font-bold tracking-tight"
                   style={{
-                    background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                    background:
+                      'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                   }}
                 >
-                  <div className="w-full h-full rounded-[14px] bg-white flex items-center justify-center">
-                    <Robot
-                      className="w-9 h-9"
-                      weight="fill"
-                      style={{
-                        background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                      }}
-                    />
-                  </div>
-                </motion.div>
-                {/* Online Status Dot */}
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.3, type: 'spring', stiffness: 500 }}
-                  className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-3 border-white shadow-md"
-                />
+                  Asistent+
+                </h1>
+                <span
+                  className="px-2 py-0.5 text-xs font-semibold rounded-full"
+                  style={{
+                    background: 'rgba(139, 92, 246, 0.1)',
+                    color: '#8B5CF6',
+                    border: '1px solid rgba(139, 92, 246, 0.25)',
+                  }}
+                >
+                  BETA
+                </span>
               </div>
-
-              {/* Single Sentence Welcome Card */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="bg-gradient-to-br from-white to-violet-50/50 rounded-2xl border border-violet-100/50 shadow-lg shadow-violet-500/5 p-6 max-w-md text-center"
-              >
-                <p className="text-gray-700 text-base leading-relaxed">
-                  Sem Asistent+ — lahko preverim termine, vpišem nov termin ali dodam stranko.
-                </p>
-              </motion.div>
+              <p className="text-gray-500 text-lg">Kako vam lahko pomagam?</p>
             </motion.div>
-          )}
-        </AnimatePresence>
 
-        {/* Actual Messages */}
-        <AnimatePresence initial={false}>
-          {messages.map((message, index) => (
-            <MessageBubble
-              key={message.message_id}
-              message={message}
-              onQuickAction={(action) => sendMessage(action.label)}
-              delay={index * 0.05}
-            />
-          ))}
-        </AnimatePresence>
+            {/* Input */}
+            <motion.div
+              className="w-full max-w-2xl mb-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.16 }}
+            >
+              <ChatInput
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+                onSend={() => sendMessage()}
+                loading={loading}
+                focused={inputFocused}
+                textareaRef={textareaRef}
+                pill
+              />
+            </motion.div>
 
-        {/* Loading Indicator - iOS style */}
-        {loading && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-end gap-2"
-          >
-            {/* Avatar with Online Indicator */}
-            <div className="relative flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
-                <Robot className="w-4 h-4 text-white" weight="fill" />
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
-            </div>
-            <div className="flex flex-col items-start">
-              <motion.div
-                className="inline-block px-4 py-2.5 bg-gray-100 rounded-2xl rounded-bl-md"
-                animate={{
-                  opacity: [0.7, 1, 0.7]
-                }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <div className="flex items-center gap-1.5">
-                  <motion.div
-                    className="w-2 h-2 bg-gray-400 rounded-full"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                  />
-                  <motion.div
-                    className="w-2 h-2 bg-gray-400 rounded-full"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-                  />
-                  <motion.div
-                    className="w-2 h-2 bg-gray-400 rounded-full"
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 0.6, repeat: Infinity, delay: 0.4 }}
-                  />
-                </div>
-              </motion.div>
-            </div>
+            {/* Quick action chips */}
+            <motion.div
+              className="flex flex-wrap justify-center gap-3 max-w-2xl"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.24 }}
+            >
+              {QUICK_ACTIONS.map((action, idx) => (
+                <QuickActionChip
+                  key={action.label}
+                  label={action.label}
+                  icon={action.icon}
+                  delay={0.28 + idx * 0.05}
+                  onClick={() => sendMessage(action.label)}
+                />
+              ))}
+            </motion.div>
           </motion.div>
         )}
 
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Smart Suggestions - Only show when chat is empty */}
-      <AnimatePresence>
-        {!hasMessages && !loading && (
+        {/* ── STATE 2: Expanded full chat ── */}
+        {isExpanded && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="px-4 pb-2 flex flex-wrap justify-center gap-2"
+            key="chat"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.28, ease: 'easeOut' }}
+            className="absolute inset-0 flex flex-col"
           >
-            {SMART_SUGGESTIONS.map((suggestion, idx) => (
-              <motion.button
-                key={suggestion.value}
-                onClick={() => handleSuggestionClick(suggestion)}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 + idx * 0.1 }}
-                whileHover={{ scale: 1.03, y: -1 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md hover:border-violet-200 transition-all"
-                style={{
-                  background: 'white',
-                }}
-              >
+            {/* Chat header */}
+            <motion.header
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="flex-shrink-0 h-14 flex items-center justify-between px-4 sm:px-6"
+              style={{
+                background: 'rgba(255, 255, 255, 0.88)',
+                backdropFilter: 'blur(16px)',
+                borderBottom: '1px solid rgba(139, 92, 246, 0.08)',
+              }}
+            >
+              {/* Brand */}
+              <div className="flex items-center gap-2.5">
                 <span
+                  className="text-lg font-bold tracking-tight"
                   style={{
-                    background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                    background:
+                      'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                   }}
                 >
-                  {suggestion.label}
+                  Asistent+
                 </span>
-              </motion.button>
-            ))}
+                <span
+                  className="px-1.5 py-0.5 text-[10px] font-semibold rounded-full"
+                  style={{
+                    background: 'rgba(139, 92, 246, 0.1)',
+                    color: '#8B5CF6',
+                    border: '1px solid rgba(139, 92, 246, 0.2)',
+                  }}
+                >
+                  BETA
+                </span>
+                {/* Online dot */}
+                <div className="flex items-center gap-1.5 ml-1">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"
+                    style={{ animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }}
+                  />
+                  <span className="text-xs text-gray-400">Online</span>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <motion.button
+                  onClick={onNewSession}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="px-3.5 py-1.5 text-sm font-medium rounded-full transition-all"
+                  style={{
+                    border: '1px solid rgba(139, 92, 246, 0.25)',
+                    color: '#7C3AED',
+                    background: 'rgba(139, 92, 246, 0.05)',
+                  }}
+                >
+                  Nov pogovor
+                </motion.button>
+              </div>
+            </motion.header>
+
+            {/* Messages area */}
+            <div className="flex-1 overflow-y-auto overscroll-contain">
+              <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
+                <div className="space-y-6">
+                  <AnimatePresence initial={false}>
+                    {messages.map((message) => (
+                      <MessageBubble
+                        key={message.message_id}
+                        message={message}
+                        onQuickAction={(action) => sendMessage(action.label)}
+                        userInitials={userInitials}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+
+                {loading && (
+                  <div className="mt-6">
+                    <TypingIndicator />
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} className="h-4" />
+              </div>
+            </div>
+
+            {/* Bottom input area */}
+            <div
+              className="flex-shrink-0 px-4 sm:px-6 py-4"
+              style={{
+                background: 'rgba(255, 255, 255, 0.97)',
+                backdropFilter: 'blur(20px)',
+                borderTop: '1px solid rgba(139, 92, 246, 0.08)',
+              }}
+            >
+              <div className="max-w-3xl mx-auto">
+                <ChatInput
+                  value={input}
+                  onChange={handleInputChange}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setInputFocused(true)}
+                  onBlur={() => setInputFocused(false)}
+                  onSend={() => sendMessage()}
+                  loading={loading}
+                  focused={inputFocused}
+                  textareaRef={textareaRef}
+                />
+                <p className="text-center text-[11px] text-gray-400 mt-2">
+                  Asistent+ lahko dela napake. Preverite pomembne informacije.
+                </p>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Input Area */}
-      <div className="border-t border-gray-100 bg-white px-4 py-3 flex-shrink-0">
-        <div className="flex items-center gap-3">
-          {/* Voice button - DISABLED with gradient icon */}
-          <button
-            type="button"
-            disabled
-            className="h-12 w-12 flex items-center justify-center rounded-xl border border-gray-200 bg-white opacity-50 cursor-not-allowed flex-shrink-0"
-            title="Glasovno sporočilo (kmalu na voljo)"
-          >
-            <Microphone
-              className="w-5 h-5"
-              weight="fill"
-              style={{
-                background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            />
-          </button>
-
-          {/* Input field */}
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            placeholder="Vprašajte me karkoli..."
-            className="flex-1 h-12 px-4 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all text-base placeholder:text-gray-400"
-            disabled={loading}
-          />
-
-          {/* Send button */}
-          <motion.button
-            onClick={() => sendMessage()}
-            disabled={!input.trim() || loading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="h-12 w-12 flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 flex-shrink-0"
-          >
-            {loading ? (
-              <CircleNotch className="w-5 h-5 animate-spin" weight="bold" />
-            ) : (
-              <PaperPlaneRight className="w-5 h-5" weight="fill" />
-            )}
-          </motion.button>
-        </div>
-      </div>
     </div>
-  );
-}
-
-// Message Bubble Component - iOS SMS Style
-function MessageBubble({
-  message,
-  onQuickAction,
-  delay = 0,
-}: {
-  message: Message;
-  onQuickAction: (action: QuickAction) => void;
-  delay?: number;
-}) {
-  const isUser = message.role === 'user';
-  const contentText = extractMessageContent(message.content);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 15, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{
-        type: 'spring',
-        stiffness: 400,
-        damping: 30,
-        delay
-      }}
-      className={`flex items-end gap-2 ${isUser ? 'flex-row-reverse' : ''}`}
-    >
-      {/* Avatar */}
-      {isUser ? (
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: 'spring', stiffness: 500, delay: delay + 0.1 }}
-          className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200"
-        >
-          <User className="w-4 h-4 text-gray-600" weight="fill" />
-        </motion.div>
-      ) : (
-        <div className="relative flex-shrink-0">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 500, delay: delay + 0.1 }}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-violet-500 to-cyan-500"
-          >
-            <Robot className="w-4 h-4 text-white" weight="fill" />
-          </motion.div>
-          {/* Online Status Dot for Assistant */}
-          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
-        </div>
-      )}
-
-      {/* Message Content & Timestamp Container */}
-      <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[75%]`}>
-        {/* Bubble - iOS SMS style */}
-        <motion.div
-          initial={{ opacity: 0, x: isUser ? 10 : -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: delay + 0.05 }}
-          className={`inline-block px-4 py-2.5 ${
-            isUser
-              ? 'rounded-2xl rounded-br-md text-white'
-              : 'bg-gray-100 rounded-2xl rounded-bl-md text-gray-900'
-          }`}
-          style={isUser ? {
-            background: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 35%, #3B82F6 65%, #06B6D4 100%)',
-          } : undefined}
-        >
-          {/* Text Content - render markdown-like formatting */}
-          <div className={`text-[15px] leading-relaxed ${isUser ? 'text-white' : 'text-gray-900'}`}>
-            {contentText.split('\n').map((line, i) => (
-              <p key={i} className={i > 0 ? 'mt-1.5' : ''}>
-                {line.split('**').map((part, j) =>
-                  j % 2 === 1 ? (
-                    <strong key={j} className="font-semibold">{part}</strong>
-                  ) : (
-                    <span key={j}>{part}</span>
-                  )
-                )}
-              </p>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Data Cards - Outside bubble for assistant */}
-        {!isUser && message.cards && message.cards.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: delay + 0.2 }}
-            className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 w-full"
-          >
-            {message.cards.map((card, idx) => (
-              <DataCardComponent key={idx} card={card} delay={delay + 0.25 + idx * 0.05} />
-            ))}
-          </motion.div>
-        )}
-
-        {/* Quick Actions - Outside bubble for assistant */}
-        {!isUser && message.actions && message.actions.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: delay + 0.3 }}
-            className="mt-2 flex flex-wrap gap-2"
-          >
-            {message.actions.map((action, idx) => (
-              <motion.button
-                key={idx}
-                onClick={() => onQuickAction(action)}
-                whileHover={{ scale: 1.03, y: -1 }}
-                whileTap={{ scale: 0.97 }}
-                className="px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-full shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-shadow"
-              >
-                {action.label}
-              </motion.button>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Timestamp - Outside bubble, iOS style */}
-        <div className={`mt-1 text-[11px] text-gray-400 ${isUser ? 'mr-1' : 'ml-1'}`}>
-          {format(new Date(message.created_at), 'HH:mm', { locale: sl })}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-// Data Card Component with Premium Design
-function DataCardComponent({ card, delay = 0 }: { card: DataCard; delay?: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay }}
-      whileHover={{ scale: 1.02, y: -2 }}
-      className="p-3 bg-gradient-to-br from-violet-50 to-cyan-50 rounded-xl border border-violet-200/50 shadow-sm hover:shadow-md transition-shadow cursor-default"
-    >
-      <div className="text-[10px] font-semibold text-violet-600 uppercase tracking-wide mb-1">{card.title}</div>
-      <div className="text-sm text-gray-800 font-medium">{card.value}</div>
-    </motion.div>
   );
 }

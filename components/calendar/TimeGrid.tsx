@@ -137,17 +137,8 @@ function TimeGrid({ children, columnCount = 7, showCurrentTime = true, gridScrol
                 className="pointer-events-none absolute left-0 right-0 z-20 flex items-center"
                 style={{ top: currentTimePosition }}
               >
-                <div
-                  className="-ml-[5px] h-[10px] w-[10px] rounded-full"
-                  style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
-                />
-                <div
-                  className="flex-1"
-                  style={{
-                    height: '2px',
-                    background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                  }}
-                />
+                <div className="-ml-[5px] h-[10px] w-[10px] rounded-full bg-red-500" />
+                <div className="flex-1 bg-red-500" style={{ height: '2px' }} />
               </div>
             )}
 

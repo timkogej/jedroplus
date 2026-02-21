@@ -2,91 +2,73 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Bell,
-  BellRinging,
-  Check,
-  CheckCircle,
-  Clock,
-  Trash,
-  Info,
-  Warning,
-  XCircle,
+  BellIcon,
+  BellRingingIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  InfoIcon,
+  WarningIcon,
+  XCircleIcon,
+  ArchiveIcon,
+  ArrowRightIcon,
+  ChecksIcon,
+  CalendarBlankIcon,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
-import { useAuth } from '@/app/auth-context';
 import { supabase } from '@/lib/supabaseClient';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface Notification {
   id: string;
   company_id: string;
-  recipient_user_id: string;
+  recipient_user_id: string | null;
+  created_by_user_id: string | null;
   type: string;
   title: string;
   body: string;
+  action_url: string | null;
+  entity_type: string | null;
+  entity_id: string | null;
+  metadata: Record<string, unknown> | null;
+  is_read: boolean;
+  read_at: string | null;
+  is_archived: boolean;
+  archived_at: string | null;
+  dedupe_key: string | null;
+  expires_at: string | null;
   created_at: string;
-  read?: boolean;
 }
+
+// ============================================================================
+// Helpers
+// ============================================================================
 
 function getNotificationIcon(type: string) {
-  switch (type.toLowerCase()) {
+  switch (type?.toLowerCase()) {
     case 'info':
-      return Info;
+      return InfoIcon;
     case 'success':
-      return CheckCircle;
+      return CheckCircleIcon;
     case 'warning':
-      return Warning;
+      return WarningIcon;
     case 'error':
-      return XCircle;
+      return XCircleIcon;
     case 'reminder':
-      return BellRinging;
+      return BellRingingIcon;
+    case 'appointment':
+      return CalendarBlankIcon;
     default:
-      return Bell;
+      return BellIcon;
   }
 }
 
-function getNotificationColor(type: string) {
-  switch (type.toLowerCase()) {
-    case 'info':
-      return {
-        gradient: 'from-blue-500 to-indigo-500',
-        bg: 'border-blue-200 bg-blue-50',
-        icon: 'text-blue-600',
-      };
-    case 'success':
-      return {
-        gradient: 'from-green-500 to-emerald-500',
-        bg: 'border-green-200 bg-green-50',
-        icon: 'text-green-600',
-      };
-    case 'warning':
-      return {
-        gradient: 'from-orange-500 to-amber-500',
-        bg: 'border-orange-200 bg-orange-50',
-        icon: 'text-orange-600',
-      };
-    case 'error':
-      return {
-        gradient: 'from-red-500 to-rose-500',
-        bg: 'border-red-200 bg-red-50',
-        icon: 'text-red-600',
-      };
-    case 'reminder':
-      return {
-        gradient: 'from-cyan-500 to-blue-500',
-        bg: 'border-cyan-200 bg-cyan-50',
-        icon: 'text-cyan-600',
-      };
-    default:
-      return {
-        gradient: 'from-gray-500 to-slate-500',
-        bg: 'border-gray-200 bg-gray-50',
-        icon: 'text-gray-600',
-      };
-  }
-}
 
 function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
@@ -99,6 +81,7 @@ function formatRelativeTime(dateStr: string): string {
   if (diffMins < 1) return 'Pravkar';
   if (diffMins < 60) return `Pred ${diffMins} min`;
   if (diffHours < 24) return `Pred ${diffHours} h`;
+  if (diffDays === 1) return 'Včeraj';
   if (diffDays < 7) return `Pred ${diffDays} dni`;
 
   return date.toLocaleDateString('sl-SI', {
@@ -108,39 +91,67 @@ function formatRelativeTime(dateStr: string): string {
   });
 }
 
-function formatFullDate(dateStr: string): string {
+function formatTime(dateStr: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString('sl-SI', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return date.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' });
 }
+
+function formatDateLabel(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const notifDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  if (notifDate.getTime() === today.getTime()) return 'Danes';
+  if (notifDate.getTime() === yesterday.getTime()) return 'Včeraj';
+
+  return date.toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+function groupNotificationsByDate(notifications: Notification[]): Record<string, Notification[]> {
+  const groups: Record<string, Notification[]> = {};
+  for (const n of notifications) {
+    const label = formatDateLabel(n.created_at);
+    if (!groups[label]) groups[label] = [];
+    groups[label].push(n);
+  }
+  return groups;
+}
+
+// ============================================================================
+// Component
+// ============================================================================
 
 export default function ObvestilaPage() {
   const router = useRouter();
-  const { companyId, loading: companyLoading } = useCompany();
-  const { user } = useAuth();
+  const { companyUuid, loading: companyLoading } = useCompany();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [markingAllRead, setMarkingAllRead] = useState(false);
 
-  // Fetch notifications from database
+  // Redirect if no company
+  useEffect(() => {
+    if (!companyLoading && !companyUuid) {
+      router.replace('/onboarding');
+    }
+  }, [companyUuid, companyLoading, router]);
+
+  // Fetch notifications
   const fetchNotifications = useCallback(async () => {
-    if (!companyId || !user?.id) return;
+    if (!companyUuid) return;
 
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch notifications with BOTH company_id AND recipient_user_id conditions
       const { data, error: fetchError } = await supabase
         .from('notifications')
         .select('*')
-        .eq('company_id', companyId)
-        .eq('recipient_user_id', user.id)
+        .eq('company_id', companyUuid)
+        .eq('is_archived', false)
         .order('created_at', { ascending: false });
 
       if (fetchError) {
@@ -149,51 +160,76 @@ export default function ObvestilaPage() {
         return;
       }
 
-      setNotifications(data || []);
+      const list = data || [];
+      setNotifications(list);
     } catch (err) {
       console.error('Error fetching notifications:', err);
       setError('Napaka pri nalaganju obvestil');
     } finally {
       setLoading(false);
     }
-  }, [companyId, user?.id]);
+  }, [companyUuid]);
 
-  // Redirect if no company
   useEffect(() => {
-    if (!companyLoading && !companyId) {
-      router.replace('/onboarding');
-    }
-  }, [companyId, companyLoading, router]);
-
-  // Fetch notifications when component mounts
-  useEffect(() => {
-    if (companyId && user?.id) {
+    if (companyUuid) {
       fetchNotifications();
     }
-  }, [companyId, user?.id, fetchNotifications]);
+  }, [companyUuid, fetchNotifications]);
 
-  const handleDelete = useCallback(async (notificationId: string) => {
-    try {
-      const { error: deleteError } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('id', notificationId);
+  // Mark single notification as read
+  const handleMarkRead = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true, read_at: new Date().toISOString() })
+      .eq('id', id);
 
-      if (deleteError) {
-        console.error('Error deleting notification:', deleteError);
-        return;
-      }
-
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-    } catch (err) {
-      console.error('Error deleting notification:', err);
+    if (!error) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n))
+      );
     }
   }, []);
 
-  if (companyLoading || !companyId) {
+  // Mark all as read
+  const handleMarkAllRead = useCallback(async () => {
+    if (!companyUuid) return;
+    setMarkingAllRead(true);
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_read: true, read_at: new Date().toISOString() })
+      .eq('company_id', companyUuid)
+      .eq('is_read', false)
+      .eq('is_archived', false);
+
+    if (!error) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true, read_at: n.read_at ?? new Date().toISOString() })));
+    }
+    setMarkingAllRead(false);
+  }, [companyUuid]);
+
+  // Archive notification
+  const handleArchive = useCallback(async (id: string) => {
+    const { error } = await supabase
+      .from('notifications')
+      .update({ is_archived: true, archived_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (!error) {
+      setNotifications((prev) => {
+        const updated = prev.filter((n) => n.id !== id);
+        return updated;
+      });
+    }
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const grouped = groupNotificationsByDate(notifications);
+  const dateGroups = Object.entries(grouped);
+
+  if (companyLoading || !companyUuid) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
       </div>
     );
   }
@@ -201,134 +237,253 @@ export default function ObvestilaPage() {
   return (
     <ProtectedLayout>
       <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50">
-        <div className="mx-auto max-w-4xl px-6 py-8">
-          {/* Header */}
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Header                                                           */}
+          {/* ---------------------------------------------------------------- */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                  Obvestila
-                </h1>
-                <p className="mt-2 text-sm text-gray-600">
-                  {notifications.length} {notifications.length === 1 ? 'obvestilo' : 'obvestil'}
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold text-gray-900">Obvestila</h1>
+                  {unreadCount > 0 && (
+                    <span className="flex h-6 min-w-[24px] items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 px-2 text-xs font-bold text-white shadow-sm">
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-gray-500">
+                  Preglejte sporočila o rezervacijah, terminih in obvestilih vašega podjetja.
                 </p>
               </div>
+
+              {unreadCount > 0 && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleMarkAllRead}
+                  disabled={markingAllRead}
+                  className="flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 hover:bg-violet-100 transition-colors disabled:opacity-60"
+                >
+                  <ChecksIcon className="h-4 w-4" weight="bold" />
+                  Označi vse kot prebrano
+                </motion.button>
+              )}
             </div>
           </motion.div>
 
-          {/* Loading state */}
+          {/* ---------------------------------------------------------------- */}
+          {/* Loading                                                          */}
+          {/* ---------------------------------------------------------------- */}
           {loading && (
-            <div className="flex items-center justify-center py-20 bg-white">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+            <div className="flex flex-col items-center justify-center py-24 gap-3">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
+              <p className="text-sm text-gray-400">Nalaganje obvestil...</p>
             </div>
           )}
 
-          {/* Error state */}
+          {/* ---------------------------------------------------------------- */}
+          {/* Error                                                            */}
+          {/* ---------------------------------------------------------------- */}
           {error && !loading && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border-2 border-red-200 rounded-xl p-6 text-center"
+              className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center"
             >
-              <XCircle className="w-12 h-12 text-red-500 mx-auto mb-3" weight="fill" />
-              <h3 className="text-lg font-semibold text-red-800 mb-2">{error}</h3>
+              <XCircleIcon className="mx-auto mb-3 h-12 w-12 text-red-400" weight="fill" />
+              <h3 className="mb-1 text-base font-semibold text-red-800">{error}</h3>
               <button
                 onClick={fetchNotifications}
-                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="mt-4 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
               >
                 Poskusi znova
               </button>
             </motion.div>
           )}
 
-          {/* Notifications List */}
-          {!loading && !error && (
-            <div className="space-y-4">
+          {/* ---------------------------------------------------------------- */}
+          {/* Empty state                                                      */}
+          {/* ---------------------------------------------------------------- */}
+          {!loading && !error && notifications.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-20 text-center shadow-sm"
+            >
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-slate-100">
+                <BellIcon className="h-8 w-8 text-gray-300" weight="fill" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-700">Ni obvestil</h3>
+              <p className="mt-1 max-w-xs text-sm text-gray-400">
+                Ko boste prejeli obvestila, se bodo prikazala tukaj.
+              </p>
+            </motion.div>
+          )}
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Notification list (grouped by date)                             */}
+          {/* ---------------------------------------------------------------- */}
+          {!loading && !error && notifications.length > 0 && (
+            <div className="space-y-6">
               <AnimatePresence mode="popLayout">
-                {notifications.length === 0 ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="bg-white rounded-2xl border-2 border-gray-200 p-12 text-center"
-                  >
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-slate-100 mx-auto">
-                      <Bell className="h-8 w-8 text-gray-400" weight="regular" />
+                {dateGroups.map(([dateLabel, items]) => (
+                  <div key={dateLabel}>
+                    {/* Date separator */}
+                    <div className="mb-3 flex items-center gap-3">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+                        {dateLabel}
+                      </span>
+                      <div className="flex-1 h-px bg-gray-200" />
                     </div>
-                    <h3 className="mt-4 text-xl font-semibold text-gray-900">Ni obvestil</h3>
-                    <p className="mt-2 text-gray-600">
-                      Ko boste prejeli obvestila, se bodo prikazala tukaj
-                    </p>
-                  </motion.div>
-                ) : (
-                  notifications.map((notification, index) => {
-                    const Icon = getNotificationIcon(notification.type);
-                    const colors = getNotificationColor(notification.type);
 
-                    return (
-                      <motion.div
-                        key={notification.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: -100 }}
-                        transition={{ delay: index * 0.05 }}
-                        className={`bg-white rounded-2xl border-2 p-6 transition-all hover:shadow-md ${colors.bg}`}
-                      >
-                        <div className="flex items-start gap-4">
-                          {/* Icon */}
-                          <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} shadow-lg`}>
-                            <Icon className="h-6 w-6 text-white" weight="fill" />
-                          </div>
+                    {/* Cards */}
+                    <div className="space-y-2">
+                      {items.map((notification, index) => {
+                        const Icon = getNotificationIcon(notification.type);
+                        const isUnread = !notification.is_read;
 
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-4 mb-2">
-                              <div className="flex-1">
-                                <h3 className="font-bold text-lg text-gray-900 mb-1">
+                        const CardContent = (
+                          <motion.div
+                            key={notification.id}
+                            layout
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: -40, height: 0 }}
+                            transition={{ delay: index * 0.03 }}
+                            className={[
+                              'group relative flex items-start gap-3 rounded-2xl border px-4 py-3 transition-all duration-200',
+                              isUnread
+                                ? 'border-violet-100 bg-white shadow-sm hover:shadow-md hover:border-violet-200'
+                                : 'border-gray-100 bg-white/60 hover:bg-white hover:shadow-sm',
+                            ].join(' ')}
+                            onClick={() => {
+                              if (isUnread) handleMarkRead(notification.id);
+                            }}
+                          >
+                            {/* Unread bar — gradient violet→blue→cyan */}
+                            {isUnread && (
+                              <div
+                                className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
+                                style={{ background: 'linear-gradient(to bottom, #7C3AED, #3B82F6, #06B6D4)' }}
+                              />
+                            )}
+
+                            {/* Icon — no background circle, just the icon */}
+                            <div className="flex-shrink-0 mt-0.5">
+                              <Icon
+                                className={isUnread ? 'h-5 w-5' : 'h-5 w-5 text-gray-400'}
+                                weight="fill"
+                                style={isUnread ? { color: '#7C3AED' } : undefined}
+                              />
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-0.5">
+                                <h3
+                                  className={[
+                                    'text-sm leading-snug truncate',
+                                    isUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-600',
+                                  ].join(' ')}
+                                >
                                   {notification.title}
                                 </h3>
-                                <div className="flex items-center gap-3 text-sm text-gray-600">
-                                  <span className="px-2 py-0.5 rounded-full bg-white border text-xs font-medium">
-                                    {notification.type}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-3.5 h-3.5" weight="regular" />
+                                <div className="flex items-center gap-1.5 flex-shrink-0">
+                                  {isUnread && (
+                                    <span className="h-2 w-2 rounded-full bg-violet-500 ring-2 ring-white" />
+                                  )}
+                                  <span className="text-xs text-gray-400 whitespace-nowrap">
                                     {formatRelativeTime(notification.created_at)}
                                   </span>
                                 </div>
                               </div>
 
-                              {/* Delete Button */}
-                              <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => handleDelete(notification.id)}
-                                className="flex-shrink-0 p-2 rounded-lg text-gray-400 hover:bg-red-100 hover:text-red-600 transition-colors"
-                                title="Izbriši"
+                              {/* Time */}
+                              <div className="flex items-center gap-1 mb-2">
+                                <span className="flex items-center gap-1 text-[11px] text-gray-400">
+                                  <ClockIcon className="h-3 w-3" />
+                                  {formatTime(notification.created_at)}
+                                </span>
+                              </div>
+
+                              {/* Body */}
+                              <p
+                                className={[
+                                  'text-sm leading-relaxed',
+                                  isUnread ? 'text-gray-700' : 'text-gray-500',
+                                ].join(' ')}
                               >
-                                <Trash className="w-5 h-5" weight="bold" />
-                              </motion.button>
+                                {notification.body}
+                              </p>
+
+                              {/* Action row */}
+                              <div className="mt-3 flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  {notification.action_url && (
+                                    <span className="flex items-center gap-1 text-xs font-medium text-violet-600">
+                                      <ArrowRightIcon className="h-3 w-3" />
+                                      Odpri
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {isUnread && (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleMarkRead(notification.id);
+                                      }}
+                                      className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                                      title="Označi kot prebrano"
+                                    >
+                                      <CheckCircleIcon className="h-3.5 w-3.5" />
+                                      Prebrano
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleArchive(notification.id);
+                                    }}
+                                    className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                                    title="Arhiviraj"
+                                  >
+                                    <ArchiveIcon className="h-3.5 w-3.5" />
+                                    Arhiviraj
+                                  </button>
+                                </div>
+                              </div>
                             </div>
+                          </motion.div>
+                        );
 
-                            {/* Body */}
-                            <p className="text-gray-700 whitespace-pre-wrap">
-                              {notification.body}
-                            </p>
+                        // Wrap in Link if action_url exists
+                        if (notification.action_url) {
+                          return (
+                            <Link
+                              key={notification.id}
+                              href={notification.action_url}
+                              className="block"
+                              onClick={() => {
+                                if (isUnread) handleMarkRead(notification.id);
+                              }}
+                            >
+                              {CardContent}
+                            </Link>
+                          );
+                        }
 
-                            {/* Full date */}
-                            <p className="text-xs text-gray-500 mt-3">
-                              {formatFullDate(notification.created_at)}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    );
-                  })
-                )}
+                        return <div key={notification.id}>{CardContent}</div>;
+                      })}
+                    </div>
+                  </div>
+                ))}
               </AnimatePresence>
             </div>
           )}

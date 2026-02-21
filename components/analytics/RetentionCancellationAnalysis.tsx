@@ -3,7 +3,7 @@
 import { memo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Users, CalendarCheck, Star, Trophy } from '@phosphor-icons/react';
+import { CalendarCheck, Star, Trophy } from '@phosphor-icons/react';
 import {
   fetchRetentionData,
   fetchClientAppointmentDistribution,
@@ -92,17 +92,6 @@ function RetentionCancellationAnalysis({
         <h3 className="mb-6 text-lg font-semibold text-gray-900">Porazdelitev Strank po Terminih</h3>
 
         <div className="space-y-3">
-          {/* Total Clients */}
-          <div className="flex items-center justify-between rounded-lg bg-blue-50 p-4">
-            <div>
-              <div className="text-sm text-gray-600">Vse stranke</div>
-              <div className="text-2xl font-bold text-gray-900">
-                {distributionData.totalClients}
-              </div>
-            </div>
-            <Users className="h-8 w-8 text-blue-600" weight="duotone" />
-          </div>
-
           {/* Clients with 1 appointment */}
           <div className="flex items-center justify-between rounded-lg bg-amber-50 p-4">
             <div>

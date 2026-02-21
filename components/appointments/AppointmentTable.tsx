@@ -301,9 +301,9 @@ function AppointmentTable({
               transition={{ duration: 0.2 }}
               className="divide-y divide-gray-50"
             >
-              {paginatedAppointments.map((appointment) => (
+              {paginatedAppointments.map((appointment, idx) => (
                 <tr
-                  key={appointment.id}
+                  key={`apt-${idx}-${appointment.id}`}
                   className="group transition-colors hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-transparent"
                 >
                   {/* Date */}

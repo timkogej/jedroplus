@@ -291,11 +291,11 @@ function CalendarSidebar({
                         <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
                       )}
                     </button>
-                    {employees.map((employee) => {
+                    {employees.map((employee, idx) => {
                       const isSelected = selectedEmployeeId === employee.id;
                       return (
                         <button
-                          key={employee.id}
+                          key={`emp-${idx}-${employee.id}`}
                           type="button"
                           onClick={() => onEmployeeFilterChange(employee.id)}
                           className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all text-left
@@ -350,7 +350,7 @@ function CalendarSidebar({
                         <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
                       )}
                     </button>
-                    {services.map((service) => {
+                    {services.map((service, idx) => {
                       const isSelected = selectedServiceId === service.id;
                       const colorStyle = service.barva?.includes('gradient')
                         ? { background: service.barva }
@@ -358,7 +358,7 @@ function CalendarSidebar({
 
                       return (
                         <button
-                          key={service.id}
+                          key={`svc-${idx}-${service.id}`}
                           type="button"
                           onClick={() => onServiceFilterChange(service.id)}
                           className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all text-left
@@ -391,7 +391,7 @@ function CalendarSidebar({
                   Legenda storitev
                 </h3>
                 <div className="space-y-2">
-                  {services.slice(0, 8).map((service) => {
+                  {services.slice(0, 8).map((service, idx) => {
                     const colorStyle = service.barva?.includes('gradient')
                       ? { background: service.barva }
                       : { background: service.barva || '#6366F1' };
@@ -402,7 +402,7 @@ function CalendarSidebar({
 
                     return (
                       <div
-                        key={service.id}
+                        key={`svc-leg-${idx}-${service.id}`}
                         className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <div

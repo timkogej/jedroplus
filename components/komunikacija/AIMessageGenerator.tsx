@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Robot, MagicWand, CircleNotch } from '@phosphor-icons/react';
+import { MagicWand, CircleNotch } from '@phosphor-icons/react';
 import { callN8nAction } from '@/src/lib/n8nClient';
 
 interface AIMessageGeneratorProps {
@@ -53,10 +53,9 @@ export default function AIMessageGenerator({ onGenerate, companyId, actor, compa
   return (
     <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/60 to-cyan-50/40 p-5">
       <div className="flex items-center gap-3 mb-4">
-        <Robot className="h-6 w-6 text-[#1A1F36]" weight="regular" />
         <div>
           <h3
-            className="font-semibold"
+            className="font-bold"
             style={{
               backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
               WebkitBackgroundClip: 'text',

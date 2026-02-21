@@ -225,10 +225,10 @@ export function AppointmentListCard({
               <p className="text-sm text-gray-500">{subtitle}</p>
             </div>
           </div>
-          {/* Appointment count as text badge, not number in icon */}
-          <span className="text-sm font-medium text-gray-500">
-            {appointments.length} {appointments.length === 1 ? 'termin' : 'terminov'}
-          </span>
+          <div className="flex items-center gap-1.5 text-gray-500">
+            <span className="text-lg font-semibold text-gray-900">{appointments.length}</span>
+            <Calendar size={18} weight="regular" className="text-gray-400" />
+          </div>
         </div>
       </div>
 

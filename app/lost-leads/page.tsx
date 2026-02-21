@@ -219,16 +219,7 @@ export default function LostLeadsPage() {
                 className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
                 title="Nastavitve"
               >
-                <span
-                  style={{
-                    background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  <Gear size={20} weight="bold" />
-                </span>
+                <Gear size={20} weight="bold" className="text-gray-900" />
               </motion.button>
             </div>
           </motion.div>
@@ -317,13 +308,146 @@ export default function LostLeadsPage() {
             )}
           </div>
 
+          {/* Inactive Clients Table */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8 rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden"
+          >
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-[#1A1F36]">
+                    Neaktivne Stranke
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {inactiveClients.length} neaktivnih strank (več kot {inactivityDays} dni brez interakcije)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="p-12 text-center">
+                <div className="animate-pulse flex flex-col items-center">
+                  <div className="h-16 w-16 rounded-full bg-gray-200 mb-4" />
+                  <div className="h-5 w-32 bg-gray-200 rounded mb-2" />
+                  <div className="h-4 w-48 bg-gray-200 rounded" />
+                </div>
+              </div>
+            ) : inactiveClients.length === 0 ? (
+              <div className="p-12 text-center">
+                <UserCheck className="h-16 w-16 text-emerald-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg font-medium">
+                  There are currently no inactive customers.
+                </p>
+                <p className="text-gray-400 text-sm mt-2">
+                  Vse stranke so imele interakcijo v zadnjih {inactivityDays} dneh.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Stranka
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Telefon
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Dni Neaktivnosti
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Obveščen
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {inactiveClients.slice(0, 50).map((client, index) => {
+                      const daysInactive = getDaysInactive(client);
+                      const notified = isClientNotified(client);
+                      return (
+                        <motion.tr
+                          key={getClientId(client)}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: index * 0.02 }}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <span
+                                className="text-sm font-bold flex-shrink-0 w-8 text-center"
+                                style={{
+                                  background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                                  WebkitBackgroundClip: 'text',
+                                  WebkitTextFillColor: 'transparent',
+                                  backgroundClip: 'text',
+                                }}
+                              >
+                                {getClientInitials(client)}
+                              </span>
+                              <div className="font-medium text-gray-900">
+                                {getClientName(client)}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <EnvelopeSimple className="h-4 w-4 text-gray-400" />
+                              {getClientEmail(client)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Phone className="h-4 w-4 text-gray-400" />
+                              {getClientPhone(client)}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-3 py-1 text-xs font-semibold bg-orange-100 text-orange-700 rounded-full">
+                              {daysInactive} dni
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {notified ? (
+                              <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">
+                                <CheckCircle className="h-3.5 w-3.5" weight="fill" />
+                                Da
+                              </span>
+                            ) : (
+                              <span className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-600 rounded-full">
+                                Ne
+                              </span>
+                            )}
+                          </td>
+                        </motion.tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                {inactiveClients.length > 50 && (
+                  <div className="p-4 text-center text-sm text-gray-500 border-t border-gray-100">
+                    Prikazanih prvih 50 od {inactiveClients.length} neaktivnih strank
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
+
           {/* Settings Overview - Organized Sections */}
-          <div className="mb-8 space-y-6">
+          <div className="mt-8 mb-8 space-y-6">
             {/* Splošne nastavitve */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.3 }}
               className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
             >
               <h2 className="text-lg font-semibold text-[#1A1F36] mb-4">Splošne nastavitve</h2>
@@ -393,7 +517,7 @@ export default function LostLeadsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
+              transition={{ delay: 0.35 }}
               className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
             >
               <h2 className="text-lg font-semibold text-[#1A1F36] mb-4">Navodila za komunikacijo</h2>
@@ -425,131 +549,6 @@ export default function LostLeadsPage() {
               )}
             </motion.div>
           </div>
-
-          {/* Inactive Clients Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden"
-          >
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-[#1A1F36]">
-                    Neaktivne Stranke
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {inactiveClients.length} neaktivnih strank (več kot {inactivityDays} dni brez interakcije)
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="p-12 text-center">
-                <div className="animate-pulse flex flex-col items-center">
-                  <div className="h-16 w-16 rounded-full bg-gray-200 mb-4" />
-                  <div className="h-5 w-32 bg-gray-200 rounded mb-2" />
-                  <div className="h-4 w-48 bg-gray-200 rounded" />
-                </div>
-              </div>
-            ) : inactiveClients.length === 0 ? (
-              <div className="p-12 text-center">
-                <UserCheck className="h-16 w-16 text-emerald-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg font-medium">
-                  There are currently no inactive customers.
-                </p>
-                <p className="text-gray-400 text-sm mt-2">
-                  Vse stranke so imele interakcijo v zadnjih {inactivityDays} dneh.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Stranka
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Telefon
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Dni Neaktivnosti
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Obveščen
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {inactiveClients.slice(0, 50).map((client, index) => {
-                      const daysInactive = getDaysInactive(client);
-                      const notified = isClientNotified(client);
-                      return (
-                        <motion.tr
-                          key={getClientId(client)}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: index * 0.02 }}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 via-blue-500 to-cyan-500 flex items-center justify-center text-white font-semibold text-sm">
-                                {getClientInitials(client)}
-                              </div>
-                              <div className="font-medium text-gray-900">
-                                {getClientName(client)}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <EnvelopeSimple className="h-4 w-4 text-gray-400" />
-                              {getClientEmail(client)}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Phone className="h-4 w-4 text-gray-400" />
-                              {getClientPhone(client)}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-3 py-1 text-xs font-semibold bg-orange-100 text-orange-700 rounded-full">
-                              {daysInactive} dni
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {notified ? (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">
-                                <CheckCircle className="h-3.5 w-3.5" weight="fill" />
-                                Da
-                              </span>
-                            ) : (
-                              <span className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-600 rounded-full">
-                                Ne
-                              </span>
-                            )}
-                          </td>
-                        </motion.tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                {inactiveClients.length > 50 && (
-                  <div className="p-4 text-center text-sm text-gray-500 border-t border-gray-100">
-                    Prikazanih prvih 50 od {inactiveClients.length} neaktivnih strank
-                  </div>
-                )}
-              </div>
-            )}
-          </motion.div>
 
           {/* Info Box */}
           <motion.div

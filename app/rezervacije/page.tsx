@@ -17,6 +17,12 @@ import { useCompany } from '@/app/company-context';
 import { supabase } from '@/lib/supabaseClient';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { BookingSettingsModal } from '@/components/booking/BookingSettingsModal';
+import {
+  Design1Preview,
+  Design2Preview,
+  Design3Preview,
+  Design4Preview,
+} from '@/components/reservations/BookingDesignPreviews';
 
 interface ReservationSettings {
   timeSlotLength: number;
@@ -32,39 +38,34 @@ interface ReservationSettings {
 interface BookingDesign {
   id: number;
   name: string;
+  subtitle: string;
   description: string;
-  previewGradient: string;
-  borderColor: string;
 }
 
 const BOOKING_DESIGNS: BookingDesign[] = [
   {
     id: 1,
     name: 'Klasičen',
-    description: 'Preprost in pregleden',
-    previewGradient: 'from-gray-100 to-gray-200',
-    borderColor: 'border-gray-300',
+    subtitle: 'Preprost in pregleden',
+    description: 'Klasičen dizajn z elegantnimi gradient ozadji. Idealno za prikaz barv vašega podjetja in ustvarjanje prepoznavne blagovne znamke.',
   },
   {
     id: 2,
     name: 'Moderen',
-    description: 'Sodoben in dinamičen',
-    previewGradient: 'from-violet-100 to-blue-100',
-    borderColor: 'border-violet-300',
+    subtitle: 'Sodoben in dinamičen',
+    description: 'Sodoben dizajn s temnim ozadjem in živahnimi poudarki. Priporočamo temnejšo primarno barvo za najboljši vizualni učinek in premium občutek.',
   },
   {
     id: 3,
     name: 'Minimalen',
-    description: 'Čist in enostaven',
-    previewGradient: 'from-slate-100 to-gray-50',
-    borderColor: 'border-slate-300',
+    subtitle: 'Čist in enostaven',
+    description: 'Luksuzni minimalistični dizajn z nežnimi zemeljskimi toni. Popoln za elegantne salone, spa centre in ekskluzivne storitve.',
   },
   {
     id: 4,
-    name: 'Premium',
-    description: 'Eleganten in lukszen',
-    previewGradient: 'from-amber-50 to-orange-100',
-    borderColor: 'border-amber-300',
+    name: 'Sezonsko',
+    subtitle: 'Prilagodljiv in živahen',
+    description: 'Dinamičen dizajn, ki se samodejno prilagaja letnemu času in praznikom. Pomlad, poletje, jesen, zima, božič, valentinovo, noč čarovnic in več – vaša stran je vedno sveža in aktualna.',
   },
 ];
 
@@ -200,16 +201,7 @@ export default function RezervacijePage() {
               className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
               title="Nastavitve"
             >
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                <Gear size={20} weight="bold" />
-              </span>
+              <Gear size={20} weight="bold" className="text-gray-900" />
             </motion.button>
           </motion.div>
 
@@ -248,22 +240,16 @@ export default function RezervacijePage() {
                           className="w-64 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-md transition-all"
                         >
                           {/* Design Preview */}
-                          <div
-                            className={cn(
-                              "aspect-video rounded-lg mb-3 flex items-center justify-center relative overflow-hidden bg-gradient-to-br",
-                              design.previewGradient
-                            )}
-                          >
-                            <div className={cn(
-                              "absolute inset-2 border-2 border-dashed rounded flex items-center justify-center",
-                              design.borderColor
-                            )}>
-                              <span className="text-gray-500 font-semibold text-sm">Dizajn {design.id}</span>
-                            </div>
+                          <div className="rounded-lg mb-3 overflow-hidden" style={{ height: '140px' }}>
+                            {design.id === 1 && <Design1Preview />}
+                            {design.id === 2 && <Design2Preview />}
+                            {design.id === 3 && <Design3Preview />}
+                            {design.id === 4 && <Design4Preview />}
                           </div>
 
                           <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
-                          <p className="text-xs text-center text-gray-500 mt-0.5 mb-3">{design.description}</p>
+                          <p className="text-xs text-center text-gray-500 mt-0.5">{design.subtitle}</p>
+                          <p className="text-[10px] text-center text-gray-400 mt-1 mb-3 leading-relaxed">{design.description}</p>
 
                           {/* Booking Link for this design */}
                           <div className="space-y-2">

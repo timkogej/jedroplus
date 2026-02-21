@@ -175,7 +175,12 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
     }
 
     for (const apt of appointments) {
-      const aptDate = new Date(apt.datum);
+      // Parse date safely: if datum is a date-only string like "2024-02-16",
+      // append T12:00:00 to avoid timezone shifting to wrong day
+      const rawDatum = apt.datum;
+      const aptDate = rawDatum.length === 10
+        ? new Date(rawDatum + 'T12:00:00')
+        : new Date(rawDatum);
       const dateKey = getLocalDateKey(aptDate);
       const existing = grouped.get(dateKey);
       if (existing) {

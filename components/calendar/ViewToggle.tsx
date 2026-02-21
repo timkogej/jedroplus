@@ -7,38 +7,46 @@ import type { ViewMode } from '@/lib/utils/calendar';
 interface ViewToggleProps {
   currentView: ViewMode;
   onViewChange: (view: ViewMode) => void;
+  isMobile?: boolean;
 }
 
-const views: { mode: ViewMode; label: string; shortLabel: string }[] = [
-  { mode: 'day', label: 'Dan', shortLabel: 'D' },
-  { mode: 'week', label: 'Teden', shortLabel: 'T' },
-  { mode: 'month', label: 'Mesec', shortLabel: 'M' },
+const desktopViews: { mode: ViewMode; label: string }[] = [
+  { mode: 'day', label: 'Dan' },
+  { mode: 'week', label: 'Teden' },
+  { mode: 'month', label: 'Mesec' },
 ];
 
-function ViewToggle({ currentView, onViewChange }: ViewToggleProps) {
+const mobileViews: { mode: ViewMode; label: string }[] = [
+  { mode: 'day', label: 'Dan' },
+  { mode: '2day', label: '2 dni' },
+  { mode: 'month', label: 'Mesec' },
+];
+
+function ViewToggle({ currentView, onViewChange, isMobile = false }: ViewToggleProps) {
+  const views = isMobile ? mobileViews : desktopViews;
+
   return (
-    <div className="relative inline-flex rounded-xl bg-[#F7F8FA] p-1">
-      {views.map(({ mode, label, shortLabel }) => (
+    <div className="relative inline-flex rounded-[10px] bg-black/[0.07] p-[3px] gap-0">
+      {views.map(({ mode, label }) => (
         <button
           key={mode}
           type="button"
           onClick={() => onViewChange(mode)}
-          className={`relative z-10 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors duration-200
-                     md:px-4 md:py-2 md:text-sm
+          className={`relative z-10 rounded-[8px] px-2.5 py-[5px] text-[11px] font-medium transition-colors duration-150 select-none
+                     md:px-3 md:py-[6px] md:text-[12px]
                      ${currentView === mode
                        ? 'text-[#1A1F36]'
-                       : 'text-gray-500 hover:text-[#1A1F36]'
+                       : 'text-[#6B7280] hover:text-[#374151]'
                      }`}
         >
           {currentView === mode && (
             <motion.div
               layoutId="viewToggleIndicator"
-              className="absolute inset-0 rounded-lg bg-white shadow-sm"
-              transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+              className="absolute inset-0 rounded-[8px] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.13),0_0.5px_1.5px_rgba(0,0,0,0.07)]"
+              transition={{ type: 'spring', bounce: 0.18, duration: 0.32 }}
             />
           )}
-          <span className="relative z-10 hidden md:inline">{label}</span>
-          <span className="relative z-10 md:hidden">{shortLabel}</span>
+          <span className="relative z-10 whitespace-nowrap">{label}</span>
         </button>
       ))}
     </div>

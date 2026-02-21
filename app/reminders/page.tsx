@@ -206,15 +206,7 @@ export default function RemindersPage() {
                 className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
                 title="Nastavitve"
               >
-                <span
-                  style={{
-                    background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  <Gear size={20} weight="bold" />
-                </span>
+                <Gear size={20} weight="bold" className="text-gray-900" />
               </motion.button>
             </div>
           </motion.div>

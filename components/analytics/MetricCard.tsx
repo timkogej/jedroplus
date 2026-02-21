@@ -2,7 +2,6 @@
 
 import { memo, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { ArrowUp, ArrowDown } from '@phosphor-icons/react';
 
 // Black & White icon color options
 type IconColor = 'black' | 'darkGray' | 'mediumGray' | 'slate' | 'lightGray' | 'charcoal';
@@ -35,11 +34,11 @@ function MetricCard({
   if (isLoading) {
     return (
       <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-        <div className="flex items-start justify-between">
-          <div className="h-12 w-12 animate-pulse rounded-xl bg-gray-200" />
-          <div className="h-6 w-16 animate-pulse rounded-full bg-gray-200" />
+        <div className="mb-4 h-4 w-28 animate-pulse rounded bg-gray-200" />
+        <div className="flex items-end justify-between">
+          <div className="h-8 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="h-6 w-6 animate-pulse rounded bg-gray-200" />
         </div>
-        <div className="mt-4 h-8 w-24 animate-pulse rounded bg-gray-200" />
         <div className="mt-2 h-4 w-32 animate-pulse rounded bg-gray-200" />
       </div>
     );
@@ -51,35 +50,14 @@ function MetricCard({
       animate={{ opacity: 1, y: 0 }}
       className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
     >
-      <div className="mb-3 flex items-center justify-between">
-        {change !== undefined ? (
-          <span
-            className={`flex h-6 items-center gap-1 rounded-full px-2 text-xs font-semibold ${
-              change >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-            }`}
-          >
-            {change >= 0 ? (
-              <ArrowUp className="h-3 w-3" weight="bold" />
-            ) : (
-              <ArrowDown className="h-3 w-3" weight="bold" />
-            )}
-            {Math.abs(change).toFixed(1)}%
-          </span>
-        ) : (
-          <span className="inline-flex h-6 w-14" aria-hidden="true" />
-        )}
+      <div className="mb-3 text-sm font-medium text-gray-600">{title}</div>
+
+      <div className="flex items-end justify-between">
+        <div className="text-3xl font-bold text-gray-900">{value}</div>
         <div className="flex h-6 w-6 items-center justify-center text-black">{icon}</div>
       </div>
 
-      <div className="mb-1 text-3xl font-bold text-gray-900">{value}</div>
-
-      <div className="text-sm font-medium text-gray-600">{title}</div>
-
       {subtitle && <div className="mt-1 text-xs text-gray-500">{subtitle}</div>}
-
-      {changeLabel && change !== undefined && (
-        <div className="mt-2 text-xs text-gray-500">{changeLabel}</div>
-      )}
 
       {/* Progress Bar - now uses gray theme */}
       {progressBar !== undefined && (

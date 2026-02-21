@@ -22,17 +22,17 @@ export default function EmailQuotaCard({ used, total, resetDate }: EmailQuotaCar
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Envelope className="h-6 w-6 text-[#1A1F36]" weight="duotone" />
+          <Envelope className="h-6 w-6 text-[#1A1F36]" weight="regular" />
           <div>
             <p className="text-sm font-medium text-gray-500">Email kvota</p>
-            <p className="text-xl font-bold text-[#1A1F36]">
+            <p className="text-xl font-medium text-[#1A1F36]">
               {used.toLocaleString()} / {total.toLocaleString()}
             </p>
           </div>
         </div>
 
         <div className="text-right">
-          <span className="text-2xl font-bold text-[#1A1F36]">
+          <span className="text-2xl font-medium text-[#1A1F36]">
             {percentage}%
           </span>
           <p className="text-xs text-gray-400 mt-0.5">porabljeno</p>
@@ -40,7 +40,7 @@ export default function EmailQuotaCard({ used, total, resetDate }: EmailQuotaCar
       </div>
 
       {/* Progress bar */}
-      <div className="mt-4 h-2 rounded-full bg-gray-100 overflow-hidden">
+      <div className="mt-4 h-1 rounded-full bg-gray-100 overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
