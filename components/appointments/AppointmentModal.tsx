@@ -736,7 +736,7 @@ function AppointmentModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div key="appointment-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Backdrop */}
         <motion.div
           variants={backdropVariants}
@@ -1498,6 +1498,7 @@ function AppointmentModal({
       {/* Inline Client Creation Modal - IDENTICAL to Stranke page */}
       {companyId && (
         <ClientModal
+          key="client-modal"
           isOpen={showClientModal}
           onClose={() => setShowClientModal(false)}
           mode="create"

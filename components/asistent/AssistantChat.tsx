@@ -475,7 +475,7 @@ function ChatInput({
   onSend: () => void;
   loading: boolean;
   focused: boolean;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   pill?: boolean;
 }) {
   const borderRadius = pill ? '9999px' : '16px';
@@ -579,7 +579,7 @@ export function AssistantChat({
   const [inputFocused, setInputFocused] = useState(false);
   const [userInitials, setUserInitials] = useState('U');
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     if (!companyId) return;
