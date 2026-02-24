@@ -89,7 +89,9 @@ export default function LoginPage() {
             style={{
               background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
               WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
+              color: 'transparent',
             }}
           >
             Jedro+
