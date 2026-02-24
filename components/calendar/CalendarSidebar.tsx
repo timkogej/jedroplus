@@ -88,6 +88,7 @@ function CalendarSidebar({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
               className="fixed inset-0 bg-black/20 z-40"
               onClick={onToggle}
             />

@@ -2,7 +2,7 @@
 
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, CalendarBlank, NotePencil, LockSimple, Plus, Minus } from '@phosphor-icons/react';
+import { X, Clock, CalendarBlank, LockSimple, Plus, Minus } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import ClientSearch from './ClientSearch';
 import ClientModal from '@/components/clients/ClientModal';
@@ -1058,20 +1058,14 @@ function AppointmentModal({
                 </p>
               ) : (
                 <>
-                  <div className="relative overflow-hidden">
-                    <CalendarBlank
-                      className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                      weight="regular"
-                    />
-                    <input
-                      type="date"
-                      value={formData.datum}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, datum: e.target.value }))}
-                      className={`w-full rounded-xl border py-2.5 pl-10 pr-3 text-sm text-[#1A1F36]
-                                 focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20
-                                 ${errors.datum ? 'border-red-300' : 'border-gray-200'}`}
-                    />
-                  </div>
+                  <input
+                    type="date"
+                    value={formData.datum}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, datum: e.target.value }))}
+                    className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-[#1A1F36]
+                               focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20
+                               ${errors.datum ? 'border-red-300' : 'border-gray-200'}`}
+                  />
                   {errors.datum && (
                     <p className="mt-1 text-xs text-red-500">{errors.datum}</p>
                   )}
@@ -1368,21 +1362,15 @@ function AppointmentModal({
                   <p className="text-sm text-gray-400">-</p>
                 )
               ) : (
-                <div className="relative">
-                  <NotePencil
-                    className="absolute left-3 top-3 h-4 w-4 text-gray-400"
-                    weight="regular"
-                  />
-                  <textarea
-                    value={formData.opombe}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, opombe: e.target.value }))}
-                    placeholder="Opombe za stranko..."
-                    rows={3}
-                    className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-3 text-sm
-                               text-[#1A1F36] placeholder-gray-400 focus:outline-none
-                               focus:ring-2 focus:ring-[#1A1F36]/20"
-                  />
-                </div>
+                <textarea
+                  value={formData.opombe}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, opombe: e.target.value }))}
+                  placeholder="Opombe za stranko..."
+                  rows={3}
+                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm
+                             text-[#1A1F36] placeholder-gray-400 focus:outline-none
+                             focus:ring-2 focus:ring-[#1A1F36]/20"
+                />
               )}
             </div>
 
@@ -1411,21 +1399,15 @@ function AppointmentModal({
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Interne opombe
                 </label>
-                <div className="relative">
-                  <LockSimple
-                    className="absolute left-3 top-3 h-4 w-4 text-yellow-600"
-                    weight="fill"
-                  />
-                  <textarea
-                    value={formData.internal_opombe}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
-                    placeholder="Interne opombe (ne pošiljajo se stranki)..."
-                    rows={3}
-                    className="w-full rounded-xl border-2 border-yellow-300 bg-white py-2.5 pl-10 pr-3 text-sm
-                               text-[#1A1F36] placeholder-gray-400 focus:outline-none
-                               focus:ring-2 focus:ring-yellow-200 focus:border-yellow-400"
-                  />
-                </div>
+                <textarea
+                  value={formData.internal_opombe}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
+                  placeholder="Interne opombe (ne pošiljajo se stranki)..."
+                  rows={3}
+                  className="w-full rounded-xl border-2 border-yellow-300 bg-white px-4 py-2.5 text-sm
+                             text-[#1A1F36] placeholder-gray-400 focus:outline-none
+                             focus:ring-2 focus:ring-yellow-200 focus:border-yellow-400"
+                />
               </div>
             ) : (
               // Create mode: show button to toggle internal notes
@@ -1434,21 +1416,15 @@ function AppointmentModal({
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Interne opombe
                   </label>
-                  <div className="relative">
-                    <LockSimple
-                      className="absolute left-3 top-3 h-4 w-4 text-yellow-600"
-                      weight="fill"
-                    />
-                    <textarea
-                      value={formData.internal_opombe}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
-                      placeholder="Interne opombe (ne pošiljajo se stranki)..."
-                      rows={3}
-                      className="w-full rounded-xl border-2 border-yellow-300 bg-white py-2.5 pl-10 pr-3 text-sm
-                                 text-[#1A1F36] placeholder-gray-400 focus:outline-none
-                                 focus:ring-2 focus:ring-yellow-200 focus:border-yellow-400"
-                    />
-                  </div>
+                  <textarea
+                    value={formData.internal_opombe}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
+                    placeholder="Interne opombe (ne pošiljajo se stranki)..."
+                    rows={3}
+                    className="w-full rounded-xl border-2 border-yellow-300 bg-white px-4 py-2.5 text-sm
+                               text-[#1A1F36] placeholder-gray-400 focus:outline-none
+                               focus:ring-2 focus:ring-yellow-200 focus:border-yellow-400"
+                  />
                 </div>
               ) : (
                 <motion.button

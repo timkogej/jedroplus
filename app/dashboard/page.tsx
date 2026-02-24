@@ -227,7 +227,7 @@ function AppointmentDetailModal({
         </div>
 
         {/* Content - scrollable */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        <div className="flex-1 overflow-y-auto min-h-0 p-5 space-y-4">
           {/* Status */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Status</label>
