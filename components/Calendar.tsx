@@ -866,6 +866,9 @@ function Calendar({ companyId }: CalendarProps) {
     // Only trigger if the swipe is clearly horizontal (deltaX dominant) and long enough
     if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
 
+    // Prevent browser from also firing a click event after the swipe
+    e.preventDefault();
+
     if (deltaX < 0) {
       handleNext(); // swipe left → forward
     } else {

@@ -91,8 +91,7 @@ export default function CreateCompanyPage() {
   const [companyName, setCompanyName] = useState('');
   const [loading, setLoading] = useState(false);
   const [createdCompanyPublicId, setCreatedCompanyPublicId] = useState('');
-  const [createdJoinCode, setCreatedJoinCode] = useState('');
-  const [copied, setCopied] = useState<'id' | 'admin-code' | 'employee-code' | null>(null);
+
   const [showConfetti, setShowConfetti] = useState(false);
 
   const handleCreate = async () => {
@@ -161,7 +160,7 @@ export default function CreateCompanyPage() {
 
           // Show success with the 6-char public ID and join code
           setCreatedCompanyPublicId(publicId);
-          setCreatedJoinCode(result.join_code || '');
+
           setShowConfetti(true);
           toast.success('Podjetje uspešno ustvarjeno!');
         } else {
@@ -179,205 +178,39 @@ export default function CreateCompanyPage() {
     }
   };
 
-  const copyToClipboard = (text: string, type: 'id' | 'admin-code' | 'employee-code') => {
-    navigator.clipboard.writeText(text);
-    setCopied(type);
-    toast.success('Kopirano!');
-    setTimeout(() => setCopied(null), 2000);
-  };
-
-  // Generate a "admin code" from the join code (in reality both use same mechanism for now)
-  const adminCode = createdJoinCode ? createdJoinCode.substring(0, 4) + 'AD' + createdJoinCode.substring(6) : '';
-  const employeeCode = createdJoinCode;
-
   // Success view
   if (createdCompanyPublicId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white p-4">
         {showConfetti && <Confetti />}
-        <div className="w-full max-w-lg">
-          <div className="bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-10">
-            {/* Success icon - green gradient circle with checkmark */}
-            <div className="text-center mb-8">
-              <div
-                className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%)',
-                }}
-              >
-                <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                Podjetje ustvarjeno!
-              </h2>
-              <p className="text-gray-600">
-                Vaše podjetje je pripravljeno za uporabo
-              </p>
-            </div>
-
-            {/* Company ID - gradient border */}
+        <div className="w-full max-w-sm">
+          <div className="bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-10 text-center">
+            {/* Success icon */}
             <div
-              className="rounded-2xl p-[2px] mb-4"
+              className="w-24 h-24 mx-auto mb-8 rounded-full flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                background: 'linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%)',
+                boxShadow: '0 8px 32px rgba(16, 185, 129, 0.25)',
               }}
             >
-              <div className="bg-white rounded-[14px] p-6">
-                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 text-center">
-                  ID Podjetja
-                </p>
-                <div
-                  className="text-2xl font-mono font-bold mb-3 text-center tracking-widest"
-                  style={{
-                    background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
-                  {createdCompanyPublicId}
-                </div>
-                <div className="text-center">
-                  <button
-                    onClick={() => copyToClipboard(createdCompanyPublicId, 'id')}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors text-sm"
-                  >
-                    {copied === 'id' ? (
-                      <>
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Kopirano!
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        Kopiraj ID
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
+              <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
             </div>
 
-            {/* Admin Code */}
-            {adminCode && (
-              <div
-                className="rounded-2xl p-[2px] mb-4"
-                style={{
-                  background: 'linear-gradient(135deg, #8B5CF6, #F97316)',
-                }}
-              >
-                <div className="bg-white rounded-[14px] p-6">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 text-center">
-                    Koda za admine
-                  </p>
-                  <div
-                    className="text-3xl font-bold tracking-widest font-mono mb-4 text-center"
-                    style={{
-                      background: 'linear-gradient(to right, #8B5CF6, #F97316)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    {adminCode}
-                  </div>
-                  <div className="text-center">
-                    <button
-                      onClick={() => copyToClipboard(adminCode, 'admin-code')}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                    >
-                      {copied === 'admin-code' ? (
-                        <>
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          Kopirano!
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          Kopiraj kodo
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Employee Code */}
-            {employeeCode && (
-              <div
-                className="rounded-2xl p-[2px] mb-8"
-                style={{
-                  background: 'linear-gradient(135deg, #8B5CF6, #F97316)',
-                }}
-              >
-                <div className="bg-white rounded-[14px] p-6">
-                  <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2 text-center">
-                    Koda za zaposlene
-                  </p>
-                  <div
-                    className="text-3xl font-bold tracking-widest font-mono mb-4 text-center"
-                    style={{
-                      background: 'linear-gradient(to right, #8B5CF6, #F97316)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    {employeeCode}
-                  </div>
-                  <div className="text-center">
-                    <button
-                      onClick={() => copyToClipboard(employeeCode, 'employee-code')}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 transition-colors"
-                    >
-                      {copied === 'employee-code' ? (
-                        <>
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          Kopirano!
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          Kopiraj kodo
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Instructions */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200 p-6 mb-8">
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 text-2xl">💡</div>
-                <div className="text-sm text-gray-700">
-                  <p className="font-semibold mb-2">Kako dodati zaposlene:</p>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>Delite ID podjetja in kodo z zaposlenimi</li>
-                    <li>Zaposleni se morajo registrirati v Jedro+</li>
-                    <li>Pri onboardingu izberejo &quot;Pridruži se podjetju&quot;</li>
-                    <li>Vnesejo ID vašega podjetja in kodo</li>
-                  </ol>
-                </div>
-              </div>
-            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              Podjetje je ustvarjeno
+            </h2>
+            <p className="text-gray-500 mb-10">
+              Vaše podjetje je pripravljeno za uporabo
+            </p>
 
             <button
               onClick={() => window.location.href = '/dashboard'}
-              className="w-full h-12 bg-white border-2 border-gray-200 rounded-xl text-gray-900 font-semibold hover:bg-gray-50 transition-colors"
+              className="w-full h-12 text-white font-semibold rounded-xl transition-all duration-300 hover:opacity-90 hover:shadow-lg"
+              style={{
+                background: 'linear-gradient(to right, #8B5CF6, #06B6D4)',
+              }}
             >
               Pojdi na Dashboard
             </button>
