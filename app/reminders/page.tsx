@@ -60,6 +60,7 @@ export default function RemindersPage() {
   const [afterInstructions, setAfterInstructions] = useState('');
   const [emailPrimary, setEmailPrimary] = useState('');
   const [emailSecondary, setEmailSecondary] = useState('');
+  const [nastvetiStoritev, setNastvetiStoritev] = useState<'yes' | 'no' | 'auto'>('auto');
 
   // Stats
   const [stats, setStats] = useState({
@@ -151,6 +152,9 @@ export default function RemindersPage() {
 
     setEmailPrimary(String(source.brand_primary ?? source['from_email_primary_color'] ?? source.email_primary_color ?? ''));
     setEmailSecondary(String(source.brand_second ?? source['from_email_secondary_color'] ?? source.email_secondary_color ?? ''));
+
+    const nsVal = String(source['Nastveti_storitev'] ?? 'auto').toLowerCase().trim();
+    setNastvetiStoritev(nsVal === 'yes' ? 'yes' : nsVal === 'no' ? 'no' : 'auto');
   }, [reminderRow, companyRow]);
 
   const getToneLabel = (toneValue: string) => {
@@ -362,7 +366,7 @@ export default function RemindersPage() {
                             className="w-8 h-8 rounded-lg border border-gray-200 shadow-inner"
                             style={{ backgroundColor: emailPrimary.startsWith('#') ? emailPrimary : `#${emailPrimary}` }}
                           />
-                          <p className="text-xs text-gray-500 font-mono">{emailPrimary}</p>
+                          <p className="text-base text-gray-900 font-mono">{emailPrimary}</p>
                         </>
                       ) : (
                         <span className="text-gray-400">Ni nastavljeno</span>
@@ -382,12 +386,22 @@ export default function RemindersPage() {
                             className="w-8 h-8 rounded-lg border border-gray-200 shadow-inner"
                             style={{ backgroundColor: emailSecondary.startsWith('#') ? emailSecondary : `#${emailSecondary}` }}
                           />
-                          <p className="text-xs text-gray-500 font-mono">{emailSecondary}</p>
+                          <p className="text-base text-gray-900 font-mono">{emailSecondary}</p>
                         </>
                       ) : (
                         <span className="text-gray-400">Ni nastavljeno</span>
                       )}
                     </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-2 mb-4">
+                      <ChatText className="w-5 h-5 text-black" weight="regular" />
+                      <h3 className="font-bold text-lg text-gray-900">Nasveti glede na storitev</h3>
+                    </div>
+                    <p className="text-base text-gray-900">
+                      {nastvetiStoritev === 'yes' ? 'Da' : nastvetiStoritev === 'no' ? 'Ne' : 'AI sam odloči'}
+                    </p>
                   </div>
                 </div>
               </motion.div>

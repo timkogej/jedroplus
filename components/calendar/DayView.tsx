@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useMemo } from 'react';
+import { CalendarBlank } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Zaposleni, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
 import TimeGrid from './TimeGrid';
@@ -237,24 +238,23 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
                            ${index < displayEmployees.length - 1 ? 'border-r' : ''}`}
                 style={index < displayEmployees.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
               >
-                {/* Employee initials with gradient */}
-                <div
-                  className="w-9 h-9 flex items-center justify-center text-base font-bold mb-0.5"
-                  style={{
-                    background: employee.barva || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  {employee.initials}
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="text-sm font-bold"
+                    style={{
+                      background: employee.barva || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    {employee.initials}
+                  </span>
+                  <span className="text-[11px] font-semibold text-gray-500">
+                    {appointmentsByEmployee.get(employee.id)?.length || 0}
+                  </span>
+                  <CalendarBlank className="h-3.5 w-3.5 text-gray-400" />
                 </div>
-                <span className="text-xs font-medium text-gray-900 truncate max-w-full px-2">
-                  {employee.ime} {employee.priimek}
-                </span>
-                <span className="text-[10px] text-gray-400">
-                  {appointmentsByEmployee.get(employee.id)?.length || 0} {(appointmentsByEmployee.get(employee.id)?.length || 0) === 1 ? 'termin' : 'terminov'}
-                </span>
               </div>
             ))}
           </div>

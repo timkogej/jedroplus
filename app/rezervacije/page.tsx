@@ -346,47 +346,24 @@ export default function RezervacijePage() {
                     <Palette className="w-5 h-5 text-black" weight="regular" />
                     <h3 className="font-bold text-lg text-gray-900">Barve</h3>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-7 h-7 rounded-lg border border-gray-200 shadow-inner flex-shrink-0"
-                        style={{ backgroundColor: settings.primaryColor }}
-                      />
-                      <div className="min-w-0">
-                        <span className="text-xs text-gray-600 block">Primarna</span>
-                        <p className="text-[10px] text-gray-400 font-mono truncate">{settings.primaryColor}</p>
+                  <div className="space-y-3 mt-1">
+                    {[
+                      { label: 'Primarna', color: settings.primaryColor },
+                      { label: 'Sekundarna', color: settings.secondaryColor },
+                      { label: 'Ozadje od', color: settings.bgFromColor },
+                      { label: 'Ozadje do', color: settings.bgToColor },
+                    ].map(({ label, color }) => (
+                      <div key={label} className="flex items-center gap-3">
+                        <div
+                          className="w-8 h-8 rounded-lg border border-gray-200 shadow-inner flex-shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs text-gray-500 block">{label}</span>
+                          <p className="text-base text-gray-900 font-mono">{color}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-7 h-7 rounded-lg border border-gray-200 shadow-inner flex-shrink-0"
-                        style={{ backgroundColor: settings.secondaryColor }}
-                      />
-                      <div className="min-w-0">
-                        <span className="text-xs text-gray-600 block">Sekundarna</span>
-                        <p className="text-[10px] text-gray-400 font-mono truncate">{settings.secondaryColor}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-7 h-7 rounded-lg border border-gray-200 shadow-inner flex-shrink-0"
-                        style={{ backgroundColor: settings.bgFromColor }}
-                      />
-                      <div className="min-w-0">
-                        <span className="text-xs text-gray-600 block">Ozadje od</span>
-                        <p className="text-[10px] text-gray-400 font-mono truncate">{settings.bgFromColor}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-7 h-7 rounded-lg border border-gray-200 shadow-inner flex-shrink-0"
-                        style={{ backgroundColor: settings.bgToColor }}
-                      />
-                      <div className="min-w-0">
-                        <span className="text-xs text-gray-600 block">Ozadje do</span>
-                        <p className="text-[10px] text-gray-400 font-mono truncate">{settings.bgToColor}</p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </motion.div>

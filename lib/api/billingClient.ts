@@ -227,13 +227,19 @@ export interface BillingStatusResult {
  * Used for polling after Stripe checkout to check if subscription is active
  *
  * Endpoint: POST /billing/status
- * Body: { include_usage?: boolean }
+ * Body: { include_usage?: boolean, company_id?: string }
  * Response: { ok, subscription, plan, company, ... }
+ *
+ * @param companyUuid - Optional UUID from companies.id, passed to n8n so it
+ *                      can identify the company without relying solely on JWT.
  */
-export async function getBillingStatus(includeUsage = false): Promise<BillingStatusResult> {
+export async function getBillingStatus(includeUsage = false, companyUuid?: string): Promise<BillingStatusResult> {
   return apiRequest<BillingStatusResult>('/billing/status', {
     method: 'POST',
-    body: JSON.stringify({ include_usage: includeUsage })
+    body: JSON.stringify({
+      include_usage: includeUsage,
+      ...(companyUuid ? { company_id: companyUuid } : {}),
+    })
   });
 }
 

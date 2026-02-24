@@ -31,8 +31,8 @@ import {
   Package,
   Lock,
 } from '@phosphor-icons/react';
+import Image from 'next/image';
 import { useSidebar, MIN_WIDTH, MAX_WIDTH } from './sidebar-context';
-import { PlusSignLogo } from '@/components/logo/plus-sign';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useCompanyPlan } from '@/hooks/useCompanyPlan';
@@ -298,37 +298,39 @@ export function Sidebar() {
       {/* Header */}
       <div className="h-16 px-4 flex items-center justify-between border-b border-gray-100 flex-shrink-0">
         {!isCollapsed ? (
-          <div className="flex items-center gap-3 min-w-0">
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="flex-shrink-0"
-            >
-              <PlusSignLogo size={40} />
-            </motion.div>
-            <div className="min-w-0 flex-1">
-              <h1
-                className="text-lg font-bold"
-                style={{
-                  background: 'linear-gradient(90deg, #7C75FC 0%, #50C3D2 50%, #44D0C6 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
+          <>
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="flex-shrink-0"
               >
-                Jedro+
-              </h1>
-              <p className="text-xs text-gray-500 truncate">{companyName}</p>
+                <Image src="/brand/logo.png" alt="Jedro+" width={56} height={56} priority />
+              </motion.div>
+              <div className="min-w-0 flex-1">
+                <h1
+                  className="text-lg font-bold"
+                  style={{
+                    background: 'linear-gradient(90deg, #7C75FC 0%, #50C3D2 50%, #44D0C6 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  Jedro+
+                </h1>
+                <p className="text-xs text-gray-500 truncate">{companyName}</p>
+              </div>
             </div>
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setCollapsed(true)}
-              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 ml-2"
               aria-label="Skrči sidebar"
             >
               <CaretLeft className="w-4 h-4 text-gray-400" />
             </motion.button>
-          </div>
+          </>
         ) : (
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -337,7 +339,7 @@ export function Sidebar() {
             className="w-full flex justify-center"
             aria-label="Razširi sidebar"
           >
-            <PlusSignLogo size={32} />
+            <Image src="/brand/logo.png" alt="Jedro+" width={48} height={48} priority />
           </motion.button>
         )}
       </div>
@@ -591,7 +593,7 @@ export function Sidebar() {
             {/* Header - WHITE */}
             <div className="h-16 flex items-center justify-between px-5 border-b border-gray-100 flex-shrink-0 bg-white">
               <div className="flex items-center gap-3">
-                <PlusSignLogo size={40} />
+                <Image src="/brand/logo.png" alt="Jedro+" width={56} height={56} priority />
                 <span
                   className="text-xl font-bold"
                   style={{

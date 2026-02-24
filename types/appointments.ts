@@ -58,6 +58,7 @@ export interface AppointmentWithDetails {
   zaposleni_id?: string;
   status: TerminStatus;
   opombe?: string;
+  interne_opombe?: string;
   // Pricing fields
   cena?: number | null; // Base price
   popust?: number | null; // Discount amount

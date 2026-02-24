@@ -136,52 +136,49 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
       <div className="flex bg-white flex-shrink-0">
         <div className="w-[52px] flex-shrink-0" />
         <div className="flex-1 grid grid-cols-2">
-          {days.map((day) => {
+          {days.map((day, idx) => {
             const isCurrentDay = isToday(day);
             const dayAbsences = getAbsencesForDay(day);
             const hasAbsence = dayAbsences.length > 0;
+            const isPrimary = idx === 0;
 
             return (
-              <div
+              <button
                 key={getLocalDateKey(day)}
-                className={`flex flex-col items-center py-2.5 ${hasAbsence ? 'bg-amber-50/50' : ''}`}
+                type="button"
+                onClick={() => onDateClick?.(day)}
+                className={`flex flex-col items-center py-2 gap-[3px] transition-colors hover:bg-gray-50
+                  ${idx === 0 ? 'border-r border-gray-100' : ''}`}
               >
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
-                  {DAYS_SHORT[day.getDay()]}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => onDateClick?.(day)}
-                  className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold
-                             transition-all duration-200 hover:bg-gray-100
-                             ${isCurrentDay ? 'font-bold' : 'text-[#1A1F36]'}`}
-                  style={isCurrentDay ? {
-                    background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                <span
+                  className="text-[9px] font-semibold uppercase tracking-wider"
+                  style={isPrimary ? {
+                    background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                  } : undefined}
+                    backgroundClip: 'text',
+                  } : { color: '#9CA3AF' }}
                 >
-                  {day.getDate()}
-                </button>
+                  {DAYS_SHORT[day.getDay()]}
+                </span>
+                <div
+                  className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
+                  style={isPrimary ? {
+                    background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                  } : {
+                    background: '#E5E7EB',
+                  }}
+                >
+                  <span className={`text-[14px] font-semibold leading-none
+                    ${isPrimary ? 'text-white' : 'text-gray-500'}
+                    ${isCurrentDay && !isPrimary ? 'underline decoration-1 underline-offset-2' : ''}`}>
+                    {day.getDate()}
+                  </span>
+                </div>
                 {hasAbsence && (
-                  <div className="mt-1 flex flex-col gap-0.5 w-full px-1">
-                    {dayAbsences.slice(0, 1).map((absence) => (
-                      <span
-                        key={absence.id}
-                        className="text-[9px] font-medium text-amber-700 truncate text-center"
-                        title={`${absence.employee_name || 'Vsi'}${absence.reason ? ` - ${absence.reason}` : ''}`}
-                      >
-                        {absence.employee_name || 'Vsi'}{absence.reason ? `: ${absence.reason}` : ''}
-                      </span>
-                    ))}
-                    {dayAbsences.length > 1 && (
-                      <span className="text-[9px] text-amber-600 text-center">
-                        +{dayAbsences.length - 1} več
-                      </span>
-                    )}
-                  </div>
+                  <span className="w-1 h-1 rounded-full bg-amber-400" />
                 )}
-              </div>
+              </button>
             );
           })}
         </div>

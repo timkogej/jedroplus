@@ -199,10 +199,10 @@ function CalendarSidebar({
                         onClick={() => onDateSelect(day)}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium transition-all
+                        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs transition-all
+                                   ${isCurrentDay ? 'font-bold' : isSelected ? 'font-semibold' : 'font-medium'}
                                    ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-200'}
-                                   ${isCurrentDay ? 'font-bold' : ''}
-                                   ${isSelected && !isCurrentDay ? 'bg-gray-200 font-semibold' : ''}`}
+                                   ${isSelected && !isCurrentDay ? 'bg-gray-200' : ''}`}
                         style={isCurrentDay ? {
                           background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                           WebkitBackgroundClip: 'text',

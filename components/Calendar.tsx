@@ -1,13 +1,11 @@
 'use client';
 
-import { memo, useMemo, useCallback, useState, useEffect, useId, useRef } from 'react';
+import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   CaretLeft,
   CaretRight,
   X,
-  Envelope,
-  Phone,
   Copy,
   Check,
   XCircle,
@@ -104,33 +102,6 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   );
 }
 
-const CALENDAR_ICON_PATH =
-  'M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z';
-const CLOCK_ICON_PATH =
-  'M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z';
-
-function GradientIcon({ path, size = 20 }: { path: string; size?: number }) {
-  const gradientId = useId();
-
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 256 256"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <defs>
-        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#8B5CF6" />
-          <stop offset="50%" stopColor="#3B82F6" />
-          <stop offset="100%" stopColor="#06B6D4" />
-        </linearGradient>
-      </defs>
-      <path d={path} fill={`url(#${gradientId})`} />
-    </svg>
-  );
-}
 
 // Appointment detail modal component (view only)
 function AppointmentDetailModal({
@@ -154,18 +125,48 @@ function AppointmentDetailModal({
 }) {
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
-  // Get gradient background - handle both gradient CSS strings and hex colors
+  // Get gradient background - matches AppointmentCard color logic (supports multiple services)
   const getGradientBackground = () => {
-    const barva = appointment.storitev?.barva || '#6366F1';
-    if (barva.includes('gradient')) return barva;
-    const hex = barva.replace('#', '');
-    const r = parseInt(hex.substring(0, 2), 16) || 100;
-    const g = parseInt(hex.substring(2, 4), 16) || 100;
-    const b = parseInt(hex.substring(4, 6), 16) || 240;
-    const lighterR = Math.min(255, r + 40);
-    const lighterG = Math.min(255, g + 40);
-    const lighterB = Math.min(255, b + 40);
-    return `linear-gradient(135deg, rgb(${lighterR}, ${lighterG}, ${lighterB}) 0%, ${barva} 100%)`;
+    const extractFirst = (barva: string): string => {
+      if (!barva) return '#6366F1';
+      if (barva.includes('gradient')) {
+        const m = barva.match(/#[0-9A-Fa-f]{6}/g);
+        if (m && m.length > 0) return m[0];
+      }
+      return barva;
+    };
+    const extractLast = (barva: string): string => {
+      if (!barva) return '#6366F1';
+      if (barva.includes('gradient')) {
+        const m = barva.match(/#[0-9A-Fa-f]{6}/g);
+        if (m && m.length > 0) return m[m.length - 1];
+      }
+      return barva;
+    };
+    const singleGradient = (barva: string): string => {
+      if (barva.includes('gradient')) return barva;
+      const hex = barva.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16) || 100;
+      const g = parseInt(hex.substring(2, 4), 16) || 100;
+      const b = parseInt(hex.substring(4, 6), 16) || 240;
+      const lr = Math.min(255, r + 40);
+      const lg = Math.min(255, g + 40);
+      const lb = Math.min(255, b + 40);
+      return `linear-gradient(135deg, rgb(${lr}, ${lg}, ${lb}) 0%, ${barva} 100%)`;
+    };
+
+    const primaryColor = appointment.storitev?.barva || '#6366F1';
+    const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
+    const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
+    const allColors: string[] = [primaryColor];
+    if (service2?.barva) allColors.push(service2.barva);
+    if (service3?.barva) allColors.push(service3.barva);
+
+    if (allColors.length === 1) return singleGradient(primaryColor);
+    if (allColors.length === 2) {
+      return `linear-gradient(135deg, ${extractFirst(allColors[0])} 0%, ${extractLast(allColors[1])} 100%)`;
+    }
+    return `linear-gradient(135deg, ${extractFirst(allColors[0])} 0%, ${extractLast(allColors[1])} 50%, ${extractLast(allColors[2])} 100%)`;
   };
 
   const formatModalDate = (dateStr: string) => {
@@ -214,7 +215,7 @@ function AppointmentDetailModal({
     return service?.barva || '#6366F1';
   };
 
-  const isTerminated = ['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan'].includes(String(appointment.status));
+  const isTerminated = ['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel'].includes(String(appointment.status));
 
   return (
     <motion.div
@@ -255,111 +256,103 @@ function AppointmentDetailModal({
         {/* Content - scrollable */}
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Status */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-500">Status</span>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(appointment.status || 'scheduled')}`}>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Status</label>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(appointment.status || 'scheduled')}`}>
               {getStatusLabel(appointment.status || 'scheduled')}
             </span>
           </div>
 
-          {/* Service with color circle */}
+          {/* Client */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Stranka</label>
+            <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+              <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
+                {appointment.stranka_ime?.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
+              </span>
+              <div className="min-w-0">
+                <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
+                {appointment.stranka_email && <p className="text-xs text-gray-500 truncate">{appointment.stranka_email}</p>}
+                {appointment.stranka_telefon && <p className="text-xs text-gray-500">{appointment.stranka_telefon}</p>}
+              </div>
+              {(appointment.stranka_email || appointment.stranka_telefon) && (
+                <div className="flex flex-col gap-1 ml-auto">
+                  {appointment.stranka_email && <CopyButton text={appointment.stranka_email} label="email" />}
+                  {appointment.stranka_telefon && <CopyButton text={appointment.stranka_telefon} label="telefon" />}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Service(s) */}
           {appointment.storitev && (() => {
             const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
             const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
-
             return (
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="h-3 w-3 rounded-full flex-shrink-0"
-                    style={{ background: getServiceColor(appointment.storitev_id) }}
-                  />
-                  <div>
-                    <p className="text-xs text-gray-500">Storitev</p>
-                    <p className="text-sm font-semibold text-[#1A1F36]">{appointment.storitev.naziv}</p>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Storitev</label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
+                    <p className="text-sm font-medium text-[#1A1F36]">{appointment.storitev.naziv}</p>
+                    {appointment.storitev.trajanje > 0 && (
+                      <span className="text-xs text-gray-400">({appointment.storitev.trajanje} min)</span>
+                    )}
                   </div>
+                  {service2 && (
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: service2.barva || '#6366F1' }} />
+                      <p className="text-sm font-medium text-[#1A1F36]">{service2.naziv}</p>
+                      {service2.trajanje > 0 && <span className="text-xs text-gray-400">({service2.trajanje} min)</span>}
+                    </div>
+                  )}
+                  {service3 && (
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: service3.barva || '#6366F1' }} />
+                      <p className="text-sm font-medium text-[#1A1F36]">{service3.naziv}</p>
+                      {service3.trajanje > 0 && <span className="text-xs text-gray-400">({service3.trajanje} min)</span>}
+                    </div>
+                  )}
                 </div>
-                {service2 && (
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-3 w-3 rounded-full flex-shrink-0"
-                      style={{ background: getServiceColor(appointment.storitev_id_2) }}
-                    />
-                    <div>
-                      <p className="text-xs text-gray-500">Storitev 2</p>
-                      <p className="text-sm font-semibold text-[#1A1F36]">{service2.naziv}</p>
-                    </div>
-                  </div>
-                )}
-                {service3 && (
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-3 w-3 rounded-full flex-shrink-0"
-                      style={{ background: getServiceColor(appointment.storitev_id_3) }}
-                    />
-                    <div>
-                      <p className="text-xs text-gray-500">Storitev 3</p>
-                      <p className="text-sm font-semibold text-[#1A1F36]">{service3.naziv}</p>
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })()}
 
-          {/* Employee - initials aligned with name */}
+          {/* Employee */}
           {appointment.zaposleni && (
-            <div className="flex items-center gap-3">
-              <span
-                className="text-lg font-bold flex-shrink-0"
-                style={{
-                  backgroundImage: appointment.zaposleni.barva || 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                {appointment.zaposleni.initials}
-              </span>
-              <div>
-                <p className="text-xs text-gray-500">Oseba</p>
-                <p className="text-sm font-semibold text-[#1A1F36]">
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Oseba</label>
+              <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+                <span
+                  className="text-lg font-bold flex-shrink-0"
+                  style={{
+                    background: appointment.zaposleni.barva || 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {appointment.zaposleni.initials}
+                </span>
+                <p className="font-medium text-[#1A1F36]">
                   {appointment.zaposleni.ime} {appointment.zaposleni.priimek}
                 </p>
               </div>
             </div>
           )}
 
-          {/* Client */}
-          <div className="flex items-center gap-3">
-            <span
-              className="text-lg font-bold flex-shrink-0 bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent"
-            >
-              {appointment.stranka_ime?.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
-            </span>
-            <div>
-              <p className="text-xs text-gray-500">Stranka</p>
-              <p className="text-sm font-semibold text-[#1A1F36]">{appointment.stranka_ime}</p>
-            </div>
+          {/* Date */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Datum</label>
+            <p className="text-sm font-medium text-[#1A1F36]">{formatModalDate(appointment.datum)}</p>
           </div>
 
-          {/* Date & Time - no gradient border, plain */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <GradientIcon path={CALENDAR_ICON_PATH} size={18} />
-              <div>
-                <p className="text-xs text-gray-500">Datum</p>
-                <p className="text-sm font-semibold text-[#1A1F36]">{formatModalDate(appointment.datum)}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <GradientIcon path={CLOCK_ICON_PATH} size={18} />
-              <div>
-                <p className="text-xs text-gray-500">Čas</p>
-                <p className="text-sm font-semibold text-[#1A1F36]">
-                  {formatTimeStr(appointment.cas_zacetek)} - {formatTimeStr(appointment.cas_konec)}
-                </p>
-              </div>
-            </div>
+          {/* Time */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Čas</label>
+            <p className="text-sm font-medium text-[#1A1F36]">
+              {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
+            </p>
           </div>
 
           {/* Duration */}
@@ -369,9 +362,9 @@ function AppointmentDetailModal({
               <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                 {(() => {
                   try {
-                    const [startHour, startMin] = appointment.cas_zacetek.split(':').map(Number);
-                    const [endHour, endMin] = appointment.cas_konec.split(':').map(Number);
-                    return Math.max(0, (endHour * 60 + endMin) - (startHour * 60 + startMin));
+                    const [sh, sm] = appointment.cas_zacetek.split(':').map(Number);
+                    const [eh, em] = appointment.cas_konec.split(':').map(Number);
+                    return Math.max(0, (eh * 60 + em) - (sh * 60 + sm));
                   } catch { return appointment.storitev?.trajanje || 0; }
                 })()} min
               </span>
@@ -381,59 +374,45 @@ function AppointmentDetailModal({
           {/* Price */}
           {(() => {
             const apt = appointment as unknown as Record<string, unknown>;
-            const finalCena = (apt['Final cena'] as number) ?? (apt['final_cena'] as number) ?? (apt['koncna_cena'] as number) ?? appointment.storitev?.cena;
-            if (finalCena && finalCena > 0) {
+            const cena = (apt['Final cena'] as number) ?? (apt['final_cena'] as number) ?? (apt['koncna_cena'] as number) ?? appointment.koncna_cena ?? appointment.cena ?? appointment.storitev?.cena;
+            if (cena && Number(cena) > 0) {
               return (
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
                   <span className="text-sm font-medium text-gray-700">Cena</span>
-                  <span className="text-xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">{finalCena.toFixed(2)} €</span>
+                  <span className="text-xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                    {Number(cena).toFixed(2)} €
+                  </span>
                 </div>
               );
             }
             return null;
           })()}
 
-          {/* Client contact info */}
-          {(appointment.stranka_email || appointment.stranka_telefon) && (
-            <div className="space-y-2">
-              {appointment.stranka_email && (
-                <div className="flex items-center gap-3 p-2.5 bg-blue-50 rounded-lg">
-                  <Envelope className="h-4 w-4 text-blue-500 flex-shrink-0" weight="fill" />
-                  <span className="text-sm text-[#1A1F36] truncate flex-1">{appointment.stranka_email}</span>
-                  <CopyButton text={appointment.stranka_email} label="email" />
-                </div>
-              )}
-              {appointment.stranka_telefon && (
-                <div className="flex items-center gap-3 p-2.5 bg-emerald-50 rounded-lg">
-                  <Phone className="h-4 w-4 text-emerald-500 flex-shrink-0" weight="fill" />
-                  <span className="text-sm text-[#1A1F36] truncate flex-1">{appointment.stranka_telefon}</span>
-                  <CopyButton text={appointment.stranka_telefon} label="telefon" />
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Notes */}
           {appointment.opombe && (
-            <div className="p-3 bg-gray-50 rounded-xl">
-              <p className="text-xs font-medium text-gray-500 mb-1">Opombe</p>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.opombe}</p>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Opombe</label>
+              <div className="p-4 bg-gray-50 rounded-xl">
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.opombe}</p>
+              </div>
             </div>
           )}
 
-          {/* Internal Notes from Termini table */}
+          {/* Internal Notes */}
           {(() => {
-            const apt = appointment as unknown as Record<string, unknown>;
-            const interneOpombe = (apt['Interne opombe'] as string) ?? (apt['interne_opombe'] as string) ?? (apt['internal_opombe'] as string) ?? '';
-            if (interneOpombe) {
-              return (
-                <div className="p-3 bg-yellow-50 rounded-xl border border-yellow-200">
-                  <p className="text-xs font-semibold text-yellow-700 mb-1">Interne opombe</p>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{interneOpombe}</p>
+            const notes = appointment.interne_opombe
+              || (appointment as unknown as Record<string, unknown>)['Interne opombe'] as string
+              || '';
+            if (!notes) return null;
+            return (
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Interne opombe</label>
+                <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
+                  <p className="text-xs font-semibold text-yellow-800 uppercase mb-2">Samo za interno uporabo</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
                 </div>
-              );
-            }
-            return null;
+              </div>
+            );
           })()}
         </div>
 
@@ -574,6 +553,10 @@ function Calendar({ companyId }: CalendarProps) {
 
   // Show all days filter (true = all 7 days, false = only weekdays Mon-Fri)
   const [showAllDays, setShowAllDays] = useState(true);
+
+  // Slide animation direction: 'forward' = slide left (next), 'backward' = slide right (prev)
+  const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
+  const [animKey, setAnimKey] = useState(0);
 
   // Detect mobile screen size and auto-switch views
   useEffect(() => {
@@ -778,7 +761,10 @@ function Calendar({ companyId }: CalendarProps) {
 
   // Filter appointments
   const filteredAppointments = useMemo(() => {
-    let filtered = appointments;
+    // Always exclude cancelled appointments from calendar view
+    let filtered = appointments.filter(
+      (a) => a.status !== 'cancelled' && a.status !== 'Odpovedan'
+    );
 
     if (selectedEmployeeId) {
       filtered = filtered.filter((a) => a.zaposleni?.id === selectedEmployeeId);
@@ -804,6 +790,8 @@ function Calendar({ companyId }: CalendarProps) {
 
   // Navigation handlers
   const handlePrev = useCallback(() => {
+    setSlideDirection('backward');
+    setAnimKey(k => k + 1);
     setCurrentDate((prev) => {
       switch (currentView) {
         case 'day':
@@ -821,6 +809,8 @@ function Calendar({ companyId }: CalendarProps) {
   }, [currentView]);
 
   const handleNext = useCallback(() => {
+    setSlideDirection('forward');
+    setAnimKey(k => k + 1);
     setCurrentDate((prev) => {
       switch (currentView) {
         case 'day':
@@ -874,7 +864,7 @@ function Calendar({ companyId }: CalendarProps) {
     swipeTouchStartY.current = null;
 
     // Only trigger if the swipe is clearly horizontal (deltaX dominant) and long enough
-    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
+    if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
 
     if (deltaX < 0) {
       handleNext(); // swipe left → forward
@@ -1142,25 +1132,21 @@ function Calendar({ companyId }: CalendarProps) {
       if (data.stranka_id) {
         const clientId = String(data.stranka_id);
         const clientRow = await (async () => {
-          const columnsToTry = ['id', 'ID stranke', 'ID_stranke', 'client_id'];
-          for (const column of columnsToTry) {
-            const { data: row, error } = await supabase
-              .from('Stranke')
-              .select('*')
-              .eq(column, clientId)
-              .maybeSingle();
+          const { detectColumnForTable } = await import('@/lib/tableIntrospection');
+          const idColumn = await detectColumnForTable(
+            'Stranke',
+            ['ID stranke', 'id', 'ID_stranke', 'client_id'],
+            'client-id'
+          );
+          if (!idColumn) return null;
 
-            if (error) {
-              const message = error.message?.toLowerCase() ?? '';
-              if (message.includes('column') && message.includes('does not exist')) {
-                continue;
-              }
-              throw error;
-            }
+          const { data: row } = await supabase
+            .from('Stranke')
+            .select('*')
+            .eq(idColumn, clientId)
+            .maybeSingle();
 
-            if (row) return row as Record<string, unknown>;
-          }
-          return null;
+          return row as Record<string, unknown> | null;
         })();
 
         if (clientRow) {
@@ -1383,7 +1369,7 @@ function Calendar({ companyId }: CalendarProps) {
       {/* Main calendar area - takes available space */}
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Header – Apple Calendar style */}
-        <header className="flex flex-col border-b border-gray-100 bg-white/90 backdrop-blur-md flex-shrink-0">
+        <header className="relative z-10 flex flex-col border-b border-gray-100 bg-white/90 backdrop-blur-md flex-shrink-0">
           {/* Top row: month/year navigation + view toggle + filter */}
           <div className="flex items-center justify-between px-3 py-2.5 md:px-5 md:py-3">
 
@@ -1456,8 +1442,16 @@ function Calendar({ companyId }: CalendarProps) {
           {loading ? (
             <div className="flex h-full items-center justify-center">
               <div className="flex flex-col items-center gap-3">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-purple-500 border-t-transparent" />
-                <p className="text-sm text-gray-500">Nalagam termine...</p>
+                <svg className="h-8 w-8 animate-spin" viewBox="0 0 50 50" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="calSpinner" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#8B5CF6" />
+                      <stop offset="50%" stopColor="#3B82F6" />
+                      <stop offset="100%" stopColor="#06B6D4" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="25" cy="25" r="20" fill="none" stroke="url(#calSpinner)" strokeWidth="3" strokeLinecap="round" strokeDasharray="80 50" />
+                </svg>
               </div>
             </div>
           ) : error ? (
@@ -1483,14 +1477,37 @@ function Calendar({ companyId }: CalendarProps) {
                 />
               )}
               {currentView === 'day' && (
-                <DayView
-                  currentDate={currentDate}
-                  appointments={filteredAppointments}
-                  absences={absences}
-                  services={services}
-                  onAppointmentClick={handleAppointmentClick}
-                  employees={employees}
-                />
+                <AnimatePresence mode="popLayout" initial={false} custom={slideDirection}>
+                  <motion.div
+                    key={animKey}
+                    custom={slideDirection}
+                    variants={{
+                      enter: (dir: 'forward' | 'backward') => ({
+                        x: dir === 'forward' ? '100%' : '-100%',
+                        opacity: 0.6,
+                      }),
+                      center: { x: 0, opacity: 1 },
+                      exit: (dir: 'forward' | 'backward') => ({
+                        x: dir === 'forward' ? '-30%' : '30%',
+                        opacity: 0.4,
+                      }),
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.8 }}
+                    className="h-full"
+                  >
+                    <DayView
+                      currentDate={currentDate}
+                      appointments={filteredAppointments}
+                      absences={absences}
+                      services={services}
+                      onAppointmentClick={handleAppointmentClick}
+                      employees={employees}
+                    />
+                  </motion.div>
+                </AnimatePresence>
               )}
               {currentView === 'month' && (
                 <MonthView
@@ -1500,17 +1517,41 @@ function Calendar({ companyId }: CalendarProps) {
                   services={services}
                   onAppointmentClick={handleAppointmentClick}
                   onDateClick={handleDateClick}
+                  isMobile={isMobile}
                 />
               )}
               {currentView === '2day' && (
-                <TwoDayView
-                  currentDate={currentDate}
-                  appointments={filteredAppointments}
-                  absences={absences}
-                  services={services}
-                  onAppointmentClick={handleAppointmentClick}
-                  onDateClick={handleDateClick}
-                />
+                <AnimatePresence mode="popLayout" initial={false} custom={slideDirection}>
+                  <motion.div
+                    key={animKey}
+                    custom={slideDirection}
+                    variants={{
+                      enter: (dir: 'forward' | 'backward') => ({
+                        x: dir === 'forward' ? '100%' : '-100%',
+                        opacity: 0.6,
+                      }),
+                      center: { x: 0, opacity: 1 },
+                      exit: (dir: 'forward' | 'backward') => ({
+                        x: dir === 'forward' ? '-30%' : '30%',
+                        opacity: 0.4,
+                      }),
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.8 }}
+                    className="h-full"
+                  >
+                    <TwoDayView
+                      currentDate={currentDate}
+                      appointments={filteredAppointments}
+                      absences={absences}
+                      services={services}
+                      onAppointmentClick={handleAppointmentClick}
+                      onDateClick={handleDateClick}
+                    />
+                  </motion.div>
+                </AnimatePresence>
               )}
             </>
           )}

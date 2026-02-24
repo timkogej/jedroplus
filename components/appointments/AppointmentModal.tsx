@@ -171,7 +171,8 @@ function AppointmentModal({
     if (appointment && (mode === 'edit' || mode === 'view')) {
       // Get internal notes from various possible column names
       const apt = appointment as unknown as Record<string, unknown>;
-      const internalNotes = (apt['Interne opombe'] as string)
+      const internalNotes = appointment.interne_opombe
+        || (apt['Interne opombe'] as string)
         || (apt['Internal opombe'] as string)
         || (apt['internal_opombe'] as string)
         || (apt['notes_internal'] as string)
@@ -806,7 +807,7 @@ function AppointmentModal({
             {/* Service - Second field (supports up to 3 services) */}
             <div className="space-y-3">
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Storitev {serviceCount > 1 ? '1' : ''}
+                Storitev
               </label>
               {isViewMode ? (
                 <div className="space-y-2">
@@ -1057,7 +1058,7 @@ function AppointmentModal({
                 </p>
               ) : (
                 <>
-                  <div className="relative">
+                  <div className="relative overflow-hidden">
                     <CalendarBlank
                       className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                       weight="regular"

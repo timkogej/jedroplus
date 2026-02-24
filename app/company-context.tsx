@@ -35,7 +35,7 @@ export type CompanySettings = {
 
 type CompanyContextValue = {
   companyId: string | null;
-  companyUuid: string | null; // Long UUID from companies.id (used for billing)
+  companyUuid: string | null;
   companySettings: CompanySettings | null;
   setCompany: (companyId: string, settings: CompanySettings, companyUuid?: string) => void;
   clearCompany: () => void;
@@ -43,10 +43,9 @@ type CompanyContextValue = {
   switchCompany: () => void;
   isCompanySelected: boolean;
   loading: boolean;
-  // Subscription & Billing
   subscription: SubscriptionInfo | null;
   smsQuota: SMSQuotaInfo | null;
-  refreshSubscription: (uuid?: string) => Promise<void>;
+  refreshSubscription: () => Promise<void>;
   isPlanActive: boolean;
   planCode: string;
 };
@@ -54,7 +53,6 @@ type CompanyContextValue = {
 const CompanyContext = createContext<CompanyContextValue | undefined>(undefined);
 
 const STORAGE_KEY_UUID = "jedroplus_company_uuid";
-
 export function CompanyProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [companyId, setCompanyIdState] = useState<string | null>(null);
@@ -63,30 +61,26 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     useState<CompanySettings | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Subscription state
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [smsQuota, setSmsQuota] = useState<SMSQuotaInfo | null>(null);
-
-  // Fetch subscription info using billing status endpoint
-  const refreshSubscription = useCallback(async (uuid?: string) => {
-    const targetUuid = uuid || companyUuid;
-    if (!targetUuid) return;
-
+  const [directPlanCode, setDirectPlanCode] = useState<string | null>(null);
+  const refreshSubscription = useCallback(async (companyUuid?: string) => {
     try {
-      const result = await getBillingStatus(true);
+      const result = await getBillingStatus(true, companyUuid);
+
+      console.log('[Subscription] getBillingStatus result:', { companyUuid, ok: result.ok, plan: result.plan, subscription: result.subscription });
 
       if (result.ok && result.subscription && result.plan) {
+        const normalizedCode = (result.plan.code || 'FREE').toUpperCase().replace(/[\s-]+/g, '_');
         setSubscription({
           status: result.subscription.status,
-          plan_code: result.plan.code,
+          plan_code: normalizedCode,
           plan_name: result.plan.name,
           sms_blocked: result.subscription.sms_blocked || false,
           current_period_end: result.subscription.current_period_end,
         });
 
-        // Set SMS quota from usage if available
-        if (result.usage) {
-          const smsUsage = result.usage as { sms_used?: number; sms_quota?: number };
+        if (result.usage) {          const smsUsage = result.usage as { sms_used?: number; sms_quota?: number };
           setSmsQuota({
             enabled_effective: (smsUsage.sms_quota || 0) > 0,
             quota_effective: smsUsage.sms_quota || 0,
@@ -97,7 +91,6 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
           setSmsQuota(null);
         }
       } else {
-        // Set defaults for free plan if status check fails
         setSubscription({
           status: 'active',
           plan_code: 'FREE',
@@ -113,7 +106,6 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Error fetching subscription status:', error);
-      // Set defaults on error
       setSubscription({
         status: 'active',
         plan_code: 'FREE',
@@ -121,11 +113,42 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
         sms_blocked: false,
       });
     }
-  }, [companyUuid]);
+  }, []);
+  const fetchAndSetDirectPlanCode = useCallback(async (uuid: string) => {
+    try {
+      const { data: subData, error: subError } = await supabaseReadOnly
+        .from('company_subscriptions')
+        .select('plan_id')
+        .eq('company_id', uuid)
+        .maybeSingle();
 
+      console.log('[Plan] company_subscriptions:', { uuid, subData, subError });
+
+      if (subData?.plan_id) {
+        const { data: planData, error: planError } = await supabaseReadOnly
+          .from('plans')
+          .select('code')
+          .eq('id', subData.plan_id)
+          .maybeSingle();
+
+        console.log('[Plan] plans:', { plan_id: subData.plan_id, planData, planError });
+
+        if (planData?.code) {
+          const normalized = String(planData.code).toUpperCase().replace(/[\s-]+/g, '_');
+          console.log('[Plan] directPlanCode set to:', normalized);
+          setDirectPlanCode(normalized);
+          return normalized;
+        }
+      }
+      console.warn('[Plan] No plan found for UUID:', uuid);
+      return null;
+    } catch (e) {
+      console.error('[Plan] fetchAndSetDirectPlanCode error:', e);
+      return null;
+    }
+  }, []);
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    const storedUuid = localStorage.getItem(STORAGE_KEY_UUID);
     if (!stored || stored.trim() === "") {
       setLoading(false);
       return;
@@ -147,49 +170,42 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
           setCompanySettings(null);
           setSubscription(null);
           setSmsQuota(null);
+          setDirectPlanCode(null);
           localStorage.removeItem(STORAGE_KEY);
           localStorage.removeItem(STORAGE_KEY_UUID);
           document.cookie = "company_id=; path=/; max-age=0";
           setLoading(false);
-          // Don't redirect automatically - let individual pages handle this
           return;
         }
-
         setCompanyIdState(stored);
         setCompanySettings(data as CompanySettings);
 
-        // Fetch the long UUID from companies table if not already stored
-        let uuid: string | null = storedUuid;
-        if (!uuid) {
-          const { data: companyData } = await supabaseReadOnly
-            .from("companies")
-            .select("id")
-            .eq("company_id", stored)
-            .maybeSingle();
+        const { data: companyData } = await supabaseReadOnly
+          .from("companies")
+          .select("id")
+          .eq("company_id", stored)
+          .maybeSingle();
 
-          if (companyData?.id) {
-            uuid = companyData.id;
-            localStorage.setItem(STORAGE_KEY_UUID, companyData.id);
-          }
+        const uuid: string | null = companyData?.id ?? null;
+        if (uuid) {
+          localStorage.setItem(STORAGE_KEY_UUID, uuid);
         }
         setCompanyUuidState(uuid);
 
-        // Fetch billing status using UUID
         if (uuid) {
-          await refreshSubscription(uuid);
+          await fetchAndSetDirectPlanCode(uuid);
         }
+        await refreshSubscription(uuid || undefined);
 
         setLoading(false);
       } catch (err) {
-        // Handle CORS or network errors gracefully
         console.warn("[CompanyProvider] Error loading company settings:", err);
         setLoading(false);
       }
     };
 
     loadSettings();
-  }, [router, refreshSubscription]);
-
+  }, [router, refreshSubscription, fetchAndSetDirectPlanCode]);
   const setCompany = (value: string, settings: CompanySettings, uuid?: string) => {
     const normalized = value.trim().toUpperCase();
     setCompanyIdState(normalized);
@@ -200,19 +216,17 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     if (uuid) {
       setCompanyUuidState(uuid);
       localStorage.setItem(STORAGE_KEY_UUID, uuid);
-      // Fetch billing status for new company using UUID
-      refreshSubscription(uuid);
-    } else {
-      refreshSubscription(normalized);
+      fetchAndSetDirectPlanCode(uuid);
     }
+    refreshSubscription(uuid || undefined);
   };
-
   const clearCompany = () => {
     setCompanyIdState(null);
     setCompanyUuidState(null);
     setCompanySettings(null);
     setSubscription(null);
     setSmsQuota(null);
+    setDirectPlanCode(null);
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(STORAGE_KEY_UUID);
     document.cookie = "company_id=; path=/; max-age=0";
@@ -222,7 +236,6 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     clearCompany();
     router.replace("/onboarding");
   };
-
   const reloadSettings = async () => {
     if (!companyId) return;
     setLoading(true);
@@ -241,15 +254,16 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 
     setCompanySettings(data as CompanySettings);
 
-    // Also refresh subscription
-    await refreshSubscription();
+    if (companyUuid) {
+      await fetchAndSetDirectPlanCode(companyUuid);
+    }
+    await refreshSubscription(companyUuid || undefined);
 
     setLoading(false);
   };
-
-  // Derived values
   const isPlanActive = subscription?.status === 'active';
-  const planCode = subscription?.plan_code || 'FREE';
+  const planCode = directPlanCode || subscription?.plan_code || 'FREE';
+  console.log('[Plan] planCode computed:', { directPlanCode, subscriptionPlanCode: subscription?.plan_code, planCode });
 
   const value = useMemo(
     () => ({
@@ -262,16 +276,15 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       switchCompany,
       isCompanySelected: Boolean(companyId),
       loading,
-      // Subscription
       subscription,
       smsQuota,
       refreshSubscription,
       isPlanActive,
       planCode,
     }),
-    [companyId, companyUuid, companySettings, loading, subscription, smsQuota, isPlanActive, planCode, refreshSubscription]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [companyId, companyUuid, companySettings, loading, subscription, smsQuota, isPlanActive, planCode, refreshSubscription, fetchAndSetDirectPlanCode]
   );
-
   return (
     <CompanyContext.Provider value={value}>{children}</CompanyContext.Provider>
   );

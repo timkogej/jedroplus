@@ -384,16 +384,8 @@ function ClientDetailsPanel({
                       {interneOpombeText && (
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
                           <div className="flex items-center gap-2 mb-2">
-                            <LockSimple className="h-4 w-4 text-yellow-600" weight="fill" />
-                            <p
-                              className="text-xs font-semibold uppercase tracking-wider"
-                              style={{
-                                background: 'linear-gradient(135deg, #EAB308, #F97316)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text',
-                              }}
-                            >
+                            <LockSimple className="h-4 w-4 text-black" weight="regular" />
+                            <p className="text-xs font-bold uppercase tracking-wider text-black">
                               Interne opombe
                             </p>
                           </div>
@@ -405,16 +397,8 @@ function ClientDetailsPanel({
                       {!interneOpombeText && (
                         <div className="rounded-xl border border-gray-200 bg-white p-4">
                           <div className="flex items-center gap-2 mb-2">
-                            <LockSimple className="h-4 w-4 text-yellow-600" weight="fill" />
-                            <p
-                              className="text-xs font-semibold uppercase tracking-wider"
-                              style={{
-                                background: 'linear-gradient(135deg, #EAB308, #F97316)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text',
-                              }}
-                            >
+                            <LockSimple className="h-4 w-4 text-black" weight="regular" />
+                            <p className="text-xs font-bold uppercase tracking-wider text-black">
                               Interne opombe
                             </p>
                           </div>

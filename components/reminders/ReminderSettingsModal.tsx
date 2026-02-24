@@ -48,6 +48,9 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
   const [showDiscountField, setShowDiscountField] = useState(false);
   const [popustPo, setPopustPo] = useState('');
 
+  // Nasveti glede na storitev: 'yes' | 'no' | 'auto'
+  const [nastvetiStoritev, setNastvetiStoritev] = useState<'yes' | 'no' | 'auto'>('auto');
+
   // Brand colors for email templates
   const [brandPrimaryColor, setBrandPrimaryColor] = useState('#7C75FC');
   const [brandSecondaryColor, setBrandSecondaryColor] = useState('#50C3D2');
@@ -92,6 +95,9 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
 
           setBrandPrimaryColor(String(data['from_email_primary_color'] ?? data['brand_primary_color'] ?? '#7C75FC'));
           setBrandSecondaryColor(String(data['from_email_secondary_color'] ?? data['brand_secondary_color'] ?? '#50C3D2'));
+
+          const nsVal = String(data['Nastveti_storitev'] ?? 'auto').toLowerCase().trim();
+          setNastvetiStoritev(nsVal === 'yes' ? 'yes' : nsVal === 'no' ? 'no' : 'auto');
         }
       } catch (error) {
         console.error('Error loading reminder settings:', error);
@@ -129,6 +135,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           'Popust PO': showDiscountField ? popustPo : '',
           'from_email_primary_color': brandPrimaryColor,
           'from_email_secondary_color': brandSecondaryColor,
+          'Nastveti_storitev': nastvetiStoritev,
           sending_language: sendingLanguage,
           jezik_kratko: sendingLanguage,
           communication_tone: tonKomunikacije,
@@ -294,6 +301,45 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           <Lock className="h-4 w-4" weight="bold" />
                           <span className="text-xs">Zaklenjeno</span>
                         </div>
+                      </div>
+                    </SettingRow>
+
+                    {/* Nasveti glede na storitev */}
+                    <SettingRow
+                      label="Nasveti glede na storitev"
+                      description="Ali naj opomniki vsebujejo nasvete prilagojene glede na storitev"
+                    >
+                      <div className="flex gap-2">
+                        {([
+                          { value: 'yes' as const, label: 'Da' },
+                          { value: 'no' as const, label: 'Ne' },
+                          { value: 'auto' as const, label: 'AI sam odloči', recommended: true },
+                        ] as { value: 'yes' | 'no' | 'auto'; label: string; recommended?: boolean }[]).map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setNastvetiStoritev(opt.value)}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                              nastvetiStoritev === opt.value
+                                ? 'border-transparent text-white'
+                                : 'border-gray-200 text-gray-700 bg-white hover:border-gray-300'
+                            }`}
+                            style={nastvetiStoritev === opt.value ? {
+                              background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                            } : undefined}
+                          >
+                            {opt.label}
+                            {opt.recommended && (
+                              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                nastvetiStoritev === opt.value
+                                  ? 'bg-white/20 text-white'
+                                  : 'bg-gray-100 text-gray-500'
+                              }`}>
+                                priporočeno
+                              </span>
+                            )}
+                          </button>
+                        ))}
                       </div>
                     </SettingRow>
 

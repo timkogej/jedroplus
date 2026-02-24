@@ -130,7 +130,7 @@ function ConfigSection({
       className="hover:border-violet-200 hover:shadow-sm"
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex-shrink-0 text-violet-500">{icon}</div>
+        <div className="mt-0.5 flex-shrink-0 text-gray-900">{icon}</div>
         <div className="flex-1 min-w-0">
           <div className="text-base font-semibold text-gray-900">{label}</div>
           <div
@@ -175,7 +175,7 @@ function ConfigSectionLarge({
       className="hover:border-violet-200 hover:shadow-sm"
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex-shrink-0 text-violet-500">{icon}</div>
+        <div className="mt-0.5 flex-shrink-0 text-gray-900">{icon}</div>
         <div className="flex-1 min-w-0">
           <div className="text-base font-semibold text-gray-900">{label}</div>
           <div

@@ -70,7 +70,7 @@ export default function CustomerListItem({
         <div
           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
             selected
-              ? 'bg-cyan-500 border-transparent'
+              ? 'bg-violet-500 border-transparent'
               : 'border-gray-300 bg-white'
           }`}
         >
@@ -136,8 +136,8 @@ export default function CustomerListItem({
       <div className="hidden md:block text-right flex-shrink-0">
         {customer.nextAppointment ? (
           <div className="flex items-center gap-1.5">
-            <CalendarBlank className="h-3.5 w-3.5 text-violet-400" weight="duotone" />
-            <span className="text-xs font-medium text-violet-600">
+            <CalendarBlank className="h-3.5 w-3.5 text-black" weight="regular" />
+            <span className="text-xs font-medium text-black">
               {formatDateTime(customer.nextAppointment)}
             </span>
           </div>

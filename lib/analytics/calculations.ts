@@ -160,7 +160,13 @@ function isCompleted(status: string): boolean {
 // Check if appointment is cancelled
 function isCancelled(status: string): boolean {
   const s = status.toLowerCase();
-  return s.includes('odpovedan') || s.includes('cancelled') || s.includes('cancel') || s.includes('no_show') || s.includes('ni_prisel');
+  return s.includes('odpovedan') || s.includes('cancelled') || s.includes('cancel');
+}
+
+// Check if appointment is no-show
+function isNoShow(status: string): boolean {
+  const s = status.toLowerCase();
+  return s === 'no_show' || s.includes('ni_prisel') || s.includes('ni prisel');
 }
 
 // Check if appointment is pending/scheduled
@@ -893,9 +899,11 @@ export async function fetchRetentionData(
   let completed = 0;
   let pending = 0;
   let cancelled = 0;
+  let noShow = 0;
 
   periodAppointments.forEach((apt) => {
     if (isCompleted(apt.status)) completed++;
+    else if (isNoShow(apt.status)) noShow++;
     else if (isCancelled(apt.status)) cancelled++;
     else pending++;
   });
@@ -909,9 +917,10 @@ export async function fetchRetentionData(
       retentionRate,
     },
     statuses: [
-      { name: 'Zaključeni', value: completed, color: '#10B981' },
-      { name: 'Čakajoči', value: pending, color: '#F59E0B' },
+      { name: 'Zaključeni', value: completed, color: '#6B7280' },
+      { name: 'Načrtovani', value: pending, color: '#10B981' },
       { name: 'Odpovedani', value: cancelled, color: '#EF4444' },
+      { name: 'Ni prišel', value: noShow, color: '#F59E0B' },
     ],
   };
 }

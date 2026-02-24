@@ -85,11 +85,13 @@ interface AppointmentCardProps {
   duration?: number; // Duration in minutes
   condensed?: boolean; // Force condensed view (hide end time, service name)
   services?: Storitev[]; // List of services to lookup additional service colors
+  timeOnly?: boolean; // Show only start time (no client name) — used in mobile month view
 }
 
-function AppointmentCard({ appointment, onClick, variant = 'grid', style, duration, condensed = false, services = [] }: AppointmentCardProps) {
-  // Check if appointment is completed - show gray gradient
-  const isCompleted = ['completed', 'Zaključen', 'zaključen'].includes(appointment.status || '');
+function AppointmentCard({ appointment, onClick, variant = 'grid', style, duration, condensed = false, services = [], timeOnly = false }: AppointmentCardProps) {
+  // Check if appointment is completed or no_show - show gray gradient
+  const isCompleted = ['completed', 'Zaključen', 'zaključen', 'no_show', 'Ni prišel'].includes(appointment.status || '');
+  const isNoShow = appointment.status === 'no_show' || appointment.status === 'Ni prišel';
 
   // Calculate duration if not provided
   const appointmentDuration = useMemo(() => {
@@ -190,15 +192,28 @@ function AppointmentCard({ appointment, onClick, variant = 'grid', style, durati
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         className="group mb-0.5 cursor-pointer truncate rounded px-1.5 py-0.5 text-[10px] font-medium
-                   transition-all hover:shadow-sm border border-white/20"
+                   transition-all hover:shadow-sm relative overflow-hidden"
         style={{
           background: serviceGradient,
           color: colors.text,
           ...style,
         }}
       >
-        <span className="mr-1 opacity-80">{formatTime(appointment.cas_zacetek)}</span>
-        <span className="font-semibold">{appointment.stranka_ime}</span>
+        {timeOnly ? (
+          <span className="font-semibold">{formatTime(appointment.cas_zacetek)}</span>
+        ) : (
+          <>
+            <span className="mr-1 opacity-80">{formatTime(appointment.cas_zacetek)}</span>
+            <span className="font-semibold">{appointment.stranka_ime}</span>
+          </>
+        )}
+        {/* No-show X overlay */}
+        {isNoShow && (
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="1.5" strokeOpacity="0.5" />
+            <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="1.5" strokeOpacity="0.5" />
+          </svg>
+        )}
       </div>
     );
   }
@@ -212,7 +227,7 @@ function AppointmentCard({ appointment, onClick, variant = 'grid', style, durati
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         className="group cursor-pointer rounded-xl p-3 transition-all duration-200
-                   hover:-translate-y-0.5 hover:shadow-lg border border-white/20 overflow-hidden"
+                   hover:-translate-y-0.5 hover:shadow-lg overflow-hidden relative"
         style={{
           background: serviceGradient,
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
@@ -268,6 +283,13 @@ function AppointmentCard({ appointment, onClick, variant = 'grid', style, durati
           )}
           <StatusIndicator />
         </div>
+        {/* No-show X overlay */}
+        {isNoShow && (
+          <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-xl" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
+            <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
+          </svg>
+        )}
       </div>
     );
   }
@@ -281,7 +303,7 @@ function AppointmentCard({ appointment, onClick, variant = 'grid', style, durati
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className="group absolute cursor-pointer overflow-hidden rounded-lg border border-white/20
+        className="group absolute cursor-pointer overflow-hidden rounded-lg
                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
         style={{
           background: serviceGradient,
@@ -325,6 +347,13 @@ function AppointmentCard({ appointment, onClick, variant = 'grid', style, durati
 
         {/* Hover Effect */}
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg" />
+        {/* No-show X overlay */}
+        {isNoShow && (
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
+            <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
+          </svg>
+        )}
       </div>
     );
   }
@@ -336,7 +365,7 @@ function AppointmentCard({ appointment, onClick, variant = 'grid', style, durati
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      className="group absolute cursor-pointer overflow-hidden rounded-lg border border-white/20
+      className="group absolute cursor-pointer overflow-hidden rounded-lg
                  transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
       style={{
         background: serviceGradient,
@@ -400,6 +429,13 @@ function AppointmentCard({ appointment, onClick, variant = 'grid', style, durati
 
       {/* Hover Effect */}
       <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg" />
+      {/* No-show X overlay */}
+      {isNoShow && (
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
+          <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
+        </svg>
+      )}
     </div>
   );
 }

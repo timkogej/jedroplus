@@ -22,6 +22,9 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Jedro+",
   description: "Jedro+ - Sistem za upravljanje terminov",
+  // Icons are resolved via App Router file conventions:
+  // app/icon.png → <link rel="icon"> (512×512)
+  // app/apple-icon.png → <link rel="apple-touch-icon"> (180×180)
 };
 
 export default function RootLayout({

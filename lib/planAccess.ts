@@ -32,9 +32,8 @@ export const ROUTE_MIN_PLAN: Record<string, PlanCode> = {
   '/rezervacije': 'JEDRO_PLUS',
   '/asistent': 'JEDRO_PLUS',
   '/reminders': 'JEDRO_PLUS',
-  '/lost-leads': 'JEDRO_PLUS',
-
   // JEDRO_PRO
+  '/lost-leads': 'JEDRO_PRO',
   '/chatbot-plus': 'JEDRO_PRO',
 
   // JEDRO_PREMIUM
@@ -44,8 +43,8 @@ export const ROUTE_MIN_PLAN: Record<string, PlanCode> = {
 /** Human-readable plan names (for the upgrade page). */
 export const PLAN_NAMES: Record<PlanCode, string> = {
   FREE: 'Free',
-  JEDRO_PLUS: 'Jedro+',
-  JEDRO_PRO: 'Jedro PRO',
+  JEDRO_PLUS: 'Jedro Plus',
+  JEDRO_PRO: 'Jedro Pro',
   JEDRO_PREMIUM: 'Jedro Premium',
 };
 
@@ -53,8 +52,15 @@ export const PLAN_NAMES: Record<PlanCode, string> = {
 // Helpers
 // ---------------------------------------------------------------------------
 
+function normalizeCode(code: string): string {
+  if (!code) return '';
+  return code.toUpperCase().replace(/[\s-]+/g, '_');
+}
+
 function planRank(code: string): number {
-  const idx = PLAN_HIERARCHY.indexOf(code as PlanCode);
+  if (!code) return 0;
+  const normalized = normalizeCode(code);
+  const idx = PLAN_HIERARCHY.indexOf(normalized as PlanCode);
   return idx === -1 ? 0 : idx; // unknown codes fall back to FREE level
 }
 

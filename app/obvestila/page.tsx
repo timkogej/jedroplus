@@ -1,21 +1,23 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   BellIcon,
+  BellSlashIcon,
   BellRingingIcon,
   CheckCircleIcon,
   ClockIcon,
-  InfoIcon,
-  WarningIcon,
-  XCircleIcon,
+  GearSixIcon,
+  ChatTeardropTextIcon,
+  WarningCircleIcon,
   ArchiveIcon,
   ArrowRightIcon,
   ChecksIcon,
-  CalendarBlankIcon,
+  CalendarPlusIcon,
+  XCircleIcon,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
@@ -46,29 +48,83 @@ interface Notification {
   created_at: string;
 }
 
+type FilterId = 'all' | 'unread' | 'reservations' | 'system';
+
 // ============================================================================
 // Helpers
 // ============================================================================
 
-function getNotificationIcon(type: string) {
+function getTypeConfig(type: string) {
   switch (type?.toLowerCase()) {
-    case 'info':
-      return InfoIcon;
-    case 'success':
-      return CheckCircleIcon;
-    case 'warning':
-      return WarningIcon;
-    case 'error':
-      return XCircleIcon;
-    case 'reminder':
-      return BellRingingIcon;
     case 'appointment':
-      return CalendarBlankIcon;
+      return {
+        Icon: CalendarPlusIcon,
+        gradient: 'linear-gradient(135deg, #8B5CF6, #7C3AED)',
+        bgLight: 'bg-purple-50',
+        iconColor: 'text-purple-600',
+      };
+    case 'reminder':
+      return {
+        Icon: BellRingingIcon,
+        gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)',
+        bgLight: 'bg-blue-50',
+        iconColor: 'text-blue-600',
+      };
+    case 'success':
+      return {
+        Icon: CheckCircleIcon,
+        gradient: 'linear-gradient(135deg, #06B6D4, #0891B2)',
+        bgLight: 'bg-cyan-50',
+        iconColor: 'text-cyan-600',
+      };
+    case 'warning':
+      return {
+        Icon: WarningCircleIcon,
+        gradient: 'linear-gradient(135deg, #F59E0B, #D97706)',
+        bgLight: 'bg-amber-50',
+        iconColor: 'text-amber-600',
+      };
+    case 'error':
+      return {
+        Icon: XCircleIcon,
+        gradient: 'linear-gradient(135deg, #EF4444, #DC2626)',
+        bgLight: 'bg-red-50',
+        iconColor: 'text-red-600',
+      };
+    case 'message':
+      return {
+        Icon: ChatTeardropTextIcon,
+        gradient: 'linear-gradient(135deg, #06B6D4, #0D9488)',
+        bgLight: 'bg-cyan-50',
+        iconColor: 'text-cyan-600',
+      };
+    case 'system':
+    case 'info':
+      return {
+        Icon: GearSixIcon,
+        gradient: 'linear-gradient(135deg, #6B7280, #4B5563)',
+        bgLight: 'bg-gray-50',
+        iconColor: 'text-gray-600',
+      };
     default:
-      return BellIcon;
+      return {
+        Icon: BellIcon,
+        gradient: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+        bgLight: 'bg-purple-50',
+        iconColor: 'text-purple-600',
+      };
   }
 }
 
+function isReservationType(type: string): boolean {
+  const t = type?.toLowerCase();
+  return t === 'appointment_booked' || t === 'appointment_cancelled' || t === 'appointment_updated';
+}
+
+function isSystemType(type: string): boolean {
+  const t = type?.toLowerCase();
+  return t === 'info' || t === 'system' || t === 'success' || t === 'warning' || t === 'error';
+}
 
 function formatRelativeTime(dateStr: string): string {
   const date = new Date(dateStr);
@@ -92,8 +148,7 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 function formatTime(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' });
+  return new Date(dateStr).toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' });
 }
 
 function formatDateLabel(dateStr: string): string {
@@ -121,7 +176,173 @@ function groupNotificationsByDate(notifications: Notification[]): Record<string,
 }
 
 // ============================================================================
-// Component
+// Sub-components
+// ============================================================================
+
+const DateSeparator = ({ date }: { date: string }) => (
+  <div className="flex items-center gap-4 my-6 first:mt-0">
+    <div className="h-px flex-1 bg-gray-200" />
+    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider whitespace-nowrap">
+      {date}
+    </span>
+    <div className="h-px flex-1 bg-gray-200" />
+  </div>
+);
+
+interface NotificationCardProps {
+  notification: Notification;
+  onMarkRead: (id: string) => void;
+  onArchive: (id: string) => void;
+}
+
+const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationCardProps) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const isUnread = !notification.is_read;
+  const config = getTypeConfig(notification.type);
+  const { Icon } = config;
+
+  const cardContent = (
+    <motion.div
+      whileHover={{ scale: 1.003 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      className={[
+        'relative p-4 rounded-2xl border transition-all duration-200 cursor-pointer',
+        isUnread
+          ? 'border-purple-100 hover:border-purple-200 hover:shadow-md'
+          : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm',
+      ].join(' ')}
+      style={isUnread ? {
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.04), rgba(6, 182, 212, 0.04))',
+      } : undefined}
+      onClick={() => {
+        if (isUnread) onMarkRead(notification.id);
+      }}
+    >
+      {/* Unread pulsing dot */}
+      {isUnread && (
+        <div className="absolute -left-1 top-1/2 -translate-y-1/2">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-60" />
+            <span
+              className="relative inline-flex rounded-full h-2.5 w-2.5"
+              style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' }}
+            />
+          </span>
+        </div>
+      )}
+
+      <div className="flex items-start gap-4">
+        {/* Icon */}
+        <div
+          className={[
+            'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',
+            isUnread ? '' : config.bgLight,
+          ].join(' ')}
+          style={isUnread ? { background: config.gradient } : undefined}
+        >
+          <Icon
+            size={22}
+            weight="fill"
+            className={isUnread ? 'text-white' : config.iconColor}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-4">
+            <h3 className={`font-semibold text-sm leading-snug ${isUnread ? 'text-gray-900' : 'text-gray-600'}`}>
+              {notification.title}
+            </h3>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {isUnread && (
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' }}
+                />
+              )}
+              <span className={`text-xs whitespace-nowrap ${isUnread ? 'text-gray-500' : 'text-gray-400'}`}>
+                {formatRelativeTime(notification.created_at)}
+              </span>
+            </div>
+          </div>
+
+          {/* Time sub-label */}
+          <div className="flex items-center gap-1 mt-0.5 mb-2">
+            <ClockIcon size={11} className="text-gray-400" />
+            <span className="text-[11px] text-gray-400">{formatTime(notification.created_at)}</span>
+          </div>
+
+          {/* Body */}
+          <p className={`text-sm leading-relaxed ${isUnread ? 'text-gray-700' : 'text-gray-400'}`}>
+            {notification.body}
+          </p>
+
+          {/* Action row */}
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <div>
+              {notification.action_url && (
+                <span className="flex items-center gap-1 text-xs font-medium text-purple-600">
+                  <ArrowRightIcon size={12} />
+                  Odpri
+                </span>
+              )}
+            </div>
+
+            <motion.div
+              initial={false}
+              animate={{ opacity: isHovered ? 1 : 0, y: isHovered ? 0 : 4 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center gap-1"
+            >
+              {isUnread && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMarkRead(notification.id);
+                  }}
+                  className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-purple-600 hover:bg-purple-50 transition-colors"
+                >
+                  <CheckCircleIcon size={13} weight="fill" />
+                  Prebrano
+                </button>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive(notification.id);
+                }}
+                className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+              >
+                <ArchiveIcon size={13} weight="fill" />
+                Arhiviraj
+              </button>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  if (notification.action_url) {
+    return (
+      <Link
+        href={notification.action_url}
+        className="block"
+        onClick={() => {
+          if (isUnread) onMarkRead(notification.id);
+        }}
+      >
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
+};
+
+// ============================================================================
+// Main page
 // ============================================================================
 
 export default function ObvestilaPage() {
@@ -131,6 +352,7 @@ export default function ObvestilaPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [markingAllRead, setMarkingAllRead] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterId>('all');
 
   // Redirect if no company
   useEffect(() => {
@@ -151,7 +373,7 @@ export default function ObvestilaPage() {
         .from('notifications')
         .select('*')
         .eq('company_id', companyUuid)
-        .eq('is_archived', false)
+        .neq('is_archived', true)
         .order('created_at', { ascending: false });
 
       if (fetchError) {
@@ -160,8 +382,7 @@ export default function ObvestilaPage() {
         return;
       }
 
-      const list = data || [];
-      setNotifications(list);
+      setNotifications(data || []);
     } catch (err) {
       console.error('Error fetching notifications:', err);
       setError('Napaka pri nalaganju obvestil');
@@ -171,12 +392,9 @@ export default function ObvestilaPage() {
   }, [companyUuid]);
 
   useEffect(() => {
-    if (companyUuid) {
-      fetchNotifications();
-    }
+    if (companyUuid) fetchNotifications();
   }, [companyUuid, fetchNotifications]);
 
-  // Mark single notification as read
   const handleMarkRead = useCallback(async (id: string) => {
     const { error } = await supabase
       .from('notifications')
@@ -190,7 +408,6 @@ export default function ObvestilaPage() {
     }
   }, []);
 
-  // Mark all as read
   const handleMarkAllRead = useCallback(async () => {
     if (!companyUuid) return;
     setMarkingAllRead(true);
@@ -202,12 +419,13 @@ export default function ObvestilaPage() {
       .eq('is_archived', false);
 
     if (!error) {
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true, read_at: n.read_at ?? new Date().toISOString() })));
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, is_read: true, read_at: n.read_at ?? new Date().toISOString() }))
+      );
     }
     setMarkingAllRead(false);
   }, [companyUuid]);
 
-  // Archive notification
   const handleArchive = useCallback(async (id: string) => {
     const { error } = await supabase
       .from('notifications')
@@ -215,16 +433,36 @@ export default function ObvestilaPage() {
       .eq('id', id);
 
     if (!error) {
-      setNotifications((prev) => {
-        const updated = prev.filter((n) => n.id !== id);
-        return updated;
-      });
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     }
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-  const grouped = groupNotificationsByDate(notifications);
+  const reservationCount = notifications.filter((n) => isReservationType(n.type)).length;
+  const systemCount = notifications.filter((n) => isSystemType(n.type)).length;
+
+  const filteredNotifications = useMemo(() => {
+    switch (activeFilter) {
+      case 'unread':
+        return notifications.filter((n) => !n.is_read);
+      case 'reservations':
+        return notifications.filter((n) => isReservationType(n.type));
+      case 'system':
+        return notifications.filter((n) => isSystemType(n.type));
+      default:
+        return notifications;
+    }
+  }, [notifications, activeFilter]);
+
+  const grouped = useMemo(() => groupNotificationsByDate(filteredNotifications), [filteredNotifications]);
   const dateGroups = Object.entries(grouped);
+
+  const filters: { id: FilterId; label: string; count: number }[] = [
+    { id: 'all', label: 'Vse', count: 0 },
+    { id: 'unread', label: 'Neprebrane', count: unreadCount },
+    { id: 'reservations', label: 'Rezervacije', count: reservationCount },
+    { id: 'system', label: 'Sistem', count: systemCount },
+  ];
 
   if (companyLoading || !companyUuid) {
     return (
@@ -236,28 +474,21 @@ export default function ObvestilaPage() {
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
 
           {/* ---------------------------------------------------------------- */}
           {/* Header                                                           */}
           {/* ---------------------------------------------------------------- */}
           <motion.div
-            initial={{ opacity: 0, y: -16 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-2xl font-bold text-gray-900">Obvestila</h1>
-                  {unreadCount > 0 && (
-                    <span className="flex h-6 min-w-[24px] items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 px-2 text-xs font-bold text-white shadow-sm">
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-gray-500">
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Obvestila</h1>
+                <p className="text-gray-500 text-sm">
                   Preglejte sporočila o rezervacijah, terminih in obvestilih vašega podjetja.
                 </p>
               </div>
@@ -268,12 +499,51 @@ export default function ObvestilaPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleMarkAllRead}
                   disabled={markingAllRead}
-                  className="flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 hover:bg-violet-100 transition-colors disabled:opacity-60"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition-all disabled:opacity-60 whitespace-nowrap self-start"
                 >
-                  <ChecksIcon className="h-4 w-4" weight="bold" />
+                  <ChecksIcon size={18} weight="bold" />
                   Označi vse kot prebrano
                 </motion.button>
               )}
+            </div>
+          </motion.div>
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Filter tabs                                                      */}
+          {/* ---------------------------------------------------------------- */}
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="mb-6"
+          >
+            <div className="flex items-center gap-1.5 p-1 bg-gray-100 rounded-xl w-fit overflow-x-auto">
+              {filters.map((filter) => (
+                <button
+                  key={filter.id}
+                  onClick={() => setActiveFilter(filter.id)}
+                  className={[
+                    'flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap',
+                    activeFilter === filter.id
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900',
+                  ].join(' ')}
+                >
+                  {filter.label}
+                  {filter.count > 0 && (
+                    <span
+                      className="px-1.5 py-0.5 text-xs rounded-full font-medium"
+                      style={
+                        activeFilter === filter.id
+                          ? { background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)', color: 'white' }
+                          : { background: '#E5E7EB', color: '#6B7280' }
+                      }
+                    >
+                      {filter.count}
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
           </motion.div>
 
@@ -310,183 +580,57 @@ export default function ObvestilaPage() {
           {/* ---------------------------------------------------------------- */}
           {/* Empty state                                                      */}
           {/* ---------------------------------------------------------------- */}
-          {!loading && !error && notifications.length === 0 && (
+          {!loading && !error && filteredNotifications.length === 0 && (
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center rounded-2xl border border-gray-200 bg-white py-20 text-center shadow-sm"
+              className="flex flex-col items-center justify-center py-20 text-center"
             >
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-slate-100">
-                <BellIcon className="h-8 w-8 text-gray-300" weight="fill" />
+              <div
+                className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+                style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1))' }}
+              >
+                <BellSlashIcon size={36} className="text-gray-400" weight="fill" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-700">Ni obvestil</h3>
-              <p className="mt-1 max-w-xs text-sm text-gray-400">
-                Ko boste prejeli obvestila, se bodo prikazala tukaj.
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Ni novih obvestil</h3>
+              <p className="text-gray-500 max-w-sm">
+                Ko boste prejeli nova obvestila o rezervacijah ali pomembnih dogodkih, se bodo prikazala tukaj.
               </p>
             </motion.div>
           )}
 
           {/* ---------------------------------------------------------------- */}
-          {/* Notification list (grouped by date)                             */}
+          {/* Notification list                                                */}
           {/* ---------------------------------------------------------------- */}
-          {!loading && !error && notifications.length > 0 && (
-            <div className="space-y-6">
-              <AnimatePresence mode="popLayout">
+          {!loading && !error && filteredNotifications.length > 0 && (
+            <AnimatePresence mode="popLayout">
+              <div>
                 {dateGroups.map(([dateLabel, items]) => (
                   <div key={dateLabel}>
-                    {/* Date separator */}
-                    <div className="mb-3 flex items-center gap-3">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                        {dateLabel}
-                      </span>
-                      <div className="flex-1 h-px bg-gray-200" />
-                    </div>
-
-                    {/* Cards */}
-                    <div className="space-y-2">
-                      {items.map((notification, index) => {
-                        const Icon = getNotificationIcon(notification.type);
-                        const isUnread = !notification.is_read;
-
-                        const CardContent = (
-                          <motion.div
-                            key={notification.id}
-                            layout
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, x: -40, height: 0 }}
-                            transition={{ delay: index * 0.03 }}
-                            className={[
-                              'group relative flex items-start gap-3 rounded-2xl border px-4 py-3 transition-all duration-200',
-                              isUnread
-                                ? 'border-violet-100 bg-white shadow-sm hover:shadow-md hover:border-violet-200'
-                                : 'border-gray-100 bg-white/60 hover:bg-white hover:shadow-sm',
-                            ].join(' ')}
-                            onClick={() => {
-                              if (isUnread) handleMarkRead(notification.id);
-                            }}
-                          >
-                            {/* Unread bar — gradient violet→blue→cyan */}
-                            {isUnread && (
-                              <div
-                                className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
-                                style={{ background: 'linear-gradient(to bottom, #7C3AED, #3B82F6, #06B6D4)' }}
-                              />
-                            )}
-
-                            {/* Icon — no background circle, just the icon */}
-                            <div className="flex-shrink-0 mt-0.5">
-                              <Icon
-                                className={isUnread ? 'h-5 w-5' : 'h-5 w-5 text-gray-400'}
-                                weight="fill"
-                                style={isUnread ? { color: '#7C3AED' } : undefined}
-                              />
-                            </div>
-
-                            {/* Content */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2 mb-0.5">
-                                <h3
-                                  className={[
-                                    'text-sm leading-snug truncate',
-                                    isUnread ? 'font-bold text-gray-900' : 'font-semibold text-gray-600',
-                                  ].join(' ')}
-                                >
-                                  {notification.title}
-                                </h3>
-                                <div className="flex items-center gap-1.5 flex-shrink-0">
-                                  {isUnread && (
-                                    <span className="h-2 w-2 rounded-full bg-violet-500 ring-2 ring-white" />
-                                  )}
-                                  <span className="text-xs text-gray-400 whitespace-nowrap">
-                                    {formatRelativeTime(notification.created_at)}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Time */}
-                              <div className="flex items-center gap-1 mb-2">
-                                <span className="flex items-center gap-1 text-[11px] text-gray-400">
-                                  <ClockIcon className="h-3 w-3" />
-                                  {formatTime(notification.created_at)}
-                                </span>
-                              </div>
-
-                              {/* Body */}
-                              <p
-                                className={[
-                                  'text-sm leading-relaxed',
-                                  isUnread ? 'text-gray-700' : 'text-gray-500',
-                                ].join(' ')}
-                              >
-                                {notification.body}
-                              </p>
-
-                              {/* Action row */}
-                              <div className="mt-3 flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                  {notification.action_url && (
-                                    <span className="flex items-center gap-1 text-xs font-medium text-violet-600">
-                                      <ArrowRightIcon className="h-3 w-3" />
-                                      Odpri
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  {isUnread && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleMarkRead(notification.id);
-                                      }}
-                                      className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-                                      title="Označi kot prebrano"
-                                    >
-                                      <CheckCircleIcon className="h-3.5 w-3.5" />
-                                      Prebrano
-                                    </button>
-                                  )}
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleArchive(notification.id);
-                                    }}
-                                    className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-                                    title="Arhiviraj"
-                                  >
-                                    <ArchiveIcon className="h-3.5 w-3.5" />
-                                    Arhiviraj
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        );
-
-                        // Wrap in Link if action_url exists
-                        if (notification.action_url) {
-                          return (
-                            <Link
-                              key={notification.id}
-                              href={notification.action_url}
-                              className="block"
-                              onClick={() => {
-                                if (isUnread) handleMarkRead(notification.id);
-                              }}
-                            >
-                              {CardContent}
-                            </Link>
-                          );
-                        }
-
-                        return <div key={notification.id}>{CardContent}</div>;
-                      })}
+                    <DateSeparator date={dateLabel} />
+                    <div className="space-y-3 pl-3">
+                      {items.map((notification, index) => (
+                        <motion.div
+                          key={notification.id}
+                          initial={{ opacity: 0, x: -16 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 16 }}
+                          transition={{ delay: index * 0.04, type: 'spring', stiffness: 300, damping: 28 }}
+                        >
+                          <NotificationCard
+                            notification={notification}
+                            onMarkRead={handleMarkRead}
+                            onArchive={handleArchive}
+                          />
+                        </motion.div>
+                      ))}
                     </div>
                   </div>
                 ))}
-              </AnimatePresence>
-            </div>
+              </div>
+            </AnimatePresence>
           )}
+
         </div>
       </main>
     </ProtectedLayout>

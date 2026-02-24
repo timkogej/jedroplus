@@ -492,7 +492,7 @@ function BillingPageContent() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden"
+            className={`rounded-2xl shadow-lg overflow-hidden ${isPremium ? '' : 'bg-white'}`}
             style={
               isGradientPlan
                 ? {
@@ -502,12 +502,15 @@ function BillingPageContent() {
                     backgroundClip: 'padding-box, border-box',
                   }
                 : isPremium
-                  ? { border: '2px solid #D4AF37' }
+                  ? {
+                      background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.05) 50%, rgba(6,182,212,0.08) 100%)',
+                      border: '1px solid rgba(139,92,246,0.15)',
+                    }
                   : { border: '1px solid #E5E7EB' }
             }
           >
             {/* Top section */}
-            <div className="p-6 bg-white border-b border-gray-200">
+            <div className={`p-6 border-b ${isPremium ? 'bg-transparent border-violet-100' : 'bg-white border-gray-200'}`}>
               <p className="text-sm text-black font-medium mb-1">Trenutni paket</p>
               {loading ? (
                 <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
@@ -519,7 +522,7 @@ function BillingPageContent() {
             </div>
 
             {/* Bottom section */}
-            <div className="p-6 bg-gray-50">
+            <div className={`p-6 ${isPremium ? 'bg-transparent' : 'bg-gray-50'}`}>
               <div className="grid sm:grid-cols-3 gap-6">
                 {/* Subscription Details */}
                 <div className="space-y-3">

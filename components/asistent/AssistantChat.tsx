@@ -163,17 +163,26 @@ function GradientDefs() {
 
 function AssistantAvatar() {
   return (
-    <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center">
+    <div
+      className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center"
+      style={{
+        border: '2px solid transparent',
+        backgroundImage:
+          'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+        backgroundOrigin: 'border-box',
+        backgroundClip: 'padding-box, border-box',
+      }}
+    >
       <span
-        className="text-base font-bold leading-none"
+        className="text-xs font-semibold leading-none"
         style={{
-          background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+          background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}
       >
-        A
+        A+
       </span>
     </div>
   );
@@ -434,7 +443,7 @@ function TypingIndicator() {
               key={i}
               className="w-2 h-2 rounded-full"
               style={{
-                background: i === 0 ? '#8B5CF6' : i === 1 ? '#3B82F6' : '#06B6D4',
+                background: '#8B5CF6',
               }}
               animate={{ y: [0, -6, 0] }}
               transition={{

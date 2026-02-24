@@ -59,7 +59,7 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
     return (
       <div className="mb-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="mb-6 h-6 w-40 animate-pulse rounded bg-gray-200" />
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="h-16 animate-pulse rounded-lg bg-gray-100" />
@@ -83,7 +83,7 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
     >
       <h3 className="mb-6 text-lg font-semibold text-gray-900">Top Performerji</h3>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-2 gap-4">
         {/* Top Services - with service colors */}
         <div>
           <h4 className="mb-4 text-sm font-semibold text-gray-700">Storitve</h4>
@@ -109,8 +109,8 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
                     style={{ backgroundColor: service.color }}
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-gray-900 truncate">{service.name}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm font-semibold text-gray-900 truncate">{service.name}</div>
+                    <div className="text-xs text-gray-600">
                       {service.count} terminov
                     </div>
                   </div>
@@ -144,14 +144,14 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
                     {index + 1}
                   </div>
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0"
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
                     style={{ backgroundColor: employee.color }}
                   >
                     {employee.initials || employee.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-gray-900 truncate">{employee.name}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm font-semibold text-gray-900 truncate">{employee.name}</div>
+                    <div className="text-xs text-gray-600">
                       {employee.count} terminov
                     </div>
                   </div>

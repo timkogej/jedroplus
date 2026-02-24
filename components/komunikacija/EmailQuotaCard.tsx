@@ -24,7 +24,7 @@ export default function EmailQuotaCard({ used, total, resetDate }: EmailQuotaCar
         <div className="flex items-center gap-4">
           <Envelope className="h-6 w-6 text-[#1A1F36]" weight="regular" />
           <div>
-            <p className="text-sm font-medium text-gray-500">Email kvota</p>
+            <p className="text-sm font-bold text-gray-500">Email kvota</p>
             <p className="text-xl font-medium text-[#1A1F36]">
               {used.toLocaleString()} / {total.toLocaleString()}
             </p>

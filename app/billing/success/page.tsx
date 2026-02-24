@@ -14,25 +14,30 @@ const POLL_INTERVAL_MS = 3000; // Poll every 3 seconds
 // Plan features mapping
 const PLAN_FEATURES: Record<string, string[]> = {
   JEDRO_PLUS: [
-    'Baza strank, terminov in storitev',
+    'Baza strank in terminov',
+    'Baza storitev in osebja',
     'Personalizirani opomniki pred in po terminu',
-    'Email pošiljanje vključeno',
-    'Celotna analitika in booking link',
-    'Email kvota povečana',
+    'Email pošiljanje',
+    'Celotna analitika',
+    'Spletno Naročanje',
+    'Različni dizajni spletnega naročanja',
+    'Asistent+',
   ],
   JEDRO_PRO: [
     'Vse iz Jedro Plus',
-    'Asistent+ z AI funkcijami',
-    'Lost Leads sistem za več zasedenosti',
-    'SMS in Email pošiljanje vključeno',
-    'Email kvota povečana',
+    'Chatbot+',
+    'Lost Leads sistem',
+    'SMS pošiljanje',
+    'Email pošiljanje',
+    'Dodatni dizajni spletnega naročanja',
   ],
   JEDRO_PREMIUM: [
     'Vse iz Jedro Pro',
-    'Receptionist+ in Chatbot+',
-    'SMS pošiljanje z višjo kvoto',
-    'Email pošiljanje z višjo kvoto',
-    'Email kvota povečana',
+    'Receptionist+',
+    'SMS pošiljanje (višja kvota)',
+    'Email pošiljanje (višja kvota)',
+    'Premium dizajn spletnega naročanja',
+    'Premium chatbot dizajn',
   ],
 };
 
@@ -136,7 +141,7 @@ function GradientCheck({ size = 16 }: { size?: number }) {
 function BillingSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { companyUuid, refreshSubscription } = useCompany();
+  const { refreshSubscription } = useCompany();
   const { user } = useAuth();
   const [status, setStatus] = useState<'verifying' | 'success' | 'timeout' | 'error'>('verifying');
   const [pollCount, setPollCount] = useState(0);
@@ -184,9 +189,7 @@ function BillingSuccessContent() {
           setShowConfetti(true);
 
           // Refresh the app-wide subscription state
-          if (companyUuid) {
-            await refreshSubscription(companyUuid);
-          }
+          await refreshSubscription();
           return;
         }
       }
@@ -198,7 +201,7 @@ function BillingSuccessContent() {
       // Continue polling on error
       pollTimeoutRef.current = setTimeout(pollSubscription, POLL_INTERVAL_MS);
     }
-  }, [companyUuid, refreshSubscription]);
+  }, [refreshSubscription]);
 
   // Initial verification effect
   useEffect(() => {

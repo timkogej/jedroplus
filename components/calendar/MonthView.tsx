@@ -20,9 +20,10 @@ interface MonthViewProps {
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
   onDateClick: (date: Date) => void;
+  isMobile?: boolean;
 }
 
-function MonthView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick }: MonthViewProps) {
+function MonthView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick, isMobile = false }: MonthViewProps) {
   const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const monthDays = useMemo(() => getMonthGrid(currentDate), [currentDate]);
   const todayRef = useRef<HTMLDivElement>(null);
@@ -175,6 +176,7 @@ function MonthView({ currentDate, appointments, absences = [], services = [], on
                     onClick={onAppointmentClick}
                     variant="mini"
                     services={services}
+                    timeOnly={isMobile}
                   />
                 ))}
                 {dayAppointments.length > 3 && (

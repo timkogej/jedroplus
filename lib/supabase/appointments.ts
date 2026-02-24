@@ -285,6 +285,9 @@ export async function fetchAppointmentsForMonth(
       const notes = String(
         pickFirst(row, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
       );
+      const interneOpombe = String(
+        pickFirst(row, ['Interne opombe', 'interne_opombe', 'internal_notes']) ?? ''
+      );
 
       // Get service - first try by ID, then try by name lookup, finally use direct name from booking
       let serviceData = serviceMap.get(serviceId) || null;
@@ -330,6 +333,7 @@ export async function fetchAppointmentsForMonth(
         zaposleni_id: staffId || undefined,
         status: normalizedStatus,
         opombe: notes || undefined,
+        interne_opombe: interneOpombe || undefined,
         storitev: serviceData,
         zaposleni: staffMap.get(staffId) || null,
       });
@@ -505,6 +509,9 @@ export async function fetchAppointmentById(
     const notes = String(
       pickFirst(booking, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
     );
+    const interneOpombe = String(
+      pickFirst(booking, ['Interne opombe', 'interne_opombe', 'internal_notes']) ?? ''
+    );
 
     // Get service - first try by ID, then try by name lookup, finally use direct name from booking
     let serviceData = serviceMap.get(serviceId) || null;
@@ -550,6 +557,7 @@ export async function fetchAppointmentById(
       zaposleni_id: staffId || undefined,
       status: normalizedStatus,
       opombe: notes || undefined,
+      interne_opombe: interneOpombe || undefined,
       storitev: serviceData,
       zaposleni: staffMap.get(staffId) || null,
     };
@@ -658,6 +666,9 @@ export async function fetchAllAppointments(
       const notes = String(
         pickFirst(row, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
       );
+      const interneOpombe = String(
+        pickFirst(row, ['Interne opombe', 'interne_opombe', 'internal_notes']) ?? ''
+      );
 
       // Get service - first try by ID, then try by name lookup, finally use direct name from booking
       let serviceData = serviceMap.get(serviceId) || null;
@@ -703,6 +714,7 @@ export async function fetchAllAppointments(
         zaposleni_id: staffId || undefined,
         status: normalizedStatus,
         opombe: notes || undefined,
+        interne_opombe: interneOpombe || undefined,
         storitev: serviceData,
         zaposleni: staffMap.get(staffId) || null,
       });

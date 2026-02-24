@@ -437,8 +437,8 @@ function AppointmentTable({
                   {/* Actions - Always visible */}
                   <td className="px-4 py-3.5">
                     <div className="flex items-center justify-end gap-0.5 flex-nowrap">
-                      {/* Complete - only show if not already completed */}
-                      {onComplete && !['completed', 'zaključen', 'Zaključen'].includes(String(appointment.status)) && (
+                      {/* Complete - only show if not already completed/cancelled/no_show */}
+                      {onComplete && !['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel'].includes(String(appointment.status)) && (
                         <motion.button
                           type="button"
                           onClick={() => onComplete(appointment)}

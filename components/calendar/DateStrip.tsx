@@ -11,6 +11,9 @@ interface DateStripProps {
   onDateSelect: (date: Date) => void;
 }
 
+// Abbreviations: just first letter (uppercase) for mobile iOS look
+const DAY_LETTER = ['N', 'P', 'T', 'S', 'Č', 'P', 'S'];
+
 function DateStrip({ currentDate, currentView, onDateSelect }: DateStripProps) {
   // Show 7 days of the week containing currentDate (Mon–Sun)
   const weekStart = startOfWeek(currentDate);
@@ -25,25 +28,7 @@ function DateStrip({ currentDate, currentView, onDateSelect }: DateStripProps) {
         const isPrimary = isSameDay(day, currentDate);
         const isSecondary = secondaryDate !== null && isSameDay(day, secondaryDate);
         const today = isToday(day);
-        const dayOfWeek = day.getDay(); // 0 = Sun, 1 = Mon …
-
-        // Day abbreviation color
-        const abbrevColor = isPrimary
-          ? 'text-blue-500'
-          : isSecondary
-            ? 'text-gray-500'
-            : today
-              ? 'text-blue-400'
-              : 'text-gray-400';
-
-        // Number text color
-        const numberColor = isPrimary
-          ? 'text-white'
-          : isSecondary
-            ? 'text-[#1A1F36]'
-            : today
-              ? 'text-blue-500'
-              : 'text-[#1A1F36] group-hover:text-blue-500';
+        const dayOfWeek = day.getDay();
 
         return (
           <button
@@ -52,38 +37,68 @@ function DateStrip({ currentDate, currentView, onDateSelect }: DateStripProps) {
             onClick={() => onDateSelect(day)}
             className="group flex flex-1 flex-col items-center gap-[3px] py-2 transition-colors"
           >
-            {/* Day abbreviation */}
-            <span className={`text-[9px] font-semibold uppercase tracking-wider transition-colors ${abbrevColor}`}>
-              {DAYS_ABBR[dayOfWeek]}
+            {/* Day letter */}
+            <span
+              className="text-[9px] font-semibold uppercase tracking-wider transition-colors"
+              style={
+                isPrimary || (today && !isSecondary)
+                  ? {
+                      background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }
+                  : { color: '#9CA3AF' }
+              }
+            >
+              {DAY_LETTER[dayOfWeek]}
             </span>
 
             {/* Day number circle */}
-            <div className="relative flex h-[30px] w-[30px] items-center justify-center">
-              {/* Primary selection – solid blue circle */}
+            <div className="relative flex h-[30px] w-full items-center justify-center">
               {isPrimary && (
                 <motion.div
                   layoutId="dateStripPrimary"
-                  className="absolute inset-0 rounded-full bg-blue-500 shadow-md shadow-blue-200"
+                  className="absolute inset-0 mx-auto w-[30px] rounded-full"
+                  style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
                 />
               )}
-              {/* Secondary selection (2-day view) – soft gray circle, iOS style */}
               {isSecondary && !isPrimary && (
                 <motion.div
                   layoutId="dateStripSecondary"
-                  className="absolute inset-0 rounded-full bg-gray-200"
+                  className="absolute inset-0 mx-auto w-[30px] rounded-full bg-gray-200"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
                 />
               )}
-              <span className={`relative z-10 text-[14px] font-semibold leading-none transition-colors ${numberColor}`}>
+              <span
+                className="relative z-10 text-[14px] font-semibold leading-none"
+                style={
+                  isPrimary
+                    ? { color: '#fff' }
+                    : isSecondary
+                      ? { color: '#6B7280' }
+                      : today
+                        ? {
+                            background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }
+                        : { color: '#1A1F36' }
+                }
+              >
                 {day.getDate()}
               </span>
             </div>
 
-            {/* Today dot – shown only when not primary-selected */}
+            {/* Today dot – shown only when not selected */}
             <div className="h-[5px] flex items-center justify-center">
-              {today && !isPrimary && (
-                <span className="h-[4px] w-[4px] rounded-full bg-blue-500" />
+              {today && !isPrimary && !isSecondary && (
+                <span
+                  className="h-[4px] w-[4px] rounded-full"
+                  style={{ background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' }}
+                />
               )}
             </div>
           </button>

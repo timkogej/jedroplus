@@ -1,5 +1,3 @@
-import { supabaseReadOnly } from "@/src/lib/supabaseReadOnly";
-import { supabase } from "@/lib/supabaseClient";
 import { format, startOfMonth, endOfMonth, addDays, subDays } from "date-fns";
 import { fetchTableRows } from "@/lib/companyScope";
 import { TABLES } from "@/lib/data";
@@ -10,7 +8,7 @@ export interface DashboardStats {
   todayAppointments: number;
   activeAppointments: number;
   newClientsThisMonth: number;
-  revenueThisMonth: number | null; // null if not owner
+  revenueThisMonth: number;
   isOwner: boolean;
 }
 
@@ -18,16 +16,27 @@ export interface AppointmentItem {
   id: string;
   time: string;
   endTime?: string;
+  datum?: string;
   clientName: string;
   clientEmail?: string;
   clientPhone?: string;
   clientColor?: string;
+  clientId?: string;
   serviceName: string;
   serviceColor: string;
+  serviceColor2?: string;
+  serviceColor3?: string;
+  serviceId?: string;
+  serviceId2?: string;
+  serviceId3?: string;
   employeeName: string;
   employeeInitials: string;
   employeeColor?: string;
+  employeeId?: string;
   status: string;
+  opombe?: string;
+  interneOpombe?: string;
+  cena?: number;
 }
 
 export interface TopService {
@@ -93,25 +102,6 @@ function getTimeAgo(date: Date): string {
 // Helper to get employee initials
 function getInitials(firstName: string, lastName: string): string {
   return `${(firstName || '').charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase();
-}
-
-// Check if current user is owner of the company
-async function checkIsOwner(companyId: string): Promise<boolean> {
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
-
-    const { data: member } = await supabaseReadOnly
-      .from("company_members")
-      .select("role")
-      .eq("user_id", user.id)
-      .eq("company_id", companyId)
-      .single();
-
-    return member?.role === "owner";
-  } catch {
-    return false;
-  }
 }
 
 // Fetch today's appointments - all scheduled appointments for today, ordered by time
@@ -200,6 +190,8 @@ async function fetchTodayAppointments(companyId: string): Promise<AppointmentIte
       // Get IDs
       const id = schema.idField ? String(row[schema.idField] ?? '') : '';
       const serviceId = String(pickFirst(row, ['ID storitev', 'ID storitve', 'storitev_id', 'service_id']) ?? '');
+      const serviceId2 = String(pickFirst(row, ['ID storitve 2', 'service_id_2', 'storitev_id_2']) ?? '');
+      const serviceId3 = String(pickFirst(row, ['ID storitve 3', 'service_id_3', 'storitev_id_3']) ?? '');
       const staffId = String(pickFirst(row, ['ID osebja', 'ID osebe', 'ID Osebe', 'oseba_id', 'person_id']) ?? '');
       const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
 
@@ -214,23 +206,42 @@ async function fetchTodayAppointments(companyId: string): Promise<AppointmentIte
 
       // Get related data
       const service = servicesMap.get(serviceId);
+      const service2 = serviceId2 ? servicesMap.get(serviceId2) : undefined;
+      const service3 = serviceId3 ? servicesMap.get(serviceId3) : undefined;
       const employee = employeesMap.get(staffId);
       const client = clientsMap.get(clientId);
+
+      // Get additional fields
+      const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes', 'Notes']) ?? '');
+      const interneOpombe = String(pickFirst(row, ['interne_opombe', 'Interne opombe', 'internal_notes']) ?? '');
+      const cenaRaw = pickFirst(row, ['Final cena', 'final_cena', 'koncna_cena', 'cena', 'Cena']);
+      const cena = cenaRaw ? Number(cenaRaw) : undefined;
 
       todayAppointments.push({
         id,
         time: startTime.substring(0, 5),
         endTime: endTime ? endTime.substring(0, 5) : undefined,
+        datum: bookingDateStr,
         clientName,
         clientEmail: clientEmail || undefined,
         clientPhone: clientPhone || undefined,
         clientColor: client?.barva || undefined,
+        clientId: clientId || undefined,
         serviceName: service?.naziv || 'Neznana storitev',
         serviceColor: service?.barva || '#8B5CF6',
+        serviceColor2: service2?.barva || undefined,
+        serviceColor3: service3?.barva || undefined,
+        serviceId: serviceId || undefined,
+        serviceId2: serviceId2 || undefined,
+        serviceId3: serviceId3 || undefined,
         employeeName: employee ? `${employee.ime} ${employee.priimek}` : 'Nedoločeno',
         employeeInitials: employee ? getInitials(employee.ime, employee.priimek) : '?',
         employeeColor: employee?.barva || undefined,
+        employeeId: staffId || undefined,
         status: 'scheduled',
+        opombe: opombe || undefined,
+        interneOpombe: interneOpombe || undefined,
+        cena: cena && !isNaN(cena) ? cena : undefined,
       });
     }
 
@@ -330,6 +341,8 @@ async function fetchTomorrowAppointments(companyId: string): Promise<Appointment
       // Get IDs
       const id = schema.idField ? String(row[schema.idField] ?? '') : '';
       const serviceId = String(pickFirst(row, ['ID storitev', 'ID storitve', 'storitev_id', 'service_id']) ?? '');
+      const serviceId2 = String(pickFirst(row, ['ID storitve 2', 'service_id_2', 'storitev_id_2']) ?? '');
+      const serviceId3 = String(pickFirst(row, ['ID storitve 3', 'service_id_3', 'storitev_id_3']) ?? '');
       const staffId = String(pickFirst(row, ['ID osebja', 'ID osebe', 'ID Osebe', 'oseba_id', 'person_id']) ?? '');
       const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
 
@@ -344,23 +357,42 @@ async function fetchTomorrowAppointments(companyId: string): Promise<Appointment
 
       // Get related data
       const service = servicesMap.get(serviceId);
+      const service2 = serviceId2 ? servicesMap.get(serviceId2) : undefined;
+      const service3 = serviceId3 ? servicesMap.get(serviceId3) : undefined;
       const employee = employeesMap.get(staffId);
       const client = clientsMap.get(clientId);
+
+      // Get additional fields
+      const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes', 'Notes']) ?? '');
+      const interneOpombe = String(pickFirst(row, ['interne_opombe', 'Interne opombe', 'internal_notes']) ?? '');
+      const cenaRaw = pickFirst(row, ['Final cena', 'final_cena', 'koncna_cena', 'cena', 'Cena']);
+      const cena = cenaRaw ? Number(cenaRaw) : undefined;
 
       tomorrowAppointments.push({
         id,
         time: startTime.substring(0, 5),
         endTime: endTime ? endTime.substring(0, 5) : undefined,
+        datum: bookingDateStr,
         clientName,
         clientEmail: clientEmail || undefined,
         clientPhone: clientPhone || undefined,
         clientColor: client?.barva || undefined,
+        clientId: clientId || undefined,
         serviceName: service?.naziv || 'Neznana storitev',
         serviceColor: service?.barva || '#8B5CF6',
+        serviceColor2: service2?.barva || undefined,
+        serviceColor3: service3?.barva || undefined,
+        serviceId: serviceId || undefined,
+        serviceId2: serviceId2 || undefined,
+        serviceId3: serviceId3 || undefined,
         employeeName: employee ? `${employee.ime} ${employee.priimek}` : 'Nedoločeno',
         employeeInitials: employee ? getInitials(employee.ime, employee.priimek) : '?',
         employeeColor: employee?.barva || undefined,
+        employeeId: staffId || undefined,
         status: 'scheduled',
+        opombe: opombe || undefined,
+        interneOpombe: interneOpombe || undefined,
+        cena: cena && !isNaN(cena) ? cena : undefined,
       });
     }
 
@@ -388,10 +420,6 @@ async function fetchStats(companyId: string): Promise<DashboardStats> {
     monthEnd,
   });
 
-  // Check if user is owner first
-  const isOwner = await checkIsOwner(companyId);
-  console.log('[Dashboard] Is owner:', isOwner);
-
   try {
     // Fetch all data using fetchTableRows which handles company column detection
     const [bookingsRes, clientsRes] = await Promise.all([
@@ -406,8 +434,8 @@ async function fetchStats(companyId: string): Promise<DashboardStats> {
     let todayCount = 0;
     // 2. AKTIVNI TERMINI - Count scheduled appointments
     let activeCount = 0;
-    // 4. PRIHODKI TA MESEC - Sum for owner only
-    let revenueThisMonth: number | null = isOwner ? 0 : null;
+    // 4. PRIHODKI TA MESEC
+    let revenueThisMonth = 0;
 
     for (const row of bookings) {
       const schema = detectBookingSchema(row);
@@ -437,17 +465,16 @@ async function fetchStats(companyId: string): Promise<DashboardStats> {
         activeCount++;
       }
 
-      // Calculate revenue for this month (owner only)
-      // only completed appointments, using Final cena / cena / Cena / price fields
+      // Calculate revenue for this month - completed appointments only
       const isCompletedStatus =
         status.includes('zaključen') ||
         status.includes('zakljucen') ||
         status.includes('completed') ||
         status.includes('done');
-      if (isOwner && isCompletedStatus && bookingDateStr >= monthStart && bookingDateStr <= monthEnd) {
-        const price = pickFirst(row, ['Final cena', 'final_cena', 'cena', 'Cena', 'price']);
+      if (isCompletedStatus && bookingDateStr >= monthStart && bookingDateStr <= monthEnd) {
+        const price = pickFirst(row, ['cena', 'Cena', 'price']);
         if (price !== undefined) {
-          revenueThisMonth = (revenueThisMonth ?? 0) + (parseFloat(String(price)) || 0);
+          revenueThisMonth += parseFloat(String(price)) || 0;
         }
       }
     }
@@ -481,7 +508,7 @@ async function fetchStats(companyId: string): Promise<DashboardStats> {
       activeAppointments: activeCount,
       newClientsThisMonth: newClientsCount,
       revenueThisMonth,
-      isOwner,
+      isOwner: false,
     };
   } catch (err) {
     console.error('[Dashboard] Error fetching stats:', err);
@@ -489,8 +516,8 @@ async function fetchStats(companyId: string): Promise<DashboardStats> {
       todayAppointments: 0,
       activeAppointments: 0,
       newClientsThisMonth: 0,
-      revenueThisMonth: null,
-      isOwner,
+      revenueThisMonth: 0,
+      isOwner: false,
     };
   }
 }
