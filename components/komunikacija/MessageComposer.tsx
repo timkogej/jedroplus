@@ -5,11 +5,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Plus, CaretDown } from '@phosphor-icons/react';
 
 const variables = [
-  { key: '{ime}', label: 'Ime' },
-  { key: '{priimek}', label: 'Priimek' },
-  { key: '{email}', label: 'Email' },
-  { key: '{naslednji_termin}', label: 'Naslednji termin' },
-  { key: '{podjetje}', label: 'Ime podjetja' },
+  { key: '{{ime}}', label: 'Ime' },
+  { key: '{{priimek}}', label: 'Priimek' },
+  { key: '{{email}}', label: 'Email' },
+  { key: '{{podjetje}}', label: 'Ime podjetja' },
+  { key: '{{telefon_podjetja}}', label: 'Telefon podjetja' },
+  { key: '{{email_podjetja}}', label: 'Email podjetja' },
+  { key: '{{naslov_podjetja}}', label: 'Naslov podjetja' },
+  { key: '{{zadnja_interakcija}}', label: 'Zadnja interakcija' },
+  { key: '{{zadnja_storitev}}', label: 'Zadnja storitev' },
 ];
 
 interface MessageComposerProps {
@@ -90,7 +94,7 @@ export default function MessageComposer({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 4, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-1.5 w-48 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden z-20"
+                  className="absolute right-0 top-full mt-1.5 w-64 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden z-20"
                 >
                   {variables.map((v) => (
                     <button
@@ -119,7 +123,7 @@ export default function MessageComposer({
 
         <div className="flex items-center justify-between text-xs text-gray-400 mt-1.5">
           <span>
-            Spremenljivke: {'{ime}'}, {'{priimek}'}, {'{email}'}, {'{naslednji_termin}'}
+            Spremenljivke: {'{{ime}}'}, {'{{priimek}}'}, {'{{email}}'}, {'{{podjetje}}'}
           </span>
           <span>{charCount} znakov</span>
         </div>

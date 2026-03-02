@@ -1,17 +1,19 @@
+// app/api/n8n/[...path]/route.ts
+// ✅ SECURE: Rate limiting + API Key + Auth validation
+
 import { NextRequest, NextResponse } from 'next/server';
+import { rateLimit } from '@/lib/rateLimit';
 
 const N8N_BASE_URL = process.env.N8N_WEBHOOK_URL || 'https://tikej.app.n8n.cloud/webhook';
+const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 
 /**
  * Proxy API route for n8n webhook calls
- *
- * This route proxies requests to n8n webhooks server-side,
- * avoiding CORS issues that occur with direct browser requests.
- *
- * The client sends the Supabase access token in the Authorization header,
- * which is forwarded to n8n for authentication.
- *
- * Usage: /api/n8n/onboarding/create-company -> https://tikej.app.n8n.cloud/webhook/onboarding/create-company
+ * 
+ * Security features:
+ * - Rate limiting (50 req / 10 sec)
+ * - API Key authentication to n8n
+ * - Authorization header validation
  */
 
 export async function POST(
@@ -19,16 +21,30 @@ export async function POST(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const { path } = await params;
-    const endpoint = '/' + path.join('/');
-    const targetUrl = `${N8N_BASE_URL}${endpoint}`;
+    // ✅ KORAK 1: Rate limiting
+    const { success, limit, remaining, reset } = await rateLimit(request, "webhook");
+    
+    if (!success) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Preveč zahtev. Počakajte trenutek.",
+          retryAfter: Math.ceil((reset - Date.now()) / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": reset.toString(),
+            "Retry-After": Math.ceil((reset - Date.now()) / 1000).toString(),
+          },
+        }
+      );
+    }
 
-    // Get the request body
-    const body = await request.json().catch(() => ({}));
-
-    // Get auth token from client request header (forwarded from billingClient)
+    // ✅ KORAK 2: Preveri Authorization header
     const authHeader = request.headers.get('Authorization');
-
     if (!authHeader) {
       return NextResponse.json(
         { ok: false, error: 'Authorization header required' },
@@ -36,17 +52,26 @@ export async function POST(
       );
     }
 
-    // Forward the request to n8n with the auth token
+    // ✅ KORAK 3: Sestavi target URL
+    const { path } = await params;
+    const endpoint = '/' + path.join('/');
+    const targetUrl = `${N8N_BASE_URL}${endpoint}`;
+
+    // ✅ KORAK 4: Preberi body
+    const body = await request.json().catch(() => ({}));
+
+    // ✅ KORAK 5: Pošlji na n8n z API key IN user auth
     const n8nResponse = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': authHeader
+        'Authorization': authHeader,
+        ...(N8N_API_KEY ? { 'X-API-Key': N8N_API_KEY } : {}),
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
-    // Get response data
+    // Parsiraj response
     const responseText = await n8nResponse.text();
     let responseData: unknown;
 
@@ -56,9 +81,13 @@ export async function POST(
       responseData = { raw: responseText };
     }
 
-    // Return the response with same status code
     return NextResponse.json(responseData, {
-      status: n8nResponse.status
+      status: n8nResponse.status,
+      headers: {
+        "X-RateLimit-Limit": limit.toString(),
+        "X-RateLimit-Remaining": remaining.toString(),
+        "X-RateLimit-Reset": reset.toString(),
+      },
     });
 
   } catch (error) {
@@ -66,7 +95,7 @@ export async function POST(
     return NextResponse.json(
       {
         ok: false,
-        error: error instanceof Error ? error.message : 'Proxy request failed'
+        error: error instanceof Error ? error.message : 'Proxy request failed',
       },
       { status: 500 }
     );
@@ -78,23 +107,47 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
+    // ✅ KORAK 1: Rate limiting
+    const { success, limit, remaining, reset } = await rateLimit(request, "api");
+    
+    if (!success) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Preveč zahtev. Počakajte trenutek.",
+          retryAfter: Math.ceil((reset - Date.now()) / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            "X-RateLimit-Limit": limit.toString(),
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": reset.toString(),
+            "Retry-After": Math.ceil((reset - Date.now()) / 1000).toString(),
+          },
+        }
+      );
+    }
+
+    // ✅ KORAK 2: Auth header (opcijsko za GET, ampak priporočeno)
+    const authHeader = request.headers.get('Authorization');
+
+    // ✅ KORAK 3: Sestavi target URL
     const { path } = await params;
     const endpoint = '/' + path.join('/');
     const targetUrl = `${N8N_BASE_URL}${endpoint}`;
 
-    // Get auth token from client request header
-    const authHeader = request.headers.get('Authorization');
-
-    // Forward the request to n8n
+    // ✅ KORAK 4: Pošlji na n8n z API key
     const n8nResponse = await fetch(targetUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        ...(authHeader ? { 'Authorization': authHeader } : {})
-      }
+        ...(authHeader ? { 'Authorization': authHeader } : {}),
+        ...(N8N_API_KEY ? { 'X-API-Key': N8N_API_KEY } : {}),
+      },
     });
 
-    // Get response data
+    // Parsiraj response
     const responseText = await n8nResponse.text();
     let responseData: unknown;
 
@@ -104,9 +157,13 @@ export async function GET(
       responseData = { raw: responseText };
     }
 
-    // Return the response with same status code
     return NextResponse.json(responseData, {
-      status: n8nResponse.status
+      status: n8nResponse.status,
+      headers: {
+        "X-RateLimit-Limit": limit.toString(),
+        "X-RateLimit-Remaining": remaining.toString(),
+        "X-RateLimit-Reset": reset.toString(),
+      },
     });
 
   } catch (error) {
@@ -114,7 +171,7 @@ export async function GET(
     return NextResponse.json(
       {
         ok: false,
-        error: error instanceof Error ? error.message : 'Proxy request failed'
+        error: error instanceof Error ? error.message : 'Proxy request failed',
       },
       { status: 500 }
     );

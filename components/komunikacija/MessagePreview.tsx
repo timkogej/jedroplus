@@ -14,17 +14,20 @@ export default function MessagePreview({ subject, message, senderName }: Message
   const [isOpen, setIsOpen] = useState(false);
 
   // Replace variables with mock data for preview
-  const previewMessage = message
-    .replace(/\{ime\}/g, 'Janez')
-    .replace(/\{priimek\}/g, 'Novak')
-    .replace(/\{email\}/g, 'janez.novak@email.com')
-    .replace(/\{naslednji_termin\}/g, '15. feb 2025, 14:00')
-    .replace(/\{podjetje\}/g, senderName);
+  const applyVariables = (text: string) =>
+    text
+      .replace(/\{\{ime\}\}/g, 'Janez')
+      .replace(/\{\{priimek\}\}/g, 'Novak')
+      .replace(/\{\{email\}\}/g, 'janez.novak@email.com')
+      .replace(/\{\{podjetje\}\}/g, senderName)
+      .replace(/\{\{telefon_podjetja\}\}/g, '+386 1 234 5678')
+      .replace(/\{\{email_podjetja\}\}/g, 'info@podjetje.si')
+      .replace(/\{\{naslov_podjetja\}\}/g, 'Slovenska cesta 1, Ljubljana')
+      .replace(/\{\{zadnja_interakcija\}\}/g, '10. feb 2025')
+      .replace(/\{\{zadnja_storitev\}\}/g, 'Striženje las');
 
-  const previewSubject = subject
-    .replace(/\{ime\}/g, 'Janez')
-    .replace(/\{priimek\}/g, 'Novak')
-    .replace(/\{podjetje\}/g, senderName);
+  const previewMessage = applyVariables(message);
+  const previewSubject = applyVariables(subject);
 
   return (
     <div className="rounded-xl border border-gray-200 overflow-hidden">

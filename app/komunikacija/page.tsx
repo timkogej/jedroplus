@@ -9,6 +9,7 @@ import {
   X,
   Warning,
   ArrowLeft,
+  ArrowRight,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import EmailQuotaCard from '@/components/komunikacija/EmailQuotaCard';
@@ -104,18 +105,15 @@ function Toast({
 }
 
 // ============================================================================
-// Mobile view enum
-// ============================================================================
-
-type MobileView = 'customers' | 'composer';
-
-// ============================================================================
 // Page
 // ============================================================================
 
 export default function KomunikacijaPage() {
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
+
+  // Step state
+  const [step, setStep] = useState<1 | 2>(1);
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -126,9 +124,6 @@ export default function KomunikacijaPage() {
 
   // Toast
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
-  // Mobile view
-  const [mobileView, setMobileView] = useState<MobileView>('customers');
 
   // Customer data from Supabase
   const [customers, setCustomers] = useState<KomunikacijaCustomer[]>([]);
@@ -276,6 +271,7 @@ export default function KomunikacijaPage() {
           setSelectedIds(new Set());
           setSubject('');
           setMessage('');
+          setStep(1);
         }, 500);
       } else {
         setToast({
@@ -310,13 +306,13 @@ export default function KomunikacijaPage() {
       </svg>
 
       <main className="min-h-screen bg-[#F7F8FA]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
+
           {/* Page Header */}
           <div className="mb-6">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-1"
             >
               <h1 className="text-2xl font-bold text-[#1A1F36]">
                 Komunikacija
@@ -341,137 +337,109 @@ export default function KomunikacijaPage() {
             />
           </motion.div>
 
-          {/* Mobile View Switcher */}
-          <div className="flex lg:hidden mb-4">
-            <div className="flex w-full rounded-xl bg-white border border-gray-200 p-1">
-              <button
-                type="button"
-                onClick={() => setMobileView('customers')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                  mobileView === 'customers'
-                    ? 'bg-white shadow-md'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-                style={mobileView === 'customers' ? {
-                  background: 'white',
-                } : undefined}
+          {/* Stepped Flow */}
+          <AnimatePresence mode="wait">
+            {step === 1 ? (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.25 }}
               >
-                <span
-                  className="flex items-center gap-2"
-                  style={mobileView === 'customers' ? {
-                    backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  } : undefined}
-                >
-                  <Users className="h-4 w-4" weight="regular" />
-                  Stranke
-                </span>
-                {selectedIds.size > 0 && (
-                  <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
-                    mobileView === 'customers'
-                      ? 'bg-violet-50 text-violet-600'
-                      : 'bg-violet-50 text-violet-600'
-                  }`}>
-                    {selectedIds.size}
-                  </span>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => setMobileView('composer')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                  mobileView === 'composer'
-                    ? 'bg-white shadow-md'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                <span
-                  className="flex items-center gap-2"
-                  style={mobileView === 'composer' ? {
-                    backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  } : undefined}
-                >
-                  <PaperPlaneTilt className="h-4 w-4" weight="regular" />
-                  Sporočilo
-                </span>
-              </button>
-            </div>
-          </div>
-
-          {/* Main Content - Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column - Customer Selection */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className={`lg:col-span-5 ${mobileView !== 'customers' ? 'hidden lg:block' : ''}`}
-            >
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <Users className="h-5 w-5 text-[#1A1F36]" weight="bold" />
-                  <h2 className="text-lg font-semibold text-[#1A1F36]">
-                    Izbira strank
-                  </h2>
+                {/* Step 1: Customer Selection */}
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users className="h-5 w-5 text-[#1A1F36]" weight="bold" />
+                    <h2 className="text-lg font-semibold text-[#1A1F36]">
+                      Izbira strank
+                    </h2>
+                  </div>
+                  <CustomerList
+                    customers={customers}
+                    selectedIds={selectedIds}
+                    onSelectionChange={setSelectedIds}
+                    loading={loadingCustomers}
+                  />
                 </div>
-                <CustomerList
-                  customers={customers}
-                  selectedIds={selectedIds}
-                  onSelectionChange={setSelectedIds}
-                  loading={loadingCustomers}
-                />
-              </div>
 
-              {/* Mobile: continue to composer button */}
-              {selectedIds.size > 0 && (
-                <div className="lg:hidden mt-4">
+                {/* Continue button */}
+                <div className="mt-4">
                   <motion.button
                     type="button"
-                    onClick={() => setMobileView('composer')}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    className="w-full py-3.5 rounded-xl bg-white border border-gray-200 font-semibold text-sm shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                    onClick={() => setStep(2)}
+                    disabled={selectedIds.size === 0}
+                    whileHover={{ scale: selectedIds.size > 0 ? 1.01 : 1 }}
+                    whileTap={{ scale: selectedIds.size > 0 ? 0.99 : 1 }}
+                    className={`w-full py-3.5 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 ${
+                      selectedIds.size > 0
+                        ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent'
+                    }`}
                   >
                     <span
                       className="flex items-center gap-2"
-                      style={{
-                        backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                      }}
+                      style={
+                        selectedIds.size > 0
+                          ? {
+                              backgroundImage:
+                                'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                              WebkitBackgroundClip: 'text',
+                              WebkitTextFillColor: 'transparent',
+                            }
+                          : undefined
+                      }
                     >
-                      Nadaljuj s {selectedIds.size} {selectedIds.size === 1 ? 'stranko' : 'strankami'}
-                      <PaperPlaneTilt className="h-4 w-4" weight="fill" style={{ fill: 'url(#btn-icon-grad)' }} />
+                      {selectedIds.size > 0
+                        ? `Naprej z ${selectedIds.size} ${
+                            selectedIds.size === 1
+                              ? 'stranko'
+                              : selectedIds.size < 5
+                              ? 'strankami'
+                              : 'strankami'
+                          }`
+                        : 'Izberite stranke za nadaljevanje'}
+                      {selectedIds.size > 0 && (
+                        <ArrowRight
+                          className="h-4 w-4"
+                          weight="bold"
+                          style={{ fill: 'url(#btn-icon-grad)' }}
+                        />
+                      )}
                     </span>
                   </motion.button>
                 </div>
-              )}
-            </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.25 }}
+                className="space-y-5"
+              >
+                {/* Summary bar: back button + selected count */}
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                  >
+                    <ArrowLeft className="h-4 w-4" weight="bold" />
+                    Nazaj na izbiro strank
+                  </button>
+                  <span className="px-3 py-1 rounded-lg bg-violet-50 text-xs font-semibold text-violet-600 border border-violet-100">
+                    {selectedIds.size}{' '}
+                    {selectedIds.size === 1
+                      ? 'stranka izbrana'
+                      : selectedIds.size < 5
+                      ? 'stranke izbrane'
+                      : 'strank izbranih'}
+                  </span>
+                </div>
 
-            {/* Right Column - Message Composer */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className={`lg:col-span-7 ${mobileView !== 'composer' ? 'hidden lg:block' : ''}`}
-            >
-              <div className="space-y-5">
-                {/* Mobile: back button */}
-                <button
-                  type="button"
-                  onClick={() => setMobileView('customers')}
-                  className="lg:hidden flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors -mt-1 mb-1"
-                >
-                  <ArrowLeft className="h-4 w-4" weight="bold" />
-                  Nazaj na stranke
-                </button>
-
-                {/* Composer card */}
+                {/* Composer card: AI generator + message */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                   <div className="flex items-center gap-2 mb-5">
                     <PaperPlaneTilt className="h-5 w-5 text-[#1A1F36]" weight="bold" />
@@ -515,9 +483,9 @@ export default function KomunikacijaPage() {
                   onSend={handleSend}
                   sending={isSending}
                 />
-              </div>
-            </motion.div>
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
 

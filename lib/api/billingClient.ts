@@ -135,13 +135,14 @@ export async function createCompany(companyName: string): Promise<CreateCompanyR
 }
 
 /**
- * Join an existing company using company_id and join code
+ * Join an existing company using a join code.
+ * The backend determines admin vs staff by matching join_code against
+ * companies.join_code_admin or companies.join_code_staff.
  */
-export async function joinCompany(companyId: string, joinCode: string): Promise<JoinCompanyResult> {
+export async function joinCompany(joinCode: string): Promise<JoinCompanyResult> {
   return apiRequest<JoinCompanyResult>('/onboarding/join-company', {
     method: 'POST',
     body: JSON.stringify({
-      company_id: companyId.trim(),
       join_code: joinCode.toUpperCase().trim()
     })
   });

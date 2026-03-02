@@ -68,15 +68,10 @@ type JoinRole = null | 'admin' | 'employee';
 export default function JoinCompanyPage() {
   const router = useRouter();
   const [selectedRole, setSelectedRole] = useState<JoinRole>(null);
-  const [companyPublicId, setCompanyPublicId] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleJoin = async () => {
-    if (!companyPublicId.trim()) {
-      toast.error('Vnesite ID podjetja');
-      return;
-    }
     if (!joinCode.trim()) {
       toast.error(selectedRole === 'admin' ? 'Vnesite kodo za admine' : 'Vnesite kodo za zaposlene');
       return;
@@ -85,11 +80,9 @@ export default function JoinCompanyPage() {
     try {
       setLoading(true);
 
-      const normalizedCompanyPublicId = companyPublicId.trim().toUpperCase();
       const normalizedJoinCode = joinCode.toUpperCase().trim();
 
-      // Send the 6-char public ID to n8n
-      const result = await joinCompany(normalizedCompanyPublicId, normalizedJoinCode);
+      const result = await joinCompany(normalizedJoinCode);
 
       if (result.ok) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -122,7 +115,7 @@ export default function JoinCompanyPage() {
               companyError,
             });
 
-            if (!companyUUID && profileLookup.uuid) {
+            if (profileLookup.uuid) {
               companyUUID = profileLookup.uuid;
             } else {
               toast.error('Podjetje še ni povezano s profilom. Poskusite znova čez nekaj sekund.');
@@ -166,7 +159,7 @@ export default function JoinCompanyPage() {
 
           if (companyError || !company?.company_id) {
             console.error('Join company: failed to load company by UUID', companyError);
-            companyPublicId = initialPublicId || normalizedCompanyPublicId || null;
+            companyPublicId = initialPublicId || null;
           }
 
           if (company?.company_id) {
@@ -313,28 +306,12 @@ export default function JoinCompanyPage() {
         </h1>
         <p className="text-center text-gray-500 mb-8 text-sm">
           {isAdmin
-            ? 'Vnesite ID podjetja in kodo za admine'
-            : 'Vnesite ID podjetja in kodo za zaposlene'
+            ? 'Vnesite kodo za admine, ki ste jo prejeli od lastnika'
+            : 'Vnesite kodo za zaposlene, ki ste jo prejeli od administratorja'
           }
         </p>
 
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">ID podjetja</label>
-            <Input
-              value={companyPublicId}
-              onChange={(e) => setCompanyPublicId(e.target.value.toUpperCase())}
-              placeholder="ABC123"
-              maxLength={6}
-              disabled={loading}
-              className="text-2xl font-mono text-center tracking-widest uppercase"
-              autoFocus
-            />
-            <p className="text-xs text-gray-500 mt-2 text-center">
-              6-mestni ID podjetja, ki ste ga prejeli od administratorja
-            </p>
-          </div>
-
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">
               {isAdmin ? 'Koda za admine' : 'Koda za zaposlene'}
@@ -346,6 +323,7 @@ export default function JoinCompanyPage() {
               maxLength={8}
               disabled={loading}
               className="text-2xl font-mono text-center tracking-widest uppercase"
+              autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
             />
             <p className="text-xs text-gray-500 mt-2 text-center">
@@ -355,7 +333,7 @@ export default function JoinCompanyPage() {
 
           <button
             onClick={handleJoin}
-            disabled={loading || !companyPublicId.trim() || !joinCode.trim()}
+            disabled={loading || !joinCode.trim()}
             className="w-full h-12 text-white font-semibold rounded-xl transition-all duration-300 hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
             style={{
               background: isAdmin

@@ -1,5 +1,8 @@
-export const WEBHOOK_URL =
-  "https://tikej.app.n8n.cloud/webhook/main_povezava";
+// src/lib/n8nClient.ts
+// ✅ SECURE: Calls internal API route, not n8n directly
+// API key stays on server, never exposed to browser
+
+const WEBHOOK_PROXY_URL = "/api/webhook";  // ✅ Internal API route
 
 export type N8nPayload = {
   event: string;
@@ -35,6 +38,7 @@ export async function callN8nAction(
       user_id: normalizedPayload.actor,
     };
     normalizedPayload.data = normalizedData;
+    
     const missing = validateWebhookData(
       normalizedPayload.event,
       normalizedPayload.entity,
@@ -54,11 +58,13 @@ export async function callN8nAction(
       console.error("[webhook] missing keys", missing);
     }
 
-    const response = await fetch(WEBHOOK_URL, {
+    // ✅ Call internal API route instead of n8n directly
+    const response = await fetch(WEBHOOK_PROXY_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(normalizedPayload),
     });
+
     if (!response.ok) {
       if (retry && response.status === 409) {
         const nextPayload = await retry();
@@ -66,6 +72,7 @@ export async function callN8nAction(
       }
       return { ok: false, error: `HTTP ${response.status}` };
     }
+    
     const text = await response.text();
     if (!text) {
       return { ok: true };

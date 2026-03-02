@@ -1,5 +1,8 @@
-export const WEBHOOK_URL =
-  "https://tikej.app.n8n.cloud/webhook/main_povezava";
+// lib/webhook.ts
+// ✅ SECURE: Calls internal API route, not n8n directly
+// API key stays on server, never exposed to browser
+
+const WEBHOOK_PROXY_URL = "/api/webhook";  // ✅ Internal API route
 
 export type SendWebhookOptions = { companyId: string; actor: string };
 
@@ -29,7 +32,8 @@ export function sendWebhook(
     console.log("[webhook] sent", event, entity);
   }
 
-  fetch(WEBHOOK_URL, {
+  // ✅ Call internal API route instead of n8n directly
+  fetch(WEBHOOK_PROXY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
