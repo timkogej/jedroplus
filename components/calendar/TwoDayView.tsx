@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
 import TimeGrid from './TimeGrid';
@@ -25,6 +25,7 @@ interface TwoDayViewProps {
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
   onDateClick?: (date: Date) => void;
+  onGridSlotClick?: (date: Date, time: string) => void;
 }
 
 function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map<string, { column: number; totalColumns: number }> {
@@ -90,8 +91,8 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function TwoDayView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick }: TwoDayViewProps) {
-  const days = useMemo(() => [currentDate, addDays(currentDate, 1)], [currentDate]);
+function TwoDayView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick, onGridSlotClick }: TwoDayViewProps) {
+  const days = useMemo(() => [currentDate, addDays(currentDate, 1), addDays(currentDate, 2)], [currentDate]);
 
   const getAbsencesForDay = useMemo(() => {
     return (day: Date) => {
@@ -130,17 +131,33 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
     return grouped;
   }, [days, appointments]);
 
+  const handleColumnClick = useCallback((e: React.MouseEvent, day: Date) => {
+    if (!onGridSlotClick) return;
+    const col = e.currentTarget as HTMLElement;
+    const rect = col.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const totalMinutes = (clickY / HOUR_HEIGHT) * 60;
+    let hour = Math.floor(totalMinutes / 60) + START_HOUR;
+    let minute = Math.round((totalMinutes % 60) / 30) * 30;
+    if (minute >= 60) { hour++; minute = 0; }
+    hour = Math.max(START_HOUR, Math.min(hour, END_HOUR - 1));
+    const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    onGridSlotClick(day, time);
+  }, [onGridSlotClick]);
+
   return (
     <div className="flex h-full flex-col">
       {/* Day headers */}
       <div className="flex bg-white flex-shrink-0">
         <div className="w-[52px] flex-shrink-0" />
-        <div className="flex-1 grid grid-cols-2">
+        <div className="flex-1 grid grid-cols-3">
           {days.map((day, idx) => {
             const isCurrentDay = isToday(day);
             const dayAbsences = getAbsencesForDay(day);
             const hasAbsence = dayAbsences.length > 0;
-            const isPrimary = idx === 0;
+            // Highlight today if visible, otherwise highlight first day
+            const hasTodayInView = days.some(d => isToday(d));
+            const isPrimary = hasTodayInView ? isCurrentDay : idx === 0;
 
             return (
               <button
@@ -148,7 +165,7 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
                 type="button"
                 onClick={() => onDateClick?.(day)}
                 className={`flex flex-col items-center py-2 gap-[3px] transition-colors hover:bg-gray-50
-                  ${idx === 0 ? 'border-r border-gray-100' : ''}`}
+                  ${idx < days.length - 1 ? 'border-r border-gray-100' : ''}`}
               >
                 <span
                   className="text-[9px] font-semibold uppercase tracking-wider"
@@ -161,17 +178,16 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
                 >
                   {DAYS_SHORT[day.getDay()]}
                 </span>
-                <div
-                  className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
-                  style={isPrimary ? {
-                    background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                  } : {
-                    background: '#E5E7EB',
-                  }}
-                >
-                  <span className={`text-[14px] font-semibold leading-none
-                    ${isPrimary ? 'text-white' : 'text-gray-500'}
-                    ${isCurrentDay && !isPrimary ? 'underline decoration-1 underline-offset-2' : ''}`}>
+                <div className="w-[30px] h-[30px] flex items-center justify-center">
+                  <span
+                    className="text-[14px] font-semibold leading-none"
+                    style={isPrimary ? {
+                      background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    } : { color: '#6B7280' }}
+                  >
                     {day.getDate()}
                   </span>
                 </div>
@@ -194,8 +210,8 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
       />
 
       {/* Time grid */}
-      <TimeGrid columnCount={2} showCurrentTime>
-        <div className="grid h-full grid-cols-2">
+      <TimeGrid columnCount={3} showCurrentTime>
+        <div className="grid h-full grid-cols-3">
           {days.map((day, dayIndex) => {
             const dateKey = getLocalDateKey(day);
             const dayAppointments = appointmentsByDay.get(dateKey) || [];
@@ -208,8 +224,10 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
                 key={dateKey}
                 className={`relative
                            ${isCurrentDay ? 'bg-[#1A1F36]/[0.015]' : ''}
-                           ${dayIndex < days.length - 1 ? 'border-r' : ''}`}
+                           ${dayIndex < days.length - 1 ? 'border-r' : ''}
+                           ${onGridSlotClick ? 'cursor-pointer' : ''}`}
                 style={dayIndex < days.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
+                onClick={onGridSlotClick ? (e) => handleColumnClick(e, day) : undefined}
               >
                 {/* Absences */}
                 {dayAbsencesForGrid.map((absence) => {

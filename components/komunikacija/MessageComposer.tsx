@@ -2,9 +2,9 @@
 
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, CaretDown } from '@phosphor-icons/react';
+import { Plus, CaretDown, Sparkle } from '@phosphor-icons/react';
 
-const variables = [
+const staticVariables = [
   { key: '{{ime}}', label: 'Ime' },
   { key: '{{priimek}}', label: 'Priimek' },
   { key: '{{email}}', label: 'Email' },
@@ -21,6 +21,7 @@ interface MessageComposerProps {
   onSubjectChange: (value: string) => void;
   message: string;
   onMessageChange: (value: string) => void;
+  availableVariables?: string[];
 }
 
 export default function MessageComposer({
@@ -28,6 +29,7 @@ export default function MessageComposer({
   onSubjectChange,
   message,
   onMessageChange,
+  availableVariables,
 }: MessageComposerProps) {
   const [showVariables, setShowVariables] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,6 +54,7 @@ export default function MessageComposer({
   };
 
   const charCount = message.length;
+  const hasAiVariables = availableVariables && availableVariables.length > 0;
 
   return (
     <div className="space-y-4">
@@ -96,7 +99,7 @@ export default function MessageComposer({
                   transition={{ duration: 0.15 }}
                   className="absolute right-0 top-full mt-1.5 w-64 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden z-20"
                 >
-                  {variables.map((v) => (
+                  {staticVariables.map((v) => (
                     <button
                       key={v.key}
                       type="button"
@@ -128,6 +131,38 @@ export default function MessageComposer({
           <span>{charCount} znakov</span>
         </div>
       </div>
+
+      {/* AI-generated variable chips */}
+      <AnimatePresence>
+        {hasAiVariables && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="rounded-xl border border-violet-100 bg-violet-50/50 p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Sparkle className="h-3.5 w-3.5 text-violet-500" weight="fill" />
+                <p className="text-xs font-medium text-violet-600">Spremenljivke iz AI – klikni za vstavljanje:</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {availableVariables!.map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => insertVariable(v)}
+                    className="px-2.5 py-1 rounded-lg bg-white border border-violet-200 text-xs font-mono text-violet-700 hover:bg-violet-100 hover:border-violet-300 transition-colors"
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

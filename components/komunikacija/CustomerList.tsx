@@ -30,7 +30,7 @@ export default function CustomerList({
   loading = false,
 }: CustomerListProps) {
   const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState('today');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [selectedService, setSelectedService] = useState('Vse storitve');
 
   // Filter customers based on search and active filter

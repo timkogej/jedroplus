@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
 import { CalendarBlank } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Zaposleni, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
@@ -26,6 +26,7 @@ interface DayViewProps {
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
   employees?: (Zaposleni & { initials: string })[];
+  onGridSlotClick?: (date: Date, time: string) => void;
 }
 
 // Calculate overlapping appointments and assign columns (same as WeekView)
@@ -95,7 +96,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function DayView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, employees = [] }: DayViewProps) {
+function DayView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, employees = [], onGridSlotClick }: DayViewProps) {
   // Filter appointments for current day
   const dayAppointments = useMemo(() => {
     return appointments.filter((apt) => {
@@ -154,6 +155,20 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
 
   const isCurrentDay = isToday(currentDate);
   const hasAbsence = dayAbsences.length > 0;
+
+  const handleColumnClick = useCallback((e: React.MouseEvent) => {
+    if (!onGridSlotClick) return;
+    const col = e.currentTarget as HTMLElement;
+    const rect = col.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const totalMinutes = (clickY / HOUR_HEIGHT) * 60;
+    let hour = Math.floor(totalMinutes / 60) + START_HOUR;
+    let minute = Math.round((totalMinutes % 60) / 30) * 30;
+    if (minute >= 60) { hour++; minute = 0; }
+    hour = Math.max(START_HOUR, Math.min(hour, END_HOUR - 1));
+    const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    onGridSlotClick(currentDate, time);
+  }, [onGridSlotClick, currentDate]);
 
   return (
     <div className="flex h-full flex-col">
@@ -287,8 +302,10 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
                 <div
                   key={employee.id}
                   className={`relative ${isCurrentDay ? 'bg-[#1A1F36]/[0.01]' : ''}
-                             ${empIndex < displayEmployees.length - 1 ? 'border-r' : ''}`}
+                             ${empIndex < displayEmployees.length - 1 ? 'border-r' : ''}
+                             ${onGridSlotClick ? 'cursor-pointer' : ''}`}
                   style={empIndex < displayEmployees.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
+                  onClick={onGridSlotClick ? handleColumnClick : undefined}
                 >
                   {/* Render absence for this employee */}
                   {employeeAbsence && (() => {
@@ -378,7 +395,10 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
           </div>
         ) : (
           // Fallback single column view when no employees with appointments
-          <div className={`relative h-full ${isCurrentDay ? 'bg-[#1A1F36]/[0.015]' : ''}`}>
+          <div
+            className={`relative h-full ${isCurrentDay ? 'bg-[#1A1F36]/[0.015]' : ''} ${onGridSlotClick ? 'cursor-pointer' : ''}`}
+            onClick={onGridSlotClick ? handleColumnClick : undefined}
+          >
             {/* Render absences as background blocks */}
             {dayAbsences.map((absence) => {
               const absenceStart = new Date(absence.start_at);

@@ -19,7 +19,7 @@ const desktopViews: { mode: ViewMode; label: string }[] = [
 
 const mobileViews: { mode: ViewMode; label: string }[] = [
   { mode: 'day', label: 'Dan' },
-  { mode: '2day', label: '2 dni' },
+  { mode: '2day', label: '3 dni' },
   { mode: 'month', label: 'Mesec' },
 ];
 

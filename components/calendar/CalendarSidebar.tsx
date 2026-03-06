@@ -3,7 +3,6 @@
 import { memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  CalendarBlank,
   MagnifyingGlass,
   Plus,
   CaretLeft,
@@ -11,6 +10,7 @@ import {
   ProhibitInset,
   Check,
   Calendar,
+  Star,
 } from '@phosphor-icons/react';
 import type { Storitev, Zaposleni } from '@/types/appointments';
 import type { ViewMode } from '@/lib/utils/calendar';
@@ -22,6 +22,7 @@ import {
   MONTHS_FULL,
   DAYS_ABBR,
   addMonths,
+  getLocalDateKey,
 } from '@/lib/utils/calendar';
 
 interface CalendarSidebarProps {
@@ -45,6 +46,7 @@ interface CalendarSidebarProps {
   onToggle: () => void;
   showAllDays: boolean;
   onShowAllDaysChange: (showAll: boolean) => void;
+  appointmentDates?: Set<string>; // YYYY-MM-DD keys of future dates with appointments
 }
 
 function CalendarSidebar({
@@ -66,6 +68,7 @@ function CalendarSidebar({
   onToggle,
   showAllDays,
   onShowAllDaysChange,
+  appointmentDates,
 }: CalendarSidebarProps) {
   // Mini calendar state - always shows current selected month
   const miniCalendarDate = useMemo(() => startOfMonth(currentDate), [currentDate]);
@@ -118,17 +121,16 @@ function CalendarSidebar({
                   Nov termin
                 </motion.button>
 
-                {/* Today button */}
+                {/* Dogodek button - placeholder */}
                 <motion.button
                   type="button"
-                  onClick={onTodayClick}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#1A1F36] px-4 py-2.5
                              text-sm font-medium text-white shadow-md transition-all hover:bg-[#2D3350]"
                 >
-                  <CalendarBlank className="h-4 w-4" weight="regular" />
-                  Danes
+                  <Star className="h-4 w-4" weight="regular" />
+                  Dogodek
                 </motion.button>
 
                 {/* Absence button */}
@@ -193,25 +195,40 @@ function CalendarSidebar({
                     const isCurrentDay = isToday(day);
                     const isSelected = selectedDate && isSameDay(day, selectedDate);
 
+                    // Show purple dot for future dates (after today) that have appointments
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const dayNorm = new Date(day);
+                    dayNorm.setHours(0, 0, 0, 0);
+                    const isFuture = dayNorm > today;
+                    const hasAppointments = isFuture && appointmentDates?.has(getLocalDateKey(day));
+
                     return (
-                      <motion.button
-                        key={index}
-                        type="button"
-                        onClick={() => onDateSelect(day)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`flex h-7 w-7 items-center justify-center rounded-full text-xs transition-all
-                                   ${isCurrentDay ? 'font-bold' : isSelected ? 'font-semibold' : 'font-medium'}
-                                   ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-200'}
-                                   ${isSelected && !isCurrentDay ? 'bg-gray-200' : ''}`}
-                        style={isCurrentDay ? {
-                          background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                        } : undefined}
-                      >
-                        {day.getDate()}
-                      </motion.button>
+                      <div key={index} className="flex flex-col items-center">
+                        <motion.button
+                          type="button"
+                          onClick={() => onDateSelect(day)}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`flex h-7 w-7 items-center justify-center rounded-full text-xs transition-all
+                                     ${isCurrentDay ? 'font-bold' : isSelected ? 'font-semibold' : 'font-medium'}
+                                     ${!isCurrentMonth ? 'text-gray-300' : 'text-gray-700 hover:bg-gray-200'}
+                                     ${isSelected && !isCurrentDay ? 'bg-gray-200' : ''}`}
+                          style={isCurrentDay ? {
+                            background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                          } : undefined}
+                        >
+                          {day.getDate()}
+                        </motion.button>
+                        {/* Purple dot for future days with appointments */}
+                        <div className="h-1 flex items-center justify-center">
+                          {hasAppointments && (
+                            <div className="w-1 h-1 rounded-full bg-violet-500" />
+                          )}
+                        </div>
+                      </div>
                     );
                   })}
                 </div>

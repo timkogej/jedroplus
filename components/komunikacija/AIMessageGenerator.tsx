@@ -3,48 +3,64 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MagicWand, CircleNotch } from '@phosphor-icons/react';
-import { callN8nAction } from '@/src/lib/n8nClient';
 
 interface AIMessageGeneratorProps {
-  onGenerate: (message: string) => void;
+  onGenerate: (subject: string, message: string, variables: string[]) => void;
+  onError?: (error: string) => void;
   companyId?: string;
   actor?: string;
-  companyPayload?: Record<string, unknown>;
 }
 
-export default function AIMessageGenerator({ onGenerate, companyId, actor, companyPayload }: AIMessageGeneratorProps) {
+export default function AIMessageGenerator({
+  onGenerate,
+  onError,
+  companyId,
+  actor,
+}: AIMessageGeneratorProps) {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || isGenerating) return;
 
     setIsGenerating(true);
 
     try {
-      const result = await callN8nAction({
+      const payload = {
         event: 'GENERIRAJ_SPOROCILO',
         entity: 'communication',
-        data: {
-          prompt: prompt.trim(),
-          company_id: companyId || '',
-          company_profile: companyPayload || {},
-        },
         company_id: companyId || '',
+        user_id: actor || 'unknown',
         actor: actor || 'unknown',
         timestamp: new Date().toISOString(),
-        meta: { app: 'Integrate' as const, version: '1.0' as const },
+        data: {
+          company_id: companyId || '',
+          prompt: prompt.trim(),
+        },
+      };
+
+      const response = await fetch('/api/communication/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
-      if (result.ok && result.data) {
-        const responseData = result.data as Record<string, unknown>;
-        const generatedMessage = (responseData.message || responseData.sporocilo || responseData.text || JSON.stringify(result.data)) as string;
-        onGenerate(generatedMessage);
+      const result = await response.json();
+
+      if (result.ok !== false) {
+        const subject = typeof result.subject === 'string' ? result.subject : '';
+        const message = typeof result.message === 'string' ? result.message : '';
+        const variables: string[] = Array.isArray(result.available_variables)
+          ? result.available_variables.filter((v: unknown) => typeof v === 'string')
+          : [];
+        onGenerate(subject, message, variables);
       } else {
-        console.error('AI generation failed:', result.error);
+        const msg = result.error || 'Napaka pri generiranju sporočila';
+        onError?.(msg);
       }
     } catch (err) {
       console.error('AI generation error:', err);
+      onError?.('Napaka pri generiranju sporočila');
     } finally {
       setIsGenerating(false);
     }

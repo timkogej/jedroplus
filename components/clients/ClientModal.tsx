@@ -7,7 +7,6 @@ import {
   User,
   Envelope,
   Phone,
-  NotePencil,
   FloppyDisk,
   SpinnerGap,
   Warning,
@@ -66,6 +65,7 @@ function ClientModal({
   const [errors, setErrors] = useState<Partial<Record<keyof ClientFormData, string>>>({});
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
+  const [showInternalNotes, setShowInternalNotes] = useState(false);
 
   // Initialize form when modal opens
   useEffect(() => {
@@ -104,6 +104,7 @@ function ClientModal({
       }
       setErrors({});
       setEmailExists(false);
+      setShowInternalNotes(mode === 'edit');
     }
   }, [isOpen, mode, client]);
 
@@ -422,21 +423,18 @@ function ClientModal({
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                     Opombe
                   </label>
-                  <div className="relative">
-                    <NotePencil className="absolute left-3 top-3 h-4 w-4 text-gray-400" weight="regular" />
-                    <textarea
-                      value={formData.opombe}
-                      onChange={(e) => handleChange('opombe', e.target.value)}
-                      placeholder="Opombe o stranki..."
-                      rows={3}
-                      className={`w-full resize-none rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                 placeholder-gray-400 transition-all focus:outline-none focus:ring-2
-                                 ${errors.opombe
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-purple-400 focus:ring-purple-100'
-                                 }`}
-                    />
-                  </div>
+                  <textarea
+                    value={formData.opombe}
+                    onChange={(e) => handleChange('opombe', e.target.value)}
+                    placeholder="Opombe o stranki..."
+                    rows={3}
+                    className={`w-full resize-none rounded-xl border py-2.5 px-4 text-sm text-[#1A1F36]
+                               placeholder-gray-400 transition-all focus:outline-none focus:ring-2
+                               ${errors.opombe
+                                 ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                                 : 'border-gray-200 focus:border-purple-400 focus:ring-purple-100'
+                               }`}
+                  />
                   <div className="mt-1 flex items-center justify-between">
                     {errors.opombe ? (
                       <p className="flex items-center gap-1 text-xs text-red-500">
@@ -444,7 +442,7 @@ function ClientModal({
                         {errors.opombe}
                       </p>
                     ) : (
-                      <span />
+                      <p className="text-xs text-gray-400">Opombe se uporabljajo pri opomnikih in sporočanju</p>
                     )}
                     <span className="text-xs text-gray-400">
                       {formData.opombe.length}/500
@@ -453,42 +451,54 @@ function ClientModal({
                 </div>
 
                 {/* Internal Notes - Not sent to client */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Interne opombe
-                  </label>
-                  <div className="relative">
-                    <LockSimple className="absolute left-3 top-3 h-4 w-4 text-yellow-600" weight="fill" />
-                    <textarea
-                      value={formData.interne_opombe}
-                      onChange={(e) => handleChange('interne_opombe', e.target.value)}
-                      placeholder="Interne opombe (ne pošiljajo se stranki)..."
-                      rows={3}
-                      className={`w-full resize-none rounded-xl border-2 border-yellow-300 bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                 placeholder-gray-400 transition-all focus:outline-none focus:ring-2
-                                 ${errors.interne_opombe
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'focus:border-yellow-400 focus:ring-yellow-200'
-                                 }`}
-                    />
+                {showInternalNotes ? (
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      Interne opombe
+                    </label>
+                    <div className="relative">
+                      <textarea
+                        value={formData.interne_opombe}
+                        onChange={(e) => handleChange('interne_opombe', e.target.value)}
+                        placeholder="Interne opombe (ne pošiljajo se stranki)..."
+                        rows={3}
+                        className={`w-full resize-none rounded-xl border-2 border-yellow-300 bg-white py-2.5 px-4 text-sm text-[#1A1F36]
+                                   placeholder-gray-400 transition-all focus:outline-none focus:ring-2
+                                   ${errors.interne_opombe
+                                     ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                                     : 'focus:border-yellow-400 focus:ring-yellow-200'
+                                   }`}
+                      />
+                    </div>
+                    <div className="mt-1 flex items-center justify-between">
+                      {errors.interne_opombe ? (
+                        <p className="flex items-center gap-1 text-xs text-red-500">
+                          <Warning className="h-3 w-3" weight="fill" />
+                          {errors.interne_opombe}
+                        </p>
+                      ) : (
+                        <p className="flex items-center gap-1 text-xs text-yellow-700">
+                          <Warning className="h-3 w-3" weight="fill" />
+                          Te opombe se ne pošiljajo stranki
+                        </p>
+                      )}
+                      <span className="text-xs text-gray-400">
+                        {formData.interne_opombe.length}/500
+                      </span>
+                    </div>
                   </div>
-                  <div className="mt-1 flex items-center justify-between">
-                    {errors.interne_opombe ? (
-                      <p className="flex items-center gap-1 text-xs text-red-500">
-                        <Warning className="h-3 w-3" weight="fill" />
-                        {errors.interne_opombe}
-                      </p>
-                    ) : (
-                      <p className="flex items-center gap-1 text-xs text-yellow-700">
-                        <Warning className="h-3 w-3" weight="fill" />
-                        Te opombe se ne pošiljajo stranki
-                      </p>
-                    )}
-                    <span className="text-xs text-gray-400">
-                      {formData.interne_opombe.length}/500
-                    </span>
-                  </div>
-                </div>
+                ) : (
+                  <motion.button
+                    type="button"
+                    onClick={() => setShowInternalNotes(true)}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-yellow-300 text-yellow-700 hover:bg-yellow-50 transition-colors"
+                  >
+                    <LockSimple className="h-4 w-4" weight="fill" />
+                    <span className="text-sm font-medium">+ Interne opombe</span>
+                  </motion.button>
+                )}
               </div>
 
               {/* Footer */}

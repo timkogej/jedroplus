@@ -14,7 +14,7 @@ export function getLocalDateKey(date: Date): string {
 // Time constants
 export const START_HOUR = 5; // 5:00 AM - Start from 5:00, first labeled hour is 6:00
 export const END_HOUR = 23; // 11:00 PM
-export const HOUR_HEIGHT = 60; // pixels per hour in week/day view
+export const HOUR_HEIGHT = 80; // pixels per hour in week/day view
 export const SLOT_DURATION = 60; // minutes per slot
 
 // Day names in Slovenian
@@ -179,7 +179,7 @@ export function getDurationHeight(startTime: string, endTime: string): number {
   const startMinutes = parseTimeToMinutes(startTime);
   const endMinutes = parseTimeToMinutes(endTime);
   const durationMinutes = endMinutes - startMinutes;
-  return Math.max((durationMinutes / 60) * HOUR_HEIGHT, 30); // Minimum 30px height
+  return Math.max((durationMinutes / 60) * HOUR_HEIGHT, 40); // Minimum 40px height (30 min at 80px/hr)
 }
 
 // Generate time slots for grid (supports half-hour start like 5:30)

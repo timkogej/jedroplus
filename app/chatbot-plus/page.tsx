@@ -237,11 +237,11 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
     setLoading(true);
 
     try {
-      const response = await fetch('https://tikej.app.n8n.cloud/webhook/asistent', {
+      const response = await fetch('https://tikej.app.n8n.cloud/webhook/chatbot/help', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `[Pomagaj z implementacijo Chatbot+ na spletno stran] ${trimmed}`,
+          prompt: trimmed,
           session_id: sessionId,
           company_id: companyId ?? '',
         }),
@@ -399,21 +399,17 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
                   style={{
                     padding: '7px 13px',
                     borderRadius: 14,
-                    border: '1.5px solid rgba(139,92,246,0.2)',
-                    background: 'rgba(139,92,246,0.05)',
+                    border: '1.5px solid white',
+                    background: 'white',
                     fontSize: 12,
                     fontWeight: 500,
-                    color: '#7C3AED',
+                    backgroundImage: GRADIENT,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
                     cursor: 'pointer',
                     transition: 'all 0.15s',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(139,92,246,0.1)';
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(139,92,246,0.35)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLButtonElement).style.background = 'rgba(139,92,246,0.05)';
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(139,92,246,0.2)';
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
                   }}
                 >
                   {action}
@@ -509,6 +505,8 @@ export default function ChatbotPlusPage() {
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedEmbed, setCopiedEmbed] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [chatbotEnabled, setChatbotEnabled] = useState(true);
+  const [chatbotLink, setChatbotLink] = useState('');
 
   // Scroll to top when page data finishes loading
   useEffect(() => {
@@ -536,6 +534,13 @@ export default function ChatbotPlusPage() {
         }
 
         const { data: d } = await loadCompanyRow(companyId);
+
+        // chatbot_omogoci: 'true'/'yes' = enabled, 'false'/'no' = disabled
+        const enabledVal = String(d?.['chatbot_omogoci'] ?? 'yes').toLowerCase().trim();
+        setChatbotEnabled(enabledVal === 'true' || enabledVal === 'yes');
+
+        // chatbot_link from Podatki podjetij
+        setChatbotLink(String(d?.['chatbot_link'] ?? ''));
 
         setChatbotData({
           url: companyData?.chatbot_url || '',
@@ -612,8 +617,9 @@ export default function ChatbotPlusPage() {
   const { design } = chatbotData;
   const borderRadius = sanitizeBorderRadius(design.borderRadius);
 
-  const embedCode = chatbotData.url
-    ? `<script>\n  (function() {\n    var s = document.createElement('script');\n    s.src = '${chatbotData.url.replace(/\/$/, '')}/embed.js';\n    s.async = true;\n    document.body.appendChild(s);\n  })();\n</script>`
+  const effectiveChatbotUrl = chatbotLink || chatbotData.url;
+  const embedCode = effectiveChatbotUrl
+    ? `<script>\n  (function() {\n    var s = document.createElement('script');\n    s.src = '${effectiveChatbotUrl.replace(/\/$/, '')}/embed.js';\n    s.async = true;\n    document.body.appendChild(s);\n  })();\n</script>`
     : `<script>\n  (function() {\n    var s = document.createElement('script');\n    s.src = 'https://chatbot.jedro.si/embed.js';\n    s.async = true;\n    document.body.appendChild(s);\n  })();\n</script>`;
 
   return (
@@ -780,6 +786,46 @@ export default function ChatbotPlusPage() {
               transition={{ delay: 0.15 }}
               className="flex-1 w-full min-w-0 space-y-4"
             >
+              {/* Chatbot Status Card */}
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.8)',
+                  backdropFilter: 'blur(20px)',
+                  border: chatbotEnabled ? '1px solid rgba(52,211,153,0.2)' : '1px solid rgba(239,68,68,0.2)',
+                  borderRadius: 20,
+                  padding: 20,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-base font-semibold text-gray-900">Status chatbota</div>
+                    <div className="text-sm text-gray-500 mt-0.5">
+                      {chatbotEnabled ? 'Chatbot je aktiven na vaši spletni strani' : 'Chatbot trenutno ni aktiven'}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div style={{ position: 'relative', width: 10, height: 10 }}>
+                      {chatbotEnabled && (
+                        <motion.div
+                          animate={{ scale: [1, 1.8, 1], opacity: [0.5, 0, 0.5] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                          style={{ position: 'absolute', inset: -3, borderRadius: '50%', background: '#34d399' }}
+                        />
+                      )}
+                      <div style={{
+                        width: 10, height: 10, borderRadius: '50%',
+                        background: chatbotEnabled ? 'linear-gradient(135deg, #34d399, #10b981)' : '#E5E7EB',
+                        position: 'relative',
+                      }} />
+                    </div>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: chatbotEnabled ? '#059669' : '#EF4444' }}>
+                      {chatbotEnabled ? 'Omogočen' : 'Onemogočen'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Nastavitve card */}
               <div
                 style={{
@@ -1019,7 +1065,7 @@ export default function ChatbotPlusPage() {
                     </div>
                     <div className="overflow-x-auto" style={{ padding: '16px' }}>
                       <pre style={{ fontSize: 12, color: '#A5B4FC', fontFamily: 'monospace', margin: 0, whiteSpace: 'pre', lineHeight: 1.7 }}>
-                        {`<`}<span style={{ color: '#F97316' }}>script</span>{`>\n  (function() {\n    var `}<span style={{ color: '#86EFAC' }}>s</span>{` = document.`}<span style={{ color: '#67E8F9' }}>createElement</span>{`(`}<span style={{ color: '#FDE68A' }}>'script'</span>{`);\n    s.`}<span style={{ color: '#86EFAC' }}>src</span>{` = `}<span style={{ color: '#FDE68A' }}>{`'{chatbot_url}/embed.js'`}</span>{`;\n    s.`}<span style={{ color: '#86EFAC' }}>async</span>{` = `}<span style={{ color: '#C4B5FD' }}>true</span>{`;\n    document.`}<span style={{ color: '#86EFAC' }}>body</span>{`.`}<span style={{ color: '#67E8F9' }}>appendChild</span>{`(s);\n  })();\n<`}<span style={{ color: '#F97316' }}>/script</span>{`>`}
+                        {`<`}<span style={{ color: '#F97316' }}>script</span>{`>\n  (function() {\n    var `}<span style={{ color: '#86EFAC' }}>s</span>{` = document.`}<span style={{ color: '#67E8F9' }}>createElement</span>{`(`}<span style={{ color: '#FDE68A' }}>'script'</span>{`);\n    s.`}<span style={{ color: '#86EFAC' }}>src</span>{` = `}<span style={{ color: '#FDE68A' }}>{`'${effectiveChatbotUrl || 'https://chatbot.jedro.si'}/embed.js'`}</span>{`;\n    s.`}<span style={{ color: '#86EFAC' }}>async</span>{` = `}<span style={{ color: '#C4B5FD' }}>true</span>{`;\n    document.`}<span style={{ color: '#86EFAC' }}>body</span>{`.`}<span style={{ color: '#67E8F9' }}>appendChild</span>{`(s);\n  })();\n<`}<span style={{ color: '#F97316' }}>/script</span>{`>`}
                       </pre>
                     </div>
                   </div>

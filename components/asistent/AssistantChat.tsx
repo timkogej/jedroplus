@@ -255,9 +255,70 @@ function QuickActionChip({
       }}
     >
       {/* Phosphor icon using the shared SVG gradient paint server */}
-      <Icon size={17} color="url(#asistentIconGrad)" weight="fill" />
+      <Icon size={17} color="url(#asistentIconGrad)" weight="regular" />
       <span>{label}</span>
     </motion.button>
+  );
+}
+
+// ============================================================================
+// Markdown line renderer
+// ============================================================================
+
+const HEADING_SIZES: Record<number, string> = {
+  1: 'text-2xl',
+  2: 'text-xl',
+  3: 'text-lg',
+  4: 'text-base',
+  5: 'text-sm',
+  6: 'text-xs',
+};
+
+function renderBoldParts(text: string, isUser: boolean) {
+  return text.split('**').map((part, j) =>
+    j % 2 === 1 ? (
+      <strong
+        key={j}
+        className="font-semibold"
+        style={
+          !isUser
+            ? {
+                background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }
+            : undefined
+        }
+      >
+        {part}
+      </strong>
+    ) : (
+      <span key={j}>{part}</span>
+    )
+  );
+}
+
+function renderLine(line: string, isUser: boolean, idx: number) {
+  const headingMatch = line.match(/^(#{1,6})\s+(.+)/);
+  if (headingMatch) {
+    const level = Math.min(headingMatch[1].length, 6);
+    const headingText = headingMatch[2];
+    const sizeClass = HEADING_SIZES[level] ?? 'text-base';
+    return (
+      <p
+        key={idx}
+        className={`${sizeClass} font-bold text-black leading-snug ${idx > 0 ? 'mt-3' : ''}`}
+      >
+        {headingText}
+      </p>
+    );
+  }
+
+  return (
+    <p key={idx} className={idx > 0 ? 'mt-1.5' : ''}>
+      {renderBoldParts(line, isUser)}
+    </p>
   );
 }
 
@@ -311,32 +372,7 @@ function MessageBubble({
           }
         >
           <div className={`text-[15px] leading-relaxed ${isUser ? 'text-white' : 'text-gray-900'}`}>
-            {contentText.split('\n').map((line, i) => (
-              <p key={i} className={i > 0 ? 'mt-1.5' : ''}>
-                {line.split('**').map((part, j) =>
-                  j % 2 === 1 ? (
-                    <strong
-                      key={j}
-                      className="font-semibold"
-                      style={
-                        !isUser
-                          ? {
-                              background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                              WebkitBackgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                              backgroundClip: 'text',
-                            }
-                          : undefined
-                      }
-                    >
-                      {part}
-                    </strong>
-                  ) : (
-                    <span key={j}>{part}</span>
-                  )
-                )}
-              </p>
-            ))}
+            {contentText.split('\n').map((line, i) => renderLine(line, isUser, i))}
           </div>
         </div>
 
@@ -796,9 +832,15 @@ PRAVILA:
         },
       };
 
-      const response = await fetch('https://tikej.app.n8n.cloud/webhook/asistent', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
+
+      const response = await fetch('/api/n8n/asistent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {}),
+        },
         body: JSON.stringify({
           prompt: promptPayload,
           session_id: sessionId,

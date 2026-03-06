@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import { useCompany } from "@/app/company-context";
 import { useAuth } from "@/app/auth-context";
 import { Sidebar, AppBar, SearchModal, SidebarProvider, useSidebar } from "@/components/layout";
@@ -17,6 +18,7 @@ import { supabase } from "@/lib/supabaseClient";
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { isCollapsed, sidebarWidth, isMobile, setNotificationCount } = useSidebar();
   const { companyUuid } = useCompany();
+  const pathname = usePathname();
 
   // Calculate content margin based on sidebar state
   const contentMargin = isMobile ? 0 : (isCollapsed ? 80 : sidebarWidth);
@@ -55,8 +57,22 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         <AppBar />
 
         {/* Main content with padding for app bar */}
-        <main className="flex-1 pt-16">
-          {children}
+        <main className="flex-1 pt-16 overflow-hidden">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={pathname}
+              initial={isMobile ? { opacity: 0, y: 48 } : false}
+              animate={{ opacity: 1, y: 0 }}
+              exit={isMobile ? { opacity: 0, y: 24 } : false}
+              transition={
+                isMobile
+                  ? { type: 'spring', stiffness: 380, damping: 32 }
+                  : { duration: 0 }
+              }
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 

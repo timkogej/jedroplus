@@ -3,6 +3,7 @@
 // API key stays on server, never exposed to browser
 
 const WEBHOOK_PROXY_URL = "/api/webhook";  // ✅ Internal API route
+export const WEBHOOK_URL = WEBHOOK_PROXY_URL; // backwards compat
 
 export type SendWebhookOptions = { companyId: string; actor: string };
 

@@ -293,20 +293,17 @@ export function AppBar() {
             >
               <Bell className="w-5 h-5 text-gray-600" weight="regular" />
 
-              {/* Notification badge */}
-              {notificationCount > 0 && (
+              {/* Notification badge - number if > 0, dot otherwise */}
+              {notificationCount > 0 ? (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold text-white bg-gradient-to-r from-red-500 to-pink-500 rounded-full shadow-lg"
+                  className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold text-white bg-gradient-to-r from-red-500 to-rose-500 rounded-full shadow-lg"
                 >
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </motion.span>
-              )}
-
-              {/* Pulse animation for new notifications */}
-              {notificationCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-[18px] h-[18px] rounded-full bg-red-500 animate-ping opacity-75" />
+              ) : (
+                <span className="absolute -top-1 -right-1 w-[8px] h-[8px] rounded-full bg-gradient-to-r from-red-500 to-rose-500" />
               )}
             </motion.div>
           </Link>

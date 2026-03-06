@@ -414,9 +414,9 @@ function ClientTable({
                     key={pageNum}
                     type="button"
                     onClick={() => setCurrentPage(pageNum)}
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium transition-all
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-all
                                ${currentPage === pageNum
-                                 ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-sm'
+                                 ? 'bg-black text-white shadow-sm'
                                  : 'text-gray-500 hover:bg-gray-100 hover:text-[#1A1F36]'
                                }`}
                   >

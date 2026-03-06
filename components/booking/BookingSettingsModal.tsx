@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, SpinnerGap, FloppyDisk, Copy, Check, Lock } from '@phosphor-icons/react';
+import { X, SpinnerGap, FloppyDisk } from '@phosphor-icons/react';
 import {
   SettingsSection,
   SettingRow,
@@ -26,32 +26,20 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const { user } = useAuth();
 
   // Settings from "Podatki podjetij" table
-  const [koledarUre, setKoledarUre] = useState<'30' | '60'>('30');
+  const [bookingOmogocen, setBookingOmogocen] = useState(true);
+  const [koledarUre, setKoledarUre] = useState<'15' | '30' | '60'>('30');
   const [potrdiloReservation, setPotrdiloReservation] = useState(false);
   const [potrdiloOnline, setPotrdiloOnline] = useState(false);
-  const [rezervacijeLink, setRezervacijeLink] = useState('');
   const [bookingPrimary, setBookingPrimary] = useState('#7C75FC');
   const [bookingSecondary, setBookingSecondary] = useState('#44D0C6');
   const [bookingBgFrom, setBookingBgFrom] = useState('#7C75FC');
   const [bookingBgTo, setBookingBgTo] = useState('#44D0C6');
 
-  const [copiedLink, setCopiedLink] = useState(false);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const actor = user?.email ?? 'unknown';
-
-  // Copy to clipboard
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy:', error);
-    }
-  };
 
   // Load settings
   useEffect(() => {
@@ -63,8 +51,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         const { data } = await loadCompanyRow(companyId);
 
         if (data) {
+          const bookingEnabled = data['booking_omogocen'];
+          setBookingOmogocen(bookingEnabled !== false && bookingEnabled !== 'false');
+
           const ureValue = String(data['koledar_ure'] ?? data['Koledar_ure'] ?? '30');
-          setKoledarUre(ureValue === '60' ? '60' : '30');
+          setKoledarUre(ureValue === '60' ? '60' : ureValue === '15' ? '15' : '30');
 
           const potrdiloRez = data['Potrdilo ob rezervaciji'] ?? data['potrdilo_ob_rezervaciji'];
           setPotrdiloReservation(potrdiloRez === 'yes' || potrdiloRez === true || potrdiloRez === 'da');
@@ -72,7 +63,6 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           const potrdiloOnl = data['Potrdilo online rez'] ?? data['potrdilo_online_rez'];
           setPotrdiloOnline(potrdiloOnl === 'yes' || potrdiloOnl === true || potrdiloOnl === 'da');
 
-          setRezervacijeLink(String(data['rezervacije_link'] ?? data['Rezervacije_link'] ?? ''));
           setBookingPrimary(String(data['Booking_primary'] ?? data['booking_primary'] ?? '#7C75FC'));
           setBookingSecondary(String(data['Booking_secondary'] ?? data['booking_secondary'] ?? '#44D0C6'));
           setBookingBgFrom(String(data['Booking_bg_from'] ?? data['booking_bg_from'] ?? data['Booking_primary'] ?? data['booking_primary'] ?? '#7C75FC'));
@@ -100,6 +90,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         actor,
         timestamp: new Date().toISOString(),
         data: {
+          'booking_omogocen': bookingOmogocen,
           'koledar_ure': koledarUre,
           'Potrdilo ob rezervaciji': potrdiloReservation ? 'yes' : 'no',
           'Potrdilo online rez': potrdiloOnline ? 'yes' : 'no',
@@ -193,14 +184,25 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                   {/* General Booking Settings */}
                   <SettingsSection title="Splošne nastavitve" description="Osnovne nastavitve rezervacij">
                     <SettingRow
+                      label="Omogoči spletne rezervacije"
+                      description="Ali so spletne rezervacije aktivne"
+                    >
+                      <Switch
+                        checked={bookingOmogocen}
+                        onChange={setBookingOmogocen}
+                      />
+                    </SettingRow>
+
+                    <SettingRow
                       label="Dolžina časovnega intervala"
-                      description="Intervali za rezervacije (30 ali 60 minut)"
+                      description="Intervali za rezervacije (15, 30 ali 60 minut)"
                     >
                       <Select
                         value={koledarUre}
-                        setValue={(value) => setKoledarUre(value as '30' | '60')}
+                        setValue={(value) => setKoledarUre(value as '15' | '30' | '60')}
                         placeholder="Izberi interval"
                       >
+                        <SelectOption value="15">15 minut</SelectOption>
                         <SelectOption value="30">30 minut</SelectOption>
                         <SelectOption value="60">60 minut (1 ura)</SelectOption>
                       </Select>
@@ -227,43 +229,6 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         checked={potrdiloOnline}
                         onChange={setPotrdiloOnline}
                       />
-                    </SettingRow>
-                  </SettingsSection>
-
-                  {/* Booking URL - LOCKED */}
-                  <SettingsSection title="Spletne rezervacije" description="Povezava do vaše rezervacijske strani">
-                    <SettingRow
-                      label="Link za spletne rezervacije"
-                      description="Ta povezava je zaklenjena in se ne more spreminjati"
-                      fullWidth
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-2 flex-1">
-                          <Input
-                            type="url"
-                            value={rezervacijeLink || 'Ni konfiguriranega linka'}
-                            disabled
-                            className="flex-1 bg-gray-50 cursor-not-allowed"
-                          />
-                          <div className="flex items-center gap-1 text-gray-400">
-                            <Lock className="h-4 w-4" weight="bold" />
-                          </div>
-                        </div>
-                        {rezervacijeLink && (
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => copyToClipboard(rezervacijeLink)}
-                            className="p-2 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                          >
-                            {copiedLink ? (
-                              <Check className="w-5 h-5 text-green-500" weight="bold" />
-                            ) : (
-                              <Copy className="w-5 h-5 text-gray-500" />
-                            )}
-                          </motion.button>
-                        )}
-                      </div>
                     </SettingRow>
                   </SettingsSection>
 

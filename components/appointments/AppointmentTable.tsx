@@ -68,11 +68,14 @@ function formatTime(timeStr: string): string {
 // Get initials from name
 function getInitials(name: string): string {
   if (!name) return '?';
-  const parts = name.trim().split(' ');
+  const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase();
   }
-  return name.charAt(0).toUpperCase();
+  if (parts.length === 1) {
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+  return '?';
 }
 
 const CALENDAR_ICON_PATH =

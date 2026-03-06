@@ -23,14 +23,15 @@ import { useAuth } from '@/app/auth-context';
 import { fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst, safeDate, combineDateAndTime } from '@/lib/dashboardHelpers';
-import { callN8nAction } from '@/src/lib/n8nClient';
+import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 
 // ============================================================================
-// Customer type for this page
+// Types
 // ============================================================================
 
 interface KomunikacijaCustomer {
-  id: string;
+  id: string;         // String key used for Set<string> selection
+  numericId: number | null; // Supabase 'id' column (numeric PK) — sent in client_ids
   name: string;
   email: string;
   phone: string;
@@ -39,8 +40,20 @@ interface KomunikacijaCustomer {
   tags: string[];
 }
 
+interface SendTotals {
+  requested: number;
+  sent: number;
+  skipped: number;
+}
+
+interface SendResult {
+  totals: SendTotals;
+  sent: unknown[];
+  skipped: unknown[];
+}
+
 // ============================================================================
-// Helpers for parsing Supabase data
+// Helpers
 // ============================================================================
 
 function detectClientSchema(row: Record<string, unknown>) {
@@ -49,7 +62,6 @@ function detectClientSchema(row: Record<string, unknown>) {
     candidates.find((c) => keys.includes(c));
 
   return {
-    idField: pickField(['ID stranke', 'id', 'client_id', 'ID']),
     firstNameField: pickField(['Ime', 'ime', 'first_name', 'firstName']),
     lastNameField: pickField(['Priimek', 'priimek', 'last_name', 'lastName']),
     emailField: pickField(['Email', 'email', 'e-mail', 'E-mail']),
@@ -57,14 +69,22 @@ function detectClientSchema(row: Record<string, unknown>) {
   };
 }
 
-const mockQuota = {
-  used: 847,
-  total: 1000,
-  resetDate: '1. mar 2025',
-};
+/** Parse Supabase 'id' column to number, returns null if not parseable */
+function parseNumericId(raw: unknown): number | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw === 'number') return isNaN(raw) ? null : raw;
+  const n = parseInt(String(raw), 10);
+  return isNaN(n) ? null : n;
+}
+
+interface EmailQuota {
+  used: number;
+  total: number;
+  resetDate: string;
+}
 
 // ============================================================================
-// Toast component
+// Toast
 // ============================================================================
 
 function Toast({
@@ -105,6 +125,71 @@ function Toast({
 }
 
 // ============================================================================
+// Send result panel
+// ============================================================================
+
+function SendResultPanel({
+  result,
+  onReset,
+}: {
+  result: SendResult;
+  onReset: () => void;
+}) {
+  const skippedItems = result.skipped ?? [];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 space-y-4"
+    >
+      <div className="flex items-center gap-2">
+        <CheckCircle className="h-5 w-5 text-emerald-500" weight="fill" />
+        <h3 className="font-semibold text-emerald-700">Sporočila poslana</h3>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Zahtevano', value: result.totals.requested, color: 'text-[#1A1F36]' },
+          { label: 'Poslano', value: result.totals.sent, color: 'text-emerald-600' },
+          { label: 'Preskočeno', value: result.totals.skipped, color: result.totals.skipped > 0 ? 'text-amber-600' : 'text-gray-400' },
+        ].map(({ label, value, color }) => (
+          <div key={label} className="bg-white rounded-xl border border-gray-100 p-3 text-center">
+            <p className={`text-xl font-bold ${color}`}>{value}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {skippedItems.length > 0 && (
+        <div>
+          <p className="text-xs font-medium text-amber-600 mb-1.5">Preskočeni:</p>
+          <ul className="space-y-1 max-h-32 overflow-y-auto">
+            {skippedItems.map((item, i) => (
+              <li key={i} className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-100">
+                {typeof item === 'object' && item !== null
+                  ? (item as Record<string, unknown>).reason
+                    ? String((item as Record<string, unknown>).reason)
+                    : JSON.stringify(item)
+                  : String(item)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={onReset}
+        className="w-full py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+      >
+        Pošlji novo sporočilo
+      </button>
+    </motion.div>
+  );
+}
+
+// ============================================================================
 // Page
 // ============================================================================
 
@@ -112,31 +197,82 @@ export default function KomunikacijaPage() {
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
 
-  // Step state
   const [step, setStep] = useState<1 | 2>(1);
-
-  // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Message state
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [availableVariables, setAvailableVariables] = useState<string[]>([]);
 
-  // Toast
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
-  // Customer data from Supabase
   const [customers, setCustomers] = useState<KomunikacijaCustomer[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(true);
-
-  // Sending state
   const [isSending, setIsSending] = useState(false);
+  const [sendResult, setSendResult] = useState<SendResult | null>(null);
+  const [emailQuota, setEmailQuota] = useState<EmailQuota>({ used: 0, total: 0, resetDate: '' });
 
   const companyName = (companySettings?.['Naziv Podjetja'] as string) || 'Moje Podjetje';
   const actor = user?.email || 'unknown';
-  const companyPayload = companySettings ? { ...companySettings } : {};
 
-  // Fetch customers and their appointments from Supabase
+  // Fetch email quota
+  useEffect(() => {
+    if (!companyId) return;
+
+    const fetchEmailQuota = async () => {
+      try {
+        // Get company UUID from companies table
+        const { data: companyData } = await supabaseReadOnly
+          .from('companies')
+          .select('id')
+          .eq('company_id', companyId)
+          .maybeSingle();
+
+        if (!companyData?.id) return;
+
+        const companyUuid = companyData.id;
+
+        // Get email usage
+        const { data: usageData } = await supabaseReadOnly
+          .from('company_email_usage')
+          .select('sent_count')
+          .eq('company_id', companyUuid)
+          .maybeSingle();
+
+        // Get plan quota
+        const { data: subData } = await supabaseReadOnly
+          .from('company_subscriptions')
+          .select('plan_id')
+          .eq('company_id', companyUuid)
+          .maybeSingle();
+
+        let emailTotal = 0;
+        if (subData?.plan_id) {
+          const { data: planData } = await supabaseReadOnly
+            .from('plans')
+            .select('email_quota_monthly')
+            .eq('id', subData.plan_id)
+            .maybeSingle();
+          emailTotal = planData?.email_quota_monthly ?? 0;
+        }
+
+        const now = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const resetDate = nextMonth.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        setEmailQuota({
+          used: usageData?.sent_count ?? 0,
+          total: emailTotal,
+          resetDate,
+        });
+      } catch (err) {
+        console.error('Error fetching email quota:', err);
+      }
+    };
+
+    fetchEmailQuota();
+  }, [companyId]);
+
+  // ── Fetch clients ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!companyId) return;
 
@@ -151,7 +287,7 @@ export default function KomunikacijaPage() {
         const bookings = bookingsRes.data ?? [];
         const clients = clientsRes.data ?? [];
 
-        // Build map of client ID -> nearest future appointment ISO string
+        // Build map of client selection-key -> nearest future appointment ISO
         const now = new Date();
         const clientNextAppointment = new Map<string, string>();
 
@@ -163,22 +299,16 @@ export default function KomunikacijaPage() {
 
           if (!clientId) continue;
 
-          // Parse the booking date
           let bookingDate: Date | null = null;
-
-          // Try start_at first (ISO timestamp)
           if (schema.startAtField && row[schema.startAtField]) {
             bookingDate = safeDate(row[schema.startAtField]);
           }
-
-          // Try date + time combination
           if (!bookingDate && schema.dateField) {
             bookingDate = combineDateAndTime(
               row[schema.dateField],
               schema.startTimeField ? row[schema.startTimeField] : null
             );
           }
-
           if (!bookingDate || bookingDate < now) continue;
 
           const isoDate = bookingDate.toISOString();
@@ -188,14 +318,23 @@ export default function KomunikacijaPage() {
           }
         }
 
-        // Build customer objects from Stranke table
+        // Build customer list from Stranke table
         const customerList: KomunikacijaCustomer[] = [];
 
         if (clients.length > 0) {
           const clientSchema = detectClientSchema(clients[0]);
 
           for (const row of clients) {
-            const id = clientSchema.idField ? String(row[clientSchema.idField] ?? '') : '';
+            // CRITICAL: Use Supabase 'id' column as the numeric primary key
+            const numericId = parseNumericId(row['id']);
+
+            // For the Set key we use the string form of the Supabase id,
+            // falling back to 'ID stranke' only if 'id' is missing
+            const id =
+              row['id'] !== undefined && row['id'] !== null
+                ? String(row['id'])
+                : String(row['ID stranke'] ?? row['client_id'] ?? '');
+
             if (!id) continue;
 
             const ime = clientSchema.firstNameField ? String(row[clientSchema.firstNameField] ?? '') : '';
@@ -206,6 +345,7 @@ export default function KomunikacijaPage() {
 
             customerList.push({
               id,
+              numericId,
               name,
               email,
               phone,
@@ -228,51 +368,94 @@ export default function KomunikacijaPage() {
     fetchData();
   }, [companyId]);
 
-  // Handlers
-  const handleAIGenerate = useCallback((generatedMessage: string) => {
-    setMessage(generatedMessage);
-  }, []);
+  // ── AI generate handler ────────────────────────────────────────────────────
+  const handleAIGenerate = useCallback(
+    (genSubject: string, genMessage: string, variables: string[]) => {
+      setSubject(genSubject);
+      setMessage(genMessage);
+      setAvailableVariables(variables);
+    },
+    []
+  );
 
+  // ── Send handler ───────────────────────────────────────────────────────────
   const handleSend = useCallback(async () => {
     if (isSending) return;
+
+    // Validation
+    if (selectedIds.size === 0) {
+      setToast({ message: 'Izberite vsaj eno stranko', type: 'error' });
+      return;
+    }
+    if (!subject.trim()) {
+      setToast({ message: 'Vnesite zadevo sporočila', type: 'error' });
+      return;
+    }
+    if (!message.trim()) {
+      setToast({ message: 'Vnesite vsebino sporočila', type: 'error' });
+      return;
+    }
+
+    // Build numeric client_ids from Supabase 'id' column
+    const clientIds: number[] = [];
+    for (const c of customers) {
+      if (!selectedIds.has(c.id)) continue;
+      if (c.numericId === null) {
+        setToast({
+          message: `Stranka "${c.name}" nima veljavnega numeričnega ID-ja (Stranke.id)`,
+          type: 'error',
+        });
+        return;
+      }
+      clientIds.push(c.numericId);
+    }
+
+    if (clientIds.length !== selectedIds.size) {
+      setToast({ message: 'Nekatere stranke nimajo veljavnega ID-ja', type: 'error' });
+      return;
+    }
+
     setIsSending(true);
 
     try {
-      // Build selected clients payload
-      const selectedClients = customers
-        .filter((c) => selectedIds.has(c.id))
-        .map((c) => ({ id: c.id, name: c.name, email: c.email }));
-
-      const result = await callN8nAction({
+      const payload = {
         event: 'POSLJI_SPOROCILO',
         entity: 'communication',
-        data: {
-          subject,
-          message,
-          client_ids: Array.from(selectedIds),
-          clients: selectedClients,
-          company_id: companyId || '',
-          company_profile: companyPayload,
-        },
         company_id: companyId || '',
+        user_id: actor,
         actor,
         timestamp: new Date().toISOString(),
-        meta: { app: 'Integrate' as const, version: '1.0' as const },
+        data: {
+          company_id: companyId || '',
+          subject: subject.trim(),
+          message: message.trim(),
+          client_ids: clientIds,
+        },
+      };
+
+      const response = await fetch('/api/communication/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
-      if (result.ok) {
+      const result = await response.json();
+
+      if (result.ok !== false) {
+        const totals: SendTotals = result.totals ?? {
+          requested: clientIds.length,
+          sent: clientIds.length,
+          skipped: 0,
+        };
+        setSendResult({
+          totals,
+          sent: Array.isArray(result.sent) ? result.sent : [],
+          skipped: Array.isArray(result.skipped) ? result.skipped : [],
+        });
         setToast({
-          message: `Sporočilo uspešno poslano ${selectedIds.size} strankam!`,
+          message: `Poslano ${totals.sent} / ${totals.requested} sporočil`,
           type: 'success',
         });
-
-        // Reset form
-        setTimeout(() => {
-          setSelectedIds(new Set());
-          setSubject('');
-          setMessage('');
-          setStep(1);
-        }, 500);
       } else {
         setToast({
           message: result.error || 'Napaka pri pošiljanju sporočila',
@@ -281,16 +464,22 @@ export default function KomunikacijaPage() {
       }
     } catch (err) {
       console.error('Send error:', err);
-      setToast({
-        message: 'Napaka pri pošiljanju sporočila',
-        type: 'error',
-      });
+      setToast({ message: 'Napaka pri pošiljanju sporočila', type: 'error' });
     } finally {
       setIsSending(false);
     }
-  }, [selectedIds, subject, message, customers, companyId, actor, companyPayload, isSending]);
+  }, [selectedIds, subject, message, customers, companyId, actor, isSending]);
 
-  const remaining = mockQuota.total - mockQuota.used;
+  const handleReset = useCallback(() => {
+    setSendResult(null);
+    setSelectedIds(new Set());
+    setSubject('');
+    setMessage('');
+    setAvailableVariables([]);
+    setStep(1);
+  }, []);
+
+  const remaining = emailQuota.total - emailQuota.used;
 
   return (
     <ProtectedLayout>
@@ -310,13 +499,8 @@ export default function KomunikacijaPage() {
 
           {/* Page Header */}
           <div className="mb-6">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <h1 className="text-2xl font-bold text-[#1A1F36]">
-                Komunikacija
-              </h1>
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+              <h1 className="text-2xl font-bold text-[#1A1F36]">Komunikacija</h1>
               <p className="text-sm text-gray-500">
                 Pošljite sporočila svojim strankam hitro in enostavno
               </p>
@@ -331,9 +515,9 @@ export default function KomunikacijaPage() {
             className="mb-6"
           >
             <EmailQuotaCard
-              used={mockQuota.used}
-              total={mockQuota.total}
-              resetDate={mockQuota.resetDate}
+              used={emailQuota.used}
+              total={emailQuota.total}
+              resetDate={emailQuota.resetDate}
             />
           </motion.div>
 
@@ -351,9 +535,7 @@ export default function KomunikacijaPage() {
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Users className="h-5 w-5 text-[#1A1F36]" weight="bold" />
-                    <h2 className="text-lg font-semibold text-[#1A1F36]">
-                      Izbira strank
-                    </h2>
+                    <h2 className="text-lg font-semibold text-[#1A1F36]">Izbira strank</h2>
                   </div>
                   <CustomerList
                     customers={customers}
@@ -394,8 +576,6 @@ export default function KomunikacijaPage() {
                         ? `Naprej z ${selectedIds.size} ${
                             selectedIds.size === 1
                               ? 'stranko'
-                              : selectedIds.size < 5
-                              ? 'strankami'
                               : 'strankami'
                           }`
                         : 'Izberite stranke za nadaljevanje'}
@@ -419,11 +599,11 @@ export default function KomunikacijaPage() {
                 transition={{ duration: 0.25 }}
                 className="space-y-5"
               >
-                {/* Summary bar: back button + selected count */}
+                {/* Summary bar */}
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
-                    onClick={() => setStep(1)}
+                    onClick={() => { setStep(1); setSendResult(null); }}
                     className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                   >
                     <ArrowLeft className="h-4 w-4" weight="bold" />
@@ -439,22 +619,20 @@ export default function KomunikacijaPage() {
                   </span>
                 </div>
 
-                {/* Composer card: AI generator + message */}
+                {/* Composer card */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                   <div className="flex items-center gap-2 mb-5">
                     <PaperPlaneTilt className="h-5 w-5 text-[#1A1F36]" weight="bold" />
-                    <h2 className="text-lg font-semibold text-[#1A1F36]">
-                      Sestavi sporočilo
-                    </h2>
+                    <h2 className="text-lg font-semibold text-[#1A1F36]">Sestavi sporočilo</h2>
                   </div>
 
                   {/* AI Generator */}
                   <div className="mb-6">
                     <AIMessageGenerator
                       onGenerate={handleAIGenerate}
+                      onError={(msg) => setToast({ message: msg, type: 'error' })}
                       companyId={companyId || undefined}
                       actor={actor}
-                      companyPayload={companyPayload}
                     />
                   </div>
 
@@ -464,6 +642,7 @@ export default function KomunikacijaPage() {
                     onSubjectChange={setSubject}
                     message={message}
                     onMessageChange={setMessage}
+                    availableVariables={availableVariables}
                   />
                 </div>
 
@@ -474,15 +653,27 @@ export default function KomunikacijaPage() {
                   senderName={companyName}
                 />
 
-                {/* Send Section */}
-                <SendSection
-                  selectedCount={selectedIds.size}
-                  remainingQuota={remaining}
-                  hasMessage={message.trim().length > 0}
-                  hasSubject={subject.trim().length > 0}
-                  onSend={handleSend}
-                  sending={isSending}
-                />
+                {/* Send result or send section */}
+                <AnimatePresence mode="wait">
+                  {sendResult ? (
+                    <SendResultPanel
+                      key="result"
+                      result={sendResult}
+                      onReset={handleReset}
+                    />
+                  ) : (
+                    <motion.div key="send" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <SendSection
+                        selectedCount={selectedIds.size}
+                        remainingQuota={remaining}
+                        hasMessage={message.trim().length > 0}
+                        hasSubject={subject.trim().length > 0}
+                        onSend={handleSend}
+                        sending={isSending}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>

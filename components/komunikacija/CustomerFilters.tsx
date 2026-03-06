@@ -10,6 +10,7 @@ interface FilterOption {
 }
 
 const quickFilters: FilterOption[] = [
+  { id: 'all', label: 'Vse stranke' },
   { id: 'today', label: 'Danes' },
   { id: 'tomorrow', label: 'Jutri' },
   { id: 'this-week', label: 'Ta teden' },

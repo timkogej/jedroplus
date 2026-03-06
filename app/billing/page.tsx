@@ -334,6 +334,10 @@ function BillingPageContent() {
   const [currentPlanData, setCurrentPlanData] = useState<PlanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEnterpriseModal, setShowEnterpriseModal] = useState(false);
+  const [emailUsed, setEmailUsed] = useState(0);
+  const [emailTotal, setEmailTotal] = useState(0);
+  const [smsUsed, setSmsUsed] = useState(0);
+  const [smsTotal, setSmsTotal] = useState(0);
 
   useEffect(() => {
     const fetchCurrentPlan = async () => {
@@ -363,6 +367,49 @@ function BillingPageContent() {
     };
 
     fetchCurrentPlan();
+  }, [companyId]);
+
+  useEffect(() => {
+    const fetchQuotas = async () => {
+      if (!companyId) return;
+
+      try {
+        // Get company UUID
+        const { data: companyData } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('company_id', companyId)
+          .maybeSingle();
+
+        if (!companyData?.id) return;
+        const companyUuidLocal = companyData.id;
+
+        // Get usage
+        const [emailUsageRes, smsUsageRes, subRes] = await Promise.all([
+          supabase.from('company_email_usage').select('sent_count').eq('company_id', companyUuidLocal).maybeSingle(),
+          supabase.from('company_sms_usage').select('sent_count').eq('company_id', companyUuidLocal).maybeSingle(),
+          supabase.from('company_subscriptions').select('plan_id').eq('company_id', companyUuidLocal).maybeSingle(),
+        ]);
+
+        setEmailUsed(emailUsageRes.data?.sent_count ?? 0);
+        setSmsUsed(smsUsageRes.data?.sent_count ?? 0);
+
+        if (subRes.data?.plan_id) {
+          const { data: planData } = await supabase
+            .from('plans')
+            .select('email_quota_monthly, sms_quota_monthly')
+            .eq('id', subRes.data.plan_id)
+            .maybeSingle();
+
+          setEmailTotal(planData?.email_quota_monthly ?? 0);
+          setSmsTotal(planData?.sms_quota_monthly ?? 0);
+        }
+      } catch (err) {
+        console.error('Error fetching quotas:', err);
+      }
+    };
+
+    fetchQuotas();
   }, [companyId]);
 
   const handleManageSubscription = async () => {
@@ -561,12 +608,20 @@ function BillingPageContent() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-500">Porabljeno</span>
-                      <span className="font-semibold text-gray-900 text-lg">0</span>
+                      <span className="font-semibold text-gray-900 text-lg">{smsUsed}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Preostalo</span>
-                      <span className="font-semibold text-gray-900 text-lg">0</span>
+                      <span className="text-gray-500">Na voljo</span>
+                      <span className="font-semibold text-gray-900 text-lg">{smsTotal}</span>
                     </div>
+                    {smsTotal > 0 && (
+                      <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden mt-1">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 transition-all"
+                          style={{ width: `${Math.min(100, (smsUsed / smsTotal) * 100)}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -579,12 +634,20 @@ function BillingPageContent() {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-500">Porabljeno</span>
-                      <span className="font-semibold text-gray-900 text-lg">0</span>
+                      <span className="font-semibold text-gray-900 text-lg">{emailUsed}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Preostalo</span>
-                      <span className="font-semibold text-gray-900 text-lg">0</span>
+                      <span className="text-gray-500">Na voljo</span>
+                      <span className="font-semibold text-gray-900 text-lg">{emailTotal}</span>
                     </div>
+                    {emailTotal > 0 && (
+                      <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden mt-1">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 transition-all"
+                          style={{ width: `${Math.min(100, (emailUsed / emailTotal) * 100)}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

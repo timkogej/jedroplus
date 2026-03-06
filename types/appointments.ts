@@ -49,6 +49,7 @@ export interface AppointmentWithDetails {
   cas_konec: string;
   stranka_id?: string;
   stranka_ime: string;
+  stranka_priimek?: string; // Last name from Stranke table (for smart name truncation)
   stranka_email?: string;
   stranka_telefon?: string;
   stranka_barva?: string; // Client color - gradient CSS string
@@ -71,6 +72,18 @@ export interface AppointmentWithDetails {
     barva: string;
     trajanje: number;
     cena?: number | null;
+  } | null;
+  storitev_2?: {
+    id: string;
+    naziv: string;
+    barva: string;
+    trajanje: number;
+  } | null;
+  storitev_3?: {
+    id: string;
+    naziv: string;
+    barva: string;
+    trajanje: number;
   } | null;
   // Employee details
   zaposleni: {

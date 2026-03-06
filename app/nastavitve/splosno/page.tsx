@@ -14,6 +14,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { sendWebhook, WEBHOOK_EVENTS } from '@/components/utils/webhookUtils';
+import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 
 export default function GeneralSettingsPage() {
   const { companyId } = useCompany();
@@ -26,6 +27,7 @@ export default function GeneralSettingsPage() {
   // Company data for ID and Join Code
   const [companyIdDisplay, setCompanyIdDisplay] = useState('');
   const [joinCode, setJoinCode] = useState('');
+  const [companySlug, setCompanySlug] = useState('');
 
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -57,6 +59,16 @@ export default function GeneralSettingsPage() {
         if (data) {
           setCompanyIdDisplay(String(data['ID Podjetja'] ?? data['id_podjetja'] ?? companyId));
           setJoinCode(String(data['join_code'] ?? data['Join_code'] ?? ''));
+        }
+
+        // Load slug from companies table
+        const { data: companyRow } = await supabaseReadOnly
+          .from('companies')
+          .select('slug')
+          .eq('company_id', companyId)
+          .maybeSingle();
+        if (companyRow?.slug) {
+          setCompanySlug(String(companyRow.slug));
         }
       } catch (error) {
         console.error('Error loading settings:', error);
@@ -337,6 +349,24 @@ export default function GeneralSettingsPage() {
                   <div className="text-2xl font-bold text-gray-300">
                     —
                   </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200" />
+
+              {/* Company Slug */}
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-1">Slug podjetja</p>
+                  <p className="text-xs text-gray-400 mb-2">Končnica, ki se uporablja pri booking linkih in pri chatbotu na spletni strani</p>
+                  {companySlug ? (
+                    <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                      {companySlug}
+                    </div>
+                  ) : (
+                    <div className="text-2xl font-bold text-gray-300">—</div>
+                  )}
                 </div>
               </div>
 

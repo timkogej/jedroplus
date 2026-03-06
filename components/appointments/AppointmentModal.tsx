@@ -32,6 +32,8 @@ interface AppointmentModalProps {
   employees: Zaposleni[];
   onSave: (data: AppointmentFormData) => Promise<void>;
   isSaving?: boolean;
+  initialDate?: string;
+  initialStartTime?: string;
 }
 
 export interface AppointmentFormData {
@@ -124,6 +126,8 @@ function AppointmentModal({
   employees,
   onSave,
   isSaving = false,
+  initialDate,
+  initialStartTime,
 }: AppointmentModalProps) {
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
@@ -243,8 +247,8 @@ function AppointmentModal({
       // Set defaults for new appointment
       const now = new Date();
       setFormData({
-        datum: now.toISOString().split('T')[0],
-        cas_zacetek: '09:00',
+        datum: initialDate || now.toISOString().split('T')[0],
+        cas_zacetek: initialStartTime || '09:00',
         cas_konec: '10:00',
         stranka_ime: '',
         stranka_email: '',
@@ -277,7 +281,7 @@ function AppointmentModal({
       // In create mode, hide internal notes by default
       setShowInternalNotes(false);
     }
-  }, [appointment, mode, services, employees]);
+  }, [appointment, mode, services, employees, initialDate, initialStartTime]);
 
   // Track if end time was manually set by user
   const [endTimeManuallySet, setEndTimeManuallySet] = useState(false);
@@ -1362,15 +1366,18 @@ function AppointmentModal({
                   <p className="text-sm text-gray-400">-</p>
                 )
               ) : (
-                <textarea
-                  value={formData.opombe}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, opombe: e.target.value }))}
-                  placeholder="Opombe za stranko..."
-                  rows={3}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm
-                             text-[#1A1F36] placeholder-gray-400 focus:outline-none
-                             focus:ring-2 focus:ring-[#1A1F36]/20"
-                />
+                <>
+                  <textarea
+                    value={formData.opombe}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, opombe: e.target.value }))}
+                    placeholder="Opombe za stranko..."
+                    rows={3}
+                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm
+                               text-[#1A1F36] placeholder-gray-400 focus:outline-none
+                               focus:ring-2 focus:ring-[#1A1F36]/20"
+                  />
+                  <p className="mt-1 text-xs text-gray-400">Opombe se uporabljajo pri opomnikih in sporočanju</p>
+                </>
               )}
             </div>
 

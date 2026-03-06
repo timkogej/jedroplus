@@ -268,7 +268,7 @@ function AppointmentDetailModal({
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Stranka</label>
             <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
               <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
-                {appointment.stranka_ime?.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
+                {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
               </span>
               <div className="min-w-0">
                 <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
@@ -533,6 +533,7 @@ function Calendar({ companyId }: CalendarProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'view' | 'edit' | 'create'>('create');
   const [editingAppointment, setEditingAppointment] = useState<AppointmentWithDetails | null>(null);
+  const [newAppointmentInitials, setNewAppointmentInitials] = useState<{ date?: string; startTime?: string }>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isAbsenceModalOpen, setIsAbsenceModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -609,8 +610,8 @@ function Calendar({ companyId }: CalendarProps) {
       try {
         const { data } = await loadCompanyRow(companyId);
         if (data) {
-          // Check "Vsi dnevi koledar" column - if "true" show all days, if "false" show only weekdays
-          const vsiDnevi = data['Vsi dnevi koledar'];
+          // Check "koledar_vsi_dnevi" column - if "true" show all days, if "false" show only weekdays
+          const vsiDnevi = data['koledar_vsi_dnevi'];
           // Handle different formats: boolean, string "true"/"false", etc.
           if (vsiDnevi === false || vsiDnevi === 'false' || vsiDnevi === 'False') {
             setShowAllDays(false);
@@ -632,10 +633,11 @@ function Calendar({ companyId }: CalendarProps) {
 
     try {
       await callN8nAction({
-        event: 'DNEVI_KOLEDAR',
+        event: 'SPREMEMBA_PRIKAZ_DNI',
         entity: 'settings',
         data: {
           all_days: showAll, // true = vsi dnevi, false = samo tedenske dneve
+          koledar_vsi_dnevi: showAll,
         },
         company_id: companyId,
         actor,
@@ -685,13 +687,13 @@ function Calendar({ companyId }: CalendarProps) {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
-    // For 2day view, check if it spans two months
+    // For 2day (3-day) view, check if it spans two months
     if (currentView === '2day') {
-      const nextDay = addDays(currentDate, 1);
-      if (nextDay.getMonth() !== month || nextDay.getFullYear() !== year) {
+      const lastDay = addDays(currentDate, 2);
+      if (lastDay.getMonth() !== month || lastDay.getFullYear() !== year) {
         const [result1, result2] = await Promise.all([
           fetchAppointmentsForMonth(companyId, year, month),
-          fetchAppointmentsForMonth(companyId, nextDay.getFullYear(), nextDay.getMonth()),
+          fetchAppointmentsForMonth(companyId, lastDay.getFullYear(), lastDay.getMonth()),
         ]);
         if (result1.error) {
           setError(result1.error.message);
@@ -788,6 +790,24 @@ function Calendar({ companyId }: CalendarProps) {
     return filtered;
   }, [appointments, selectedEmployeeId, selectedServiceId, searchQuery]);
 
+  // Set of future dates (YYYY-MM-DD) that have at least one appointment — for sidebar dots
+  const appointmentDates = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dates = new Set<string>();
+    for (const apt of appointments) {
+      const rawDatum = apt.datum;
+      const aptDate = rawDatum.length === 10
+        ? new Date(rawDatum + 'T12:00:00')
+        : new Date(rawDatum);
+      aptDate.setHours(0, 0, 0, 0);
+      if (aptDate > today) {
+        dates.add(getLocalDateKey(aptDate));
+      }
+    }
+    return dates;
+  }, [appointments]);
+
   // Navigation handlers
   const handlePrev = useCallback(() => {
     setSlideDirection('backward');
@@ -826,6 +846,25 @@ function Calendar({ companyId }: CalendarProps) {
       }
     });
   }, [currentView]);
+
+  // Swipe gesture tracking for 2day (3-day) view
+  const touchStartX = useRef<number | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(diff) < 50) return;
+    if (diff < 0) {
+      handleNext();
+    } else {
+      handlePrev();
+    }
+  }, [handleNext, handlePrev]);
 
   const handleTodayClick = useCallback(() => {
     const today = new Date();
@@ -1085,6 +1124,14 @@ function Calendar({ companyId }: CalendarProps) {
 
   // Modal handlers
   const handleNewAppointment = useCallback(() => {
+    setNewAppointmentInitials({});
+    setEditingAppointment(null);
+    setModalMode('create');
+    setIsModalOpen(true);
+  }, []);
+
+  const handleGridSlotClick = useCallback((date: Date, time: string) => {
+    setNewAppointmentInitials({ date: getLocalDateKey(date), startTime: time });
     setEditingAppointment(null);
     setModalMode('create');
     setIsModalOpen(true);
@@ -1342,11 +1389,12 @@ function Calendar({ companyId }: CalendarProps) {
         return aptDateKey === currentDateKey;
       }).length;
     } else if (currentView === '2day') {
-      // Count appointments for current day and next day
-      const nextDateKey = getLocalDateKey(addDays(currentDate, 1));
+      // Count appointments for current day and next 2 days (3-day view)
+      const day2Key = getLocalDateKey(addDays(currentDate, 1));
+      const day3Key = getLocalDateKey(addDays(currentDate, 2));
       return filteredAppointments.filter(apt => {
         const aptDateKey = getLocalDateKey(new Date(apt.datum));
-        return aptDateKey === currentDateKey || aptDateKey === nextDateKey;
+        return aptDateKey === currentDateKey || aptDateKey === day2Key || aptDateKey === day3Key;
       }).length;
     } else if (currentView === 'week') {
       // Count appointments for current week
@@ -1426,8 +1474,8 @@ function Calendar({ companyId }: CalendarProps) {
             </div>
           </div>
 
-          {/* Date strip – hidden in month and week view (week grid already shows all day headers) */}
-          {currentView !== 'month' && currentView !== 'week' && (
+          {/* Date strip – hidden in month, week, day and 2day views */}
+          {false && currentView !== 'month' && currentView !== 'week' && (
             <DateStrip
               currentDate={currentDate}
               currentView={currentView}
@@ -1477,6 +1525,7 @@ function Calendar({ companyId }: CalendarProps) {
                   onAppointmentClick={handleAppointmentClick}
                   onDateClick={handleDateClick}
                   showAllDays={showAllDays}
+                  onGridSlotClick={handleGridSlotClick}
                 />
               )}
               {currentView === 'day' && (
@@ -1508,6 +1557,7 @@ function Calendar({ companyId }: CalendarProps) {
                       services={services}
                       onAppointmentClick={handleAppointmentClick}
                       employees={employees}
+                      onGridSlotClick={handleGridSlotClick}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -1524,37 +1574,44 @@ function Calendar({ companyId }: CalendarProps) {
                 />
               )}
               {currentView === '2day' && (
-                <AnimatePresence mode="popLayout" initial={false} custom={slideDirection}>
-                  <motion.div
-                    key={animKey}
-                    custom={slideDirection}
-                    variants={{
-                      enter: (dir: 'forward' | 'backward') => ({
-                        x: dir === 'forward' ? '100%' : '-100%',
-                        opacity: 0.6,
-                      }),
-                      center: { x: 0, opacity: 1 },
-                      exit: (dir: 'forward' | 'backward') => ({
-                        x: dir === 'forward' ? '-30%' : '30%',
-                        opacity: 0.4,
-                      }),
-                    }}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.8 }}
-                    className="h-full"
-                  >
-                    <TwoDayView
-                      currentDate={currentDate}
-                      appointments={filteredAppointments}
-                      absences={absences}
-                      services={services}
-                      onAppointmentClick={handleAppointmentClick}
-                      onDateClick={handleDateClick}
-                    />
-                  </motion.div>
-                </AnimatePresence>
+                <div
+                  className="h-full"
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  <AnimatePresence mode="popLayout" initial={false} custom={slideDirection}>
+                    <motion.div
+                      key={animKey}
+                      custom={slideDirection}
+                      variants={{
+                        enter: (dir: 'forward' | 'backward') => ({
+                          x: dir === 'forward' ? '100%' : '-100%',
+                          opacity: 0.6,
+                        }),
+                        center: { x: 0, opacity: 1 },
+                        exit: (dir: 'forward' | 'backward') => ({
+                          x: dir === 'forward' ? '-30%' : '30%',
+                          opacity: 0.4,
+                        }),
+                      }}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ type: 'spring', stiffness: 380, damping: 38, mass: 0.8 }}
+                      className="h-full"
+                    >
+                      <TwoDayView
+                        currentDate={currentDate}
+                        appointments={filteredAppointments}
+                        absences={absences}
+                        services={services}
+                        onAppointmentClick={handleAppointmentClick}
+                        onDateClick={handleDateClick}
+                        onGridSlotClick={handleGridSlotClick}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
               )}
             </>
           )}
@@ -1583,6 +1640,7 @@ function Calendar({ companyId }: CalendarProps) {
         onToggle={handleToggleSidebar}
         showAllDays={showAllDays}
         onShowAllDaysChange={handleShowAllDaysChange}
+        appointmentDates={appointmentDates}
       />
 
       {/* Appointment detail modal (view) */}
@@ -1611,6 +1669,8 @@ function Calendar({ companyId }: CalendarProps) {
         employees={employees}
         onSave={handleSaveAppointment}
         isSaving={isSaving}
+        initialDate={newAppointmentInitials.date}
+        initialStartTime={newAppointmentInitials.startTime}
       />
 
       {/* Absence modal */}
@@ -1684,7 +1744,7 @@ function Calendar({ companyId }: CalendarProps) {
                 {/* Client with initials */}
                 <div className="flex items-center gap-3">
                   <span className="text-lg font-bold flex-shrink-0 bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                    {completeTarget.stranka_ime?.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
+                    {(() => { const p = (completeTarget.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
                   </span>
                   <div>
                     <p className="text-xs text-gray-500">Stranka</p>

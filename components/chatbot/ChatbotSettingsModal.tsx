@@ -9,6 +9,7 @@ import {
   Input,
   Textarea,
   Select,
+  Switch,
   SaveIndicator,
 } from '@/components/settings';
 import { useCompany } from '@/app/company-context';
@@ -56,6 +57,7 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
   const { companyId } = useCompany();
   const { user } = useAuth();
 
+  const [chatbotEnabled, setChatbotEnabled] = useState(true);
   const [language, setLanguage] = useState('sl');
   const [name, setName] = useState('');
   const [tone, setTone] = useState('');
@@ -102,6 +104,8 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
         const { data } = await loadCompanyRow(companyId);
 
         if (data) {
+          const enabledVal = String(data?.['chatbot_omogoci'] ?? 'yes').toLowerCase().trim();
+          setChatbotEnabled(enabledVal === 'true' || enabledVal === 'yes');
           setLanguage(String(data['chatbot jezik'] ?? data['chatbot_jezik'] ?? 'sl'));
           setName(String(data['chatbot_name'] ?? data['Chatbot_name'] ?? ''));
           setTone(String(data['Ton komunikacije chatbot'] ?? data['ton_komunikacije_chatbot'] ?? ''));
@@ -147,6 +151,7 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
         actor,
         timestamp: new Date().toISOString(),
         data: {
+          chatbot_omogoci: chatbotEnabled ? 'yes' : 'no',
           'chatbot jezik': language,
           'Ton komunikacije chatbot': tone,
           'chatbot_pozdrav': greeting,
@@ -253,6 +258,19 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
                 </div>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {/* Enabled/Disabled */}
+                  <SettingsSection title="Splošno" description="Aktivacija chatbota">
+                    <SettingRow
+                      label="Omogoči chatbot"
+                      description="Ali je chatbot aktiven na vaši spletni strani"
+                    >
+                      <Switch
+                        checked={chatbotEnabled}
+                        onChange={setChatbotEnabled}
+                      />
+                    </SettingRow>
+                  </SettingsSection>
+
                   {/* Language Settings */}
                   <SettingsSection title="Jezik" description="V katerem jeziku naj chatbot komunicira">
                     <SettingRow label="Jezik za chatbot" description="Izberite jezik komunikacije">

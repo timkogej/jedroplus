@@ -195,11 +195,12 @@ export async function fetchAppointmentsForMonth(
   month: number // 0-indexed (0 = January)
 ): Promise<{ data: AppointmentWithDetails[] | null; error: Error | null }> {
   try {
-    // Fetch all bookings, services, and staff
-    const [bookingsRes, servicesRes, staffRes] = await Promise.all([
+    // Fetch all bookings, services, staff, and clients
+    const [bookingsRes, servicesRes, staffRes, clientsRes] = await Promise.all([
       fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
+      fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),
     ]);
 
     if (bookingsRes.error) {
@@ -209,6 +210,7 @@ export async function fetchAppointmentsForMonth(
     const bookings = bookingsRes.data ?? [];
     const services = servicesRes.data ?? [];
     const staff = staffRes.data ?? [];
+    const clients = clientsRes.data ?? [];
 
     // Build lookup maps
     const serviceMap = new Map<string, Storitev>();
@@ -224,6 +226,19 @@ export async function fetchAppointmentsForMonth(
       const person = parseStaff(row);
       if (person) {
         staffMap.set(person.id, person);
+      }
+    }
+
+    // Build client surname map: clientId → priimek (from Stranke table)
+    const clientPriimekMap = new Map<string, string>();
+    for (const row of clients) {
+      const rowKeys = Object.keys(row);
+      const idField = rowKeys.find(k => ['ID stranke', 'id', 'ID_stranke', 'client_id'].includes(k));
+      const priimekField = rowKeys.find(k => ['Priimek', 'priimek', 'last_name', 'lastName', 'surname'].includes(k));
+      if (idField && priimekField) {
+        const cid = String(row[idField] ?? '');
+        const priimek = String(row[priimekField] ?? '');
+        if (cid && priimek) clientPriimekMap.set(cid, priimek);
       }
     }
 
@@ -318,6 +333,10 @@ export async function fetchAppointmentsForMonth(
       // Extract additional service IDs from raw row
       const { serviceId2, serviceId3 } = extractAdditionalServiceIds(row);
 
+      // Resolve additional service objects directly (prevents color flash on initial render)
+      const storitev2 = serviceId2 ? (serviceMap.get(serviceId2) || null) : null;
+      const storitev3 = serviceId3 ? (serviceMap.get(serviceId3) || null) : null;
+
       appointments.push({
         id,
         datum: bookingDate.toISOString(),
@@ -325,6 +344,7 @@ export async function fetchAppointmentsForMonth(
         cas_konec: endTime,
         stranka_id: clientId || undefined,
         stranka_ime: clientName,
+        stranka_priimek: (clientId && clientPriimekMap.get(clientId)) || undefined,
         stranka_email: clientEmail || undefined,
         stranka_telefon: clientPhone || undefined,
         storitev_id: serviceId || undefined,
@@ -335,6 +355,8 @@ export async function fetchAppointmentsForMonth(
         opombe: notes || undefined,
         interne_opombe: interneOpombe || undefined,
         storitev: serviceData,
+        storitev_2: storitev2,
+        storitev_3: storitev3,
         zaposleni: staffMap.get(staffId) || null,
       });
     }
@@ -576,11 +598,12 @@ export async function fetchAllAppointments(
   companyId: string
 ): Promise<{ data: AppointmentWithDetails[] | null; error: Error | null }> {
   try {
-    // Fetch all bookings, services, and staff
-    const [bookingsRes, servicesRes, staffRes] = await Promise.all([
+    // Fetch all bookings, services, staff, and clients
+    const [bookingsRes, servicesRes, staffRes, clientsRes] = await Promise.all([
       fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
+      fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),
     ]);
 
     if (bookingsRes.error) {
@@ -590,6 +613,7 @@ export async function fetchAllAppointments(
     const bookings = bookingsRes.data ?? [];
     const services = servicesRes.data ?? [];
     const staff = staffRes.data ?? [];
+    const clients = clientsRes.data ?? [];
 
     // Build lookup maps
     const serviceMap = new Map<string, Storitev>();
@@ -605,6 +629,19 @@ export async function fetchAllAppointments(
       const person = parseStaff(row);
       if (person) {
         staffMap.set(person.id, person);
+      }
+    }
+
+    // Build client surname map: clientId → priimek
+    const clientPriimekMap = new Map<string, string>();
+    for (const row of clients) {
+      const rowKeys = Object.keys(row);
+      const idField = rowKeys.find(k => ['ID stranke', 'id', 'ID_stranke', 'client_id'].includes(k));
+      const priimekField = rowKeys.find(k => ['Priimek', 'priimek', 'last_name', 'lastName', 'surname'].includes(k));
+      if (idField && priimekField) {
+        const cid = String(row[idField] ?? '');
+        const priimek = String(row[priimekField] ?? '');
+        if (cid && priimek) clientPriimekMap.set(cid, priimek);
       }
     }
 
@@ -699,6 +736,10 @@ export async function fetchAllAppointments(
       // Extract additional service IDs from raw row
       const { serviceId2, serviceId3 } = extractAdditionalServiceIds(row);
 
+      // Resolve additional service objects directly (prevents color flash on initial render)
+      const storitev2 = serviceId2 ? (serviceMap.get(serviceId2) || null) : null;
+      const storitev3 = serviceId3 ? (serviceMap.get(serviceId3) || null) : null;
+
       appointments.push({
         id,
         datum: bookingDate.toISOString(),
@@ -706,6 +747,7 @@ export async function fetchAllAppointments(
         cas_konec: endTime,
         stranka_id: clientId || undefined,
         stranka_ime: clientName,
+        stranka_priimek: (clientId && clientPriimekMap.get(clientId)) || undefined,
         stranka_email: clientEmail || undefined,
         stranka_telefon: clientPhone || undefined,
         storitev_id: serviceId || undefined,
@@ -716,6 +758,8 @@ export async function fetchAllAppointments(
         opombe: notes || undefined,
         interne_opombe: interneOpombe || undefined,
         storitev: serviceData,
+        storitev_2: storitev2,
+        storitev_3: storitev3,
         zaposleni: staffMap.get(staffId) || null,
       });
     }

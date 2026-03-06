@@ -27,6 +27,7 @@ interface WeekViewProps {
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
   onDateClick?: (date: Date) => void;
   showAllDays?: boolean;
+  onGridSlotClick?: (date: Date, time: string) => void;
 }
 
 // Calculate overlapping appointments and assign columns
@@ -101,7 +102,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function WeekView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick, showAllDays = true }: WeekViewProps) {
+function WeekView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick, showAllDays = true, onGridSlotClick }: WeekViewProps) {
   const [isMobile, setIsMobile] = useState(false);
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const gridScrollRef = useRef<HTMLDivElement>(null);
@@ -220,6 +221,20 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
     });
   }, [isMobile, weekDays, columnCount]);
 
+  const handleColumnClick = useCallback((e: React.MouseEvent, day: Date) => {
+    if (!onGridSlotClick) return;
+    const col = e.currentTarget as HTMLElement;
+    const rect = col.getBoundingClientRect();
+    const clickY = e.clientY - rect.top;
+    const totalMinutes = (clickY / HOUR_HEIGHT) * 60;
+    let hour = Math.floor(totalMinutes / 60) + START_HOUR;
+    let minute = Math.round((totalMinutes % 60) / 30) * 30;
+    if (minute >= 60) { hour++; minute = 0; }
+    hour = Math.max(START_HOUR, Math.min(hour, END_HOUR - 1));
+    const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    onGridSlotClick(day, time);
+  }, [onGridSlotClick]);
+
   return (
     <div className="flex h-full flex-col">
       {/* Day headers */}
@@ -319,8 +334,10 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
                 key={dateKey}
                 className={`relative
                            ${isCurrentDay ? 'bg-[#1A1F36]/[0.015]' : ''}
-                           ${dayIndex < weekDays.length - 1 ? 'border-r' : ''}`}
+                           ${dayIndex < weekDays.length - 1 ? 'border-r' : ''}
+                           ${onGridSlotClick ? 'cursor-pointer' : ''}`}
                 style={dayIndex < weekDays.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
+                onClick={onGridSlotClick ? (e) => handleColumnClick(e, day) : undefined}
               >
                 {/* Render absences as background blocks */}
                 {dayAbsencesForGrid.map((absence) => {
