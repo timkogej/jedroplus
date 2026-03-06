@@ -61,9 +61,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={pathname}
-              initial={isMobile ? { opacity: 0, y: 48 } : false}
+              initial={isMobile ? { opacity: 0, y: 48 } : undefined}
               animate={{ opacity: 1, y: 0 }}
-              exit={isMobile ? { opacity: 0, y: 24 } : false}
+              exit={isMobile ? { opacity: 0, y: 24 } : undefined}
               transition={
                 isMobile
                   ? { type: 'spring', stiffness: 380, damping: 32 }
