@@ -16,6 +16,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
+import { TemplateEditor, migrateTemplate } from '@/components/reminders/TemplateEditor';
 
 const SENDING_LANGUAGES = [
   { value: 'sl', label: 'Slovenščina' },
@@ -61,6 +62,21 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
   const [smsIncludeNotesPo, setSmsIncludeNotesPo] = useState(false);
   const [smsTipPo, setSmsTipPo] = useState(false);
   const [smsTemplatePo, setSmsTemplatePo] = useState('');
+
+  // SMS sender ID (read-only from Supabase)
+  const [smsSenderId, setSmsSenderId] = useState('');
+
+  // Last custom templates from Supabase (read-only display, editable)
+  const [lastnaPrelogaPred, setLastnaPrelogaPred] = useState('');
+  const [lastnaPredlogaPo, setLastnaPredlogaPo] = useState('');
+
+  // SMS Supabase column values for before/after
+  const [smsStoritevPred, setSmsStoritevPred] = useState(false);
+  const [smsOpombePred, setSmsOpombePred] = useState(false);
+  const [smsNavodilaPred, setSmsNavodilaPred] = useState(false);
+  const [smsStoritevPo, setSmsStoritevPo] = useState(false);
+  const [smsOpombePo, setSmsOpombePo] = useState(false);
+  const [smsNavodilaPo, setSmsNavodilaPo] = useState(false);
 
   // Nasveti glede na storitev: 'yes' | 'no' | 'auto'
   const [nastvetiStoritev, setNastvetiStoritev] = useState<'yes' | 'no' | 'auto'>('auto');
@@ -114,18 +130,36 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           setNastvetiStoritev(nsVal === 'yes' ? 'yes' : nsVal === 'no' ? 'no' : 'auto');
 
           // SMS config - before
-          setSmsModePred(data['sms_mode_pred'] === 'manual' ? 'manual' : 'ai');
+          const smsTypePred = String(data['sms_type_pred'] ?? data['sms_mode_pred'] ?? 'AI').toUpperCase();
+          setSmsModePred(smsTypePred === 'LP' ? 'manual' : 'ai');
           setSmsIncludeServicePred(data['sms_include_service_pred'] !== false && data['sms_include_service_pred'] !== 'false');
           setSmsIncludeNotesPred(data['sms_include_notes_pred'] === true || data['sms_include_notes_pred'] === 'true');
           setSmsTipPred(data['sms_tip_pred'] === true || data['sms_tip_pred'] === 'true');
-          setSmsTemplatePred(String(data['sms_template_pred'] ?? ''));
+          setSmsTemplatePred(migrateTemplate(String(data['lastna_predloga_pred'] ?? data['sms_template_pred'] ?? '')));
 
           // SMS config - after
-          setSmsModePo(data['sms_mode_po'] === 'manual' ? 'manual' : 'ai');
+          const smsTypePo = String(data['sms_type_po'] ?? data['sms_mode_po'] ?? 'AI').toUpperCase();
+          setSmsModePo(smsTypePo === 'LP' ? 'manual' : 'ai');
           setSmsIncludeServicePo(data['sms_include_service_po'] !== false && data['sms_include_service_po'] !== 'false');
           setSmsIncludeNotesPo(data['sms_include_notes_po'] === true || data['sms_include_notes_po'] === 'true');
           setSmsTipPo(data['sms_tip_po'] === true || data['sms_tip_po'] === 'true');
-          setSmsTemplatePo(String(data['sms_template_po'] ?? ''));
+          setSmsTemplatePo(migrateTemplate(String(data['lastna_predloga_po'] ?? data['sms_template_po'] ?? '')));
+
+          // SMS sender ID
+          setSmsSenderId(String(data['sms_sender_id'] ?? ''));
+
+          // SMS Supabase columns - use true/yes for enabled
+          const parseBool = (v: unknown) => {
+            if (typeof v === 'boolean') return v;
+            if (typeof v === 'string') return v.toLowerCase() === 'true' || v.toLowerCase() === 'yes';
+            return false;
+          };
+          setSmsStoritevPred(parseBool(data['sms_storitev_pred']));
+          setSmsOpombePred(parseBool(data['sms_opombe_pred']));
+          setSmsNavodilaPred(parseBool(data['sms_navodila_pred']));
+          setSmsStoritevPo(parseBool(data['sms_storitev_po']));
+          setSmsOpombePo(parseBool(data['sms_opombe_po']));
+          setSmsNavodilaPo(parseBool(data['sms_navodila_po']));
         }
       } catch (error) {
         console.error('Error loading reminder settings:', error);
@@ -200,19 +234,32 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
               template: smsModePo === 'manual' ? smsTemplatePo : null,
             } : null,
           },
+          'sms_sender_id': smsSenderId,
+          'sms_type_pred': smsModePred === 'manual' ? 'LP' : 'AI',
+          'sms_type_po': smsModePo === 'manual' ? 'LP' : 'AI',
+          'lastna_predloga_pred': smsModePred === 'manual' ? smsTemplatePred : lastnaPrelogaPred,
+          'lastna_predloga_po': smsModePo === 'manual' ? smsTemplatePo : lastnaPredlogaPo,
+          'sms_storitev_pred': smsStoritevPred,
+          'sms_opombe_pred': smsOpombePred,
+          'sms_navodila_pred': smsNavodilaPred,
+          'sms_storitev_po': smsStoritevPo,
+          'sms_opombe_po': smsOpombePo,
+          'sms_navodila_po': smsNavodilaPo,
           sms_pred: {
             mode: smsModePred,
-            include_service: smsIncludeServicePred,
-            include_notes: smsIncludeNotesPred,
-            include_tip: smsTipPred,
+            include_service: smsStoritevPred,
+            include_notes: smsOpombePred,
+            include_navodila: smsNavodilaPred,
             template: smsTemplatePred,
+            lastna_predloga: smsModePred === 'manual' ? smsTemplatePred : lastnaPrelogaPred,
           },
           sms_po: {
             mode: smsModePo,
-            include_service: smsIncludeServicePo,
-            include_notes: smsIncludeNotesPo,
-            include_tip: smsTipPo,
+            include_service: smsStoritevPo,
+            include_notes: smsOpombePo,
+            include_navodila: smsNavodilaPo,
             template: smsTemplatePo,
+            lastna_predloga: smsModePo === 'manual' ? smsTemplatePo : lastnaPredlogaPo,
           },
         },
       };
@@ -360,6 +407,22 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                       </div>
                     </SettingRow>
 
+                    {/* SMS Sender ID - LOCKED, read from Supabase */}
+                    <SettingRow
+                      label="ID pošiljatelja SMS"
+                      description="Ime pošiljatelja ki se prikaže pri SMS sporočilih"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 font-mono text-sm text-gray-700 p-3 bg-gray-100 rounded-xl border-2 border-gray-200">
+                          {smsSenderId || <span className="text-gray-400 font-sans">Ni nastavljeno</span>}
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-400">
+                          <Lock className="h-4 w-4" weight="bold" />
+                          <span className="text-xs">Zaklenjeno</span>
+                        </div>
+                      </div>
+                    </SettingRow>
+
                     {/* Nasveti glede na storitev */}
                     <SettingRow
                       label="Nasveti glede na storitev"
@@ -494,49 +557,92 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                             </div>
 
                             {smsModePred === 'ai' && (
-                              <div className="space-y-3">
+                              <div className="space-y-4">
                                 <p className="text-xs text-gray-500">AI bo sestavil SMS na podlagi izbranih podatkov:</p>
-                                {[
-                                  { label: 'Vključi storitev', value: smsIncludeServicePred, set: setSmsIncludeServicePred },
-                                  { label: 'Vključi opombo o terminu', value: smsIncludeNotesPred, set: setSmsIncludeNotesPred },
-                                  { label: 'Vključi nasvet', value: smsTipPred, set: setSmsTipPred },
-                                ].map(({ label, value, set }) => (
-                                  <div key={label} className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-700">{label}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => set(!value)}
-                                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${value ? 'bg-violet-500' : 'bg-gray-200'}`}
-                                    >
-                                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${value ? 'translate-x-6' : 'translate-x-1'}`} />
-                                    </button>
+
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <span className="text-sm text-gray-700">Vključi storitev</span>
+                                    <p className="text-xs text-gray-400 mt-0.5">Omeni storitev termina v opomniku.</p>
                                   </div>
-                                ))}
+                                  <button
+                                    type="button"
+                                    onClick={() => setSmsStoritevPred(!smsStoritevPred)}
+                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsStoritevPred ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                  >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsStoritevPred ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </button>
+                                </div>
+
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <span className="text-sm text-gray-700">Vključi opombe o terminu</span>
+                                    <p className="text-xs text-gray-400 mt-0.5">Vključi opombe termina in morebitne opombe stranke.</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSmsOpombePred(!smsOpombePred)}
+                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsOpombePred ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                  >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsOpombePred ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </button>
+                                </div>
+
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <span className="text-sm text-gray-700">Vključi navodila za opomnike</span>
+                                    <p className="text-xs text-gray-400 mt-0.5">Vpišite spodaj navodila, ki jih AI upošteva pri sestavljanju opomnika.</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSmsNavodilaPred(!smsNavodilaPred)}
+                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsNavodilaPred ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                  >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsNavodilaPred ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </button>
+                                </div>
+
+                                {smsNavodilaPred && (
+                                  <div className="space-y-2">
+                                    <textarea
+                                      value={nastavitvePred}
+                                      onChange={(e) => setNastavitvePred(e.target.value)}
+                                      rows={5}
+                                      placeholder="Npr: Stranke vedno nagovorite po imenu. Pred masažo opomni, da naj pridejo spočiti in ne takoj po jedi. Za storitev 'gel lak' opomni, da naj ne namakajo nohtov vsaj dan prej. Ton naj bo topel in profesionalen."
+                                      className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-violet-300 focus:outline-none resize-none"
+                                    />
+                                    <p className="text-xs text-gray-400">Navedite poslovne navade, posebne nasvete pred določenimi storitvami, kaj naj AI omeni ali izpostavi, kakšen odnos do stranke si želite ipd.</p>
+                                  </div>
+                                )}
                               </div>
                             )}
 
                             {smsModePred === 'manual' && (
                               <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <p className="text-xs text-gray-500">Lastna predloga SMS sporočila (max 160 znakov)</p>
-                                  <span className={`text-xs font-medium ${smsTemplatePred.length > 160 ? 'text-red-500' : 'text-gray-400'}`}>
-                                    {smsTemplatePred.length}/160
-                                  </span>
-                                </div>
-                                <textarea
+                                <p className="text-xs text-gray-500">Predloga SMS sporočila (max 160 znakov)</p>
+                                <TemplateEditor
                                   value={smsTemplatePred}
-                                  onChange={(e) => {
-                                    const val = e.target.value.replace(/[^\x00-\x7F\u00C0-\u024F\u0410-\u044F ]/g, '');
-                                    if (val.length <= 160) setSmsTemplatePred(val);
-                                  }}
-                                  rows={4}
+                                  onChange={setSmsTemplatePred}
                                   maxLength={160}
-                                  placeholder="Npr: Spomin na vaš termin jutri ob {ura}. Salon {ime}. Za odpoved pokličite {tel}."
-                                  className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-violet-300 focus:outline-none resize-none"
+                                  placeholder="Npr: Spomin na vaš termin jutri ob {{cas}}. {{ime_podjetja}}. Za odpoved pokličite {{telefon_podjetja}}."
+                                  rows={4}
                                 />
-                                <p className="text-xs text-gray-400">Brez emojijev in posebnih znakov. Dovoljeni so samo osnovni znaki.</p>
+                                <p className="text-xs text-gray-400">Brez emojijev in posebnih znakov.</p>
                               </div>
                             )}
+                          </div>
+                        )}
+
+                        {chanelPred === 'email' && (
+                          <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl space-y-3">
+                            <div className="font-semibold text-gray-900 text-sm">Navodila za opomnik pred terminom</div>
+                            <p className="text-xs text-gray-500">Dodatna navodila ali informacije za opomnik pred terminom</p>
+                            <Textarea
+                              value={nastavitvePred}
+                              onChange={(e) => setNastavitvePred(e.target.value)}
+                              rows={5}
+                              placeholder="Npr: Prosimo pridite 5 minut pred terminom. Parkirišče je na zadnji strani stavbe."
+                            />
                           </div>
                         )}
 
@@ -546,21 +652,6 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                             Fiksno: <strong>1 dan pred terminom</strong>
                           </div>
                         </div>
-
-                        {chanelPred === 'email' && (
-                          <SettingRow
-                            label="Navodila za opomnik"
-                            description="Dodatna navodila ali informacije za opomnik pred terminom"
-                            fullWidth
-                          >
-                            <Textarea
-                              value={nastavitvePred}
-                              onChange={(e) => setNastavitvePred(e.target.value)}
-                              rows={5}
-                              placeholder="Npr: Prosimo pridite 5 minut pred terminom. Parkirišče je na zadnji strani stavbe."
-                            />
-                          </SettingRow>
-                        )}
                       </>
                     )}
                   </SettingsSection>
@@ -620,49 +711,92 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                             </div>
 
                             {smsModePo === 'ai' && (
-                              <div className="space-y-3">
+                              <div className="space-y-4">
                                 <p className="text-xs text-gray-500">AI bo sestavil SMS na podlagi izbranih podatkov:</p>
-                                {[
-                                  { label: 'Vključi storitev', value: smsIncludeServicePo, set: setSmsIncludeServicePo },
-                                  { label: 'Vključi opombo po terminu', value: smsIncludeNotesPo, set: setSmsIncludeNotesPo },
-                                  { label: 'Vključi nasvet', value: smsTipPo, set: setSmsTipPo },
-                                ].map(({ label, value, set }) => (
-                                  <div key={label} className="flex items-center justify-between">
-                                    <span className="text-sm text-gray-700">{label}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() => set(!value)}
-                                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${value ? 'bg-violet-500' : 'bg-gray-200'}`}
-                                    >
-                                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${value ? 'translate-x-6' : 'translate-x-1'}`} />
-                                    </button>
+
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <span className="text-sm text-gray-700">Vključi storitev</span>
+                                    <p className="text-xs text-gray-400 mt-0.5">Omeni storitev termina v sporočilu po obisku.</p>
                                   </div>
-                                ))}
+                                  <button
+                                    type="button"
+                                    onClick={() => setSmsStoritevPo(!smsStoritevPo)}
+                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsStoritevPo ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                  >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsStoritevPo ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </button>
+                                </div>
+
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <span className="text-sm text-gray-700">Vključi opombe po terminu</span>
+                                    <p className="text-xs text-gray-400 mt-0.5">Vključi opombe, ki jih napišete ob zaključku termina.</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSmsOpombePo(!smsOpombePo)}
+                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsOpombePo ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                  >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsOpombePo ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </button>
+                                </div>
+
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <span className="text-sm text-gray-700">Vključi navodila za opomnike</span>
+                                    <p className="text-xs text-gray-400 mt-0.5">Vpišite spodaj navodila, ki jih AI upošteva pri sestavljanju sporočila po terminu.</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSmsNavodilaPo(!smsNavodilaPo)}
+                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsNavodilaPo ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                  >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsNavodilaPo ? 'translate-x-6' : 'translate-x-1'}`} />
+                                  </button>
+                                </div>
+
+                                {smsNavodilaPo && (
+                                  <div className="space-y-2">
+                                    <textarea
+                                      value={nastavitvePo}
+                                      onChange={(e) => setNastavitvePo(e.target.value)}
+                                      rows={5}
+                                      placeholder="Npr: Po masaži priporočite, da stranka pije veliko vode. Za storitev 'barvanje las' opomni, naj se izogiba mokrim lasom vsaj 24 ur. Stranki zaželite lep dan in jo povabite k ponovnemu obisku."
+                                      className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-violet-300 focus:outline-none resize-none"
+                                    />
+                                    <p className="text-xs text-gray-400">Navedite poslovne navade, posebne nasvete po določenih storitvah, kaj naj AI omeni ali priporoči, ter kakšen odnos do stranke si želite po obisku.</p>
+                                  </div>
+                                )}
                               </div>
                             )}
 
                             {smsModePo === 'manual' && (
                               <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <p className="text-xs text-gray-500">Lastna predloga SMS sporočila (max 160 znakov)</p>
-                                  <span className={`text-xs font-medium ${smsTemplatePo.length > 160 ? 'text-red-500' : 'text-gray-400'}`}>
-                                    {smsTemplatePo.length}/160
-                                  </span>
-                                </div>
-                                <textarea
+                                <p className="text-xs text-gray-500">Predloga SMS sporočila (max 160 znakov)</p>
+                                <TemplateEditor
                                   value={smsTemplatePo}
-                                  onChange={(e) => {
-                                    const val = e.target.value.replace(/[^\x00-\x7F\u00C0-\u024F\u0410-\u044F ]/g, '');
-                                    if (val.length <= 160) setSmsTemplatePo(val);
-                                  }}
-                                  rows={4}
+                                  onChange={setSmsTemplatePo}
                                   maxLength={160}
-                                  placeholder="Npr: Hvala za obisk! Za naslednji termin nas kontaktirajte na {tel}."
-                                  className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-violet-300 focus:outline-none resize-none"
+                                  placeholder="Npr: Hvala za obisk! Za naslednji termin nas kontaktirajte na {{telefon_podjetja}}."
+                                  rows={4}
                                 />
-                                <p className="text-xs text-gray-400">Brez emojijev in posebnih znakov. Dovoljeni so samo osnovni znaki.</p>
+                                <p className="text-xs text-gray-400">Brez emojijev in posebnih znakov.</p>
                               </div>
                             )}
+                          </div>
+                        )}
+
+                        {chanelPo === 'email' && (
+                          <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl space-y-3">
+                            <div className="font-semibold text-gray-900 text-sm">Navodila za opomnik po terminu</div>
+                            <p className="text-xs text-gray-500">Dodatna navodila ali informacije za follow-up po terminu</p>
+                            <Textarea
+                              value={nastavitvePo}
+                              onChange={(e) => setNastavitvePo(e.target.value)}
+                              rows={5}
+                              placeholder="Npr: Hvala za obisk! Za najboljše rezultate priporočamo uporabo našega specialnega šampona."
+                            />
                           </div>
                         )}
 
@@ -672,21 +806,6 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                             Fiksno: <strong>Takoj po zaključenem terminu</strong>
                           </div>
                         </div>
-
-                        {chanelPo === 'email' && (
-                          <SettingRow
-                            label="Navodila za opomnik"
-                            description="Dodatna navodila ali informacije za follow-up po terminu"
-                            fullWidth
-                          >
-                            <Textarea
-                              value={nastavitvePo}
-                              onChange={(e) => setNastavitvePo(e.target.value)}
-                              rows={5}
-                              placeholder="Npr: Hvala za obisk! Za najboljše rezultate priporočamo uporabo našega specialnega šampona."
-                            />
-                          </SettingRow>
-                        )}
 
                         {/* Discount option */}
                         <div className="flex items-center justify-between p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">

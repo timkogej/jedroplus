@@ -413,18 +413,31 @@ function BillingPageContent() {
   }, [companyId]);
 
   const handleManageSubscription = async () => {
-    if (!companyId) return;
+    // Need the company UUID (companies.id = profiles.default_company_id)
+    const uuid = companyUuid;
+    if (!uuid) {
+      setError('Podjetje ni nastavljeno. Prosimo, prijavite se ponovno.');
+      return;
+    }
+
+    // Ensure active session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.assign('/login');
+      return;
+    }
 
     setIsLoadingPortal(true);
     setError(null);
     try {
-      const result = await getCustomerPortal(companyId);
-      if (result.ok && result.portal_url) {
-        window.location.href = result.portal_url;
+      const result = await getCustomerPortal(uuid);
+      const portalUrl = result.url || result.portal_url;
+      if (result.ok && portalUrl && portalUrl.startsWith('http')) {
+        window.location.assign(portalUrl);
       } else {
         setError(result.error || 'Napaka pri pridobivanju portala za plačila');
       }
-    } catch (err) {
+    } catch {
       setError('Napaka pri povezavi s strežnikom');
     } finally {
       setIsLoadingPortal(false);
@@ -652,30 +665,29 @@ function BillingPageContent() {
                 </div>
               </div>
 
-              {/* Manage Subscription Button */}
-              {subscription && subscription.status !== 'pending' && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleManageSubscription}
-                    disabled={isLoadingPortal}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors disabled:opacity-50"
-                  >
-                    {isLoadingPortal ? (
-                      <>
-                        <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                        Nalagam...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="h-4 w-4" weight="bold" />
-                        Upravljaj plačila
-                      </>
-                    )}
-                  </motion.button>
-                </div>
-              )}
+              {/* Stripe Billing Portal Button */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleManageSubscription}
+                  disabled={isLoadingPortal}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
+                  {isLoadingPortal ? (
+                    <>
+                      <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                      Odpiranje portala...
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="h-4 w-4" weight="bold" />
+                      Odpri Billing Portal
+                    </>
+                  )}
+                </motion.button>
+                <p className="mt-2 text-xs text-gray-400">Upravljajte naročnino, plačilno metodo in račune prek Stripe portala.</p>
+              </div>
             </div>
           </motion.div>
 

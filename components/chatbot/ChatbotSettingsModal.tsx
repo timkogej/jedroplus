@@ -301,19 +301,18 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
                     </SettingRow>
 
                     <SettingRow label="Pozdravno sporocilo" description="Prvo sporocilo ki ga vidi stranka" fullWidth>
-                      <Textarea
+                      <Input
                         value={greeting}
                         onChange={(e) => setGreeting(e.target.value)}
                         placeholder="Pozdravite stranke ob prvem stiku..."
-                        rows={3}
                       />
                     </SettingRow>
 
-                    <SettingRow label="Navodila za chatbota" description="Specificna navodila, pravila, omejitve" fullWidth>
+                    <SettingRow label="Navodila za chatbot+" description="Navodila in pravila za delovanje chatbota. Navedite posebna pravila, omejitve, odgovore na pogosto zastavljena vprasanja in vse kar bi zeleli da chatbot ve." fullWidth>
                       <Textarea
                         value={instructions}
                         onChange={(e) => setInstructions(e.target.value)}
-                        placeholder="Tu navedite posebna pravila, smernice ali omejitve za delovanje chatbota..."
+                        placeholder="Tu navedite posebna pravila, smernice, omejitve za delovanje chatbota, odgovore na pogosto zastavljena vprasanja in vse informacije ki naj jih chatbot pozna..."
                         rows={4}
                       />
                     </SettingRow>

@@ -1,7 +1,6 @@
 'use client';
 
 import { memo } from 'react';
-import { motion } from 'motion/react';
 import type { Service } from '@/types/services';
 import ServiceCard, { ServiceCardSkeleton } from './ServiceCard';
 
@@ -31,9 +30,7 @@ function ServiceGrid({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
       {services.map((service, index) => (
@@ -46,7 +43,7 @@ function ServiceGrid({
           index={index}
         />
       ))}
-    </motion.div>
+    </div>
   );
 }
 

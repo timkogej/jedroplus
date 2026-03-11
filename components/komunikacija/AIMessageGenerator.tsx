@@ -11,6 +11,12 @@ interface AIMessageGeneratorProps {
   actor?: string;
 }
 
+const TONE_OPTIONS = [
+  { value: 'prijazen', label: 'Prijazen' },
+  { value: 'profesionalen', label: 'Profesionalen' },
+  { value: 'formalen', label: 'Formalen' },
+];
+
 export default function AIMessageGenerator({
   onGenerate,
   onError,
@@ -18,6 +24,7 @@ export default function AIMessageGenerator({
   actor,
 }: AIMessageGeneratorProps) {
   const [prompt, setPrompt] = useState('');
+  const [tone, setTone] = useState('prijazen');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerate = async () => {
@@ -36,6 +43,7 @@ export default function AIMessageGenerator({
         data: {
           company_id: companyId || '',
           prompt: prompt.trim(),
+          tone,
         },
       };
 
@@ -87,9 +95,30 @@ export default function AIMessageGenerator({
       <textarea
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Npr: Sporoči strankam, da imamo 20% popust na vse storitve ta vikend. Ton naj bo prijazen in profesionalen."
+        placeholder="Npr: Sporoči strankam, da imamo 20% popust na vse storitve ta vikend."
         className="w-full h-24 px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#1A1F36] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 resize-none"
       />
+
+      {/* Tone selector */}
+      <div className="mt-3">
+        <p className="text-xs text-gray-500 mb-2">Ton sporočila</p>
+        <div className="flex gap-2">
+          {TONE_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setTone(option.value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+                tone === option.value
+                  ? 'bg-white border border-violet-300 text-violet-600 shadow-sm'
+                  : 'bg-white/60 border border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <motion.button
         type="button"
@@ -97,7 +126,7 @@ export default function AIMessageGenerator({
         disabled={!prompt.trim() || isGenerating}
         whileHover={{ scale: prompt.trim() && !isGenerating ? 1.01 : 1 }}
         whileTap={{ scale: prompt.trim() && !isGenerating ? 0.99 : 1 }}
-        className={`mt-3 w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-all duration-200 ${
+        className={`mt-3 w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition-all duration-200 ${
           prompt.trim() && !isGenerating
             ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
             : 'bg-gray-100 text-gray-400 cursor-not-allowed'

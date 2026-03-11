@@ -83,7 +83,7 @@ const navigationSections: NavSection[] = [
       { name: 'Komunikacija', href: '/komunikacija', icon: Envelope },
       { name: 'Opomniki', href: '/reminders', icon: Bell },
       { name: 'Rezervacije', href: '/rezervacije', icon: CalendarCheck },
-      { name: 'Lost Leads', href: '/lost-leads', icon: TrendDown },
+      { name: 'Izgubljene stranke', href: '/lost-leads', icon: TrendDown },
     ],
   },
   {
@@ -100,7 +100,7 @@ const navigationSections: NavSection[] = [
     ],
   },
   {
-    label: 'Racun',
+    label: 'Račun',
     items: [
       { name: 'Paketi in kvote', href: '/billing', icon: Package },
     ],
@@ -291,7 +291,7 @@ export function Sidebar() {
       ref={sidebarRef}
       style={{ width: effectiveWidth }}
       className={cn(
-        'hidden md:flex fixed left-0 top-0 bottom-0 z-40 flex-col transition-all duration-300',
+        'hidden md:flex fixed left-0 top-0 bottom-0 z-40 flex-col transition-all duration-300 overflow-hidden',
         'bg-white border-r border-gray-200'
       )}
     >
@@ -370,7 +370,7 @@ export function Sidebar() {
           <div key={section.label} className="mb-6">
             {!isCollapsed && (
               <div className="px-3 pb-2">
-                <h3 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                <h3 className="text-[11px] font-semibold text-gray-400 tracking-wider">
                   {section.label}
                 </h3>
               </div>
@@ -398,20 +398,7 @@ export function Sidebar() {
                     )}
                   >
                     {active ? (
-                      useGradient ? (
-                        <span
-                          className="w-5 h-5 flex-shrink-0"
-                          style={{
-                            background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                          }}
-                        >
-                          <Icon className="w-5 h-5" weight="fill" />
-                        </span>
-                      ) : (
-                        <Icon className="w-5 h-5 flex-shrink-0 text-gray-900" weight="fill" />
-                      )
+                      <Icon className="w-5 h-5 flex-shrink-0 text-gray-900" weight="fill" />
                     ) : (
                       <Icon
                         className="w-5 h-5 transition-all flex-shrink-0 text-gray-500 group-hover:text-gray-700"
@@ -422,22 +409,9 @@ export function Sidebar() {
                     {!isCollapsed && (
                       <>
                         {active ? (
-                          useGradient ? (
-                            <span
-                              className="font-semibold text-sm flex-1"
-                              style={{
-                                background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                              }}
-                            >
-                              {item.name}
-                            </span>
-                          ) : (
-                            <span className="font-semibold text-sm flex-1 text-gray-900">
-                              {item.name}
-                            </span>
-                          )
+                          <span className="font-semibold text-sm flex-1 text-gray-900">
+                            {item.name}
+                          </span>
                         ) : (
                           <span className="font-medium text-sm flex-1">
                             {item.name}
@@ -651,7 +625,7 @@ export function Sidebar() {
               >
                 {navigationSections.map((section) => (
                   <div key={section.label} className="mb-6">
-                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-3">
+                    <div className="text-xs font-semibold text-gray-400 tracking-wider mb-2 px-3">
                       {section.label}
                     </div>
 

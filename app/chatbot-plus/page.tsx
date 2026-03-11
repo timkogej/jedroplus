@@ -21,6 +21,8 @@ import {
   ArrowRight,
   Code,
   BookOpen,
+  Shield,
+  X,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
@@ -197,6 +199,32 @@ function ConfigSectionLarge({
   );
 }
 
+// ─── Conversation ID helpers (localStorage, keyed per company) ─────────────────
+
+function getConversationId(companyId: string): string | null {
+  try {
+    return localStorage.getItem(`chatbot_conversation_id_${companyId}`);
+  } catch {
+    return null;
+  }
+}
+
+function setConversationId(companyId: string, conversationId: string): void {
+  try {
+    localStorage.setItem(`chatbot_conversation_id_${companyId}`, conversationId);
+  } catch {
+    // localStorage unavailable – continue without persistence
+  }
+}
+
+function clearConversationId(companyId: string): void {
+  try {
+    localStorage.removeItem(`chatbot_conversation_id_${companyId}`);
+  } catch {
+    // ignore
+  }
+}
+
 // ─── Mini Asistent+ Chat Widget ────────────────────────────────────────────────
 
 const MINI_QUICK_ACTIONS = [
@@ -209,16 +237,13 @@ const MINI_QUICK_ACTIONS = [
 const WELCOME_MSG: MiniChatMessage = {
   id: 'welcome',
   role: 'assistant',
-  text: 'Pozdravljeni! 👋 Sem vaš Asistent+. Tukaj sem, da vam pomagam z implementacijo Chatbot+ na vašo spletno stran. Kar vprašajte – z veseljem pomogam!',
+  text: 'Tukaj sem, da vam pomagam z implementacijo Chatbot+ na vašo spletno stran. Kar vprašajte – z veseljem pomogam!',
 };
 
 function MiniAsistentChat({ companyId }: { companyId: string | null }) {
   const [messages, setMessages] = useState<MiniChatMessage[]>([WELCOME_MSG]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sessionId] = useState<string>(() => {
-    try { return crypto.randomUUID(); } catch { return `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
-  });
   const bottomRef = useRef<HTMLDivElement>(null);
   const hasInteracted = useRef(false);
 
@@ -231,27 +256,43 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
+    if (!companyId) {
+      console.error('[MiniAsistentChat] company_id is missing – cannot send message');
+      return;
+    }
+
     hasInteracted.current = true;
     setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', text: trimmed }]);
     setInput('');
     setLoading(true);
 
     try {
-      const response = await fetch('https://tikej.app.n8n.cloud/webhook/chatbot/help', {
+      // Route through local proxy to avoid CORS and include user auth.
+      const existingConvId = getConversationId(companyId);
+      let url = `/api/n8n/chatbot-plus-message?company_id=${encodeURIComponent(companyId)}`;
+      if (existingConvId) url += `&conversation_id=${encodeURIComponent(existingConvId)}`;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token;
+      if (!authToken) {
+        throw new Error('Missing auth token');
+      }
+
+      const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: trimmed,
-          session_id: sessionId,
-          company_id: companyId ?? '',
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ message: trimmed }),
       });
 
       let content = 'Oprostite, prišlo je do napake. Prosim poskusite znova.';
       if (response.ok) {
         const result = await response.json();
-        if (typeof result === 'string') content = result;
-        else content = result.content ?? result.message ?? result.text ?? content;
+        // Persist returned conversation_id for all subsequent messages
+        if (result.conversation_id) setConversationId(companyId, result.conversation_id);
+        content = result.message ?? result.content ?? result.text ?? content;
       }
 
       setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', text: content }]);
@@ -265,51 +306,91 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
     }
   };
 
+  const startNewChat = () => {
+    if (companyId) clearConversationId(companyId);
+    setMessages([WELCOME_MSG]);
+    setInput('');
+    hasInteracted.current = false;
+  };
+
   return (
     <div
       style={{
-        background: 'rgba(255,255,255,0.9)',
-        backdropFilter: 'blur(20px)',
-        border: '1px solid rgba(139,92,246,0.12)',
+        background: 'linear-gradient(135deg, #EDE9FE 0%, #DBEAFE 60%, #CFFAFE 100%)',
         borderRadius: 20,
         overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(139,92,246,0.08), 0 2px 8px rgba(0,0,0,0.04)',
+        boxShadow: '0 8px 32px rgba(139,92,246,0.18), 0 2px 8px rgba(0,0,0,0.06)',
       }}
     >
-      {/* Header */}
+      {/* Header - transparent so gradient shows through */}
       <div
         style={{
-          background: 'white',
+          background: 'transparent',
           padding: '16px 20px',
-          borderBottom: '1px solid rgba(139,92,246,0.08)',
           display: 'flex',
-          justifyContent: 'center',
           alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
-        <div
-          style={{
-            fontSize: 16,
-            fontWeight: 700,
-            background: GRADIENT,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
-        >
-          Asistent+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#3B0764' }}>Asistent+</div>
+            <div style={{ fontSize: 12, color: '#6D28D9', opacity: 0.75 }}>Online</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {/* Shield icon */}
+          <button
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255,255,255,0.3)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.15s',
+              opacity: 0.7,
+            }}
+            title="Nastavitve zasebnosti"
+          >
+            <Shield size={17} color="#3B0764" />
+          </button>
+          {/* X button – clears conversation and starts a new chat */}
+          <button
+            onClick={startNewChat}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: '50%',
+              border: 'none',
+              background: 'rgba(255,255,255,0.3)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background 0.15s',
+              opacity: 0.7,
+            }}
+            title="Nova pogovor"
+          >
+            <X size={17} color="#3B0764" />
+          </button>
         </div>
       </div>
 
-      {/* Messages */}
+      {/* Messages - transparent so gradient shows through */}
       <div
         style={{
           height: 320,
           overflowY: 'auto',
           padding: '16px 20px',
-          background: '#FAFBFF',
+          background: 'transparent',
           scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(139,92,246,0.15) transparent',
+          scrollbarColor: 'rgba(139,92,246,0.25) transparent',
         }}
       >
         <div className="space-y-4">
@@ -333,18 +414,17 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
                           fontSize: 14,
                           lineHeight: 1.5,
                           color: 'white',
-                          boxShadow: '0 2px 10px rgba(139,92,246,0.22)',
+                          boxShadow: '0 2px 10px rgba(139,92,246,0.28)',
                         }
                       : {
-                          background: 'rgba(139,92,246,0.07)',
-                          border: '1px solid rgba(139,92,246,0.1)',
+                          background: 'rgba(255,255,255,0.92)',
                           borderRadius: '16px',
                           borderBottomLeftRadius: 5,
                           padding: '10px 14px',
                           fontSize: 14,
                           lineHeight: 1.5,
                           color: '#1f2937',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                         }
                   }
                 >
@@ -362,14 +442,14 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
             >
               <div
                 style={{
-                  background: 'rgba(139,92,246,0.07)',
-                  border: '1px solid rgba(139,92,246,0.1)',
+                  background: 'rgba(255,255,255,0.92)',
                   borderRadius: '16px',
                   borderBottomLeftRadius: 5,
                   padding: '12px 16px',
                   display: 'flex',
                   gap: 4,
                   alignItems: 'center',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                 }}
               >
                 {[0, 1, 2].map((i) => (
@@ -377,7 +457,7 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
                     key={i}
                     animate={{ y: [0, -5, 0] }}
                     transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.18 }}
-                    style={{ width: 6, height: 6, borderRadius: '50%', background: '#8B5CF6', opacity: 0.7 }}
+                    style={{ width: 6, height: 6, borderRadius: '50%', background: '#8B5CF6', opacity: 0.8 }}
                   />
                 ))}
               </div>
@@ -399,8 +479,8 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
                   style={{
                     padding: '7px 13px',
                     borderRadius: 14,
-                    border: '1.5px solid white',
-                    background: 'white',
+                    border: 'none',
+                    background: 'rgba(255,255,255,0.85)',
                     fontSize: 12,
                     fontWeight: 500,
                     backgroundImage: GRADIENT,
@@ -409,7 +489,7 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
                     backgroundClip: 'text',
                     cursor: 'pointer',
                     transition: 'all 0.15s',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                    boxShadow: '0 1px 6px rgba(0,0,0,0.08)',
                   }}
                 >
                   {action}
@@ -422,23 +502,15 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
         </div>
       </div>
 
-      {/* Input */}
-      <div
-        style={{
-          padding: '12px 16px',
-          borderTop: '1px solid rgba(139,92,246,0.08)',
-          background: 'linear-gradient(180deg, rgba(139,92,246,0.02) 0%, rgba(139,92,246,0.04) 100%)',
-        }}
-      >
+      {/* Input area - transparent so gradient shows through */}
+      <div style={{ padding: '12px 16px', background: 'transparent' }}>
+        {/* Gradient border wrapper */}
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: 'white',
-            borderRadius: 22,
-            padding: '6px 6px 6px 16px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(139,92,246,0.1)',
+            position: 'relative',
+            borderRadius: 24,
+            background: GRADIENT,
+            padding: '2px',
           }}
         >
           <input
@@ -448,22 +520,30 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input); } }}
             placeholder="Vprašajte o implementaciji chatbota..."
             style={{
-              flex: 1,
+              display: 'block',
+              width: '100%',
               border: 'none',
-              outline: 'none',
-              background: 'transparent',
+              borderRadius: 22,
+              background: 'rgba(255,255,255,0.97)',
+              padding: '11px 52px 11px 18px',
               fontSize: 13,
               color: '#1f2937',
+              outline: 'none',
+              boxSizing: 'border-box',
             }}
           />
           <button
             onClick={() => send(input)}
             disabled={!input.trim() || loading}
             style={{
-              width: 34,
-              height: 34,
+              position: 'absolute',
+              right: 6,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 36,
+              height: 36,
               borderRadius: '50%',
-              background: input.trim() && !loading ? GRADIENT : '#E5E7EB',
+              background: input.trim() && !loading ? GRADIENT : 'rgba(0,0,0,0.1)',
               border: 'none',
               cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
               display: 'flex',
@@ -471,12 +551,13 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
               justifyContent: 'center',
               flexShrink: 0,
               transition: 'all 0.15s',
+              boxShadow: input.trim() && !loading ? '0 2px 8px rgba(139,92,246,0.35)' : 'none',
             }}
           >
             {loading ? (
-              <CircleNotch size={16} color={input.trim() ? 'white' : '#9CA3AF'} weight="bold" style={{ animation: 'spin 1s linear infinite' }} />
+              <CircleNotch size={16} color="white" weight="bold" style={{ animation: 'spin 1s linear infinite' }} />
             ) : (
-              <PaperPlaneTilt size={16} color={input.trim() ? 'white' : '#9CA3AF'} weight="fill" />
+              <PaperPlaneTilt size={16} color={input.trim() ? 'white' : 'rgba(255,255,255,0.5)'} weight="fill" />
             )}
           </button>
         </div>
@@ -616,6 +697,7 @@ export default function ChatbotPlusPage() {
   const botGreeting = chatbotData.greeting || 'Pozdravljeni! 👋 Kako vam lahko pomagam danes?';
   const { design } = chatbotData;
   const borderRadius = sanitizeBorderRadius(design.borderRadius);
+  const accentGradient = `linear-gradient(135deg, ${design.accentGradientFrom}, ${design.accentGradientTo})`;
 
   const effectiveChatbotUrl = chatbotLink || chatbotData.url;
   const embedCode = effectiveChatbotUrl
@@ -679,19 +761,21 @@ export default function ChatbotPlusPage() {
                   maxWidth: 420,
                   borderRadius: 24,
                   overflow: 'hidden',
+                  background: `linear-gradient(135deg, ${design.bgGradientFrom}, ${design.bgGradientTo})`,
                   boxShadow:
                     '0 32px 64px rgba(139, 92, 246, 0.15), ' +
                     '0 16px 32px rgba(0, 0, 0, 0.1), ' +
                     '0 0 0 1px rgba(139, 92, 246, 0.1)',
                 }}
               >
-                {/* Chat Header */}
-                <div style={{ background: GRADIENT, padding: '20px 24px' }}>
+                {/* Chat Header - transparent, gradient shows through */}
+                <div style={{ background: 'transparent', padding: '20px 24px' }}>
                   <div className="flex items-center gap-4">
+                    {/* Bot avatar - square with shine (original shape), accent gradient bg */}
                     <div
                       style={{
                         width: 52, height: 52, borderRadius: 16,
-                        background: 'rgba(255,255,255,0.2)',
+                        background: accentGradient,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         boxShadow: '0 8px 24px rgba(0,0,0,0.15), inset 0 2px 0 rgba(255,255,255,0.2)',
                         flexShrink: 0, overflow: 'hidden', position: 'relative',
@@ -708,71 +792,78 @@ export default function ChatbotPlusPage() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div style={{ fontSize: 18, fontWeight: 700, color: 'white', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: design.textColor, letterSpacing: '-0.01em', lineHeight: 1.2 }}>
                         {botName}
                       </div>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <div style={{ position: 'relative', width: 10, height: 10 }}>
+                      <div className="flex items-center gap-2 mt-1">
+                        <div style={{ position: 'relative', width: 8, height: 8 }}>
                           <motion.div
                             animate={{ scale: [1, 1.8, 1], opacity: [0.5, 0, 0.5] }}
                             transition={{ duration: 2, repeat: Infinity }}
-                            style={{ position: 'absolute', inset: -3, borderRadius: '50%', background: '#34d399' }}
+                            style={{ position: 'absolute', inset: -2, borderRadius: '50%', background: '#34d399' }}
                           />
-                          <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'linear-gradient(135deg, #34d399, #10b981)', boxShadow: '0 0 12px rgba(52,211,153,0.6)', position: 'relative' }} />
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'linear-gradient(135deg, #34d399, #10b981)', position: 'relative' }} />
                         </div>
-                        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>Na voljo za klepet</span>
+                        <span style={{ fontSize: 12, color: design.textColor, opacity: 0.7, fontWeight: 500 }}>Na voljo za klepet</span>
                       </div>
                     </div>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
+                    {/* Shield + X buttons - black icons */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.9 }}>
+                        <Shield size={16} color="#111827" weight="fill" />
+                      </div>
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.9 }}>
+                        <X size={16} color="#111827" weight="bold" />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Messages Area */}
-                <div style={{ background: '#FAFBFF', padding: '24px', minHeight: 310 }}>
+                {/* Messages Area - transparent, gradient shows through */}
+                <div style={{ background: 'transparent', padding: '24px', minHeight: 310 }}>
                   <div className="space-y-5">
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.2 }} className="flex justify-start">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.1)', borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: '#1f2937', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>{botGreeting}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(107,114,128,0.6)', marginTop: 6, paddingLeft: 4 }}>17:03</div>
+                        <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: '#1f2937', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>{botGreeting}</div>
+                        <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingLeft: 4 }}>17:03</div>
                       </div>
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.4 }} className="flex justify-end">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)', borderRadius: '20px', borderBottomRightRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: 'white', textShadow: '0 1px 2px rgba(0,0,0,0.1)', boxShadow: '0 4px 16px rgba(139,92,246,0.25)' }}>Rezerviraj termin</div>
-                        <div style={{ fontSize: 11, color: 'rgba(107,114,128,0.6)', marginTop: 6, paddingRight: 4, textAlign: 'right' }}>17:03</div>
+                        <div style={{ background: accentGradient, borderRadius: '20px', borderBottomRightRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: 'white' }}>Rezerviraj termin</div>
+                        <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingRight: 4, textAlign: 'right' }}>17:03</div>
                       </div>
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.6 }} className="flex justify-start">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.1)', borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: '#1f2937', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>Super, vesel me, da želiš rezervirati termin! 😊 Katero storitev bi želel naročiti?</div>
-                        <div style={{ fontSize: 11, color: 'rgba(107,114,128,0.6)', marginTop: 6, paddingLeft: 4 }}>17:03</div>
+                        <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: '#1f2937', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>Super, vesel me, da želiš rezervirati termin! 😊 Katero storitev bi želel naročiti?</div>
+                        <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingLeft: 4 }}>17:03</div>
                       </div>
                     </motion.div>
                   </div>
+                  {/* Action chips: white bg, dark text, subtle border */}
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }} className="flex flex-wrap gap-2 mt-5">
                     {['Rezerviraj termin', 'Kontaktni podatki', 'Delovni čas', 'Cenik storitev'].map((chip, idx) => (
-                      <div key={idx} style={{ padding: '9px 16px', borderRadius: 18, border: '1.5px solid rgba(139,92,246,0.2)', background: 'rgba(139,92,246,0.05)', backdropFilter: 'blur(8px)', fontSize: 13, fontWeight: 500, color: '#6B7280', cursor: 'default' }}>{chip}</div>
+                      <div key={idx} style={{ padding: '9px 16px', borderRadius: 18, border: '1px solid rgba(0,0,0,0.12)', background: 'rgba(255,255,255,0.95)', fontSize: 13, fontWeight: 500, color: '#1f2937', cursor: 'default' }}>{chip}</div>
                     ))}
                   </motion.div>
                 </div>
 
-                {/* Input */}
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} style={{ padding: '16px 20px 20px', background: 'linear-gradient(180deg, rgba(139,92,246,0.02) 0%, rgba(139,92,246,0.05) 100%)', borderTop: '1px solid rgba(139,92,246,0.08)' }}>
-                  <div style={{ background: 'white', borderRadius: 28, padding: '8px 8px 8px 20px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04), inset 0 0 0 1px rgba(139,92,246,0.1)' }}>
-                    <span style={{ flex: 1, fontSize: 15, color: '#a1a1aa', userSelect: 'none' }}>Napišite sporočilo...</span>
-                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 4px 12px rgba(139,92,246,0.3)' }}>
+                {/* Input - transparent, accent gradient border wrapper */}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }} style={{ padding: '12px 20px 16px', background: 'transparent' }}>
+                  <div style={{ position: 'relative', borderRadius: 28, background: accentGradient, padding: '2px' }}>
+                    <div style={{ background: 'white', borderRadius: 26, padding: '12px 58px 12px 20px', display: 'flex', alignItems: 'center' }}>
+                      <span style={{ flex: 1, fontSize: 15, color: '#a1a1aa', userSelect: 'none' }}>Napišite sporočilo...</span>
+                    </div>
+                    <div style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, borderRadius: '50%', background: accentGradient, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <PaperPlaneTilt size={20} color="white" weight="fill" />
                     </div>
                   </div>
                 </motion.div>
 
-                {/* Footer */}
-                <div style={{ padding: '8px 20px 12px', background: 'linear-gradient(180deg, rgba(139,92,246,0.02) 0%, rgba(139,92,246,0.05) 100%)', textAlign: 'center' }}>
-                  <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.01em', color: 'rgba(107,114,128,0.5)' }}>Powered by Jedro+</span>
+                {/* Footer - transparent */}
+                <div style={{ padding: '6px 20px 12px', background: 'transparent', textAlign: 'center' }}>
+                  <span style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.01em', color: design.textColor, opacity: 0.5 }}>Powered by Jedro+</span>
                 </div>
               </div>
 

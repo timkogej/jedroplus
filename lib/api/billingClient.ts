@@ -278,19 +278,21 @@ export async function startCheckout(
 
 export interface PortalResult {
   ok: boolean;
+  url?: string;
   portal_url?: string;
   error?: string;
 }
 
 /**
  * Get Stripe Customer Portal URL for managing subscription
+ * companyUuid must be profiles.default_company_id (= companies.id UUID)
  */
-export async function getCustomerPortal(companyId: string): Promise<PortalResult> {
+export async function getCustomerPortal(companyUuid: string): Promise<PortalResult> {
   return apiRequest<PortalResult>('/billing/portal', {
     method: 'POST',
     body: JSON.stringify({
-      company_id: companyId,
-      return_url: `${window.location.origin}/nastavitve/racun`
+      company_id: companyUuid,
+      return_url: `${window.location.origin}/billing`
     })
   });
 }

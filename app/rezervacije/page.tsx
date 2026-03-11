@@ -11,6 +11,7 @@ import {
   Copy,
   ArrowSquareOut,
   Check,
+  Link,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
@@ -37,6 +38,7 @@ interface ReservationSettings {
   bookingLink3: string;
   bookingLink4: string;
   bookingLink5: string;
+  apptManagementLink: string;
 }
 
 interface BookingDesign {
@@ -110,10 +112,12 @@ export default function RezervacijePage() {
     bookingLink3: '',
     bookingLink4: '',
     bookingLink5: '',
+    apptManagementLink: '',
   });
 
   const [loading, setLoading] = useState(true);
   const [copiedDesignId, setCopiedDesignId] = useState<number | null>(null);
+  const [copiedMgmt, setCopiedMgmt] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Fetch settings from same tables as Nastavitve > Rezervacije
@@ -151,6 +155,7 @@ export default function RezervacijePage() {
         bookingLink3: String(podatkiRow?.['booking_link_3'] ?? podatkiRow?.['Booking_link_3'] ?? ''),
         bookingLink4: String(podatkiRow?.['booking_link_4'] ?? podatkiRow?.['Booking_link_4'] ?? ''),
         bookingLink5: String(podatkiRow?.['booking_link_5'] ?? podatkiRow?.['Booking_link_5'] ?? ''),
+        apptManagementLink: String(podatkiRow?.['appt_management_link'] ?? ''),
       });
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -220,6 +225,27 @@ export default function RezervacijePage() {
             </motion.button>
           </motion.div>
 
+          {/* Monthly designs announcement banner */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 flex items-center gap-3 rounded-2xl px-5 py-3.5"
+            style={{
+              background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.06) 50%, rgba(6,182,212,0.08) 100%)',
+              border: '1px solid rgba(139,92,246,0.15)',
+            }}
+          >
+            <span style={{ fontSize: 16 }}>✦</span>
+            <p className="text-sm font-semibold" style={{
+              background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              Vsak mesec novi dizajni za booking strani
+            </p>
+          </motion.div>
+
           {/* Loading state */}
           {loading ? (
             <div className="flex items-center justify-center py-20 bg-white">
@@ -234,18 +260,10 @@ export default function RezervacijePage() {
                 transition={{ delay: 0.1 }}
                 className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6"
               >
-                <div className="mb-2">
+                <div className="mb-4">
                   <h2 className="text-lg font-semibold text-[#1A1F36] mb-1">Standardne strani za rezervacijo</h2>
                   <p className="text-sm text-gray-500">Klasičen, Moderen in Minimalen dizajn</p>
                 </div>
-                <p className="text-xs font-medium mb-4" style={{
-                  background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}>
-                  ✦ Vsak mesec novi dizajni za booking strani
-                </p>
                 <div className="overflow-x-auto pb-4 -mx-2 px-2">
                   <div className="flex gap-5" style={{ minWidth: 'max-content' }}>
                     {STANDARD_DESIGNS.map((design) => {
@@ -415,6 +433,68 @@ export default function RezervacijePage() {
                 </div>
               </motion.div>
 
+              {/* Appointment Management Link */}
+              {settings.apptManagementLink && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6"
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <Link className="w-5 h-5 text-gray-400" weight="regular" />
+                    <h2 className="text-base font-semibold text-[#1A1F36]">Link za prenaročanje in odpoved terminov</h2>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Univerzalen link za upravljanje terminov — stranke ga lahko uporabijo za prenaročanje ali odpoved.
+                  </p>
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="flex-1 min-w-0">
+                      <a
+                        href={settings.apptManagementLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm truncate block"
+                        style={{
+                          background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
+                        {settings.apptManagementLink}
+                      </a>
+                    </div>
+                    <div className="flex gap-1.5 flex-shrink-0">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(settings.apptManagementLink);
+                          setCopiedMgmt(true);
+                          setTimeout(() => setCopiedMgmt(false), 2000);
+                        }}
+                        className="h-8 px-3 flex items-center gap-1.5 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors text-xs"
+                      >
+                        {copiedMgmt ? (
+                          <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">Kopirano</span></>
+                        ) : (
+                          <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">Kopiraj</span></>
+                        )}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => window.open(settings.apptManagementLink, '_blank')}
+                        className="h-8 w-8 flex items-center justify-center bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-lg shadow-sm"
+                      >
+                        <ArrowSquareOut className="w-3.5 h-3.5" weight="bold" />
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Settings Overview */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -461,8 +541,22 @@ export default function RezervacijePage() {
                     </div>
                   </div>
 
+                  {/* Online confirmation */}
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Potrdilo po spletni rezervaciji</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={cn("text-sm font-semibold", settings.sendOnlineConfirmation ? "text-green-600" : "text-gray-400")}>
+                        {settings.sendOnlineConfirmation ? 'Da' : 'Ne'}
+                      </span>
+                      <div className={cn("w-2.5 h-2.5 rounded-full", settings.sendOnlineConfirmation ? "bg-green-500" : "bg-gray-300")} />
+                    </div>
+                  </div>
+
                   {/* Colors */}
-                  <div className="flex items-center justify-between py-2.5">
+                  <div className={`flex items-center justify-between py-2.5 ${settings.apptManagementLink ? 'border-b border-gray-100' : ''}`}>
                     <div className="flex items-center gap-2">
                       <Palette className="w-4 h-4 text-gray-400" weight="regular" />
                       <span className="text-sm font-medium text-gray-700">Barve</span>
@@ -473,6 +567,30 @@ export default function RezervacijePage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Appointment Management Link */}
+                  {settings.apptManagementLink && (
+                    <div className="flex items-start justify-between gap-4 py-2.5">
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <Link className="w-4 h-4 text-gray-400" weight="regular" />
+                        <span className="text-sm font-medium text-gray-700">Link za prenaročanje in odpoved</span>
+                      </div>
+                      <a
+                        href={settings.apptManagementLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium truncate max-w-xs"
+                        style={{
+                          background: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
+                        {settings.apptManagementLink}
+                      </a>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             </>

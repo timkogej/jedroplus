@@ -76,7 +76,7 @@ export default function SendSection({
         disabled={!canSend}
         whileHover={{ scale: canSend ? 1.01 : 1 }}
         whileTap={{ scale: canSend ? 0.99 : 1 }}
-        className={`w-full py-3.5 rounded-xl flex items-center justify-center gap-2.5 font-semibold text-sm transition-all duration-200 ${
+        className={`w-full py-3.5 rounded-xl flex items-center justify-center gap-2.5 font-normal text-sm transition-all duration-200 ${
           canSend
             ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300'
             : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent'

@@ -38,6 +38,8 @@ interface KomunikacijaCustomer {
   nextAppointment: string | null;
   lastVisit: string;
   tags: string[];
+  /** Date-only strings (YYYY-MM-DD) of all appointments — used for Danes/Jutri/etc. filters */
+  appointmentDates: string[];
 }
 
 interface SendTotals {
@@ -287,17 +289,18 @@ export default function KomunikacijaPage() {
         const bookings = bookingsRes.data ?? [];
         const clients = clientsRes.data ?? [];
 
-        // Build map of client selection-key -> nearest future appointment ISO
-        const now = new Date();
-        const clientNextAppointment = new Map<string, string>();
+        // Build map: "ID stranke" business key → Set of appointment date strings (YYYY-MM-DD)
+        // Include ALL appointments (past and future) so date filters work correctly
+        const strankaIdToDateSet = new Map<string, Set<string>>();
 
         for (const row of bookings) {
           const schema = detectBookingSchema(row);
-          const clientId = schema.clientIdField
+          // Get "ID stranke" business key from the booking
+          const strankaId = schema.clientIdField
             ? String(row[schema.clientIdField] ?? '')
             : String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
 
-          if (!clientId) continue;
+          if (!strankaId) continue;
 
           let bookingDate: Date | null = null;
           if (schema.startAtField && row[schema.startAtField]) {
@@ -309,13 +312,13 @@ export default function KomunikacijaPage() {
               schema.startTimeField ? row[schema.startTimeField] : null
             );
           }
-          if (!bookingDate || bookingDate < now) continue;
+          if (!bookingDate) continue;
 
-          const isoDate = bookingDate.toISOString();
-          const existing = clientNextAppointment.get(clientId);
-          if (!existing || isoDate < existing) {
-            clientNextAppointment.set(clientId, isoDate);
+          const dateStr = bookingDate.toISOString().split('T')[0]; // YYYY-MM-DD
+          if (!strankaIdToDateSet.has(strankaId)) {
+            strankaIdToDateSet.set(strankaId, new Set());
           }
+          strankaIdToDateSet.get(strankaId)!.add(dateStr);
         }
 
         // Build customer list from Stranke table
@@ -337,11 +340,17 @@ export default function KomunikacijaPage() {
 
             if (!id) continue;
 
+            // Get "ID stranke" business key from the client row for appointment lookup
+            const strankaId = String(row['ID stranke'] ?? row['stranka_id'] ?? row['client_id'] ?? id);
+
             const ime = clientSchema.firstNameField ? String(row[clientSchema.firstNameField] ?? '') : '';
             const priimek = clientSchema.lastNameField ? String(row[clientSchema.lastNameField] ?? '') : '';
             const name = `${ime} ${priimek}`.trim() || 'Neznana stranka';
             const email = clientSchema.emailField ? String(row[clientSchema.emailField] ?? '') : '';
             const phone = clientSchema.phoneField ? String(row[clientSchema.phoneField] ?? '') : '';
+
+            const dateSet = strankaIdToDateSet.get(strankaId);
+            const appointmentDates = dateSet ? Array.from(dateSet) : [];
 
             customerList.push({
               id,
@@ -349,9 +358,10 @@ export default function KomunikacijaPage() {
               name,
               email,
               phone,
-              nextAppointment: clientNextAppointment.get(id) || null,
+              nextAppointment: null,
               lastVisit: '',
               tags: [],
+              appointmentDates,
             });
           }
         }
@@ -535,7 +545,7 @@ export default function KomunikacijaPage() {
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <Users className="h-5 w-5 text-[#1A1F36]" weight="bold" />
-                    <h2 className="text-lg font-semibold text-[#1A1F36]">Izbira strank</h2>
+                    <h2 className="text-lg font-medium text-[#1A1F36]">Izbira strank</h2>
                   </div>
                   <CustomerList
                     customers={customers}
@@ -553,7 +563,7 @@ export default function KomunikacijaPage() {
                     disabled={selectedIds.size === 0}
                     whileHover={{ scale: selectedIds.size > 0 ? 1.01 : 1 }}
                     whileTap={{ scale: selectedIds.size > 0 ? 0.99 : 1 }}
-                    className={`w-full py-3.5 rounded-xl flex items-center justify-center gap-2 font-semibold text-sm transition-all duration-200 ${
+                    className={`w-full py-3.5 rounded-xl flex items-center justify-center gap-2 font-normal text-sm transition-all duration-200 ${
                       selectedIds.size > 0
                         ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
                         : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent'
@@ -623,7 +633,7 @@ export default function KomunikacijaPage() {
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                   <div className="flex items-center gap-2 mb-5">
                     <PaperPlaneTilt className="h-5 w-5 text-[#1A1F36]" weight="bold" />
-                    <h2 className="text-lg font-semibold text-[#1A1F36]">Sestavi sporočilo</h2>
+                    <h2 className="text-lg font-medium text-[#1A1F36]">Sestavi sporočilo</h2>
                   </div>
 
                   {/* AI Generator */}

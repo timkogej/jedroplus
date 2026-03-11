@@ -477,8 +477,7 @@ function ClientModal({
                           {errors.interne_opombe}
                         </p>
                       ) : (
-                        <p className="flex items-center gap-1 text-xs text-yellow-700">
-                          <Warning className="h-3 w-3" weight="fill" />
+                        <p className="text-xs text-yellow-700">
                           Te opombe se ne pošiljajo stranki
                         </p>
                       )}

@@ -22,7 +22,7 @@ function detectEmployeeSchema(row: Record<string, unknown>) {
     phoneField: pickField(['telefon', 'Telefon', 'Telefonska številka', 'phone', 'Phone']),
     positionField: pickField(['pozicija', 'Pozicija', 'position', 'Position', 'vloga', 'Vloga', 'role']),
     gradientField: pickField(['Barva', 'barva', 'barva_gradient_id', 'gradient_id', 'avatar_color']),
-    activeField: pickField(['aktivna', 'Aktivna', 'active', 'Active', 'is_active']),
+    activeField: pickField(['Status', 'aktivna', 'Aktivna', 'active', 'Active', 'is_active']),
     notesField: pickField(['opombe', 'Opombe', 'notes', 'Notes']),
     companyField: pickField(['podjetje_id', 'company_id', 'Podjetje']),
     createdAtField: pickField(['created_at', 'Created', 'datum_vnosa']),
@@ -67,7 +67,8 @@ function parseEmployee(row: Record<string, unknown>): Employee | null {
     if (typeof activeValue === 'boolean') {
       aktivna = activeValue;
     } else if (typeof activeValue === 'string') {
-      aktivna = activeValue.toLowerCase() === 'true' || activeValue === '1';
+      const v = activeValue.toLowerCase();
+      aktivna = v === 'true' || v === '1' || v === 'active';
     } else if (typeof activeValue === 'number') {
       aktivna = activeValue === 1;
     }

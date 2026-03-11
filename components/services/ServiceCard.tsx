@@ -44,11 +44,13 @@ function ServiceCard({
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
+      animate={{ opacity: service.aktivna ? 1 : 0.6, y: 0 }}
+      transition={{
+        opacity: { duration: 0.15 },
+        y: { delay: index * 0.05, duration: 0.3 },
+      }}
       whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }}
-      className={`group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100
-                  transition-all ${!service.aktivna ? 'opacity-60' : ''}`}
+      className="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100"
     >
       {/* Color gradient header */}
       <div

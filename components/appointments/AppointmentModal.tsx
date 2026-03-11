@@ -99,6 +99,32 @@ function generateTimeSlots(): string[] {
 
 const TIME_SLOTS = generateTimeSlots();
 
+// Map JS day index (0=Sunday) to Slovenian day names
+const DAY_INDEX_TO_SLOVENIAN: Record<number, string> = {
+  0: 'Nedelja',
+  1: 'Ponedeljek',
+  2: 'Torek',
+  3: 'Sreda',
+  4: 'Četrtek',
+  5: 'Petek',
+  6: 'Sobota',
+};
+
+interface ScheduleInterval { start: string; end: string; }
+interface DaySchedule { enabled: boolean; intervals: ScheduleInterval[]; }
+
+/** Returns true if timeStr (HH:MM) falls within any of the day's intervals */
+function isTimeInSchedule(timeStr: string, daySchedule: DaySchedule | undefined): boolean {
+  if (!daySchedule || !daySchedule.enabled) return false;
+  const [h, m] = timeStr.split(':').map(Number);
+  const timeMinutes = h * 60 + m;
+  return daySchedule.intervals.some((interval) => {
+    const [sh, sm] = interval.start.split(':').map(Number);
+    const [eh, em] = interval.end.split(':').map(Number);
+    return timeMinutes >= sh * 60 + sm && timeMinutes < eh * 60 + em;
+  });
+}
+
 function formatDateForInput(dateStr: string): string {
   try {
     const date = new Date(dateStr);
@@ -257,7 +283,7 @@ function AppointmentModal({
         storitev_id_2: '',
         storitev_id_3: '',
         stevilo_storitev: 1,
-        zaposleni_id: employees[0]?.id || '',
+        zaposleni_id: '',
         status: 'scheduled',
         opombe: '',
         internal_opombe: '',
@@ -436,6 +462,25 @@ function AppointmentModal({
       return true;
     });
   }, [employees, formData.storitev_id, canPerformService]);
+
+  // Get the selected employee's day schedule based on formData.datum
+  const employeeDaySchedule = useMemo((): DaySchedule | undefined => {
+    if (!formData.zaposleni_id || !formData.datum) return undefined;
+    const emp = employees.find(e => e.id === formData.zaposleni_id) as unknown as Record<string, unknown>;
+    if (!emp) return undefined;
+    const urnik = emp['urnik'] as Record<string, DaySchedule> | null | undefined;
+    if (!urnik) return undefined;
+    const date = new Date(formData.datum);
+    const dayName = DAY_INDEX_TO_SLOVENIAN[date.getDay()];
+    if (!dayName) return undefined;
+    const dayData = urnik[dayName];
+    if (!dayData || typeof dayData !== 'object') return undefined;
+    // Support intervals format
+    if ('intervals' in dayData && Array.isArray((dayData as DaySchedule).intervals)) {
+      return dayData as DaySchedule;
+    }
+    return undefined;
+  }, [employees, formData.zaposleni_id, formData.datum]);
 
   // Get filtered services based on selected employee (deduplicated by ID)
   const filteredServices = useMemo(() => {
@@ -1100,7 +1145,11 @@ function AppointmentModal({
                       placeholder="Izberi čas"
                     >
                       {TIME_SLOTS.map((time) => (
-                        <SelectOption key={time} value={time}>
+                        <SelectOption
+                          key={time}
+                          value={time}
+                          dimmed={!!employeeDaySchedule && !isTimeInSchedule(time, employeeDaySchedule)}
+                        >
                           {time}
                         </SelectOption>
                       ))}
@@ -1132,7 +1181,11 @@ function AppointmentModal({
                       placeholder="Izberi čas konca"
                     >
                       {TIME_SLOTS.map((time) => (
-                        <SelectOption key={time} value={time}>
+                        <SelectOption
+                          key={time}
+                          value={time}
+                          dimmed={!!employeeDaySchedule && !isTimeInSchedule(time, employeeDaySchedule)}
+                        >
                           {time}
                         </SelectOption>
                       ))}

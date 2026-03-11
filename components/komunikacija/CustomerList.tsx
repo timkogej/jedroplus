@@ -14,6 +14,8 @@ interface Customer {
   nextAppointment: string | null;
   lastVisit: string;
   tags: string[];
+  /** ISO date-only strings (YYYY-MM-DD) of all appointments for date-based filtering */
+  appointmentDates?: string[];
 }
 
 interface CustomerListProps {
@@ -30,7 +32,7 @@ export default function CustomerList({
   loading = false,
 }: CustomerListProps) {
   const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState('today');
   const [selectedService, setSelectedService] = useState('Vse storitve');
 
   // Filter customers based on search and active filter
@@ -48,48 +50,61 @@ export default function CustomerList({
       );
     }
 
-    // Quick filters
+    // Quick filters — use appointmentDates (date-only strings) when available
     const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const tomorrow = new Date(today);
+    const todayStr = now.toISOString().split('T')[0];
+    const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const endOfWeek = new Date(today);
-    endOfWeek.setDate(endOfWeek.getDate() + (7 - endOfWeek.getDay()));
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    // Start of this week (Monday) and end (Sunday)
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const weekEndStr = weekEnd.toISOString().split('T')[0];
+
+    // Start and end of this month
+    const monthStartStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const monthEndStr = monthEnd.toISOString().split('T')[0];
 
     switch (activeFilter) {
       case 'today':
         result = result.filter((c) => {
+          if (c.appointmentDates) return c.appointmentDates.includes(todayStr);
+          // fallback: use nextAppointment
           if (!c.nextAppointment) return false;
-          const apt = new Date(c.nextAppointment);
-          return apt >= today && apt < tomorrow;
+          return c.nextAppointment.startsWith(todayStr);
         });
         break;
       case 'tomorrow':
         result = result.filter((c) => {
+          if (c.appointmentDates) return c.appointmentDates.includes(tomorrowStr);
           if (!c.nextAppointment) return false;
-          const apt = new Date(c.nextAppointment);
-          const dayAfter = new Date(tomorrow);
-          dayAfter.setDate(dayAfter.getDate() + 1);
-          return apt >= tomorrow && apt < dayAfter;
+          return c.nextAppointment.startsWith(tomorrowStr);
         });
         break;
       case 'this-week':
         result = result.filter((c) => {
+          if (c.appointmentDates) {
+            return c.appointmentDates.some((d) => d >= weekStartStr && d <= weekEndStr);
+          }
           if (!c.nextAppointment) return false;
-          const apt = new Date(c.nextAppointment);
-          return apt >= today && apt <= endOfWeek;
+          const d = c.nextAppointment.split('T')[0];
+          return d >= weekStartStr && d <= weekEndStr;
         });
         break;
       case 'this-month':
         result = result.filter((c) => {
+          if (c.appointmentDates) {
+            return c.appointmentDates.some((d) => d >= monthStartStr && d <= monthEndStr);
+          }
           if (!c.nextAppointment) return false;
-          const apt = new Date(c.nextAppointment);
-          return apt >= today && apt <= endOfMonth;
+          const d = c.nextAppointment.split('T')[0];
+          return d >= monthStartStr && d <= monthEndStr;
         });
-        break;
-      case 'no-appointment':
-        result = result.filter((c) => !c.nextAppointment);
         break;
     }
 

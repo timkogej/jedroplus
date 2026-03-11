@@ -18,7 +18,7 @@ import {
 } from '@phosphor-icons/react';
 import type { Employee, EmployeeSchedule, EmployeeWorkingHours } from '@/types/employees';
 import type { Service } from '@/types/services';
-import { defaultWorkingHours } from '@/types/settings';
+import { defaultWorkingHoursDay as defaultWorkingHours } from '@/types/settings';
 import EmployeeAvatar from './EmployeeAvatar';
 
 // Schedule with intervals support
@@ -38,7 +38,7 @@ interface EmployeeSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   employee: Employee | null;
-  companySchedule: Record<string, { enabled: boolean; start: string; end: string; intervals?: TimeInterval[] }>;
+  companySchedule: Record<string, { enabled: boolean; start?: string; end?: string; intervals?: TimeInterval[] }>;
   allServices: Service[];
   onSave: (data: { urnik: EmployeeSchedule | ScheduleWithIntervals; storitve: string[]; aliImaUrnikPodjetja: boolean }) => Promise<void>;
   isSaving?: boolean;
@@ -362,7 +362,22 @@ function EmployeeSettingsModal({
                     </div>
                     <button
                       type="button"
-                      onClick={() => setUsesCompanySchedule(!usesCompanySchedule)}
+                      onClick={() => {
+                        if (usesCompanySchedule) {
+                          // Switching from company → custom: pre-fill with company schedule
+                          const prefilled: ScheduleWithIntervals = {};
+                          for (const day of DAYS) {
+                            const companyDay = companySchedule[day] || defaultWorkingHours[day];
+                            const intervals = companyDay?.intervals || [{ start: companyDay?.start ?? '08:00', end: companyDay?.end ?? '17:00' }];
+                            prefilled[day] = {
+                              enabled: companyDay?.enabled ?? true,
+                              intervals,
+                            };
+                          }
+                          setSchedule(prefilled);
+                        }
+                        setUsesCompanySchedule(!usesCompanySchedule);
+                      }}
                       className="flex items-center gap-2"
                     >
                       {usesCompanySchedule ? (
@@ -477,10 +492,29 @@ function EmployeeSettingsModal({
                   )}
 
                   {usesCompanySchedule && (
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                      <p className="text-sm text-gray-600">
+                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+                      <p className="text-sm text-gray-500 mb-2">
                         Zaposleni uporablja urnik podjetja. Za prilagojen urnik izklopite stikalo zgoraj.
                       </p>
+                      {DAYS.map((day) => {
+                        const companyDay = companySchedule[day];
+                        if (!companyDay) return null;
+                        const intervals: TimeInterval[] = companyDay.intervals || [{ start: companyDay.start ?? '08:00', end: companyDay.end ?? '17:00' }];
+                        return (
+                          <div key={day} className={`flex items-start gap-3 text-sm ${companyDay.enabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
+                            <span className="w-24 font-medium flex-shrink-0">{day}</span>
+                            {companyDay.enabled ? (
+                              <span className="text-gray-600">
+                                {intervals.map((iv, i) => (
+                                  <span key={i}>{i > 0 ? ', ' : ''}{iv.start}–{iv.end}</span>
+                                ))}
+                              </span>
+                            ) : (
+                              <span className="italic">Prost dan</span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

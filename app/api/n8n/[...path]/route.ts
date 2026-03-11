@@ -55,7 +55,8 @@ export async function POST(
     // ✅ KORAK 3: Sestavi target URL
     const { path } = await params;
     const endpoint = '/' + path.join('/');
-    const targetUrl = `${N8N_BASE_URL}${endpoint}`;
+    const query = request.nextUrl.search;
+    const targetUrl = `${N8N_BASE_URL}${endpoint}${query}`;
 
     // ✅ KORAK 4: Preberi body
     const body = await request.json().catch(() => ({}));
@@ -135,7 +136,8 @@ export async function GET(
     // ✅ KORAK 3: Sestavi target URL
     const { path } = await params;
     const endpoint = '/' + path.join('/');
-    const targetUrl = `${N8N_BASE_URL}${endpoint}`;
+    const query = request.nextUrl.search;
+    const targetUrl = `${N8N_BASE_URL}${endpoint}${query}`;
 
     // ✅ KORAK 4: Pošlji na n8n z API key
     const n8nResponse = await fetch(targetUrl, {

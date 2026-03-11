@@ -15,7 +15,6 @@ const quickFilters: FilterOption[] = [
   { id: 'tomorrow', label: 'Jutri' },
   { id: 'this-week', label: 'Ta teden' },
   { id: 'this-month', label: 'Ta mesec' },
-  { id: 'no-appointment', label: 'Brez termina' },
 ];
 
 const serviceOptions = [

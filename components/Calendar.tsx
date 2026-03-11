@@ -1029,7 +1029,7 @@ function Calendar({ companyId }: CalendarProps) {
       setSuccessMessage('Termin označen kot No Show');
       setTimeout(() => setSuccessMessage(null), 3000);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 700));
       await loadAppointments();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Napaka pri No Show');
@@ -1071,7 +1071,7 @@ function Calendar({ companyId }: CalendarProps) {
       setSuccessMessage('Termin uspešno odpovedan');
       setTimeout(() => setSuccessMessage(null), 3000);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 700));
       await loadAppointments();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Napaka pri odpovedi');

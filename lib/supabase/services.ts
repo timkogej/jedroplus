@@ -59,7 +59,7 @@ function detectServiceSchema(row: Record<string, unknown>) {
     priceTypeField: pickField(['tip_cene', 'Tip cene', 'price_type']),
     priceField: pickField(['cena', 'Cena', 'price', 'Price']),
     descriptionField: pickField(['opis', 'Opis', 'description', 'Description']),
-    activeField: pickField(['aktivna', 'Aktivna', 'active', 'Active', 'is_active']),
+    activeField: pickField(['Status', 'aktivna', 'Aktivna', 'active', 'Active', 'is_active']),
     categoryField: pickField(['kategorija', 'Kategorija', 'category', 'Category']),
     companyField: pickField(['podjetje_id', 'company_id', 'Podjetje']),
     createdAtField: pickField(['created_at', 'Created', 'datum_vnosa', 'Datum vnosa']),
@@ -102,7 +102,8 @@ function parseService(row: Record<string, unknown>): Service | null {
     if (typeof activeValue === 'boolean') {
       aktivna = activeValue;
     } else if (typeof activeValue === 'string') {
-      aktivna = activeValue.toLowerCase() === 'true' || activeValue === '1';
+      const v = activeValue.toLowerCase();
+      aktivna = v === 'true' || v === '1' || v === 'active';
     } else if (typeof activeValue === 'number') {
       aktivna = activeValue === 1;
     }

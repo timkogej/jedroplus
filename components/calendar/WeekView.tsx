@@ -261,7 +261,14 @@ function WeekView({ currentDate, appointments, absences = [], services = [], onA
                              ${hasAbsence ? 'bg-amber-50/50' : ''}`}
                   style={isMobile ? { scrollSnapAlign: 'start' } as React.CSSProperties : undefined}
                 >
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-wider"
+                    style={isCurrentDay ? {
+                      background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    } : { color: '#9CA3AF' }}
+                  >
                     {DAYS_SHORT[day.getDay()]}
                   </span>
                   <button

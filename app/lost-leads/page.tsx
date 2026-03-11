@@ -14,15 +14,14 @@ import {
   ChatText,
   CalendarX,
   CheckCircle,
-  XCircle,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { safeDate } from '@/lib/dashboardHelpers';
 import { fetchClients } from '@/lib/data';
 import { loadCompanyRow } from '@/lib/settingsStore';
-import StatusBadge from '@/components/shared/StatusBadge';
 import { LostLeadsSettingsModal } from '@/components/lost-leads/LostLeadsSettingsModal';
+import ClientInitialsBadge from '@/components/clients/ClientInitialsBadge';
 
 type ClientRow = Record<string, unknown>;
 
@@ -204,7 +203,7 @@ export default function LostLeadsPage() {
             className="mb-8 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1F36]">Lost Leads</h1>
+              <h1 className="text-2xl font-bold text-[#1A1F36]">Izgubljene stranke</h1>
               <p className="mt-1 text-sm text-gray-500">
                 Pregled nastavitev in neaktivnih strank
               </p>
@@ -382,17 +381,13 @@ export default function LostLeadsPage() {
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
-                              <span
-                                className="text-sm font-bold flex-shrink-0 w-8 text-center"
-                                style={{
-                                  background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                                  WebkitBackgroundClip: 'text',
-                                  WebkitTextFillColor: 'transparent',
-                                  backgroundClip: 'text',
-                                }}
-                              >
-                                {getClientInitials(client)}
-                              </span>
+                              <ClientInitialsBadge
+                                firstName={getClientName(client).split(/\s+/)[0] || ''}
+                                lastName={getClientName(client).split(/\s+/).slice(1).join(' ') || ''}
+                                size="sm"
+                                gradient="violet-cyan"
+                                variant="text"
+                              />
                               <div className="font-medium text-gray-900">
                                 {getClientName(client)}
                               </div>
@@ -411,7 +406,7 @@ export default function LostLeadsPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="px-3 py-1 text-xs font-semibold bg-orange-100 text-orange-700 rounded-full">
+                            <span className="text-sm font-semibold text-orange-600">
                               {daysInactive} dni
                             </span>
                           </td>
@@ -422,7 +417,7 @@ export default function LostLeadsPage() {
                                 Da
                               </span>
                             ) : (
-                              <span className="px-3 py-1 text-xs font-semibold bg-gray-100 text-gray-600 rounded-full">
+                              <span className="text-sm font-medium text-gray-500">
                                 Ne
                               </span>
                             )}
@@ -441,114 +436,75 @@ export default function LostLeadsPage() {
             )}
           </motion.div>
 
-          {/* Settings Overview - Organized Sections */}
-          <div className="mt-8 mb-8 space-y-6">
-            {/* Splošne nastavitve */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
-            >
-              <h2 className="text-lg font-semibold text-[#1A1F36] mb-4">Splošne nastavitve</h2>
-              {loading ? (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="bg-gray-50 rounded-xl p-4 animate-pulse">
-                      <div className="h-4 w-24 bg-gray-200 rounded mb-2" />
-                      <div className="h-6 w-32 bg-gray-200 rounded" />
-                    </div>
-                  ))}
-                </div>
-              ) : !enabled ? (
-                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl">
-                  <XCircle className="w-6 h-6 text-red-500" weight="fill" />
-                  <div>
-                    <p className="font-medium text-red-700">Onemogočeno</p>
-                    <p className="text-sm text-red-600">Lost Leads sledenje je trenutno izklopljeno</p>
+          {/* Settings Overview */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-8 mb-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
+          >
+            <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Nastavitve</h2>
+            {loading ? (
+              <div className="flex items-center justify-center py-10">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <TrendDown className="w-4 h-4 text-gray-400" weight="regular" />
+                    <span className="text-sm font-medium text-gray-700">Status</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm font-semibold ${enabled ? 'text-green-600' : 'text-red-500'}`}>
+                      {enabled ? 'Omogočeno' : 'Onemogočeno'}
+                    </span>
+                    <div className={`w-2.5 h-2.5 rounded-full ${enabled ? 'bg-green-500' : 'bg-red-400'}`} />
                   </div>
                 </div>
-              ) : (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {/* Status */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                      <TrendDown className="w-4 h-4" weight="regular" />
-                      <span>Status</span>
-                    </div>
-                    <StatusBadge enabled={enabled} />
-                  </div>
 
-                  {/* Inactivity Days */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                      <CalendarX className="w-4 h-4" weight="regular" />
-                      <span>Prag neaktivnosti</span>
-                    </div>
-                    <p className="text-lg font-semibold text-gray-900">{inactivityDays} dni</p>
+                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <CalendarX className="w-4 h-4 text-gray-400" weight="regular" />
+                    <span className="text-sm font-medium text-gray-700">Prag neaktivnosti</span>
                   </div>
-
-                  {/* Communication Tone */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                      <ChatText className="w-4 h-4" weight="regular" />
-                      <span>Ton komunikacije</span>
-                    </div>
-                    <p className="text-lg font-semibold text-gray-900">{getToneLabel(tone)}</p>
-                  </div>
-
-                  {/* Discount */}
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                      <Users className="w-4 h-4" weight="regular" />
-                      <span>Popust za vrnitev</span>
-                    </div>
-                    {hasDiscount && discountText ? (
-                      <p className="text-lg font-semibold text-gray-900">{discountText}</p>
-                    ) : (
-                      <p className="text-gray-400">Ni nastavljeno</p>
-                    )}
-                  </div>
+                  <span className="text-sm font-semibold text-gray-900">{inactivityDays} dni</span>
                 </div>
-              )}
-            </motion.div>
 
-            {/* Navodila za komunikacijo */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
-            >
-              <h2 className="text-lg font-semibold text-[#1A1F36] mb-4">Navodila za komunikacijo</h2>
-              {loading ? (
-                <div className="bg-gray-50 rounded-xl p-4 animate-pulse">
-                  <div className="h-4 w-24 bg-gray-200 rounded mb-2" />
-                  <div className="h-20 bg-gray-200 rounded" />
-                </div>
-              ) : !enabled ? (
-                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl">
-                  <XCircle className="w-6 h-6 text-red-500" weight="fill" />
-                  <div>
-                    <p className="font-medium text-red-700">Onemogočeno</p>
-                    <p className="text-sm text-red-600">Lost Leads sledenje je trenutno izklopljeno</p>
+                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                    <span className="text-sm font-medium text-gray-700">Ton komunikacije</span>
                   </div>
+                  <span className="text-sm font-semibold text-gray-900">{getToneLabel(tone)}</span>
                 </div>
-              ) : (
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                    <EnvelopeSimple className="w-4 h-4" weight="regular" />
-                    <span>Navodila AI-ju</span>
+
+                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gray-400" weight="regular" />
+                    <span className="text-sm font-medium text-gray-700">Popust za vrnitev</span>
                   </div>
-                  {instructions ? (
-                    <p className="text-gray-700 whitespace-pre-wrap">{instructions}</p>
+                  {hasDiscount && discountText ? (
+                    <span className="text-sm font-semibold text-gray-900">{discountText}</span>
                   ) : (
-                    <p className="text-gray-400 italic">Ni navodil</p>
+                    <span className="text-sm text-gray-400">Ni nastavljeno</span>
                   )}
                 </div>
-              )}
-            </motion.div>
-          </div>
+
+                <div className="flex items-start justify-between gap-4 py-2.5">
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <EnvelopeSimple className="w-4 h-4 text-gray-400" weight="regular" />
+                    <span className="text-sm font-medium text-gray-700">Navodila AI-ju</span>
+                  </div>
+                  {instructions ? (
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap text-right max-w-xs">{instructions}</p>
+                  ) : (
+                    <span className="text-sm text-gray-400">Ni navodil</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </motion.div>
 
           {/* Info Box */}
           <motion.div

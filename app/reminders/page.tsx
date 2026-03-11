@@ -12,14 +12,12 @@ import {
   EnvelopeSimple,
   Palette,
   ChatText,
-  XCircle,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
-import StatusBadge from '@/components/shared/StatusBadge';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
 
 type ReminderRow = Record<string, unknown>;
@@ -61,6 +59,7 @@ export default function RemindersPage() {
   const [emailPrimary, setEmailPrimary] = useState('');
   const [emailSecondary, setEmailSecondary] = useState('');
   const [nastvetiStoritev, setNastvetiStoritev] = useState<'yes' | 'no' | 'auto'>('auto');
+  const [smsSenderId, setSmsSenderId] = useState('');
 
   // Stats
   const [stats, setStats] = useState({
@@ -155,6 +154,8 @@ export default function RemindersPage() {
 
     const nsVal = String(source['Nastveti_storitev'] ?? 'auto').toLowerCase().trim();
     setNastvetiStoritev(nsVal === 'yes' ? 'yes' : nsVal === 'no' ? 'no' : 'auto');
+
+    setSmsSenderId(String(source['sms_sender_id'] ?? ''));
   }, [reminderRow, companyRow]);
 
   const getToneLabel = (toneValue: string) => {
@@ -295,17 +296,8 @@ export default function RemindersPage() {
 
           {/* Settings Sections */}
           {loading ? (
-            <div className="space-y-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100 animate-pulse">
-                  <div className="h-6 w-48 bg-gray-200 rounded mb-6" />
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {[1, 2, 3].map((j) => (
-                      <div key={j} className="h-24 bg-gray-100 rounded-xl" />
-                    ))}
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center justify-center py-20">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
             </div>
           ) : (
             <div className="space-y-6">
@@ -314,94 +306,86 @@ export default function RemindersPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100"
+                className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
               >
-                <h2 className="text-xl font-semibold text-[#1A1F36] mb-6">Splošne nastavitve</h2>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <ChatText className="w-5 h-5 text-black" weight="regular" />
-                      <h3 className="font-bold text-lg text-gray-900">Jezik pošiljanja</h3>
+                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Splošne nastavitve</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Jezik pošiljanja</span>
                     </div>
-                    <p className="text-base text-gray-900">{getLanguageLabel(sendingLanguage)}</p>
+                    <span className="text-sm font-semibold text-gray-900">{getLanguageLabel(sendingLanguage)}</span>
                   </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <ChatText className="w-5 h-5 text-black" weight="regular" />
-                      <h3 className="font-bold text-lg text-gray-900">Ton komunikacije</h3>
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Ton komunikacije</span>
                     </div>
-                    <p className="text-base text-gray-900">{getToneLabel(tone)}</p>
+                    <span className="text-sm font-semibold text-gray-900">{getToneLabel(tone)}</span>
                   </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <EnvelopeSimple className="w-5 h-5 text-black" weight="regular" />
-                      <h3 className="font-bold text-lg text-gray-900">Reply-to Email</h3>
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <EnvelopeSimple className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Reply-to Email</span>
                     </div>
-                    <p className="text-base text-gray-900 truncate">
-                      {replyToEmail || <span className="text-gray-400">Ni nastavljeno</span>}
-                    </p>
+                    <span className="text-sm font-semibold text-gray-900 truncate max-w-xs">
+                      {replyToEmail || <span className="font-normal text-gray-400">Ni nastavljeno</span>}
+                    </span>
                   </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <EnvelopeSimple className="w-5 h-5 text-black" weight="regular" />
-                      <h3 className="font-bold text-lg text-gray-900">Ime pošiljatelja</h3>
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <EnvelopeSimple className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Ime pošiljatelja</span>
                     </div>
-                    <p className="text-base text-gray-900 truncate">
-                      {fromName || <span className="text-gray-400">Ni nastavljeno</span>}
-                    </p>
+                    <span className="text-sm font-semibold text-gray-900">
+                      {fromName || <span className="font-normal text-gray-400">Ni nastavljeno</span>}
+                    </span>
                   </div>
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Palette className="w-5 h-5 text-black" weight="regular" />
-                      <h3 className="font-bold text-lg text-gray-900">Primarna barva</h3>
+                  {smsSenderId && (
+                    <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                        <div>
+                          <span className="text-sm font-medium text-gray-700">ID pošiljatelja</span>
+                          <p className="text-xs text-gray-400">Uporablja se pri SMS pošiljanju</p>
+                        </div>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900">{smsSenderId}</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      {emailPrimary ? (
-                        <>
-                          <div
-                            className="w-8 h-8 rounded-lg border border-gray-200 shadow-inner"
-                            style={{ backgroundColor: emailPrimary.startsWith('#') ? emailPrimary : `#${emailPrimary}` }}
-                          />
-                          <p className="text-base text-gray-900 font-mono">{emailPrimary}</p>
-                        </>
-                      ) : (
-                        <span className="text-gray-400">Ni nastavljeno</span>
-                      )}
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Palette className="w-5 h-5 text-black" weight="regular" />
-                      <h3 className="font-bold text-lg text-gray-900">Sekundarna barva</h3>
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Nasveti glede na storitev</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      {emailSecondary ? (
-                        <>
-                          <div
-                            className="w-8 h-8 rounded-lg border border-gray-200 shadow-inner"
-                            style={{ backgroundColor: emailSecondary.startsWith('#') ? emailSecondary : `#${emailSecondary}` }}
-                          />
-                          <p className="text-base text-gray-900 font-mono">{emailSecondary}</p>
-                        </>
-                      ) : (
-                        <span className="text-gray-400">Ni nastavljeno</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-2 mb-4">
-                      <ChatText className="w-5 h-5 text-black" weight="regular" />
-                      <h3 className="font-bold text-lg text-gray-900">Nasveti glede na storitev</h3>
-                    </div>
-                    <p className="text-base text-gray-900">
+                    <span className="text-sm font-semibold text-gray-900">
                       {nastvetiStoritev === 'yes' ? 'Da' : nastvetiStoritev === 'no' ? 'Ne' : 'AI sam odloči'}
-                    </p>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2.5">
+                    <div className="flex items-center gap-2">
+                      <Palette className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Barve emaila</span>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {[emailPrimary, emailSecondary].filter(Boolean).map((color, i) => (
+                        <div
+                          key={i}
+                          className="w-6 h-6 rounded-md border border-gray-200 shadow-inner"
+                          style={{ backgroundColor: color.startsWith('#') ? color : `#${color}` }}
+                        />
+                      ))}
+                      {!emailPrimary && !emailSecondary && (
+                        <span className="text-sm text-gray-400">Ni nastavljeno</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -411,51 +395,53 @@ export default function RemindersPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100"
+                className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
               >
-                <h2 className="text-xl font-semibold text-[#1A1F36] mb-6">Opomniki pred terminom</h2>
-                {!enabledBefore ? (
-                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <XCircle className="w-6 h-6 text-gray-400" weight="regular" />
-                    <span className="text-gray-600 font-medium">Onemogočeno</span>
+                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Opomniki pred terminom</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Status</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-semibold ${enabledBefore ? 'text-green-600' : 'text-red-500'}`}>
+                        {enabledBefore ? 'Omogočeno' : 'Onemogočeno'}
+                      </span>
+                      <div className={`w-2.5 h-2.5 rounded-full ${enabledBefore ? 'bg-green-500' : 'bg-red-400'}`} />
+                    </div>
                   </div>
-                ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Bell className="w-5 h-5 text-black" weight="regular" />
-                        <h3 className="font-bold text-lg text-gray-900">Status</h3>
-                      </div>
-                      <StatusBadge enabled={enabledBefore} />
-                    </div>
 
-                    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-2 mb-4">
-                        <EnvelopeSimple className="w-5 h-5 text-black" weight="regular" />
-                        <h3 className="font-bold text-lg text-gray-900">Način pošiljanja</h3>
-                      </div>
-                      <p className="text-base text-gray-900">{getChannelLabel(beforeChannel)}</p>
-                    </div>
-
-                    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Clock className="w-5 h-5 text-black" weight="regular" />
-                        <h3 className="font-bold text-lg text-gray-900">Čas pošiljanja</h3>
-                      </div>
-                      <p className="text-base text-gray-900">1 dan pred terminom</p>
-                    </div>
-
-                    {beforeInstructions && (
-                      <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow md:col-span-2 lg:col-span-3">
-                        <div className="flex items-center gap-2 mb-4">
-                          <ChatText className="w-5 h-5 text-black" weight="regular" />
-                          <h3 className="font-bold text-lg text-gray-900">Navodila</h3>
+                  {enabledBefore && (
+                    <>
+                      <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <EnvelopeSimple className="w-4 h-4 text-gray-400" weight="regular" />
+                          <span className="text-sm font-medium text-gray-700">Način pošiljanja</span>
                         </div>
-                        <p className="text-sm text-gray-600 whitespace-pre-wrap">{beforeInstructions}</p>
+                        <span className="text-sm font-semibold text-gray-900">{getChannelLabel(beforeChannel)}</span>
                       </div>
-                    )}
-                  </div>
-                )}
+
+                      <div className={`flex items-center justify-between py-2.5 ${beforeInstructions ? 'border-b border-gray-100' : ''}`}>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" weight="regular" />
+                          <span className="text-sm font-medium text-gray-700">Čas pošiljanja</span>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900">1 dan pred terminom</span>
+                      </div>
+
+                      {beforeInstructions && (
+                        <div className="flex items-start justify-between gap-4 py-2.5">
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                            <span className="text-sm font-medium text-gray-700">Navodila</span>
+                          </div>
+                          <p className="text-sm text-gray-600 whitespace-pre-wrap text-right max-w-xs">{beforeInstructions}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </motion.div>
 
               {/* Opomniki po terminu */}
@@ -463,61 +449,63 @@ export default function RemindersPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-gray-100"
+                className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
               >
-                <h2 className="text-xl font-semibold text-[#1A1F36] mb-6">Opomniki po terminu</h2>
-                {!enabledAfter ? (
-                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <XCircle className="w-6 h-6 text-gray-400" weight="regular" />
-                    <span className="text-gray-600 font-medium">Onemogočeno</span>
+                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Opomniki po terminu</h2>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-gray-400" weight="regular" />
+                      <span className="text-sm font-medium text-gray-700">Status</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm font-semibold ${enabledAfter ? 'text-green-600' : 'text-red-500'}`}>
+                        {enabledAfter ? 'Omogočeno' : 'Onemogočeno'}
+                      </span>
+                      <div className={`w-2.5 h-2.5 rounded-full ${enabledAfter ? 'bg-green-500' : 'bg-red-400'}`} />
+                    </div>
                   </div>
-                ) : (
-                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-2 mb-4">
-                        <CheckCircle className="w-5 h-5 text-black" weight="regular" />
-                        <h3 className="font-bold text-lg text-gray-900">Status</h3>
-                      </div>
-                      <StatusBadge enabled={enabledAfter} />
-                    </div>
 
-                    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-2 mb-4">
-                        <EnvelopeSimple className="w-5 h-5 text-black" weight="regular" />
-                        <h3 className="font-bold text-lg text-gray-900">Način pošiljanja</h3>
-                      </div>
-                      <p className="text-base text-gray-900">{getChannelLabel(afterChannel)}</p>
-                    </div>
-
-                    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Clock className="w-5 h-5 text-black" weight="regular" />
-                        <h3 className="font-bold text-lg text-gray-900">Čas pošiljanja</h3>
-                      </div>
-                      <p className="text-base text-gray-900">Takoj po zaključku</p>
-                    </div>
-
-                    {afterHasDiscount && afterDiscountText && (
-                      <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow md:col-span-2 lg:col-span-3">
-                        <div className="flex items-center gap-2 mb-4">
-                          <ChatText className="w-5 h-5 text-black" weight="regular" />
-                          <h3 className="font-bold text-lg text-gray-900">Popust</h3>
+                  {enabledAfter && (
+                    <>
+                      <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <EnvelopeSimple className="w-4 h-4 text-gray-400" weight="regular" />
+                          <span className="text-sm font-medium text-gray-700">Način pošiljanja</span>
                         </div>
-                        <p className="text-base text-gray-900">{afterDiscountText}</p>
+                        <span className="text-sm font-semibold text-gray-900">{getChannelLabel(afterChannel)}</span>
                       </div>
-                    )}
 
-                    {afterInstructions && (
-                      <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow md:col-span-2 lg:col-span-3">
-                        <div className="flex items-center gap-2 mb-4">
-                          <ChatText className="w-5 h-5 text-black" weight="regular" />
-                          <h3 className="font-bold text-lg text-gray-900">Navodila</h3>
+                      <div className={`flex items-center justify-between py-2.5 ${(afterHasDiscount && afterDiscountText) || afterInstructions ? 'border-b border-gray-100' : ''}`}>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-gray-400" weight="regular" />
+                          <span className="text-sm font-medium text-gray-700">Čas pošiljanja</span>
                         </div>
-                        <p className="text-sm text-gray-600 whitespace-pre-wrap">{afterInstructions}</p>
+                        <span className="text-sm font-semibold text-gray-900">Takoj po zaključku</span>
                       </div>
-                    )}
-                  </div>
-                )}
+
+                      {afterHasDiscount && afterDiscountText && (
+                        <div className={`flex items-center justify-between py-2.5 ${afterInstructions ? 'border-b border-gray-100' : ''}`}>
+                          <div className="flex items-center gap-2">
+                            <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                            <span className="text-sm font-medium text-gray-700">Popust</span>
+                          </div>
+                          <span className="text-sm font-semibold text-gray-900">{afterDiscountText}</span>
+                        </div>
+                      )}
+
+                      {afterInstructions && (
+                        <div className="flex items-start justify-between gap-4 py-2.5">
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                            <span className="text-sm font-medium text-gray-700">Navodila</span>
+                          </div>
+                          <p className="text-sm text-gray-600 whitespace-pre-wrap text-right max-w-xs">{afterInstructions}</p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </motion.div>
             </div>
           )}

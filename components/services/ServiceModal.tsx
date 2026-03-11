@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -14,13 +14,12 @@ import {
   Warning,
   Palette,
   Check,
-  Timer,
   Info,
   CaretLeft,
   CaretRight,
 } from '@phosphor-icons/react';
 import type { Service, ServiceFormData, PriceType } from '@/types/services';
-import { DURATION_OPTIONS, BUFFER_OPTIONS, PRICE_TYPE_OPTIONS } from '@/types/services';
+import { DURATION_OPTIONS, PRICE_TYPE_OPTIONS } from '@/types/services';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/constants/serviceGradients';
 
@@ -72,11 +71,6 @@ function ServiceModal({
     colorPage * COLORS_PER_PAGE,
     (colorPage + 1) * COLORS_PER_PAGE
   );
-
-  // Calculate total time
-  const totalTime = useMemo(() => {
-    return formData.trajanje + formData.buffer_pred + formData.buffer_po;
-  }, [formData.trajanje, formData.buffer_pred, formData.buffer_po]);
 
   // Initialize form when modal opens
   useEffect(() => {
@@ -577,76 +571,6 @@ function ServiceModal({
                       {errors.trajanje}
                     </p>
                   )}
-                </div>
-
-                {/* Rezervni čas pred terminom */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Rezervni čas pred terminom (opcijsko)
-                  </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <Timer className="h-4 w-4" weight="regular" />
-                    </div>
-                    <Select
-                      value={formData.buffer_pred.toString()}
-                      setValue={(value) => handleChange('buffer_pred', parseInt(value, 10))}
-                      placeholder="Brez rezerve"
-                      className="[&>button]:pl-10"
-                    >
-                      {BUFFER_OPTIONS.map((opt) => (
-                        <SelectOption key={opt.value} value={opt.value.toString()}>
-                          {opt.label}
-                        </SelectOption>
-                      ))}
-                    </Select>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Čas za pripravo pred storitvijo
-                  </p>
-                </div>
-
-                {/* Rezervni čas po terminu */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Rezervni čas po terminu (opcijsko)
-                  </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <Timer className="h-4 w-4" weight="regular" />
-                    </div>
-                    <Select
-                      value={formData.buffer_po.toString()}
-                      setValue={(value) => handleChange('buffer_po', parseInt(value, 10))}
-                      placeholder="Brez rezerve"
-                      className="[&>button]:pl-10"
-                    >
-                      {BUFFER_OPTIONS.map((opt) => (
-                        <SelectOption key={opt.value} value={opt.value.toString()}>
-                          {opt.label}
-                        </SelectOption>
-                      ))}
-                    </Select>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Čas za čiščenje/pripravo po storitvi
-                  </p>
-                </div>
-
-                {/* Total Time Display */}
-                <div className="p-4 bg-violet-50 border border-violet-200 rounded-xl">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-violet-900">
-                      Skupni čas termina:
-                    </span>
-                    <span className="text-lg font-bold text-violet-900">
-                      {totalTime} minut
-                    </span>
-                  </div>
-                  <p className="text-xs text-violet-700 mt-1 flex items-center gap-1">
-                    <Info className="h-3 w-3" />
-                    Trajanje ({formData.trajanje} min) + Rezervni čas pred ({formData.buffer_pred} min) + Rezervni čas po ({formData.buffer_po} min)
-                  </p>
                 </div>
 
                 {/* Price Type */}

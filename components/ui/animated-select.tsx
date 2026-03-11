@@ -42,6 +42,8 @@ interface SelectOptionProps {
   description?: string;
   /** CSS gradient string or hex color for the color dot */
   colorDot?: string;
+  /** If true, option text is rendered in gray (still selectable) */
+  dimmed?: boolean;
 }
 
 // Helper to get background style for color dots (handles gradients and hex colors)
@@ -262,6 +264,7 @@ export function SelectOption({
   icon,
   description,
   colorDot,
+  dimmed = false,
   _index = 0,
 }: SelectOptionProps & { _index?: number }) {
   const { value, setValue, setIsOpen, highlightedIndex, setHighlightedIndex } = useSelectContext();
@@ -299,7 +302,7 @@ export function SelectOption({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className={`font-medium ${isSelected ? 'text-[#1A1F36]' : 'text-gray-700'}`}>
+        <div className={`font-medium ${dimmed ? 'text-gray-400' : isSelected ? 'text-[#1A1F36]' : 'text-gray-700'}`}>
           {children}
         </div>
         {description && (

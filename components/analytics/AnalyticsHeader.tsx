@@ -1,18 +1,17 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { DownloadSimple, FileText, Table, FileCsv, X, CalendarBlank } from '@phosphor-icons/react';
+import { CalendarBlank } from '@phosphor-icons/react';
 import { format } from 'date-fns';
-import { sl } from 'date-fns/locale';
-import { type TimePeriod, type CustomRange, getPeriodLabel } from '@/lib/analytics/dateUtils';
+import { type TimePeriod, type CustomRange } from '@/lib/analytics/dateUtils';
 
 interface AnalyticsHeaderProps {
   timePeriod: TimePeriod;
   setTimePeriod: (period: TimePeriod) => void;
   customRange: CustomRange;
   setCustomRange: (range: CustomRange) => void;
-  onExportCSV: () => void;
+  onExportCSV?: () => void;
 }
 
 const TIME_PERIODS: { value: TimePeriod; label: string }[] = [
@@ -31,8 +30,6 @@ function AnalyticsHeader({
   setCustomRange,
   onExportCSV,
 }: AnalyticsHeaderProps) {
-  const [showExportMenu, setShowExportMenu] = useState(false);
-
   const handleApplyCustomRange = () => {
     // Custom range is already set, just close the picker by changing to custom
     setTimePeriod('custom');
@@ -47,41 +44,6 @@ function AnalyticsHeader({
           <p className="mt-1 text-gray-600">Pregled poslovanja in ključnih metrik</p>
         </div>
 
-        {/* Export Button */}
-        <div className="relative">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-xl hover:shadow-cyan-500/30"
-          >
-            <DownloadSimple className="h-4 w-4" weight="bold" />
-            Izvozi Podatke
-          </motion.button>
-
-          {/* Export Dropdown */}
-          <AnimatePresence>
-            {showExportMenu && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute right-0 z-10 mt-2 w-48 rounded-xl border border-gray-200 bg-white py-2 shadow-lg"
-              >
-                <button
-                  onClick={() => {
-                    onExportCSV();
-                    setShowExportMenu(false);
-                  }}
-                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                >
-                  <FileCsv className="h-4 w-4" weight="regular" />
-                  Izvozi kot CSV
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
       </div>
 
       {/* Time Period Pills */}

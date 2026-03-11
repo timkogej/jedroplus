@@ -257,10 +257,12 @@ function AppointmentCard({
           </>
         )}
         {isNoShow && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="1.5" strokeOpacity="0.5" />
-            <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="1.5" strokeOpacity="0.5" />
-          </svg>
+          <div
+            className="absolute inset-0 pointer-events-none rounded"
+            style={{
+              background: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(55,55,55,0.18) 4px, rgba(55,55,55,0.18) 7px)',
+            }}
+          />
         )}
       </div>
     );
@@ -313,10 +315,12 @@ function AppointmentCard({
           <StatusIndicator />
         </div>
         {isNoShow && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none rounded-xl" xmlns="http://www.w3.org/2000/svg">
-            <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
-            <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
-          </svg>
+          <div
+            className="absolute inset-0 pointer-events-none rounded-xl"
+            style={{
+              background: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(55,55,55,0.18) 4px, rgba(55,55,55,0.18) 7px)',
+            }}
+          />
         )}
       </div>
     );
@@ -384,10 +388,12 @@ function AppointmentCard({
         </div>
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-md" />
         {isNoShow && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="1.5" strokeOpacity="0.4" />
-            <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="1.5" strokeOpacity="0.4" />
-          </svg>
+          <div
+            className="absolute inset-0 pointer-events-none rounded-md"
+            style={{
+              background: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(55,55,55,0.18) 4px, rgba(55,55,55,0.18) 7px)',
+            }}
+          />
         )}
       </div>
     );
@@ -429,10 +435,12 @@ function AppointmentCard({
         </div>
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg" />
         {isNoShow && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
-            <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
-          </svg>
+          <div
+            className="absolute inset-0 pointer-events-none rounded-lg"
+            style={{
+              background: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(55,55,55,0.18) 4px, rgba(55,55,55,0.18) 7px)',
+            }}
+          />
         )}
       </div>
     );
@@ -479,10 +487,12 @@ function AppointmentCard({
         </div>
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg" />
         {isNoShow && (
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
-            <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
-          </svg>
+          <div
+            className="absolute inset-0 pointer-events-none rounded-lg"
+            style={{
+              background: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(55,55,55,0.18) 4px, rgba(55,55,55,0.18) 7px)',
+            }}
+          />
         )}
       </div>
     );
@@ -537,10 +547,12 @@ function AppointmentCard({
       </div>
       <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-lg" />
       {isNoShow && (
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="0" y1="0" x2="100%" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
-          <line x1="100%" y1="0" x2="0" y2="100%" stroke="black" strokeWidth="2" strokeOpacity="0.4" />
-        </svg>
+        <div
+          className="absolute inset-0 pointer-events-none rounded-lg"
+          style={{
+            background: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(55,55,55,0.18) 4px, rgba(55,55,55,0.18) 7px)',
+          }}
+        />
       )}
     </div>
   );

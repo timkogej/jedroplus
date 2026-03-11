@@ -484,54 +484,43 @@ export default function StoritvePage() {
   const handleToggleActive = useCallback(async (service: Service) => {
     if (!companyId) return;
 
-    try {
-      // Build a full service row so n8n receives all service details
-      const serviceRow = {
-        id: service.id,
-        Naziv: service.naziv,
-        Kategorija: service.kategorija,
-        Barva: service.barva,
-        Trajanje: service.trajanje,
-        buffer_pred: service.buffer_pred,
-        buffer_po: service.buffer_po,
-        skupni_cas: service.skupni_cas,
-        Tip_cene: service.tip_cene,
-        Cena: service.cena,
-        Opis: service.opis,
-        Aktivna: !service.aktivna,
-      };
+    const newActive = !service.aktivna;
 
+    // Optimistic update — immediately reflect the change in UI
+    setServices(prev => prev.map(s => s.id === service.id ? { ...s, aktivna: newActive } : s));
+
+    try {
       const result = await callN8nAction(
         buildPayload(
-          service.aktivna ? 'DEAKTIVACIJA_STORITVE' : 'AKTIVACIJA_STORITVE',
+          newActive ? 'AKTIVACIJA_STORITVE' : 'DEAKTIVACIJA_STORITVE',
           'services',
           buildServiceActivityData({
             companyId,
             userEmail: actor,
             companyProfile: companyPayload,
             serviceId: service.id,
-            active: !service.aktivna,
-            serviceRow,
+            active: newActive,
           })
         )
       );
 
       if (!result.ok) {
+        setServices(prev => prev.map(s => s.id === service.id ? { ...s, aktivna: service.aktivna } : s));
         throw new Error('Napaka pri spremembi statusa');
       }
 
       showToast(
-        service.aktivna ? 'Storitev deaktivirana' : 'Storitev aktivirana',
+        newActive ? 'Storitev aktivirana' : 'Storitev deaktivirana',
         'success'
       );
-      loadData();
     } catch (err) {
+      setServices(prev => prev.map(s => s.id === service.id ? { ...s, aktivna: service.aktivna } : s));
       showToast(
         err instanceof Error ? err.message : 'Napaka pri spremembi statusa',
         'error'
       );
     }
-  }, [companyId, actor, companyPayload, buildPayload, showToast, loadData]);
+  }, [companyId, actor, companyPayload, buildPayload, showToast]);
 
   // Delete service
   const handleDeleteService = useCallback(async () => {
@@ -568,6 +557,7 @@ export default function StoritvePage() {
       setIsDeleting(false);
     }
   }, [companyId, deleteService, actor, companyPayload, buildPayload, showToast, closeDeleteModal, loadData]);
+
 
   // Deactivate service (instead of delete when it has appointments)
   const handleDeactivateService = useCallback(async () => {

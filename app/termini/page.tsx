@@ -517,7 +517,7 @@ export default function TerminiPage() {
       setSuccessMessage('Termin označen kot No Show');
       setTimeout(() => setSuccessMessage(null), 3000);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 700));
       await loadData();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Napaka pri No Show');
@@ -561,7 +561,7 @@ export default function TerminiPage() {
       setSuccessMessage('Termin uspešno odpovedan');
       setTimeout(() => setSuccessMessage(null), 3000);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 700));
       await loadData();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Napaka pri odpovedi');
@@ -637,6 +637,15 @@ export default function TerminiPage() {
   if (!companyId) return null;
 
   // Stats for header
+  const currentMonthCount = appointments.filter((apt) => {
+    const today = new Date();
+    const aptDate = new Date(apt.datum);
+    return (
+      aptDate.getFullYear() === today.getFullYear() &&
+      aptDate.getMonth() === today.getMonth()
+    );
+  }).length;
+
   const todayCount = appointments.filter((apt) => {
     const today = new Date();
     const aptDate = new Date(apt.datum);
@@ -688,8 +697,8 @@ export default function TerminiPage() {
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
               icon={<CalendarBlank className="h-6 w-6" weight="bold" />}
-              value={appointments.length}
-              label="Vseh terminov"
+              value={currentMonthCount}
+              label="Termini ta mesec"
               delay={0}
             />
             <StatCard

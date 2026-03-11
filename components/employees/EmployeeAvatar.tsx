@@ -38,15 +38,49 @@ function EmployeeAvatar({
 
   return (
     <div
-      className={`
-        rounded-full flex items-center justify-center font-bold text-white
-        shadow-lg select-none
-        ${sizeClasses[size]}
-        ${className}
-      `}
-      style={{ background: gradientStyle }}
+      className={`rounded-full flex items-center justify-center select-none flex-shrink-0 ${sizeClasses[size]} ${className}`}
+      style={{
+        background: `white`,
+        boxShadow: `0 0 0 2px transparent`,
+        border: '2px solid transparent',
+        backgroundClip: 'padding-box',
+        outline: `2px solid transparent`,
+        position: 'relative',
+      }}
     >
-      {initials}
+      {/* Gradient border ring */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: -2,
+          borderRadius: '9999px',
+          background: gradientStyle,
+          zIndex: 0,
+        }}
+      />
+      {/* White inner circle */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '9999px',
+          background: 'white',
+          zIndex: 1,
+        }}
+      />
+      {/* Gradient initials */}
+      <span
+        className="font-bold relative"
+        style={{
+          background: gradientStyle,
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          zIndex: 2,
+        }}
+      >
+        {initials}
+      </span>
     </div>
   );
 }

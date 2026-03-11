@@ -12,12 +12,8 @@ import {
   Books,
   ArrowsLeftRight,
   CheckCircle,
-  Clock,
-  CaretRight,
-  Warning,
   Sparkle,
-  PencilSimple,
-  ChartBar,
+  Clock,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { ReceptionistSettingsModal } from '@/components/receptionist/ReceptionistSettingsModal';
@@ -232,229 +228,66 @@ export default function ReceptionistPlusPage() {
             </motion.div>
           )}
 
-          {/* Info Cards Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-
-            {/* Card 1: Knowledge base */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="group cursor-pointer"
-              style={{
-                background: 'rgba(255,255,255,0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(139,92,246,0.08)',
-                borderRadius: 20,
-                padding: 24,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-                transition: 'border-color 0.15s, box-shadow 0.15s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.2)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(139,92,246,0.1)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.08)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(0,0,0,0.04)';
-              }}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <span style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-flex' }}>
-                  <Books size={26} weight="regular" />
-                </span>
-                <CaretRight size={18} weight="bold" className="text-gray-300 group-hover:text-violet-400 transition-colors mt-1" />
-              </div>
-
-              <h3 className="font-semibold text-gray-800 text-base mb-2">Baza znanja</h3>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-gray-900">{knowledgeDocsCount}</span>
-                <span className="text-gray-500 text-sm">dokumentov</span>
-              </div>
-
-              {knowledgeDocsCount === 0 && (
-                <div className="flex items-center gap-1.5 mt-3">
-                  <Warning size={14} weight="regular" className="text-amber-500 flex-shrink-0" />
-                  <p className="text-xs text-amber-600">Dodajte dokumente za boljše odgovore</p>
-                </div>
-              )}
-            </motion.div>
-
-            {/* Card 2: Greeting */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="group cursor-pointer"
-              style={{
-                background: 'rgba(255,255,255,0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(139,92,246,0.08)',
-                borderRadius: 20,
-                padding: 24,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-                transition: 'border-color 0.15s, box-shadow 0.15s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.2)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(139,92,246,0.1)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.08)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(0,0,0,0.04)';
-              }}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <span style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-flex' }}>
-                  <ChatText size={26} weight="regular" />
-                </span>
-                <CaretRight size={18} weight="bold" className="text-gray-300 group-hover:text-violet-400 transition-colors mt-1" />
-              </div>
-
-              <h3 className="font-semibold text-gray-800 text-base mb-2">Pozdrav</h3>
-              {greetingText ? (
-                <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">{greetingText}</p>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 flex-shrink-0" />
-                  <span className="text-gray-400 text-sm">Ni nastavljeno</span>
-                </div>
-              )}
-            </motion.div>
-
-            {/* Card 3: Forwarding */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="group cursor-pointer"
-              style={{
-                background: 'rgba(255,255,255,0.8)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(139,92,246,0.08)',
-                borderRadius: 20,
-                padding: 24,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-                transition: 'border-color 0.15s, box-shadow 0.15s',
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.2)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(139,92,246,0.1)';
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(139,92,246,0.08)';
-                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 20px rgba(0,0,0,0.04)';
-              }}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <span style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-flex' }}>
-                  <ArrowsLeftRight size={26} weight="regular" />
-                </span>
-                <CaretRight size={18} weight="bold" className="text-gray-300 group-hover:text-violet-400 transition-colors mt-1" />
-              </div>
-
-              <h3 className="font-semibold text-gray-800 text-base mb-2">Preusmeritev</h3>
-              <p
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  color: '#9CA3AF',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  marginBottom: 6,
-                }}
-              >
-                Številka
-              </p>
-              {handoffNumber ? (
-                <p className="font-mono text-sm font-semibold text-gray-800">{handoffNumber}</p>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" />
-                  <span className="text-gray-400 text-sm">Ni nastavljeno</span>
-                </div>
-              )}
-            </motion.div>
-          </div>
-
-          {/* Greeting Text Card */}
+          {/* Nastavitve */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mb-8"
-            style={{
-              background: 'rgba(255,255,255,0.8)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(139,92,246,0.08)',
-              borderRadius: 20,
-              padding: 24,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-            }}
+            transition={{ delay: 0.15 }}
+            className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-8"
           >
-            <div className="flex items-start justify-between mb-5">
-              <div className="flex items-center gap-3">
-                <span style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-flex', flexShrink: 0 }}>
-                  <ChatText size={24} weight="regular" />
-                </span>
-                <div>
-                  <h3 className="font-semibold text-gray-800">Celotno pozdravno besedilo</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">Besedilo, ki ga AI prebere ob začetku klica</p>
+            <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Nastavitve</h2>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-gray-400" weight="regular" />
+                  <span className="text-sm font-medium text-gray-700">Telefonska številka</span>
                 </div>
+                {phoneNumber ? (
+                  <span className="text-sm font-semibold text-gray-900">{phoneNumber}</span>
+                ) : (
+                  <span className="text-sm text-gray-400">Ni nastavljeno</span>
+                )}
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowSettingsModal(true)}
-                className="flex items-center gap-1.5 text-sm font-medium transition-colors"
-                style={{ color: '#7C3AED' }}
-              >
-                <PencilSimple size={14} weight="regular" />
-                Uredi
-              </motion.button>
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <ArrowsLeftRight className="w-4 h-4 text-gray-400" weight="regular" />
+                  <span className="text-sm font-medium text-gray-700">Preusmeritev</span>
+                </div>
+                {handoffNumber ? (
+                  <span className="text-sm font-semibold text-gray-900 font-mono">{handoffNumber}</span>
+                ) : (
+                  <span className="text-sm text-gray-400">Ni nastavljeno</span>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Books className="w-4 h-4 text-gray-400" weight="regular" />
+                  <span className="text-sm font-medium text-gray-700">Baza znanja</span>
+                </div>
+                <span className="text-sm font-semibold text-gray-900">{knowledgeDocsCount} dokumentov</span>
+              </div>
+
+              <div className="py-2.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                  <span className="text-sm font-medium text-gray-700">Pozdravno besedilo</span>
+                </div>
+                {greetingText ? (
+                  <p className="text-sm text-gray-600 italic pl-6">"{greetingText}"</p>
+                ) : (
+                  <span className="text-sm text-gray-400 pl-6">Ni nastavljeno</span>
+                )}
+              </div>
             </div>
-
-            {greetingText ? (
-              <div
-                style={{
-                  background: '#F9FAFB',
-                  border: '1px solid #F3F4F6',
-                  borderRadius: 14,
-                  padding: '16px 20px',
-                }}
-              >
-                <p className="text-gray-700 leading-relaxed italic">"{greetingText}"</p>
-              </div>
-            ) : (
-              <div
-                style={{
-                  background: '#F9FAFB',
-                  border: '2px dashed #E5E7EB',
-                  borderRadius: 14,
-                  padding: '28px 20px',
-                  textAlign: 'center',
-                }}
-              >
-                <p className="text-gray-400 mb-3 text-sm">Pozdravno besedilo še ni nastavljeno</p>
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setShowSettingsModal(true)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                  style={{ background: 'rgba(139,92,246,0.1)', color: '#7C3AED' }}
-                >
-                  + Dodaj besedilo
-                </motion.button>
-              </div>
-            )}
           </motion.div>
 
           {/* Capabilities Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.25 }}
             className="mb-8"
             style={{
               background: 'linear-gradient(135deg, rgba(139,92,246,0.04) 0%, rgba(6,182,212,0.04) 100%)',
@@ -476,7 +309,7 @@ export default function ReceptionistPlusPage() {
                   key={capability.title}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.5 + index * 0.08 }}
+                  transition={{ delay: 0.3 + index * 0.08 }}
                   className="flex items-start gap-3 p-4 rounded-xl"
                   style={{
                     background: 'rgba(255,255,255,0.6)',
@@ -493,76 +326,6 @@ export default function ReceptionistPlusPage() {
                   </div>
                 </motion.div>
               ))}
-            </div>
-          </motion.div>
-
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            style={{
-              background: 'rgba(255,255,255,0.8)',
-              backdropFilter: 'blur(20px)',
-              border: '1px solid rgba(139,92,246,0.08)',
-              borderRadius: 20,
-              padding: 24,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-            }}
-          >
-            <div className="flex items-center gap-3 mb-5">
-              <span style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-flex', flexShrink: 0 }}>
-                <ChartBar size={24} weight="regular" />
-              </span>
-              <div>
-                <h3 className="font-semibold text-gray-800">Hitre akcije</h3>
-                <p className="text-sm text-gray-500">Upravljajte vašo AI recepcionistko</p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setShowSettingsModal(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white"
-                style={{ background: GRADIENT, boxShadow: '0 4px 16px rgba(139,92,246,0.3)' }}
-              >
-                <Gear size={16} weight="bold" />
-                Uredi nastavitve
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => { if (phoneNumber) window.location.href = `tel:${phoneNumber}`; }}
-                disabled={!phoneNumber}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: 'white',
-                  border: '1px solid rgba(139,92,246,0.2)',
-                  color: '#7C3AED',
-                }}
-              >
-                <PhoneCall size={16} weight="regular" />
-                Testiraj klic
-              </motion.button>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => copyToClipboard(phoneNumber)}
-                disabled={!phoneNumber}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: 'white',
-                  border: '1px solid rgba(139,92,246,0.2)',
-                  color: '#7C3AED',
-                }}
-              >
-                {copiedPhone ? <Check size={16} weight="bold" /> : <Copy size={16} weight="regular" />}
-                {copiedPhone ? 'Kopirano!' : 'Kopiraj številko'}
-              </motion.button>
             </div>
           </motion.div>
 

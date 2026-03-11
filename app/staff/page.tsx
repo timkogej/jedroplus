@@ -33,7 +33,9 @@ import EmployeeGrid from '@/components/employees/EmployeeGrid';
 import EmployeeModal from '@/components/employees/EmployeeModal';
 import DeleteEmployeeModal from '@/components/employees/DeleteEmployeeModal';
 import EmployeeSettingsModal from '@/components/employees/EmployeeSettingsModal';
-import { defaultWorkingHours } from '@/types/settings';
+import { defaultWorkingHoursDay } from '@/types/settings';
+import type { WorkingHoursDay, TimeInterval } from '@/types/settings';
+import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import {
   buildPartnerActivityData,
@@ -218,6 +220,7 @@ export default function OsebjePage() {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [columns, setColumns] = useState<Record<string, string>>({});
+  const [rawCompanySchedule, setRawCompanySchedule] = useState<Record<string, WorkingHoursDay>>(defaultWorkingHoursDay);
 
   // UI states
   const [searchQuery, setSearchQuery] = useState('');
@@ -255,17 +258,44 @@ export default function OsebjePage() {
     [companyId, actor]
   );
 
+  // Helper: convert urnik JSON to WorkingHoursDay format with intervals
+  const parseCompanyUrnik = useCallback((urnikData: unknown): Record<string, WorkingHoursDay> => {
+    const DAYS = ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja'];
+    let parsed = urnikData;
+    if (typeof urnikData === 'string') {
+      try { parsed = JSON.parse(urnikData); } catch { return defaultWorkingHoursDay; }
+    }
+    if (!parsed || typeof parsed !== 'object') return defaultWorkingHoursDay;
+    const data = parsed as Record<string, unknown>;
+    const result: Record<string, WorkingHoursDay> = {};
+    for (const day of DAYS) {
+      const dayData = data[day];
+      if (dayData && typeof dayData === 'object') {
+        const d = dayData as Record<string, unknown>;
+        if (Array.isArray(d.intervals)) {
+          result[day] = { enabled: Boolean(d.enabled), intervals: d.intervals as TimeInterval[] };
+        } else {
+          result[day] = { enabled: Boolean(d.enabled), intervals: [{ start: String(d.start || '08:00'), end: String(d.end || '17:00') }] };
+        }
+      } else {
+        result[day] = defaultWorkingHoursDay[day];
+      }
+    }
+    return result;
+  }, []);
+
   // Load employees and services
   const loadEmployees = useCallback(async () => {
     if (!companyId) return;
 
     setIsLoading(true);
     try {
-      const [employeesResult, statsResult, detectedColumns, servicesResult] = await Promise.all([
+      const [employeesResult, statsResult, detectedColumns, servicesResult, companyRow] = await Promise.all([
         fetchEmployees(companyId),
         getEmployeeStats(companyId),
         detectEmployeeColumns(),
         fetchServices(companyId),
+        loadCompanyRow(companyId),
       ]);
 
       if (employeesResult.data) {
@@ -278,6 +308,14 @@ export default function OsebjePage() {
         setServices(servicesResult.data);
       }
       setColumns(detectedColumns);
+
+      // Load company schedule from "Urnik" column
+      if (companyRow.data) {
+        const urnikRaw = (companyRow.data as Record<string, unknown>)['Urnik'] ?? (companyRow.data as Record<string, unknown>)['urnik'];
+        if (urnikRaw) {
+          setRawCompanySchedule(parseCompanyUrnik(urnikRaw));
+        }
+      }
     } catch (error) {
       console.error('Error loading employees:', error);
       setToast({ message: 'Napaka pri nalaganju zaposlenih', type: 'error' });
@@ -474,39 +512,45 @@ export default function OsebjePage() {
   const handleToggleActive = async (employee: Employee) => {
     if (!companyId) return;
 
+    const newActive = !employee.aktivna;
+    const newStatus = newActive ? 'active' : 'inactive';
+
+    // Optimistic update — immediately reflect in UI
+    setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: newActive } : e));
+
     try {
       const identifier = await getEmployeeIdentifier(employee);
       if (!identifier) {
+        setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: employee.aktivna } : e));
         setToast({ message: 'Manjka ID zaposlenega', type: 'error' });
         return;
       }
 
       const result = await callN8nAction(
         buildPayload(
-          'PARTNER_AKTIVNOST',
+          'SPREMEMBA_STATUS_OSEBJE',
           'partners',
-          buildPartnerActivityData({
-            companyId,
-            userEmail: actor,
-            companyProfile,
-            partnerId: identifier.value as string,
-            active: !employee.aktivna,
-          })
+          {
+            partner_id: identifier.value,
+            id: employee.id,
+            status: newStatus,
+          }
         )
       );
 
       if (!result.ok) {
+        setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: employee.aktivna } : e));
         setToast({ message: 'Napaka pri spreminjanju statusa', type: 'error' });
         return;
       }
 
       setToast({
-        message: employee.aktivna ? 'Zaposleni deaktiviran' : 'Zaposleni aktiviran',
+        message: newActive ? 'Zaposleni aktiviran' : 'Zaposleni deaktiviran',
         type: 'success',
       });
-      loadEmployees();
     } catch (error) {
       console.error('Error toggling active:', error);
+      setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: employee.aktivna } : e));
       setToast({ message: 'Napaka pri spreminjanju statusa', type: 'error' });
     }
   };
@@ -606,14 +650,8 @@ export default function OsebjePage() {
     }
   };
 
-  // Get company schedule from settings
-  const companySchedule = useMemo((): Record<string, { enabled: boolean; start: string; end: string }> => {
-    const wh = companySettings?.workingHours as Record<string, { enabled: boolean; start: string; end: string }> | undefined;
-    if (wh && Object.keys(wh).length > 0) {
-      return wh;
-    }
-    return defaultWorkingHours;
-  }, [companySettings]);
+  // Company schedule with intervals — loaded directly from "Urnik" column
+  const companySchedule = rawCompanySchedule;
 
   if (!companyId) return null;
 
