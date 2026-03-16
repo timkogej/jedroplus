@@ -335,9 +335,9 @@ function ClientDetailsPanel({
                     <div>
                       <div className="text-xs text-gray-500">Spol</div>
                       <div className="text-sm font-medium text-gray-900">
-                        {(client.spol === 'moški' || client.spol === 'male') ? 'Moški' :
-                         (client.spol === 'ženska' || client.spol === 'female') ? 'Ženska' :
-                         client.spol === 'drugo' ? 'Drugo' : 'Ni navedeno'}
+                        {client.spol === 'ženska' ? 'Ženska' :
+                         client.spol === 'drugo' ? 'Drugo' :
+                         client.spol ? 'Moški' : 'Ni navedeno'}
                       </div>
                     </div>
                   </div>
