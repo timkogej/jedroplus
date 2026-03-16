@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -88,7 +88,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
   );
 }
 
-export default function TerminiPage() {
+function TerminiPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
@@ -987,5 +987,13 @@ export default function TerminiPage() {
         )}
       </AnimatePresence>
     </ProtectedLayout>
+  );
+}
+
+export default function TerminiPage() {
+  return (
+    <Suspense>
+      <TerminiPageInner />
+    </Suspense>
   );
 }
