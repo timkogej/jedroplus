@@ -318,7 +318,8 @@ export default function GeneralSettingsPage() {
               {/* Admin Code */}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-1">Admin code</p>
+                  <p className="text-sm font-semibold text-gray-800 mb-0.5">Admin code</p>
+                  <p className="text-xs text-gray-500 mb-2">Za dodajanje administratorjev v vaše podjetje. Administrator ima popoln dostop: vidi in ureja vse termine, stranke, storitve, osebje, analitiko, nastavitve in pakete.</p>
                   <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
                     {joinCode || '—'}
                   </div>
@@ -345,7 +346,8 @@ export default function GeneralSettingsPage() {
               {/* Employee Code */}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-1">Employee code</p>
+                  <p className="text-sm font-semibold text-gray-800 mb-0.5">Employee code</p>
+                  <p className="text-xs text-gray-500 mb-2">Za dodajanje zaposlenih v vaše podjetje. Zaposleni vidi le svoj urnik in termine, ki so mu dodeljeni. Nima dostopa do nastavitev, analitike ali podatkov o drugih zaposlenih.</p>
                   <div className="text-2xl font-bold text-gray-300">
                     —
                   </div>
@@ -374,9 +376,8 @@ export default function GeneralSettingsPage() {
               <div className="border-t border-gray-200" />
 
               {/* Explanation */}
-              <div className="text-sm text-gray-600">
-                <strong>Admin code</strong> je za dodajanje administratorjev v vaše podjetje.
-                <strong> Employee code</strong> pa je za dodajanje zaposlenih.
+              <div className="text-xs text-gray-400">
+                Kode delite le z zaupanja vrednimi osebami. Administrator ima polni dostop do sistema, zaposleni pa le do svojih terminov.
               </div>
             </div>
           </div>

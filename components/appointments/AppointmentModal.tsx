@@ -4,6 +4,7 @@ import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Clock, CalendarBlank, LockSimple, Plus, Minus } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
+import { ScrollTimePicker } from '@/components/ui/ScrollTimePicker';
 import ClientSearch from './ClientSearch';
 import ClientModal from '@/components/clients/ClientModal';
 import StatusBadge, { type AppointmentStatus, getStatusConfig } from './StatusBadge';
@@ -85,11 +86,8 @@ const getStatusDotColor = (status: AppointmentStatus): string => {
 // Generate time slots from 5:30 to 23:00 in 15-minute intervals
 function generateTimeSlots(): string[] {
   const slots: string[] = [];
-  // Start from 5:30 (330 minutes from midnight)
-  const startMinutes = 5 * 60 + 30; // 5:30
-  const endMinutes = 23 * 60; // 23:00
-
-  for (let minutes = startMinutes; minutes <= endMinutes; minutes += 15) {
+  // Start from 5:00, 5-minute steps — covers 10/20/25/35/40/50/55-min services
+  for (let minutes = 5 * 60; minutes <= 23 * 60 + 55; minutes += 5) {
     const hour = Math.floor(minutes / 60);
     const min = minutes % 60;
     slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
@@ -98,6 +96,7 @@ function generateTimeSlots(): string[] {
 }
 
 const TIME_SLOTS = generateTimeSlots();
+
 
 // Map JS day index (0=Sunday) to Slovenian day names
 const DAY_INDEX_TO_SLOVENIAN: Record<number, string> = {
@@ -157,6 +156,15 @@ function AppointmentModal({
 }: AppointmentModalProps) {
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
+
+  // Detect mobile (< 768px) for time picker variant
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Inline client creation state
   const [showClientModal, setShowClientModal] = useState(false);
@@ -272,6 +280,8 @@ function AppointmentModal({
     } else if (mode === 'create') {
       // Set defaults for new appointment
       const now = new Date();
+      // Auto-select employee when only one exists
+      const autoEmployee = employees.length === 1 ? employees[0].id : '';
       setFormData({
         datum: initialDate || now.toISOString().split('T')[0],
         cas_zacetek: initialStartTime || '09:00',
@@ -283,7 +293,7 @@ function AppointmentModal({
         storitev_id_2: '',
         storitev_id_3: '',
         stevilo_storitev: 1,
-        zaposleni_id: '',
+        zaposleni_id: autoEmployee,
         status: 'scheduled',
         opombe: '',
         internal_opombe: '',
@@ -449,11 +459,16 @@ function AppointmentModal({
     return employee.storitve.includes(serviceId);
   }, []);
 
-  // Get filtered employees based on selected service (deduplicated by ID)
+  // Get filtered employees based on selected service and active status (deduplicated by ID)
   const filteredEmployees = useMemo(() => {
+    const activeEmployees = employees.filter(emp => {
+      const status = (emp as unknown as Record<string, unknown>)['Status'] ?? (emp as unknown as Record<string, unknown>)['status'];
+      // Show employee if status is 'active' or status field is not set (backwards compat)
+      return !status || status === 'active';
+    });
     const base = !formData.storitev_id
-      ? employees
-      : employees.filter(emp => canPerformService(emp, formData.storitev_id));
+      ? activeEmployees
+      : activeEmployees.filter(emp => canPerformService(emp, formData.storitev_id));
     const seen = new Set<string>();
     return base.filter(emp => {
       if (!emp.id) return false;
@@ -482,14 +497,15 @@ function AppointmentModal({
     return undefined;
   }, [employees, formData.zaposleni_id, formData.datum]);
 
-  // Get filtered services based on selected employee (deduplicated by ID)
+  // Get filtered services based on selected employee (deduplicated by ID, active only)
   const filteredServices = useMemo(() => {
+    const activeServices = services.filter(s => !s.status || s.status === 'active');
     const base = (() => {
-      if (!formData.zaposleni_id) return services;
+      if (!formData.zaposleni_id) return activeServices;
       const employee = employees.find(e => e.id === formData.zaposleni_id);
-      if (!employee) return services;
-      if (!employee.storitve || employee.storitve.length === 0) return services;
-      return services.filter(s => employee.storitve?.includes(s.id));
+      if (!employee) return activeServices;
+      if (!employee.storitve || employee.storitve.length === 0) return activeServices;
+      return activeServices.filter(s => employee.storitve?.includes(s.id));
     })();
     const seen = new Set<string>();
     return base.filter(s => {
@@ -1135,25 +1151,15 @@ function AppointmentModal({
                   </p>
                 ) : (
                   <>
-                    <Select
+                    <input
+                      type="time"
                       value={formData.cas_zacetek}
-                      setValue={(value) => {
-                        setFormData((prev) => ({ ...prev, cas_zacetek: value }));
-                        // Reset manual flag so end time auto-calculates based on new start time
+                      onChange={(e) => {
+                        setFormData((prev) => ({ ...prev, cas_zacetek: e.target.value }));
                         setEndTimeManuallySet(false);
                       }}
-                      placeholder="Izberi čas"
-                    >
-                      {TIME_SLOTS.map((time) => (
-                        <SelectOption
-                          key={time}
-                          value={time}
-                          dimmed={!!employeeDaySchedule && !isTimeInSchedule(time, employeeDaySchedule)}
-                        >
-                          {time}
-                        </SelectOption>
-                      ))}
-                    </Select>
+                      className={`w-full rounded-xl border-2 bg-white px-4 py-2.5 text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
+                    />
                     {errors.cas_zacetek && (
                       <p className="mt-1 text-xs text-red-500">{errors.cas_zacetek}</p>
                     )}
@@ -1171,25 +1177,15 @@ function AppointmentModal({
                   </p>
                 ) : (
                   <>
-                    <Select
+                    <input
+                      type="time"
                       value={formData.cas_konec}
-                      setValue={(value) => {
-                        setFormData((prev) => ({ ...prev, cas_konec: value }));
-                        // Mark end time as manually set
+                      onChange={(e) => {
+                        setFormData((prev) => ({ ...prev, cas_konec: e.target.value }));
                         setEndTimeManuallySet(true);
                       }}
-                      placeholder="Izberi čas konca"
-                    >
-                      {TIME_SLOTS.map((time) => (
-                        <SelectOption
-                          key={time}
-                          value={time}
-                          dimmed={!!employeeDaySchedule && !isTimeInSchedule(time, employeeDaySchedule)}
-                        >
-                          {time}
-                        </SelectOption>
-                      ))}
-                    </Select>
+                      className={`w-full rounded-xl border-2 bg-white px-4 py-2.5 text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
+                    />
                     {errors.cas_konec && (
                       <p className="mt-1 text-xs text-red-500">{errors.cas_konec}</p>
                     )}
@@ -1443,12 +1439,6 @@ function AppointmentModal({
                     Interne opombe
                   </label>
                   <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
-                    <div className="flex items-center gap-2 mb-2">
-                      <LockSimple className="w-4 h-4 text-yellow-600" weight="fill" />
-                      <span className="text-xs font-semibold text-yellow-800 uppercase">
-                        Samo za interno uporabo
-                      </span>
-                    </div>
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">{formData.internal_opombe}</p>
                   </div>
                 </div>

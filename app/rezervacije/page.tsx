@@ -22,6 +22,7 @@ import {
   Design2Preview,
   Design3Preview,
   Design4Preview,
+  Design5Preview,
 } from '@/components/reservations/BookingDesignPreviews';
 
 interface ReservationSettings {
@@ -367,17 +368,7 @@ export default function RezervacijePage() {
                         >
                           <div className="rounded-lg mb-3 overflow-hidden" style={{ height: '160px' }}>
                             {design.id === 4 && <Design4Preview />}
-                            {design.id === 5 && (
-                              <div
-                                className="w-full h-full flex items-center justify-center"
-                                style={{ background: 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)' }}
-                              >
-                                <div className="text-center">
-                                  <div className="text-white font-serif text-lg font-light tracking-widest">MAGAZINE</div>
-                                  <div className="text-gray-400 text-xs mt-1 tracking-wider">Premium</div>
-                                </div>
-                              </div>
-                            )}
+                            {design.id === 5 && <Design5Preview />}
                           </div>
                           <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
                           <p className="text-xs text-center text-gray-500 mt-0.5">{design.subtitle}</p>

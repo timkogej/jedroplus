@@ -6,7 +6,6 @@ import {
   X,
   CalendarBlank,
   Clock,
-  User,
   Users,
   CheckSquare,
   Square,
@@ -14,6 +13,7 @@ import {
   SpinnerGap,
   Warning,
 } from '@phosphor-icons/react';
+import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { Zaposleni } from '@/types/appointments';
 
 interface AbsenceModalProps {
@@ -49,6 +49,16 @@ function generateTimeOptions(): string[] {
 }
 
 const TIME_OPTIONS = generateTimeOptions();
+
+// Extract a solid color from a gradient string for displaying initials
+function extractColor(barva: string): string {
+  if (!barva) return '#8B5CF6';
+  if (barva.includes('gradient')) {
+    const m = barva.match(/#[0-9A-Fa-f]{6}/g);
+    if (m && m.length > 0) return m[0];
+  }
+  return barva;
+}
 
 function AbsenceModal({
   isOpen,
@@ -205,15 +215,13 @@ function AbsenceModal({
                     Označite dneve ali ure odsotnosti zaposlenega
                   </p>
                 </div>
-                <motion.button
+                <button
                   type="button"
                   onClick={onClose}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
                   className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
                 >
                   <X className="h-5 w-5" weight="bold" />
-                </motion.button>
+                </button>
               </div>
             </div>
 
@@ -240,11 +248,9 @@ function AbsenceModal({
                 </label>
 
                 {/* All employees toggle */}
-                <motion.button
+                <button
                   type="button"
                   onClick={handleAllEmployees}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
                   className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left
                              ${allEmployees
                                ? 'bg-orange-50 border-orange-200 ring-1 ring-orange-200'
@@ -252,9 +258,9 @@ function AbsenceModal({
                              }`}
                 >
                   {allEmployees ? (
-                    <CheckSquare className="h-5 w-5 text-orange-500" weight="fill" />
+                    <CheckSquare className="h-5 w-5 text-orange-500 flex-shrink-0" weight="fill" />
                   ) : (
-                    <Square className="h-5 w-5 text-gray-400" weight="regular" />
+                    <Square className="h-5 w-5 text-gray-400 flex-shrink-0" weight="regular" />
                   )}
                   <div className="flex items-center gap-2">
                     <Users className="h-5 w-5 text-gray-600" weight="regular" />
@@ -262,38 +268,36 @@ function AbsenceModal({
                       Vsi zaposleni
                     </span>
                   </div>
-                </motion.button>
+                </button>
 
                 {/* Individual employees */}
                 {!allEmployees && (
                   <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                     {employees.map((employee, idx) => {
                       const isSelected = selectedEmployeeIds.includes(employee.id);
+                      const color = extractColor(employee.barva || '');
                       return (
-                        <motion.button
+                        <button
                           key={`emp-${idx}-${employee.id}`}
                           type="button"
                           onClick={() => toggleEmployee(employee.id)}
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
                           className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-left
                                      ${isSelected
                                        ? 'bg-orange-50 border-orange-200'
                                        : 'bg-white border-gray-200 hover:border-gray-300'
                                      }`}
                         >
-                          <div
-                            className="h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
-                            style={{
-                              background: employee.barva || 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
-                            }}
+                          {/* Initials only, colored in employee color - no circle */}
+                          <span
+                            className="text-sm font-bold flex-shrink-0 w-6 text-center"
+                            style={{ color }}
                           >
                             {employee.initials}
-                          </div>
+                          </span>
                           <span className={`text-sm truncate ${isSelected ? 'text-orange-700 font-medium' : 'text-[#1A1F36]'}`}>
                             {employee.ime} {employee.priimek}
                           </span>
-                        </motion.button>
+                        </button>
                       );
                     })}
                   </div>
@@ -302,11 +306,9 @@ function AbsenceModal({
 
               {/* Single day vs Date range toggle */}
               <div className="flex gap-2">
-                <motion.button
+                <button
                   type="button"
                   onClick={() => setSingleDay(true)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all
                              ${singleDay
                                ? 'bg-[#1A1F36] text-white border-[#1A1F36]'
@@ -315,12 +317,10 @@ function AbsenceModal({
                 >
                   <Clock className="h-4 w-4" weight={singleDay ? 'fill' : 'regular'} />
                   <span className="text-sm font-medium">Samo ure</span>
-                </motion.button>
-                <motion.button
+                </button>
+                <button
                   type="button"
                   onClick={() => setSingleDay(false)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all
                              ${!singleDay
                                ? 'bg-[#1A1F36] text-white border-[#1A1F36]'
@@ -329,7 +329,7 @@ function AbsenceModal({
                 >
                   <CalendarBlank className="h-4 w-4" weight={!singleDay ? 'fill' : 'regular'} />
                   <span className="text-sm font-medium">Več dni</span>
-                </motion.button>
+                </button>
               </div>
 
               {/* Date selection */}
@@ -364,38 +364,40 @@ function AbsenceModal({
                   )}
                 </div>
 
-                {/* Time selection (only for single day) */}
+                {/* Time selection (only for single day) - using same Select design as appointment form */}
                 {singleDay && (
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
                         Od ure
                       </label>
-                      <select
+                      <Select
                         value={timeFrom}
-                        onChange={(e) => setTimeFrom(e.target.value)}
-                        className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[#1A1F36]
-                                 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        setValue={setTimeFrom}
+                        placeholder="Izberi uro"
                       >
                         {TIME_OPTIONS.map((time) => (
-                          <option key={time} value={time}>{time}</option>
+                          <SelectOption key={time} value={time}>
+                            {time}
+                          </SelectOption>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
                         Do ure
                       </label>
-                      <select
+                      <Select
                         value={timeTo}
-                        onChange={(e) => setTimeTo(e.target.value)}
-                        className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[#1A1F36]
-                                 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        setValue={setTimeTo}
+                        placeholder="Izberi uro"
                       >
                         {TIME_OPTIONS.map((time) => (
-                          <option key={time} value={time}>{time}</option>
+                          <SelectOption key={time} value={time}>
+                            {time}
+                          </SelectOption>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                   </div>
                 )}
@@ -420,21 +422,17 @@ function AbsenceModal({
 
             {/* Footer */}
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
-              <motion.button
+              <button
                 type="button"
                 onClick={onClose}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
               >
                 Prekliči
-              </motion.button>
-              <motion.button
+              </button>
+              <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSaving}
-                whileHover={{ scale: isSaving ? 1 : 1.02 }}
-                whileTap={{ scale: isSaving ? 1 : 0.98 }}
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5
                            text-sm font-medium text-white shadow-lg shadow-orange-500/25 transition-all
                            hover:shadow-xl hover:shadow-orange-500/30 disabled:opacity-70"
@@ -450,7 +448,7 @@ function AbsenceModal({
                     Shrani odsotnost
                   </>
                 )}
-              </motion.button>
+              </button>
             </div>
           </motion.div>
         </motion.div>

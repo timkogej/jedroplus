@@ -251,19 +251,34 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
                   const top = ((clampedStart - START_HOUR * 60) / 60) * HOUR_HEIGHT;
                   const height = ((clampedEnd - clampedStart) / 60) * HOUR_HEIGHT;
 
+                  const fmt = (d: Date) =>
+                    d.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit', hour12: false });
+
                   return (
                     <div
                       key={absence.id}
-                      className="absolute left-0 right-0 bg-amber-100/60 border-l-4 border-amber-400 mx-1 rounded-r-lg overflow-hidden"
-                      style={{ top: `${top}px`, height: `${Math.max(height, 30)}px` }}
-                      title={`${absence.employee_name || 'Vsi zaposleni'}: ${absence.reason || 'Odsotnost'}`}
+                      className="absolute left-0 right-0 bg-amber-50 mx-1 rounded-lg overflow-hidden shadow-sm"
+                      style={{ top: `${top}px`, height: `${Math.max(height, 36)}px` }}
+                      title={`${absence.employee_name || 'Vsi zaposleni'}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${absence.reason ? ` · ${absence.reason}` : ''}`}
                     >
-                      <div className="p-1.5 h-full flex flex-col justify-center">
-                        <p className="text-[10px] font-semibold text-amber-800 truncate">
-                          {absence.employee_name || 'Vsi'}
+                      <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#1A1F36' }}>
+                        <p className="truncate leading-tight" style={absence.employee_color ? {
+                          background: absence.employee_color,
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                        } : { fontSize: '12px', fontWeight: 600 }}>
+                          {absence.employee_name || 'Vsi zaposleni'}
                         </p>
+                        <div className="flex items-center gap-0.5 mt-0.5 overflow-hidden whitespace-nowrap" style={{ fontSize: '10px', fontWeight: 500, opacity: 0.88 }}>
+                          <span>{fmt(visibleStart)}</span>
+                          <span className="opacity-60 mx-px">–</span>
+                          <span>{fmt(visibleEnd)}</span>
+                        </div>
                         {absence.reason && (
-                          <p className="text-[9px] text-amber-700 truncate">{absence.reason}</p>
+                          <p className="truncate mt-0.5" style={{ fontSize: '10px', fontWeight: 400, opacity: 0.75 }}>{absence.reason}</p>
                         )}
                       </div>
                     </div>

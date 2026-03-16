@@ -30,6 +30,7 @@ export interface Storitev {
   trajanje: number; // Duration in minutes
   skupni_cas?: number; // Total time including buffers (optional for backward compat)
   cena?: number | null; // Price (optional for backward compat)
+  status?: string | null; // e.g. 'active' | 'inactive'
 }
 
 export interface Zaposleni {

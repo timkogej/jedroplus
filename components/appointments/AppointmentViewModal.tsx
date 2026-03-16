@@ -381,6 +381,24 @@ function AppointmentViewModal({
                 </p>
               </div>
             )}
+
+            {/* Internal Notes */}
+            {(() => {
+              const notes = appointment.interne_opombe
+                || (appointment as unknown as Record<string, unknown>)['Interne opombe'] as string
+                || '';
+              if (!notes) return null;
+              return (
+                <div className="p-5 bg-white rounded-2xl border-2 border-yellow-200">
+                  <div className="text-xs font-bold text-yellow-700 uppercase tracking-wide mb-2">
+                    Interne opombe
+                  </div>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {notes}
+                  </p>
+                </div>
+              );
+            })()}
           </div>
 
           {/* FOOTER - No Zapri button, only action buttons */}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, SpinnerGap, FloppyDisk } from '@phosphor-icons/react';
+import { X, SpinnerGap, FloppyDisk, EnvelopeSimple, DeviceMobile } from '@phosphor-icons/react';
 import {
   SettingsSection,
   SettingRow,
@@ -21,6 +21,45 @@ interface BookingSettingsModalProps {
   onClose: () => void;
 }
 
+// ── Channel picker (SMS / Email) ─────────────────────────────────────────────
+
+function ChannelPicker({
+  value,
+  onChange,
+}: {
+  value: 'sms' | 'email';
+  onChange: (v: 'sms' | 'email') => void;
+}) {
+  return (
+    <div className="flex gap-2 mt-3">
+      <button
+        type="button"
+        onClick={() => onChange('email')}
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all
+                   ${value === 'email'
+                     ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200'
+                     : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                   }`}
+      >
+        <EnvelopeSimple className="h-4 w-4" weight={value === 'email' ? 'fill' : 'regular'} />
+        Email
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange('sms')}
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all
+                   ${value === 'sms'
+                     ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200'
+                     : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                   }`}
+      >
+        <DeviceMobile className="h-4 w-4" weight={value === 'sms' ? 'fill' : 'regular'} />
+        SMS
+      </button>
+    </div>
+  );
+}
+
 export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalProps) {
   const { companyId } = useCompany();
   const { user } = useAuth();
@@ -29,7 +68,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const [bookingOmogocen, setBookingOmogocen] = useState(true);
   const [koledarUre, setKoledarUre] = useState<'15' | '30' | '60'>('30');
   const [potrdiloReservation, setPotrdiloReservation] = useState(false);
+  const [potrdiloChannel, setPotrdiloChannel] = useState<'sms' | 'email'>('email');
   const [potrdiloOnline, setPotrdiloOnline] = useState(false);
+  const [potrdiloOnlineChannel, setPotrdiloOnlineChannel] = useState<'sms' | 'email'>('email');
   const [bookingPrimary, setBookingPrimary] = useState('#7C75FC');
   const [bookingSecondary, setBookingSecondary] = useState('#44D0C6');
   const [bookingBgFrom, setBookingBgFrom] = useState('#7C75FC');
@@ -60,8 +101,16 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           const potrdiloRez = data['Potrdilo ob rezervaciji'] ?? data['potrdilo_ob_rezervaciji'];
           setPotrdiloReservation(potrdiloRez === 'yes' || potrdiloRez === true || potrdiloRez === 'da');
 
+          // Read potrdilo_channel
+          const ch = String(data['potrdilo_channel'] ?? 'email').toLowerCase();
+          setPotrdiloChannel(ch === 'sms' ? 'sms' : 'email');
+
           const potrdiloOnl = data['Potrdilo online rez'] ?? data['potrdilo_online_rez'];
           setPotrdiloOnline(potrdiloOnl === 'yes' || potrdiloOnl === true || potrdiloOnl === 'da');
+
+          // Read potrdilo_online_channel
+          const onlCh = String(data['potrdilo_online_channel'] ?? 'email').toLowerCase();
+          setPotrdiloOnlineChannel(onlCh === 'sms' ? 'sms' : 'email');
 
           setBookingPrimary(String(data['Booking_primary'] ?? data['booking_primary'] ?? '#7C75FC'));
           setBookingSecondary(String(data['Booking_secondary'] ?? data['booking_secondary'] ?? '#44D0C6'));
@@ -93,7 +142,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           'booking_omogocen': bookingOmogocen,
           'koledar_ure': koledarUre,
           'Potrdilo ob rezervaciji': potrdiloReservation ? 'yes' : 'no',
+          'potrdilo_channel': potrdiloChannel,
           'Potrdilo online rez': potrdiloOnline ? 'yes' : 'no',
+          'potrdilo_online_channel': potrdiloOnlineChannel,
           'Booking_primary': bookingPrimary,
           'Booking_secondary': bookingSecondary,
           'Booking_bg_from': bookingBgFrom,
@@ -106,7 +157,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           },
           time_slot_duration: koledarUre,
           send_confirmation: potrdiloReservation,
+          confirmation_channel: potrdiloChannel,
           send_online_confirmation: potrdiloOnline,
+          online_confirmation_channel: potrdiloOnlineChannel,
         },
       };
 
@@ -211,25 +264,59 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
 
                   {/* Confirmation Settings */}
                   <SettingsSection title="Potrdila" description="Pošiljanje potrdil strankam">
-                    <SettingRow
-                      label="Pošlji potrdilo stranki"
-                      description="Avtomatsko pošlji email potrdilo ob kreaciji termina"
-                    >
-                      <Switch
-                        checked={potrdiloReservation}
-                        onChange={setPotrdiloReservation}
-                      />
-                    </SettingRow>
+                    {/* Confirmation on manual booking */}
+                    <div className="space-y-1">
+                      <SettingRow
+                        label="Pošlji potrdilo ob rezervaciji termina"
+                        description="Avtomatsko pošlji potrdilo ob kreaciji termina"
+                      >
+                        <Switch
+                          checked={potrdiloReservation}
+                          onChange={setPotrdiloReservation}
+                        />
+                      </SettingRow>
+                      {potrdiloReservation && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="px-4 pb-3"
+                        >
+                          <p className="text-xs font-medium text-gray-500 mb-2">Pošlji potrdilo preko:</p>
+                          <ChannelPicker
+                            value={potrdiloChannel}
+                            onChange={setPotrdiloChannel}
+                          />
+                        </motion.div>
+                      )}
+                    </div>
 
-                    <SettingRow
-                      label="Pošlji potrdilo po spletni rezervaciji"
-                      description="Potrdilo ob rezervaciji preko spletnega sistema"
-                    >
-                      <Switch
-                        checked={potrdiloOnline}
-                        onChange={setPotrdiloOnline}
-                      />
-                    </SettingRow>
+                    {/* Confirmation on online booking */}
+                    <div className="space-y-1">
+                      <SettingRow
+                        label="Pošlji potrdilo po online rezervaciji"
+                        description="Potrdilo ob rezervaciji preko spletnega sistema"
+                      >
+                        <Switch
+                          checked={potrdiloOnline}
+                          onChange={setPotrdiloOnline}
+                        />
+                      </SettingRow>
+                      {potrdiloOnline && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="px-4 pb-3"
+                        >
+                          <p className="text-xs font-medium text-gray-500 mb-2">Pošlji potrdilo preko:</p>
+                          <ChannelPicker
+                            value={potrdiloOnlineChannel}
+                            onChange={setPotrdiloOnlineChannel}
+                          />
+                        </motion.div>
+                      )}
+                    </div>
                   </SettingsSection>
 
                   {/* Booking Page Colors */}

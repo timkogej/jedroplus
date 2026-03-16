@@ -24,6 +24,8 @@ import {
   Trash,
   WarningCircle,
   DotsThreeVertical,
+  Envelope,
+  Phone,
 } from "@phosphor-icons/react";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import { useCompany } from "@/app/company-context";
@@ -243,15 +245,41 @@ function AppointmentDetailModal({
               <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
                 {appointment.stranka_ime?.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
                 {appointment.stranka_email && <p className="text-xs text-gray-500 truncate">{appointment.stranka_email}</p>}
                 {appointment.stranka_telefon && <p className="text-xs text-gray-500">{appointment.stranka_telefon}</p>}
               </div>
               {(appointment.stranka_email || appointment.stranka_telefon) && (
-                <div className="flex flex-col gap-1 ml-auto">
-                  {appointment.stranka_email && <CopyButton text={appointment.stranka_email} label="email" />}
-                  {appointment.stranka_telefon && <CopyButton text={appointment.stranka_telefon} label="telefon" />}
+                <div className="flex flex-col gap-1.5 ml-auto flex-shrink-0">
+                  {appointment.stranka_email && (
+                    <div className="flex items-center gap-1">
+                      <CopyButton text={appointment.stranka_email} label="email" />
+                      <motion.a
+                        href={`mailto:${appointment.stranka_email}`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 p-1.5 text-white"
+                        title="Pošlji email"
+                      >
+                        <Envelope className="h-3.5 w-3.5" weight="bold" />
+                      </motion.a>
+                    </div>
+                  )}
+                  {appointment.stranka_telefon && (
+                    <div className="flex items-center gap-1">
+                      <CopyButton text={appointment.stranka_telefon} label="telefon" />
+                      <motion.a
+                        href={`tel:${appointment.stranka_telefon}`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center justify-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 p-1.5 text-white"
+                        title="Pokliči"
+                      >
+                        <Phone className="h-3.5 w-3.5" weight="bold" />
+                      </motion.a>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -381,7 +409,6 @@ function AppointmentDetailModal({
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Interne opombe</label>
                 <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
-                  <p className="text-xs font-semibold text-yellow-800 uppercase mb-2">Samo za interno uporabo</p>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
                 </div>
               </div>
@@ -885,6 +912,49 @@ export default function DashboardPage() {
 
   const todayFormatted = format(new Date(), "EEEE, d. MMMM yyyy", { locale: sl });
 
+  // ── Random greeting based on time of day ────────────────────────────────
+  const welcomeGreeting = useMemo(() => {
+    const hour = new Date().getHours();
+
+    const morningGreetings = [
+      'Dobro jutro,',
+      'Lepo jutro,',
+      'Pozdravljeni zjutraj,',
+    ];
+    const afternoonGreetings = [
+      'Dober dan,',
+      'Pozdravljeni,',
+      'Zdravo,',
+    ];
+    const eveningGreetings = [
+      'Dober večer,',
+      'Lep večer,',
+      'Pozdravljeni zvečer,',
+    ];
+    const generalGreetings = [
+      'Dobrodošli nazaj,',
+      'Lepo je videti vas,',
+      'Pozdravljen/a,',
+      'Hej,',
+      'Dobrodošli,',
+      'Živjo,',
+      'Pozdravljeni,',
+    ];
+
+    let pool: string[];
+    if (hour >= 5 && hour < 12) {
+      pool = morningGreetings;
+    } else if (hour >= 12 && hour < 18) {
+      pool = afternoonGreetings;
+    } else if (hour >= 18 && hour < 23) {
+      pool = eveningGreetings;
+    } else {
+      pool = generalGreetings;
+    }
+
+    return pool[Math.floor(Math.random() * pool.length)];
+  }, []);
+
   // ── Loading state ─────────────────────────────────────────────────────────
   if (!initialCheckDone || companyLoading || loading) {
     return (
@@ -941,7 +1011,7 @@ export default function DashboardPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Dobrodošli nazaj,{" "}
+                  {welcomeGreeting}{" "}
                   <span className="bg-gradient-to-r from-violet-600 to-cyan-500 bg-clip-text text-transparent">
                     {displayName}
                   </span>
@@ -989,7 +1059,7 @@ export default function DashboardPage() {
               iconColor="darkGray"
             />
             <MetricCard
-              title="Nove stranke ta mesec"
+              title="Nove stranke"
               value={dashboardData?.stats.newClientsThisMonth ?? 0}
               subtitle="Ta mesec"
               icon={UsersThree}
@@ -1012,6 +1082,7 @@ export default function DashboardPage() {
               appointments={dashboardData?.todayAppointments ?? []}
               emptyMessage="Danes ni terminov"
               gradientOutline
+              viewAllHref={`/termini?dateFrom=${format(new Date(), "yyyy-MM-dd")}&dateTo=${format(new Date(), "yyyy-MM-dd")}`}
               onAppointmentClick={handleAppointmentClick}
             />
             <AppointmentListCard
@@ -1019,6 +1090,7 @@ export default function DashboardPage() {
               subtitle={format(new Date(Date.now() + 86400000), "d. MMMM", { locale: sl })}
               appointments={dashboardData?.tomorrowAppointments ?? []}
               emptyMessage="Jutri ni terminov"
+              viewAllHref={`/termini?dateFrom=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}&dateTo=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}`}
               onAppointmentClick={handleAppointmentClick}
             />
           </div>

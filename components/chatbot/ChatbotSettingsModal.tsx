@@ -404,22 +404,22 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
                       </div>
                     </div>
 
-                    {/* User Bubble Gradient */}
+                    {/* User Message Bubble Gradient */}
                     <div className="space-y-4 mt-6">
-                      <p className="text-sm font-medium text-gray-700">Barva mehurchka uporabnika (gradient)</p>
+                      <p className="text-sm font-medium text-gray-700">Barva mehurčka uporabnika (gradient)</p>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-xs text-gray-600 mb-1">Od</p>
                           <div className="flex items-center gap-2">
                             <input
                               type="color"
-                              value={design.userBubbleGradientFrom}
-                              onChange={(e) => updateDesign('userBubbleGradientFrom', e.target.value)}
+                              value={design.userMsgGradientFrom}
+                              onChange={(e) => updateDesign('userMsgGradientFrom', e.target.value)}
                               className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200"
                             />
                             <Input
-                              value={design.userBubbleGradientFrom}
-                              onChange={(e) => updateDesign('userBubbleGradientFrom', e.target.value)}
+                              value={design.userMsgGradientFrom}
+                              onChange={(e) => updateDesign('userMsgGradientFrom', e.target.value)}
                               className="flex-1"
                             />
                           </div>
@@ -429,19 +429,68 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
                           <div className="flex items-center gap-2">
                             <input
                               type="color"
-                              value={design.userBubbleGradientTo}
-                              onChange={(e) => updateDesign('userBubbleGradientTo', e.target.value)}
+                              value={design.userMsgGradientTo}
+                              onChange={(e) => updateDesign('userMsgGradientTo', e.target.value)}
                               className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200"
                             />
                             <Input
-                              value={design.userBubbleGradientTo}
-                              onChange={(e) => updateDesign('userBubbleGradientTo', e.target.value)}
+                              value={design.userMsgGradientTo}
+                              onChange={(e) => updateDesign('userMsgGradientTo', e.target.value)}
                               className="flex-1"
                             />
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* Bot Bubble Gradient */}
+                    <div className="space-y-4 mt-6">
+                      <p className="text-sm font-medium text-gray-700">Barva mehurčka bota (gradient)</p>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-gray-600 mb-1">Od</p>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={design.botBubbleGradientFrom}
+                              onChange={(e) => updateDesign('botBubbleGradientFrom', e.target.value)}
+                              className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200"
+                            />
+                            <Input
+                              value={design.botBubbleGradientFrom}
+                              onChange={(e) => updateDesign('botBubbleGradientFrom', e.target.value)}
+                              className="flex-1"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-600 mb-1">Do</p>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={design.botBubbleGradientTo}
+                              onChange={(e) => updateDesign('botBubbleGradientTo', e.target.value)}
+                              className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200"
+                            />
+                            <Input
+                              value={design.botBubbleGradientTo}
+                              onChange={(e) => updateDesign('botBubbleGradientTo', e.target.value)}
+                              className="flex-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Text Color */}
+                    <SettingRow label="Barva besedila" description="Barva naslova in besedila v glavi chatbota">
+                      <input
+                        type="color"
+                        value={design.textColor}
+                        onChange={(e) => updateDesign('textColor', e.target.value)}
+                        className="w-10 h-10 rounded-lg cursor-pointer border-2 border-gray-200"
+                      />
+                    </SettingRow>
 
                     {/* Accent Gradient */}
                     <div className="space-y-4 mt-6">

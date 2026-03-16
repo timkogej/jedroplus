@@ -31,6 +31,7 @@ interface CalendarSidebarProps {
   onDateSelect: (date: Date) => void;
   onTodayClick: () => void;
   onNewAppointment: () => void;
+  onNewEvent?: () => void;
   onAbsence?: () => void;
   services: Storitev[];
   employees: (Zaposleni & { initials: string })[];
@@ -55,6 +56,7 @@ function CalendarSidebar({
   onDateSelect,
   onTodayClick,
   onNewAppointment,
+  onNewEvent,
   onAbsence,
   services,
   employees,
@@ -121,9 +123,10 @@ function CalendarSidebar({
                   Nov termin
                 </motion.button>
 
-                {/* Dogodek button - placeholder */}
+                {/* Dogodek button */}
                 <motion.button
                   type="button"
+                  onClick={onNewEvent}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#1A1F36] px-4 py-2.5

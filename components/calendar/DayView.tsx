@@ -4,8 +4,10 @@ import { memo, useMemo, useCallback } from 'react';
 import { CalendarBlank } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Zaposleni, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
+import type { CalendarEvent } from '@/types/events';
 import TimeGrid from './TimeGrid';
 import AppointmentCard from './AppointmentCard';
+import EventCard from './EventCard';
 import {
   isSameDay,
   isToday,
@@ -15,18 +17,25 @@ import {
   getTimePosition,
   getDurationHeight,
   parseTimeToMinutes,
+  getLocalDateKey,
   START_HOUR,
   END_HOUR,
+  type CompanySchedule,
+  JS_DAY_TO_SLOVENIAN,
+  getOffHourRanges,
 } from '@/lib/utils/calendar';
 
 interface DayViewProps {
   currentDate: Date;
   appointments: AppointmentWithDetails[];
   absences?: Absence[];
+  events?: CalendarEvent[];
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
+  onEventClick?: (event: CalendarEvent) => void;
   employees?: (Zaposleni & { initials: string })[];
   onGridSlotClick?: (date: Date, time: string) => void;
+  companySchedule?: CompanySchedule | null;
 }
 
 // Calculate overlapping appointments and assign columns (same as WeekView)
@@ -96,7 +105,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function DayView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, employees = [], onGridSlotClick }: DayViewProps) {
+function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, employees = [], onGridSlotClick, companySchedule }: DayViewProps) {
   // Filter appointments for current day
   const dayAppointments = useMemo(() => {
     return appointments.filter((apt) => {
@@ -118,6 +127,15 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
       return absenceStart <= dayEnd && absenceEnd >= dayStart;
     });
   }, [absences, currentDate]);
+
+  // Get events for current day
+  const dayEvents = useMemo(() => {
+    const dayKey = getLocalDateKey(currentDate);
+    return events.filter((ev) => {
+      const endKey = ev.end_date ?? ev.event_date;
+      return ev.event_date <= dayKey && endKey >= dayKey;
+    });
+  }, [events, currentDate]);
 
   // Group appointments by employee
   const appointmentsByEmployee = useMemo(() => {
@@ -155,6 +173,12 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
 
   const isCurrentDay = isToday(currentDate);
   const hasAbsence = dayAbsences.length > 0;
+  const hasEvents = dayEvents.length > 0;
+
+  // Company schedule shading for this day
+  const slDayName = JS_DAY_TO_SLOVENIAN[currentDate.getDay()];
+  const dayScheduleEntry = companySchedule?.[slDayName];
+  const offRanges = companySchedule ? getOffHourRanges(dayScheduleEntry) : [];
 
   const handleColumnClick = useCallback((e: React.MouseEvent) => {
     if (!onGridSlotClick) return;
@@ -200,7 +224,24 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
               {formatDate(currentDate, 'dayMonth')} {currentDate.getFullYear()}
             </p>
           </div>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex flex-col gap-2 items-end">
+            {/* Event banners */}
+            {hasEvents && (
+              <div className="flex flex-wrap items-center gap-1.5 max-w-xs">
+                {dayEvents.slice(0, 3).map((ev) => (
+                  <EventCard
+                    key={ev.id}
+                    event={ev}
+                    onClick={onEventClick ?? (() => {})}
+                    variant="banner"
+                  />
+                ))}
+                {dayEvents.length > 3 && (
+                  <span className="text-[9px] text-gray-500">+{dayEvents.length - 3}</span>
+                )}
+              </div>
+            )}
+            <div className="flex items-center gap-3">
             {/* Absence indicators */}
             {hasAbsence && (
               <div className="flex flex-wrap items-center gap-2">
@@ -233,6 +274,7 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
               <span className="text-xs text-gray-400">
                 {dayAppointments.length === 1 ? 'termin' : dayAppointments.length >= 2 && dayAppointments.length <= 4 ? 'termini' : 'terminov'}
               </span>
+            </div>
             </div>
           </div>
         </div>
@@ -307,6 +349,23 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
                   style={empIndex < displayEmployees.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
                   onClick={onGridSlotClick ? handleColumnClick : undefined}
                 >
+                  {/* Company schedule: shade off-hours */}
+                  {offRanges.map((range, i) => {
+                    const top = ((range.start - START_HOUR * 60) / 60) * HOUR_HEIGHT;
+                    const height = ((range.end - range.start) / 60) * HOUR_HEIGHT;
+                    return (
+                      <div
+                        key={`off-${i}`}
+                        className="absolute left-0 right-0 pointer-events-none z-0"
+                        style={{
+                          top: `${top}px`,
+                          height: `${height}px`,
+                          background: 'rgba(0,0,0,0.018)',
+                        }}
+                      />
+                    );
+                  })}
+
                   {/* Render absence for this employee */}
                   {employeeAbsence && (() => {
                     const absenceStart = new Date(employeeAbsence.start_at);
@@ -337,19 +396,39 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
                     const top = ((clampedStart - START_HOUR * 60) / 60) * HOUR_HEIGHT;
                     const height = ((clampedEnd - clampedStart) / 60) * HOUR_HEIGHT;
 
+                    const fmt = (d: Date) =>
+                      d.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit', hour12: false });
+
                     return (
                       <div
-                        className="absolute left-1 right-1 bg-amber-100/60 border-l-4 border-amber-400 rounded-r-lg overflow-hidden"
+                        className="absolute left-1 right-1 bg-amber-50 rounded-lg overflow-hidden shadow-sm"
                         style={{
                           top: `${top}px`,
-                          height: `${Math.max(height, 30)}px`,
+                          height: `${Math.max(height, 36)}px`,
                         }}
-                        title={`${employeeAbsence.reason || 'Odsotnost'}`}
+                        title={`${employeeAbsence.employee_name || 'Odsotnost'}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${employeeAbsence.reason ? ` · ${employeeAbsence.reason}` : ''}`}
                       >
-                        <div className="p-1.5 h-full flex flex-col justify-center">
-                          <p className="text-[10px] font-semibold text-amber-800 truncate">
-                            Odsotnost
+                        <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#1A1F36' }}>
+                          <p className="truncate leading-tight" style={employeeAbsence.employee_color ? {
+                            background: employeeAbsence.employee_color,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                          } : { fontSize: '12px', fontWeight: 600 }}>
+                            {employeeAbsence.employee_name || 'Vsi zaposleni'}
                           </p>
+                          <div className="flex items-center gap-0.5 mt-0.5 overflow-hidden whitespace-nowrap" style={{ fontSize: '10px', fontWeight: 500, opacity: 0.88 }}>
+                            <span>{fmt(visibleStart)}</span>
+                            <span className="opacity-60 mx-px">–</span>
+                            <span>{fmt(visibleEnd)}</span>
+                          </div>
+                          {employeeAbsence.reason && (
+                            <p className="truncate mt-0.5" style={{ fontSize: '10px', fontWeight: 400, opacity: 0.75 }}>
+                              {employeeAbsence.reason}
+                            </p>
+                          )}
                         </div>
                       </div>
                     );
@@ -399,6 +478,23 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
             className={`relative h-full ${isCurrentDay ? 'bg-[#1A1F36]/[0.015]' : ''} ${onGridSlotClick ? 'cursor-pointer' : ''}`}
             onClick={onGridSlotClick ? handleColumnClick : undefined}
           >
+            {/* Company schedule: shade off-hours */}
+            {offRanges.map((range, i) => {
+              const top = ((range.start - START_HOUR * 60) / 60) * HOUR_HEIGHT;
+              const height = ((range.end - range.start) / 60) * HOUR_HEIGHT;
+              return (
+                <div
+                  key={`off-${i}`}
+                  className="absolute left-0 right-0 pointer-events-none z-0"
+                  style={{
+                    top: `${top}px`,
+                    height: `${height}px`,
+                    background: 'rgba(0,0,0,0.018)',
+                  }}
+                />
+              );
+            })}
+
             {/* Render absences as background blocks */}
             {dayAbsences.map((absence) => {
               const absenceStart = new Date(absence.start_at);
@@ -429,22 +525,37 @@ function DayView({ currentDate, appointments, absences = [], services = [], onAp
               const top = ((clampedStart - START_HOUR * 60) / 60) * HOUR_HEIGHT;
               const height = ((clampedEnd - clampedStart) / 60) * HOUR_HEIGHT;
 
+              const fmt = (d: Date) =>
+                d.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit', hour12: false });
+
               return (
                 <div
                   key={absence.id}
-                  className="absolute left-4 right-4 bg-amber-100/60 border-l-4 border-amber-400 rounded-r-lg overflow-hidden"
+                  className="absolute left-4 right-4 bg-amber-50 rounded-lg overflow-hidden shadow-sm"
                   style={{
                     top: `${top}px`,
-                    height: `${Math.max(height, 40)}px`,
+                    height: `${Math.max(height, 44)}px`,
                   }}
-                  title={`${absence.employee_name || 'Vsi zaposleni'}: ${absence.reason || 'Odsotnost'}`}
+                  title={`${absence.employee_name || 'Vsi zaposleni'}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${absence.reason ? ` · ${absence.reason}` : ''}`}
                 >
-                  <div className="p-2 h-full flex flex-col justify-center">
-                    <p className="text-sm font-semibold text-amber-800">
+                  <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#1A1F36' }}>
+                    <p className="truncate leading-tight" style={absence.employee_color ? {
+                      background: absence.employee_color,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                    } : { fontSize: '12px', fontWeight: 600 }}>
                       {absence.employee_name || 'Vsi zaposleni'}
                     </p>
+                    <div className="flex items-center gap-0.5 mt-0.5 overflow-hidden whitespace-nowrap" style={{ fontSize: '10px', fontWeight: 500, opacity: 0.88 }}>
+                      <span>{fmt(visibleStart)}</span>
+                      <span className="opacity-60 mx-px">–</span>
+                      <span>{fmt(visibleEnd)}</span>
+                    </div>
                     {absence.reason && (
-                      <p className="text-xs text-amber-700">
+                      <p className="truncate mt-0.5" style={{ fontSize: '10px', fontWeight: 400, opacity: 0.75 }}>
                         {absence.reason}
                       </p>
                     )}

@@ -723,7 +723,14 @@ function BillingPageContent() {
                       )}
 
                       {/* Plan Name */}
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">{plan.name}</h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
+                        {plan.code === 'JEDRO_PREMIUM' && (
+                          <span className="px-2 py-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full">
+                            Prihaja kmalu
+                          </span>
+                        )}
+                      </div>
 
                       {/* Price */}
                       <div className="mb-2">
@@ -752,38 +759,47 @@ function BillingPageContent() {
                       </ul>
 
                       {/* CTA Button */}
-                      <motion.button
-                        whileHover={{ scale: isCurrent ? 1 : 1.05 }}
-                        whileTap={{ scale: isCurrent ? 1 : 0.98 }}
-                        onClick={() => handleSelectPlan(plan.code)}
-                        disabled={isCurrent || isLoading}
-                        className={`w-full rounded-xl px-6 py-3 font-semibold transition-all text-sm ${
-                          plan.isEnterprise
-                            ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white hover:shadow-lg'
-                            : isCurrent
-                              ? 'relative bg-white cursor-default'
-                              : 'bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md'
-                        }`}
-                        style={isCurrent && !plan.isEnterprise ? {
-                          background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4) border-box',
-                          border: '2px solid transparent',
-                        } : undefined}
-                      >
-                        {isLoading ? (
-                          <span className="flex items-center justify-center gap-2">
-                            <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                            Nalagam...
-                          </span>
-                        ) : isCurrent ? (
-                          <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent font-semibold">
-                            Trenutni paket
-                          </span>
-                        ) : plan.isEnterprise ? (
-                          'Pošlji Povpraševanje'
-                        ) : (
-                          'Izberi paket'
-                        )}
-                      </motion.button>
+                      {plan.code === 'JEDRO_PREMIUM' && !isCurrent ? (
+                        <button
+                          disabled
+                          className="w-full rounded-xl px-6 py-3 font-semibold text-sm bg-gray-50 text-gray-400 cursor-not-allowed border border-dashed border-gray-200"
+                        >
+                          Prihaja kmalu
+                        </button>
+                      ) : (
+                        <motion.button
+                          whileHover={{ scale: isCurrent ? 1 : 1.05 }}
+                          whileTap={{ scale: isCurrent ? 1 : 0.98 }}
+                          onClick={() => handleSelectPlan(plan.code)}
+                          disabled={isCurrent || isLoading}
+                          className={`w-full rounded-xl px-6 py-3 font-semibold transition-all text-sm ${
+                            plan.isEnterprise
+                              ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white hover:shadow-lg'
+                              : isCurrent
+                                ? 'relative bg-white cursor-default'
+                                : 'bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md'
+                          }`}
+                          style={isCurrent && !plan.isEnterprise ? {
+                            background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4) border-box',
+                            border: '2px solid transparent',
+                          } : undefined}
+                        >
+                          {isLoading ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                              Nalagam...
+                            </span>
+                          ) : isCurrent ? (
+                            <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent font-semibold">
+                              Trenutni paket
+                            </span>
+                          ) : plan.isEnterprise ? (
+                            'Pošlji Povpraševanje'
+                          ) : (
+                            'Izberi paket'
+                          )}
+                        </motion.button>
+                      )}
                     </motion.div>
                   );
                 })}

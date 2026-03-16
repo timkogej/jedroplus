@@ -12,6 +12,7 @@ interface AppointmentListCardProps {
   appointments: AppointmentItem[];
   emptyMessage?: string;
   showViewAll?: boolean;
+  viewAllHref?: string;
   gradientOutline?: boolean;
   onAppointmentClick?: (item: AppointmentItem) => void;
 }
@@ -261,6 +262,7 @@ export function AppointmentListCard({
   appointments,
   emptyMessage = "Ni terminov",
   showViewAll = true,
+  viewAllHref = "/termini",
   gradientOutline = false,
   onAppointmentClick,
 }: AppointmentListCardProps) {
@@ -348,7 +350,7 @@ export function AppointmentListCard({
       {/* View all link */}
       {showViewAll && appointments.length > 0 && (
         <Link
-          href="/termini"
+          href={viewAllHref}
           className="flex items-center justify-center gap-2 p-4 border-t border-gray-100 text-sm font-medium text-violet-600 hover:bg-violet-50 transition-colors"
         >
           Poglej vse termine

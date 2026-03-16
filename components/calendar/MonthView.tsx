@@ -3,7 +3,9 @@
 import { memo, useMemo, useRef, useEffect } from 'react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
+import type { CalendarEvent } from '@/types/events';
 import AppointmentCard from './AppointmentCard';
+import EventCard from './EventCard';
 import {
   getMonthGrid,
   isSameDay,
@@ -17,13 +19,15 @@ interface MonthViewProps {
   currentDate: Date;
   appointments: AppointmentWithDetails[];
   absences?: Absence[];
+  events?: CalendarEvent[];
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
+  onEventClick?: (event: CalendarEvent) => void;
   onDateClick: (date: Date) => void;
   isMobile?: boolean;
 }
 
-function MonthView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick, isMobile = false }: MonthViewProps) {
+function MonthView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onDateClick, isMobile = false }: MonthViewProps) {
   const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const monthDays = useMemo(() => getMonthGrid(currentDate), [currentDate]);
   const todayRef = useRef<HTMLDivElement>(null);
@@ -66,6 +70,17 @@ function MonthView({ currentDate, appointments, absences = [], services = [], on
     };
   }, [absences]);
 
+  // Get events for a specific day (handles multi-day spans)
+  const getEventsForDay = useMemo(() => {
+    return (day: Date): CalendarEvent[] => {
+      const dayKey = getLocalDateKey(day);
+      return events.filter((ev) => {
+        const endKey = ev.end_date ?? ev.event_date;
+        return ev.event_date <= dayKey && endKey >= dayKey;
+      });
+    };
+  }, [events]);
+
   // Days header (Monday first)
   const daysHeader = [1, 2, 3, 4, 5, 6, 0].map((i) => DAYS_ABBR[i]);
 
@@ -99,10 +114,12 @@ function MonthView({ currentDate, appointments, absences = [], services = [], on
           const dateKey = getLocalDateKey(day);
           const dayAppointments = appointmentsByDay.get(dateKey) || [];
           const dayAbsences = getAbsencesForDay(day);
+          const dayEvents = getEventsForDay(day);
           const isCurrentMonth = day.getMonth() === currentDate.getMonth();
           const isCurrentDay = isToday(day);
           const hasAppointments = dayAppointments.length > 0;
           const hasAbsence = dayAbsences.length > 0;
+          const hasEvents = dayEvents.length > 0;
 
           return (
             <div
@@ -147,20 +164,39 @@ function MonthView({ currentDate, appointments, absences = [], services = [], on
                 )}
               </div>
 
+              {/* Event cards — rendered above absences and appointments */}
+              {hasEvents && (
+                <div className="mb-1 space-y-0.5">
+                  {dayEvents.slice(0, 2).map((ev) => (
+                    <EventCard
+                      key={ev.id}
+                      event={ev}
+                      onClick={onEventClick ?? (() => {})}
+                      variant="mini"
+                    />
+                  ))}
+                  {dayEvents.length > 2 && (
+                    <div className="text-[8px] text-[#1A1F36] opacity-60 px-1">
+                      +{dayEvents.length - 2} dogodki
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Absence indicators with employee name and reason */}
               {hasAbsence && (
                 <div className="mb-1 space-y-0.5">
                   {dayAbsences.slice(0, 2).map((absence) => (
                     <div
                       key={absence.id}
-                      className="truncate rounded bg-amber-100 px-1 py-0.5 text-[9px] font-medium text-amber-700"
+                      className="truncate rounded px-1 py-0.5 text-[9px] font-medium text-[#1A1F36]"
                       title={`${absence.employee_name || 'Vsi zaposleni'}${absence.reason ? ` - ${absence.reason}` : ''}`}
                     >
                       {absence.employee_name || 'Vsi'}{absence.reason ? `: ${absence.reason}` : ''}
                     </div>
                   ))}
                   {dayAbsences.length > 2 && (
-                    <div className="text-[8px] text-amber-600 px-1">
+                    <div className="text-[8px] text-[#1A1F36] opacity-60 px-1">
                       +{dayAbsences.length - 2} odsotnosti
                     </div>
                   )}

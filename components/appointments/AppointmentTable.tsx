@@ -554,16 +554,14 @@ function AppointmentTable({
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3.5">
           <p className="text-sm text-gray-500">
-            Prikazujem{' '}
             <span className="font-medium text-[#1A1F36]">
               {(currentPage - 1) * itemsPerPage + 1}
             </span>{' '}
-            -{' '}
+            –{' '}
             <span className="font-medium text-[#1A1F36]">
               {Math.min(currentPage * itemsPerPage, sortedAppointments.length)}
             </span>{' '}
-            od <span className="font-medium text-[#1A1F36]">{sortedAppointments.length}</span>{' '}
-            terminov
+            od <span className="font-medium text-[#1A1F36]">{sortedAppointments.length}</span>
           </p>
 
           <div className="flex items-center gap-1">

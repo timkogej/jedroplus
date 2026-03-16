@@ -293,8 +293,8 @@ export function AppBar() {
             >
               <Bell className="w-5 h-5 text-gray-600" weight="regular" />
 
-              {/* Notification badge - number if > 0, dot otherwise */}
-              {notificationCount > 0 ? (
+              {/* Notification badge - only show when count > 0 */}
+              {notificationCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -302,8 +302,6 @@ export function AppBar() {
                 >
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </motion.span>
-              ) : (
-                <span className="absolute -top-1 -right-1 w-[8px] h-[8px] rounded-full bg-gradient-to-r from-red-500 to-rose-500" />
               )}
             </motion.div>
           </Link>

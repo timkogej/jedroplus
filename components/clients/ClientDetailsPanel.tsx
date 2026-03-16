@@ -21,6 +21,7 @@ import {
   GenderIntersex,
   NotePencil,
   LockSimple,
+  LockKey,
 } from '@phosphor-icons/react';
 import type { Client, ClientWithAppointments, ClientAppointment } from '@/types/clients';
 import { getClientWithAppointments } from '@/lib/supabase/clients';
@@ -334,8 +335,8 @@ function ClientDetailsPanel({
                     <div>
                       <div className="text-xs text-gray-500">Spol</div>
                       <div className="text-sm font-medium text-gray-900">
-                        {client.spol === 'moški' ? 'Moški' :
-                         client.spol === 'ženska' ? 'Ženska' :
+                        {(client.spol === 'moški' || client.spol === 'male') ? 'Moški' :
+                         (client.spol === 'ženska' || client.spol === 'female') ? 'Ženska' :
                          client.spol === 'drugo' ? 'Drugo' : 'Ni navedeno'}
                       </div>
                     </div>
@@ -367,44 +368,27 @@ function ClientDetailsPanel({
 
                   return (
                     <>
-                      {/* Regular Notes */}
-                      {opombeText && (
-                        <div className="rounded-xl border border-gray-200 bg-white p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <NotePencil className="h-4 w-4 text-gray-500" weight="fill" />
-                            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                              Opombe
-                            </p>
+                      {/* Regular Notes - always show */}
+                      <div className="rounded-xl border border-gray-200 bg-white p-4">
+                        <div className="flex items-center gap-3">
+                          <PencilSimple className="h-5 w-5 text-[#1A1F36] flex-shrink-0" weight="regular" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs text-gray-500">Opombe</div>
+                            <p className="text-sm text-[#1A1F36] whitespace-pre-wrap mt-1">{opombeText || '-'}</p>
                           </div>
-                          <p className="text-sm text-[#1A1F36] whitespace-pre-wrap">{opombeText}</p>
                         </div>
-                      )}
+                      </div>
 
-                      {/* Internal Notes */}
-                      {interneOpombeText && (
-                        <div className="rounded-xl border border-gray-200 bg-white p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <LockSimple className="h-4 w-4 text-black" weight="regular" />
-                            <p className="text-xs font-bold uppercase tracking-wider text-black">
-                              Interne opombe
-                            </p>
+                      {/* Internal Notes - always show */}
+                      <div className="rounded-xl border border-gray-200 bg-white p-4">
+                        <div className="flex items-center gap-3">
+                          <LockKey className="h-5 w-5 text-[#1A1F36] flex-shrink-0" weight="regular" />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs text-gray-500">Interne opombe</div>
+                            <p className="text-sm text-[#1A1F36] whitespace-pre-wrap mt-1">{interneOpombeText || '-'}</p>
                           </div>
-                          <p className="text-sm text-[#1A1F36] whitespace-pre-wrap">{interneOpombeText}</p>
                         </div>
-                      )}
-
-                      {/* Always show Interne opombe section even when empty */}
-                      {!interneOpombeText && (
-                        <div className="rounded-xl border border-gray-200 bg-white p-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <LockSimple className="h-4 w-4 text-black" weight="regular" />
-                            <p className="text-xs font-bold uppercase tracking-wider text-black">
-                              Interne opombe
-                            </p>
-                          </div>
-                          <p className="text-sm text-gray-400 italic">Ni internih opomb</p>
-                        </div>
-                      )}
+                      </div>
                     </>
                   );
                 })()}

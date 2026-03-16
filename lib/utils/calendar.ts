@@ -327,6 +327,83 @@ export function isCurrentTimeVisible(): boolean {
 // Local storage helpers for view preference
 export const VIEW_STORAGE_KEY = 'jedroplus_calendar_view';
 
+// ── Company schedule / urnik helpers ──────────────────────────────────────────
+
+export interface ScheduleInterval { start: string; end: string; }
+export interface DaySchedule { enabled: boolean; intervals: ScheduleInterval[]; }
+export type CompanySchedule = Record<string, DaySchedule>;
+
+// Map JS day-of-week index (0=Sunday) to Slovenian day name used in urnik JSON
+export const JS_DAY_TO_SLOVENIAN: Record<number, string> = {
+  0: 'Nedelja',
+  1: 'Ponedeljek',
+  2: 'Torek',
+  3: 'Sreda',
+  4: 'Četrtek',
+  5: 'Petek',
+  6: 'Sobota',
+};
+
+/** Parse the raw urnik value (string or object) into a CompanySchedule map. */
+export function parseCompanySchedule(raw: unknown): CompanySchedule | null {
+  if (!raw) return null;
+  try {
+    const obj = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (typeof obj !== 'object' || obj === null) return null;
+    return obj as CompanySchedule;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Returns the "off" time ranges (in minutes from midnight) for a given day,
+ * relative to the visible grid (START_HOUR..END_HOUR).
+ */
+export function getOffHourRanges(
+  daySchedule: DaySchedule | undefined
+): Array<{ start: number; end: number }> {
+  const START = START_HOUR * 60;
+  const END = END_HOUR * 60;
+
+  if (!daySchedule || !daySchedule.enabled) {
+    return [{ start: START, end: END }];
+  }
+
+  const intervals = (daySchedule.intervals ?? [])
+    .map((i) => {
+      const [sh, sm] = i.start.split(':').map(Number);
+      const [eh, em] = i.end.split(':').map(Number);
+      return { start: sh * 60 + sm, end: eh * 60 + em };
+    })
+    .filter((i) => i.end > i.start)
+    .sort((a, b) => a.start - b.start);
+
+  if (intervals.length === 0) return [{ start: START, end: END }];
+
+  const ranges: Array<{ start: number; end: number }> = [];
+
+  // Before first interval
+  if (intervals[0].start > START) {
+    ranges.push({ start: START, end: intervals[0].start });
+  }
+
+  // Between intervals
+  for (let i = 0; i < intervals.length - 1; i++) {
+    if (intervals[i].end < intervals[i + 1].start) {
+      ranges.push({ start: intervals[i].end, end: intervals[i + 1].start });
+    }
+  }
+
+  // After last interval
+  const last = intervals[intervals.length - 1];
+  if (last.end < END) {
+    ranges.push({ start: last.end, end: END });
+  }
+
+  return ranges;
+}
+
 export function saveViewPreference(view: ViewMode): void {
   if (typeof window !== 'undefined') {
     localStorage.setItem(VIEW_STORAGE_KEY, view);

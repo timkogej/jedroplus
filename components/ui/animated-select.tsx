@@ -204,7 +204,7 @@ export function Select({
                      focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20`}
           whileTap={{ scale: disabled ? 1 : 0.99 }}
         >
-          <span className={`flex items-center gap-2 ${!selectedOption ? 'text-gray-400' : 'text-[#1A1F36]'}`}>
+          <span className={`flex items-center gap-2 ${!selectedOption && !value ? 'text-gray-400' : 'text-[#1A1F36]'}`}>
             {selectedOption ? (
               <>
                 {selectedOption.props.colorDot && (
@@ -216,6 +216,8 @@ export function Select({
                 {selectedOption.props.icon}
                 {selectedOption.props.children}
               </>
+            ) : value ? (
+              value
             ) : (
               placeholder
             )}

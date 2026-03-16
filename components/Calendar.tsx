@@ -19,6 +19,8 @@ import {
   CalendarBlank,
   Clock,
   ListChecks,
+  Envelope,
+  Phone,
 } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import type { ViewMode } from '@/lib/utils/calendar';
@@ -32,6 +34,8 @@ import TwoDayView from './calendar/TwoDayView';
 import AppointmentModal, { type AppointmentFormData } from './appointments/AppointmentModal';
 import DeleteConfirmation from './appointments/DeleteConfirmation';
 import AbsenceModal, { type AbsenceFormData } from './calendar/AbsenceModal';
+import EventModal, { type EventFormData } from './calendar/EventModal';
+import EventViewModal from './calendar/EventViewModal';
 import {
   fetchAppointmentsForMonth,
   fetchServices,
@@ -39,6 +43,8 @@ import {
   fetchAbsences,
   type Absence,
 } from '@/lib/supabase/appointments';
+import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
+import type { CalendarEvent } from '@/types/events';
 import {
   MONTHS_FULL,
   formatWeekRange,
@@ -54,6 +60,8 @@ import {
   startOfMonth,
   endOfMonth,
   getLocalDateKey,
+  parseCompanySchedule,
+  type CompanySchedule,
 } from '@/lib/utils/calendar';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import {
@@ -270,15 +278,41 @@ function AppointmentDetailModal({
               <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
                 {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
                 {appointment.stranka_email && <p className="text-xs text-gray-500 truncate">{appointment.stranka_email}</p>}
                 {appointment.stranka_telefon && <p className="text-xs text-gray-500">{appointment.stranka_telefon}</p>}
               </div>
               {(appointment.stranka_email || appointment.stranka_telefon) && (
-                <div className="flex flex-col gap-1 ml-auto">
-                  {appointment.stranka_email && <CopyButton text={appointment.stranka_email} label="email" />}
-                  {appointment.stranka_telefon && <CopyButton text={appointment.stranka_telefon} label="telefon" />}
+                <div className="flex flex-col gap-1.5 ml-auto flex-shrink-0">
+                  {appointment.stranka_email && (
+                    <div className="flex items-center gap-1">
+                      <CopyButton text={appointment.stranka_email} label="email" />
+                      <motion.a
+                        href={`mailto:${appointment.stranka_email}`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 p-1.5 text-white"
+                        title="Pošlji email"
+                      >
+                        <Envelope className="h-3.5 w-3.5" weight="bold" />
+                      </motion.a>
+                    </div>
+                  )}
+                  {appointment.stranka_telefon && (
+                    <div className="flex items-center gap-1">
+                      <CopyButton text={appointment.stranka_telefon} label="telefon" />
+                      <motion.a
+                        href={`tel:${appointment.stranka_telefon}`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center justify-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 p-1.5 text-white"
+                        title="Pokliči"
+                      >
+                        <Phone className="h-3.5 w-3.5" weight="bold" />
+                      </motion.a>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -408,7 +442,6 @@ function AppointmentDetailModal({
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Interne opombe</label>
                 <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
-                  <p className="text-xs font-semibold text-yellow-800 uppercase mb-2">Samo za interno uporabo</p>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
                 </div>
               </div>
@@ -520,6 +553,7 @@ function Calendar({ companyId }: CalendarProps) {
   const [services, setServices] = useState<Storitev[]>([]);
   const [employees, setEmployees] = useState<(Zaposleni & { initials: string })[]>([]);
   const [absences, setAbsences] = useState<Absence[]>([]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -536,6 +570,12 @@ function Calendar({ companyId }: CalendarProps) {
   const [newAppointmentInitials, setNewAppointmentInitials] = useState<{ date?: string; startTime?: string }>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isAbsenceModalOpen, setIsAbsenceModalOpen] = useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [eventModalMode, setEventModalMode] = useState<'create' | 'edit'>('create');
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [isEventDeleting, setIsEventDeleting] = useState(false);
+  const [isEventViewModalOpen, setIsEventViewModalOpen] = useState(false);
+  const [viewingEvent, setViewingEvent] = useState<CalendarEvent | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -584,6 +624,13 @@ function Calendar({ companyId }: CalendarProps) {
     () => getPodatkiPodjetja(companySettings ?? undefined),
     [companySettings]
   );
+
+  // Parse company working hours schedule for calendar shading
+  const companySchedule = useMemo((): CompanySchedule | null => {
+    if (!companySettings) return null;
+    const raw = (companySettings as Record<string, unknown>)['Urnik'] ?? (companySettings as Record<string, unknown>)['urnik'];
+    return parseCompanySchedule(raw);
+  }, [companySettings]);
 
   const buildPayload = useCallback(
     (event: string, entity: string, data: Record<string, unknown>) => ({
@@ -761,6 +808,171 @@ function Calendar({ companyId }: CalendarProps) {
     loadAppointments();
   }, [loadAppointments]);
 
+  // Load events for the current visible date range
+  const loadEvents = useCallback(async () => {
+    // Determine visible date range based on current view
+    let dateFrom: string;
+    let dateTo: string;
+
+    if (currentView === 'day') {
+      dateFrom = currentDate.toISOString().split('T')[0];
+      dateTo = dateFrom;
+    } else if (currentView === '2day') {
+      const end = addDays(currentDate, 2);
+      dateFrom = currentDate.toISOString().split('T')[0];
+      dateTo = end.toISOString().split('T')[0];
+    } else if (currentView === 'week') {
+      const ws = startOfWeek(currentDate);
+      const we = endOfWeek(currentDate);
+      dateFrom = ws.toISOString().split('T')[0];
+      dateTo = we.toISOString().split('T')[0];
+    } else {
+      // month — use a wider range to include the full grid (prev/next month padding)
+      const ms = startOfMonth(currentDate);
+      const me = endOfMonth(currentDate);
+      // Expand by 7 days on each side to cover partial weeks at grid edges
+      const from = addDays(ms, -7);
+      const to = addDays(me, 7);
+      dateFrom = from.toISOString().split('T')[0];
+      dateTo = to.toISOString().split('T')[0];
+    }
+
+    const result = await fetchEvents(companyId, dateFrom, dateTo);
+    if (result.data) {
+      setEvents(result.data);
+    }
+  }, [companyId, currentDate, currentView]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
+
+  // ── Event modal handlers ──────────────────────────────────────────────────
+
+  const handleOpenEventModal = useCallback(() => {
+    setEventModalMode('create');
+    setEditingEvent(null);
+    setIsEventModalOpen(true);
+    setIsSidebarOpen(false);
+  }, []);
+
+  const handleCloseEventModal = useCallback(() => {
+    setIsEventModalOpen(false);
+    setEditingEvent(null);
+  }, []);
+
+  const handleEventClick = useCallback((event: CalendarEvent) => {
+    setViewingEvent(event);
+    setIsEventViewModalOpen(true);
+  }, []);
+
+  const handleCloseEventViewModal = useCallback(() => {
+    setIsEventViewModalOpen(false);
+    setViewingEvent(null);
+  }, []);
+
+  const handleOpenEditFromView = useCallback((event: CalendarEvent) => {
+    setIsEventViewModalOpen(false);
+    setViewingEvent(null);
+    setEditingEvent(event);
+    setEventModalMode('edit');
+    setIsEventModalOpen(true);
+  }, []);
+
+  const handleDeleteFromView = useCallback(async () => {
+    if (!viewingEvent) return;
+    setIsEventDeleting(true);
+    try {
+      const payload = {
+        event: 'IZBRISI_DOGODEK',
+        company_id: companyId,
+        id: viewingEvent.id,
+        title: viewingEvent.title,
+        event_date: viewingEvent.event_date,
+        updated_by: actor,
+      };
+      const result = await sendEventWebhook(payload);
+      if (!result.ok) throw new Error(result.error || 'Napaka pri brisanju');
+      await new Promise((r) => setTimeout(r, 800));
+      await loadEvents();
+      handleCloseEventViewModal();
+      setSuccessMessage('Dogodek izbrisan');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Napaka pri brisanju');
+    } finally {
+      setIsEventDeleting(false);
+    }
+  }, [viewingEvent, companyId, actor, loadEvents, handleCloseEventViewModal]);
+
+  const handleSaveEvent = useCallback(async (data: EventFormData) => {
+    setIsSaving(true);
+    try {
+      const isEdit = eventModalMode === 'edit' && editingEvent;
+      const payload = {
+        event: isEdit ? 'POSODOBI_DOGODEK' : 'USTVARI_DOGODEK',
+        company_id: companyId,
+        id: isEdit ? editingEvent!.id : null,
+        title: data.title,
+        description: data.description || null,
+        notes: data.notes || null,
+        event_date: data.event_date,
+        end_date: data.end_date || null,
+        start_time: data.all_day ? null : (data.start_time || null),
+        end_time: data.all_day ? null : (data.end_time || null),
+        all_day: data.all_day,
+        color: data.color,
+        location: data.location || null,
+        status: isEdit ? (editingEvent!.status || 'active') : 'active',
+        is_visible: data.is_visible,
+        created_by: isEdit ? (editingEvent!.created_by ?? actor) : actor,
+        updated_by: actor,
+      };
+
+      const result = await sendEventWebhook(payload);
+      if (!result.ok) throw new Error(result.error || 'Napaka pri shranjevanju');
+
+      // Give n8n a moment to write to Supabase before re-fetching
+      await new Promise((r) => setTimeout(r, 800));
+      await loadEvents();
+      handleCloseEventModal();
+      setSuccessMessage(isEdit ? 'Dogodek posodobljen' : 'Dogodek ustvarjen');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Napaka pri shranjevanju');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [eventModalMode, editingEvent, companyId, actor, loadEvents, handleCloseEventModal]);
+
+  const handleDeleteEvent = useCallback(async () => {
+    if (!editingEvent) return;
+    setIsEventDeleting(true);
+    try {
+      const payload = {
+        event: 'IZBRISI_DOGODEK',
+        company_id: companyId,
+        id: editingEvent.id,
+        title: editingEvent.title,
+        event_date: editingEvent.event_date,
+        updated_by: actor,
+      };
+
+      const result = await sendEventWebhook(payload);
+      if (!result.ok) throw new Error(result.error || 'Napaka pri brisanju');
+
+      await new Promise((r) => setTimeout(r, 800));
+      await loadEvents();
+      handleCloseEventModal();
+      setSuccessMessage('Dogodek izbrisan');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Napaka pri brisanju');
+    } finally {
+      setIsEventDeleting(false);
+    }
+  }, [editingEvent, companyId, actor, loadEvents, handleCloseEventModal]);
+
   // Filter appointments
   const filteredAppointments = useMemo(() => {
     // Always exclude cancelled appointments from calendar view
@@ -789,6 +1001,12 @@ function Calendar({ companyId }: CalendarProps) {
 
     return filtered;
   }, [appointments, selectedEmployeeId, selectedServiceId, searchQuery]);
+
+  // Filter absences by selected employee (same logic as appointments)
+  const filteredAbsences = useMemo(() => {
+    if (!selectedEmployeeId) return absences;
+    return absences.filter((a) => a.employee_id === selectedEmployeeId);
+  }, [absences, selectedEmployeeId]);
 
   // Set of future dates (YYYY-MM-DD) that have at least one appointment — for sidebar dots
   const appointmentDates = useMemo(() => {
@@ -1416,7 +1634,7 @@ function Calendar({ companyId }: CalendarProps) {
   }, [currentView, currentDate, filteredAppointments]);
 
   return (
-    <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-slate-50">
+    <div className="flex h-full bg-white">
       {/* Main calendar area - takes available space */}
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Header – Apple Calendar style */}
@@ -1520,12 +1738,15 @@ function Calendar({ companyId }: CalendarProps) {
                 <WeekView
                   currentDate={currentDate}
                   appointments={filteredAppointments}
-                  absences={absences}
+                  absences={filteredAbsences}
+                  events={events}
                   services={services}
                   onAppointmentClick={handleAppointmentClick}
+                  onEventClick={handleEventClick}
                   onDateClick={handleDateClick}
                   showAllDays={showAllDays}
                   onGridSlotClick={handleGridSlotClick}
+                  companySchedule={companySchedule}
                 />
               )}
               {currentView === 'day' && (
@@ -1553,11 +1774,14 @@ function Calendar({ companyId }: CalendarProps) {
                     <DayView
                       currentDate={currentDate}
                       appointments={filteredAppointments}
-                      absences={absences}
+                      absences={filteredAbsences}
+                      events={events}
                       services={services}
                       onAppointmentClick={handleAppointmentClick}
+                      onEventClick={handleEventClick}
                       employees={employees}
                       onGridSlotClick={handleGridSlotClick}
+                      companySchedule={companySchedule}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -1566,9 +1790,11 @@ function Calendar({ companyId }: CalendarProps) {
                 <MonthView
                   currentDate={currentDate}
                   appointments={filteredAppointments}
-                  absences={absences}
+                  absences={filteredAbsences}
+                  events={events}
                   services={services}
                   onAppointmentClick={handleAppointmentClick}
+                  onEventClick={handleEventClick}
                   onDateClick={handleDateClick}
                   isMobile={isMobile}
                 />
@@ -1603,7 +1829,7 @@ function Calendar({ companyId }: CalendarProps) {
                       <TwoDayView
                         currentDate={currentDate}
                         appointments={filteredAppointments}
-                        absences={absences}
+                        absences={filteredAbsences}
                         services={services}
                         onAppointmentClick={handleAppointmentClick}
                         onDateClick={handleDateClick}
@@ -1625,6 +1851,7 @@ function Calendar({ companyId }: CalendarProps) {
         onDateSelect={handleDateSelect}
         onTodayClick={handleTodayClick}
         onNewAppointment={handleNewAppointment}
+        onNewEvent={handleOpenEventModal}
         onAbsence={handleOpenAbsenceModal}
         services={services}
         employees={employees}
@@ -1680,6 +1907,28 @@ function Calendar({ companyId }: CalendarProps) {
         employees={employees}
         onSave={handleSaveAbsence}
         isSaving={isSaving}
+      />
+
+      {/* Event view modal */}
+      <EventViewModal
+        isOpen={isEventViewModalOpen}
+        event={viewingEvent}
+        onClose={handleCloseEventViewModal}
+        onEdit={handleOpenEditFromView}
+        onDelete={handleDeleteFromView}
+        isDeleting={isEventDeleting}
+      />
+
+      {/* Event modal */}
+      <EventModal
+        isOpen={isEventModalOpen}
+        mode={eventModalMode}
+        event={editingEvent}
+        onClose={handleCloseEventModal}
+        onSave={handleSaveEvent}
+        onDelete={eventModalMode === 'edit' ? handleDeleteEvent : undefined}
+        isSaving={isSaving}
+        isDeleting={isEventDeleting}
       />
 
       {/* Delete confirmation - identical to Termini */}

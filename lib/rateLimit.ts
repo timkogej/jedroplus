@@ -5,49 +5,29 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { NextRequest, NextResponse } from "next/server";
 
-// Preveri da so env spremenljivke nastavljene
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+// Gracefully handle missing Upstash env vars (e.g. in production before setup)
+const UPSTASH_CONFIGURED =
+  !!process.env.UPSTASH_REDIS_REST_URL && !!process.env.UPSTASH_REDIS_REST_TOKEN;
+
+const redis = UPSTASH_CONFIGURED
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    })
+  : null;
 
 // Različni rate limiterji za različne namene
-export const rateLimiters = {
-  // Splošni API klici: 100 requestov na 10 sekund
-  api: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(100, "10 s"),
-    analytics: true,
-    prefix: "ratelimit:api",
-  }),
-
-  // Webhook klici: 50 requestov na 10 sekund (bolj strogo)
-  webhook: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(50, "10 s"),
-    analytics: true,
-    prefix: "ratelimit:webhook",
-  }),
-
-  // Auth poskusi (login): 5 poskusov na minuto (zelo strogo)
-  auth: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(5, "60 s"),
-    analytics: true,
-    prefix: "ratelimit:auth",
-  }),
-
-  // AI klici: 20 requestov na minuto
-  ai: new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(20, "60 s"),
-    analytics: true,
-    prefix: "ratelimit:ai",
-  }),
-};
+export const rateLimiters = UPSTASH_CONFIGURED && redis
+  ? {
+      api: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, "10 s"), analytics: true, prefix: "ratelimit:api" }),
+      webhook: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(50, "10 s"), analytics: true, prefix: "ratelimit:webhook" }),
+      auth: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60 s"), analytics: true, prefix: "ratelimit:auth" }),
+      ai: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), analytics: true, prefix: "ratelimit:ai" }),
+    }
+  : null;
 
 // Tip za rate limiter
-type RateLimiterType = keyof typeof rateLimiters;
+type RateLimiterType = "api" | "webhook" | "auth" | "ai";
 
 // Helper funkcija za pridobitev IP naslova
 function getIP(request: NextRequest): string {
@@ -73,12 +53,21 @@ export async function rateLimit(
   remaining: number;
   reset: number;
 }> {
+  // If Upstash is not configured, allow all requests through
+  if (!rateLimiters) {
+    return { success: true, limit: 999, remaining: 998, reset: Date.now() + 10000 };
+  }
+
   const ip = getIP(request);
   const limiter = rateLimiters[type];
-  
-  const { success, limit, remaining, reset } = await limiter.limit(ip);
-  
-  return { success, limit, remaining, reset };
+
+  try {
+    const { success, limit, remaining, reset } = await limiter.limit(ip);
+    return { success, limit, remaining, reset };
+  } catch {
+    // If Redis call fails, allow the request through rather than blocking all users
+    return { success: true, limit: 999, remaining: 998, reset: Date.now() + 10000 };
+  }
 }
 
 // Wrapper za API route z rate limiting

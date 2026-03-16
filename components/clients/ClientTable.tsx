@@ -377,7 +377,14 @@ function ClientTable({
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3">
           <p className="text-sm text-gray-500">
-            Stran {currentPage} od {totalPages} • {clients.length} strank
+            <span className="font-medium text-[#1A1F36]">
+              {(currentPage - 1) * itemsPerPage + 1}
+            </span>{' '}
+            –{' '}
+            <span className="font-medium text-[#1A1F36]">
+              {Math.min(currentPage * itemsPerPage, sortedClients.length)}
+            </span>{' '}
+            od <span className="font-medium text-[#1A1F36]">{sortedClients.length}</span>
           </p>
           <div className="flex items-center gap-1">
             <button

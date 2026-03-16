@@ -16,6 +16,7 @@ export interface Absence {
   // Employee details (joined from Osebe table)
   employee_name?: string;
   employee_initials?: string;
+  employee_color?: string;
 }
 
 // Helper function to compute initials from first and last name
@@ -38,6 +39,7 @@ function detectServiceSchema(row: Record<string, unknown>) {
     durationField: pickField(['Trajanje', 'trajanje', 'duration', 'duration_min']),
     totalTimeField: pickField(['skupni_cas', 'Skupni čas', 'total_time', 'total_duration']),
     priceField: pickField(['cena', 'Cena', 'price', 'Price']),
+    statusField: pickField(['Status', 'status']),
   };
 }
 
@@ -78,6 +80,7 @@ function parseService(row: Record<string, unknown>): Storitev | null {
     trajanje,
     skupni_cas: skupni_cas && skupni_cas > 0 ? skupni_cas : undefined,
     cena: cena !== null && !isNaN(cena) ? cena : null,
+    status: schema.statusField ? String(row[schema.statusField] ?? '') || null : null,
   };
 }
 
@@ -787,8 +790,6 @@ export async function fetchAbsences(
   try {
     console.log('[fetchAbsences] Fetching absences for company_id:', companyId);
 
-    // Fetch absences from the absences table
-    // Only show confirmed absences
     let { data: absencesData, error: absencesError } = await supabase
       .from('absences')
       .select('*')
@@ -798,49 +799,43 @@ export async function fetchAbsences(
     console.log('[fetchAbsences] Query result - error:', absencesError, 'data count:', absencesData?.length ?? 0);
 
     if (absencesError) {
-      throw absencesError;
+      // Maybe the table doesn't exist or RLS issue — log and continue with empty
+      console.warn('[fetchAbsences] Error querying absences:', absencesError.message);
+      absencesData = [];
     }
 
-    // If no absences found with the string company_id, try with the UUID from companies table
-    if (!absencesData?.length) {
-      try {
-        const { data: companyRow } = await supabase
-          .from('companies')
-          .select('id')
-          .eq('company_id', companyId)
-          .single();
-        if (companyRow?.id) {
-          const uuidResult = await supabase
-            .from('absences')
-            .select('*')
-            .eq('company_id', companyRow.id)
-            .eq('status', 'CONFIRMED');
-          if (!uuidResult.error && uuidResult.data?.length) {
-            absencesData = uuidResult.data;
-            console.log('[fetchAbsences] Found absences using UUID fallback:', absencesData.length);
-          }
-        }
-      } catch (uuidErr) {
-        console.warn('[fetchAbsences] UUID fallback failed:', uuidErr);
-      }
-    }
 
-    // Fetch employees to get their names (with error handling)
-    const staffMap = new Map<string, { name: string; initials: string }>();
+    // Fetch employee names directly from Osebe by employee_id
+    const staffMap = new Map<string, { name: string; initials: string; color?: string }>();
     try {
-      const staffResult = await fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200);
-      for (const row of staffResult.data ?? []) {
-        const person = parseStaff(row);
-        if (person) {
-          staffMap.set(person.id, {
-            name: `${person.ime} ${person.priimek}`.trim(),
-            initials: person.initials,
-          });
+      // employee_id is bigint — collect as numbers/strings, deduplicate
+      const employeeIds = [...new Set(
+        (absencesData || [])
+          .map((r: Record<string, unknown>) => r.employee_id)
+          .filter((id) => id !== null && id !== undefined)
+          .map((id) => Number(id))
+          .filter((id) => !isNaN(id))
+      )];
+
+      if (employeeIds.length > 0) {
+        const { data: osebe } = await supabase
+          .from('Osebe')
+          .select('id, Ime, Priimek, Barva')
+          .in('id', employeeIds);
+
+        for (const row of osebe ?? []) {
+          const id = String(row.id ?? '');
+          if (!id) continue;
+          const ime = String(row.Ime ?? '');
+          const priimek = String(row.Priimek ?? '');
+          const name = `${ime} ${priimek}`.trim();
+          const initials = `${ime.charAt(0)}${priimek.charAt(0)}`.toUpperCase();
+          const color = row.Barva ? String(row.Barva) : undefined;
+          staffMap.set(id, { name, initials, color });
         }
       }
     } catch (staffError) {
-      console.warn('[fetchAbsences] Could not fetch staff for employee names:', staffError);
-      // Continue without employee names - absences will still display
+      console.warn('[fetchAbsences] Could not fetch employee names from Osebe:', staffError);
     }
 
     console.log('[fetchAbsences] Raw absences data:', absencesData?.length ?? 0, 'records');
@@ -849,13 +844,14 @@ export async function fetchAbsences(
       const employeeId = row.employee_id ? String(row.employee_id) : undefined;
       const employeeData = employeeId ? staffMap.get(employeeId) : undefined;
 
-      // Parse timestamps - handle format like "2026-01-30 10:00:00+00"
-      // Convert PostgreSQL timestamp format to ISO format for reliable parsing
+      // Parse timestamps - handle PostgreSQL format "2026-01-30 10:00:00+00" or "+02"
+      // Step 1: space → T  Step 2: bare ±HH offset → ±HH:00 (JS requires colon)
+      const normTs = (raw: string) =>
+        raw.replace(' ', 'T').replace(/([+-]\d{2})$/, '$1:00');
       const rawStartAt = row.start_at ? String(row.start_at) : '';
       const rawEndAt = row.end_at ? String(row.end_at) : '';
-      // Replace space with T for ISO format compatibility
-      const startAt = rawStartAt.replace(' ', 'T');
-      const endAt = rawEndAt.replace(' ', 'T');
+      const startAt = normTs(rawStartAt);
+      const endAt = normTs(rawEndAt);
 
       return {
         id: String(row.id ?? ''),
@@ -867,6 +863,7 @@ export async function fetchAbsences(
         status: String(row.status ?? ''),
         employee_name: employeeData?.name,
         employee_initials: employeeData?.initials,
+        employee_color: employeeData?.color,
       };
     });
 

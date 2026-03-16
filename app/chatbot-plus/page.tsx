@@ -413,7 +413,9 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
                           padding: '10px 14px',
                           fontSize: 14,
                           lineHeight: 1.5,
-                          color: 'white',
+                          fontFamily: 'inherit',
+                          color: '#ffffff',
+                          WebkitTextFillColor: '#ffffff',
                           boxShadow: '0 2px 10px rgba(139,92,246,0.28)',
                         }
                       : {
@@ -423,6 +425,7 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
                           padding: '10px 14px',
                           fontSize: 14,
                           lineHeight: 1.5,
+                          fontFamily: 'inherit',
                           color: '#1f2937',
                           boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                         }
@@ -698,6 +701,8 @@ export default function ChatbotPlusPage() {
   const { design } = chatbotData;
   const borderRadius = sanitizeBorderRadius(design.borderRadius);
   const accentGradient = `linear-gradient(135deg, ${design.accentGradientFrom}, ${design.accentGradientTo})`;
+  const userMsgGradient = `linear-gradient(135deg, ${design.userMsgGradientFrom}, ${design.userMsgGradientTo})`;
+  const botBubbleGradient = `linear-gradient(135deg, ${design.botBubbleGradientFrom}, ${design.botBubbleGradientTo})`;
 
   const effectiveChatbotUrl = chatbotLink || chatbotData.url;
   const embedCode = effectiveChatbotUrl
@@ -766,6 +771,7 @@ export default function ChatbotPlusPage() {
                     '0 32px 64px rgba(139, 92, 246, 0.15), ' +
                     '0 16px 32px rgba(0, 0, 0, 0.1), ' +
                     '0 0 0 1px rgba(139, 92, 246, 0.1)',
+                  fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
                 }}
               >
                 {/* Chat Header - transparent, gradient shows through */}
@@ -824,19 +830,19 @@ export default function ChatbotPlusPage() {
                   <div className="space-y-5">
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.2 }} className="flex justify-start">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: '#1f2937', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>{botGreeting}</div>
+                        <div style={{ background: botBubbleGradient, borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: design.textColor, fontFamily: design.fontFamily, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>{botGreeting}</div>
                         <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingLeft: 4 }}>17:03</div>
                       </div>
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.4 }} className="flex justify-end">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: accentGradient, borderRadius: '20px', borderBottomRightRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: 'white' }}>Rezerviraj termin</div>
+                        <div style={{ background: userMsgGradient, borderRadius: '20px', borderBottomRightRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: design.textColor, fontFamily: design.fontFamily }}>Rezerviraj termin</div>
                         <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingRight: 4, textAlign: 'right' }}>17:03</div>
                       </div>
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.6 }} className="flex justify-start">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: '#1f2937', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>Super, vesel me, da želiš rezervirati termin! 😊 Katero storitev bi želel naročiti?</div>
+                        <div style={{ background: botBubbleGradient, borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: design.textColor, fontFamily: design.fontFamily, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>Super, vesel me, da želiš rezervirati termin! 😊 Katero storitev bi želel naročiti?</div>
                         <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingLeft: 4 }}>17:03</div>
                       </div>
                     </motion.div>
@@ -977,7 +983,15 @@ export default function ChatbotPlusPage() {
                     <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
                       Mehurček uporabnika
                     </p>
-                    <GradientSwatch from={design.userBubbleGradientFrom} to={design.userBubbleGradientTo} label="uporabnik" />
+                    <GradientSwatch from={design.userMsgGradientFrom} to={design.userMsgGradientTo} label="uporabnik" />
+                  </div>
+
+                  {/* Bot bubble */}
+                  <div>
+                    <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+                      Mehurček bota
+                    </p>
+                    <GradientSwatch from={design.botBubbleGradientFrom} to={design.botBubbleGradientTo} label="bot" />
                   </div>
 
                   {/* Accent */}
@@ -1024,21 +1038,21 @@ export default function ChatbotPlusPage() {
               >
                 <p style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>Link chatbota</p>
                 <div className="flex items-center gap-2">
-                  <p className={`text-sm font-mono truncate flex-1 min-w-0 ${chatbotData.url ? 'text-gray-700' : 'text-gray-400 italic'}`}>
-                    {chatbotData.url || 'Link bo konfiguriran kmalu...'}
+                  <p className={`text-sm font-mono truncate flex-1 min-w-0 ${effectiveChatbotUrl ? 'text-gray-700' : 'text-gray-400 italic'}`}>
+                    {effectiveChatbotUrl || 'Link bo konfiguriran kmalu...'}
                   </p>
-                  {chatbotData.url && (
+                  {effectiveChatbotUrl && (
                     <>
                       <motion.button
                         whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                        onClick={async () => { await navigator.clipboard.writeText(chatbotData.url); setCopiedUrl(true); setTimeout(() => setCopiedUrl(false), 2000); }}
+                        onClick={async () => { await navigator.clipboard.writeText(effectiveChatbotUrl); setCopiedUrl(true); setTimeout(() => setCopiedUrl(false), 2000); }}
                         className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:border-violet-300 transition-colors"
                       >
                         {copiedUrl ? <Check size={15} className="text-green-500" weight="bold" /> : <Copy size={15} className="text-gray-500" weight="regular" />}
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                        onClick={() => window.open(chatbotData.url, '_blank')}
+                        onClick={() => window.open(effectiveChatbotUrl, '_blank')}
                         className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-gray-200 hover:border-violet-300 transition-colors"
                       >
                         <ArrowSquareOut size={15} className="text-gray-500" weight="regular" />

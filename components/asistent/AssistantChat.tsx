@@ -623,6 +623,18 @@ export function AssistantChat({
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
   const [userInitials, setUserInitials] = useState('U');
+
+  // Random subtitle (one of 5 options, picked once on mount)
+  const randomSubtitle = useState(() => {
+    const subtitles = [
+      'Kako vam lahko pomagam?',
+      'Kaj vas danes zanima?',
+      'Vprašajte me karkoli.',
+      'Tukaj sem, da pomagam.',
+      'Skupaj naredimo več.',
+    ];
+    return subtitles[Math.floor(Math.random() * subtitles.length)];
+  })[0];
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -993,8 +1005,10 @@ PRAVILA:
             >
               <div className="flex items-center justify-center gap-3 mb-3">
                 <h1
-                  className="text-4xl font-bold tracking-tight"
+                  className="font-bold tracking-tight"
                   style={{
+                    fontSize: '3.5rem',
+                    lineHeight: '1',
                     background:
                       'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                     WebkitBackgroundClip: 'text',
@@ -1015,7 +1029,7 @@ PRAVILA:
                   BETA
                 </span>
               </div>
-              <p className="text-gray-500 text-lg">Kako vam lahko pomagam?</p>
+              <p className="text-gray-500 text-lg">{randomSubtitle}</p>
             </motion.div>
 
             {/* Input */}

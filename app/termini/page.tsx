@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   CalendarBlank,
@@ -90,6 +90,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
 
 export default function TerminiPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
 
@@ -100,8 +101,12 @@ export default function TerminiPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Filter state
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  // Filter state — initialize from URL params if present
+  const [filters, setFilters] = useState<FilterState>(() => {
+    const dateFrom = searchParams.get('dateFrom') ?? '';
+    const dateTo = searchParams.get('dateTo') ?? '';
+    return { ...DEFAULT_FILTERS, dateFrom, dateTo };
+  });
 
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
