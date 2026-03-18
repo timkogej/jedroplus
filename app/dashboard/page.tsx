@@ -739,7 +739,7 @@ export default function DashboardPage() {
       });
 
       const result = await callN8nAction(buildPayload(event, 'appointments', enhancedData));
-      if (!result.ok) throw new Error('Napaka pri shranjevanju termina');
+      if (!result.ok) throw new Error(result.error || 'Napaka pri shranjevanju termina');
 
       setSuccessMessage(isNew ? 'Termin uspešno dodan' : 'Termin uspešno posodobljen');
       setTimeout(() => setSuccessMessage(null), 3000);

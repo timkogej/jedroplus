@@ -49,7 +49,9 @@ export default function OnboardingPage() {
             // Store the 6-char public ID (used for filtering business tables)
             localStorage.setItem(STORAGE_KEY, company.company_id);
             document.cookie = `company_id=${company.company_id}; path=/; max-age=31536000`;
-            router.replace('/dashboard');
+            // Use a hard navigation so CompanyProvider re-initialises from localStorage
+            // (soft router.replace would keep the same provider instance with stale null state)
+            window.location.href = '/dashboard';
             return;
           }
         }

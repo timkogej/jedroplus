@@ -31,13 +31,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ KORAK 2: Preveri API key konfiguracijo
+    // ✅ KORAK 2: Opozori če API key ni konfiguriran (ne blokira - n8n vrne 401 če je key obvezen)
     if (!N8N_API_KEY) {
-      console.error("[api/webhook] N8N_WEBHOOK_API_KEY is not configured!");
-      return NextResponse.json(
-        { ok: false, error: "Webhook not configured" },
-        { status: 500 }
-      );
+      console.warn("[api/webhook] N8N_WEBHOOK_API_KEY is not configured! Add it to Vercel environment variables.");
     }
 
     // ✅ KORAK 3: Preberi payload
@@ -52,21 +48,29 @@ export async function POST(request: NextRequest) {
       meta: payload.meta ?? { app: "Integrate", version: "1.0" },
     };
 
-    // ✅ KORAK 4: Pošlji na n8n z API key
+    // ✅ KORAK 4: Pošlji na n8n (z API key če je nastavljen)
     const response = await fetch(WEBHOOK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": N8N_API_KEY,
+        ...(N8N_API_KEY ? { "X-API-Key": N8N_API_KEY } : {}),
       },
       body: JSON.stringify(normalizedPayload),
     });
 
     if (!response.ok) {
-      console.error(`[api/webhook] n8n returned ${response.status}`);
+      let n8nErrorMsg = `Webhook failed: ${response.status}`;
+      try {
+        const errText = await response.text();
+        if (errText) {
+          const errJson = JSON.parse(errText);
+          n8nErrorMsg = errJson?.message || errJson?.error || n8nErrorMsg;
+        }
+      } catch { /* ignore */ }
+      console.error(`[api/webhook] n8n returned ${response.status}: ${n8nErrorMsg}`);
       return NextResponse.json(
-        { ok: false, error: `Webhook failed: ${response.status}` },
-        { 
+        { ok: false, error: n8nErrorMsg },
+        {
           status: response.status,
           headers: {
             "X-RateLimit-Limit": limit.toString(),

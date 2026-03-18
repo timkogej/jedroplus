@@ -158,13 +158,34 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       setLoading(true);
 
       try {
-        const { data, error } = await supabaseReadOnly
-          .from("Podatki podjetij")
-          .select("*")
-          .eq("ID Podjetja", stored)
-          .maybeSingle();
+        // Retry logic: n8n may need a moment to propagate "Podatki podjetij" after company creation.
+        // On a hard network error we fail fast; on "not found" (null data, no error) we retry
+        // up to 2 more times with short back-off delays.
+        let data: Record<string, unknown> | null = null;
+        let fetchError: unknown = null;
 
-        if (error || !data) {
+        for (let attempt = 0; attempt < 3; attempt++) {
+          if (attempt > 0) {
+            await new Promise<void>((r) => setTimeout(r, attempt * 1000));
+          }
+          const result = await supabaseReadOnly
+            .from("Podatki podjetij")
+            .select("*")
+            .eq("ID Podjetja", stored)
+            .maybeSingle();
+
+          if (result.error) {
+            fetchError = result.error;
+            break; // hard DB error – don't retry
+          }
+          if (result.data) {
+            data = result.data as Record<string, unknown>;
+            break; // found
+          }
+          // no error, no data → possible race condition with backend, retry
+        }
+
+        if (fetchError || !data) {
           setCompanyIdState(null);
           setCompanyUuidState(null);
           setCompanySettings(null);

@@ -70,6 +70,17 @@ export async function callN8nAction(
         const nextPayload = await retry();
         return callN8nAction(nextPayload);
       }
+      // Read the response body to get the actual error message
+      try {
+        const errText = await response.text();
+        if (errText) {
+          const errJson = JSON.parse(errText);
+          const errMsg = errJson?.error || errJson?.message || `HTTP ${response.status}`;
+          return { ok: false, error: errMsg };
+        }
+      } catch {
+        // ignore parse errors
+      }
       return { ok: false, error: `HTTP ${response.status}` };
     }
     

@@ -1361,6 +1361,10 @@ function Calendar({ companyId }: CalendarProps) {
   }, []);
 
   const handleSaveAppointment = useCallback(async (data: AppointmentFormData) => {
+    if (!companyId) {
+      setActionError('Podjetje ni izbrano. Prosimo, osvežite stran.');
+      return;
+    }
     setIsSaving(true);
     setActionError(null);
 
@@ -1515,7 +1519,7 @@ function Calendar({ companyId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri shranjevanju termina');
+        throw new Error(result.error || 'Napaka pri shranjevanju termina');
       }
 
       // Wait 1 second for system to process

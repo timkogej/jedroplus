@@ -124,13 +124,31 @@ export interface JoinCompanyResult {
   error?: string;
 }
 
+export interface UrnikInterval {
+  start: string;
+  end: string;
+}
+
+export interface UrnikDay {
+  enabled: boolean;
+  intervals: UrnikInterval[];
+}
+
+export interface CreateCompanyPayload {
+  company_name: string;
+  panoga?: string;
+  country?: string;
+  language?: string;
+  urnik?: Record<string, UrnikDay>;
+}
+
 /**
  * Create a new company during onboarding
  */
-export async function createCompany(companyName: string): Promise<CreateCompanyResult> {
+export async function createCompany(payload: CreateCompanyPayload): Promise<CreateCompanyResult> {
   return apiRequest<CreateCompanyResult>('/onboarding/create-company', {
     method: 'POST',
-    body: JSON.stringify({ company_name: companyName })
+    body: JSON.stringify(payload)
   });
 }
 
