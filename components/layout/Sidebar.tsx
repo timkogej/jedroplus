@@ -59,7 +59,7 @@ interface NavSection {
 // Navigation config
 // ============================================================================
 
-const navigationSections: NavSection[] = [
+const navigationSectionsPaid: NavSection[] = [
   {
     label: 'Glavno',
     items: [
@@ -102,6 +102,53 @@ const navigationSections: NavSection[] = [
   },
   {
     label: 'Račun',
+    items: [
+      { name: 'Paketi in kvote', href: '/billing', icon: Package },
+    ],
+  },
+];
+
+const navigationSectionsFree: NavSection[] = [
+  {
+    label: 'Glavno',
+    items: [
+      { name: 'Dashboard', href: '/dashboard', icon: ChartBar },
+      { name: 'Koledar', href: '/koledar', icon: CalendarBlank },
+      { name: 'Termini', href: '/termini', icon: ClipboardText },
+      { name: 'Stranke', href: '/clients', icon: Users },
+    ],
+  },
+  {
+    label: 'Moduli',
+    items: [
+      { name: 'Storitve', href: '/services', icon: Briefcase },
+      { name: 'Osebje', href: '/staff', icon: UserCircle },
+    ],
+  },
+  {
+    label: 'AI',
+    items: [
+      { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'Novo' },
+      { name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'Novo' },
+    ],
+  },
+  {
+    label: 'Komunikacija',
+    items: [
+      { name: 'Komunikacija', href: '/komunikacija', icon: Envelope },
+      { name: 'Opomniki', href: '/reminders', icon: Bell },
+      { name: 'Rezervacije', href: '/rezervacije', icon: CalendarCheck },
+      { name: 'Izgubljene stranke', href: '/lost-leads', icon: TrendDown },
+    ],
+  },
+  {
+    label: 'Analitika',
+    items: [
+      { name: 'Analitika', href: '/analytics', icon: ChartLine },
+    ],
+  },
+  {
+    label: 'Paketi in kvote',
     items: [
       { name: 'Paketi in kvote', href: '/billing', icon: Package },
     ],
@@ -184,6 +231,9 @@ export function Sidebar() {
   const { companySettings, switchCompany, companyId } = useCompany();
   const { user, signOut } = useAuth();
   const { planCode } = useCompanyPlan();
+
+  const isFree = planCode === 'FREE';
+  const navigationSections = isFree ? navigationSectionsFree : navigationSectionsPaid;
 
   const isLocked = (href: string) => !hasAccessToRoute(href, planCode);
 

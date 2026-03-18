@@ -61,17 +61,23 @@ function EmployeeCard({
             {fullName}
           </h3>
 
-          {/* Position badge */}
-          {employee.pozicija && (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700">
-              <Briefcase className="h-3 w-3" weight="regular" />
-              {employee.pozicija}
-            </div>
-          )}
+          {/* Position badge — always reserve space so card height stays consistent */}
+          <div className="mt-2 h-[26px] flex items-center justify-center">
+            {employee.pozicija ? (
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700">
+                <Briefcase className="h-3 w-3" weight="regular" />
+                {employee.pozicija}
+              </div>
+            ) : !employee.aktivna ? (
+              <div className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+                Neaktiven
+              </div>
+            ) : null}
+          </div>
 
-          {/* Active/Inactive badge */}
-          {!employee.aktivna && (
-            <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
+          {/* Inactive badge when pozicija is also set */}
+          {employee.pozicija && !employee.aktivna && (
+            <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
               Neaktiven
             </div>
           )}

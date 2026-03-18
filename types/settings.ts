@@ -176,7 +176,8 @@ export interface AllSettings {
 // Settings section type for navigation
 export type SettingsSection =
   | 'splosno'
-  | 'podjetje';
+  | 'podjetje'
+  | 'clani';
 
 // Default values
 export const defaultGeneralSettings: GeneralSettings = {

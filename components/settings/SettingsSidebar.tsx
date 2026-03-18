@@ -2,30 +2,65 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   Gear,
   Buildings,
+  UsersThree,
 } from '@phosphor-icons/react';
 import type { SettingsSection } from '@/types/settings';
+import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
+import { useCompany } from '@/app/company-context';
+import { useAuth } from '@/app/auth-context';
 
 interface TabItem {
   id: SettingsSection;
   label: string;
   icon: React.ElementType;
   path: string;
+  ownerOnly?: boolean;
 }
 
 const settingsTabs: TabItem[] = [
   { id: 'splosno', label: 'Splošno', icon: Gear, path: '/nastavitve/splosno' },
   { id: 'podjetje', label: 'Podjetje', icon: Buildings, path: '/nastavitve/podjetje' },
+  { id: 'clani', label: 'Člani podjetja', icon: UsersThree, path: '/nastavitve/clani', ownerOnly: true },
 ];
 
 export function SettingsSidebar() {
   const pathname = usePathname();
+  const { companyUuid } = useCompany();
+  const { user } = useAuth();
+
+  // Initialise from localStorage so there's no pop-in on re-visits
+  const cacheKey = companyUuid && user?.id ? `owner_${companyUuid}_${user.id}` : null;
+  const [isOwner, setIsOwner] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || !cacheKey) return false;
+    return localStorage.getItem(cacheKey) === '1';
+  });
+
+  useEffect(() => {
+    if (!companyUuid || !user?.id || !cacheKey) return;
+    supabaseReadOnly
+      .from('company_members')
+      .select('role')
+      .eq('company_id', companyUuid)
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const owner = data?.role === 'owner';
+        setIsOwner(owner);
+        localStorage.setItem(cacheKey, owner ? '1' : '0');
+      });
+  }, [companyUuid, user?.id, cacheKey]);
+
+  const visibleTabs = settingsTabs.filter(
+    (tab) => !tab.ownerOnly || isOwner
+  );
 
   const getCurrentSection = (): SettingsSection | null => {
-    for (const tab of settingsTabs) {
+    for (const tab of visibleTabs) {
       if (pathname.includes(tab.path)) {
         return tab.id;
       }
@@ -37,7 +72,7 @@ export function SettingsSidebar() {
 
   return (
     <div className="flex gap-1 p-1 rounded-xl bg-gray-100 w-full">
-      {settingsTabs.map((tab) => {
+      {visibleTabs.map((tab) => {
         const isActive = currentSection === tab.id;
         const Icon = tab.icon;
 
