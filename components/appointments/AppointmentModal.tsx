@@ -1158,7 +1158,7 @@ function AppointmentModal({
                         setFormData((prev) => ({ ...prev, cas_zacetek: e.target.value }));
                         setEndTimeManuallySet(false);
                       }}
-                      className={`w-full min-w-0 rounded-xl border-2 bg-white px-1.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
+                      className={`w-full min-w-0 rounded-xl border sm:border-2 bg-white px-1 py-1.5 sm:px-4 sm:py-2.5 text-[11px] sm:text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
                     />
                     {errors.cas_zacetek && (
                       <p className="mt-1 text-xs text-red-500">{errors.cas_zacetek}</p>
@@ -1184,7 +1184,7 @@ function AppointmentModal({
                         setFormData((prev) => ({ ...prev, cas_konec: e.target.value }));
                         setEndTimeManuallySet(true);
                       }}
-                      className={`w-full min-w-0 rounded-xl border-2 bg-white px-1.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
+                      className={`w-full min-w-0 rounded-xl border sm:border-2 bg-white px-1 py-1.5 sm:px-4 sm:py-2.5 text-[11px] sm:text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
                     />
                     {errors.cas_konec && (
                       <p className="mt-1 text-xs text-red-500">{errors.cas_konec}</p>

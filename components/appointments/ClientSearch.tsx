@@ -18,7 +18,7 @@ interface ClientSearchProps {
 function ClientSearch({
   selectedClient,
   onSelect,
-  placeholder = 'Išči stranko po imenu, emailu ali telefonu...',
+  placeholder = 'Išči po imenu, emailu ali telefonu...',
   onCreateNew,
 }: ClientSearchProps) {
   const { companyId } = useCompany();
