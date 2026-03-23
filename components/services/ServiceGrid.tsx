@@ -10,6 +10,8 @@ interface ServiceGridProps {
   onDelete: (service: Service) => void;
   onToggleActive: (service: Service) => void;
   isLoading?: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 function ServiceGrid({
@@ -18,6 +20,8 @@ function ServiceGrid({
   onDelete,
   onToggleActive,
   isLoading = false,
+  canEdit = true,
+  canDelete = true,
 }: ServiceGridProps) {
   if (isLoading) {
     return (
@@ -41,6 +45,8 @@ function ServiceGrid({
           onDelete={onDelete}
           onToggleActive={onToggleActive}
           index={index}
+          canEdit={canEdit}
+          canDelete={canDelete}
         />
       ))}
     </div>

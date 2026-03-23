@@ -42,6 +42,8 @@ export interface Employee {
   storitve?: string[] | null;
   // Whether employee uses company schedule (true) or custom schedule (false)
   ali_ima_urnik_podjetja?: boolean;
+  // Auth user linked to this person (null = not yet connected to any user account)
+  auth_user_id?: string | null;
   // Computed fields from joins
   appointments_today?: number;
   appointments_week?: number;

@@ -11,7 +11,6 @@ import {
   SpinnerGap,
   Warning,
   GenderIntersex,
-  LockSimple,
 } from '@phosphor-icons/react';
 import type { Client, ClientFormData, Gender } from '@/types/clients';
 import { Select, SelectOption } from '@/components/ui/animated-select';
@@ -477,9 +476,7 @@ function ClientModal({
                           {errors.interne_opombe}
                         </p>
                       ) : (
-                        <p className="text-xs text-yellow-700">
-                          Te opombe se ne pošiljajo stranki
-                        </p>
+                        <span />
                       )}
                       <span className="text-xs text-gray-400">
                         {formData.interne_opombe.length}/500
@@ -494,7 +491,6 @@ function ClientModal({
                     whileTap={{ scale: 0.99 }}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-yellow-300 text-yellow-700 hover:bg-yellow-50 transition-colors"
                   >
-                    <LockSimple className="h-4 w-4" weight="fill" />
                     <span className="text-sm font-medium">+ Interne opombe</span>
                   </motion.button>
                 )}

@@ -14,6 +14,7 @@ import {
 } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { getCustomerPortal, startCheckout, getBillingStatus } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
 import ProtectedLayout from '@/components/ProtectedLayout';
@@ -76,7 +77,7 @@ const PLANS: Plan[] = [
   {
     code: 'JEDRO_PREMIUM',
     name: 'Jedro Premium',
-    price: '99 €',
+    price: '?? €',
     period: '/ mesec',
     description: 'Za podjetja, ki želijo maksimalno avtomatizacijo',
     tagline: 'Celoten nabor AI funkcij za rast in komunikacijo.',
@@ -328,6 +329,8 @@ function BillingPageContent() {
   const router = useRouter();
   const { companyId, companyUuid, subscription, smsQuota, planCode: contextPlanCode, isPlanActive } = useCompany();
   const { user } = useAuth();
+  const { role } = useRolePermissions();
+  const isStaff = role === 'staff';
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -528,7 +531,9 @@ function BillingPageContent() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Paketi in kvote</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {isStaff ? 'Paketi' : 'Paketi in kvote'}
+          </h1>
         </div>
 
         {/* Error Toast */}
@@ -548,8 +553,8 @@ function BillingPageContent() {
         )}
 
         <div className="grid gap-6">
-          {/* Current Plan Section */}
-          <motion.div
+          {/* Current Plan Section — hidden for staff */}
+          {!isStaff && <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className={`rounded-2xl shadow-lg overflow-hidden ${isPremium ? '' : 'bg-white'}`}
@@ -689,7 +694,7 @@ function BillingPageContent() {
                 <p className="mt-2 text-xs text-gray-400">Upravljajte naročnino, plačilno metodo in račune prek Stripe portala.</p>
               </div>
             </div>
-          </motion.div>
+          </motion.div>}
 
           {/* Plan Selector Cards */}
           <motion.div
@@ -709,11 +714,12 @@ function BillingPageContent() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className={`relative bg-white rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 flex flex-col ${
+                      className={`relative rounded-3xl p-6 shadow-lg transition-all duration-300 flex flex-col ${
                         plan.popular
                           ? 'border-2 border-violet-500 ring-4 ring-violet-500/10'
                           : 'border border-gray-100'
-                      }`}
+                      } ${plan.code === 'JEDRO_PREMIUM' && !isCurrent ? 'opacity-50' : 'hover:shadow-xl'}`}
+                      style={isCurrent ? { background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.05) 50%, rgba(6,182,212,0.08) 100%)', border: '2px solid rgba(139,92,246,0.2)' } : { background: 'white' }}
                     >
                       {/* Popular Badge */}
                       {plan.popular && (
@@ -725,11 +731,6 @@ function BillingPageContent() {
                       {/* Plan Name */}
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-                        {plan.code === 'JEDRO_PREMIUM' && (
-                          <span className="px-2 py-0.5 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-full">
-                            Prihaja kmalu
-                          </span>
-                        )}
                       </div>
 
                       {/* Price */}

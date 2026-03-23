@@ -390,14 +390,6 @@ export function AppBar() {
                       <span>Moj profil</span>
                     </Link>
 
-                    <button
-                      onClick={handleSwitchCompany}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                    >
-                      <Briefcase className="w-4 h-4" />
-                      <span>Zamenjaj podjetje</span>
-                    </button>
-
                     <Link
                       href="/billing"
                       onClick={() => setIsProfileOpen(false)}

@@ -12,6 +12,7 @@ import {
   Switch,
   SaveIndicator,
 } from '@/components/settings';
+import { Select as AnimatedSelect, SelectOption } from '@/components/ui/animated-select';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
@@ -274,11 +275,15 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
                   {/* Language Settings */}
                   <SettingsSection title="Jezik" description="V katerem jeziku naj chatbot komunicira">
                     <SettingRow label="Jezik za chatbot" description="Izberite jezik komunikacije">
-                      <Select
+                      <AnimatedSelect
                         value={language}
-                        onChange={(value) => setLanguage(value)}
-                        options={CHATBOT_LANGUAGES}
-                      />
+                        setValue={setLanguage}
+                        placeholder="Izberi jezik"
+                      >
+                        {CHATBOT_LANGUAGES.map((lang) => (
+                          <SelectOption key={lang.value} value={lang.value}>{lang.label}</SelectOption>
+                        ))}
+                      </AnimatedSelect>
                     </SettingRow>
                   </SettingsSection>
 
@@ -293,11 +298,14 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
                     </SettingRow>
 
                     <SettingRow label="Ton komunikacije" description="Opisite zeleni ton komunikacije">
-                      <Input
+                      <AnimatedSelect
                         value={tone}
-                        onChange={(e) => setTone(e.target.value)}
-                        placeholder="npr. prijazen, profesionalen, sproscen..."
-                      />
+                        setValue={setTone}
+                        placeholder="Izberi ton"
+                      >
+                        <SelectOption value="prijazen">Prijazen</SelectOption>
+                        <SelectOption value="profesionalen">Profesionalen</SelectOption>
+                      </AnimatedSelect>
                     </SettingRow>
 
                     <SettingRow label="Pozdravno sporocilo" description="Prvo sporocilo ki ga vidi stranka" fullWidth>

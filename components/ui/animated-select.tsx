@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useState, useRef, useEffect, createContext, useContext } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { CaretDown, Check } from '@phosphor-icons/react';
 
@@ -119,7 +120,9 @@ export function Select({
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const selectRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
 
   // Get all option values for keyboard navigation
@@ -131,10 +134,26 @@ export function Select({
   // Find selected option to display
   const selectedOption = options.find((opt) => opt.props.value === value);
 
+  // Calculate dropdown position based on trigger button
+  const updateDropdownPosition = () => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setDropdownStyle({
+      position: 'fixed',
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width,
+      zIndex: 9999,
+    });
+  };
+
   // Handle click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const clickedInsideTrigger = selectRef.current?.contains(target);
+      const clickedInsideDropdown = optionsRef.current?.contains(target);
+      if (!clickedInsideTrigger && !clickedInsideDropdown) {
         setIsOpen(false);
       }
     }
@@ -143,12 +162,29 @@ export function Select({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close dropdown on scroll (only when scrolling outside the dropdown) or resize
+  useEffect(() => {
+    if (!isOpen) return;
+    const onResize = () => setIsOpen(false);
+    const onScroll = (e: Event) => {
+      if (optionsRef.current && optionsRef.current.contains(e.target as Node)) return;
+      setIsOpen(false);
+    };
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', onScroll, true);
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onScroll, true);
+    };
+  }, [isOpen]);
+
   // Handle keyboard navigation
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (!isOpen) {
         if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
           event.preventDefault();
+          updateDropdownPosition();
           setIsOpen(true);
           setHighlightedIndex(0);
         }
@@ -184,6 +220,32 @@ export function Select({
     }
   }, [isOpen, highlightedIndex, options, setValue]);
 
+  const dropdown = (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          key="dropdown"
+          ref={optionsRef}
+          variants={dropdownVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          style={dropdownStyle}
+          className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg shadow-gray-200/50"
+        >
+          <div className="max-h-60 overflow-y-auto p-1.5">
+            {React.Children.map(children, (child, index) => {
+              if (React.isValidElement(child) && child.type === SelectOption) {
+                return React.cloneElement(child, { _index: index } as any);
+              }
+              return child;
+            })}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <SelectContext.Provider
       value={{ value, setValue, isOpen, setIsOpen, highlightedIndex, setHighlightedIndex }}
@@ -191,8 +253,13 @@ export function Select({
       <div ref={selectRef} className={`relative ${className}`}>
         {/* Trigger button */}
         <motion.button
+          ref={triggerRef}
           type="button"
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={() => {
+            if (disabled) return;
+            if (!isOpen) updateDropdownPosition();
+            setIsOpen(!isOpen);
+          }}
           disabled={disabled}
           className={`flex w-full items-center justify-between gap-2 rounded-xl border px-4 py-2.5
                      text-left text-sm transition-all
@@ -204,7 +271,7 @@ export function Select({
                      focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20`}
           whileTap={{ scale: disabled ? 1 : 0.99 }}
         >
-          <span className={`flex items-center gap-2 ${!selectedOption && !value ? 'text-gray-400' : 'text-[#1A1F36]'}`}>
+          <span className={`flex items-center gap-2 ${!selectedOption ? 'text-gray-400' : 'text-[#1A1F36]'}`}>
             {selectedOption ? (
               <>
                 {selectedOption.props.colorDot && (
@@ -216,8 +283,6 @@ export function Select({
                 {selectedOption.props.icon}
                 {selectedOption.props.children}
               </>
-            ) : value ? (
-              value
             ) : (
               placeholder
             )}
@@ -230,30 +295,8 @@ export function Select({
           </motion.span>
         </motion.button>
 
-        {/* Dropdown */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              key="dropdown"
-              ref={optionsRef}
-              variants={dropdownVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-100
-                         bg-white shadow-lg shadow-gray-200/50"
-            >
-              <div className="max-h-60 overflow-y-auto p-1.5">
-                {React.Children.map(children, (child, index) => {
-                  if (React.isValidElement(child) && child.type === SelectOption) {
-                    return React.cloneElement(child, { _index: index } as any);
-                  }
-                  return child;
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Dropdown rendered via portal to escape overflow clipping */}
+        {typeof document !== 'undefined' && createPortal(dropdown, document.body)}
       </div>
     </SelectContext.Provider>
   );

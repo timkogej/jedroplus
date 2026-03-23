@@ -244,18 +244,16 @@ function AppointmentCard({
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className="group mb-0.5 cursor-pointer truncate rounded px-1.5 py-0.5 text-[10px] font-medium
-                   transition-all hover:shadow-sm relative overflow-hidden"
+        className="group mb-0.5 cursor-pointer rounded px-1.5 py-0.5 text-[10px] font-medium
+                   transition-all hover:shadow-sm relative overflow-hidden flex items-center"
         style={{ background: serviceGradient, color: '#FFFFFF', ...style }}
       >
-        {timeOnly ? (
-          <span className="font-semibold">{formatTime(appointment.cas_zacetek)}</span>
-        ) : (
-          <>
-            <span className="mr-1 opacity-80">{formatTime(appointment.cas_zacetek)}</span>
-            <span className="font-semibold">{appointment.stranka_ime}</span>
-          </>
-        )}
+        <SmartClientName
+          fullName={appointment.stranka_ime}
+          priimek={appointment.stranka_priimek}
+          fontSize="10px"
+          fontWeight={600}
+        />
         {isNoShow && (
           <div
             className="absolute inset-0 pointer-events-none rounded"

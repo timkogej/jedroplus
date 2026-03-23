@@ -15,20 +15,16 @@ import {
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { BookingSettingsModal } from '@/components/booking/BookingSettingsModal';
-import {
-  Design1Preview,
-  Design2Preview,
-  Design3Preview,
-  Design4Preview,
-  Design5Preview,
-} from '@/components/reservations/BookingDesignPreviews';
 
 interface ReservationSettings {
   timeSlotLength: number;
   sendClientConfirmation: boolean;
+  clientConfirmationChannel: string;
   sendOnlineConfirmation: boolean;
+  onlineConfirmationChannel: string;
   primaryColor: string;
   secondaryColor: string;
   bgFromColor: string;
@@ -98,11 +94,15 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 export default function RezervacijePage() {
   const router = useRouter();
   const { companyId, loading: companyLoading } = useCompany();
+  const { role, permissions } = useRolePermissions();
+  const canManageSettings = role !== 'staff' || (permissions?.can_manage_rezervacije ?? true);
 
   const [settings, setSettings] = useState<ReservationSettings>({
     timeSlotLength: 30,
     sendClientConfirmation: false,
+    clientConfirmationChannel: 'email',
     sendOnlineConfirmation: false,
+    onlineConfirmationChannel: 'email',
     primaryColor: '#8B5CF6',
     secondaryColor: '#06B6D4',
     bgFromColor: '#8B5CF6',
@@ -133,8 +133,16 @@ export default function RezervacijePage() {
 
       // Extract settings from the row
       const timeSlotValue = podatkiRow?.['koledar_ure'] || podatkiRow?.['Koledar_ure'] || 30;
-      const sendConfirmation = podatkiRow?.['Potrdilo ob rezervaciji'] === 'yes' || podatkiRow?.['potrdilo_ob_rezervaciji'] === 'yes';
-      const sendOnlineConfirmation = podatkiRow?.['Potrdilo online rez'] === 'yes' || podatkiRow?.['potrdilo_online_rez'] === 'yes';
+
+      // Client confirmation: check "Potrdilo po rezervaciji" column, handle true/false/yes/no
+      const potrdiloPodatkiRaw = podatkiRow?.['Potrdilo po rezervaciji'] ?? podatkiRow?.['potrdilo_po_rezervaciji'] ?? podatkiRow?.['Potrdilo ob rezervaciji'] ?? podatkiRow?.['potrdilo_ob_rezervaciji'];
+      const sendConfirmation = potrdiloPodatkiRaw === 'true' || potrdiloPodatkiRaw === 'yes' || potrdiloPodatkiRaw === true;
+      const clientConfirmationChannel = (podatkiRow?.['potrdilo_channel'] || 'email') as string;
+
+      // Online confirmation: check "Potrdilo online termina" column
+      const potrdiloPodatkiOnlineRaw = podatkiRow?.['Potrdilo online termina'] ?? podatkiRow?.['potrdilo_online_termina'] ?? podatkiRow?.['Potrdilo online rez'] ?? podatkiRow?.['potrdilo_online_rez'];
+      const sendOnlineConfirmation = potrdiloPodatkiOnlineRaw === 'true' || potrdiloPodatkiOnlineRaw === 'yes' || potrdiloPodatkiOnlineRaw === true;
+      const onlineConfirmationChannel = (podatkiRow?.['potrdilo_online_channel'] || 'email') as string;
       const primaryColor = (podatkiRow?.['Booking_primary'] || podatkiRow?.['booking_primary'] || '#8B5CF6') as string;
       const secondaryColor = (podatkiRow?.['Booking_secondary'] || podatkiRow?.['booking_secondary'] || '#06B6D4') as string;
       const bgFromColor = (podatkiRow?.['booking_bg_from'] || podatkiRow?.['Booking_bg_from'] || primaryColor) as string;
@@ -145,7 +153,9 @@ export default function RezervacijePage() {
       setSettings({
         timeSlotLength: typeof timeSlotValue === 'number' ? timeSlotValue : parseInt(String(timeSlotValue), 10) || 30,
         sendClientConfirmation: sendConfirmation,
+        clientConfirmationChannel,
         sendOnlineConfirmation: sendOnlineConfirmation,
+        onlineConfirmationChannel,
         primaryColor: primaryColor,
         secondaryColor: secondaryColor,
         bgFromColor: bgFromColor,
@@ -215,15 +225,17 @@ export default function RezervacijePage() {
             </div>
 
             {/* Settings button - icon only */}
-            <motion.button
-              onClick={() => setShowSettingsModal(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-              title="Nastavitve"
-            >
-              <Gear size={20} weight="bold" className="text-gray-900" />
-            </motion.button>
+            {canManageSettings && (
+              <motion.button
+                onClick={() => setShowSettingsModal(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                title="Nastavitve"
+              >
+                <Gear size={20} weight="bold" className="text-gray-900" />
+              </motion.button>
+            )}
           </motion.div>
 
           {/* Monthly designs announcement banner */}
@@ -275,10 +287,12 @@ export default function RezervacijePage() {
                           key={design.id}
                           className="w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-md transition-all"
                         >
-                          <div className="rounded-lg mb-3 overflow-hidden" style={{ height: '160px' }}>
-                            {design.id === 1 && <Design1Preview />}
-                            {design.id === 2 && <Design2Preview />}
-                            {design.id === 3 && <Design3Preview />}
+                          {/* Image placeholder */}
+                          <div className="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center mb-3 gap-1" style={{ height: '160px' }}>
+                            <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9H6" />
+                            </svg>
+                            <span className="text-xs text-gray-400">Slika</span>
                           </div>
                           <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
                           <p className="text-xs text-center text-gray-500 mt-0.5">{design.subtitle}</p>
@@ -366,9 +380,12 @@ export default function RezervacijePage() {
                           className="w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-violet-200 hover:shadow-md transition-all"
                           style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.03), rgba(6,182,212,0.03))' }}
                         >
-                          <div className="rounded-lg mb-3 overflow-hidden" style={{ height: '160px' }}>
-                            {design.id === 4 && <Design4Preview />}
-                            {design.id === 5 && <Design5Preview />}
+                          {/* Image placeholder */}
+                          <div className="rounded-lg border-2 border-dashed border-violet-200 bg-violet-50/30 flex flex-col items-center justify-center mb-3 gap-1" style={{ height: '160px' }}>
+                            <svg className="w-8 h-8 text-violet-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9H6" />
+                            </svg>
+                            <span className="text-xs text-violet-300">Slika</span>
                           </div>
                           <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
                           <p className="text-xs text-center text-gray-500 mt-0.5">{design.subtitle}</p>
@@ -525,6 +542,11 @@ export default function RezervacijePage() {
                       <span className="text-sm font-medium text-gray-700">Potrdilo stranki</span>
                     </div>
                     <div className="flex items-center gap-2">
+                      {settings.sendClientConfirmation && (
+                        <span className="text-xs font-medium text-gray-500 uppercase">
+                          {settings.clientConfirmationChannel === 'sms' ? 'SMS' : 'Email'}
+                        </span>
+                      )}
                       <span className={cn("text-sm font-semibold", settings.sendClientConfirmation ? "text-green-600" : "text-gray-400")}>
                         {settings.sendClientConfirmation ? 'Da' : 'Ne'}
                       </span>
@@ -539,6 +561,11 @@ export default function RezervacijePage() {
                       <span className="text-sm font-medium text-gray-700">Potrdilo po spletni rezervaciji</span>
                     </div>
                     <div className="flex items-center gap-2">
+                      {settings.sendOnlineConfirmation && (
+                        <span className="text-xs font-medium text-gray-500 uppercase">
+                          {settings.onlineConfirmationChannel === 'sms' ? 'SMS' : 'Email'}
+                        </span>
+                      )}
                       <span className={cn("text-sm font-semibold", settings.sendOnlineConfirmation ? "text-green-600" : "text-gray-400")}>
                         {settings.sendOnlineConfirmation ? 'Da' : 'Ne'}
                       </span>

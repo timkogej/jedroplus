@@ -26,6 +26,7 @@ import {
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { supabaseReadOnly as supabase } from '@/src/lib/supabaseReadOnly';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { ChatbotSettingsModal } from '@/components/chatbot/ChatbotSettingsModal';
@@ -135,18 +136,20 @@ function ConfigSection({
         <div className="mt-0.5 flex-shrink-0 text-gray-900">{icon}</div>
         <div className="flex-1 min-w-0">
           <div className="text-base font-semibold text-gray-900">{label}</div>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: '#9CA3AF',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginTop: 2,
-            }}
-          >
-            {sublabel}
-          </div>
+          {sublabel && (
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: '#9CA3AF',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginTop: 2,
+              }}
+            >
+              {sublabel}
+            </div>
+          )}
           <div className="text-sm text-gray-700 mt-1.5 truncate">{value}</div>
         </div>
       </div>
@@ -180,18 +183,20 @@ function ConfigSectionLarge({
         <div className="mt-0.5 flex-shrink-0 text-gray-900">{icon}</div>
         <div className="flex-1 min-w-0">
           <div className="text-base font-semibold text-gray-900">{label}</div>
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 500,
-              color: '#9CA3AF',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginTop: 2,
-            }}
-          >
-            {sublabel}
-          </div>
+          {sublabel && (
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                color: '#9CA3AF',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginTop: 2,
+              }}
+            >
+              {sublabel}
+            </div>
+          )}
           <div className="text-sm text-gray-600 mt-1.5 line-clamp-3">{value}</div>
         </div>
       </div>
@@ -573,6 +578,8 @@ function MiniAsistentChat({ companyId }: { companyId: string | null }) {
 
 export default function ChatbotPlusPage() {
   const { companyId, loading: companyLoading } = useCompany();
+  const { role, permissions } = useRolePermissions();
+  const canManageSettings = role !== 'staff' || (permissions?.can_manage_chatbot_plus_settings ?? true);
 
   const [chatbotData, setChatbotData] = useState<ChatbotData>({
     url: '',
@@ -732,22 +739,24 @@ export default function ChatbotPlusPage() {
           >
             <div>
               <h1
-                className="text-3xl font-bold"
+                className="text-5xl font-bold"
                 style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
               >
                 Chatbot+
               </h1>
               <p className="mt-1 text-base text-gray-500">Vaš AI asistent za spletne strani</p>
             </div>
-            <motion.button
-              onClick={() => setShowSettingsModal(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
-              title="Nastavitve"
-            >
-              <Gear size={20} weight="bold" className="text-gray-900" />
-            </motion.button>
+            {canManageSettings && (
+              <motion.button
+                onClick={() => setShowSettingsModal(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
+                title="Nastavitve"
+              >
+                <Gear size={20} weight="bold" className="text-gray-900" />
+              </motion.button>
+            )}
           </motion.div>
 
           {/* ── Two-column layout ────────────────────────────────────────────────── */}
@@ -830,19 +839,19 @@ export default function ChatbotPlusPage() {
                   <div className="space-y-5">
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.2 }} className="flex justify-start">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: botBubbleGradient, borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: design.textColor, fontFamily: design.fontFamily, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>{botGreeting}</div>
+                        <div style={{ background: botBubbleGradient, borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: design.textColor, fontFamily: 'inherit', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>{botGreeting}</div>
                         <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingLeft: 4 }}>17:03</div>
                       </div>
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.4 }} className="flex justify-end">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: userMsgGradient, borderRadius: '20px', borderBottomRightRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: design.textColor, fontFamily: design.fontFamily }}>Rezerviraj termin</div>
+                        <div style={{ background: userMsgGradient, borderRadius: '20px', borderBottomRightRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: '#ffffff', fontFamily: 'inherit' }}>Rezerviraj termin</div>
                         <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingRight: 4, textAlign: 'right' }}>17:03</div>
                       </div>
                     </motion.div>
                     <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 300, delay: 0.6 }} className="flex justify-start">
                       <div style={{ maxWidth: '85%' }}>
-                        <div style={{ background: botBubbleGradient, borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: design.textColor, fontFamily: design.fontFamily, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>Super, vesel me, da želiš rezervirati termin! 😊 Katero storitev bi želel naročiti?</div>
+                        <div style={{ background: botBubbleGradient, borderRadius: '20px', borderBottomLeftRadius: 6, padding: '14px 18px', fontSize: 15, lineHeight: 1.55, color: design.textColor, fontFamily: 'inherit', boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>Super, vesel me, da želiš rezervirati termin! 😊 Katero storitev bi želel naročiti?</div>
                         <div style={{ fontSize: 11, color: design.textColor, opacity: 0.5, marginTop: 6, paddingLeft: 4 }}>17:03</div>
                       </div>
                     </motion.div>
@@ -850,7 +859,7 @@ export default function ChatbotPlusPage() {
                   {/* Action chips: white bg, dark text, subtle border */}
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85 }} className="flex flex-wrap gap-2 mt-5">
                     {['Rezerviraj termin', 'Kontaktni podatki', 'Delovni čas', 'Cenik storitev'].map((chip, idx) => (
-                      <div key={idx} style={{ padding: '9px 16px', borderRadius: 18, border: '1px solid rgba(0,0,0,0.12)', background: 'rgba(255,255,255,0.95)', fontSize: 13, fontWeight: 500, color: '#1f2937', cursor: 'default' }}>{chip}</div>
+                      <div key={idx} style={{ padding: '9px 16px', borderRadius: 18, border: '1.5px solid rgba(0,0,0,0.18)', background: 'transparent', fontSize: 13, fontWeight: 500, color: '#1f2937', cursor: 'default' }}>{chip}</div>
                     ))}
                   </motion.div>
                 </div>
@@ -936,21 +945,23 @@ export default function ChatbotPlusPage() {
               >
                 <h2 className="text-lg font-semibold text-gray-900 mb-5">Nastavitve chatbota</h2>
                 <div className="space-y-3">
-                  <ConfigSection icon={<User size={20} weight="regular" />} label="Osebnost" sublabel="IME" value={chatbotData.name || '—'} />
-                  <ConfigSection icon={<Globe size={20} weight="regular" />} label="Jezik" sublabel="AKTIVNI JEZIK" value={LANGUAGE_MAP[chatbotData.language] || chatbotData.language || '—'} />
-                  <ConfigSectionLarge icon={<ChatText size={20} weight="regular" />} label="Navodila" sublabel="NAVODILA ZA CHATBOT" value={chatbotData.instructions || 'Ni nastavljeno'} />
-                  <ConfigSection icon={<ChatCircle size={20} weight="regular" />} label="Ton" sublabel="TON KOMUNIKACIJE" value={chatbotData.tone || '—'} />
+                  <ConfigSection icon={<User size={20} weight="regular" />} label="Ime" sublabel="" value={chatbotData.name || '—'} />
+                  <ConfigSection icon={<Globe size={20} weight="regular" />} label="Jezik" sublabel="" value={LANGUAGE_MAP[chatbotData.language] || chatbotData.language || '—'} />
+                  <ConfigSectionLarge icon={<ChatText size={20} weight="regular" />} label="Navodila" sublabel="" value={chatbotData.instructions || 'Ni nastavljeno'} />
+                  <ConfigSection icon={<ChatCircle size={20} weight="regular" />} label="Ton" sublabel="" value={chatbotData.tone || '—'} />
                 </div>
-                <motion.button
-                  onClick={() => setShowSettingsModal(true)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full mt-5 flex items-center justify-center gap-2 h-11 rounded-xl text-white font-medium text-sm"
-                  style={{ background: GRADIENT, boxShadow: '0 4px 16px rgba(139,92,246,0.3)' }}
-                >
-                  <Gear size={18} weight="bold" />
-                  Uredi nastavitve chatbota
-                </motion.button>
+                {canManageSettings && (
+                  <motion.button
+                    onClick={() => setShowSettingsModal(true)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full mt-5 flex items-center justify-center gap-2 h-11 rounded-xl text-white font-medium text-sm"
+                    style={{ background: GRADIENT, boxShadow: '0 4px 16px rgba(139,92,246,0.3)' }}
+                  >
+                    <Gear size={18} weight="bold" />
+                    Uredi nastavitve chatbota
+                  </motion.button>
+                )}
               </div>
 
               {/* Dizajn chatbota card */}
@@ -1008,7 +1019,7 @@ export default function ChatbotPlusPage() {
                   <div className="flex items-center gap-3">
                     <TextT size={16} weight="regular" className="text-violet-400 flex-shrink-0" />
                     <span style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', minWidth: 80 }}>Pisava</span>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#1F2937', fontFamily: design.fontFamily }}>{design.fontFamily}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#1F2937', fontFamily: 'system-ui, sans-serif' }}>System UI</span>
                   </div>
 
                   {/* Border radius */}

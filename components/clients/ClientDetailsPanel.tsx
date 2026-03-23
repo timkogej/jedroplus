@@ -167,18 +167,17 @@ function ClientDetailsPanel({
   // Calculate stats
   const stats = clientData ? {
     total: clientData.appointments.length,
-    completed: clientData.appointments.filter(a =>
-      a.status.toLowerCase().includes('complet') ||
-      a.status.toLowerCase().includes('zakljuc') ||
-      a.status.toLowerCase().includes('done')
+    noShow: clientData.appointments.filter(a =>
+      a.status.toLowerCase() === 'no_show' ||
+      a.status.toLowerCase().includes('no_show') ||
+      a.status.toLowerCase().includes('ni_prisel') ||
+      a.status.toLowerCase() === 'ni prišel'
     ).length,
     cancelled: clientData.appointments.filter(a =>
       a.status.toLowerCase().includes('cancel') ||
-      a.status.toLowerCase().includes('odpoved') ||
-      a.status.toLowerCase().includes('no_show') ||
-      a.status.toLowerCase().includes('ni_prisel')
+      a.status.toLowerCase().includes('odpoved')
     ).length,
-  } : { total: 0, completed: 0, cancelled: 0 };
+  } : { total: 0, noShow: 0, cancelled: 0 };
 
   // Animation variants
   const backdropVariants = {
@@ -220,7 +219,7 @@ function ClientDetailsPanel({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header - NO INITIALS, JUST NAME */}
-            <div className="sticky top-0 z-10 bg-gradient-to-r from-violet-500 to-cyan-500 p-8 rounded-bl-3xl rounded-br-3xl">
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-violet-500 to-cyan-500 p-8">
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-3xl font-bold text-white mb-2">
@@ -405,10 +404,10 @@ function ClientDetailsPanel({
                     <p className="text-2xl font-bold text-[#1A1F36]">{stats.total}</p>
                     <p className="text-xs font-medium text-[#1A1F36]">Skupaj</p>
                   </div>
-                  {/* Zaključenih */}
+                  {/* Ni prišel */}
                   <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
-                    <p className="text-2xl font-bold text-[#1A1F36]">{stats.completed}</p>
-                    <p className="text-xs font-medium text-[#1A1F36]">Zaključenih</p>
+                    <p className="text-2xl font-bold text-[#1A1F36]">{stats.noShow}</p>
+                    <p className="text-xs font-medium text-[#1A1F36]">Ni prišel</p>
                   </div>
                   {/* Odpovedanih */}
                   <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
@@ -467,10 +466,11 @@ function ClientDetailsPanel({
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {clientData?.appointments.slice(0, 10).map((apt, index) => {
+                    {[...clientData?.appointments ?? []].sort((a, b) => new Date(b.datum).getTime() - new Date(a.datum).getTime()).slice(0, 10).map((apt, index) => {
                       const statusConfig = getStatusConfig(apt.status);
                       const appointmentNotes = (apt.opombe ?? '').toString().trim();
                       const appointmentInternalNotes = (apt.interne_opombe ?? '').toString().trim();
+                      const appointmentCompletionNotes = (apt.opombe_po_zakljucku ?? '').toString().trim();
                       const finalPriceValue = apt.koncna_cena;
                       const hasFinalPrice = finalPriceValue !== null && finalPriceValue !== undefined
                         && String(finalPriceValue).trim() !== '';
@@ -524,7 +524,7 @@ function ClientDetailsPanel({
                               {statusConfig.label}
                             </span>
                           </div>
-                          {(appointmentNotes || appointmentInternalNotes || hasFinalPrice) && (
+                          {(appointmentNotes || appointmentInternalNotes || appointmentCompletionNotes || hasFinalPrice) && (
                             <div className="mt-3 space-y-2">
                               {appointmentNotes && (
                                 <div className="rounded-lg bg-gray-50 p-3">
@@ -557,6 +557,17 @@ function ClientDetailsPanel({
                                   </p>
                                 </div>
                               )}
+                              {appointmentCompletionNotes && (
+                                <div className="rounded-lg bg-blue-50 p-3">
+                                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-blue-600">
+                                    <CheckCircle className="h-3 w-3" weight="fill" />
+                                    Opombe po zaključku
+                                  </div>
+                                  <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">
+                                    {appointmentCompletionNotes}
+                                  </p>
+                                </div>
+                              )}
                               {hasFinalPrice && (
                                 <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
                                   <span className="font-semibold uppercase tracking-wider">Končna cena</span>
@@ -580,7 +591,7 @@ function ClientDetailsPanel({
                     })}
                     {clientData && clientData.appointments.length > 10 && (
                       <p className="text-center text-xs text-gray-500">
-                        Prikazanih je prvih 10 terminov od {clientData.appointments.length}
+                        Prikazanih je zadnjih 10 terminov od {clientData.appointments.length}
                       </p>
                     )}
                   </div>

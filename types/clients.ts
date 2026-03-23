@@ -46,6 +46,7 @@ export interface ClientAppointment {
   interne_opombe?: string | null;
   koncna_cena?: string | null;
   valuta?: string | null;
+  opombe_po_zakljucku?: string | null;
 }
 
 // Filter and sort types

@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Warning, Trash, X, SpinnerGap, CalendarBlank, Clock, User, Briefcase } from '@phosphor-icons/react';
+import { Warning, Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle } from '@phosphor-icons/react';
 import type { AppointmentWithDetails } from '@/types/appointments';
 
 interface DeleteConfirmationProps {
@@ -80,9 +80,7 @@ function DeleteConfirmation({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 p-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-red-100 to-rose-100">
-                  <Warning className="h-6 w-6 text-red-600" weight="fill" />
-                </div>
+                <Warning className="h-6 w-6 text-red-600 flex-shrink-0" weight="regular" />
                 <div>
                   <h2 className="text-lg font-semibold text-[#1A1F36]">
                     {title}
@@ -112,9 +110,6 @@ function DeleteConfirmation({
                 <div className="rounded-xl bg-gray-50 p-4 space-y-3">
                   {/* Client */}
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 text-white">
-                      <User className="h-5 w-5" weight="bold" />
-                    </div>
                     <div>
                       <p className="font-semibold text-[#1A1F36]">
                         {appointment.stranka_ime || 'Neznana stranka'}
@@ -139,17 +134,14 @@ function DeleteConfirmation({
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-gray-400" weight="regular" />
                       <span className="text-sm text-gray-700">
-                        {appointment.cas_zacetek || '-'}
+                        {appointment.cas_zacetek ? appointment.cas_zacetek.substring(0, 5) : '-'}
                       </span>
                     </div>
 
                     {/* Service */}
                     {appointment.storitev?.naziv && (
                       <div className="flex items-center gap-2 col-span-2">
-                        <div
-                          className="h-3 w-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: appointment.storitev.barva || '#6366F1' }}
-                        />
+                        <Briefcase className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                         <span className="text-sm text-gray-700">
                           {appointment.storitev.naziv}
                         </span>
@@ -159,7 +151,7 @@ function DeleteConfirmation({
                     {/* Employee */}
                     {appointment.zaposleni && (
                       <div className="flex items-center gap-2 col-span-2">
-                        <Briefcase className="h-4 w-4 text-gray-400" weight="regular" />
+                        <UserCircle className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                         <span className="text-sm text-gray-700">
                           {appointment.zaposleni.ime} {appointment.zaposleni.priimek}
                         </span>

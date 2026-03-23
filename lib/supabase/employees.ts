@@ -138,6 +138,7 @@ function parseEmployee(row: Record<string, unknown>): Employee | null {
     urnik, // Schedule (inherits from company if null)
     storitve, // Services this employee can perform
     ali_ima_urnik_podjetja: aliImaUrnikPodjetja, // Whether employee uses company schedule
+    auth_user_id: (row['auth_user_id'] as string | null | undefined) ?? null,
   };
 }
 

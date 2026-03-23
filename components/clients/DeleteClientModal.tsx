@@ -6,6 +6,7 @@ import { Warning, Trash, X, SpinnerGap, CalendarBlank } from '@phosphor-icons/re
 import type { Client } from '@/types/clients';
 import ClientInitialsBadge from './ClientInitialsBadge';
 
+
 interface DeleteClientModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -64,9 +65,7 @@ function DeleteClientModal({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 p-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-red-100 to-rose-100">
-                  <Warning className="h-6 w-6 text-red-600" weight="fill" />
-                </div>
+                <Warning className="h-6 w-6 text-red-600 flex-shrink-0" weight="regular" />
                 <div>
                   <h2 className="text-lg font-semibold text-[#1A1F36]">
                     Brisanje stranke
@@ -97,6 +96,7 @@ function DeleteClientModal({
                   firstName={client.ime}
                   lastName={client.priimek}
                   size="lg"
+                  variant="text"
                 />
                 <div>
                   <p className="font-semibold text-[#1A1F36]">

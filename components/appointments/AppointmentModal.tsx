@@ -2,7 +2,7 @@
 
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, CalendarBlank, LockSimple, Plus, Minus } from '@phosphor-icons/react';
+import { X, Clock, CalendarBlank, LockSimple, Plus, Minus, Envelope, Phone } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { ScrollTimePicker } from '@/components/ui/ScrollTimePicker';
 import ClientSearch from './ClientSearch';
@@ -35,6 +35,7 @@ interface AppointmentModalProps {
   isSaving?: boolean;
   initialDate?: string;
   initialStartTime?: string;
+  initialEmployeeId?: string;
 }
 
 export interface AppointmentFormData {
@@ -153,6 +154,7 @@ function AppointmentModal({
   isSaving = false,
   initialDate,
   initialStartTime,
+  initialEmployeeId,
 }: AppointmentModalProps) {
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
@@ -280,8 +282,8 @@ function AppointmentModal({
     } else if (mode === 'create') {
       // Set defaults for new appointment
       const now = new Date();
-      // Auto-select employee when only one exists
-      const autoEmployee = employees.length === 1 ? employees[0].id : '';
+      // Auto-select employee: prefer initialEmployeeId (staff pre-fill), then auto-select when only one exists
+      const autoEmployee = initialEmployeeId || (employees.length === 1 ? employees[0].id : '');
       setFormData({
         datum: initialDate || now.toISOString().split('T')[0],
         cas_zacetek: initialStartTime || '09:00',
@@ -289,7 +291,7 @@ function AppointmentModal({
         stranka_ime: '',
         stranka_email: '',
         stranka_telefon: '',
-        storitev_id: services[0]?.id || '',
+        storitev_id: '',
         storitev_id_2: '',
         storitev_id_3: '',
         stevilo_storitev: 1,
@@ -317,7 +319,7 @@ function AppointmentModal({
       // In create mode, hide internal notes by default
       setShowInternalNotes(false);
     }
-  }, [appointment, mode, services, employees, initialDate, initialStartTime]);
+  }, [appointment, mode, services, employees, initialDate, initialStartTime, initialEmployeeId]);
 
   // Track if end time was manually set by user
   const [endTimeManuallySet, setEndTimeManuallySet] = useState(false);
@@ -784,6 +786,59 @@ function AppointmentModal({
 
   if (!isOpen) return null;
 
+  // If in create/edit mode and no services or no employees — show navigation prompt
+  if (mode !== 'view' && (services.length === 0 || employees.length === 0)) {
+    return (
+      <AnimatePresence>
+        <div key="appointment-modal-empty" className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl p-6 text-center space-y-4"
+          >
+            <p className="text-sm font-medium text-[#1A1F36]">
+              Za dodajanje termina potrebujete vsaj eno storitev in enega zaposlenega.
+            </p>
+            <div className="flex flex-col gap-2">
+              {services.length === 0 && (
+                <a
+                  href="/services"
+                  className="block w-full rounded-xl bg-[#1A1F36] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#2D3461] transition-colors"
+                >
+                  Dodaj storitev
+                </a>
+              )}
+              {employees.length === 0 && (
+                <a
+                  href="/staff"
+                  className="block w-full rounded-xl bg-[#1A1F36] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#2D3461] transition-colors"
+                >
+                  Dodaj zaposlenega
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+              >
+                Zapri
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </AnimatePresence>
+    );
+  }
+
   const isViewMode = mode === 'view';
   const title =
     mode === 'create'
@@ -844,16 +899,43 @@ function AppointmentModal({
                 Stranka
               </label>
               {isViewMode ? (
-                <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-                  <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                    {formData.stranka_ime.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
-                  </span>
-                  <div>
+                <div className="space-y-2">
+                  {/* Client name */}
+                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+                    <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
+                      {(() => { const p = (formData.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
+                    </span>
                     <p className="font-medium text-[#1A1F36]">{formData.stranka_ime || '-'}</p>
-                    {formData.stranka_email && (
-                      <p className="text-xs text-gray-500">{formData.stranka_email}</p>
-                    )}
                   </div>
+                  {/* Email and phone boxes */}
+                  {(formData.stranka_email || formData.stranka_telefon) && (
+                    <div className="grid grid-cols-2 gap-2">
+                      {formData.stranka_email && (
+                        <a
+                          href={`mailto:${formData.stranka_email}`}
+                          className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-violet-300 hover:shadow-sm transition-all"
+                        >
+                          <Envelope className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                          <div className="min-w-0">
+                            <div className="text-[10px] text-gray-500">Email</div>
+                            <div className="text-xs font-medium text-[#1A1F36] truncate">{formData.stranka_email}</div>
+                          </div>
+                        </a>
+                      )}
+                      {formData.stranka_telefon && (
+                        <a
+                          href={`tel:${formData.stranka_telefon}`}
+                          className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-green-300 hover:shadow-sm transition-all"
+                        >
+                          <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                          <div className="min-w-0">
+                            <div className="text-[10px] text-gray-500">Telefon</div>
+                            <div className="text-xs font-medium text-[#1A1F36] truncate">{formData.stranka_telefon}</div>
+                          </div>
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>

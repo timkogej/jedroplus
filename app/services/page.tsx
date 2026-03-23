@@ -22,6 +22,9 @@ import {
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
+import { useRolePermissions } from '@/app/role-permission-context';
+import DisabledActionModal from '@/components/DisabledActionModal';
+import { supabase as supabaseClient } from '@/lib/supabaseClient';
 import type { Service, ServiceFormData, ServiceStats } from '@/types/services';
 import {
   fetchServicesWithCount,
@@ -193,6 +196,14 @@ export default function StoritvePage() {
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
+  const { role, personId: rolePersonId, permissions } = useRolePermissions();
+  const [showDisabledCreateModal, setShowDisabledCreateModal] = useState(false);
+  const [staffAllowedServiceIds, setStaffAllowedServiceIds] = useState<string[] | null>(null);
+
+  const canViewAllServices  = role !== 'staff' || (permissions?.can_view_services ?? true);
+  const canEditService      = role !== 'staff' || (permissions?.can_edit_services ?? true);
+  const canDeleteService    = role !== 'staff' || (permissions?.can_delete_services ?? true);
+  const canCreateService    = role !== 'staff' || (permissions?.can_create_services ?? true);
 
   // Data states
   const [services, setServices] = useState<Service[]>([]);
@@ -249,6 +260,29 @@ export default function StoritvePage() {
     }
   }, [companyId, companyLoading, router]);
 
+  // Fetch staff's allowed service IDs when can_view_services = false
+  useEffect(() => {
+    if (canViewAllServices || !rolePersonId) {
+      setStaffAllowedServiceIds(null);
+      return;
+    }
+    supabaseClient
+      .from('Osebje')
+      .select('storitve')
+      .eq('id', rolePersonId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data?.storitve) {
+          setStaffAllowedServiceIds([]);
+          return;
+        }
+        const ids: string[] = Array.isArray(data.storitve)
+          ? data.storitve.map(String)
+          : [];
+        setStaffAllowedServiceIds(ids);
+      });
+  }, [canViewAllServices, rolePersonId]);
+
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -293,6 +327,11 @@ export default function StoritvePage() {
   const filteredServices = useMemo(() => {
     let result = services;
 
+    // Staff view restriction: only show services the employee is assigned to
+    if (staffAllowedServiceIds !== null) {
+      result = result.filter((s) => staffAllowedServiceIds.includes(String(s.id)));
+    }
+
     // Filter by active status
     if (!showInactive) {
       result = result.filter((s) => s.aktivna);
@@ -314,7 +353,7 @@ export default function StoritvePage() {
     }
 
     return result;
-  }, [services, debouncedSearch, selectedCategory, showInactive]);
+  }, [services, debouncedSearch, selectedCategory, showInactive, staffAllowedServiceIds]);
 
   // Show toast
   const showToast = useCallback((message: string, type: 'success' | 'error') => {
@@ -607,7 +646,7 @@ export default function StoritvePage() {
             </div>
             <motion.button
               type="button"
-              onClick={openCreateModal}
+              onClick={canCreateService ? openCreateModal : () => setShowDisabledCreateModal(true)}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               whileHover={{ scale: 1.02 }}
@@ -766,6 +805,8 @@ export default function StoritvePage() {
               onEdit={openEditModal}
               onDelete={openDeleteModal}
               onToggleActive={handleToggleActive}
+              canEdit={canEditService}
+              canDelete={canDeleteService}
             />
           )}
         </div>
@@ -803,6 +844,12 @@ export default function StoritvePage() {
           />
         )}
       </AnimatePresence>
+
+      <DisabledActionModal
+        isOpen={showDisabledCreateModal}
+        onClose={() => setShowDisabledCreateModal(false)}
+        message="Lastnik podjetja je onemogočil dodajanje novih storitev. Obrnite se nanj, da vam to omogoči."
+      />
     </ProtectedLayout>
   );
 }

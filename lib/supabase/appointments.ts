@@ -295,10 +295,10 @@ export async function fetchAppointmentsForMonth(
 
       // Get additional client fields
       const clientEmail = String(
-        pickFirst(row, ['client_email', 'stranka_email', 'Email stranke', 'email']) ?? ''
+        pickFirst(row, ['Email', 'client_email', 'stranka_email', 'Email stranke', 'email']) ?? ''
       );
       const clientPhone = String(
-        pickFirst(row, ['Telefonska številka', 'client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
+        pickFirst(row, ['Telefon', 'Telefonska številka', 'client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
       );
       const notes = String(
         pickFirst(row, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
@@ -526,10 +526,10 @@ export async function fetchAppointmentById(
 
     // Get additional client fields
     const clientEmail = String(
-      pickFirst(booking, ['client_email', 'stranka_email', 'Email stranke', 'email']) ?? ''
+      pickFirst(booking, ['Email', 'client_email', 'stranka_email', 'Email stranke', 'email']) ?? ''
     );
     const clientPhone = String(
-      pickFirst(booking, ['client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
+      pickFirst(booking, ['Telefon', 'Telefonska številka', 'client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
     );
     const notes = String(
       pickFirst(booking, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
@@ -698,10 +698,10 @@ export async function fetchAllAppointments(
 
       // Get additional client fields
       const clientEmail = String(
-        pickFirst(row, ['client_email', 'stranka_email', 'Email stranke', 'email']) ?? ''
+        pickFirst(row, ['Email', 'client_email', 'stranka_email', 'Email stranke', 'email']) ?? ''
       );
       const clientPhone = String(
-        pickFirst(row, ['Telefonska številka', 'client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
+        pickFirst(row, ['Telefon', 'Telefonska številka', 'client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
       );
       const notes = String(
         pickFirst(row, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
@@ -845,9 +845,9 @@ export async function fetchAbsences(
       const employeeData = employeeId ? staffMap.get(employeeId) : undefined;
 
       // Parse timestamps - handle PostgreSQL format "2026-01-30 10:00:00+00" or "+02"
-      // Step 1: space → T  Step 2: bare ±HH offset → ±HH:00 (JS requires colon)
+      // Strip timezone suffix so JS treats the value as local time (no UTC conversion)
       const normTs = (raw: string) =>
-        raw.replace(' ', 'T').replace(/([+-]\d{2})$/, '$1:00');
+        raw.replace(' ', 'T').replace(/([+-]\d{2}:\d{2}|[+-]\d{2}|Z)$/, '');
       const rawStartAt = row.start_at ? String(row.start_at) : '';
       const rawEndAt = row.end_at ? String(row.end_at) : '';
       const startAt = normTs(rawStartAt);

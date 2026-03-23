@@ -26,6 +26,8 @@ import {
   DotsThreeVertical,
   Envelope,
   Phone,
+  ClockCountdown,
+  User,
 } from "@phosphor-icons/react";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import { useCompany } from "@/app/company-context";
@@ -66,6 +68,8 @@ import { pickFirst } from "@/lib/dashboardHelpers";
 import { getNextClientId } from "@/src/lib/idGenerators";
 import { getCompanyColumnForTable } from "@/lib/companyScope";
 import { TABLES } from "@/lib/data";
+import { useUserPersonId } from "@/hooks/useUserPersonId";
+import { useRolePermissions } from "@/app/role-permission-context";
 
 // ─── Copy button (reused in detail modal) ────────────────────────────────────
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -107,7 +111,7 @@ function AppointmentDetailModal({
   appointment: AppointmentWithDetails;
   services: Storitev[];
   onClose: () => void;
-  onEdit: (appointment: AppointmentWithDetails) => void;
+  onEdit?: (appointment: AppointmentWithDetails) => void;
   onComplete?: (appointment: AppointmentWithDetails) => void;
   onNoShow?: (appointment: AppointmentWithDetails) => void;
   onCancel?: (appointment: AppointmentWithDetails) => void;
@@ -241,44 +245,38 @@ function AppointmentDetailModal({
           {/* Client */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Stranka</label>
-            <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-              <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
-                {appointment.stranka_ime?.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
-              </span>
-              <div className="min-w-0 flex-1">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+                <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
+                  {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
+                </span>
                 <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
-                {appointment.stranka_email && <p className="text-xs text-gray-500 truncate">{appointment.stranka_email}</p>}
-                {appointment.stranka_telefon && <p className="text-xs text-gray-500">{appointment.stranka_telefon}</p>}
               </div>
               {(appointment.stranka_email || appointment.stranka_telefon) && (
-                <div className="flex flex-col gap-1.5 ml-auto flex-shrink-0">
+                <div className="grid grid-cols-2 gap-2">
                   {appointment.stranka_email && (
-                    <div className="flex items-center gap-1">
-                      <CopyButton text={appointment.stranka_email} label="email" />
-                      <motion.a
-                        href={`mailto:${appointment.stranka_email}`}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 p-1.5 text-white"
-                        title="Pošlji email"
-                      >
-                        <Envelope className="h-3.5 w-3.5" weight="bold" />
-                      </motion.a>
-                    </div>
+                    <a
+                      href={`mailto:${appointment.stranka_email}`}
+                      className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-violet-300 hover:shadow-sm transition-all"
+                    >
+                      <Envelope className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                      <div className="min-w-0">
+                        <div className="text-[10px] text-gray-500">Email</div>
+                        <div className="text-xs font-medium text-[#1A1F36] truncate">{appointment.stranka_email}</div>
+                      </div>
+                    </a>
                   )}
                   {appointment.stranka_telefon && (
-                    <div className="flex items-center gap-1">
-                      <CopyButton text={appointment.stranka_telefon} label="telefon" />
-                      <motion.a
-                        href={`tel:${appointment.stranka_telefon}`}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center justify-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 p-1.5 text-white"
-                        title="Pokliči"
-                      >
-                        <Phone className="h-3.5 w-3.5" weight="bold" />
-                      </motion.a>
-                    </div>
+                    <a
+                      href={`tel:${appointment.stranka_telefon}`}
+                      className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-green-300 hover:shadow-sm transition-all"
+                    >
+                      <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                      <div className="min-w-0">
+                        <div className="text-[10px] text-gray-500">Telefon</div>
+                        <div className="text-xs font-medium text-[#1A1F36] truncate">{appointment.stranka_telefon}</div>
+                      </div>
+                    </a>
                   )}
                 </div>
               )}
@@ -431,17 +429,19 @@ function AppointmentDetailModal({
                 <CheckCircle className="h-4.5 w-4.5" weight="regular" />
               </motion.button>
             )}
-            <motion.button
-              type="button"
-              onClick={() => onEdit(appointment)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-              title="Uredi"
-            >
-              <NotePencil className="h-4.5 w-4.5" weight="regular" />
-            </motion.button>
-            <div className="relative">
+            {onEdit && (
+              <motion.button
+                type="button"
+                onClick={() => onEdit(appointment)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                title="Uredi"
+              >
+                <NotePencil className="h-4.5 w-4.5" weight="regular" />
+              </motion.button>
+            )}
+            {(onNoShow || onCancel || onDelete) && <div className="relative">
               <motion.button
                 type="button"
                 onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
@@ -481,18 +481,20 @@ function AppointmentDetailModal({
                         Odpoved
                       </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={() => { onDelete?.(appointment); setActionsMenuOpen(false); }}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
-                    >
-                      <Trash className="h-4 w-4" weight="regular" />
-                      Izbriši
-                    </button>
+                    {onDelete && (
+                      <button
+                        type="button"
+                        onClick={() => { onDelete(appointment); setActionsMenuOpen(false); }}
+                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
+                      >
+                        <Trash className="h-4 w-4" weight="regular" />
+                        Izbriši
+                      </button>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </div>}
           </div>
         </div>
       </motion.div>
@@ -505,6 +507,21 @@ export default function DashboardPage() {
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading, reloadSettings } = useCompany();
   const { user, loading: authLoading } = useAuth();
+  const userPersonId = useUserPersonId(user?.id);
+  const { role, personId: rolePersonId, permissions } = useRolePermissions();
+
+  // RBAC: appointment permissions for staff
+  const canCreateAppointment = role !== 'staff' || (permissions?.can_create_appointments ?? true);
+  const canDeleteAppointment = role !== 'staff' || (permissions?.can_delete_appointments ?? true);
+  const staffEditOwnOnly = role === 'staff' && (
+    (permissions?.can_edit_only_own_appointments === true) ||
+    (permissions?.can_edit_all_appointments === false)
+  );
+  const canEditAppointment = useCallback((apt: AppointmentWithDetails): boolean => {
+    if (role !== 'staff') return true;
+    if (staffEditOwnOnly) return apt.zaposleni_id === rolePersonId;
+    return true;
+  }, [role, staffEditOwnOnly, rolePersonId]);
 
   // Dashboard data
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -541,6 +558,15 @@ export default function DashboardPage() {
   // Action feedback
   const [actionError, setActionError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Next appointment for staff dashboard card - uses dedicated per-person query
+  const nextAppointment = useMemo(() => {
+    if (role !== 'staff' || !dashboardData) return null;
+    const apt = dashboardData.nextPersonAppointment;
+    if (!apt) return null;
+    const today = new Date().toISOString().split('T')[0];
+    return { ...apt, isToday: apt.datum === today };
+  }, [role, dashboardData]);
 
   const actor = user?.email ?? 'unknown';
   const companyPayload = useMemo(
@@ -593,10 +619,12 @@ export default function DashboardPage() {
   // ── Load dashboard data ──────────────────────────────────────────────────
   const loadDashboard = useCallback(async () => {
     if (!companyId) return;
+    // Wait until personId is resolved (undefined = still loading)
+    if (userPersonId === undefined) return;
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDashboardData(companyId);
+      const data = await fetchDashboardData(companyId, userPersonId);
       setDashboardData(data);
     } catch (err) {
       console.error("Error loading dashboard data:", err);
@@ -604,7 +632,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [companyId]);
+  }, [companyId, userPersonId]);
 
   useEffect(() => {
     loadDashboard();
@@ -1021,14 +1049,16 @@ export default function DashboardPage() {
 
               {/* Quick Actions */}
               <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowNewAppointmentModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-medium shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all"
-                >
-                  <Plus size={18} weight="bold" />
-                  <span className="hidden sm:inline">Nov Termin</span>
-                </button>
+                {canCreateAppointment && (
+                  <button
+                    type="button"
+                    onClick={() => setShowNewAppointmentModal(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-medium shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all"
+                  >
+                    <Plus size={18} weight="bold" />
+                    <span className="hidden sm:inline">Nov Termin</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setShowNewClientModal(true)}
@@ -1042,37 +1072,131 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* Metrics Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <MetricCard
-              title="Termini danes"
-              value={dashboardData?.stats.todayAppointments ?? 0}
-              subtitle="Načrtovanih terminov"
-              icon={CalendarCheck}
-              iconColor="black"
-              gradientOutline
-            />
-            <MetricCard
-              title="Aktivni termini"
-              value={dashboardData?.stats.activeAppointments ?? 0}
-              subtitle="Status: načrtovan"
-              icon={Clock}
-              iconColor="darkGray"
-            />
-            <MetricCard
-              title="Nove stranke"
-              value={dashboardData?.stats.newClientsThisMonth ?? 0}
-              subtitle="Ta mesec"
-              icon={UsersThree}
-              iconColor="mediumGray"
-            />
-            <MetricCard
-              title="Prihodki ta mesec"
-              value={`${(dashboardData?.stats.revenueThisMonth ?? 0).toFixed(2)} €`}
-              subtitle="Ta mesec"
-              icon={CurrencyCircleDollar}
-              iconColor="slate"
-            />
-          </div>
+          {role === 'staff' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <MetricCard
+                title="Termini danes"
+                value={dashboardData?.stats.todayAppointments ?? 0}
+                subtitle="Načrtovanih terminov"
+                icon={CalendarCheck}
+                iconColor="black"
+                gradientOutline
+              />
+              <MetricCard
+                title="Aktivni termini"
+                value={dashboardData?.stats.activeAppointments ?? 0}
+                subtitle="Načrtovanih terminov"
+                icon={Clock}
+                iconColor="darkGray"
+              />
+              {/* Naslednji termin — spans 2 columns */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="sm:col-span-2 rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden"
+              >
+                <div className="h-full flex flex-col p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <ClockCountdown className="w-5 h-5 text-black flex-shrink-0" weight="regular" />
+                      <span className="text-sm font-semibold text-gray-700">Naslednji termin</span>
+                    </div>
+                    {nextAppointment && (
+                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-50 text-violet-600">
+                        {nextAppointment.isToday ? 'Danes' : 'Jutri'}
+                      </span>
+                    )}
+                  </div>
+
+                  {nextAppointment ? (
+                    <div className="flex-1 flex flex-col gap-3">
+                      {/* Time + service color bar */}
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-1 self-stretch rounded-full flex-shrink-0"
+                          style={{ background: nextAppointment.serviceColor || '#8B5CF6', minHeight: 40 }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-2xl font-bold text-gray-900 tabular-nums">{nextAppointment.time}</span>
+                            {nextAppointment.endTime && (
+                              <span className="text-sm text-gray-400 font-medium">→ {nextAppointment.endTime}</span>
+                            )}
+                          </div>
+                          <p className="text-sm font-semibold text-gray-800 truncate mt-0.5">{nextAppointment.serviceName}</p>
+                        </div>
+                      </div>
+
+                      {/* Client + employee row */}
+                      <div className="flex flex-wrap gap-3">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <User className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" weight="regular" />
+                          <span className="text-sm text-gray-700 truncate font-medium">{nextAppointment.clientName}</span>
+                        </div>
+                        {nextAppointment.clientPhone && (
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" weight="regular" />
+                            <span className="text-sm text-gray-600">{nextAppointment.clientPhone}</span>
+                          </div>
+                        )}
+                        {nextAppointment.clientEmail && (
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <Envelope className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" weight="regular" />
+                            <span className="text-sm text-gray-600 truncate">{nextAppointment.clientEmail}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Notes if any */}
+                      {nextAppointment.opombe && (
+                        <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 line-clamp-2">
+                          {nextAppointment.opombe}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center gap-2 py-4">
+                      <CalendarBlank className="w-5 h-5 text-gray-300" weight="regular" />
+                      <p className="text-sm text-gray-400">Ni prihajajočih terminov</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <MetricCard
+                title="Termini danes"
+                value={dashboardData?.stats.todayAppointments ?? 0}
+                subtitle="Načrtovanih terminov"
+                icon={CalendarCheck}
+                iconColor="black"
+                gradientOutline
+              />
+              <MetricCard
+                title="Aktivni termini"
+                value={dashboardData?.stats.activeAppointments ?? 0}
+                subtitle="Načrtovanih terminov"
+                icon={Clock}
+                iconColor="darkGray"
+              />
+              <MetricCard
+                title="Nove stranke"
+                value={dashboardData?.stats.newClientsThisMonth ?? 0}
+                subtitle="Ta mesec"
+                icon={UsersThree}
+                iconColor="mediumGray"
+              />
+              <MetricCard
+                title="Prihodki"
+                value={`${(dashboardData?.stats.revenueThisMonth ?? 0).toFixed(2)} €`}
+                subtitle="Ta mesec"
+                icon={CurrencyCircleDollar}
+                iconColor="slate"
+              />
+            </div>
+          )}
 
           {/* Today and Tomorrow Appointments */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -1152,6 +1276,7 @@ export default function DashboardPage() {
         employees={employees}
         onSave={(data) => handleSaveAppointment(data, true)}
         isSaving={isNewAppointmentSaving}
+        initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : undefined}
       />
 
       {/* ── Edit Appointment Modal ────────────────────────────────────────── */}
@@ -1181,18 +1306,21 @@ export default function DashboardPage() {
 
       {/* ── Appointment Detail Modal ──────────────────────────────────────── */}
       <AnimatePresence>
-        {viewingAppointment && (
-          <AppointmentDetailModal
-            appointment={viewingAppointment}
-            services={services}
-            onClose={() => setViewingAppointment(null)}
-            onEdit={handleEditFromDetail}
-            onComplete={handleCompleteAppointment}
-            onNoShow={handleNoShowAppointment}
-            onCancel={handleCancelAppointment}
-            onDelete={handleDeleteAppointment}
-          />
-        )}
+        {viewingAppointment && (() => {
+          const aptEditable = canEditAppointment(viewingAppointment);
+          return (
+            <AppointmentDetailModal
+              appointment={viewingAppointment}
+              services={services}
+              onClose={() => setViewingAppointment(null)}
+              onEdit={aptEditable ? handleEditFromDetail : undefined}
+              onComplete={aptEditable ? handleCompleteAppointment : undefined}
+              onNoShow={aptEditable ? handleNoShowAppointment : undefined}
+              onCancel={aptEditable ? handleCancelAppointment : undefined}
+              onDelete={aptEditable && canDeleteAppointment ? handleDeleteAppointment : undefined}
+            />
+          );
+        })()}
       </AnimatePresence>
 
       {/* ── Delete Confirmation ───────────────────────────────────────────── */}

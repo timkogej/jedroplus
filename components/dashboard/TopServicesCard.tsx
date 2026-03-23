@@ -42,19 +42,19 @@ export function TopServicesCard({ services }: TopServicesCardProps) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="flex-1 flex flex-col justify-center p-3 rounded-xl bg-gray-50 min-h-[72px]"
+                className="flex flex-col justify-center p-3 rounded-xl bg-gray-50 min-h-[72px]"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div
                       className="w-3 h-3 rounded-full flex-shrink-0"
                       style={{ backgroundColor: service.color }}
                     />
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-gray-900 truncate">
                       {service.name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <span className="text-sm text-gray-500">{service.count}x</span>
                     <span className="text-xs font-medium text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
                       {service.percentage}%

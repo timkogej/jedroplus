@@ -38,6 +38,9 @@ import {
 } from '@/lib/webhookPayloadBuilders';
 import { generateUnique8DigitId } from '@/lib/utils/uniqueIdGenerator';
 import { supabase } from '@/lib/supabaseClient';
+import { useUserPersonId } from '@/hooks/useUserPersonId';
+import { useRolePermissions } from '@/app/role-permission-context';
+import DisabledActionModal from '@/components/DisabledActionModal';
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -93,6 +96,9 @@ function TerminiPageInner() {
   const searchParams = useSearchParams();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
+  const userPersonId = useUserPersonId(user?.id);
+  const { role, personId: rolePersonId, permissions } = useRolePermissions();
+  const [showDisabledCreateModal, setShowDisabledCreateModal] = useState(false);
 
   // Data states
   const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
@@ -188,9 +194,42 @@ function TerminiPageInner() {
     loadData();
   }, [loadData]);
 
+  // Auto-set employee filter when user is connected to a person
+  useEffect(() => {
+    if (userPersonId === undefined) return;
+    if (userPersonId) {
+      setFilters((prev) => ({ ...prev, employeeId: userPersonId }));
+    }
+  }, [userPersonId]);
+
+  // For staff: determine if appointments should be restricted to own only
+  const staffViewOwnOnly =
+    role === 'staff' &&
+    (permissions?.can_view_only_own_appointments === true ||
+      permissions?.can_view_all_appointments === false);
+
+  // For staff: determine edit access per appointment
+  const staffEditOwnOnly =
+    role === 'staff' &&
+    (permissions?.can_edit_only_own_appointments === true ||
+      permissions?.can_edit_all_appointments === false);
+
+  const canEditAppointment = (apt: AppointmentWithDetails) => {
+    if (staffEditOwnOnly) return apt.zaposleni_id === rolePersonId;
+    return true;
+  };
+
+  const canDeleteAppointment =
+    role !== 'staff' || (permissions?.can_delete_appointments ?? true);
+
+  const canCreateAppointment =
+    role !== 'staff' || (permissions?.can_create_appointments ?? true);
+
   // Filter appointments
   const filteredAppointments = useMemo(() => {
     return appointments.filter((apt) => {
+      // Staff view restriction: only show own appointments when required
+      if (staffViewOwnOnly && apt.zaposleni_id !== rolePersonId) return false;
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase();
@@ -243,7 +282,7 @@ function TerminiPageInner() {
 
       return true;
     });
-  }, [appointments, filters]);
+  }, [appointments, filters, staffViewOwnOnly, rolePersonId]);
 
   // Handlers
   const handleView = (appointment: AppointmentWithDetails) => {
@@ -686,7 +725,7 @@ function TerminiPageInner() {
 
             <motion.button
               type="button"
-              onClick={handleCreate}
+              onClick={canCreateAppointment ? handleCreate : () => setShowDisabledCreateModal(true)}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
@@ -759,8 +798,9 @@ function TerminiPageInner() {
             <AppointmentFilters
               filters={filters}
               onFiltersChange={setFilters}
-              employees={employees}
+              employees={staffViewOwnOnly && rolePersonId ? employees.filter(e => e.id === rolePersonId) : employees}
               services={services}
+              restrictedEmployeeId={staffViewOwnOnly && rolePersonId ? rolePersonId : undefined}
             />
           </motion.div>
 
@@ -779,6 +819,8 @@ function TerminiPageInner() {
               onNoShow={handleNoShow}
               onCancel={handleCancel}
               isLoading={isLoading}
+              canEditAppointment={canEditAppointment}
+              canDeleteAppointment={canDeleteAppointment}
             />
           </motion.div>
         </div>
@@ -794,6 +836,7 @@ function TerminiPageInner() {
         employees={employees}
         onSave={handleSave}
         isSaving={isSaving}
+        initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : undefined}
       />
 
       <DeleteConfirmation
@@ -829,8 +872,13 @@ function TerminiPageInner() {
               className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Header with icon outside circle */}
-              <div className="relative flex flex-col items-center gap-2 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-5">
+              {/* Header */}
+              <div className="relative flex items-center gap-3 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-5">
+                <CheckCircle className="h-8 w-8 text-emerald-500 flex-shrink-0" weight="regular" />
+                <div>
+                  <h2 className="text-lg font-semibold text-[#1A1F36]">Zaključitev termina</h2>
+                  <p className="text-sm text-gray-500">Potrdite zaključitev termina</p>
+                </div>
                 <motion.button
                   type="button"
                   onClick={() => {
@@ -845,11 +893,6 @@ function TerminiPageInner() {
                 >
                   <X className="h-4 w-4" weight="bold" />
                 </motion.button>
-                <CheckCircle className="h-10 w-10 text-emerald-500" weight="fill" />
-                <div className="text-center">
-                  <h2 className="text-lg font-semibold text-[#1A1F36]">Zaključi termin</h2>
-                  <p className="text-sm text-gray-500">Potrdite zaključitev termina</p>
-                </div>
               </div>
 
               {/* Content */}
@@ -875,6 +918,26 @@ function TerminiPageInner() {
                     <div>
                       <p className="text-xs text-gray-500">Storitev</p>
                       <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev.naziv}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Employee */}
+                {completeTarget.zaposleni && (
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-base font-bold flex-shrink-0"
+                      style={{
+                        backgroundImage: completeTarget.zaposleni.barva || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                      }}
+                    >
+                      {completeTarget.zaposleni.ime?.charAt(0)}{completeTarget.zaposleni.priimek?.charAt(0)}
+                    </span>
+                    <div>
+                      <p className="text-xs text-gray-500">Oseba</p>
+                      <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.zaposleni.ime} {completeTarget.zaposleni.priimek}</p>
                     </div>
                   </div>
                 )}
@@ -986,6 +1049,12 @@ function TerminiPageInner() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <DisabledActionModal
+        isOpen={showDisabledCreateModal}
+        onClose={() => setShowDisabledCreateModal(false)}
+        message="Lastnik podjetja je onemogočil ustvarjanje novih terminov. Obrnite se nanj, da vam to omogoči."
+      />
     </ProtectedLayout>
   );
 }

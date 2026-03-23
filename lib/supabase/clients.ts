@@ -333,6 +333,9 @@ export async function getClientWithAppointments(
         const valuta = normalizeOptionalText(
           pickValue(apt, ['Valuta', 'valuta', 'currency', 'Currency'])
         );
+        const opombePoZakljucku = normalizeOptionalText(
+          pickValue(apt, ['opombe_po_zakljucku', 'Opombe po zaključku', 'opombe po zakljucku'])
+        );
         const statusValue = pickValue(apt, [schema.statusField, 'status', 'Status', 'stanje', 'Stanje']);
         const idValue = pickValue(apt, [schema.idField, 'id', 'ID', 'ID termina', 'ID_termina']);
         const dateValue = pickValue(apt, [schema.dateField, 'datum', 'Datum', 'date', 'Date', schema.startAtField]);
@@ -367,6 +370,7 @@ export async function getClientWithAppointments(
           interne_opombe: appointmentInternalNotes,
           koncna_cena: finalPrice,
           valuta: valuta,
+          opombe_po_zakljucku: opombePoZakljucku,
         });
       }
     }

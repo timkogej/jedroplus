@@ -23,11 +23,12 @@ interface MonthViewProps {
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
   onEventClick?: (event: CalendarEvent) => void;
+  onAbsenceClick?: (absence: Absence) => void;
   onDateClick: (date: Date) => void;
   isMobile?: boolean;
 }
 
-function MonthView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onDateClick, isMobile = false }: MonthViewProps) {
+function MonthView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, isMobile = false }: MonthViewProps) {
   const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const monthDays = useMemo(() => getMonthGrid(currentDate), [currentDate]);
   const todayRef = useRef<HTMLDivElement>(null);
@@ -126,8 +127,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
               key={index}
               ref={isCurrentDay ? todayRef : undefined}
               className={`group relative flex min-h-[140px] flex-col overflow-hidden p-2 transition-colors cursor-pointer
-                         ${!isCurrentMonth ? 'bg-gray-50/30' : 'bg-white hover:bg-gray-50/50'}
-                         ${hasAbsence ? 'bg-amber-50/30' : ''}`}
+                         ${!isCurrentMonth ? 'bg-gray-50/30' : 'bg-white hover:bg-gray-50/50'}`}
               style={{
                 borderRight: (index + 1) % 7 !== 0 ? '1px solid rgba(0,0,0,0.04)' : undefined,
                 borderBottom: index < 35 ? '1px solid rgba(0,0,0,0.04)' : undefined,
@@ -140,15 +140,10 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                 <button
                   type="button"
                   onClick={() => onDateClick(day)}
-                  className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-medium
-                             transition-all
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-xs transition-all
+                             ${isCurrentDay ? 'font-bold' : 'font-medium'}
                              ${!isCurrentMonth ? 'text-gray-300' : ''}
-                             ${isCurrentDay
-                               ? 'font-bold'
-                               : isCurrentMonth
-                                 ? 'text-[#1A1F36] hover:bg-gray-100'
-                                 : ''
-                             }`}
+                             ${!isCurrentDay && isCurrentMonth ? 'text-[#1A1F36] hover:bg-gray-100' : ''}`}
                   style={isCurrentDay ? {
                     background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                     WebkitBackgroundClip: 'text',
@@ -183,20 +178,35 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                 </div>
               )}
 
-              {/* Absence indicators with employee name and reason */}
+              {/* Absence indicators - yellow box with gradient text */}
               {hasAbsence && (
                 <div className="mb-1 space-y-0.5">
                   {dayAbsences.slice(0, 2).map((absence) => (
-                    <div
+                    <button
                       key={absence.id}
-                      className="truncate rounded px-1 py-0.5 text-[9px] font-medium text-[#1A1F36]"
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); onAbsenceClick?.(absence); }}
+                      className="flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200 px-1.5 py-0.5 truncate w-full text-left hover:bg-amber-100 transition-colors"
                       title={`${absence.employee_name || 'Vsi zaposleni'}${absence.reason ? ` - ${absence.reason}` : ''}`}
                     >
-                      {absence.employee_name || 'Vsi'}{absence.reason ? `: ${absence.reason}` : ''}
-                    </div>
+                      <span
+                        className="text-[9px] font-semibold truncate"
+                        style={absence.employee_color ? {
+                          background: absence.employee_color,
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        } : { color: '#92400E' }}
+                      >
+                        {absence.employee_name || 'Vsi'}
+                      </span>
+                      {absence.reason && (
+                        <span className="text-[8px] text-amber-700 truncate">{absence.reason}</span>
+                      )}
+                    </button>
                   ))}
                   {dayAbsences.length > 2 && (
-                    <div className="text-[8px] text-[#1A1F36] opacity-60 px-1">
+                    <div className="text-[8px] text-amber-600 opacity-80 px-1">
                       +{dayAbsences.length - 2} odsotnosti
                     </div>
                   )}

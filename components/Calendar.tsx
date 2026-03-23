@@ -34,6 +34,7 @@ import TwoDayView from './calendar/TwoDayView';
 import AppointmentModal, { type AppointmentFormData } from './appointments/AppointmentModal';
 import DeleteConfirmation from './appointments/DeleteConfirmation';
 import AbsenceModal, { type AbsenceFormData } from './calendar/AbsenceModal';
+import AbsenceDetailModal, { type AbsenceEditData } from './calendar/AbsenceDetailModal';
 import EventModal, { type EventFormData } from './calendar/EventModal';
 import EventViewModal from './calendar/EventViewModal';
 import {
@@ -77,9 +78,11 @@ import { supabase } from '@/lib/supabaseClient';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
+import { useRolePermissions } from '@/app/role-permission-context';
 
 interface CalendarProps {
   companyId: string;
+  initialEmployeeId?: string | null;
 }
 
 // Copy button component for contact info
@@ -125,7 +128,7 @@ function AppointmentDetailModal({
   appointment: AppointmentWithDetails;
   services: Storitev[];
   onClose: () => void;
-  onEdit: (appointment: AppointmentWithDetails) => void;
+  onEdit?: (appointment: AppointmentWithDetails) => void;
   onComplete?: (appointment: AppointmentWithDetails) => void;
   onNoShow?: (appointment: AppointmentWithDetails) => void;
   onCancel?: (appointment: AppointmentWithDetails) => void;
@@ -274,44 +277,38 @@ function AppointmentDetailModal({
           {/* Client */}
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Stranka</label>
-            <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-              <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
-                {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
-              </span>
-              <div className="min-w-0 flex-1">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+                <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
+                  {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
+                </span>
                 <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
-                {appointment.stranka_email && <p className="text-xs text-gray-500 truncate">{appointment.stranka_email}</p>}
-                {appointment.stranka_telefon && <p className="text-xs text-gray-500">{appointment.stranka_telefon}</p>}
               </div>
               {(appointment.stranka_email || appointment.stranka_telefon) && (
-                <div className="flex flex-col gap-1.5 ml-auto flex-shrink-0">
+                <div className="grid grid-cols-2 gap-2">
                   {appointment.stranka_email && (
-                    <div className="flex items-center gap-1">
-                      <CopyButton text={appointment.stranka_email} label="email" />
-                      <motion.a
-                        href={`mailto:${appointment.stranka_email}`}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 p-1.5 text-white"
-                        title="Pošlji email"
-                      >
-                        <Envelope className="h-3.5 w-3.5" weight="bold" />
-                      </motion.a>
-                    </div>
+                    <a
+                      href={`mailto:${appointment.stranka_email}`}
+                      className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-violet-300 hover:shadow-sm transition-all"
+                    >
+                      <Envelope className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                      <div className="min-w-0">
+                        <div className="text-[10px] text-gray-500">Email</div>
+                        <div className="text-xs font-medium text-[#1A1F36] truncate">{appointment.stranka_email}</div>
+                      </div>
+                    </a>
                   )}
                   {appointment.stranka_telefon && (
-                    <div className="flex items-center gap-1">
-                      <CopyButton text={appointment.stranka_telefon} label="telefon" />
-                      <motion.a
-                        href={`tel:${appointment.stranka_telefon}`}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="flex items-center justify-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 p-1.5 text-white"
-                        title="Pokliči"
-                      >
-                        <Phone className="h-3.5 w-3.5" weight="bold" />
-                      </motion.a>
-                    </div>
+                    <a
+                      href={`tel:${appointment.stranka_telefon}`}
+                      className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-green-300 hover:shadow-sm transition-all"
+                    >
+                      <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                      <div className="min-w-0">
+                        <div className="text-[10px] text-gray-500">Telefon</div>
+                        <div className="text-xs font-medium text-[#1A1F36] truncate">{appointment.stranka_telefon}</div>
+                      </div>
+                    </a>
                   )}
                 </div>
               )}
@@ -467,19 +464,21 @@ function AppointmentDetailModal({
             )}
 
             {/* Edit */}
-            <motion.button
-              type="button"
-              onClick={() => onEdit(appointment)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-              title="Uredi"
-            >
-              <NotePencil className="h-4.5 w-4.5" weight="regular" />
-            </motion.button>
+            {onEdit && (
+              <motion.button
+                type="button"
+                onClick={() => onEdit(appointment)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                title="Uredi"
+              >
+                <NotePencil className="h-4.5 w-4.5" weight="regular" />
+              </motion.button>
+            )}
 
-            {/* Three dots menu - No Show, Cancel, Delete - always visible like Termini */}
-            <div className="relative">
+            {/* Three dots menu - No Show, Cancel, Delete - hidden when no actions available */}
+            {(onNoShow || onCancel || onDelete) && <div className="relative">
               <motion.button
                 type="button"
                 onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
@@ -531,7 +530,7 @@ function AppointmentDetailModal({
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </div>}
           </div>
         </div>
       </motion.div>
@@ -539,9 +538,29 @@ function AppointmentDetailModal({
   );
 }
 
-function Calendar({ companyId }: CalendarProps) {
+function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   const { companySettings } = useCompany();
   const { user } = useAuth();
+  const { role, personId: rolePersonId, permissions } = useRolePermissions();
+
+  // RBAC: appointment permissions for staff
+  const staffViewOwnOnly = role === 'staff' && (
+    (permissions?.can_view_only_own_appointments === true) ||
+    (permissions?.can_view_all_appointments === false)
+  );
+  const staffEditOwnOnly = role === 'staff' && (
+    (permissions?.can_edit_only_own_appointments === true) ||
+    (permissions?.can_edit_all_appointments === false)
+  );
+  const canCreateAppointment = role !== 'staff' || (permissions?.can_create_appointments ?? true);
+  const canDeleteAppointment = role !== 'staff' || (permissions?.can_delete_appointments ?? true);
+
+  // For a given appointment, can the current user edit it?
+  const canEditAppointment = useCallback((apt: AppointmentWithDetails): boolean => {
+    if (role !== 'staff') return true;
+    if (staffEditOwnOnly) return apt.zaposleni_id === rolePersonId;
+    return true;
+  }, [role, staffEditOwnOnly, rolePersonId]);
 
   // View state - default to week, load from localStorage
   const [currentView, setCurrentView] = useState<ViewMode>('day');
@@ -563,6 +582,13 @@ function Calendar({ companyId }: CalendarProps) {
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Auto-set employee filter when user is connected to a person
+  useEffect(() => {
+    if (initialEmployeeId) {
+      setSelectedEmployeeId(initialEmployeeId);
+    }
+  }, [initialEmployeeId]);
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'view' | 'edit' | 'create'>('create');
@@ -570,6 +596,9 @@ function Calendar({ companyId }: CalendarProps) {
   const [newAppointmentInitials, setNewAppointmentInitials] = useState<{ date?: string; startTime?: string }>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isAbsenceModalOpen, setIsAbsenceModalOpen] = useState(false);
+  const [isAbsenceDetailOpen, setIsAbsenceDetailOpen] = useState(false);
+  const [selectedAbsence, setSelectedAbsence] = useState<Absence | null>(null);
+  const [isAbsenceDeleting, setIsAbsenceDeleting] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [eventModalMode, setEventModalMode] = useState<'create' | 'edit'>('create');
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
@@ -925,6 +954,7 @@ function Calendar({ companyId }: CalendarProps) {
         location: data.location || null,
         status: isEdit ? (editingEvent!.status || 'active') : 'active',
         is_visible: data.is_visible,
+        enable_booking: data.enable_booking,
         created_by: isEdit ? (editingEvent!.created_by ?? actor) : actor,
         updated_by: actor,
       };
@@ -980,7 +1010,10 @@ function Calendar({ companyId }: CalendarProps) {
       (a) => a.status !== 'cancelled' && a.status !== 'Odpovedan'
     );
 
-    if (selectedEmployeeId) {
+    // RBAC: staff with view-own-only restriction sees only their appointments
+    if (staffViewOwnOnly && rolePersonId) {
+      filtered = filtered.filter((a) => a.zaposleni_id === rolePersonId);
+    } else if (selectedEmployeeId) {
       filtered = filtered.filter((a) => a.zaposleni?.id === selectedEmployeeId);
     }
 
@@ -1000,7 +1033,7 @@ function Calendar({ companyId }: CalendarProps) {
     }
 
     return filtered;
-  }, [appointments, selectedEmployeeId, selectedServiceId, searchQuery]);
+  }, [appointments, selectedEmployeeId, selectedServiceId, searchQuery, staffViewOwnOnly, rolePersonId]);
 
   // Filter absences by selected employee (same logic as appointments)
   const filteredAbsences = useMemo(() => {
@@ -1342,18 +1375,20 @@ function Calendar({ companyId }: CalendarProps) {
 
   // Modal handlers
   const handleNewAppointment = useCallback(() => {
+    if (!canCreateAppointment) return;
     setNewAppointmentInitials({});
     setEditingAppointment(null);
     setModalMode('create');
     setIsModalOpen(true);
-  }, []);
+  }, [canCreateAppointment]);
 
   const handleGridSlotClick = useCallback((date: Date, time: string) => {
+    if (!canCreateAppointment) return;
     setNewAppointmentInitials({ date: getLocalDateKey(date), startTime: time });
     setEditingAppointment(null);
     setModalMode('create');
     setIsModalOpen(true);
-  }, []);
+  }, [canCreateAppointment]);
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
@@ -1564,8 +1599,7 @@ function Calendar({ companyId }: CalendarProps) {
         event: 'ODSOTNOST',
         entity: 'absence',
         data: {
-          employee_ids: data.employeeIds,
-          all_employees: data.allEmployees,
+          employee_id: data.employeeId,
           date_from: data.dateFrom,
           date_to: data.dateTo,
           single_day: data.singleDay,
@@ -1585,15 +1619,92 @@ function Calendar({ companyId }: CalendarProps) {
         throw new Error('Napaka pri shranjevanju odsotnosti');
       }
 
-      // Refresh absences after saving
-      await refreshAbsences();
       handleCloseAbsenceModal();
+      // 0.7s delay before refresh (n8n needs time to write)
+      await new Promise((r) => setTimeout(r, 700));
+      await refreshAbsences();
     } catch (err) {
       console.error('Error saving absence:', err);
     } finally {
       setIsSaving(false);
     }
   }, [companyId, actor, companyPayload, handleCloseAbsenceModal, refreshAbsences]);
+
+  // Handle absence detail modal
+  const handleAbsenceClick = useCallback((absence: Absence) => {
+    setSelectedAbsence(absence);
+    setIsAbsenceDetailOpen(true);
+  }, []);
+
+  const handleAbsenceDetailClose = useCallback(() => {
+    setIsAbsenceDetailOpen(false);
+    setSelectedAbsence(null);
+  }, []);
+
+  const handleAbsenceDelete = useCallback(async (absence: Absence) => {
+    setIsAbsenceDeleting(true);
+    try {
+      const result = await callN8nAction({
+        event: 'IZBRIS_ODSOTNOSTI',
+        entity: 'absence',
+        data: {
+          id: absence.id,
+          employee_id: absence.employee_id,
+          employee_name: absence.employee_name,
+          start_at: absence.start_at,
+          end_at: absence.end_at,
+          reason: absence.reason,
+          company_id: companyId,
+        },
+        company_id: companyId,
+        actor,
+        timestamp: new Date().toISOString(),
+        meta: { app: 'Integrate' as const, version: '1.0' as const },
+      });
+      if (!result.ok) throw new Error('Napaka pri brisanju odsotnosti');
+      handleAbsenceDetailClose();
+      await new Promise((r) => setTimeout(r, 700));
+      await refreshAbsences();
+    } catch (err) {
+      console.error('Error deleting absence:', err);
+    } finally {
+      setIsAbsenceDeleting(false);
+    }
+  }, [companyId, actor, refreshAbsences, handleAbsenceDetailClose]);
+
+  const handleAbsenceEdit = useCallback(async (absence: Absence, data: AbsenceEditData) => {
+    setIsSaving(true);
+    try {
+      const result = await callN8nAction({
+        event: 'UREDI_ODSOTNOST',
+        entity: 'absence',
+        data: {
+          id: absence.id,
+          employee_ids: data.employee_ids,
+          all_employees: data.all_employees,
+          date_from: data.date_from,
+          date_to: data.date_to,
+          single_day: data.single_day,
+          time_from: data.time_from,
+          time_to: data.time_to,
+          reason: data.reason,
+          company_id: companyId,
+        },
+        company_id: companyId,
+        actor,
+        timestamp: new Date().toISOString(),
+        meta: { app: 'Integrate' as const, version: '1.0' as const },
+      });
+      if (!result.ok) throw new Error('Napaka pri urejanju odsotnosti');
+      handleAbsenceDetailClose();
+      await new Promise((r) => setTimeout(r, 700));
+      await refreshAbsences();
+    } catch (err) {
+      console.error('Error editing absence:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [companyId, actor, refreshAbsences, handleAbsenceDetailClose]);
 
   // Header title: always "Month Year" (Apple Calendar style – date strip shows specific day)
   const headerTitle = useMemo(() => {
@@ -1747,6 +1858,7 @@ function Calendar({ companyId }: CalendarProps) {
                   services={services}
                   onAppointmentClick={handleAppointmentClick}
                   onEventClick={handleEventClick}
+                  onAbsenceClick={handleAbsenceClick}
                   onDateClick={handleDateClick}
                   showAllDays={showAllDays}
                   onGridSlotClick={handleGridSlotClick}
@@ -1783,9 +1895,11 @@ function Calendar({ companyId }: CalendarProps) {
                       services={services}
                       onAppointmentClick={handleAppointmentClick}
                       onEventClick={handleEventClick}
+                      onAbsenceClick={handleAbsenceClick}
                       employees={employees}
                       onGridSlotClick={handleGridSlotClick}
                       companySchedule={companySchedule}
+                      showAllDays={showAllDays}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -1799,6 +1913,7 @@ function Calendar({ companyId }: CalendarProps) {
                   services={services}
                   onAppointmentClick={handleAppointmentClick}
                   onEventClick={handleEventClick}
+                  onAbsenceClick={handleAbsenceClick}
                   onDateClick={handleDateClick}
                   isMobile={isMobile}
                 />
@@ -1834,10 +1949,15 @@ function Calendar({ companyId }: CalendarProps) {
                         currentDate={currentDate}
                         appointments={filteredAppointments}
                         absences={filteredAbsences}
+                        events={events}
                         services={services}
                         onAppointmentClick={handleAppointmentClick}
+                        onEventClick={handleEventClick}
+                        onAbsenceClick={handleAbsenceClick}
                         onDateClick={handleDateClick}
                         onGridSlotClick={handleGridSlotClick}
+                        companySchedule={companySchedule}
+                        showAllDays={showAllDays}
                       />
                     </motion.div>
                   </AnimatePresence>
@@ -1861,6 +1981,7 @@ function Calendar({ companyId }: CalendarProps) {
         employees={employees}
         selectedEmployeeId={selectedEmployeeId}
         onEmployeeFilterChange={setSelectedEmployeeId}
+        restrictedToEmployeeId={staffViewOwnOnly && rolePersonId ? rolePersonId : undefined}
         selectedServiceId={selectedServiceId}
         onServiceFilterChange={setSelectedServiceId}
         searchQuery={searchQuery}
@@ -1876,18 +1997,21 @@ function Calendar({ companyId }: CalendarProps) {
 
       {/* Appointment detail modal (view) */}
       <AnimatePresence>
-        {selectedAppointment && (
-          <AppointmentDetailModal
-            appointment={selectedAppointment}
-            services={services}
-            onClose={handleCloseDetailModal}
-            onEdit={handleEditFromDetail}
-            onComplete={handleCompleteAppointment}
-            onNoShow={handleNoShowAppointment}
-            onCancel={handleCancelAppointment}
-            onDelete={handleDeleteAppointment}
-          />
-        )}
+        {selectedAppointment && (() => {
+          const aptEditable = canEditAppointment(selectedAppointment);
+          return (
+            <AppointmentDetailModal
+              appointment={selectedAppointment}
+              services={services}
+              onClose={handleCloseDetailModal}
+              onEdit={aptEditable ? handleEditFromDetail : undefined}
+              onComplete={aptEditable ? handleCompleteAppointment : undefined}
+              onNoShow={aptEditable ? handleNoShowAppointment : undefined}
+              onCancel={aptEditable ? handleCancelAppointment : undefined}
+              onDelete={aptEditable && canDeleteAppointment ? handleDeleteAppointment : undefined}
+            />
+          );
+        })()}
       </AnimatePresence>
 
       {/* Create/Edit modal - Uses IDENTICAL modal as Termini page */}
@@ -1902,6 +2026,7 @@ function Calendar({ companyId }: CalendarProps) {
         isSaving={isSaving}
         initialDate={newAppointmentInitials.date}
         initialStartTime={newAppointmentInitials.startTime}
+        initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : undefined}
       />
 
       {/* Absence modal */}
@@ -1910,6 +2035,18 @@ function Calendar({ companyId }: CalendarProps) {
         onClose={handleCloseAbsenceModal}
         employees={employees}
         onSave={handleSaveAbsence}
+        isSaving={isSaving}
+      />
+
+      {/* Absence detail modal */}
+      <AbsenceDetailModal
+        isOpen={isAbsenceDetailOpen}
+        absence={selectedAbsence}
+        employees={employees}
+        onClose={handleAbsenceDetailClose}
+        onDelete={handleAbsenceDelete}
+        onEdit={handleAbsenceEdit}
+        isDeleting={isAbsenceDeleting}
         isSaving={isSaving}
       />
 

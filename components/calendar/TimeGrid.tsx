@@ -142,6 +142,16 @@ function TimeGrid({ children, columnCount = 7, showCurrentTime = true, gridScrol
               </div>
             )}
 
+            {/* After END_HOUR stripe (always off-schedule) */}
+            <div
+              className="absolute left-0 right-0 pointer-events-none z-0"
+              style={{
+                top: (END_HOUR - START_HOUR) * HOUR_HEIGHT,
+                height: HOUR_HEIGHT,
+                background: 'repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(0,0,0,0.045) 6px, rgba(0,0,0,0.045) 7px)',
+              }}
+            />
+
             {/* Column content */}
             <div className="absolute inset-0">
               {children}

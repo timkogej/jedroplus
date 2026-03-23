@@ -9,7 +9,10 @@ import { Sidebar, AppBar, SearchModal, SidebarProvider, useSidebar } from "@/com
 import { useCompanyPlan } from "@/hooks/useCompanyPlan";
 import { hasAccessToRoute, getRequiredPlan, type PlanCode } from "@/lib/planAccess";
 import UpgradePlanGate from "@/components/UpgradePlanGate";
+import RoleAccessGate from "@/components/RoleAccessGate";
+import { useRolePermissions } from "@/app/role-permission-context";
 import { supabase } from "@/lib/supabaseClient";
+import type { StaffPermissions } from "@/types/roles";
 
 // ============================================================================
 // Inner layout that uses sidebar context
@@ -96,8 +99,9 @@ export default function ProtectedLayout({
   const { companyId, loading: companyLoading } = useCompany();
   const { user, loading: authLoading } = useAuth();
   const { planCode, loading: planLoading } = useCompanyPlan();
+  const { role, permissions, loading: roleLoading } = useRolePermissions();
 
-  const isLoading = companyLoading || authLoading || planLoading;
+  const isLoading = companyLoading || authLoading || planLoading || roleLoading;
 
   useEffect(() => {
     if (companyLoading || authLoading) return;
@@ -137,15 +141,60 @@ export default function ProtectedLayout({
   }
 
   // ── Plan-based access gate ──────────────────────────────────────────────
-  // planLoading is already handled above (shows spinner). Once loaded,
-  // if the route requires a higher plan, show the upgrade screen.
   const accessAllowed = hasAccessToRoute(pathname, planCode);
   const requiredPlan = getRequiredPlan(pathname);
+
+  // ── Role-based access gate ──────────────────────────────────────────────
+  // Admin cannot access /billing at all.
+  // Staff access to certain routes depends on staff_role_permissions.
+  function getRoleGate(): React.ReactNode | null {
+    if (role === 'owner' || role === null) return null;
+
+    if (role === 'admin') {
+      if (pathname === '/billing' || pathname.startsWith('/billing/')) {
+        return <RoleAccessGate message="Stran 'Paketi in kvote' je dostopna samo lastniku podjetja." />;
+      }
+      return null;
+    }
+
+    if (role === 'staff') {
+      const p = permissions;
+
+      // /billing is always accessible for staff (page itself handles the restricted view)
+      if (pathname === '/billing' || pathname.startsWith('/billing/')) return null;
+
+      const routePermMap: { prefix: string; key: keyof StaffPermissions }[] = [
+        { prefix: '/analytics', key: 'can_view_analytics' },
+        { prefix: '/asistent', key: 'can_access_asistent_plus' },
+        { prefix: '/chatbot-plus', key: 'can_access_chatbot_plus' },
+        { prefix: '/komunikacija', key: 'can_access_komunikacija' },
+        { prefix: '/reminders', key: 'can_access_opomniki' },
+        { prefix: '/rezervacije', key: 'can_access_rezervacije' },
+        { prefix: '/lost-leads', key: 'can_access_lost_leads' },
+      ];
+
+      for (const { prefix, key } of routePermMap) {
+        if (pathname === prefix || pathname.startsWith(prefix + '/')) {
+          if (p && p[key] === false) {
+            return <RoleAccessGate message="Lastnik podjetja vam ni omogočil dostopa do te strani." />;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  const roleGate = getRoleGate();
 
   return (
     <SidebarProvider>
       <LayoutContent>
-        {accessAllowed ? children : <UpgradePlanGate requiredPlan={requiredPlan as PlanCode} />}
+        {roleGate
+          ? roleGate
+          : accessAllowed
+          ? children
+          : <UpgradePlanGate requiredPlan={requiredPlan as PlanCode} />}
       </LayoutContent>
     </SidebarProvider>
   );

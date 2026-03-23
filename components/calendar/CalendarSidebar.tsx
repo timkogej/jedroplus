@@ -48,6 +48,7 @@ interface CalendarSidebarProps {
   showAllDays: boolean;
   onShowAllDaysChange: (showAll: boolean) => void;
   appointmentDates?: Set<string>; // YYYY-MM-DD keys of future dates with appointments
+  restrictedToEmployeeId?: string | null; // When set, employee filter is locked to this employee only
 }
 
 function CalendarSidebar({
@@ -71,6 +72,7 @@ function CalendarSidebar({
   showAllDays,
   onShowAllDaysChange,
   appointmentDates,
+  restrictedToEmployeeId,
 }: CalendarSidebarProps) {
   // Mini calendar state - always shows current selected month
   const miniCalendarDate = useMemo(() => startOfMonth(currentDate), [currentDate]);
@@ -295,56 +297,85 @@ function CalendarSidebar({
                     Zaposleni
                   </div>
                   <div className="space-y-1.5 max-h-40 overflow-y-auto">
-                    {/* All employees option */}
-                    <button
-                      type="button"
-                      onClick={() => onEmployeeFilterChange(null)}
-                      className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all text-left
-                                 ${!selectedEmployeeId
-                                   ? 'border-violet-500 bg-violet-50'
-                                   : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                                 }`}
-                    >
-                      <span className={`flex-1 text-sm font-medium ${!selectedEmployeeId ? 'text-gray-900' : 'text-gray-700'}`}>
-                        Vsi zaposleni
-                      </span>
-                      {!selectedEmployeeId && (
-                        <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
-                      )}
-                    </button>
-                    {employees.map((employee, idx) => {
-                      const isSelected = selectedEmployeeId === employee.id;
-                      return (
+                    {restrictedToEmployeeId ? (
+                      // Staff with can_view_all_appointments=false: show only their own employee entry
+                      (() => {
+                        const emp = employees.find(e => e.id === restrictedToEmployeeId);
+                        if (!emp) return null;
+                        return (
+                          <div
+                            className="w-full flex items-center gap-3 p-2.5 rounded-xl border-2 border-violet-500 bg-violet-50 text-left"
+                          >
+                            <div
+                              className="w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0"
+                              style={{
+                                backgroundImage: emp.barva || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                              }}
+                            >
+                              {emp.initials}
+                            </div>
+                            <span className="flex-1 text-sm font-medium truncate text-gray-900">
+                              {emp.ime} {emp.priimek}
+                            </span>
+                            <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <>
+                        {/* All employees option */}
                         <button
-                          key={`emp-${idx}-${employee.id}`}
                           type="button"
-                          onClick={() => onEmployeeFilterChange(employee.id)}
+                          onClick={() => onEmployeeFilterChange(null)}
                           className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all text-left
-                                     ${isSelected
+                                     ${!selectedEmployeeId
                                        ? 'border-violet-500 bg-violet-50'
                                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                                      }`}
                         >
-                          {/* Employee initials - gradient text, no circle */}
-                          <div
-                            className="w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0"
-                            style={{
-                              backgroundImage: employee.barva || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                              WebkitBackgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                            }}
-                          >
-                            {employee.initials}
-                          </div>
-                          <span className={`flex-1 text-sm font-medium truncate ${isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
-                            {employee.ime} {employee.priimek}
+                          <span className={`flex-1 text-sm font-medium ${!selectedEmployeeId ? 'text-gray-900' : 'text-gray-700'}`}>
+                            Vsi zaposleni
                           </span>
-                          {isSelected && (
+                          {!selectedEmployeeId && (
                             <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
                           )}
                         </button>
-                      );
-                    })}
+                        {employees.map((employee, idx) => {
+                          const isSelected = selectedEmployeeId === employee.id;
+                          return (
+                            <button
+                              key={`emp-${idx}-${employee.id}`}
+                              type="button"
+                              onClick={() => onEmployeeFilterChange(employee.id)}
+                              className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all text-left
+                                         ${isSelected
+                                           ? 'border-violet-500 bg-violet-50'
+                                           : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                         }`}
+                            >
+                              <div
+                                className="w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0"
+                                style={{
+                                  backgroundImage: employee.barva || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                                  WebkitBackgroundClip: 'text',
+                                  WebkitTextFillColor: 'transparent',
+                                }}
+                              >
+                                {employee.initials}
+                              </div>
+                              <span className={`flex-1 text-sm font-medium truncate ${isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
+                                {employee.ime} {employee.priimek}
+                              </span>
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </>
+                    )}
                   </div>
                 </div>
 

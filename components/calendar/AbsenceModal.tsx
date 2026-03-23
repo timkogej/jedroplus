@@ -6,9 +6,6 @@ import {
   X,
   CalendarBlank,
   Clock,
-  Users,
-  CheckSquare,
-  Square,
   FloppyDisk,
   SpinnerGap,
   Warning,
@@ -25,8 +22,7 @@ interface AbsenceModalProps {
 }
 
 export interface AbsenceFormData {
-  employeeIds: string[]; // Selected employee IDs (or all if "vsi")
-  allEmployees: boolean;
+  employeeId: string;
   dateFrom: string;
   dateTo: string;
   singleDay: boolean; // If true, only dateFrom is used with time range
@@ -68,8 +64,7 @@ function AbsenceModal({
   isSaving = false,
 }: AbsenceModalProps) {
   // Form state
-  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([]);
-  const [allEmployees, setAllEmployees] = useState(false);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
   const [singleDay, setSingleDay] = useState(true);
   const [dateFrom, setDateFrom] = useState(() => {
     const today = new Date();
@@ -86,34 +81,12 @@ function AbsenceModal({
   // Validation errors
   const [errors, setErrors] = useState<string[]>([]);
 
-  // Toggle employee selection
-  const toggleEmployee = useCallback((employeeId: string) => {
-    setSelectedEmployeeIds((prev) => {
-      if (prev.includes(employeeId)) {
-        return prev.filter((id) => id !== employeeId);
-      }
-      return [...prev, employeeId];
-    });
-    setAllEmployees(false);
-  }, []);
-
-  // Select all employees
-  const handleAllEmployees = useCallback(() => {
-    if (allEmployees) {
-      setAllEmployees(false);
-      setSelectedEmployeeIds([]);
-    } else {
-      setAllEmployees(true);
-      setSelectedEmployeeIds(employees.map((e) => e.id));
-    }
-  }, [allEmployees, employees]);
-
   // Validate form
   const validate = useCallback(() => {
     const newErrors: string[] = [];
 
-    if (!allEmployees && selectedEmployeeIds.length === 0) {
-      newErrors.push('Izberite vsaj enega zaposlenega');
+    if (!selectedEmployeeId) {
+      newErrors.push('Izberite zaposlenega');
     }
 
     if (!dateFrom) {
@@ -134,7 +107,7 @@ function AbsenceModal({
 
     setErrors(newErrors);
     return newErrors.length === 0;
-  }, [allEmployees, selectedEmployeeIds, dateFrom, dateTo, singleDay, timeFrom, timeTo]);
+  }, [selectedEmployeeId, dateFrom, dateTo, singleDay, timeFrom, timeTo]);
 
   // Handle submit
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -143,8 +116,7 @@ function AbsenceModal({
     if (!validate()) return;
 
     await onSave({
-      employeeIds: allEmployees ? employees.map((e) => e.id) : selectedEmployeeIds,
-      allEmployees,
+      employeeId: selectedEmployeeId,
       dateFrom,
       dateTo: singleDay ? dateFrom : dateTo,
       singleDay,
@@ -152,12 +124,11 @@ function AbsenceModal({
       timeTo: singleDay ? timeTo : undefined,
       reason: reason.trim() || undefined,
     });
-  }, [validate, onSave, allEmployees, employees, selectedEmployeeIds, dateFrom, dateTo, singleDay, timeFrom, timeTo, reason]);
+  }, [validate, onSave, selectedEmployeeId, dateFrom, dateTo, singleDay, timeFrom, timeTo, reason]);
 
   // Reset form when modal opens
   const resetForm = useCallback(() => {
-    setSelectedEmployeeIds([]);
-    setAllEmployees(false);
+    setSelectedEmployeeId('');
     setSingleDay(true);
     const today = new Date().toISOString().split('T')[0];
     setDateFrom(today);
@@ -246,62 +217,34 @@ function AbsenceModal({
                 <label className="text-sm font-medium text-[#1A1F36]">
                   Zaposleni
                 </label>
-
-                {/* All employees toggle */}
-                <button
-                  type="button"
-                  onClick={handleAllEmployees}
-                  className={`w-full flex items-center gap-3 p-4 rounded-xl border transition-all text-left
-                             ${allEmployees
-                               ? 'bg-orange-50 border-orange-200 ring-1 ring-orange-200'
-                               : 'bg-gray-50 border-gray-200 hover:border-gray-300'
-                             }`}
-                >
-                  {allEmployees ? (
-                    <CheckSquare className="h-5 w-5 text-orange-500 flex-shrink-0" weight="fill" />
-                  ) : (
-                    <Square className="h-5 w-5 text-gray-400 flex-shrink-0" weight="regular" />
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-gray-600" weight="regular" />
-                    <span className={`font-medium ${allEmployees ? 'text-orange-700' : 'text-[#1A1F36]'}`}>
-                      Vsi zaposleni
-                    </span>
-                  </div>
-                </button>
-
-                {/* Individual employees */}
-                {!allEmployees && (
-                  <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-                    {employees.map((employee, idx) => {
-                      const isSelected = selectedEmployeeIds.includes(employee.id);
-                      const color = extractColor(employee.barva || '');
-                      return (
-                        <button
-                          key={`emp-${idx}-${employee.id}`}
-                          type="button"
-                          onClick={() => toggleEmployee(employee.id)}
-                          className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-left
-                                     ${isSelected
-                                       ? 'bg-orange-50 border-orange-200'
-                                       : 'bg-white border-gray-200 hover:border-gray-300'
-                                     }`}
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                  {employees.map((employee, idx) => {
+                    const isSelected = selectedEmployeeId === employee.id;
+                    const color = extractColor(employee.barva || '');
+                    return (
+                      <button
+                        key={`emp-${idx}-${employee.id}`}
+                        type="button"
+                        onClick={() => setSelectedEmployeeId(employee.id)}
+                        className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-left
+                                   ${isSelected
+                                     ? 'bg-orange-50 border-orange-300 ring-1 ring-orange-200'
+                                     : 'bg-white border-gray-200 hover:border-gray-300'
+                                   }`}
+                      >
+                        <span
+                          className="text-sm font-bold flex-shrink-0 w-6 text-center"
+                          style={{ color }}
                         >
-                          {/* Initials only, colored in employee color - no circle */}
-                          <span
-                            className="text-sm font-bold flex-shrink-0 w-6 text-center"
-                            style={{ color }}
-                          >
-                            {employee.initials}
-                          </span>
-                          <span className={`text-sm truncate ${isSelected ? 'text-orange-700 font-medium' : 'text-[#1A1F36]'}`}>
-                            {employee.ime} {employee.priimek}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                          {employee.initials}
+                        </span>
+                        <span className={`text-sm truncate ${isSelected ? 'text-orange-700 font-medium' : 'text-[#1A1F36]'}`}>
+                          {employee.ime} {employee.priimek}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Single day vs Date range toggle */}

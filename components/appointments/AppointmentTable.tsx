@@ -36,6 +36,10 @@ interface AppointmentTableProps {
   onNoShow?: (appointment: AppointmentWithDetails) => void;
   onCancel?: (appointment: AppointmentWithDetails) => void;
   isLoading?: boolean;
+  /** Per-appointment edit access: if provided and returns false, hides edit/complete/noshow/cancel for that row */
+  canEditAppointment?: (appointment: AppointmentWithDetails) => boolean;
+  /** If false, hides the delete button for all rows */
+  canDeleteAppointment?: boolean;
 }
 
 // Format date for display
@@ -151,6 +155,8 @@ function AppointmentTable({
   onNoShow,
   onCancel,
   isLoading = false,
+  canEditAppointment,
+  canDeleteAppointment = true,
 }: AppointmentTableProps) {
   const [sortField, setSortField] = useState<SortField>('datum');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -439,110 +445,121 @@ function AppointmentTable({
 
                   {/* Actions - Always visible */}
                   <td className="px-4 py-3.5">
-                    <div className="flex items-center justify-end gap-0.5 flex-nowrap">
-                      {/* Complete - only show if not already completed/cancelled/no_show */}
-                      {onComplete && !['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel'].includes(String(appointment.status)) && (
-                        <motion.button
-                          type="button"
-                          onClick={() => onComplete(appointment)}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
-                          title="Zaključi termin"
-                        >
-                          <CheckCircle className="h-4 w-4" weight="regular" />
-                        </motion.button>
-                      )}
-                      {/* View */}
-                      <motion.button
-                        type="button"
-                        onClick={() => onView(appointment)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-violet-50 hover:text-violet-600"
-                        title="Podrobnosti"
-                      >
-                        <Eye className="h-4 w-4" weight="regular" />
-                      </motion.button>
-                      {/* Edit */}
-                      <motion.button
-                        type="button"
-                        onClick={() => onEdit(appointment)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                        title="Uredi"
-                      >
-                        <PencilSimple className="h-4 w-4" weight="regular" />
-                      </motion.button>
-                      {/* Actions Menu (No Show, Cancel, Delete) */}
-                      <div className="relative">
-                        <motion.button
-                          type="button"
-                          onClick={() => setOpenActionsMenu(openActionsMenu === appointment.id ? null : appointment.id)}
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                          title="Več možnosti"
-                        >
-                          <DotsThreeVertical className="h-4 w-4" weight="bold" />
-                        </motion.button>
-
-                        {/* Dropdown Menu */}
-                        <AnimatePresence>
-                          {openActionsMenu === appointment.id && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                              transition={{ duration: 0.15 }}
-                              className="absolute right-0 top-full z-50 mt-1 w-36 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-gray-200"
+                    {(() => {
+                      const canEdit = canEditAppointment ? canEditAppointment(appointment) : true;
+                      return (
+                        <div className="flex items-center justify-end gap-0.5 flex-nowrap">
+                          {/* Complete - only show if not already completed/cancelled/no_show and user can edit */}
+                          {canEdit && onComplete && !['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel'].includes(String(appointment.status)) && (
+                            <motion.button
+                              type="button"
+                              onClick={() => onComplete(appointment)}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
+                              title="Zaključi termin"
                             >
-                              {/* No Show */}
-                              {onNoShow && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    onNoShow(appointment);
-                                    setOpenActionsMenu(null);
-                                  }}
-                                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-amber-50 hover:text-amber-700"
-                                >
-                                  <UserMinus className="h-4 w-4" weight="regular" />
-                                  No Show
-                                </button>
-                              )}
-                              {/* Cancel */}
-                              {onCancel && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    onCancel(appointment);
-                                    setOpenActionsMenu(null);
-                                  }}
-                                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-orange-50 hover:text-orange-700"
-                                >
-                                  <XCircle className="h-4 w-4" weight="regular" />
-                                  Odpoved
-                                </button>
-                              )}
-                              {/* Delete */}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  onDelete(appointment);
-                                  setOpenActionsMenu(null);
-                                }}
-                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
-                              >
-                                <Trash className="h-4 w-4" weight="regular" />
-                                Izbriši
-                              </button>
-                            </motion.div>
+                              <CheckCircle className="h-4 w-4" weight="regular" />
+                            </motion.button>
                           )}
-                        </AnimatePresence>
-                      </div>
-                    </div>
+                          {/* View */}
+                          <motion.button
+                            type="button"
+                            onClick={() => onView(appointment)}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-violet-50 hover:text-violet-600"
+                            title="Podrobnosti"
+                          >
+                            <Eye className="h-4 w-4" weight="regular" />
+                          </motion.button>
+                          {/* Edit */}
+                          {canEdit && (
+                            <motion.button
+                              type="button"
+                              onClick={() => onEdit(appointment)}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95 }}
+                              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                              title="Uredi"
+                            >
+                              <PencilSimple className="h-4 w-4" weight="regular" />
+                            </motion.button>
+                          )}
+                          {/* Actions Menu (No Show, Cancel, Delete) — only when at least one action is available */}
+                          {(canEdit || canDeleteAppointment) && (
+                            <div className="relative">
+                              <motion.button
+                                type="button"
+                                onClick={() => setOpenActionsMenu(openActionsMenu === appointment.id ? null : appointment.id)}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                                title="Več možnosti"
+                              >
+                                <DotsThreeVertical className="h-4 w-4" weight="bold" />
+                              </motion.button>
+
+                              {/* Dropdown Menu */}
+                              <AnimatePresence>
+                                {openActionsMenu === appointment.id && (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="absolute right-0 top-full z-50 mt-1 w-36 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-gray-200"
+                                  >
+                                    {/* No Show */}
+                                    {canEdit && onNoShow && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          onNoShow(appointment);
+                                          setOpenActionsMenu(null);
+                                        }}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                                      >
+                                        <UserMinus className="h-4 w-4" weight="regular" />
+                                        No Show
+                                      </button>
+                                    )}
+                                    {/* Cancel */}
+                                    {canEdit && onCancel && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          onCancel(appointment);
+                                          setOpenActionsMenu(null);
+                                        }}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-orange-50 hover:text-orange-700"
+                                      >
+                                        <XCircle className="h-4 w-4" weight="regular" />
+                                        Odpoved
+                                      </button>
+                                    )}
+                                    {/* Delete */}
+                                    {canDeleteAppointment && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          onDelete(appointment);
+                                          setOpenActionsMenu(null);
+                                        }}
+                                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
+                                      >
+                                        <Trash className="h-4 w-4" weight="regular" />
+                                        Izbriši
+                                      </button>
+                                    )}
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </td>
                 </tr>
               ))}

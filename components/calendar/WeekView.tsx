@@ -32,6 +32,7 @@ interface WeekViewProps {
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
   onEventClick?: (event: CalendarEvent) => void;
+  onAbsenceClick?: (absence: Absence) => void;
   onDateClick?: (date: Date) => void;
   showAllDays?: boolean;
   onGridSlotClick?: (date: Date, time: string) => void;
@@ -110,7 +111,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function WeekView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onDateClick, showAllDays = true, onGridSlotClick, companySchedule }: WeekViewProps) {
+function WeekView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, showAllDays = true, onGridSlotClick, companySchedule }: WeekViewProps) {
   const [isMobile, setIsMobile] = useState(false);
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const gridScrollRef = useRef<HTMLDivElement>(null);
@@ -278,8 +279,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
               return (
                 <div
                   key={getLocalDateKey(day)}
-                  className={`flex flex-col items-center py-2.5
-                             ${hasAbsence ? 'bg-amber-50/50' : ''}`}
+                  className="flex flex-col items-center py-2.5"
                   style={isMobile ? { scrollSnapAlign: 'start' } as React.CSSProperties : undefined}
                 >
                   <span
@@ -308,17 +308,37 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                   </button>
                   {hasAbsence && !isMobile && (
                     <div className="mt-1 flex flex-col gap-0.5 w-full px-1">
-                      {dayAbsences.slice(0, 2).map((absence) => (
-                        <span
-                          key={absence.id}
-                          className="text-[9px] font-medium text-amber-700 truncate text-center"
-                          title={`${absence.employee_name || 'Vsi'}${absence.reason ? ` - ${absence.reason}` : ''}`}
-                        >
-                          {absence.employee_name || 'Vsi'}{absence.reason ? `: ${absence.reason}` : ''}
-                        </span>
-                      ))}
+                      {dayAbsences.slice(0, 2).map((absence) => {
+                        const titleStyle = absence.employee_color ? {
+                          background: absence.employee_color,
+                          WebkitBackgroundClip: 'text' as const,
+                          WebkitTextFillColor: 'transparent' as const,
+                          backgroundClip: 'text' as const,
+                        } : { color: '#92400E' };
+                        return (
+                          <div
+                            key={absence.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => onAbsenceClick?.(absence)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAbsenceClick?.(absence); }}
+                            title={`${absence.employee_name || 'Vsi'}${absence.reason ? ` - ${absence.reason}` : ''}`}
+                            className="cursor-pointer w-full"
+                            style={{ padding: '1.5px', background: '#F59E0B', borderRadius: '5px' }}
+                          >
+                            <div
+                              className="w-full flex items-center gap-1 min-w-0 overflow-hidden"
+                              style={{ background: '#FFFBEB', borderRadius: '3px', padding: '1.5px 5px' }}
+                            >
+                              <span className="text-[9px] font-semibold truncate flex-1 leading-tight" style={titleStyle}>
+                                {absence.employee_name || 'Vsi'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
                       {dayAbsences.length > 2 && (
-                        <span className="text-[9px] text-amber-600 text-center">
+                        <span className="text-[9px] text-amber-600 text-right">
                           +{dayAbsences.length - 2} več
                         </span>
                       )}
@@ -400,7 +420,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                       style={{
                         top: `${top}px`,
                         height: `${height}px`,
-                        background: 'rgba(0,0,0,0.018)',
+                        background: 'repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(0,0,0,0.045) 6px, rgba(0,0,0,0.045) 7px)',
                       }}
                     />
                   );

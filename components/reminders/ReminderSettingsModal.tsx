@@ -432,8 +432,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                         {([
                           { value: 'yes' as const, label: 'Da' },
                           { value: 'no' as const, label: 'Ne' },
-                          { value: 'auto' as const, label: 'AI sam odloči', recommended: true },
-                        ] as { value: 'yes' | 'no' | 'auto'; label: string; recommended?: boolean }[]).map((opt) => (
+                          { value: 'auto' as const, label: 'AI določi' },
+                        ] as { value: 'yes' | 'no' | 'auto'; label: string }[]).map((opt) => (
                           <button
                             key={opt.value}
                             type="button"
@@ -448,15 +448,6 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                             } : undefined}
                           >
                             {opt.label}
-                            {opt.recommended && (
-                              <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                                nastvetiStoritev === opt.value
-                                  ? 'bg-white/20 text-white'
-                                  : 'bg-gray-100 text-gray-500'
-                              }`}>
-                                priporočeno
-                              </span>
-                            )}
                           </button>
                         ))}
                       </div>

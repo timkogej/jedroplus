@@ -33,9 +33,11 @@ interface DayViewProps {
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
   onEventClick?: (event: CalendarEvent) => void;
+  onAbsenceClick?: (absence: Absence) => void;
   employees?: (Zaposleni & { initials: string })[];
   onGridSlotClick?: (date: Date, time: string) => void;
   companySchedule?: CompanySchedule | null;
+  showAllDays?: boolean;
 }
 
 // Calculate overlapping appointments and assign columns (same as WeekView)
@@ -105,7 +107,10 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, employees = [], onGridSlotClick, companySchedule }: DayViewProps) {
+function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true }: DayViewProps) {
+  // If showAllDays=false and it's a weekend, show "not a working day" state
+  const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
+  const skipDay = !showAllDays && isWeekend;
   // Filter appointments for current day
   const dayAppointments = useMemo(() => {
     return appointments.filter((apt) => {
@@ -194,6 +199,15 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
     onGridSlotClick(currentDate, time);
   }, [onGridSlotClick, currentDate]);
 
+  if (skipDay) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center text-center">
+        <p className="text-sm font-medium text-gray-400">{DAYS_FULL[currentDate.getDay()]} ni delovni dan</p>
+        <p className="text-xs text-gray-300 mt-1">{formatDate(currentDate, 'dayMonth')} {currentDate.getFullYear()}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full flex-col">
       {/* Day header - Apple Calendar style */}
@@ -242,29 +256,40 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
               </div>
             )}
             <div className="flex items-center gap-3">
-            {/* Absence indicators */}
+            {/* Absence indicators - event card style, clickable */}
             {hasAbsence && (
-              <div className="flex flex-wrap items-center gap-2">
-                {dayAbsences.map((absence) => (
-                  <div
-                    key={absence.id}
-                    className="flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5"
-                  >
-                    {absence.employee_name && (
-                      <span className="text-xs font-semibold text-amber-800">
-                        {absence.employee_name}
-                      </span>
-                    )}
-                    {absence.reason && (
-                      <span className="text-xs text-amber-700">
-                        {absence.employee_name ? `- ${absence.reason}` : absence.reason}
-                      </span>
-                    )}
-                    {!absence.employee_name && !absence.reason && (
-                      <span className="text-xs text-amber-700">Odsotnost</span>
-                    )}
-                  </div>
-                ))}
+              <div className="flex flex-col gap-1">
+                {dayAbsences.map((absence) => {
+                  const titleStyle = absence.employee_color ? {
+                    background: absence.employee_color,
+                    WebkitBackgroundClip: 'text' as const,
+                    WebkitTextFillColor: 'transparent' as const,
+                    backgroundClip: 'text' as const,
+                  } : { color: '#92400E' };
+                  return (
+                    <div
+                      key={absence.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => onAbsenceClick?.(absence)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAbsenceClick?.(absence); }}
+                      className="cursor-pointer"
+                      style={{ padding: '1.5px', background: '#F59E0B', borderRadius: '5px' }}
+                    >
+                      <div
+                        className="flex items-center gap-2 min-w-0 overflow-hidden"
+                        style={{ background: '#FFFBEB', borderRadius: '3px', padding: '3px 8px' }}
+                      >
+                        <span className="text-xs font-semibold truncate leading-tight" style={titleStyle}>
+                          {absence.employee_name || 'Vsi zaposleni'}
+                        </span>
+                        {absence.reason && (
+                          <span className="text-[10px] text-amber-600 truncate max-w-[80px]">{absence.reason}</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
             <div className="flex items-center gap-1.5 rounded-full bg-[#F7F8FA] px-3 py-1.5">
@@ -360,7 +385,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                         style={{
                           top: `${top}px`,
                           height: `${height}px`,
-                          background: 'rgba(0,0,0,0.018)',
+                          background: 'repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(0,0,0,0.045) 6px, rgba(0,0,0,0.045) 7px)',
                         }}
                       />
                     );
@@ -489,7 +514,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                   style={{
                     top: `${top}px`,
                     height: `${height}px`,
-                    background: 'rgba(0,0,0,0.018)',
+                    background: 'repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(0,0,0,0.045) 6px, rgba(0,0,0,0.045) 7px)',
                   }}
                 />
               );

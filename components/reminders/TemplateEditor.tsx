@@ -49,9 +49,10 @@ function parseTemplate(template: string): Array<{ type: 'text' | 'token'; value:
 
 // Inline styles for token spans rendered inside contentEditable
 const TOKEN_OUTER = [
-  'display:inline-block',
+  'display:inline-flex',
+  'align-items:center',
   'border-radius:999px',
-  'padding:2px 10px',
+  'padding:3px 10px',
   'white-space:nowrap',
   'cursor:default',
   'user-select:none',
@@ -72,6 +73,7 @@ const TOKEN_INNER = [
   'font-weight:600',
   'font-size:11px',
   'letter-spacing:0.01em',
+  'line-height:1',
 ].join(';');
 
 // Build HTML string for contentEditable from raw template

@@ -15,6 +15,7 @@ import {
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
@@ -36,6 +37,8 @@ const isEnabledValue = (value: unknown, fallback = false) => {
 
 export default function RemindersPage() {
   const { companyId, companySettings } = useCompany();
+  const { role, permissions } = useRolePermissions();
+  const canManageSettings = role !== 'staff' || (permissions?.can_manage_opomniki ?? true);
   const [companyRow, setCompanyRow] = useState<Record<string, unknown> | null>(
     companySettings ?? null
   );
@@ -60,6 +63,14 @@ export default function RemindersPage() {
   const [emailSecondary, setEmailSecondary] = useState('');
   const [nastvetiStoritev, setNastvetiStoritev] = useState<'yes' | 'no' | 'auto'>('auto');
   const [smsSenderId, setSmsSenderId] = useState('');
+  const [smsModePred, setSmsModePred] = useState<'ai' | 'manual'>('ai');
+  const [smsModePo, setSmsModePo] = useState<'ai' | 'manual'>('ai');
+  const [smsTemplatePred, setSmsTemplatePred] = useState('');
+  const [smsTemplatePo, setSmsTemplatePo] = useState('');
+  const [smsStoritevPred, setSmsStoritevPred] = useState(false);
+  const [smsNavodilaPred, setSmsNavodilaPred] = useState(false);
+  const [smsStoritevPo, setSmsStoritevPo] = useState(false);
+  const [smsNavodilaPo, setSmsNavodilaPo] = useState(false);
 
   // Stats
   const [stats, setStats] = useState({
@@ -76,6 +87,18 @@ export default function RemindersPage() {
       const { data: companyData } = await loadCompanyRow(companyId);
       setCompanyRow(companyData ?? null);
       setReminderRow(companyData ?? null);
+
+      // Load sms_sender_id from companies table
+      try {
+        const { data: companiesData } = await supabaseReadOnly
+          .from('companies')
+          .select('sms_sender_id')
+          .eq('company_id', companyId)
+          .maybeSingle();
+        if (companiesData?.sms_sender_id) {
+          setSmsSenderId(String(companiesData.sms_sender_id));
+        }
+      } catch {}
 
       // Fetch stats from appointments
       const today = new Date();
@@ -156,6 +179,23 @@ export default function RemindersPage() {
     setNastvetiStoritev(nsVal === 'yes' ? 'yes' : nsVal === 'no' ? 'no' : 'auto');
 
     setSmsSenderId(String(source['sms_sender_id'] ?? ''));
+
+    // SMS mode settings
+    const parseBool = (v: unknown) => {
+      if (typeof v === 'boolean') return v;
+      if (typeof v === 'string') return v.toLowerCase() === 'true' || v.toLowerCase() === 'yes';
+      return false;
+    };
+    const smsTypePred = String(source['sms_type_pred'] ?? 'AI').toUpperCase();
+    setSmsModePred(smsTypePred === 'LP' ? 'manual' : 'ai');
+    const smsTypePo = String(source['sms_type_po'] ?? 'AI').toUpperCase();
+    setSmsModePo(smsTypePo === 'LP' ? 'manual' : 'ai');
+    setSmsTemplatePred(String(source['lastna_predloga_pred'] ?? ''));
+    setSmsTemplatePo(String(source['lastna_predloga_po'] ?? ''));
+    setSmsStoritevPred(parseBool(source['sms_storitev_pred']));
+    setSmsNavodilaPred(parseBool(source['sms_navodila_pred']));
+    setSmsStoritevPo(parseBool(source['sms_storitev_po']));
+    setSmsNavodilaPo(parseBool(source['sms_navodila_po']));
   }, [reminderRow, companyRow]);
 
   const getToneLabel = (toneValue: string) => {
@@ -204,15 +244,17 @@ export default function RemindersPage() {
 
             <div className="flex items-center gap-3">
               {/* Settings button */}
-              <motion.button
-                onClick={() => setShowSettingsModal(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
-                title="Nastavitve"
-              >
-                <Gear size={20} weight="bold" className="text-gray-900" />
-              </motion.button>
+              {canManageSettings && (
+                <motion.button
+                  onClick={() => setShowSettingsModal(true)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
+                  title="Nastavitve"
+                >
+                  <Gear size={20} weight="bold" className="text-gray-900" />
+                </motion.button>
+              )}
             </div>
           </motion.div>
 
@@ -346,18 +388,16 @@ export default function RemindersPage() {
                     </span>
                   </div>
 
-                  {smsSenderId && (
-                    <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                      <div className="flex items-center gap-2">
-                        <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
-                        <div>
-                          <span className="text-sm font-medium text-gray-700">ID pošiljatelja</span>
-                          <p className="text-xs text-gray-400">Uporablja se pri SMS pošiljanju</p>
-                        </div>
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                      <div>
+                        <span className="text-sm font-medium text-gray-700">ID pošiljatelja</span>
+                        <p className="text-xs text-gray-400">Uporablja se pri SMS pošiljanju</p>
                       </div>
-                      <span className="text-sm font-semibold text-gray-900">{smsSenderId}</span>
                     </div>
-                  )}
+                    <span className="text-sm font-semibold text-gray-900">{smsSenderId || <span className="font-normal text-gray-400">Ni nastavljeno</span>}</span>
+                  </div>
 
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
@@ -365,7 +405,7 @@ export default function RemindersPage() {
                       <span className="text-sm font-medium text-gray-700">Nasveti glede na storitev</span>
                     </div>
                     <span className="text-sm font-semibold text-gray-900">
-                      {nastvetiStoritev === 'yes' ? 'Da' : nastvetiStoritev === 'no' ? 'Ne' : 'AI sam odloči'}
+                      {nastvetiStoritev === 'yes' ? 'Da' : nastvetiStoritev === 'no' ? 'Ne' : 'AI določi'}
                     </span>
                   </div>
 
@@ -422,6 +462,45 @@ export default function RemindersPage() {
                         <span className="text-sm font-semibold text-gray-900">{getChannelLabel(beforeChannel)}</span>
                       </div>
 
+                      {beforeChannel === 'sms' && (
+                        <>
+                          <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                            <div className="flex items-center gap-2">
+                              <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                              <span className="text-sm font-medium text-gray-700">Vrsta SMS sporočila</span>
+                            </div>
+                            <span className="text-sm font-semibold text-gray-900">{smsModePred === 'manual' ? 'Lastna predloga' : 'AI ustvari'}</span>
+                          </div>
+                          {smsModePred === 'ai' && (
+                            <div className="py-2.5 border-b border-gray-100 space-y-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                                <span className="text-sm font-medium text-gray-700">AI upošteva</span>
+                              </div>
+                              <div className="pl-6 space-y-1">
+                                {smsStoritevPred && <p className="text-xs text-gray-600">• Vključi storitev</p>}
+                                {smsNavodilaPred && beforeInstructions && (
+                                  <>
+                                    <p className="text-xs text-gray-600">• Navodila</p>
+                                    <p className="text-xs text-gray-500 pl-3 whitespace-pre-wrap text-left">{beforeInstructions}</p>
+                                  </>
+                                )}
+                                {!smsStoritevPred && !smsNavodilaPred && <p className="text-xs text-gray-400">Ni posebnih navodil</p>}
+                              </div>
+                            </div>
+                          )}
+                          {smsModePred === 'manual' && smsTemplatePred && (
+                            <div className="flex items-start justify-between gap-4 py-2.5 border-b border-gray-100">
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                                <span className="text-sm font-medium text-gray-700">Lastna predloga</span>
+                              </div>
+                              <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{smsTemplatePred}</p>
+                            </div>
+                          )}
+                        </>
+                      )}
+
                       <div className={`flex items-center justify-between py-2.5 ${beforeInstructions ? 'border-b border-gray-100' : ''}`}>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-gray-400" weight="regular" />
@@ -436,7 +515,7 @@ export default function RemindersPage() {
                             <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
                             <span className="text-sm font-medium text-gray-700">Navodila</span>
                           </div>
-                          <p className="text-sm text-gray-600 whitespace-pre-wrap text-right max-w-xs">{beforeInstructions}</p>
+                          <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{beforeInstructions}</p>
                         </div>
                       )}
                     </>
@@ -476,6 +555,45 @@ export default function RemindersPage() {
                         <span className="text-sm font-semibold text-gray-900">{getChannelLabel(afterChannel)}</span>
                       </div>
 
+                      {afterChannel === 'sms' && (
+                        <>
+                          <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                            <div className="flex items-center gap-2">
+                              <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                              <span className="text-sm font-medium text-gray-700">Vrsta SMS sporočila</span>
+                            </div>
+                            <span className="text-sm font-semibold text-gray-900">{smsModePo === 'manual' ? 'Lastna predloga' : 'AI ustvari'}</span>
+                          </div>
+                          {smsModePo === 'ai' && (
+                            <div className="py-2.5 border-b border-gray-100 space-y-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                                <span className="text-sm font-medium text-gray-700">AI upošteva</span>
+                              </div>
+                              <div className="pl-6 space-y-1">
+                                {smsStoritevPo && <p className="text-xs text-gray-600">• Vključi storitev</p>}
+                                {smsNavodilaPo && afterInstructions && (
+                                  <>
+                                    <p className="text-xs text-gray-600">• Navodila</p>
+                                    <p className="text-xs text-gray-500 pl-3 whitespace-pre-wrap text-left">{afterInstructions}</p>
+                                  </>
+                                )}
+                                {!smsStoritevPo && !smsNavodilaPo && <p className="text-xs text-gray-400">Ni posebnih navodil</p>}
+                              </div>
+                            </div>
+                          )}
+                          {smsModePo === 'manual' && smsTemplatePo && (
+                            <div className="flex items-start justify-between gap-4 py-2.5 border-b border-gray-100">
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
+                                <span className="text-sm font-medium text-gray-700">Lastna predloga</span>
+                              </div>
+                              <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{smsTemplatePo}</p>
+                            </div>
+                          )}
+                        </>
+                      )}
+
                       <div className={`flex items-center justify-between py-2.5 ${(afterHasDiscount && afterDiscountText) || afterInstructions ? 'border-b border-gray-100' : ''}`}>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-gray-400" weight="regular" />
@@ -500,7 +618,7 @@ export default function RemindersPage() {
                             <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
                             <span className="text-sm font-medium text-gray-700">Navodila</span>
                           </div>
-                          <p className="text-sm text-gray-600 whitespace-pre-wrap text-right max-w-xs">{afterInstructions}</p>
+                          <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{afterInstructions}</p>
                         </div>
                       )}
                     </>
@@ -524,10 +642,13 @@ export default function RemindersPage() {
               <div className="flex-1">
                 <h4 className="font-semibold text-gray-900 mb-1">O Opomnikih</h4>
                 <p className="text-sm text-gray-700">
-                  Opomniki se pošiljajo avtomatsko na podlagi tukaj prikazanih nastavitev.
-                  Stranke prejmejo opomnik pred terminom in/ali po zaključenem terminu,
-                  odvisno od konfiguracije. Sistem samodejno prilagaja vsebino glede na
-                  izbran ton komunikacije.
+                  Opomniki se pošiljajo avtomatsko na podlagi tukaj prikazanih nastavitev — brez ročnega dela. Vsaka stranka prejme sporočilo pred in/ali po terminu, odvisno od vaše konfiguracije.
+
+Ko je aktiviran AI, sporočila niso nikoli enaka — AI si zapomni kontekst stranke, omeni pravo storitev in prilagodi vsebino, da zveni naravno in osebno. To pomeni večjo odprtost, bolj zapomnjena sporočila in stranke, ki se počutijo cenjene.
+
+Za lažje upravljanje je na voljo tudi možnost lastne predloge sporočila, kadar želite popoln nadzor nad vsebino.
+
+V kolikor imate kakršnakoli vprašanja, nas kontaktirajte na help@jedroplus.com.
                 </p>
               </div>
             </div>

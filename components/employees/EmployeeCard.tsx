@@ -6,12 +6,12 @@ import {
   Envelope,
   Phone,
   Briefcase,
-  CalendarBlank,
   PencilSimple,
   Trash,
   ToggleLeft,
   ToggleRight,
   GearSix,
+  LinkSimple,
 } from '@phosphor-icons/react';
 import type { Employee } from '@/types/employees';
 import EmployeeAvatar from './EmployeeAvatar';
@@ -22,7 +22,13 @@ interface EmployeeCardProps {
   onDelete: (employee: Employee) => void;
   onToggleActive: (employee: Employee) => void;
   onSettings?: (employee: Employee) => void;
+  onConnect?: (employee: Employee) => void;
+  showConnectButton?: boolean;
   index?: number;
+  /** If false, hides edit and settings buttons */
+  canEdit?: boolean;
+  /** If false, hides delete button */
+  canDelete?: boolean;
 }
 
 function EmployeeCard({
@@ -31,7 +37,11 @@ function EmployeeCard({
   onDelete,
   onToggleActive,
   onSettings,
+  onConnect,
+  showConnectButton = false,
   index = 0,
+  canEdit = true,
+  canDelete = true,
 }: EmployeeCardProps) {
   const fullName = `${employee.ime} ${employee.priimek}`.trim();
 
@@ -83,19 +93,19 @@ function EmployeeCard({
           )}
         </div>
 
-        {/* Contact info */}
+        {/* Contact info — always reserve two rows for consistent card height */}
         <div className="mt-4 space-y-2">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Envelope className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
-            <span className="truncate">{employee.email}</span>
+            <span className="truncate">{employee.email || '—'}</span>
           </div>
 
-          {employee.telefon && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
-              <span>{employee.telefon}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-sm">
+            <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
+            <span className={employee.telefon ? 'text-gray-600' : 'text-gray-300'}>
+              {employee.telefon || '—'}
+            </span>
+          </div>
         </div>
 
         {/* Stats: Danes, Teden, Mesec */}
@@ -115,6 +125,20 @@ function EmployeeCard({
             <p className="text-xs text-gray-500">Mesec</p>
           </div>
         </div>
+
+        {/* Connect button */}
+        {showConnectButton && onConnect && (
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onConnect(employee); }}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/10 px-3 py-2 text-xs font-medium text-violet-700 ring-1 ring-violet-200 transition-all hover:from-violet-500/20 hover:to-cyan-500/20 hover:ring-violet-300"
+            >
+              <LinkSimple className="h-3.5 w-3.5" weight="bold" />
+              Poveži moj račun s to osebo
+            </button>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
@@ -145,7 +169,7 @@ function EmployeeCard({
 
           {/* Settings/Edit/Delete buttons */}
           <div className="flex items-center gap-1">
-            {onSettings && (
+            {canEdit && onSettings && (
               <motion.button
                 type="button"
                 onClick={() => onSettings(employee)}
@@ -157,26 +181,30 @@ function EmployeeCard({
                 <GearSix className="h-4 w-4" weight="regular" />
               </motion.button>
             )}
-            <motion.button
-              type="button"
-              onClick={() => onEdit(employee)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-pink-50 hover:text-pink-600"
-              title="Uredi podatke"
-            >
-              <PencilSimple className="h-4 w-4" weight="regular" />
-            </motion.button>
-            <motion.button
-              type="button"
-              onClick={() => onDelete(employee)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
-              title="Izbriši"
-            >
-              <Trash className="h-4 w-4" weight="regular" />
-            </motion.button>
+            {canEdit && (
+              <motion.button
+                type="button"
+                onClick={() => onEdit(employee)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-pink-50 hover:text-pink-600"
+                title="Uredi podatke"
+              >
+                <PencilSimple className="h-4 w-4" weight="regular" />
+              </motion.button>
+            )}
+            {canDelete && (
+              <motion.button
+                type="button"
+                onClick={() => onDelete(employee)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                title="Izbriši"
+              >
+                <Trash className="h-4 w-4" weight="regular" />
+              </motion.button>
+            )}
           </div>
         </div>
       </div>

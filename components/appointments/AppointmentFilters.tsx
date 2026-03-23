@@ -22,13 +22,12 @@ interface AppointmentFiltersProps {
   onFiltersChange: (filters: FilterState) => void;
   employees: Zaposleni[];
   services: Storitev[];
+  restrictedEmployeeId?: string | null;
 }
 
 const STATUS_OPTIONS: { value: AppointmentStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'Vsi statusi' },
   { value: 'scheduled', label: 'Načrtovan' },
-  { value: 'confirmed', label: 'Potrjen' },
-  { value: 'pending', label: 'Čakajoč' },
   { value: 'completed', label: 'Zaključen' },
   { value: 'cancelled', label: 'Odpovedan' },
   { value: 'no_show', label: 'Ni prišel' },
@@ -39,6 +38,7 @@ function AppointmentFilters({
   onFiltersChange,
   employees,
   services,
+  restrictedEmployeeId,
 }: AppointmentFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -110,12 +110,12 @@ function AppointmentFilters({
     const config = getStatusConfig(status);
     // Extract the base color from dotClass (e.g., 'bg-emerald-500' -> '#10B981')
     const colorMap: Record<string, string> = {
-      'scheduled': '#8B5CF6',
+      'scheduled': '#10B981',
       'confirmed': '#10B981',
       'pending': '#F59E0B',
-      'completed': '#3B82F6',
+      'completed': '#9CA3AF',
       'cancelled': '#EF4444',
-      'no_show': '#6B7280',
+      'no_show': '#F97316',
     };
     return colorMap[status];
   };
@@ -225,18 +225,32 @@ function AppointmentFilters({
                 <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
                   Zaposleni
                 </label>
-                <Select
-                  value={filters.employeeId || ''}
-                  setValue={(value) => updateFilter('employeeId', value || null)}
-                  placeholder="Vsi zaposleni"
-                >
-                  <SelectOption key="all-employees" value="">Vsi zaposleni</SelectOption>
-                  {employees.map((employee, idx) => (
-                    <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
-                      {employee.ime} {employee.priimek}
-                    </SelectOption>
-                  ))}
-                </Select>
+                {restrictedEmployeeId ? (
+                  <Select
+                    value={filters.employeeId || ''}
+                    setValue={() => {}}
+                    placeholder="Zaposleni"
+                  >
+                    {employees.map((employee, idx) => (
+                      <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
+                        {employee.ime} {employee.priimek}
+                      </SelectOption>
+                    ))}
+                  </Select>
+                ) : (
+                  <Select
+                    value={filters.employeeId || ''}
+                    setValue={(value) => updateFilter('employeeId', value || null)}
+                    placeholder="Vsi zaposleni"
+                  >
+                    <SelectOption key="all-employees" value="">Vsi zaposleni</SelectOption>
+                    {employees.map((employee, idx) => (
+                      <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
+                        {employee.ime} {employee.priimek}
+                      </SelectOption>
+                    ))}
+                  </Select>
+                )}
               </div>
 
               {/* Service filter */}

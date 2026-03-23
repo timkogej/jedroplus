@@ -19,6 +19,8 @@ import {
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
+import { useRolePermissions } from '@/app/role-permission-context';
+import DisabledActionModal from '@/components/DisabledActionModal';
 import type { Client, ClientFormData, ClientStats } from '@/types/clients';
 import {
   fetchClientsWithCount,
@@ -190,6 +192,13 @@ export default function ClientsPage() {
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
+  const { role, permissions } = useRolePermissions();
+  const [showDisabledCreateModal, setShowDisabledCreateModal] = useState(false);
+
+  const canCreateClient = role !== 'staff' || (permissions?.can_create_clients ?? true);
+  const canViewClient   = role !== 'staff' || (permissions?.can_view_clients ?? true);
+  const canEditClient   = role !== 'staff' || (permissions?.can_edit_clients ?? true);
+  const canDeleteClient = role !== 'staff' || (permissions?.can_delete_clients ?? true);
 
   // Data states
   const [clients, setClients] = useState<Client[]>([]);
@@ -692,7 +701,7 @@ export default function ClientsPage() {
               {/* Nova stranka button */}
               <motion.button
                 type="button"
-                onClick={openCreateModal}
+                onClick={canCreateClient ? openCreateModal : () => setShowDisabledCreateModal(true)}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.02 }}
@@ -811,6 +820,9 @@ export default function ClientsPage() {
               onEdit={openEditModal}
               onDelete={openDeleteModal}
               onView={openDetailsPanel}
+              canViewClient={canViewClient}
+              canEditClient={canEditClient}
+              canDeleteClient={canDeleteClient}
             />
           )}
         </div>
@@ -856,6 +868,12 @@ export default function ClientsPage() {
           />
         )}
       </AnimatePresence>
+
+      <DisabledActionModal
+        isOpen={showDisabledCreateModal}
+        onClose={() => setShowDisabledCreateModal(false)}
+        message="Lastnik podjetja je onemogočil dodajanje novih strank. Obrnite se nanj, da vam to omogoči."
+      />
     </ProtectedLayout>
   );
 }

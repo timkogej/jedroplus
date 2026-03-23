@@ -25,6 +25,9 @@ interface ClientTableProps {
   onDelete: (client: Client) => void;
   onView: (client: Client) => void;
   isLoading?: boolean;
+  canViewClient?: boolean;
+  canEditClient?: boolean;
+  canDeleteClient?: boolean;
 }
 
 // Format date for display
@@ -129,6 +132,9 @@ function ClientTable({
   onDelete,
   onView,
   isLoading = false,
+  canViewClient = true,
+  canEditClient = true,
+  canDeleteClient = true,
 }: ClientTableProps) {
   const [sortField, setSortField] = useState<ClientSortField>('priimek');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -334,36 +340,42 @@ function ClientTable({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
-                      <motion.button
-                        type="button"
-                        onClick={() => onView(client)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                        title="Podrobnosti"
-                      >
-                        <Eye className="h-4 w-4" weight="bold" />
-                      </motion.button>
-                      <motion.button
-                        type="button"
-                        onClick={() => onEdit(client)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-amber-50 hover:text-amber-600"
-                        title="Uredi"
-                      >
-                        <PencilSimple className="h-4 w-4" weight="bold" />
-                      </motion.button>
-                      <motion.button
-                        type="button"
-                        onClick={() => onDelete(client)}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                        title="Izbriši"
-                      >
-                        <Trash className="h-4 w-4" weight="bold" />
-                      </motion.button>
+                      {canViewClient && (
+                        <motion.button
+                          type="button"
+                          onClick={() => onView(client)}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                          title="Podrobnosti"
+                        >
+                          <Eye className="h-4 w-4" weight="bold" />
+                        </motion.button>
+                      )}
+                      {canEditClient && (
+                        <motion.button
+                          type="button"
+                          onClick={() => onEdit(client)}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-amber-50 hover:text-amber-600"
+                          title="Uredi"
+                        >
+                          <PencilSimple className="h-4 w-4" weight="bold" />
+                        </motion.button>
+                      )}
+                      {canDeleteClient && (
+                        <motion.button
+                          type="button"
+                          onClick={() => onDelete(client)}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                          title="Izbriši"
+                        >
+                          <Trash className="h-4 w-4" weight="bold" />
+                        </motion.button>
+                      )}
                     </div>
                   </td>
                 </motion.tr>

@@ -13,6 +13,10 @@ interface EmployeeGridProps {
   onDelete: (employee: Employee) => void;
   onToggleActive: (employee: Employee) => void;
   onSettings?: (employee: Employee) => void;
+  onConnect?: (employee: Employee) => void;
+  showConnectButton?: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 function EmployeeGrid({
@@ -22,6 +26,10 @@ function EmployeeGrid({
   onDelete,
   onToggleActive,
   onSettings,
+  onConnect,
+  showConnectButton = false,
+  canEdit = true,
+  canDelete = true,
 }: EmployeeGridProps) {
   if (isLoading) {
     return (
@@ -64,7 +72,11 @@ function EmployeeGrid({
             onDelete={onDelete}
             onToggleActive={onToggleActive}
             onSettings={onSettings}
+            onConnect={onConnect}
+            showConnectButton={showConnectButton && !employee.auth_user_id}
             index={index}
+            canEdit={canEdit}
+            canDelete={canDelete}
           />
         ))}
       </AnimatePresence>

@@ -100,8 +100,8 @@ function detectAppointmentSchema(row: Record<string, unknown>) {
   return {
     idField: pickField(['id', 'ID', 'ID termina']),
     dateField: pickField(['datum', 'Datum', 'date']),
-    timeStartField: pickField(['cas_zacetek', 'Čas začetka', 'time_start', 'Ura']),
-    timeEndField: pickField(['cas_konec', 'Čas konca', 'time_end']),
+    timeStartField: pickField(['Čas', 'cas_zacetek', 'Čas začetka', 'time_start', 'Ura']),
+    timeEndField: pickField(['Konec', 'cas_konec', 'Čas konca', 'time_end']),
     statusField: pickField(['status', 'Status']),
     serviceIdField: pickField(['ID storitve', 'ID storitev', 'storitev_id', 'service_id', 'ID_storitve', 'Storitev']),
     employeeIdField: pickField(['ID osebe', 'ID osebja', 'zaposleni_id', 'employee_id', 'ID_osebja', 'Osebje']),
@@ -572,51 +572,85 @@ export async function fetchEmployeeChartData(
   return sortedData;
 }
 
+// Parse "HH:MM" or "HH:MM:SS" to total minutes from midnight. Returns -1 on failure.
+function parseTimeToMinutes(timeStr: string): number {
+  if (!timeStr) return -1;
+  // Handle ISO datetime strings
+  const t = timeStr.includes('T') ? timeStr.split('T')[1] : timeStr;
+  const parts = t.split(':');
+  if (parts.length < 2) return -1;
+  const hours = parseInt(parts[0], 10);
+  const minutes = parseInt(parts[1], 10);
+  if (isNaN(hours) || isNaN(minutes)) return -1;
+  return hours * 60 + minutes;
+}
+
 /**
- * Fetch hourly occupancy heatmap data
+ * Fetch hourly occupancy heatmap data.
+ * For each appointment, spreads its full time range (Čas → Konec) across
+ * all overlapping working-hour slots. Returns each slot's share (%) of the
+ * total appointment minutes across the whole period.
  */
 export async function fetchHeatmapData(
   companyId: string,
   dateRange: DateRange
 ): Promise<HeatmapData> {
-  console.log('[Analytics] Fetching heatmap data for period:', {
-    start: dateRange.startDate.toISOString(),
-    end: dateRange.endDate.toISOString(),
-  });
-
   const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
     TABLES.bookings,
     companyId,
     5000
   );
 
-  // Initialize grid
-  const grid: HeatmapData = {};
+  // Accumulate minutes per (dayOfWeek, hour) slot
+  const gridMinutes: { [key: string]: number } = {};
   DAYS_OF_WEEK.forEach((_, dayIndex) => {
     WORKING_HOURS.forEach((hour) => {
-      grid[`${dayIndex}-${hour}`] = 0;
+      gridMinutes[`${dayIndex}-${hour}`] = 0;
     });
   });
 
-  // Count appointments per hour/day - count ALL appointments, not just completed
+  let totalMinutes = 0;
+
   for (const row of appointmentsResult.data ?? []) {
     const apt = parseAppointment(row);
-    if (!apt || !apt.datum || !apt.cas_zacetek) continue;
+    if (!apt || !apt.datum) continue;
 
+    // Filter by date range
     const aptDate = new Date(apt.datum);
+    if (isNaN(aptDate.getTime())) continue;
     if (aptDate < dateRange.startDate || aptDate > dateRange.endDate) continue;
 
-    const dayIndex = getDayOfWeekIndex(aptDate);
-    const hourStr = apt.cas_zacetek.split(':')[0];
-    const hour = parseInt(hourStr, 10);
+    const startMin = parseTimeToMinutes(apt.cas_zacetek);
+    const endMin = parseTimeToMinutes(apt.cas_konec);
 
-    if (WORKING_HOURS.includes(hour)) {
-      const key = `${dayIndex}-${hour}`;
-      grid[key] = (grid[key] || 0) + 1;
+    // Need valid start and end; end must be after start
+    if (startMin < 0 || endMin <= startMin) continue;
+
+    const dayIndex = getDayOfWeekIndex(aptDate);
+
+    // Distribute minutes across every overlapping working-hour slot
+    for (const hour of WORKING_HOURS) {
+      const slotStart = hour * 60;
+      const slotEnd = (hour + 1) * 60;
+      const overlapStart = Math.max(startMin, slotStart);
+      const overlapEnd = Math.min(endMin, slotEnd);
+      const overlap = Math.max(0, overlapEnd - overlapStart);
+      if (overlap > 0) {
+        const key = `${dayIndex}-${hour}`;
+        gridMinutes[key] += overlap;
+        totalMinutes += overlap;
+      }
     }
   }
 
-  console.log('[Analytics] Heatmap data computed');
+  // Convert accumulated minutes to percentage of total
+  const grid: HeatmapData = {};
+  for (const key of Object.keys(gridMinutes)) {
+    grid[key] = totalMinutes > 0
+      ? Number(((gridMinutes[key] / totalMinutes) * 100).toFixed(2))
+      : 0;
+  }
+
   return grid;
 }
 

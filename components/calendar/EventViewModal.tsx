@@ -91,13 +91,14 @@ function EventViewModal({
             animate="visible"
             exit="exit"
             className="relative w-full max-w-md flex flex-col rounded-2xl shadow-2xl overflow-hidden"
-            style={{ background: '#fff', maxHeight: '90vh' }}
+            style={{ maxHeight: '90vh', padding: '2px', background: event.color || '#6D5EF7' }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* ── Header (dark) ───────────────────────────────────────────────── */}
+            <div className="flex flex-col rounded-[14px] overflow-hidden" style={{ background: '#fff', maxHeight: 'calc(90vh - 4px)' }}>
+            {/* ── Header (white) ──────────────────────────────────────────────── */}
             <div
               className="px-6 py-5 flex-shrink-0"
-              style={{ background: '#0D0F14' }}
+              style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
@@ -106,10 +107,10 @@ function EventViewModal({
                     style={{ width: 22, height: 22, color: iconColor, flexShrink: 0 }}
                   />
                   <div className="min-w-0">
-                    <h2 className="text-lg font-semibold truncate" style={{ color: '#fff' }}>
+                    <h2 className="text-lg font-semibold truncate" style={{ color: '#1A1F36' }}>
                       {event.title}
                     </h2>
-                    <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                    <p className="text-sm mt-0.5" style={{ color: '#6B7280' }}>
                       {formatDateRange(event.event_date, event.end_date)}
                     </p>
                   </div>
@@ -117,7 +118,7 @@ function EventViewModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-full p-1.5 text-white/40 transition-colors hover:bg-white/10 hover:text-white flex-shrink-0"
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 flex-shrink-0"
                 >
                   <X style={{ width: 20, height: 20 }} weight="bold" />
                 </button>
@@ -264,6 +265,7 @@ function EventViewModal({
                   </button>
                 </>
               )}
+            </div>
             </div>
           </motion.div>
         </motion.div>

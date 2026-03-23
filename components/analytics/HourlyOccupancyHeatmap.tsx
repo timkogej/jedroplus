@@ -17,17 +17,20 @@ interface HourlyOccupancyHeatmapProps {
   customRange?: CustomRange;
 }
 
-function getIntensityColor(count: number): string {
-  if (count === 0) return 'bg-gray-100';
-  if (count <= 2) return 'bg-violet-200';
-  if (count <= 4) return 'bg-violet-400';
-  if (count <= 6) return 'bg-violet-600';
-  return 'bg-violet-800';
+function getIntensityColor(pct: number, maxPct: number): string {
+  if (pct === 0 || maxPct === 0) return 'bg-gray-100';
+  const rel = pct / maxPct;
+  if (rel >= 0.7) return 'bg-violet-800';
+  if (rel >= 0.4) return 'bg-violet-600';
+  if (rel >= 0.2) return 'bg-violet-400';
+  return 'bg-violet-200';
 }
 
-function getTextColor(count: number): string {
-  if (count <= 4) return 'text-violet-900';
-  return 'text-white';
+function getTextColor(pct: number, maxPct: number): string {
+  if (maxPct === 0) return 'text-violet-900';
+  const rel = pct / maxPct;
+  if (rel >= 0.4) return 'text-white';
+  return 'text-violet-900';
 }
 
 function HourlyOccupancyHeatmap({
@@ -37,6 +40,7 @@ function HourlyOccupancyHeatmap({
 }: HourlyOccupancyHeatmapProps) {
   const [heatmapData, setHeatmapData] = useState<HeatmapData>({});
   const [isLoading, setIsLoading] = useState(true);
+  const maxPct = Math.max(...Object.values(heatmapData).filter(v => v > 0), 1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,8 +80,8 @@ function HourlyOccupancyHeatmap({
       className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Zasedenost po Urah</h3>
-        <p className="mt-1 text-sm text-gray-500">Termini po dnevih in urah</p>
+        <h3 className="text-lg font-semibold text-gray-900">Zasedenost po urah</h3>
+        <p className="mt-1 text-sm text-gray-500">Delež skupnega časa terminov po dnevih in urah</p>
       </div>
 
       {/* Heatmap Grid */}
@@ -99,17 +103,17 @@ function HourlyOccupancyHeatmap({
               <div className="flex w-12 items-center text-sm font-medium text-gray-700">{day}</div>
               {WORKING_HOURS.map((hour) => {
                 const key = `${dayIndex}-${hour}`;
-                const count = heatmapData[key] || 0;
+                const pct = heatmapData[key] || 0;
                 return (
                   <motion.div
                     key={key}
                     whileHover={{ scale: 1.1 }}
-                    className={`mx-0.5 flex h-8 w-10 cursor-pointer items-center justify-center rounded transition-all ${getIntensityColor(count)}`}
-                    title={`${day} ${hour}:00 - ${count} terminov`}
+                    className={`mx-0.5 flex h-8 w-10 cursor-pointer items-center justify-center rounded transition-all ${getIntensityColor(pct, maxPct)}`}
+                    title={`${day} ${hour}:00–${hour + 1}:00 · ${pct.toFixed(1)}% zasedenosti`}
                   >
-                    {count > 0 && (
-                      <span className={`text-xs font-semibold ${getTextColor(count)}`}>
-                        {count}
+                    {pct >= 0.5 && (
+                      <span className={`text-[10px] font-semibold ${getTextColor(pct, maxPct)}`}>
+                        {pct.toFixed(0)}%
                       </span>
                     )}
                   </motion.div>
@@ -122,7 +126,7 @@ function HourlyOccupancyHeatmap({
 
       {/* Legend */}
       <div className="mt-6 flex items-center gap-4">
-        <span className="text-sm text-gray-600">Manj</span>
+        <span className="text-sm text-gray-600">Manj zasedeno</span>
         <div className="flex gap-1">
           <div className="h-6 w-6 rounded bg-gray-100" />
           <div className="h-6 w-6 rounded bg-violet-200" />
@@ -130,8 +134,11 @@ function HourlyOccupancyHeatmap({
           <div className="h-6 w-6 rounded bg-violet-600" />
           <div className="h-6 w-6 rounded bg-violet-800" />
         </div>
-        <span className="text-sm text-gray-600">Več</span>
+        <span className="text-sm text-gray-600">Bolj zasedeno</span>
       </div>
+      <p className="mt-2 text-xs text-gray-400">
+        % prikazuje delež skupnega časa terminov v posamezni urni reži
+      </p>
     </motion.div>
   );
 }

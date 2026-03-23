@@ -22,4 +22,5 @@ export interface CalendarEvent {
   updated_by?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
+  enable_booking?: boolean | string | null;
 }

@@ -33,6 +33,8 @@ import EmployeeGrid from '@/components/employees/EmployeeGrid';
 import EmployeeModal from '@/components/employees/EmployeeModal';
 import DeleteEmployeeModal from '@/components/employees/DeleteEmployeeModal';
 import EmployeeSettingsModal from '@/components/employees/EmployeeSettingsModal';
+import ConnectEmployeeModal from '@/components/employees/ConnectEmployeeModal';
+import { getUserPersonId } from '@/lib/supabase/companyMembers';
 import { defaultWorkingHoursDay } from '@/types/settings';
 import type { WorkingHoursDay, TimeInterval } from '@/types/settings';
 import { loadCompanyRow } from '@/lib/settingsStore';
@@ -50,6 +52,7 @@ import {
   getNextStaffId,
 } from '@/src/lib/idGenerators';
 import { Select, SelectOption } from '@/components/ui/animated-select';
+import { useRolePermissions } from '@/app/role-permission-context';
 
 type FilterType = 'all' | 'active' | 'inactive';
 
@@ -239,6 +242,19 @@ export default function OsebjePage() {
     type: 'success' | 'error';
   } | null>(null);
 
+  // Connect user to employee state
+  const [userPersonId, setUserPersonId] = useState<string | null | undefined>(undefined); // undefined = not yet loaded
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [connectEmployee, setConnectEmployee] = useState<Employee | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  const { role, personId: rolePersonId, permissions } = useRolePermissions();
+
+  // RBAC: staff permissions
+  const canViewAllStaff = role !== 'staff' || (permissions?.can_view_staff ?? true);
+  const canEditStaff = role !== 'staff' || (permissions?.can_edit_staff ?? true);
+  const canDeleteStaff = role !== 'staff'; // staff can never delete employees
+
   const actor = user?.email ?? 'unknown';
   const companyProfile = useMemo(
     () => getPodatkiPodjetja(companySettings ?? undefined),
@@ -328,9 +344,20 @@ export default function OsebjePage() {
     loadEmployees();
   }, [loadEmployees]);
 
+  // Check if current user is already connected to a person in company_members
+  useEffect(() => {
+    if (!user?.id) return;
+    getUserPersonId(user.id).then((personId) => {
+      setUserPersonId(personId);
+    });
+  }, [user?.id]);
+
   // Filter employees
   const filteredEmployees = useMemo(() => {
     return employees.filter((employee) => {
+      // RBAC: staff sees only own card when can_view_staff=false
+      if (!canViewAllStaff && employee.id !== rolePersonId) return false;
+
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -352,7 +379,7 @@ export default function OsebjePage() {
 
       return true;
     });
-  }, [employees, searchQuery, statusFilter]);
+  }, [employees, searchQuery, statusFilter, canViewAllStaff, rolePersonId]);
 
   // Handle save (create/update)
   const handleSave = async (data: EmployeeFormData) => {
@@ -573,6 +600,43 @@ export default function OsebjePage() {
     setIsSettingsModalOpen(true);
   };
 
+  // Open connect modal
+  const handleConnectClick = (employee: Employee) => {
+    setConnectEmployee(employee);
+    setIsConnectModalOpen(true);
+  };
+
+  // Confirm connect — call webhook
+  const handleConnectConfirm = async (employee: Employee) => {
+    if (!user?.id) return;
+
+    setIsConnecting(true);
+    try {
+      const response = await fetch('https://tikej.app.n8n.cloud/webhook/connect-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          person_id: employee.id,
+        }),
+      });
+
+      if (!response.ok) {
+        setToast({ message: 'Napaka pri povezovanju računa', type: 'error' });
+        return;
+      }
+
+      setUserPersonId(employee.id);
+      setIsConnectModalOpen(false);
+      setConnectEmployee(null);
+      setToast({ message: 'Račun uspešno povezan z zaposlenim', type: 'success' });
+    } catch {
+      setToast({ message: 'Napaka pri povezovanju računa', type: 'error' });
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
   // Save employee settings (schedule and services)
   const handleSaveSettings = async (data: { urnik: EmployeeSchedule | Record<string, { enabled: boolean; intervals: { start: string; end: string }[] }>; storitve: string[]; aliImaUrnikPodjetja?: boolean }) => {
     if (!companyId || !selectedEmployee) return;
@@ -667,19 +731,21 @@ export default function OsebjePage() {
                 Upravljajte z vašimi zaposlenimi in njihovimi termini
               </p>
             </div>
-            <motion.button
-              type="button"
-              onClick={() => {
-                setSelectedEmployee(null);
-                setIsModalOpen(true);
-              }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-xl hover:shadow-cyan-500/30"
-            >
-              <Plus className="h-5 w-5" weight="bold" />
-              Dodaj zaposlenega
-            </motion.button>
+            {role !== 'staff' && (
+              <motion.button
+                type="button"
+                onClick={() => {
+                  setSelectedEmployee(null);
+                  setIsModalOpen(true);
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-xl hover:shadow-cyan-500/30"
+              >
+                <Plus className="h-5 w-5" weight="bold" />
+                Dodaj zaposlenega
+              </motion.button>
+            )}
           </div>
 
           {/* Stats Cards */}
@@ -751,6 +817,10 @@ export default function OsebjePage() {
             onDelete={handleDeleteClick}
             onToggleActive={handleToggleActive}
             onSettings={handleSettings}
+            onConnect={handleConnectClick}
+            showConnectButton={userPersonId === null}
+            canEdit={canEditStaff}
+            canDelete={canDeleteStaff}
           />
         </div>
       </main>
@@ -792,6 +862,18 @@ export default function OsebjePage() {
         allServices={services}
         onSave={handleSaveSettings}
         isSaving={isSaving}
+      />
+
+      {/* Connect Employee Modal */}
+      <ConnectEmployeeModal
+        isOpen={isConnectModalOpen}
+        employee={connectEmployee}
+        isConnecting={isConnecting}
+        onClose={() => {
+          setIsConnectModalOpen(false);
+          setConnectEmployee(null);
+        }}
+        onConfirm={handleConnectConfirm}
       />
 
       {/* Toast Notifications */}

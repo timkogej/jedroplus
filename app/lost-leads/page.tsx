@@ -17,6 +17,7 @@ import {
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { safeDate } from '@/lib/dashboardHelpers';
 import { fetchClients } from '@/lib/data';
 import { loadCompanyRow } from '@/lib/settingsStore';
@@ -37,6 +38,8 @@ const isEnabledValue = (value: unknown, fallback = false) => {
 
 export default function LostLeadsPage() {
   const { companyId, companySettings } = useCompany();
+  const { role, permissions } = useRolePermissions();
+  const canManageSettings = role !== 'staff' || (permissions?.can_manage_lost_leads ?? true);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [companyRow, setCompanyRow] = useState<Record<string, unknown> | null>(
     companySettings ?? null
@@ -183,6 +186,17 @@ export default function LostLeadsPage() {
     return toneMap[toneValue] || toneValue;
   };
 
+  const notifiedThisMonthCount = useMemo(() => {
+    const now = new Date();
+    return clients.filter((client) => {
+      const datumLostLead = client['Datum lost lead'] ?? client['datum_lost_lead'];
+      if (!datumLostLead) return false;
+      const date = safeDate(datumLostLead);
+      if (!date) return false;
+      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    }).length;
+  }, [clients]);
+
   if (!companyId) return null;
 
   // Calculate stats
@@ -211,15 +225,17 @@ export default function LostLeadsPage() {
 
             <div className="flex items-center gap-3">
               {/* Settings button - icon only */}
-              <motion.button
-                onClick={() => setShowSettingsModal(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                title="Nastavitve"
-              >
-                <Gear size={20} weight="bold" className="text-gray-900" />
-              </motion.button>
+              {canManageSettings && (
+                <motion.button
+                  onClick={() => setShowSettingsModal(true)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                  title="Nastavitve"
+                >
+                  <Gear size={20} weight="bold" className="text-gray-900" />
+                </motion.button>
+              )}
             </div>
           </motion.div>
 
@@ -275,13 +291,13 @@ export default function LostLeadsPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="text-3xl font-bold text-gray-900 leading-none">
-                      {stats.notifiedClients}
+                      {notifiedThisMonthCount}
                     </div>
                     <PaperPlaneRight className="h-6 w-6 text-gray-900" weight="bold" />
                   </div>
                   <div className="mt-3 text-left">
-                    <div className="text-sm font-medium text-gray-600">Obveščene Stranke</div>
-                    <div className="text-xs text-gray-500 mt-1">Prejele sporočilo</div>
+                    <div className="text-sm font-medium text-gray-600">Obveščeni stranke</div>
+                    <div className="text-xs text-gray-500 mt-1">Ta mesec</div>
                   </div>
                 </motion.div>
 
@@ -294,13 +310,13 @@ export default function LostLeadsPage() {
                 >
                   <div className="flex items-center justify-between">
                     <div className="text-3xl font-bold text-gray-900 leading-none">
-                      {stats.pendingNotification}
+                      {inactivityDays}
                     </div>
-                    <UserCheck className="h-6 w-6 text-gray-900" weight="bold" />
+                    <CalendarX className="h-6 w-6 text-gray-900" weight="bold" />
                   </div>
                   <div className="mt-3 text-left">
-                    <div className="text-sm font-medium text-gray-600">Čakajo na Obvestilo</div>
-                    <div className="text-xs text-gray-500 mt-1">Še niso bile obveščene</div>
+                    <div className="text-sm font-medium text-gray-600">Dnevi neaktivnosti</div>
+                    <div className="text-xs text-gray-500 mt-1">Prag neaktivnosti</div>
                   </div>
                 </motion.div>
               </>
@@ -497,7 +513,7 @@ export default function LostLeadsPage() {
                     <span className="text-sm font-medium text-gray-700">Navodila AI-ju</span>
                   </div>
                   {instructions ? (
-                    <p className="text-sm text-gray-600 whitespace-pre-wrap text-right max-w-xs">{instructions}</p>
+                    <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{instructions}</p>
                   ) : (
                     <span className="text-sm text-gray-400">Ni navodil</span>
                   )}
@@ -518,11 +534,15 @@ export default function LostLeadsPage() {
                 <Info className="h-4 w-4" weight="bold" />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-900 mb-1">O Lost Leads</h4>
+                <h4 className="font-semibold text-gray-900 mb-1">O Izgubljenih strankah</h4>
                 <p className="text-sm text-gray-700">
-                  Stranke se avtomatsko označijo kot neaktivne, če nimajo terminov v določenem
-                  obdobju. Sistem spremlja te stranke in omogoča pošiljanje personaliziranih
-                  sporočil za ponovno aktivacijo.
+                  Sistem avtomatsko zazna stranke, ki v določenem obdobju niso imele termina, in jim pošlje personalizirano sporočilo za povratno naročanje.
+
+AI generira vsebino sporočila glede na vašo konfiguracijo — besedilo se prilagodi vsaki stranki posebej, ob upoštevanju njene zgodovine in storitev. Tako vaše sporočilo nikoli ne zveni kot množična pošta, ampak kot osebno povabilo nazaj.
+
+Zahvaljujoč temu sistemu pridobite stranke, ki bi sicer odšle h konkurenci — brez ročnega dela in brez pozabljenih kontaktov.
+
+V kolikor imate kakršnakoli vprašanja, nas kontaktirajte na help@jedroplus.com.
                 </p>
               </div>
             </div>

@@ -323,8 +323,20 @@ export function AppointmentListCard({
                   <div className="font-semibold text-gray-900 truncate">
                     {appointment.clientName}
                   </div>
-                  <div className="text-sm text-gray-600 truncate">
-                    {appointment.serviceName}
+                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                    <span className="truncate">{appointment.serviceName}</span>
+                    {((appointment.serviceId2 ? 1 : 0) + (appointment.serviceId3 ? 1 : 0)) > 0 && (
+                      <span
+                        className="text-sm font-bold flex-shrink-0"
+                        style={{
+                          backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}
+                      >
+                        +{(appointment.serviceId2 ? 1 : 0) + (appointment.serviceId3 ? 1 : 0)}
+                      </span>
+                    )}
                   </div>
                 </div>
 

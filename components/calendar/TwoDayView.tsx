@@ -3,8 +3,10 @@
 import { memo, useMemo, useCallback } from 'react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
+import type { CalendarEvent } from '@/types/events';
 import TimeGrid from './TimeGrid';
 import AppointmentCard from './AppointmentCard';
+import EventCard from './EventCard';
 import {
   isToday,
   DAYS_SHORT,
@@ -16,16 +18,24 @@ import {
   START_HOUR,
   END_HOUR,
   addDays,
+  type CompanySchedule,
+  JS_DAY_TO_SLOVENIAN,
+  getOffHourRanges,
 } from '@/lib/utils/calendar';
 
 interface TwoDayViewProps {
   currentDate: Date;
   appointments: AppointmentWithDetails[];
   absences?: Absence[];
+  events?: CalendarEvent[];
   services?: Storitev[];
   onAppointmentClick: (appointment: AppointmentWithDetails) => void;
+  onEventClick?: (event: CalendarEvent) => void;
+  onAbsenceClick?: (absence: Absence) => void;
   onDateClick?: (date: Date) => void;
   onGridSlotClick?: (date: Date, time: string) => void;
+  companySchedule?: CompanySchedule | null;
+  showAllDays?: boolean;
 }
 
 function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map<string, { column: number; totalColumns: number }> {
@@ -91,8 +101,19 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function TwoDayView({ currentDate, appointments, absences = [], services = [], onAppointmentClick, onDateClick, onGridSlotClick }: TwoDayViewProps) {
-  const days = useMemo(() => [currentDate, addDays(currentDate, 1), addDays(currentDate, 2)], [currentDate]);
+function TwoDayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, onGridSlotClick, companySchedule, showAllDays = true }: TwoDayViewProps) {
+  // When showAllDays=false, compute next 3 weekdays skipping Sat/Sun
+  const days = useMemo(() => {
+    if (showAllDays) return [currentDate, addDays(currentDate, 1), addDays(currentDate, 2)];
+    const result: Date[] = [];
+    let candidate = currentDate;
+    while (result.length < 3) {
+      const dow = candidate.getDay();
+      if (dow !== 0 && dow !== 6) result.push(candidate);
+      if (result.length < 3) candidate = addDays(candidate, 1);
+    }
+    return result;
+  }, [currentDate, showAllDays]);
 
   const getAbsencesForDay = useMemo(() => {
     return (day: Date) => {
@@ -108,6 +129,16 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
       });
     };
   }, [absences]);
+
+  const getEventsForDay = useMemo(() => {
+    return (day: Date): CalendarEvent[] => {
+      const dayKey = getLocalDateKey(day);
+      return events.filter((ev) => {
+        const endKey = ev.end_date ?? ev.event_date;
+        return ev.event_date <= dayKey && endKey >= dayKey;
+      });
+    };
+  }, [events]);
 
   const appointmentsByDay = useMemo(() => {
     const grouped = new Map<string, AppointmentWithDetails[]>();
@@ -155,46 +186,99 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
             const isCurrentDay = isToday(day);
             const dayAbsences = getAbsencesForDay(day);
             const hasAbsence = dayAbsences.length > 0;
-            // Highlight today if visible, otherwise highlight first day
-            const hasTodayInView = days.some(d => isToday(d));
-            const isPrimary = hasTodayInView ? isCurrentDay : idx === 0;
+            const dayEventsForCell = getEventsForDay(day);
+            const hasEventsForCell = dayEventsForCell.length > 0;
+            const isPrimary = isCurrentDay;
 
             return (
-              <button
+              <div
                 key={getLocalDateKey(day)}
-                type="button"
-                onClick={() => onDateClick?.(day)}
-                className={`flex flex-col items-center py-2 gap-[3px] transition-colors hover:bg-gray-50
+                className={`flex flex-col items-center py-2 gap-[3px]
                   ${idx < days.length - 1 ? 'border-r border-gray-100' : ''}`}
               >
-                <span
-                  className="text-[9px] font-semibold uppercase tracking-wider"
-                  style={isPrimary ? {
-                    background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  } : { color: '#9CA3AF' }}
+                <button
+                  type="button"
+                  onClick={() => onDateClick?.(day)}
+                  className="flex flex-col items-center gap-[3px]"
                 >
-                  {DAYS_SHORT[day.getDay()]}
-                </span>
-                <div className="w-[30px] h-[30px] flex items-center justify-center">
                   <span
-                    className="text-[14px] font-semibold leading-none"
+                    className="text-[9px] font-semibold uppercase tracking-wider"
                     style={isPrimary ? {
                       background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
-                    } : { color: '#6B7280' }}
+                    } : { color: '#9CA3AF' }}
                   >
-                    {day.getDate()}
+                    {DAYS_SHORT[day.getDay()]}
                   </span>
-                </div>
+                  <div className="w-[30px] h-[30px] flex items-center justify-center">
+                    <span
+                      className="text-[14px] font-semibold leading-none"
+                      style={isPrimary ? {
+                        background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                      } : { color: '#6B7280' }}
+                    >
+                      {day.getDate()}
+                    </span>
+                  </div>
+                </button>
+                {/* Absences - event card style */}
                 {hasAbsence && (
-                  <span className="w-1 h-1 rounded-full bg-amber-400" />
+                  <div className="flex flex-col gap-0.5 w-full px-1">
+                    {dayAbsences.slice(0, 2).map((absence) => {
+                      const titleStyle = absence.employee_color ? {
+                        background: absence.employee_color,
+                        WebkitBackgroundClip: 'text' as const,
+                        WebkitTextFillColor: 'transparent' as const,
+                        backgroundClip: 'text' as const,
+                      } : { color: '#92400E' };
+                      return (
+                        <div
+                          key={absence.id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={(e) => { e.stopPropagation(); onAbsenceClick?.(absence); }}
+                          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAbsenceClick?.(absence); }}
+                          className="cursor-pointer w-full"
+                          style={{ padding: '1.5px', background: '#F59E0B', borderRadius: '5px' }}
+                        >
+                          <div
+                            className="w-full flex items-center gap-1 min-w-0 overflow-hidden"
+                            style={{ background: '#FFFBEB', borderRadius: '3px', padding: '1.5px 5px' }}
+                          >
+                            <span className="text-[9px] font-semibold truncate flex-1 leading-tight" style={titleStyle}>
+                              {absence.employee_name || 'Vsi'}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {dayAbsences.length > 2 && (
+                      <span className="text-[8px] text-amber-600">+{dayAbsences.length - 2}</span>
+                    )}
+                  </div>
                 )}
-              </button>
+                {/* Events */}
+                {hasEventsForCell && (
+                  <div className="flex flex-col gap-0.5 w-full px-1">
+                    {dayEventsForCell.slice(0, 1).map((ev) => (
+                      <EventCard
+                        key={ev.id}
+                        event={ev}
+                        onClick={onEventClick ?? (() => {})}
+                        variant="banner"
+                      />
+                    ))}
+                    {dayEventsForCell.length > 1 && (
+                      <span className="text-[8px] text-gray-500 text-center">+{dayEventsForCell.length - 1}</span>
+                    )}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -218,6 +302,9 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
             const layout = calculateAppointmentLayout(dayAppointments);
             const isCurrentDay = isToday(day);
             const dayAbsencesForGrid = getAbsencesForDay(day);
+            const slDayName = JS_DAY_TO_SLOVENIAN[day.getDay()];
+            const dayScheduleEntry = companySchedule?.[slDayName];
+            const offRanges = companySchedule ? getOffHourRanges(dayScheduleEntry) : [];
 
             return (
               <div
@@ -229,6 +316,23 @@ function TwoDayView({ currentDate, appointments, absences = [], services = [], o
                 style={dayIndex < days.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
                 onClick={onGridSlotClick ? (e) => handleColumnClick(e, day) : undefined}
               >
+                {/* Company schedule: shade off-hours */}
+                {offRanges.map((range, i) => {
+                  const top = ((range.start - START_HOUR * 60) / 60) * HOUR_HEIGHT;
+                  const height = ((range.end - range.start) / 60) * HOUR_HEIGHT;
+                  return (
+                    <div
+                      key={`off-${i}`}
+                      className="absolute left-0 right-0 pointer-events-none z-0"
+                      style={{
+                        top: `${top}px`,
+                        height: `${height}px`,
+                        background: 'repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(0,0,0,0.045) 6px, rgba(0,0,0,0.045) 7px)',
+                      }}
+                    />
+                  );
+                })}
+
                 {/* Absences */}
                 {dayAbsencesForGrid.map((absence) => {
                   const absenceStart = new Date(absence.start_at);

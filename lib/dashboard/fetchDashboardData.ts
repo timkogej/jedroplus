@@ -83,6 +83,7 @@ export interface DashboardData {
   topServices: TopService[];
   topEmployees: TopEmployee[];
   recentActivity: RecentActivity[];
+  nextPersonAppointment?: AppointmentItem | null;
 }
 
 // Helper to format time ago
@@ -105,7 +106,7 @@ function getInitials(firstName: string, lastName: string): string {
 }
 
 // Fetch today's appointments - all scheduled appointments for today, ordered by time
-async function fetchTodayAppointments(companyId: string): Promise<AppointmentItem[]> {
+async function fetchTodayAppointments(companyId: string, personId?: string | null): Promise<AppointmentItem[]> {
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
 
@@ -195,14 +196,17 @@ async function fetchTodayAppointments(companyId: string): Promise<AppointmentIte
       const staffId = String(pickFirst(row, ['ID osebja', 'ID osebe', 'ID Osebe', 'oseba_id', 'person_id']) ?? '');
       const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
 
+      // Filter by personId if provided
+      if (personId && staffId !== personId) continue;
+
       // Get time fields
       const startTime = String(pickFirst(row, ['cas_zacetek', 'Čas', 'Cas', 'start_time', 'ura_od']) ?? '00:00');
       const endTime = String(pickFirst(row, ['cas_konec', 'Konec', 'end_time', 'ura_do']) ?? '');
 
       // Get client name
       const clientName = String(pickFirst(row, ['stranka_ime', 'Stranka', 'client_name', 'Ime stranke']) ?? 'Neznana stranka');
-      const clientEmail = String(pickFirst(row, ['stranka_email', 'client_email', 'Email stranke']) ?? '');
-      const clientPhone = String(pickFirst(row, ['stranka_telefon', 'client_phone', 'Telefon stranke']) ?? '');
+      const clientEmail = String(pickFirst(row, ['Email', 'stranka_email', 'client_email', 'Email stranke', 'email']) ?? '');
+      const clientPhone = String(pickFirst(row, ['Telefon', 'stranka_telefon', 'client_phone', 'Telefon stranke', 'Telefonska številka', 'telefon', 'phone']) ?? '');
 
       // Get related data
       const service = servicesMap.get(serviceId);
@@ -257,7 +261,7 @@ async function fetchTodayAppointments(companyId: string): Promise<AppointmentIte
 }
 
 // Fetch tomorrow's appointments - all scheduled appointments for tomorrow, ordered by time
-async function fetchTomorrowAppointments(companyId: string): Promise<AppointmentItem[]> {
+async function fetchTomorrowAppointments(companyId: string, personId?: string | null): Promise<AppointmentItem[]> {
   const tomorrow = addDays(new Date(), 1);
   const tomorrowStr = format(tomorrow, "yyyy-MM-dd");
 
@@ -346,14 +350,17 @@ async function fetchTomorrowAppointments(companyId: string): Promise<Appointment
       const staffId = String(pickFirst(row, ['ID osebja', 'ID osebe', 'ID Osebe', 'oseba_id', 'person_id']) ?? '');
       const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
 
+      // Filter by personId if provided
+      if (personId && staffId !== personId) continue;
+
       // Get time fields
       const startTime = String(pickFirst(row, ['cas_zacetek', 'Čas', 'Cas', 'start_time', 'ura_od']) ?? '00:00');
       const endTime = String(pickFirst(row, ['cas_konec', 'Konec', 'end_time', 'ura_do']) ?? '');
 
       // Get client name
       const clientName = String(pickFirst(row, ['stranka_ime', 'Stranka', 'client_name', 'Ime stranke']) ?? 'Neznana stranka');
-      const clientEmail = String(pickFirst(row, ['stranka_email', 'client_email', 'Email stranke']) ?? '');
-      const clientPhone = String(pickFirst(row, ['stranka_telefon', 'client_phone', 'Telefon stranke']) ?? '');
+      const clientEmail = String(pickFirst(row, ['Email', 'stranka_email', 'client_email', 'Email stranke', 'email']) ?? '');
+      const clientPhone = String(pickFirst(row, ['Telefon', 'stranka_telefon', 'client_phone', 'Telefon stranke', 'Telefonska številka', 'telefon', 'phone']) ?? '');
 
       // Get related data
       const service = servicesMap.get(serviceId);
@@ -408,7 +415,7 @@ async function fetchTomorrowAppointments(companyId: string): Promise<Appointment
 }
 
 // Fetch dashboard stats with new logic
-async function fetchStats(companyId: string): Promise<DashboardStats> {
+async function fetchStats(companyId: string, personId?: string | null): Promise<DashboardStats> {
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
   const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
@@ -439,6 +446,12 @@ async function fetchStats(companyId: string): Promise<DashboardStats> {
 
     for (const row of bookings) {
       const schema = detectBookingSchema(row);
+
+      // Filter by personId if provided
+      if (personId) {
+        const staffId = String(pickFirst(row, ['ID osebja', 'ID osebe', 'ID Osebe', 'oseba_id', 'person_id']) ?? '');
+        if (staffId !== personId) continue;
+      }
 
       // Get date from booking
       const dateValue = schema.dateField ? row[schema.dateField] : null;
@@ -523,7 +536,7 @@ async function fetchStats(companyId: string): Promise<DashboardStats> {
 }
 
 // Fetch weekly chart data (last 7 days) - accurate appointment counts
-async function fetchWeeklyChart(companyId: string): Promise<WeeklyChartData[]> {
+async function fetchWeeklyChart(companyId: string, personId?: string | null): Promise<WeeklyChartData[]> {
   const today = new Date();
   const weekData: WeeklyChartData[] = [];
   const dayNames = ["Ned", "Pon", "Tor", "Sre", "Čet", "Pet", "Sob"];
@@ -556,6 +569,12 @@ async function fetchWeeklyChart(companyId: string): Promise<WeeklyChartData[]> {
       const dateValue = schema.dateField ? row[schema.dateField] : null;
 
       if (!dateValue) continue;
+
+      // Filter by personId if provided
+      if (personId) {
+        const staffId = String(pickFirst(row, ['ID osebja', 'ID osebe', 'ID Osebe', 'oseba_id', 'person_id']) ?? '');
+        if (staffId !== personId) continue;
+      }
 
       let bookingDateStr = '';
       if (typeof dateValue === 'string') {
@@ -847,8 +866,145 @@ async function fetchRecentActivity(companyId: string): Promise<RecentActivity[]>
   }
 }
 
+// Fetch the next upcoming appointment for a specific person (across all future dates)
+async function fetchNextPersonAppointment(companyId: string, personId: string): Promise<AppointmentItem | null> {
+  const now = new Date();
+  const todayStr = format(now, "yyyy-MM-dd");
+  const currentTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+  try {
+    const [bookingsRes, servicesRes, staffRes] = await Promise.all([
+      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
+      fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
+      fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
+    ]);
+
+    if (bookingsRes.error) return null;
+
+    const bookings = bookingsRes.data ?? [];
+    const services = servicesRes.data ?? [];
+    const staff = staffRes.data ?? [];
+
+    const servicesMap = new Map<string, { naziv: string; barva: string }>();
+    for (const s of services) {
+      const id = String(pickFirst(s, ['id', 'ID storitev', 'ID storitve', 'service_id']) ?? '');
+      const naziv = String(pickFirst(s, ['naziv', 'Naziv', 'name', 'service_name']) ?? '');
+      const barva = String(pickFirst(s, ['barva', 'Barva', 'color']) ?? '#8B5CF6');
+      if (id) servicesMap.set(id, { naziv, barva });
+    }
+
+    const employeesMap = new Map<string, { ime: string; priimek: string; barva: string }>();
+    for (const e of staff) {
+      const id = String(pickFirst(e, ['id', 'ID osebja', 'ID osebe', 'ID Osebe', 'person_id', 'partner_id']) ?? '');
+      const ime = String(pickFirst(e, ['ime', 'Ime', 'first_name']) ?? '');
+      const priimek = String(pickFirst(e, ['priimek', 'Priimek', 'last_name']) ?? '');
+      const barva = String(pickFirst(e, ['Barva', 'barva', 'color']) ?? '');
+      if (id) employeesMap.set(id, { ime, priimek, barva });
+    }
+
+    const candidates: Array<{ item: AppointmentItem; dateStr: string; timeStr: string }> = [];
+
+    for (const row of bookings) {
+      const schema = detectBookingSchema(row);
+
+      // Get staff ID and check it matches our person
+      const staffId = String(pickFirst(row, ['ID Osebe', 'ID osebe', 'ID osebja', 'oseba_id', 'person_id']) ?? '');
+      if (staffId !== personId) continue;
+
+      // Only scheduled appointments
+      const status = String(pickFirst(row, ['status', 'Status', 'stanje']) ?? 'scheduled').toLowerCase();
+      if (status !== 'scheduled' && !status.includes('načrtovan') && !status.includes('nacrtovan') && !status.includes('potrj') && !status.includes('confirm')) continue;
+
+      // Get date
+      const dateValue = schema.dateField ? row[schema.dateField] : null;
+      if (!dateValue) continue;
+
+      let bookingDateStr = '';
+      if (typeof dateValue === 'string') {
+        if (dateValue.includes('T')) {
+          bookingDateStr = dateValue.split('T')[0];
+        } else if (dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          bookingDateStr = dateValue;
+        } else if (dateValue.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+          const parts = dateValue.split('.');
+          bookingDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+
+      if (!bookingDateStr) continue;
+
+      // Must be today or in the future
+      if (bookingDateStr < todayStr) continue;
+
+      const startTime = String(pickFirst(row, ['cas_zacetek', 'Čas', 'Cas', 'start_time', 'ura_od']) ?? '00:00');
+      const timeStr = startTime.substring(0, 5);
+
+      // If today, must be upcoming (time >= now)
+      if (bookingDateStr === todayStr && timeStr < currentTimeStr) continue;
+
+      const endTime = String(pickFirst(row, ['cas_konec', 'Konec', 'end_time', 'ura_do']) ?? '');
+      const id = schema.idField ? String(row[schema.idField] ?? '') : '';
+      const serviceId = String(pickFirst(row, ['ID storitev', 'ID storitve', 'storitev_id', 'service_id']) ?? '');
+      const serviceId2 = String(pickFirst(row, ['ID storitve 2', 'service_id_2', 'storitev_id_2']) ?? '');
+      const serviceId3 = String(pickFirst(row, ['ID storitve 3', 'service_id_3', 'storitev_id_3']) ?? '');
+      const clientName = String(pickFirst(row, ['stranka_ime', 'Stranka', 'client_name', 'Ime stranke']) ?? 'Neznana stranka');
+      const clientEmail = String(pickFirst(row, ['Email', 'stranka_email', 'client_email', 'Email stranke', 'email']) ?? '');
+      const clientPhone = String(pickFirst(row, ['Telefon', 'stranka_telefon', 'client_phone', 'Telefon stranke', 'Telefonska številka', 'telefon', 'phone']) ?? '');
+      const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
+      const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes']) ?? '');
+
+      const service = servicesMap.get(serviceId);
+      const service2 = serviceId2 ? servicesMap.get(serviceId2) : undefined;
+      const service3 = serviceId3 ? servicesMap.get(serviceId3) : undefined;
+      const employee = employeesMap.get(staffId);
+
+      candidates.push({
+        dateStr: bookingDateStr,
+        timeStr,
+        item: {
+          id,
+          time: timeStr,
+          endTime: endTime ? endTime.substring(0, 5) : undefined,
+          datum: bookingDateStr,
+          clientName,
+          clientEmail: clientEmail || undefined,
+          clientPhone: clientPhone || undefined,
+          clientId: clientId || undefined,
+          serviceName: service?.naziv || 'Neznana storitev',
+          serviceColor: service?.barva || '#8B5CF6',
+          serviceColor2: service2?.barva || undefined,
+          serviceColor3: service3?.barva || undefined,
+          serviceId: serviceId || undefined,
+          serviceId2: serviceId2 || undefined,
+          serviceId3: serviceId3 || undefined,
+          employeeName: employee ? `${employee.ime} ${employee.priimek}` : 'Nedoločeno',
+          employeeInitials: employee ? getInitials(employee.ime, employee.priimek) : '?',
+          employeeColor: employee?.barva || undefined,
+          employeeId: staffId || undefined,
+          status: 'scheduled',
+          opombe: opombe || undefined,
+        },
+      });
+    }
+
+    if (candidates.length === 0) return null;
+
+    // Sort by date then time, pick first
+    candidates.sort((a, b) => {
+      const dc = a.dateStr.localeCompare(b.dateStr);
+      if (dc !== 0) return dc;
+      return a.timeStr.localeCompare(b.timeStr);
+    });
+
+    return candidates[0].item;
+  } catch (err) {
+    console.error('[Dashboard] Error fetching next person appointment:', err);
+    return null;
+  }
+}
+
 // Main function to fetch all dashboard data
-export async function fetchDashboardData(companyId: string): Promise<DashboardData> {
+export async function fetchDashboardData(companyId: string, personId?: string | null): Promise<DashboardData> {
   const [
     stats,
     todayAppointments,
@@ -857,14 +1013,16 @@ export async function fetchDashboardData(companyId: string): Promise<DashboardDa
     topServices,
     topEmployees,
     recentActivity,
+    nextPersonAppointment,
   ] = await Promise.all([
-    fetchStats(companyId),
-    fetchTodayAppointments(companyId),
-    fetchTomorrowAppointments(companyId),
-    fetchWeeklyChart(companyId),
+    fetchStats(companyId, personId),
+    fetchTodayAppointments(companyId, personId),
+    fetchTomorrowAppointments(companyId, personId),
+    fetchWeeklyChart(companyId, personId),
     fetchTopServices(companyId),
     fetchTopEmployees(companyId),
     fetchRecentActivity(companyId),
+    personId ? fetchNextPersonAppointment(companyId, personId) : Promise.resolve(null),
   ]);
 
   return {
@@ -875,5 +1033,6 @@ export async function fetchDashboardData(companyId: string): Promise<DashboardDa
     topServices,
     topEmployees,
     recentActivity,
+    nextPersonAppointment,
   };
 }

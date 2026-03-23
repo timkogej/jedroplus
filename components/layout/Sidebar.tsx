@@ -37,6 +37,8 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useCompanyPlan } from '@/hooks/useCompanyPlan';
 import { hasAccessToRoute } from '@/lib/planAccess';
+import { useRolePermissions } from '@/app/role-permission-context';
+import type { StaffPermissions } from '@/types/roles';
 
 // ============================================================================
 // Types
@@ -231,11 +233,66 @@ export function Sidebar() {
   const { companySettings, switchCompany, companyId } = useCompany();
   const { user, signOut } = useAuth();
   const { planCode } = useCompanyPlan();
+  const { role, permissions } = useRolePermissions();
 
   const isFree = planCode === 'FREE';
-  const navigationSections = isFree ? navigationSectionsFree : navigationSectionsPaid;
+  const baseNavigationSections = isFree ? navigationSectionsFree : navigationSectionsPaid;
 
   const isLocked = (href: string) => !hasAccessToRoute(href, planCode);
+
+  // ── Role-based nav filtering ─────────────────────────────────────────────
+
+  /**
+   * Returns true if this nav item should be visible for the current role.
+   * Owner → always visible.
+   * Admin → everything except /billing.
+   * Staff → filtered by staff_role_permissions.
+   */
+  function isNavVisible(href: string): boolean {
+    if (role === 'owner' || role === null) return true;
+
+    if (role === 'admin') {
+      return href !== '/billing';
+    }
+
+    if (role === 'staff') {
+      // /billing is always hidden for staff (nav shows "Paketi" item added separately below)
+      if (href === '/billing') return false;
+
+      if (!permissions) return true; // no perms record → allow (fallback)
+
+      const staffMap: Partial<Record<string, keyof StaffPermissions>> = {
+        '/analytics': 'can_view_analytics',
+        '/asistent': 'can_access_asistent_plus',
+        '/chatbot-plus': 'can_access_chatbot_plus',
+        '/komunikacija': 'can_access_komunikacija',
+        '/reminders': 'can_access_opomniki',
+        '/rezervacije': 'can_access_rezervacije',
+        '/lost-leads': 'can_access_lost_leads',
+      };
+
+      const key = staffMap[href];
+      if (key) return permissions[key] === true;
+
+      return true;
+    }
+
+    return true;
+  }
+
+  // Build filtered sections + staff "Paketi" item
+  const navigationSections = baseNavigationSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => isNavVisible(item.href)),
+    }))
+    .filter((section) => section.items.length > 0);
+
+  // Staff gets a "Paketi" item in place of "Paketi in kvote"
+  const staffPaketiSection: NavSection | null =
+    role === 'staff'
+      ? { label: 'Račun', items: [{ name: 'Paketi', href: '/billing', icon: Package }] }
+      : null;
 
   // User info
   const companyName = String(companySettings?.['Naziv Podjetja'] || companySettings?.['ID Podjetja'] || 'Moje Podjetje');
@@ -417,12 +474,12 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav ref={desktopNavRef} className="flex-1 overflow-y-auto py-4 px-3">
-        {navigationSections.map((section) => (
+        {[...navigationSections, ...(staffPaketiSection ? [staffPaketiSection] : [])].map((section) => (
           <div key={section.label} className="mb-6">
             {!isCollapsed && (
               <div className="px-3 pb-2">
                 <h3 className="text-[11px] font-semibold text-gray-400 tracking-wider">
-                  {section.label}
+                  {section.label.toUpperCase()}
                 </h3>
               </div>
             )}
@@ -674,10 +731,10 @@ export function Sidebar() {
                   },
                 }}
               >
-                {navigationSections.map((section) => (
+                {[...navigationSections, ...(staffPaketiSection ? [staffPaketiSection] : [])].map((section) => (
                   <div key={section.label} className="mb-6">
                     <div className="text-xs font-semibold text-gray-400 tracking-wider mb-2 px-3">
-                      {section.label}
+                      {section.label.toUpperCase()}
                     </div>
 
                     {section.items.map((item) => {
@@ -777,22 +834,13 @@ export function Sidebar() {
                 <span>v1.0.0</span>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSwitchCompany}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <Briefcase className="w-4 h-4" />
-                  <span>Zamenjaj</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
-                >
-                  <SignOut className="w-4 h-4" weight="bold" />
-                  <span>Odjava</span>
-                </button>
-              </div>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+              >
+                <SignOut className="w-4 h-4" weight="bold" />
+                <span>Odjava</span>
+              </button>
             </div>
           </motion.aside>
         </>

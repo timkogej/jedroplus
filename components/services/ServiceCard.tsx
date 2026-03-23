@@ -22,6 +22,8 @@ interface ServiceCardProps {
   onDelete: (service: Service) => void;
   onToggleActive: (service: Service) => void;
   index?: number;
+  canEdit?: boolean;
+  canDelete?: boolean;
 }
 
 function ServiceCard({
@@ -30,6 +32,8 @@ function ServiceCard({
   onDelete,
   onToggleActive,
   index = 0,
+  canEdit = true,
+  canDelete = true,
 }: ServiceCardProps) {
   // Handle both gradient strings and legacy hex colors
   const displayGradient = isGradient(service.barva)
@@ -139,24 +143,28 @@ function ServiceCard({
 
           {/* Edit/Delete buttons */}
           <div className="flex items-center gap-1">
-            <motion.button
-              type="button"
-              onClick={() => onEdit(service)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-violet-50 hover:text-violet-600"
-            >
-              <PencilSimple className="h-4 w-4" weight="regular" />
-            </motion.button>
-            <motion.button
-              type="button"
-              onClick={() => onDelete(service)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
-            >
-              <Trash className="h-4 w-4" weight="regular" />
-            </motion.button>
+            {canEdit && (
+              <motion.button
+                type="button"
+                onClick={() => onEdit(service)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-violet-50 hover:text-violet-600"
+              >
+                <PencilSimple className="h-4 w-4" weight="regular" />
+              </motion.button>
+            )}
+            {canDelete && (
+              <motion.button
+                type="button"
+                onClick={() => onDelete(service)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+              >
+                <Trash className="h-4 w-4" weight="regular" />
+              </motion.button>
+            )}
           </div>
         </div>
       </div>
