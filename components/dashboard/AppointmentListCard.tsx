@@ -355,18 +355,6 @@ export function AppointmentListCard({
               className="w-full p-4 hover:bg-gray-50 transition-colors text-left"
             >
               <div className="flex items-center gap-3">
-                {/* Service color bar */}
-                <div
-                  className="w-1 self-stretch rounded-full flex-shrink-0"
-                  style={{
-                    background: buildServiceBarGradient(
-                      appointment.serviceColor || '#8B5CF6',
-                      appointment.serviceColor2,
-                      appointment.serviceColor3,
-                    ),
-                    minHeight: 40,
-                  }}
-                />
                 {/* Time */}
                 <div className="flex-shrink-0">
                   <div className="text-lg font-bold text-gray-900">
