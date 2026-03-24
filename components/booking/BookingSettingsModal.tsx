@@ -176,8 +176,6 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           'Booking_bg_from': bookingBgFrom,
           'Booking_bg_to': bookingBgTo,
           'main_booking_link': mainBookingLink,
-          'cancel_appt_days': parseInt(cancelApptDays, 10),
-          'reschedule_appt_days': parseInt(rescheduleApptDays, 10),
           colors: {
             primary: bookingPrimary,
             secondary: bookingSecondary,
