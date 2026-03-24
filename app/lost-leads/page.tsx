@@ -467,8 +467,8 @@ export default function LostLeadsPage() {
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <TrendDown className="w-4 h-4 text-gray-400" weight="regular" />
+                  <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
+                    <TrendDown className="w-4 h-4 text-gray-400 flex-shrink-0" weight="regular" />
                     <span className="text-sm font-medium text-gray-700">Status</span>
                   </div>
                   <div className="flex items-center gap-2">

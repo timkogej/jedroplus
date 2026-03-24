@@ -1007,7 +1007,7 @@ PRAVILA:
                 <h1
                   className="font-bold tracking-tight"
                   style={{
-                    fontSize: '3.5rem',
+                    fontSize: '2.25rem',
                     lineHeight: '1',
                     background:
                       'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',

@@ -76,6 +76,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const [bookingBgFrom, setBookingBgFrom] = useState('#7C75FC');
   const [bookingBgTo, setBookingBgTo] = useState('#44D0C6');
 
+  const [cancelApptDays, setCancelApptDays] = useState('1');
+  const [rescheduleApptDays, setRescheduleApptDays] = useState('1');
+
   // Booking links (for main link selector)
   const [bookingLink1, setBookingLink1] = useState('');
   const [bookingLink2, setBookingLink2] = useState('');
@@ -136,6 +139,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           setBookingLink4(bl4);
           setBookingLink5(bl5);
           setMainBookingLink(String(data['main_booking_link'] ?? ''));
+
+          setCancelApptDays(String(data['cancel_appt_days'] ?? '1'));
+          setRescheduleApptDays(String(data['reschedule_appt_days'] ?? '1'));
         }
       } catch (error) {
         console.error('Error loading booking settings:', error);
@@ -170,6 +176,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           'Booking_bg_from': bookingBgFrom,
           'Booking_bg_to': bookingBgTo,
           'main_booking_link': mainBookingLink,
+          'cancel_appt_days': parseInt(cancelApptDays, 10),
+          'reschedule_appt_days': parseInt(rescheduleApptDays, 10),
           colors: {
             primary: bookingPrimary,
             secondary: bookingSecondary,
@@ -181,6 +189,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           confirmation_channel: potrdiloChannel,
           send_online_confirmation: potrdiloOnline,
           online_confirmation_channel: potrdiloOnlineChannel,
+          cancel_appt_days: parseInt(cancelApptDays, 10),
+          reschedule_appt_days: parseInt(rescheduleApptDays, 10),
         },
       };
 
@@ -363,6 +373,47 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         </motion.div>
                       )}
                     </div>
+                  </SettingsSection>
+
+                  {/* Cancellation & Rescheduling Policy */}
+                  <SettingsSection title="Politika odpovedi in prestavitev" description="Koliko dni pred terminom lahko stranke odpovejo ali prestavijo">
+                    <SettingRow
+                      label="Odpoved termina"
+                      description="Koliko dni pred terminom lahko stranka odpove"
+                    >
+                      <Select
+                        value={cancelApptDays}
+                        setValue={setCancelApptDays}
+                        placeholder="Izberi"
+                      >
+                        <SelectOption value="0">Isti dan</SelectOption>
+                        <SelectOption value="1">1 dan prej</SelectOption>
+                        <SelectOption value="2">2 dni prej</SelectOption>
+                        <SelectOption value="3">3 dni prej</SelectOption>
+                        <SelectOption value="5">5 dni prej</SelectOption>
+                        <SelectOption value="7">7 dni prej</SelectOption>
+                        <SelectOption value="14">14 dni prej</SelectOption>
+                      </Select>
+                    </SettingRow>
+
+                    <SettingRow
+                      label="Prestavitev termina"
+                      description="Koliko dni pred terminom lahko stranka prestavi"
+                    >
+                      <Select
+                        value={rescheduleApptDays}
+                        setValue={setRescheduleApptDays}
+                        placeholder="Izberi"
+                      >
+                        <SelectOption value="0">Isti dan</SelectOption>
+                        <SelectOption value="1">1 dan prej</SelectOption>
+                        <SelectOption value="2">2 dni prej</SelectOption>
+                        <SelectOption value="3">3 dni prej</SelectOption>
+                        <SelectOption value="5">5 dni prej</SelectOption>
+                        <SelectOption value="7">7 dni prej</SelectOption>
+                        <SelectOption value="14">14 dni prej</SelectOption>
+                      </Select>
+                    </SettingRow>
                   </SettingsSection>
 
                   {/* Booking Page Colors */}

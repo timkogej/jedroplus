@@ -739,7 +739,7 @@ export default function ChatbotPlusPage() {
           >
             <div>
               <h1
-                className="text-5xl font-bold"
+                className="text-3xl font-bold"
                 style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
               >
                 Chatbot+

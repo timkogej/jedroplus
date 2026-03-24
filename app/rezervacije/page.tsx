@@ -35,6 +35,7 @@ interface ReservationSettings {
   bookingLink3: string;
   bookingLink4: string;
   bookingLink5: string;
+  bookingLink6: string;
   apptManagementLink: string;
   mainBookingLink: string;
 }
@@ -86,6 +87,13 @@ const PREMIUM_DESIGNS: BookingDesign[] = [
     description: 'Premium Magazine dizajn z uredniško estetiko in visokokakovostnim vizualnim slogom. Idealno za ekskluzivne salone, kozmetične studio in premium storitve.',
     linkKey: 'bookingLink5',
   },
+  {
+    id: 6,
+    name: 'Casino',
+    subtitle: 'Glamurozen in razburljiv',
+    description: 'Ekskluziven kazino dizajn z glamurozno atmosfero, bleščečimi akcenti in dinamičnimi vizualnimi elementi. Popoln za tiste, ki želijo rezervacijo terminov spremeniti v nepozabno izkušnjo.',
+    linkKey: 'bookingLink6',
+  },
 ];
 
 function cn(...classes: (string | boolean | undefined | null)[]) {
@@ -114,6 +122,7 @@ export default function RezervacijePage() {
     bookingLink3: '',
     bookingLink4: '',
     bookingLink5: '',
+    bookingLink6: '',
     apptManagementLink: '',
     mainBookingLink: '',
   });
@@ -168,6 +177,7 @@ export default function RezervacijePage() {
         bookingLink3: String(podatkiRow?.['booking_link_3'] ?? podatkiRow?.['Booking_link_3'] ?? ''),
         bookingLink4: String(podatkiRow?.['booking_link_4'] ?? podatkiRow?.['Booking_link_4'] ?? ''),
         bookingLink5: String(podatkiRow?.['booking_link_5'] ?? podatkiRow?.['Booking_link_5'] ?? ''),
+        bookingLink6: String(podatkiRow?.['booking_link_6'] ?? podatkiRow?.['Booking_link_6'] ?? ''),
         apptManagementLink: String(podatkiRow?.['appt_management_link'] ?? ''),
         mainBookingLink: String(podatkiRow?.['main_booking_link'] ?? ''),
       });
@@ -302,10 +312,10 @@ export default function RezervacijePage() {
                       return (
                         <div
                           key={design.id}
-                          className="w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-md transition-all"
+                          className="w-64 sm:w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-md transition-all"
                         >
                           {/* Image placeholder */}
-                          <div className="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center mb-3 gap-1" style={{ height: '160px' }}>
+                          <div className="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center mb-3 gap-1" style={{ height: '120px' }}>
                             <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9H6" />
                             </svg>
@@ -394,11 +404,11 @@ export default function RezervacijePage() {
                       return (
                         <div
                           key={design.id}
-                          className="w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-violet-200 hover:shadow-md transition-all"
+                          className="w-64 sm:w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-violet-200 hover:shadow-md transition-all"
                           style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.03), rgba(6,182,212,0.03))' }}
                         >
                           {/* Image placeholder */}
-                          <div className="rounded-lg border-2 border-dashed border-violet-200 bg-violet-50/30 flex flex-col items-center justify-center mb-3 gap-1" style={{ height: '160px' }}>
+                          <div className="rounded-lg border-2 border-dashed border-violet-200 bg-violet-50/30 flex flex-col items-center justify-center mb-3 gap-1" style={{ height: '120px' }}>
                             <svg className="w-8 h-8 text-violet-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9H6" />
                             </svg>

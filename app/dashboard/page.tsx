@@ -939,47 +939,12 @@ export default function DashboardPage() {
 
   const todayFormatted = format(new Date(), "EEEE, d. MMMM yyyy", { locale: sl });
 
-  // ── Random greeting based on time of day ────────────────────────────────
+  // ── Greeting based on time of day ────────────────────────────────────────
   const welcomeGreeting = useMemo(() => {
     const hour = new Date().getHours();
-
-    const morningGreetings = [
-      'Dobro jutro,',
-      'Lepo jutro,',
-      'Pozdravljeni zjutraj,',
-    ];
-    const afternoonGreetings = [
-      'Dober dan,',
-      'Pozdravljeni,',
-      'Zdravo,',
-    ];
-    const eveningGreetings = [
-      'Dober večer,',
-      'Lep večer,',
-      'Pozdravljeni zvečer,',
-    ];
-    const generalGreetings = [
-      'Dobrodošli nazaj,',
-      'Lepo je videti vas,',
-      'Pozdravljen/a,',
-      'Hej,',
-      'Dobrodošli,',
-      'Živjo,',
-      'Pozdravljeni,',
-    ];
-
-    let pool: string[];
-    if (hour >= 5 && hour < 12) {
-      pool = morningGreetings;
-    } else if (hour >= 12 && hour < 18) {
-      pool = afternoonGreetings;
-    } else if (hour >= 18 && hour < 23) {
-      pool = eveningGreetings;
-    } else {
-      pool = generalGreetings;
-    }
-
-    return pool[Math.floor(Math.random() * pool.length)];
+    if (hour >= 5 && hour < 12) return 'Dobro jutro,';
+    if (hour >= 12 && hour < 18) return 'Dober dan,';
+    return 'Dober večer,';
   }, []);
 
   // ── Loading state ─────────────────────────────────────────────────────────

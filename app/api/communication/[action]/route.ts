@@ -5,6 +5,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
 
+export const maxDuration = 60;
+
 const N8N_BASE = "https://tikej.app.n8n.cloud/webhook/communication";
 const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 
