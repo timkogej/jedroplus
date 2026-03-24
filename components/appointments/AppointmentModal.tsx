@@ -13,6 +13,7 @@ import type { Client } from '@/lib/supabase/clients';
 import type { ClientFormData } from '@/types/clients';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import {
   buildClientCreateData,
@@ -36,6 +37,7 @@ interface AppointmentModalProps {
   initialDate?: string;
   initialStartTime?: string;
   initialEmployeeId?: string;
+  lockEmployee?: boolean;
 }
 
 export interface AppointmentFormData {
@@ -155,9 +157,11 @@ function AppointmentModal({
   initialDate,
   initialStartTime,
   initialEmployeeId,
+  lockEmployee = false,
 }: AppointmentModalProps) {
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
+  const { personId } = useRolePermissions();
 
   // Detect mobile (< 768px) for time picker variant
   const [isMobile, setIsMobile] = useState(false);
@@ -282,8 +286,9 @@ function AppointmentModal({
     } else if (mode === 'create') {
       // Set defaults for new appointment
       const now = new Date();
-      // Auto-select employee: prefer initialEmployeeId (staff pre-fill), then auto-select when only one exists
-      const autoEmployee = initialEmployeeId || (employees.length === 1 ? employees[0].id : '');
+      // Auto-select employee: prefer initialEmployeeId (staff pre-fill), then user's linked employee (personId), then auto-select when only one exists
+      const personEmployee = personId ? (employees.find(e => e.id === personId)?.id ?? '') : '';
+      const autoEmployee = initialEmployeeId || personEmployee || (employees.length === 1 ? employees[0].id : '');
       setFormData({
         datum: initialDate || now.toISOString().split('T')[0],
         cas_zacetek: initialStartTime || '09:00',
@@ -319,7 +324,7 @@ function AppointmentModal({
       // In create mode, hide internal notes by default
       setShowInternalNotes(false);
     }
-  }, [appointment, mode, services, employees, initialDate, initialStartTime, initialEmployeeId]);
+  }, [appointment, mode, services, employees, initialDate, initialStartTime, initialEmployeeId, personId]);
 
   // Track if end time was manually set by user
   const [endTimeManuallySet, setEndTimeManuallySet] = useState(false);
@@ -1155,7 +1160,7 @@ function AppointmentModal({
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Osebje
               </label>
-              {isViewMode ? (
+              {isViewMode || lockEmployee ? (
                 <div className="flex items-center gap-3">
                   <span
                     className="text-lg font-bold flex-shrink-0"

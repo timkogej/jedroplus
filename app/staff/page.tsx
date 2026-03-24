@@ -214,7 +214,7 @@ function Toast({
 
 export default function OsebjePage() {
   const router = useRouter();
-  const { companyId, companySettings, loading: companyLoading } = useCompany();
+  const { companyId, companyUuid, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
 
   // Data states
@@ -618,6 +618,8 @@ export default function OsebjePage() {
         body: JSON.stringify({
           user_id: user.id,
           person_id: employee.id,
+          company_id: companyId,
+          company_uuid: companyUuid,
         }),
       });
 

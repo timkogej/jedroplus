@@ -6,6 +6,55 @@ import { Calendar, ArrowRight, X, Copy, Check } from "@phosphor-icons/react";
 import Link from "next/link";
 import type { AppointmentItem } from "@/lib/dashboard/fetchDashboardData";
 
+function extractFirstColor(barva: string): string {
+  if (!barva) return '#8B5CF6';
+  if (barva.includes('gradient')) {
+    // Try hex
+    const m = barva.match(/#[0-9A-Fa-f]{6}/g);
+    if (m && m.length > 0) return m[0];
+    // Try rgb(...)
+    const rgb = barva.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i);
+    if (rgb) return `rgb(${rgb[1]}, ${rgb[2]}, ${rgb[3]})`;
+  }
+  return barva;
+}
+
+function extractLastColor(barva: string): string {
+  if (!barva) return '#8B5CF6';
+  if (barva.includes('gradient')) {
+    const m = barva.match(/#[0-9A-Fa-f]{6}/g);
+    if (m && m.length > 0) return m[m.length - 1];
+    const allRgb = [...barva.matchAll(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/gi)];
+    if (allRgb.length > 0) { const last = allRgb[allRgb.length - 1]; return `rgb(${last[1]}, ${last[2]}, ${last[3]})`; }
+  }
+  return barva;
+}
+
+// For a single hex/solid color, generate a light→dark gradient (same as calendar AppointmentCard)
+function singleColorGradient(barva: string): string {
+  if (barva.includes('gradient')) {
+    // Already a gradient — change direction to 180deg (top→bottom) for vertical bar
+    return barva.replace(/\d+deg/, '180deg');
+  }
+  const hex = barva.replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16) || 100;
+  const g = parseInt(hex.substring(2, 4), 16) || 100;
+  const b = parseInt(hex.substring(4, 6), 16) || 240;
+  const lr = Math.min(255, r + 40);
+  const lg = Math.min(255, g + 40);
+  const lb = Math.min(255, b + 40);
+  const dr = Math.max(0, r - 20);
+  const dg = Math.max(0, g - 20);
+  const db = Math.max(0, b - 20);
+  return `linear-gradient(180deg, rgb(${lr},${lg},${lb}) 0%, rgb(${dr},${dg},${db}) 100%)`;
+}
+
+function buildServiceBarGradient(c1: string, c2?: string, c3?: string): string {
+  if (!c2) return singleColorGradient(c1);
+  if (!c3) return `linear-gradient(180deg, ${extractFirstColor(c1)} 0%, ${extractLastColor(c2)} 100%)`;
+  return `linear-gradient(180deg, ${extractFirstColor(c1)} 0%, ${extractLastColor(c2)} 50%, ${extractLastColor(c3)} 100%)`;
+}
+
 interface AppointmentListCardProps {
   title: string;
   subtitle: string;
@@ -305,7 +354,19 @@ export function AppointmentListCard({
               transition={{ delay: index * 0.05 }}
               className="w-full p-4 hover:bg-gray-50 transition-colors text-left"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                {/* Service color bar */}
+                <div
+                  className="w-1 self-stretch rounded-full flex-shrink-0"
+                  style={{
+                    background: buildServiceBarGradient(
+                      appointment.serviceColor || '#8B5CF6',
+                      appointment.serviceColor2,
+                      appointment.serviceColor3,
+                    ),
+                    minHeight: 40,
+                  }}
+                />
                 {/* Time */}
                 <div className="flex-shrink-0">
                   <div className="text-lg font-bold text-gray-900">

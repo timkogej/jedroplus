@@ -243,17 +243,12 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
                           tabIndex={0}
                           onClick={(e) => { e.stopPropagation(); onAbsenceClick?.(absence); }}
                           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAbsenceClick?.(absence); }}
-                          className="cursor-pointer w-full"
-                          style={{ padding: '1.5px', background: '#F59E0B', borderRadius: '5px' }}
+                          className="cursor-pointer w-full flex items-center gap-1 min-w-0 overflow-hidden"
+                          style={{ background: '#FFFBEB', borderRadius: '5px', padding: '1.5px 5px' }}
                         >
-                          <div
-                            className="w-full flex items-center gap-1 min-w-0 overflow-hidden"
-                            style={{ background: '#FFFBEB', borderRadius: '3px', padding: '1.5px 5px' }}
-                          >
-                            <span className="text-[9px] font-semibold truncate flex-1 leading-tight" style={titleStyle}>
-                              {absence.employee_name || 'Vsi'}
-                            </span>
-                          </div>
+                          <span className="text-[9px] font-semibold truncate flex-1 leading-tight" style={titleStyle}>
+                            {absence.employee_name || 'Vsi'}
+                          </span>
                         </div>
                       );
                     })}

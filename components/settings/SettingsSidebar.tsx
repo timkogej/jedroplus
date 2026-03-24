@@ -25,7 +25,7 @@ interface TabItem {
 const settingsTabs: TabItem[] = [
   { id: 'splosno', label: 'Splošno', icon: Gear, path: '/nastavitve/splosno' },
   { id: 'podjetje', label: 'Podjetje', icon: Buildings, path: '/nastavitve/podjetje' },
-  { id: 'clani', label: 'Člani podjetja', icon: UsersThree, path: '/nastavitve/clani', ownerOnly: true },
+  { id: 'clani', label: 'Člani', icon: UsersThree, path: '/nastavitve/clani', ownerOnly: true },
 ];
 
 export function SettingsSidebar() {

@@ -1,5 +1,21 @@
 import { supabaseReadOnly } from "@/src/lib/supabaseReadOnly";
 
+const SESSION_CACHE_PREFIX = '__col_cache__';
+
+function readSessionCache(key: string): boolean | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const v = sessionStorage.getItem(SESSION_CACHE_PREFIX + key);
+    if (v === null) return undefined;
+    return v === '1';
+  } catch { return undefined; }
+}
+
+function writeSessionCache(key: string, value: boolean) {
+  if (typeof window === 'undefined') return;
+  try { sessionStorage.setItem(SESSION_CACHE_PREFIX + key, value ? '1' : '0'); } catch { /* ignore */ }
+}
+
 const columnExistsCache = new Map<string, boolean>();
 const columnExistsPending = new Map<string, Promise<boolean>>();
 const detectedColumnCache = new Map<string, string | null>();
@@ -17,6 +33,13 @@ export async function checkColumnExists(tableName: string, column: string) {
   const cached = columnExistsCache.get(cacheKey);
   if (cached !== undefined) return cached;
 
+  // Check sessionStorage so results persist across page navigations
+  const sessionCached = readSessionCache(cacheKey);
+  if (sessionCached !== undefined) {
+    columnExistsCache.set(cacheKey, sessionCached);
+    return sessionCached;
+  }
+
   // Deduplicate concurrent checks for the same column
   const pending = columnExistsPending.get(cacheKey);
   if (pending) return pending;
@@ -32,22 +55,26 @@ export async function checkColumnExists(tableName: string, column: string) {
 
       if (!error) {
         columnExistsCache.set(cacheKey, true);
+        writeSessionCache(cacheKey, true);
         return true;
       }
 
       if (isMissingColumnError(error)) {
         columnExistsCache.set(cacheKey, false);
+        writeSessionCache(cacheKey, false);
         return false;
       }
 
       // Log but don't throw - assume column doesn't exist
       console.warn(`[tableIntrospection] Error checking column ${column} in ${tableName}:`, error.message);
       columnExistsCache.set(cacheKey, false);
+      writeSessionCache(cacheKey, false);
       return false;
     } catch (err) {
       columnExistsPending.delete(cacheKey);
       console.warn(`[tableIntrospection] Exception checking column ${column} in ${tableName}:`, err);
       columnExistsCache.set(cacheKey, false);
+      writeSessionCache(cacheKey, false);
       return false;
     }
   })();

@@ -36,6 +36,7 @@ interface ReservationSettings {
   bookingLink4: string;
   bookingLink5: string;
   apptManagementLink: string;
+  mainBookingLink: string;
 }
 
 interface BookingDesign {
@@ -114,6 +115,7 @@ export default function RezervacijePage() {
     bookingLink4: '',
     bookingLink5: '',
     apptManagementLink: '',
+    mainBookingLink: '',
   });
 
   const [loading, setLoading] = useState(true);
@@ -167,6 +169,7 @@ export default function RezervacijePage() {
         bookingLink4: String(podatkiRow?.['booking_link_4'] ?? podatkiRow?.['Booking_link_4'] ?? ''),
         bookingLink5: String(podatkiRow?.['booking_link_5'] ?? podatkiRow?.['Booking_link_5'] ?? ''),
         apptManagementLink: String(podatkiRow?.['appt_management_link'] ?? ''),
+        mainBookingLink: String(podatkiRow?.['main_booking_link'] ?? ''),
       });
     } catch (error) {
       console.error('Error fetching settings:', error);
@@ -242,7 +245,7 @@ export default function RezervacijePage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 flex items-center gap-3 rounded-2xl px-5 py-3.5"
+            className="mb-3 flex items-center gap-3 rounded-2xl px-5 py-3.5"
             style={{
               background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.06) 50%, rgba(6,182,212,0.08) 100%)',
               border: '1px solid rgba(139,92,246,0.15)',
@@ -256,6 +259,20 @@ export default function RezervacijePage() {
               backgroundClip: 'text',
             }}>
               Vsak mesec novi dizajni za booking strani
+            </p>
+          </motion.div>
+
+          {/* Multi-channel info banner */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="mb-6 flex items-start gap-3 rounded-2xl px-5 py-3.5 bg-amber-50 border border-amber-100"
+          >
+            <span className="text-amber-500 mt-0.5 flex-shrink-0" style={{ fontSize: 16 }}>💡</span>
+            <p className="text-sm text-amber-800">
+              <span className="font-semibold">Vsak booking link lahko uporabite na drugem kanalu.</span>{' '}
+              Na Instagram profilu en dizajn, na spletni strani drug, v email podpisu tretji – vsak kanal ima lahko svojega. Stranke vsakič pristanejo na isti vaši strani, samo z drugačnim videzom.
             </p>
           </motion.div>
 
@@ -441,6 +458,68 @@ export default function RezervacijePage() {
                 </div>
               </motion.div>
 
+              {/* Main Booking Link */}
+              {settings.mainBookingLink && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.23 }}
+                  className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Link className="w-5 h-5 text-violet-400" weight="regular" />
+                    <h2 className="text-base font-semibold text-[#1A1F36]">Glavni booking link</h2>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Uporablja se pri pošiljanju strankam, kadar je potrebno deliti link za rezervacijo.
+                  </p>
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="flex-1 min-w-0">
+                      <a
+                        href={settings.mainBookingLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm truncate block"
+                        style={{
+                          background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
+                        {settings.mainBookingLink}
+                      </a>
+                    </div>
+                    <div className="flex gap-1.5 flex-shrink-0">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(settings.mainBookingLink);
+                          setCopiedDesignId(-1);
+                          setTimeout(() => setCopiedDesignId(null), 2000);
+                        }}
+                        className="h-8 px-3 flex items-center gap-1.5 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors text-xs"
+                      >
+                        {copiedDesignId === -1 ? (
+                          <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">Kopirano</span></>
+                        ) : (
+                          <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">Kopiraj</span></>
+                        )}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => window.open(settings.mainBookingLink, '_blank')}
+                        className="h-8 w-8 flex items-center justify-center bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-lg shadow-sm"
+                      >
+                        <ArrowSquareOut className="w-3.5 h-3.5" weight="bold" />
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Appointment Management Link */}
               {settings.apptManagementLink && (
                 <motion.div
@@ -573,8 +652,22 @@ export default function RezervacijePage() {
                     </div>
                   </div>
 
+                  {/* Main Booking Link row */}
+                  {settings.mainBookingLink && (
+                    <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <Link className="w-4 h-4 text-gray-400" weight="regular" />
+                        <span className="text-sm font-medium text-gray-700">Glavni booking link</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-violet-400" />
+                        <span className="text-sm font-semibold text-violet-600">Nastavljen</span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Colors */}
-                  <div className={`flex items-center justify-between py-2.5 ${settings.apptManagementLink ? 'border-b border-gray-100' : ''}`}>
+                  <div className={`flex items-center justify-between py-2.5 ${(settings.apptManagementLink || settings.mainBookingLink) ? 'border-b border-gray-100' : ''}`}>
                     <div className="flex items-center gap-2">
                       <Palette className="w-4 h-4 text-gray-400" weight="regular" />
                       <span className="text-sm font-medium text-gray-700">Barve</span>

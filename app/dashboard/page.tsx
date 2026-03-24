@@ -27,7 +27,6 @@ import {
   Envelope,
   Phone,
   ClockCountdown,
-  User,
 } from "@phosphor-icons/react";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import { useCompany } from "@/app/company-context";
@@ -1110,51 +1109,73 @@ export default function DashboardPage() {
                   </div>
 
                   {nextAppointment ? (
-                    <div className="flex-1 flex flex-col gap-3">
-                      {/* Time + service color bar */}
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-1 self-stretch rounded-full flex-shrink-0"
-                          style={{ background: nextAppointment.serviceColor || '#8B5CF6', minHeight: 40 }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-2xl font-bold text-gray-900 tabular-nums">{nextAppointment.time}</span>
-                            {nextAppointment.endTime && (
-                              <span className="text-sm text-gray-400 font-medium">→ {nextAppointment.endTime}</span>
-                            )}
-                          </div>
-                          <p className="text-sm font-semibold text-gray-800 truncate mt-0.5">{nextAppointment.serviceName}</p>
-                        </div>
-                      </div>
-
-                      {/* Client + employee row */}
-                      <div className="flex flex-wrap gap-3">
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          <User className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" weight="regular" />
-                          <span className="text-sm text-gray-700 truncate font-medium">{nextAppointment.clientName}</span>
-                        </div>
-                        {nextAppointment.clientPhone && (
-                          <div className="flex items-center gap-1.5">
-                            <Phone className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" weight="regular" />
-                            <span className="text-sm text-gray-600">{nextAppointment.clientPhone}</span>
-                          </div>
-                        )}
-                        {nextAppointment.clientEmail && (
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <Envelope className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" weight="regular" />
-                            <span className="text-sm text-gray-600 truncate">{nextAppointment.clientEmail}</span>
-                          </div>
+                    <motion.button
+                      type="button"
+                      onClick={() => handleAppointmentClick(nextAppointment)}
+                      className="flex-1 flex items-center gap-3 hover:bg-gray-50 rounded-xl px-2 py-1 -mx-2 transition-colors text-left w-full"
+                    >
+                      {/* Service color bar */}
+                      <div
+                        className="w-1 self-stretch rounded-full flex-shrink-0"
+                        style={{
+                          background: (() => {
+                            const c1 = nextAppointment.serviceColor || '#8B5CF6';
+                            const c2 = nextAppointment.serviceColor2;
+                            const c3 = nextAppointment.serviceColor3;
+                            const extractFirst = (b: string) => { const m = b.includes('gradient') ? b.match(/#[0-9A-Fa-f]{6}/g) : null; return m ? m[0] : b; };
+                            const extractLast = (b: string) => { const m = b.includes('gradient') ? b.match(/#[0-9A-Fa-f]{6}/g) : null; return m ? m[m.length - 1] : b; };
+                            const singleGrad = (b: string) => {
+                              if (b.includes('gradient')) return b.replace(/\d+deg/, '180deg');
+                              const hex = b.replace('#', ''); const r = parseInt(hex.substring(0,2),16)||100; const g = parseInt(hex.substring(2,4),16)||100; const bv = parseInt(hex.substring(4,6),16)||240;
+                              return `linear-gradient(180deg, rgb(${Math.min(255,r+40)},${Math.min(255,g+40)},${Math.min(255,bv+40)}) 0%, rgb(${Math.max(0,r-20)},${Math.max(0,g-20)},${Math.max(0,bv-20)}) 100%)`;
+                            };
+                            if (!c2) return singleGrad(c1);
+                            if (!c3) return `linear-gradient(180deg, ${extractFirst(c1)} 0%, ${extractLast(c2)} 100%)`;
+                            return `linear-gradient(180deg, ${extractFirst(c1)} 0%, ${extractLast(c2)} 50%, ${extractLast(c3)} 100%)`;
+                          })(),
+                          minHeight: 40,
+                        }}
+                      />
+                      {/* Time */}
+                      <div className="flex-shrink-0">
+                        <div className="text-lg font-bold text-gray-900">{nextAppointment.time}</div>
+                        {nextAppointment.endTime && (
+                          <div className="text-xs text-gray-500">{nextAppointment.endTime}</div>
                         )}
                       </div>
-
-                      {/* Notes if any */}
-                      {nextAppointment.opombe && (
-                        <div className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 line-clamp-2">
-                          {nextAppointment.opombe}
+                      {/* Client + service */}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900 truncate">{nextAppointment.clientName}</div>
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <span className="truncate">{nextAppointment.serviceName}</span>
+                          {((nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0)) > 0 && (
+                            <span
+                              className="text-sm font-bold flex-shrink-0"
+                              style={{
+                                backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                              }}
+                            >
+                              +{(nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0)}
+                            </span>
+                          )}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                      {/* Employee initials */}
+                      <div
+                        className="flex h-10 w-10 items-center justify-center text-lg font-bold flex-shrink-0"
+                        style={{
+                          background: nextAppointment.employeeColor || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                          color: 'transparent',
+                        }}
+                      >
+                        {nextAppointment.employeeInitials}
+                      </div>
+                    </motion.button>
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center gap-2 py-4">
                       <CalendarBlank className="w-5 h-5 text-gray-300" weight="regular" />
@@ -1277,6 +1298,7 @@ export default function DashboardPage() {
         onSave={(data) => handleSaveAppointment(data, true)}
         isSaving={isNewAppointmentSaving}
         initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : undefined}
+        lockEmployee={role === 'staff' && Boolean(rolePersonId)}
       />
 
       {/* ── Edit Appointment Modal ────────────────────────────────────────── */}

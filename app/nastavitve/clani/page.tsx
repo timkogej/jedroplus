@@ -135,23 +135,20 @@ const permissionSections: {
 function RoleBadge({ role }: { role: MemberRole }) {
   if (role === 'owner') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-        <Crown className="w-3.5 h-3.5" weight="fill" />
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
         Lastnik
       </span>
     );
   }
   if (role === 'admin') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-        <ShieldStar className="w-3.5 h-3.5" weight="fill" />
+      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
         Admin
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
-      <UserCircle className="w-3.5 h-3.5" weight="fill" />
+    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
       Zaposleni
     </span>
   );
@@ -374,7 +371,7 @@ export default function ClaniPage() {
         className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
       >
         <div className="px-6 py-5 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-[#1A1F36]">Člani podjetja</h2>
+          <h2 className="text-base font-semibold text-[#1A1F36]">Člani</h2>
           <p className="text-sm text-gray-500 mt-0.5">
             Vsi uporabniki, ki so del tega podjetja
           </p>

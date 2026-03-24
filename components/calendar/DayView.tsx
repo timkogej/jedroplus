@@ -38,6 +38,7 @@ interface DayViewProps {
   onGridSlotClick?: (date: Date, time: string) => void;
   companySchedule?: CompanySchedule | null;
   showAllDays?: boolean;
+  isMobile?: boolean;
 }
 
 // Calculate overlapping appointments and assign columns (same as WeekView)
@@ -107,7 +108,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true }: DayViewProps) {
+function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true, isMobile = false }: DayViewProps) {
   // If showAllDays=false and it's a weekend, show "not a working day" state
   const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
   const skipDay = !showAllDays && isWeekend;
@@ -216,9 +217,9 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
         <div className="w-[52px] flex-shrink-0" />
 
         {/* Day header */}
-        <div className="flex flex-1 items-center gap-4 px-6 py-3">
-          {/* Date circle - only number, no day name above */}
-          <div className="flex flex-col items-center">
+        <div className={`flex flex-1 gap-3 py-3 ${isMobile ? 'px-2 items-start' : 'px-6 items-center'}`}>
+          {/* Date circle */}
+          <div className="flex flex-col items-center flex-shrink-0 pt-0.5">
             <div
               className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold ${isCurrentDay ? '' : 'text-[#1A1F36]'}`}
               style={isCurrentDay ? {
@@ -230,7 +231,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
               {currentDate.getDate()}
             </div>
           </div>
-          <div>
+          <div className="flex-shrink-0">
             <p className="text-base font-semibold text-[#1A1F36]">
               {DAYS_FULL[currentDate.getDay()]}
             </p>
@@ -238,68 +239,59 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
               {formatDate(currentDate, 'dayMonth')} {currentDate.getFullYear()}
             </p>
           </div>
-          <div className="ml-auto flex flex-col gap-2 items-end">
+
+          {/* Right section — all items stack vertically on mobile */}
+          <div className="ml-auto flex flex-col gap-1 items-end min-w-0" style={isMobile ? { maxWidth: '46%' } : undefined}>
             {/* Event banners */}
-            {hasEvents && (
-              <div className="flex flex-wrap items-center gap-1.5 max-w-xs">
-                {dayEvents.slice(0, 3).map((ev) => (
-                  <EventCard
-                    key={ev.id}
-                    event={ev}
-                    onClick={onEventClick ?? (() => {})}
-                    variant="banner"
-                  />
-                ))}
-                {dayEvents.length > 3 && (
-                  <span className="text-[9px] text-gray-500">+{dayEvents.length - 3}</span>
-                )}
+            {hasEvents && dayEvents.slice(0, isMobile ? 2 : 3).map((ev) => (
+              <div key={ev.id} className="w-full">
+                <EventCard
+                  event={ev}
+                  onClick={onEventClick ?? (() => {})}
+                  variant="banner"
+                />
               </div>
+            ))}
+            {hasEvents && dayEvents.length > (isMobile ? 2 : 3) && (
+              <span className="text-[9px] text-gray-500 self-end">+{dayEvents.length - (isMobile ? 2 : 3)}</span>
             )}
-            <div className="flex items-center gap-3">
-            {/* Absence indicators - event card style, clickable */}
-            {hasAbsence && (
-              <div className="flex flex-col gap-1">
-                {dayAbsences.map((absence) => {
-                  const titleStyle = absence.employee_color ? {
-                    background: absence.employee_color,
-                    WebkitBackgroundClip: 'text' as const,
-                    WebkitTextFillColor: 'transparent' as const,
-                    backgroundClip: 'text' as const,
-                  } : { color: '#92400E' };
-                  return (
-                    <div
-                      key={absence.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => onAbsenceClick?.(absence)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAbsenceClick?.(absence); }}
-                      className="cursor-pointer"
-                      style={{ padding: '1.5px', background: '#F59E0B', borderRadius: '5px' }}
-                    >
-                      <div
-                        className="flex items-center gap-2 min-w-0 overflow-hidden"
-                        style={{ background: '#FFFBEB', borderRadius: '3px', padding: '3px 8px' }}
-                      >
-                        <span className="text-xs font-semibold truncate leading-tight" style={titleStyle}>
-                          {absence.employee_name || 'Vsi zaposleni'}
-                        </span>
-                        {absence.reason && (
-                          <span className="text-[10px] text-amber-600 truncate max-w-[80px]">{absence.reason}</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-            <div className="flex items-center gap-1.5 rounded-full bg-[#F7F8FA] px-3 py-1.5">
+
+            {/* Absence indicators */}
+            {hasAbsence && dayAbsences.map((absence) => {
+              const titleStyle = absence.employee_color ? {
+                background: absence.employee_color,
+                WebkitBackgroundClip: 'text' as const,
+                WebkitTextFillColor: 'transparent' as const,
+                backgroundClip: 'text' as const,
+              } : { color: '#92400E' };
+              return (
+                <div
+                  key={absence.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onAbsenceClick?.(absence)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAbsenceClick?.(absence); }}
+                  className="cursor-pointer w-full flex items-center gap-2 min-w-0 overflow-hidden"
+                  style={{ background: '#FFFBEB', borderRadius: '5px', padding: '3px 8px' }}
+                >
+                  <span className="text-xs font-semibold truncate leading-tight" style={titleStyle}>
+                    {absence.employee_name || 'Vsi zaposleni'}
+                  </span>
+                  {!isMobile && absence.reason && (
+                    <span className="text-[10px] text-amber-600 truncate max-w-[80px]">{absence.reason}</span>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Appointment count pill */}
+            <div className="flex items-center gap-1.5 rounded-full bg-[#F7F8FA] px-3 py-1.5 flex-shrink-0 self-end">
               <span className="text-xs font-semibold text-[#1A1F36]">
                 {dayAppointments.length}
               </span>
               <span className="text-xs text-gray-400">
                 {dayAppointments.length === 1 ? 'termin' : dayAppointments.length >= 2 && dayAppointments.length <= 4 ? 'termini' : 'terminov'}
               </span>
-            </div>
             </div>
           </div>
         </div>

@@ -76,6 +76,14 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const [bookingBgFrom, setBookingBgFrom] = useState('#7C75FC');
   const [bookingBgTo, setBookingBgTo] = useState('#44D0C6');
 
+  // Booking links (for main link selector)
+  const [bookingLink1, setBookingLink1] = useState('');
+  const [bookingLink2, setBookingLink2] = useState('');
+  const [bookingLink3, setBookingLink3] = useState('');
+  const [bookingLink4, setBookingLink4] = useState('');
+  const [bookingLink5, setBookingLink5] = useState('');
+  const [mainBookingLink, setMainBookingLink] = useState('');
+
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -116,6 +124,18 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           setBookingSecondary(String(data['Booking_secondary'] ?? data['booking_secondary'] ?? '#44D0C6'));
           setBookingBgFrom(String(data['Booking_bg_from'] ?? data['booking_bg_from'] ?? data['Booking_primary'] ?? data['booking_primary'] ?? '#7C75FC'));
           setBookingBgTo(String(data['Booking_bg_to'] ?? data['booking_bg_to'] ?? data['Booking_secondary'] ?? data['booking_secondary'] ?? '#44D0C6'));
+
+          const bl1 = String(data['booking_link_1'] ?? data['Booking_link_1'] ?? '');
+          const bl2 = String(data['booking_link_2'] ?? data['Booking_link_2'] ?? '');
+          const bl3 = String(data['booking_link_3'] ?? data['Booking_link_3'] ?? '');
+          const bl4 = String(data['booking_link_4'] ?? data['Booking_link_4'] ?? '');
+          const bl5 = String(data['booking_link_5'] ?? data['Booking_link_5'] ?? '');
+          setBookingLink1(bl1);
+          setBookingLink2(bl2);
+          setBookingLink3(bl3);
+          setBookingLink4(bl4);
+          setBookingLink5(bl5);
+          setMainBookingLink(String(data['main_booking_link'] ?? ''));
         }
       } catch (error) {
         console.error('Error loading booking settings:', error);
@@ -149,6 +169,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           'Booking_secondary': bookingSecondary,
           'Booking_bg_from': bookingBgFrom,
           'Booking_bg_to': bookingBgTo,
+          'main_booking_link': mainBookingLink,
           colors: {
             primary: bookingPrimary,
             secondary: bookingSecondary,
@@ -260,6 +281,31 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         <SelectOption value="60">60 minut (1 ura)</SelectOption>
                       </Select>
                     </SettingRow>
+                  </SettingsSection>
+
+                  {/* Main Booking Link */}
+                  <SettingsSection title="Glavni booking link" description="Link, ki se uporablja pri pošiljanju strankam">
+                    <SettingRow
+                      label="Izberi glavni booking link"
+                      description="Ta link se bo uporabljal pri pošiljanju rezervacij strankam"
+                    >
+                      <Select
+                        value={mainBookingLink}
+                        setValue={setMainBookingLink}
+                        placeholder="Izberi link..."
+                      >
+                        {bookingLink1 && <SelectOption value={bookingLink1}>Klasičen</SelectOption>}
+                        {bookingLink2 && <SelectOption value={bookingLink2}>Moderen</SelectOption>}
+                        {bookingLink3 && <SelectOption value={bookingLink3}>Minimalen</SelectOption>}
+                        {bookingLink4 && <SelectOption value={bookingLink4}>Sezonsko</SelectOption>}
+                        {bookingLink5 && <SelectOption value={bookingLink5}>Magazine</SelectOption>}
+                      </Select>
+                    </SettingRow>
+                    {mainBookingLink && (
+                      <div className="px-4 pb-3">
+                        <p className="text-xs text-gray-500 mt-1 break-all">{mainBookingLink}</p>
+                      </div>
+                    )}
                   </SettingsSection>
 
                   {/* Confirmation Settings */}

@@ -151,8 +151,14 @@ function SendResultPanel({
       </div>
 
       <div className="grid grid-cols-3 gap-3">
+        <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
+          <p className="text-xl font-bold text-[#1A1F36]">{result.totals.requested}</p>
+          <p className="text-xs text-gray-400 mt-0.5">Zahtevano</p>
+          <p className="text-[10px] text-gray-300 mt-0.5 leading-tight">
+            {result.totals.requested} strank · {result.totals.requested} sporočil
+          </p>
+        </div>
         {[
-          { label: 'Zahtevano', value: result.totals.requested, color: 'text-[#1A1F36]' },
           { label: 'Poslano', value: result.totals.sent, color: 'text-emerald-600' },
           { label: 'Preskočeno', value: result.totals.skipped, color: result.totals.skipped > 0 ? 'text-amber-600' : 'text-gray-400' },
         ].map(({ label, value, color }) => (

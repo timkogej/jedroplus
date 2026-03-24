@@ -56,10 +56,9 @@ export default function ConnectEmployeeModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100">
+            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl ring-1 ring-gray-100 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
                 <div className="flex items-center gap-3">

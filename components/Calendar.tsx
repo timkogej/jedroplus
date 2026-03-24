@@ -1900,6 +1900,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                       onGridSlotClick={handleGridSlotClick}
                       companySchedule={companySchedule}
                       showAllDays={showAllDays}
+                      isMobile={isMobile}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -2027,6 +2028,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         initialDate={newAppointmentInitials.date}
         initialStartTime={newAppointmentInitials.startTime}
         initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : undefined}
+        lockEmployee={role === 'staff' && Boolean(rolePersonId)}
       />
 
       {/* Absence modal */}
