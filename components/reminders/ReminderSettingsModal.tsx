@@ -599,10 +599,14 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                       value={nastavitvePred}
                                       onChange={(e) => setNastavitvePred(e.target.value)}
                                       rows={5}
+                                      maxLength={500}
                                       placeholder="Npr: Stranke vedno nagovorite po imenu. Pred masažo opomni, da naj pridejo spočiti in ne takoj po jedi. Za storitev 'gel lak' opomni, da naj ne namakajo nohtov vsaj dan prej. Ton naj bo topel in profesionalen."
                                       className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-violet-300 focus:outline-none resize-none"
                                     />
-                                    <p className="text-xs text-gray-400">Navedite poslovne navade, posebne nasvete pred določenimi storitvami, kaj naj AI omeni ali izpostavi, kakšen odnos do stranke si želite ipd.</p>
+                                    <div className="flex justify-between items-center">
+                                      <p className="text-xs text-gray-400">Navedite poslovne navade, posebne nasvete pred določenimi storitvami, kaj naj AI omeni ali izpostavi, kakšen odnos do stranke si želite ipd.</p>
+                                      <p className="text-xs text-gray-400 flex-shrink-0 ml-2">{nastavitvePred.length}/500</p>
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -632,8 +636,10 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                               value={nastavitvePred}
                               onChange={(e) => setNastavitvePred(e.target.value)}
                               rows={5}
+                              maxLength={500}
                               placeholder="Npr: Prosimo pridite 5 minut pred terminom. Parkirišče je na zadnji strani stavbe."
                             />
+                            <p className="text-xs text-gray-400 text-right">{nastavitvePred.length}/500</p>
                           </div>
                         )}
 
@@ -753,10 +759,14 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                       value={nastavitvePo}
                                       onChange={(e) => setNastavitvePo(e.target.value)}
                                       rows={5}
+                                      maxLength={500}
                                       placeholder="Npr: Po masaži priporočite, da stranka pije veliko vode. Za storitev 'barvanje las' opomni, naj se izogiba mokrim lasom vsaj 24 ur. Stranki zaželite lep dan in jo povabite k ponovnemu obisku."
                                       className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-violet-300 focus:outline-none resize-none"
                                     />
-                                    <p className="text-xs text-gray-400">Navedite poslovne navade, posebne nasvete po določenih storitvah, kaj naj AI omeni ali priporoči, ter kakšen odnos do stranke si želite po obisku.</p>
+                                    <div className="flex justify-between items-center">
+                                      <p className="text-xs text-gray-400">Navedite poslovne navade, posebne nasvete po določenih storitvah, kaj naj AI omeni ali priporoči, ter kakšen odnos do stranke si želite po obisku.</p>
+                                      <p className="text-xs text-gray-400 flex-shrink-0 ml-2">{nastavitvePo.length}/500</p>
+                                    </div>
                                   </div>
                                 )}
                               </div>
@@ -786,8 +796,10 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                               value={nastavitvePo}
                               onChange={(e) => setNastavitvePo(e.target.value)}
                               rows={5}
+                              maxLength={500}
                               placeholder="Npr: Hvala za obisk! Za najboljše rezultate priporočamo uporabo našega specialnega šampona."
                             />
+                            <p className="text-xs text-gray-400 text-right">{nastavitvePo.length}/500</p>
                           </div>
                         )}
 

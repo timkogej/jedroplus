@@ -284,9 +284,11 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                         value={instructions}
                         onChange={(e) => setInstructions(e.target.value)}
                         rows={6}
+                        maxLength={500}
                         placeholder="Npr: Bodi prijazen in oseben. Omeni koliko časa je minilo od zadnjega obiska. Ponudi možnost rezervacije novega termina. Če je na voljo popust, ga omeni kot posebno ponudbo za zveste stranke."
                         disabled={!enabled}
                       />
+                      <p className="text-xs text-gray-400 text-right mt-1">{instructions.length}/500</p>
                     </SettingRow>
                   </SettingsSection>
 
@@ -300,6 +302,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                       <Input
                         value={discount}
                         onChange={(e) => setDiscount(e.target.value)}
+                        maxLength={100}
                         placeholder="Npr.: 15% popust na naslednji obisk"
                         disabled={!enabled}
                       />

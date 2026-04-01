@@ -21,6 +21,7 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import type { AppointmentWithDetails } from '@/types/appointments';
+import { normalizeStatus } from './StatusBadge';
 import StatusBadge from './StatusBadge';
 import ServiceColorDot from '@/components/shared/ServiceColorDot';
 

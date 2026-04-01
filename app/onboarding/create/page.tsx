@@ -248,6 +248,9 @@ export default function CreateCompanyPage() {
           setCreatedCompanyPublicId(publicId);
           setShowConfetti(true);
           toast.success('Podjetje uspešno ustvarjeno!');
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 1500);
         } else {
           toast.error('Napaka pri nalaganju podjetja. Prosimo, poskusite znova.');
           setLoading(false);

@@ -477,10 +477,10 @@ export default function PlansPage() {
           <p className="text-gray-600">
             Imate vprašanja? Kontaktirajte nas na{' '}
             <a
-              href="mailto:podpora@jedroplus.com"
+              href="mailto:help@jedroplus.com"
               className="text-violet-600 hover:text-violet-700 font-medium"
             >
-              podpora@jedroplus.com
+              help@jedroplus.com
             </a>
           </p>
         </motion.div>

@@ -823,8 +823,8 @@ function BillingPageContent() {
           >
             <p className="text-gray-600">
               Imate vprašanja? Kontaktirajte nas na{' '}
-              <a href="mailto:podpora@jedroplus.com" className="text-violet-600 hover:text-violet-700 font-medium">
-                podpora@jedroplus.com
+              <a href="mailto:help@jedroplus.com" className="text-violet-600 hover:text-violet-700 font-medium">
+                help@jedroplus.com
               </a>
             </p>
             <p className="text-gray-500 text-sm">
