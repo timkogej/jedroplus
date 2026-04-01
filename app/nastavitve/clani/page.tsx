@@ -192,6 +192,7 @@ export default function ClaniPage() {
   const [currentRole, setCurrentRole] = useState<MemberRole | null>(null);
   const [members, setMembers] = useState<CompanyMember[]>([]);
   const [permissions, setPermissions] = useState<StaffPermissions | null>(null);
+  const [maxUsers, setMaxUsers] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -246,6 +247,15 @@ export default function ClaniPage() {
         .maybeSingle();
 
       setPermissions(permsData as StaffPermissions | null);
+
+      // 5. Fetch max_users from company_user_limits
+      const { data: limitsData } = await supabaseReadOnly
+        .from('company_user_limits')
+        .select('max_users')
+        .eq('company_id', companyUuid)
+        .maybeSingle();
+
+      setMaxUsers(limitsData?.max_users ?? null);
     } catch (err) {
       console.error('[ClaniPage] fetchData error:', err);
       setError('Napaka pri nalaganju podatkov.');
@@ -364,6 +374,24 @@ export default function ClaniPage() {
 
   return (
     <div className="space-y-6">
+      {/* User limit banner */}
+      {maxUsers !== null && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl border border-gray-200 px-6 py-4 flex items-center justify-between gap-4"
+        >
+          <div>
+            <p className="text-sm font-medium text-gray-500">Največje število uporabnikov aplikacije</p>
+            <p className="text-2xl font-bold text-[#1A1F36] mt-0.5">{maxUsers}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">Trenutno v ekipi</p>
+            <p className="text-2xl font-bold text-[#1A1F36] mt-0.5">{members.length}</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Members list */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}

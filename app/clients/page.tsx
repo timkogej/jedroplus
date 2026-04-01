@@ -42,6 +42,7 @@ import ClientTable from '@/components/clients/ClientTable';
 import ClientModal from '@/components/clients/ClientModal';
 import ClientDetailsPanel from '@/components/clients/ClientDetailsPanel';
 import DeleteClientModal from '@/components/clients/DeleteClientModal';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 // Stats card component - Gradient border with black icon (no circle)
 interface StatCardProps {
@@ -540,7 +541,7 @@ export default function ClientsPage() {
   if (companyLoading || !companyId) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+        <GradientSpinner />
       </div>
     );
   }

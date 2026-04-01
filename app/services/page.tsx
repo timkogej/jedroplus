@@ -49,6 +49,7 @@ import ServiceGrid from '@/components/services/ServiceGrid';
 import ServiceModal from '@/components/services/ServiceModal';
 import DeleteServiceModal from '@/components/services/DeleteServiceModal';
 import { Select, SelectOption } from '@/components/ui/animated-select';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 // Stats card component - no icon circles, icons on right side
 interface StatCardProps {
@@ -616,7 +617,7 @@ export default function StoritvePage() {
   if (companyLoading || !companyId) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+        <GradientSpinner />
       </div>
     );
   }
@@ -747,7 +748,7 @@ export default function StoritvePage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all
-                         ${showInactive
+                         ${!showInactive
                            ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
                            : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'
                          }`}

@@ -109,15 +109,15 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           const ureValue = String(data['koledar_ure'] ?? data['Koledar_ure'] ?? '30');
           setKoledarUre(ureValue === '60' ? '60' : ureValue === '15' ? '15' : '30');
 
-          const potrdiloRez = data['Potrdilo ob rezervaciji'] ?? data['potrdilo_ob_rezervaciji'];
-          setPotrdiloReservation(potrdiloRez === 'yes' || potrdiloRez === true || potrdiloRez === 'da');
+          const potrdiloRez = data['Potrdilo po rezervaciji'] ?? data['Potrdilo ob rezervaciji'];
+          setPotrdiloReservation(potrdiloRez === true || potrdiloRez === 'true' || potrdiloRez === 'yes' || potrdiloRez === 'da');
 
           // Read potrdilo_channel
           const ch = String(data['potrdilo_channel'] ?? 'email').toLowerCase();
           setPotrdiloChannel(ch === 'sms' ? 'sms' : 'email');
 
-          const potrdiloOnl = data['Potrdilo online rez'] ?? data['potrdilo_online_rez'];
-          setPotrdiloOnline(potrdiloOnl === 'yes' || potrdiloOnl === true || potrdiloOnl === 'da');
+          const potrdiloOnl = data['Potrdilo online termina'] ?? data['Potrdilo online rez'];
+          setPotrdiloOnline(potrdiloOnl === true || potrdiloOnl === 'true' || potrdiloOnl === 'yes' || potrdiloOnl === 'da');
 
           // Read potrdilo_online_channel
           const onlCh = String(data['potrdilo_online_channel'] ?? 'email').toLowerCase();
@@ -167,9 +167,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         data: {
           'booking_omogocen': bookingOmogocen,
           'koledar_ure': koledarUre,
-          'Potrdilo ob rezervaciji': potrdiloReservation ? 'yes' : 'no',
+          'Potrdilo po rezervaciji': potrdiloReservation ? 'true' : 'false',
+          'Potrdilo ob rezervaciji': potrdiloReservation ? 'true' : 'false',
           'potrdilo_channel': potrdiloChannel,
-          'Potrdilo online rez': potrdiloOnline ? 'yes' : 'no',
+          'Potrdilo online termina': potrdiloOnline ? 'true' : 'false',
+          'Potrdilo online rez': potrdiloOnline ? 'true' : 'false',
           'potrdilo_online_channel': potrdiloOnlineChannel,
           'Booking_primary': bookingPrimary,
           'Booking_secondary': bookingSecondary,

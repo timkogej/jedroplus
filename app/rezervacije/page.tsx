@@ -12,12 +12,14 @@ import {
   ArrowSquareOut,
   Check,
   Link,
+  Warning,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { BookingSettingsModal } from '@/components/booking/BookingSettingsModal';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 interface ReservationSettings {
   timeSlotLength: number;
@@ -145,14 +147,14 @@ export default function RezervacijePage() {
       // Extract settings from the row
       const timeSlotValue = podatkiRow?.['koledar_ure'] || podatkiRow?.['Koledar_ure'] || 30;
 
-      // Client confirmation: check "Potrdilo po rezervaciji" column, handle true/false/yes/no
-      const potrdiloPodatkiRaw = podatkiRow?.['Potrdilo po rezervaciji'] ?? podatkiRow?.['potrdilo_po_rezervaciji'] ?? podatkiRow?.['Potrdilo ob rezervaciji'] ?? podatkiRow?.['potrdilo_ob_rezervaciji'];
-      const sendConfirmation = potrdiloPodatkiRaw === 'true' || potrdiloPodatkiRaw === 'yes' || potrdiloPodatkiRaw === true;
+      // Client confirmation: read from "Potrdilo po rezervaciji" column
+      const potrdiloPodatkiRaw = podatkiRow?.['Potrdilo po rezervaciji'] ?? podatkiRow?.['Potrdilo ob rezervaciji'];
+      const sendConfirmation = potrdiloPodatkiRaw === true || potrdiloPodatkiRaw === 'true' || potrdiloPodatkiRaw === 'yes' || potrdiloPodatkiRaw === 'da';
       const clientConfirmationChannel = (podatkiRow?.['potrdilo_channel'] || 'email') as string;
 
-      // Online confirmation: check "Potrdilo online termina" column
-      const potrdiloPodatkiOnlineRaw = podatkiRow?.['Potrdilo online termina'] ?? podatkiRow?.['potrdilo_online_termina'] ?? podatkiRow?.['Potrdilo online rez'] ?? podatkiRow?.['potrdilo_online_rez'];
-      const sendOnlineConfirmation = potrdiloPodatkiOnlineRaw === 'true' || potrdiloPodatkiOnlineRaw === 'yes' || potrdiloPodatkiOnlineRaw === true;
+      // Online confirmation: read from "Potrdilo online termina" column
+      const potrdiloPodatkiOnlineRaw = podatkiRow?.['Potrdilo online termina'] ?? podatkiRow?.['Potrdilo online rez'];
+      const sendOnlineConfirmation = potrdiloPodatkiOnlineRaw === true || potrdiloPodatkiOnlineRaw === 'true' || potrdiloPodatkiOnlineRaw === 'yes' || potrdiloPodatkiOnlineRaw === 'da';
       const onlineConfirmationChannel = (podatkiRow?.['potrdilo_online_channel'] || 'email') as string;
       const primaryColor = (podatkiRow?.['Booking_primary'] || podatkiRow?.['booking_primary'] || '#8B5CF6') as string;
       const secondaryColor = (podatkiRow?.['Booking_secondary'] || podatkiRow?.['booking_secondary'] || '#06B6D4') as string;
@@ -215,10 +217,12 @@ export default function RezervacijePage() {
   if (companyLoading || !companyId) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+        <GradientSpinner />
       </div>
     );
   }
+
+  const hasIncompleteSettings = !loading && !settings.mainBookingLink.trim();
 
   return (
     <ProtectedLayout>
@@ -243,13 +247,39 @@ export default function RezervacijePage() {
                 onClick={() => setShowSettingsModal(true)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                className="relative w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
                 title="Nastavitve"
               >
                 <Gear size={20} weight="bold" className="text-gray-900" />
+                {hasIncompleteSettings && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-white border border-white" style={{ fontSize: 9, fontWeight: 700, lineHeight: 1 }}>!</span>
+                )}
               </motion.button>
             )}
           </motion.div>
+
+          {/* Incomplete settings banner */}
+          {hasIncompleteSettings && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 flex items-center gap-3 rounded-2xl px-5 py-3.5 bg-orange-50 border border-orange-200"
+            >
+              <Warning size={18} weight="fill" className="text-orange-500 flex-shrink-0" />
+              <p className="text-sm text-orange-800 flex-1">
+                <span className="font-semibold">Izpolnite nastavitve označene s !</span>{' '}
+                za brezhibno delovanje in izkoriščanje celotnega potenciala rezervacij.
+              </p>
+              {canManageSettings && (
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="text-xs font-semibold text-orange-700 hover:text-orange-900 underline underline-offset-2 flex-shrink-0"
+                >
+                  Odpri nastavitve →
+                </button>
+              )}
+            </motion.div>
+          )}
 
           {/* Monthly designs announcement banner */}
           <motion.div
@@ -289,7 +319,7 @@ export default function RezervacijePage() {
           {/* Loading state */}
           {loading ? (
             <div className="flex items-center justify-center py-20 bg-white">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+              <GradientSpinner />
             </div>
           ) : (
             <>

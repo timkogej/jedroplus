@@ -147,6 +147,7 @@ export default function ProtectedLayout({
   // ── Role-based access gate ──────────────────────────────────────────────
   // Admin cannot access /billing at all.
   // Staff access to certain routes depends on staff_role_permissions.
+  // NOTE: plan is checked FIRST; role gate only applies when the plan allows the route.
   function getRoleGate(): React.ReactNode | null {
     if (role === 'owner' || role === null) return null;
 
@@ -176,7 +177,9 @@ export default function ProtectedLayout({
       for (const { prefix, key } of routePermMap) {
         if (pathname === prefix || pathname.startsWith(prefix + '/')) {
           if (p && p[key] === false) {
-            return <RoleAccessGate message="Lastnik podjetja vam ni omogočil dostopa do te strani." />;
+            return (
+              <RoleAccessGate message="Ta funkcija je za vaš račun onemogočena. Za dostop kontaktirajte lastnika podjetja." />
+            );
           }
         }
       }
@@ -186,15 +189,18 @@ export default function ProtectedLayout({
   }
 
   const roleGate = getRoleGate();
+  // Staff and admin cannot manage billing — hide the upgrade button for them
+  const hideUpgradeButton = role === 'staff' || role === 'admin';
 
   return (
     <SidebarProvider>
       <LayoutContent>
-        {roleGate
+        {/* Plan is checked FIRST — it always takes precedence over role */}
+        {!accessAllowed
+          ? <UpgradePlanGate requiredPlan={requiredPlan as PlanCode} hideUpgradeButton={hideUpgradeButton} />
+          : roleGate
           ? roleGate
-          : accessAllowed
-          ? children
-          : <UpgradePlanGate requiredPlan={requiredPlan as PlanCode} />}
+          : children}
       </LayoutContent>
     </SidebarProvider>
   );

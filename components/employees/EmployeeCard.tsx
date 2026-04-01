@@ -132,7 +132,7 @@ function EmployeeCard({
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onConnect(employee); }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/10 px-3 py-2 text-xs font-medium text-violet-700 ring-1 ring-violet-200 transition-all hover:from-violet-500/20 hover:to-cyan-500/20 hover:ring-violet-300"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/10 px-3 py-2 text-xs font-medium text-violet-700 ring-1 ring-violet-200 transition-colors hover:from-violet-500/20 hover:to-cyan-500/20 hover:ring-violet-300"
             >
               <LinkSimple className="h-3.5 w-3.5" weight="bold" />
               Poveži moj račun s to osebo

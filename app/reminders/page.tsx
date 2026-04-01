@@ -12,6 +12,7 @@ import {
   EnvelopeSimple,
   Palette,
   ChatText,
+  Warning,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
@@ -20,6 +21,7 @@ import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 type ReminderRow = Record<string, unknown>;
 
@@ -87,18 +89,6 @@ export default function RemindersPage() {
       const { data: companyData } = await loadCompanyRow(companyId);
       setCompanyRow(companyData ?? null);
       setReminderRow(companyData ?? null);
-
-      // Load sms_sender_id from companies table
-      try {
-        const { data: companiesData } = await supabaseReadOnly
-          .from('companies')
-          .select('sms_sender_id')
-          .eq('company_id', companyId)
-          .maybeSingle();
-        if (companiesData?.sms_sender_id) {
-          setSmsSenderId(String(companiesData.sms_sender_id));
-        }
-      } catch {}
 
       // Fetch stats from appointments
       const today = new Date();
@@ -225,6 +215,8 @@ export default function RemindersPage() {
 
   if (!companyId) return null;
 
+  const hasIncompleteSettings = !loading && (!fromName.trim() || !replyToEmail.trim());
+
   return (
     <ProtectedLayout>
       <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50">
@@ -249,14 +241,40 @@ export default function RemindersPage() {
                   onClick={() => setShowSettingsModal(true)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
+                  className="relative w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
                   title="Nastavitve"
                 >
                   <Gear size={20} weight="bold" className="text-gray-900" />
+                  {hasIncompleteSettings && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-white border border-white" style={{ fontSize: 9, fontWeight: 700, lineHeight: 1 }}>!</span>
+                  )}
                 </motion.button>
               )}
             </div>
           </motion.div>
+
+          {/* Incomplete settings banner */}
+          {hasIncompleteSettings && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 flex items-center gap-3 rounded-2xl px-5 py-3.5 bg-orange-50 border border-orange-200"
+            >
+              <Warning size={18} weight="fill" className="text-orange-500 flex-shrink-0" />
+              <p className="text-sm text-orange-800 flex-1">
+                <span className="font-semibold">Izpolnite nastavitve označene s !</span>{' '}
+                za brezhibno delovanje in izkoriščanje celotnega potenciala opomnikov.
+              </p>
+              {canManageSettings && (
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="text-xs font-semibold text-orange-700 hover:text-orange-900 underline underline-offset-2 flex-shrink-0"
+                >
+                  Odpri nastavitve →
+                </button>
+              )}
+            </motion.div>
+          )}
 
           {/* Statistics Cards */}
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -339,7 +357,7 @@ export default function RemindersPage() {
           {/* Settings Sections */}
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+              <GradientSpinner />
             </div>
           ) : (
             <div className="space-y-6">
@@ -381,7 +399,10 @@ export default function RemindersPage() {
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <EnvelopeSimple className="w-4 h-4 text-gray-400" weight="regular" />
-                      <span className="text-sm font-medium text-gray-700">Ime pošiljatelja</span>
+                      <div>
+                        <span className="text-sm font-medium text-gray-700">Ime pošiljatelja</span>
+                        <p className="text-xs text-gray-400">Uporablja se pri email pošiljanju</p>
+                      </div>
                     </div>
                     <span className="text-sm font-semibold text-gray-900">
                       {fromName || <span className="font-normal text-gray-400">Ni nastavljeno</span>}
@@ -392,7 +413,7 @@ export default function RemindersPage() {
                     <div className="flex items-center gap-2">
                       <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
                       <div>
-                        <span className="text-sm font-medium text-gray-700">ID pošiljatelja</span>
+                        <span className="text-sm font-medium text-gray-700">ID Pošiljatelja SMS</span>
                         <p className="text-xs text-gray-400">Uporablja se pri SMS pošiljanju</p>
                       </div>
                     </div>

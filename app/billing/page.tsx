@@ -518,12 +518,9 @@ function BillingPageContent() {
   const isGradientPlan = currentCode === 'JEDRO_PLUS' || currentCode === 'JEDRO_PRO';
 
   const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('sl-SI', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    if (!dateString) return '/';
+    // Slice the first 10 chars to get YYYY-MM-DD regardless of timezone
+    return dateString.slice(0, 10);
   };
 
   return (
@@ -603,17 +600,24 @@ function BillingPageContent() {
                           {subscription.status === 'active' ? 'Aktivna' : subscription.status}
                         </span>
                       </div>
-                      {subscription.current_period_end && (
-                        <div className="flex justify-between">
-                          <span className="text-gray-500">Naslednja obnova</span>
-                          <span className="font-medium text-gray-900">
-                            {formatDate(subscription.current_period_end)}
-                          </span>
-                        </div>
-                      )}
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Naslednja obnova</span>
+                        <span className="font-medium text-gray-900">
+                          {subscription.current_period_end ? formatDate(subscription.current_period_end) : '/'}
+                        </span>
+                      </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500">Brezplačni paket</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Status</span>
+                        <span className="font-medium text-gray-900">Brezplačni</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Naslednja obnova</span>
+                        <span className="font-medium text-gray-900">/</span>
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -670,29 +674,31 @@ function BillingPageContent() {
                 </div>
               </div>
 
-              {/* Stripe Billing Portal Button */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleManageSubscription}
-                  disabled={isLoadingPortal}
-                  className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                  {isLoadingPortal ? (
-                    <>
-                      <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                      Odpiranje portala...
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard className="h-4 w-4" weight="bold" />
-                      Odpri Billing Portal
-                    </>
-                  )}
-                </motion.button>
-                <p className="mt-2 text-xs text-gray-400">Upravljajte naročnino, plačilno metodo in račune prek Stripe portala.</p>
-              </div>
+              {/* Stripe Billing Portal Button — hidden for FREE plan */}
+              {currentCode !== 'FREE' && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleManageSubscription}
+                    disabled={isLoadingPortal}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50"
+                  >
+                    {isLoadingPortal ? (
+                      <>
+                        <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                        Odpiranje portala...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4" weight="bold" />
+                        Odpri Billing Portal
+                      </>
+                    )}
+                  </motion.button>
+                  <p className="mt-2 text-xs text-gray-400">Upravljajte naročnino, plačilno metodo in račune prek Stripe portala.</p>
+                </div>
+              )}
             </div>
           </motion.div>}
 
@@ -767,7 +773,7 @@ function BillingPageContent() {
                         >
                           Prihaja kmalu
                         </button>
-                      ) : (
+                      ) : isStaff ? null : (
                         <motion.button
                           whileHover={{ scale: isCurrent ? 1 : 1.05 }}
                           whileTap={{ scale: isCurrent ? 1 : 0.98 }}
@@ -813,12 +819,18 @@ function BillingPageContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-center pt-6"
+            className="text-center pt-6 space-y-2"
           >
             <p className="text-gray-600">
               Imate vprašanja? Kontaktirajte nas na{' '}
               <a href="mailto:podpora@jedroplus.com" className="text-violet-600 hover:text-violet-700 font-medium">
                 podpora@jedroplus.com
+              </a>
+            </p>
+            <p className="text-gray-500 text-sm">
+              Želite večjo kvoto ali več zaposlenih? Pišite nam na{' '}
+              <a href="mailto:help@jedroplus.com" className="text-violet-600 hover:text-violet-700 font-medium">
+                help@jedroplus.com
               </a>
             </p>
           </motion.div>

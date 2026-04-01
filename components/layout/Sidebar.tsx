@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -32,7 +32,7 @@ import {
   Lock,
 } from '@phosphor-icons/react';
 import Image from 'next/image';
-import { useSidebar, MIN_WIDTH, MAX_WIDTH } from './sidebar-context';
+import { useSidebar } from './sidebar-context';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useCompanyPlan } from '@/hooks/useCompanyPlan';
@@ -213,7 +213,6 @@ const backdropVariants = {
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const resizeRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const desktopNavRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
@@ -225,9 +224,6 @@ export function Sidebar() {
     close,
     setCollapsed,
     sidebarWidth,
-    setSidebarWidth,
-    isResizing,
-    setIsResizing,
   } = useSidebar();
 
   const { companySettings, switchCompany, companyId } = useCompany();
@@ -239,6 +235,25 @@ export function Sidebar() {
   const baseNavigationSections = isFree ? navigationSectionsFree : navigationSectionsPaid;
 
   const isLocked = (href: string) => !hasAccessToRoute(href, planCode);
+
+  // ── Incomplete settings alerts ─────────────────────────────────────────────
+  const hasOpomnikiPlan = planCode === 'JEDRO_PLUS' || planCode === 'JEDRO_PRO' || planCode === 'JEDRO_PREMIUM';
+  const hasChatbotPlan = planCode === 'JEDRO_PRO' || planCode === 'JEDRO_PREMIUM';
+
+  const opomniki_incomplete = hasOpomnikiPlan && (
+    !String(companySettings?.['from_name'] ?? companySettings?.['From_name'] ?? '').trim() ||
+    !String(companySettings?.['reply_to'] ?? companySettings?.['reply_to_email'] ?? '').trim()
+  );
+  const rezervacije_incomplete = hasOpomnikiPlan && !String(companySettings?.['main_booking_link'] ?? '').trim();
+  const chatbot_incomplete = hasChatbotPlan && !String(companySettings?.['chatbot_link'] ?? '').trim();
+  const any_incomplete = opomniki_incomplete || rezervacije_incomplete || chatbot_incomplete;
+
+  const getAlertBadge = (href: string): boolean => {
+    if (href === '/reminders') return opomniki_incomplete;
+    if (href === '/rezervacije') return rezervacije_incomplete;
+    if (href === '/chatbot-plus') return chatbot_incomplete;
+    return false;
+  };
 
   // ── Role-based nav filtering ─────────────────────────────────────────────
 
@@ -350,38 +365,6 @@ export function Sidebar() {
     close();
     switchCompany();
   };
-
-  // -------------------------------------------------------------------------
-  // Resize functionality
-  // -------------------------------------------------------------------------
-
-  const startResize = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  }, [setIsResizing]);
-
-  useEffect(() => {
-    if (!isResizing) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const newWidth = e.clientX;
-      if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) {
-        setSidebarWidth(newWidth);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsResizing(false);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizing, setSidebarWidth, setIsResizing]);
 
   // -------------------------------------------------------------------------
   // Determine effective width
@@ -527,7 +510,9 @@ export function Sidebar() {
                         )}
 
                         {locked ? (
-                          <Lock className="w-3.5 h-3.5 text-gray-400" weight="fill" />
+                          <Lock className="w-3.5 h-3.5 text-gray-400" weight="regular" />
+                        ) : getAlertBadge(item.href) ? (
+                          <span className="w-5 h-5 flex items-center justify-center text-white bg-orange-500 rounded-full text-[10px] font-bold flex-shrink-0">!</span>
                         ) : item.badge ? (
                           <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full">
                             {item.badge}
@@ -536,12 +521,19 @@ export function Sidebar() {
                       </>
                     )}
 
+                    {/* Alert dot for collapsed state */}
+                    {isCollapsed && getAlertBadge(item.href) && (
+                      <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border border-white" />
+                    )}
+
                     {/* Tooltip for collapsed state */}
                     {isCollapsed && (
                       <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg">
                         {item.name}
                         {locked ? (
-                          <Lock className="inline-block ml-1.5 w-3 h-3" weight="fill" />
+                          <Lock className="inline-block ml-1.5 w-3 h-3" weight="regular" />
+                        ) : getAlertBadge(item.href) ? (
+                          <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-orange-500/80 rounded font-bold">!</span>
                         ) : item.badge ? (
                           <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-white/20 rounded">
                             {item.badge}
@@ -570,24 +562,35 @@ export function Sidebar() {
               : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           )}
         >
-          {isActive('/nastavitve') ? (
-            <Gear className="w-5 h-5 text-gray-900" weight="fill" />
-          ) : (
-            <Gear className="w-5 h-5 transition-all text-gray-500" weight="regular" />
-          )}
-          {!isCollapsed && (
-            isActive('/nastavitve') ? (
-              <span className="font-semibold text-sm text-gray-900">
-                Nastavitve
-              </span>
+          <div className="relative flex-shrink-0">
+            {isActive('/nastavitve') ? (
+              <Gear className="w-5 h-5 text-gray-900" weight="fill" />
             ) : (
-              <span className="font-medium text-sm">Nastavitve</span>
-            )
+              <Gear className="w-5 h-5 transition-all text-gray-500" weight="regular" />
+            )}
+            {any_incomplete && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-orange-500 rounded-full border border-white" />
+            )}
+          </div>
+          {!isCollapsed && (
+            <>
+              {isActive('/nastavitve') ? (
+                <span className="font-semibold text-sm text-gray-900 flex-1">
+                  Nastavitve
+                </span>
+              ) : (
+                <span className="font-medium text-sm flex-1">Nastavitve</span>
+              )}
+              {any_incomplete && (
+                <span className="w-5 h-5 flex items-center justify-center text-white bg-orange-500 rounded-full text-[10px] font-bold flex-shrink-0">!</span>
+              )}
+            </>
           )}
 
           {isCollapsed && (
             <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg">
               Nastavitve
+              {any_incomplete && <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-orange-500/80 rounded font-bold">!</span>}
             </div>
           )}
         </Link>
@@ -633,18 +636,6 @@ export function Sidebar() {
         )}
       </div>
 
-      {/* Resize handle */}
-      {!isCollapsed && (
-        <div
-          ref={resizeRef}
-          onMouseDown={startResize}
-          className={cn(
-            'absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize transition-colors',
-            'hover:bg-indigo-500/50',
-            isResizing && 'bg-indigo-500'
-          )}
-        />
-      )}
     </aside>
   );
 
@@ -767,7 +758,9 @@ export function Sidebar() {
                               <span className="flex-1 font-medium">{item.name}</span>
                             )}
                             {locked ? (
-                              <Lock className="w-3.5 h-3.5 text-gray-400" weight="fill" />
+                              <Lock className="w-3.5 h-3.5 text-gray-400" weight="regular" />
+                            ) : getAlertBadge(item.href) ? (
+                              <span className="w-5 h-5 flex items-center justify-center text-white bg-orange-500 rounded-full text-[10px] font-bold flex-shrink-0">!</span>
                             ) : item.badge ? (
                               <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full">
                                 {item.badge}
@@ -807,17 +800,25 @@ export function Sidebar() {
                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     )}
                   >
-                    {isActive('/nastavitve') ? (
-                      <Gear className="w-5 h-5 flex-shrink-0 text-gray-900" weight="fill" />
-                    ) : (
-                      <Gear className="w-5 h-5 text-gray-500" weight="regular" />
-                    )}
+                    <div className="relative flex-shrink-0">
+                      {isActive('/nastavitve') ? (
+                        <Gear className="w-5 h-5 text-gray-900" weight="fill" />
+                      ) : (
+                        <Gear className="w-5 h-5 text-gray-500" weight="regular" />
+                      )}
+                      {any_incomplete && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-orange-500 rounded-full border border-white" />
+                      )}
+                    </div>
                     {isActive('/nastavitve') ? (
                       <span className="flex-1 font-semibold text-gray-900">
                         Nastavitve
                       </span>
                     ) : (
                       <span className="flex-1 font-medium">Nastavitve</span>
+                    )}
+                    {any_incomplete && (
+                      <span className="w-5 h-5 flex items-center justify-center text-white bg-orange-500 rounded-full text-[10px] font-bold flex-shrink-0">!</span>
                     )}
                     {isActive('/nastavitve') && (
                       <CaretRight className="w-4 h-4 text-gray-900" weight="bold" />

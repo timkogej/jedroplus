@@ -7,6 +7,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import Calendar from '@/components/Calendar';
 import { useUserPersonId } from '@/hooks/useUserPersonId';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 export default function KoledarPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function KoledarPage() {
   if (loading || !companyId) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+        <GradientSpinner />
       </div>
     );
   }

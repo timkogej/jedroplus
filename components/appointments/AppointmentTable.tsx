@@ -310,10 +310,12 @@ function AppointmentTable({
               transition={{ duration: 0.2 }}
               className="divide-y divide-gray-50"
             >
-              {paginatedAppointments.map((appointment, idx) => (
+              {paginatedAppointments.map((appointment, idx) => {
+                const isCancelled = normalizeStatus(appointment.status || '') === 'cancelled';
+                return (
                 <tr
                   key={`apt-${idx}-${appointment.id}`}
-                  className="group transition-colors hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-transparent"
+                  className={`group transition-colors hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-transparent${isCancelled ? ' opacity-60' : ''}`}
                 >
                   {/* Date */}
                   <td className="px-4 py-3.5">
@@ -321,7 +323,7 @@ function AppointmentTable({
                       <span className="flex-shrink-0">
                         <GradientCalendarIcon size={16} />
                       </span>
-                      <span className="text-sm font-medium text-[#1A1F36] whitespace-nowrap">
+                      <span className={`text-sm font-medium text-[#1A1F36] whitespace-nowrap${isCancelled ? ' line-through' : ''}`}>
                         {formatDate(appointment.datum)}
                       </span>
                     </div>
@@ -357,7 +359,7 @@ function AppointmentTable({
                       >
                         {getInitials(appointment.stranka_ime || '')}
                       </span>
-                      <span className="text-sm font-medium text-[#1A1F36]">
+                      <span className={`text-sm font-medium text-[#1A1F36]${isCancelled ? ' line-through' : ''}`}>
                         {appointment.stranka_ime || '-'}
                       </span>
                     </div>
@@ -381,7 +383,7 @@ function AppointmentTable({
                               />
                             </span>
                           )}
-                          <span className="text-sm text-gray-600">
+                          <span className={`text-sm text-gray-600${isCancelled ? ' line-through' : ''}`}>
                             {appointment.storitev?.naziv || '-'}
                           </span>
                           {additionalServicesCount > 0 && (
@@ -562,7 +564,8 @@ function AppointmentTable({
                     })()}
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </motion.tbody>
         </table>
       </div>

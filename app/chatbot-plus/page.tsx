@@ -735,7 +735,7 @@ export default function ChatbotPlusPage() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-10 flex items-start justify-between"
+            className="mb-6 flex items-start justify-between"
           >
             <div>
               <h1
@@ -751,13 +751,39 @@ export default function ChatbotPlusPage() {
                 onClick={() => setShowSettingsModal(true)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
+                className="relative w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
                 title="Nastavitve"
               >
                 <Gear size={20} weight="bold" className="text-gray-900" />
+                {!chatbotLink.trim() && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-white border border-white" style={{ fontSize: 9, fontWeight: 700, lineHeight: 1 }}>!</span>
+                )}
               </motion.button>
             )}
           </motion.div>
+
+          {/* Incomplete settings banner */}
+          {!chatbotLink.trim() && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 flex items-center gap-3 rounded-2xl px-5 py-3.5 bg-orange-50 border border-orange-200"
+            >
+              <Warning size={18} weight="fill" className="text-orange-500 flex-shrink-0" />
+              <p className="text-sm text-orange-800 flex-1">
+                <span className="font-semibold">Izpolnite nastavitve označene s !</span>{' '}
+                za brezhibno delovanje in izkoriščanje celotnega potenciala chatbota.
+              </p>
+              {canManageSettings && (
+                <button
+                  onClick={() => setShowSettingsModal(true)}
+                  className="text-xs font-semibold text-orange-700 hover:text-orange-900 underline underline-offset-2 flex-shrink-0"
+                >
+                  Odpri nastavitve →
+                </button>
+              )}
+            </motion.div>
+          )}
 
           {/* ── Two-column layout ────────────────────────────────────────────────── */}
           <div className="flex flex-col lg:flex-row gap-10 items-start">
@@ -930,6 +956,26 @@ export default function ChatbotPlusPage() {
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* Reservations info note */}
+              <div
+                style={{
+                  background: 'rgba(139,92,246,0.05)',
+                  border: '1px solid rgba(139,92,246,0.15)',
+                  borderRadius: 16,
+                  padding: '14px 18px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                }}
+              >
+                <BookOpen size={18} weight="regular" style={{ color: '#8B5CF6', flexShrink: 0, marginTop: 1 }} />
+                <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.55, margin: 0 }}>
+                  <span style={{ fontWeight: 600, color: '#1F2937' }}>Rezervacije prek chatbota</span>{' '}
+                  uporabljajo enake nastavitve kot spletno naročanje na strani{' '}
+                  <span style={{ fontWeight: 600, color: '#7C3AED' }}>Rezervacije</span>.
+                </p>
               </div>
 
               {/* Nastavitve card */}
@@ -1215,33 +1261,6 @@ export default function ChatbotPlusPage() {
             </div>
           </motion.div>
 
-          {/* ── Mini Asistent+ Chat Widget ─────────────────────────────────────────── */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-6 mb-8"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: GRADIENT }} />
-              <h2 className="text-base font-semibold text-gray-700">Potrebujete pomoč?</h2>
-              <span style={{ fontSize: 12, padding: '2px 8px', borderRadius: 8, background: 'rgba(139,92,246,0.08)', color: '#8B5CF6', fontWeight: 600 }}>Asistent+</span>
-            </div>
-            <MiniAsistentChat companyId={companyId} />
-
-            <div className="mt-4 text-center">
-              <p className="text-sm text-gray-400">
-                Potrebujete dodatno pomoč?{' '}
-                <a
-                  href="mailto:help@jedroplus.com"
-                  className="font-medium"
-                  style={{ color: '#8B5CF6' }}
-                >
-                  help@jedroplus.com
-                </a>
-              </p>
-            </div>
-          </motion.div>
         </div>
       </div>
 

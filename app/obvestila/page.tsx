@@ -22,6 +22,7 @@ import {
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { supabase } from '@/lib/supabaseClient';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 // ============================================================================
 // Types
@@ -198,8 +199,6 @@ interface NotificationCardProps {
 const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const isUnread = !notification.is_read;
-  const config = getTypeConfig(notification.type);
-  const { Icon } = config;
 
   const cardContent = (
     <motion.div
@@ -233,19 +232,19 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
       )}
 
       <div className="flex items-start gap-4">
-        {/* Icon */}
+        {/* Bell icon — gradient bg + white bell when unread, gray bg + black bell when read */}
         <div
-          className={[
-            'w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0',
-            isUnread ? '' : config.bgLight,
-          ].join(' ')}
-          style={isUnread ? { background: config.gradient } : undefined}
+          className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={isUnread
+            ? { background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)' }
+            : { background: '#F3F4F6', border: '1.5px solid #E5E7EB' }
+          }
         >
-          <Icon
-            size={22}
-            weight="fill"
-            className={isUnread ? 'text-white' : config.iconColor}
-          />
+          {isUnread ? (
+            <BellRingingIcon size={22} weight="fill" className="text-white" />
+          ) : (
+            <BellIcon size={22} weight="fill" className="text-gray-900" />
+          )}
         </div>
 
         {/* Content */}
@@ -438,7 +437,7 @@ export default function ObvestilaPage() {
   }, []);
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
-  const reservationCount = notifications.filter((n) => isReservationType(n.type)).length;
+  const reservationCount = notifications.filter((n) => isReservationType(n.type) && !n.is_read).length;
   const systemCount = notifications.filter((n) => isSystemType(n.type)).length;
 
   const filteredNotifications = useMemo(() => {
@@ -467,7 +466,7 @@ export default function ObvestilaPage() {
   if (companyLoading || !companyUuid) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
+        <GradientSpinner />
       </div>
     );
   }
@@ -552,7 +551,7 @@ export default function ObvestilaPage() {
           {/* ---------------------------------------------------------------- */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-24 gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-500 border-t-transparent" />
+              <GradientSpinner />
               <p className="text-sm text-gray-400">Nalaganje obvestil...</p>
             </div>
           )}

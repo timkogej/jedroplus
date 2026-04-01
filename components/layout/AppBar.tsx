@@ -47,6 +47,7 @@ const routeLabels: Record<string, string> = {
   '/lost-leads': 'Lost Leads',
   '/analytics': 'Analitika',
   '/asistent': 'Asistent+',
+  '/chatbot-plus': 'Chatbot+',
   '/nastavitve': 'Nastavitve',
   '/billing': 'Paketi',
   '/obvestila': 'Obvestila',

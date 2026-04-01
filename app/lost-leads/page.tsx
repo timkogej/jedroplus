@@ -23,6 +23,7 @@ import { fetchClients } from '@/lib/data';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { LostLeadsSettingsModal } from '@/components/lost-leads/LostLeadsSettingsModal';
 import ClientInitialsBadge from '@/components/clients/ClientInitialsBadge';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 type ClientRow = Record<string, unknown>;
 
@@ -462,7 +463,7 @@ export default function LostLeadsPage() {
             <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Nastavitve</h2>
             {loading ? (
               <div className="flex items-center justify-center py-10">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-black border-t-transparent" />
+                <GradientSpinner />
               </div>
             ) : (
               <div className="space-y-3">

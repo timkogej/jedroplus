@@ -84,6 +84,15 @@ export default function JoinCompanyPage() {
 
       const result = await joinCompany(normalizedJoinCode);
 
+      if (result.code === 'NO_FREE_USER_SLOT') {
+        const redirectUrl = result.redirect_url || 'https://app.jedroplus.com/billing';
+        toast.error(result.message || 'Podjetje nima več prostih uporabniških mest.');
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 1500);
+        return;
+      }
+
       if (result.ok) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {

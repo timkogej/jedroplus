@@ -6,9 +6,10 @@ import { PLAN_NAMES, type PlanCode } from '@/lib/planAccess';
 
 interface UpgradePlanGateProps {
   requiredPlan: PlanCode;
+  hideUpgradeButton?: boolean;
 }
 
-export default function UpgradePlanGate({ requiredPlan }: UpgradePlanGateProps) {
+export default function UpgradePlanGate({ requiredPlan, hideUpgradeButton }: UpgradePlanGateProps) {
   const planName = PLAN_NAMES[requiredPlan] || requiredPlan;
 
   return (
@@ -46,17 +47,19 @@ export default function UpgradePlanGate({ requiredPlan }: UpgradePlanGateProps) 
           platforme Jedro+.
         </p>
 
-        {/* Upgrade button */}
-        <Link
-          href="/billing"
-          className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-white font-semibold text-base shadow-lg shadow-violet-200 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300 hover:scale-[1.02] active:scale-[0.98]"
-          style={{
-            background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-          }}
-        >
-          <RocketLaunch className="w-5 h-5" weight="bold" />
-          Nadgradi paket
-        </Link>
+        {/* Upgrade button — hidden for staff/admin who cannot manage billing */}
+        {!hideUpgradeButton && (
+          <Link
+            href="/billing"
+            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-white font-semibold text-base shadow-lg shadow-violet-200 transition-all duration-200 hover:shadow-xl hover:shadow-violet-300 hover:scale-[1.02] active:scale-[0.98]"
+            style={{
+              background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+            }}
+          >
+            <RocketLaunch className="w-5 h-5" weight="bold" />
+            Nadgradi paket
+          </Link>
+        )}
 
         {/* Current plan hint */}
         <p className="mt-6 text-sm text-gray-400">

@@ -122,6 +122,10 @@ export interface JoinCompanyResult {
   company_name?: string;
   reason?: string;
   error?: string;
+  code?: string;
+  redirect_url?: string;
+  success?: boolean;
+  message?: string;
 }
 
 export interface UrnikInterval {

@@ -801,6 +801,7 @@ function TerminiPageInner() {
               employees={staffViewOwnOnly && rolePersonId ? employees.filter(e => e.id === rolePersonId) : employees}
               services={services}
               restrictedEmployeeId={staffViewOwnOnly && rolePersonId ? rolePersonId : undefined}
+              staffViewOwnOnly={staffViewOwnOnly}
             />
           </motion.div>
 
@@ -910,14 +911,34 @@ function TerminiPageInner() {
 
                 {/* Service with color circle */}
                 {completeTarget.storitev && (
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start gap-3">
                     <div
-                      className="h-3 w-3 rounded-full flex-shrink-0"
+                      className="h-3 w-3 rounded-full flex-shrink-0 mt-1"
                       style={{ background: completeTarget.storitev.barva || '#6366F1' }}
                     />
-                    <div>
+                    <div className="flex-1">
                       <p className="text-xs text-gray-500">Storitev</p>
-                      <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev.naziv}</p>
+                      <div className="space-y-1 mt-0.5">
+                        <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev.naziv}</p>
+                        {completeTarget.storitev_2 && (
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                              style={{ background: completeTarget.storitev_2.barva || '#6366F1' }}
+                            />
+                            <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev_2.naziv}</p>
+                          </div>
+                        )}
+                        {completeTarget.storitev_3 && (
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                              style={{ background: completeTarget.storitev_3.barva || '#6366F1' }}
+                            />
+                            <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev_3.naziv}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}

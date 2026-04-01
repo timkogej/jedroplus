@@ -23,6 +23,7 @@ interface AppointmentFiltersProps {
   employees: Zaposleni[];
   services: Storitev[];
   restrictedEmployeeId?: string | null;
+  staffViewOwnOnly?: boolean;
 }
 
 const STATUS_OPTIONS: { value: AppointmentStatus | 'all'; label: string }[] = [
@@ -39,6 +40,7 @@ function AppointmentFilters({
   employees,
   services,
   restrictedEmployeeId,
+  staffViewOwnOnly,
 }: AppointmentFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -61,9 +63,10 @@ function AppointmentFilters({
   }, [onFiltersChange]);
 
   // Count active filters (excluding search and 'all' status)
+  // When staffViewOwnOnly, the employeeId is auto-set and should not count as an active filter
   const activeFilterCount = [
     filters.status !== 'all',
-    filters.employeeId !== null,
+    !staffViewOwnOnly && filters.employeeId !== null,
     filters.serviceId !== null,
     filters.dateFrom !== '',
     filters.dateTo !== '',
@@ -76,7 +79,7 @@ function AppointmentFilters({
     const statusOption = STATUS_OPTIONS.find((s) => s.value === filters.status);
     activeFilters.push({ key: 'status', label: `Status: ${statusOption?.label}` });
   }
-  if (filters.employeeId) {
+  if (!staffViewOwnOnly && filters.employeeId) {
     const employee = employees.find((e) => e.id === filters.employeeId);
     activeFilters.push({
       key: 'employeeId',

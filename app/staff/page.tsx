@@ -811,19 +811,52 @@ export default function OsebjePage() {
             </p>
           </div>
 
-          {/* Employee Grid */}
-          <EmployeeGrid
-            employees={filteredEmployees}
-            isLoading={isLoading}
-            onEdit={handleEdit}
-            onDelete={handleDeleteClick}
-            onToggleActive={handleToggleActive}
-            onSettings={handleSettings}
-            onConnect={handleConnectClick}
-            showConnectButton={userPersonId === null}
-            canEdit={canEditStaff}
-            canDelete={canDeleteStaff}
-          />
+          {/* Employee Grid or empty state */}
+          {!isLoading && employees.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+            >
+              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-violet-100">
+                <Users className="h-10 w-10 text-violet-500" weight="duotone" />
+              </div>
+              <h3 className="text-xl font-semibold text-[#1A1F36]">Še nimate dodanega osebja</h3>
+              <p className="mt-2 text-center text-sm text-gray-500">
+                Začnite z dodajanjem vaše prve osebe za upravljanje terminov.
+              </p>
+              {role !== 'staff' && (
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    setSelectedEmployee(null);
+                    setIsModalOpen(true);
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="mt-6 flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-6 py-3
+                             text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
+                             hover:shadow-xl hover:shadow-cyan-500/30"
+                >
+                  <Plus className="h-5 w-5" weight="bold" />
+                  Dodaj prvo osebo
+                </motion.button>
+              )}
+            </motion.div>
+          ) : (
+            <EmployeeGrid
+              employees={filteredEmployees}
+              isLoading={isLoading}
+              onEdit={handleEdit}
+              onDelete={handleDeleteClick}
+              onToggleActive={handleToggleActive}
+              onSettings={handleSettings}
+              onConnect={handleConnectClick}
+              showConnectButton={userPersonId === null}
+              canEdit={canEditStaff}
+              canDelete={canDeleteStaff}
+            />
+          )}
         </div>
       </main>
 

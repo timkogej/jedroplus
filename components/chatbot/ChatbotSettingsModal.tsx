@@ -100,11 +100,13 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
           console.error('Error fetching company chatbot_url:', companyError);
         }
 
-        setChatbotLink(companyData?.chatbot_url || '');
-
         const { data } = await loadCompanyRow(companyId);
 
         if (data) {
+          // chatbot_link (Podatki podjetij) takes priority, fallback to chatbot_url (companies)
+          const podatkiLink = String(data['chatbot_link'] ?? '');
+          setChatbotLink(podatkiLink || companyData?.chatbot_url || '');
+
           const enabledVal = String(data?.['chatbot_omogoci'] ?? 'yes').toLowerCase().trim();
           setChatbotEnabled(enabledVal === 'true' || enabledVal === 'yes');
           setLanguage(String(data['chatbot jezik'] ?? data['chatbot_jezik'] ?? 'sl'));
@@ -360,7 +362,7 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
                   </SettingsSection>
 
                   {/* Fixed Capabilities */}
-                  <SettingsSection title="Zmoznosti chatbota" description="Kaj lahko chatbot pocne">
+                  <SettingsSection title="Zmožnosti chatbota" description="Kaj lahko chatbot počne">
                     <div className="p-4 bg-gray-50 rounded-xl space-y-3">
                       {CAPABILITIES.map((capability, idx) => (
                         <div key={idx} className="flex items-start gap-2">
