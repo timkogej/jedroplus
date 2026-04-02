@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import {
@@ -48,6 +49,7 @@ interface BookingDesign {
   subtitle: string;
   description: string;
   linkKey: keyof ReservationSettings;
+  image: string;
 }
 
 const STANDARD_DESIGNS: BookingDesign[] = [
@@ -57,6 +59,7 @@ const STANDARD_DESIGNS: BookingDesign[] = [
     subtitle: 'Preprost in pregleden',
     description: 'Klasičen dizajn z elegantnimi gradient ozadji. Idealno za prikaz barv vašega podjetja in ustvarjanje prepoznavne blagovne znamke.',
     linkKey: 'bookingLink1',
+    image: '/booking-designs/booking-classic.jpg',
   },
   {
     id: 2,
@@ -64,13 +67,15 @@ const STANDARD_DESIGNS: BookingDesign[] = [
     subtitle: 'Sodoben in dinamičen',
     description: 'Sodoben dizajn s temnim ozadjem in živahnimi poudarki. Priporočamo temnejšo primarno barvo za najboljši vizualni učinek in premium občutek.',
     linkKey: 'bookingLink2',
+    image: '/booking-designs/booking-modern.jpg',
   },
   {
     id: 3,
-    name: 'Minimalen',
+    name: 'Eleganten',
     subtitle: 'Čist in enostaven',
     description: 'Luksuzni minimalistični dizajn z nežnimi zemeljskimi toni. Popoln za elegantne salone, spa centre in ekskluzivne storitve.',
     linkKey: 'bookingLink3',
+    image: '/booking-designs/booking-elegant.jpg',
   },
 ];
 
@@ -81,6 +86,7 @@ const PREMIUM_DESIGNS: BookingDesign[] = [
     subtitle: 'Prilagodljiv in živahen',
     description: 'Dinamičen dizajn, ki se samodejno prilagaja letnemu času in praznikom. Pomlad, poletje, jesen, zima, božič, valentinovo, noč čarovnic in več – vaša stran je vedno sveža in aktualna.',
     linkKey: 'bookingLink4',
+    image: '/booking-designs/booking-seasonal.jpg',
   },
   {
     id: 5,
@@ -88,6 +94,7 @@ const PREMIUM_DESIGNS: BookingDesign[] = [
     subtitle: 'Eleganten in urejevalen',
     description: 'Premium Magazine dizajn z uredniško estetiko in visokokakovostnim vizualnim slogom. Idealno za ekskluzivne salone, kozmetične studio in premium storitve.',
     linkKey: 'bookingLink5',
+    image: '/booking-designs/booking-magazine.jpg',
   },
   {
     id: 6,
@@ -95,6 +102,7 @@ const PREMIUM_DESIGNS: BookingDesign[] = [
     subtitle: 'Glamurozen in razburljiv',
     description: 'Ekskluziven kazino dizajn z glamurozno atmosfero, bleščečimi akcenti in dinamičnimi vizualnimi elementi. Popoln za tiste, ki želijo rezervacijo terminov spremeniti v nepozabno izkušnjo.',
     linkKey: 'bookingLink6',
+    image: '/booking-designs/booking-casino.jpg',
   },
 ];
 
@@ -332,7 +340,7 @@ export default function RezervacijePage() {
               >
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-[#1A1F36] mb-1">Standardne strani za rezervacijo</h2>
-                  <p className="text-sm text-gray-500">Klasičen, Moderen in Minimalen dizajn</p>
+                  <p className="text-sm text-gray-500">Klasičen, Moderen in Eleganten dizajn</p>
                 </div>
                 <div className="overflow-x-auto pb-4 -mx-2 px-2">
                   <div className="flex gap-5" style={{ minWidth: 'max-content' }}>
@@ -344,12 +352,14 @@ export default function RezervacijePage() {
                           key={design.id}
                           className="w-64 sm:w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-md transition-all"
                         >
-                          {/* Image placeholder */}
-                          <div className="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 flex flex-col items-center justify-center mb-3 gap-1" style={{ height: '120px' }}>
-                            <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9H6" />
-                            </svg>
-                            <span className="text-xs text-gray-400">Slika</span>
+                          <div className="relative h-[120px] mb-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                            <Image
+                              src={design.image}
+                              alt={`${design.name} booking dizajn`}
+                              fill
+                              sizes="(max-width: 640px) 256px, 320px"
+                              className="object-cover"
+                            />
                           </div>
                           <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
                           <p className="text-xs text-center text-gray-500 mt-0.5">{design.subtitle}</p>
@@ -437,12 +447,14 @@ export default function RezervacijePage() {
                           className="w-64 sm:w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-violet-200 hover:shadow-md transition-all"
                           style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.03), rgba(6,182,212,0.03))' }}
                         >
-                          {/* Image placeholder */}
-                          <div className="rounded-lg border-2 border-dashed border-violet-200 bg-violet-50/30 flex flex-col items-center justify-center mb-3 gap-1" style={{ height: '120px' }}>
-                            <svg className="w-8 h-8 text-violet-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9H6" />
-                            </svg>
-                            <span className="text-xs text-violet-300">Slika</span>
+                          <div className="relative h-[120px] mb-3 overflow-hidden rounded-lg border border-violet-200 bg-violet-50/30">
+                            <Image
+                              src={design.image}
+                              alt={`${design.name} booking dizajn`}
+                              fill
+                              sizes="(max-width: 640px) 256px, 320px"
+                              className="object-cover"
+                            />
                           </div>
                           <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
                           <p className="text-xs text-center text-gray-500 mt-0.5">{design.subtitle}</p>
