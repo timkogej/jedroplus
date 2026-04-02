@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, SpinnerGap, FloppyDisk, EnvelopeSimple, DeviceMobile } from '@phosphor-icons/react';
+import { X, SpinnerGap, FloppyDisk, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
+import { useRouter } from 'next/navigation';
 import {
   SettingsSection,
   SettingRow,
@@ -26,43 +27,71 @@ interface BookingSettingsModalProps {
 function ChannelPicker({
   value,
   onChange,
+  smsLocked = false,
+  onUpgradeClick,
 }: {
   value: 'sms' | 'email';
   onChange: (v: 'sms' | 'email') => void;
+  smsLocked?: boolean;
+  onUpgradeClick?: () => void;
 }) {
   return (
-    <div className="flex gap-2 mt-3">
-      <button
-        type="button"
-        onClick={() => onChange('email')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all
-                   ${value === 'email'
-                     ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200'
-                     : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                   }`}
-      >
-        <EnvelopeSimple className="h-4 w-4" weight={value === 'email' ? 'fill' : 'regular'} />
-        Email
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange('sms')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all
-                   ${value === 'sms'
-                     ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200'
-                     : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                   }`}
-      >
-        <DeviceMobile className="h-4 w-4" weight={value === 'sms' ? 'fill' : 'regular'} />
-        SMS
-      </button>
+    <div className="flex flex-col gap-2 mt-3">
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => onChange('email')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all
+                     ${value === 'email'
+                       ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200'
+                       : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                     }`}
+        >
+          <EnvelopeSimple className="h-4 w-4" weight={value === 'email' ? 'fill' : 'regular'} />
+          Email
+        </button>
+        {smsLocked ? (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed text-sm font-medium">
+            <DeviceMobile className="h-4 w-4" weight="regular" />
+            SMS
+            <span className="text-xs text-gray-400">– ni dostopno</span>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onChange('sms')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all
+                       ${value === 'sms'
+                         ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200'
+                         : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                       }`}
+          >
+            <DeviceMobile className="h-4 w-4" weight={value === 'sms' ? 'fill' : 'regular'} />
+            SMS
+          </button>
+        )}
+      </div>
+      {smsLocked && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">SMS je na voljo v višjih paketih.</span>
+          <button
+            type="button"
+            onClick={onUpgradeClick}
+            className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+          >
+            Nadgradi paket <ArrowRight className="h-3 w-3" weight="bold" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalProps) {
-  const { companyId } = useCompany();
+  const { companyId, planCode } = useCompany();
   const { user } = useAuth();
+  const router = useRouter();
+  const smsLockedForPlan = planCode === 'JEDRO_PLUS';
 
   // Settings from "Podatki podjetij" table
   const [bookingOmogocen, setBookingOmogocen] = useState(true);
@@ -339,9 +368,24 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           className="px-4 pb-3"
                         >
                           <p className="text-xs font-medium text-gray-500 mb-2">Pošlji potrdilo preko:</p>
+                          {smsLockedForPlan && (
+                            <p className="text-xs text-gray-500 mb-1">
+                              Za pošiljanje SMS potrdil{' '}
+                              <button
+                                type="button"
+                                onClick={() => { onClose(); router.push('/billing'); }}
+                                className="font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+                              >
+                                nadgradite paket
+                              </button>
+                              .
+                            </p>
+                          )}
                           <ChannelPicker
                             value={potrdiloChannel}
                             onChange={setPotrdiloChannel}
+                            smsLocked={smsLockedForPlan}
+                            onUpgradeClick={() => { onClose(); router.push('/billing'); }}
                           />
                         </motion.div>
                       )}
@@ -366,9 +410,24 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           className="px-4 pb-3"
                         >
                           <p className="text-xs font-medium text-gray-500 mb-2">Pošlji potrdilo preko:</p>
+                          {smsLockedForPlan && (
+                            <p className="text-xs text-gray-500 mb-1">
+                              Za pošiljanje SMS potrdil{' '}
+                              <button
+                                type="button"
+                                onClick={() => { onClose(); router.push('/billing'); }}
+                                className="font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+                              >
+                                nadgradite paket
+                              </button>
+                              .
+                            </p>
+                          )}
                           <ChannelPicker
                             value={potrdiloOnlineChannel}
                             onChange={setPotrdiloOnlineChannel}
+                            smsLocked={smsLockedForPlan}
+                            onUpgradeClick={() => { onClose(); router.push('/billing'); }}
                           />
                         </motion.div>
                       )}

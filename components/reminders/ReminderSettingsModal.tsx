@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, SpinnerGap, FloppyDisk, Lock } from '@phosphor-icons/react';
+import { X, SpinnerGap, FloppyDisk, Lock, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
+import { useRouter } from 'next/navigation';
 import {
   SettingsSection,
   SettingRow,
@@ -16,6 +17,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
+import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { TemplateEditor, migrateTemplate } from '@/components/reminders/TemplateEditor';
 
 const SENDING_LANGUAGES = [
@@ -31,8 +33,10 @@ interface ReminderSettingsModalProps {
 }
 
 export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModalProps) {
-  const { companyId } = useCompany();
+  const { companyId, companyUuid, planCode } = useCompany();
   const { user } = useAuth();
+  const router = useRouter();
+  const smsLockedForPlan = planCode === 'JEDRO_PLUS';
 
   // Settings from "Podatki podjetij" table
   const [sendingLanguage, setSendingLanguage] = useState('sl');
@@ -145,8 +149,17 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           setSmsTipPo(data['sms_tip_po'] === true || data['sms_tip_po'] === 'true');
           setSmsTemplatePo(migrateTemplate(String(data['lastna_predloga_po'] ?? data['sms_template_po'] ?? '')));
 
-          // SMS sender ID
-          setSmsSenderId(String(data['sms_sender_id'] ?? ''));
+          // SMS sender ID — read from companies table
+          if (companyUuid) {
+            const { data: companiesData } = await supabaseReadOnly
+              .from('companies')
+              .select('sms_sender_id')
+              .eq('id', companyUuid)
+              .maybeSingle();
+            setSmsSenderId(String(companiesData?.sms_sender_id ?? data['sms_sender_id'] ?? ''));
+          } else {
+            setSmsSenderId(String(data['sms_sender_id'] ?? ''));
+          }
 
           // SMS Supabase columns - use true/yes for enabled
           const parseBool = (v: unknown) => {
@@ -382,7 +395,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
 
                     <SettingRow
                       label="Ime pošiljatelja"
-                      description="Ime ki se prikaže kot pošiljatelj"
+                      description="Ime ki se prikaže pri email kot pošiljatelj"
                     >
                       <Input
                         value={fromName}
@@ -511,14 +524,44 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           label="Način pošiljanja"
                           description="Email ali SMS"
                         >
-                          <Select
-                            value={chanelPred}
-                            setValue={setChanelPred}
-                            placeholder="Izberi način"
-                          >
-                            <SelectOption value="email">Email</SelectOption>
-                            <SelectOption value="sms">SMS</SelectOption>
-                          </Select>
+                          {smsLockedForPlan ? (
+                            <div className="flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setChanelPred('email')}
+                                  className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${chanelPred === 'email' ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                                >
+                                  <EnvelopeSimple className="h-4 w-4" weight={chanelPred === 'email' ? 'fill' : 'regular'} />
+                                  Email
+                                </button>
+                                <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed text-sm font-medium">
+                                  <DeviceMobile className="h-4 w-4" weight="regular" />
+                                  SMS
+                                  <span className="text-xs text-gray-400">– ni dostopno</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-500">SMS je na voljo v višjih paketih.</span>
+                                <button
+                                  type="button"
+                                  onClick={() => { onClose(); router.push('/billing'); }}
+                                  className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+                                >
+                                  Nadgradi paket <ArrowRight className="h-3 w-3" weight="bold" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Select
+                              value={chanelPred}
+                              setValue={setChanelPred}
+                              placeholder="Izberi način"
+                            >
+                              <SelectOption value="email">Email</SelectOption>
+                              <SelectOption value="sms">SMS</SelectOption>
+                            </Select>
+                          )}
                         </SettingRow>
 
                         {chanelPred === 'sms' && (
@@ -671,14 +714,44 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           label="Način pošiljanja"
                           description="Email ali SMS"
                         >
-                          <Select
-                            value={chanelPo}
-                            setValue={setChanelPo}
-                            placeholder="Izberi način"
-                          >
-                            <SelectOption value="email">Email</SelectOption>
-                            <SelectOption value="sms">SMS</SelectOption>
-                          </Select>
+                          {smsLockedForPlan ? (
+                            <div className="flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setChanelPo('email')}
+                                  className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${chanelPo === 'email' ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'}`}
+                                >
+                                  <EnvelopeSimple className="h-4 w-4" weight={chanelPo === 'email' ? 'fill' : 'regular'} />
+                                  Email
+                                </button>
+                                <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed text-sm font-medium">
+                                  <DeviceMobile className="h-4 w-4" weight="regular" />
+                                  SMS
+                                  <span className="text-xs text-gray-400">– ni dostopno</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-500">SMS je na voljo v višjih paketih.</span>
+                                <button
+                                  type="button"
+                                  onClick={() => { onClose(); router.push('/billing'); }}
+                                  className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+                                >
+                                  Nadgradi paket <ArrowRight className="h-3 w-3" weight="bold" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <Select
+                              value={chanelPo}
+                              setValue={setChanelPo}
+                              placeholder="Izberi način"
+                            >
+                              <SelectOption value="email">Email</SelectOption>
+                              <SelectOption value="sms">SMS</SelectOption>
+                            </Select>
+                          )}
                         </SettingRow>
 
                         {chanelPo === 'sms' && (

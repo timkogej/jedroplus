@@ -498,6 +498,31 @@ export default function RezervacijePage() {
                 </div>
               </motion.div>
 
+              {/* Custom booking CTA */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.22 }}
+                className="mb-6 flex items-center gap-3 rounded-2xl px-5 py-4 bg-white shadow-sm ring-1 ring-gray-100"
+              >
+                <span className="text-lg flex-shrink-0">✉️</span>
+                <p className="text-sm text-gray-600">
+                  Želite prilagojen booking sistem prav za vaše podjetje?{' '}
+                  <a
+                    href="mailto:info@jedroplus.com"
+                    className="font-semibold"
+                    style={{
+                      background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    Pišite nam na info@jedroplus.com
+                  </a>
+                </p>
+              </motion.div>
+
               {/* Main Booking Link */}
               {settings.mainBookingLink && (
                 <motion.div

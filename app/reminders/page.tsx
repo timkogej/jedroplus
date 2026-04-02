@@ -38,7 +38,7 @@ const isEnabledValue = (value: unknown, fallback = false) => {
 };
 
 export default function RemindersPage() {
-  const { companyId, companySettings } = useCompany();
+  const { companyId, companyUuid, companySettings } = useCompany();
   const { role, permissions } = useRolePermissions();
   const canManageSettings = role !== 'staff' || (permissions?.can_manage_opomniki ?? true);
   const [companyRow, setCompanyRow] = useState<Record<string, unknown> | null>(
@@ -90,6 +90,18 @@ export default function RemindersPage() {
       setCompanyRow(companyData ?? null);
       setReminderRow(companyData ?? null);
 
+      // Fetch sms_sender_id from companies table
+      if (companyUuid) {
+        const { data: companiesData } = await supabaseReadOnly
+          .from('companies')
+          .select('sms_sender_id')
+          .eq('id', companyUuid)
+          .maybeSingle();
+        if (companiesData?.sms_sender_id !== undefined) {
+          setSmsSenderId(String(companiesData.sms_sender_id ?? ''));
+        }
+      }
+
       // Fetch stats from appointments
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -124,7 +136,7 @@ export default function RemindersPage() {
     } finally {
       setLoading(false);
     }
-  }, [companyId]);
+  }, [companyId, companyUuid]);
 
   useEffect(() => {
     loadData();
@@ -401,7 +413,7 @@ export default function RemindersPage() {
                       <EnvelopeSimple className="w-4 h-4 text-gray-400" weight="regular" />
                       <div>
                         <span className="text-sm font-medium text-gray-700">Ime pošiljatelja</span>
-                        <p className="text-xs text-gray-400">Uporablja se pri email pošiljanju</p>
+                        <p className="text-xs text-gray-400">Ime ki se prikaže pri email kot pošiljatelj</p>
                       </div>
                     </div>
                     <span className="text-sm font-semibold text-gray-900">
