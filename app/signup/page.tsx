@@ -91,7 +91,9 @@ export default function SignupPage() {
 
       if (signUpData?.user) {
         toast.success('Račun ustvarjen!');
-        window.location.href = '/onboarding';
+        // Redirect to the check-email screen so the user knows to confirm their inbox.
+        // DO NOT redirect to /onboarding or /dashboard here — the account is not yet confirmed.
+        window.location.href = '/auth/check-email';
       }
 
     } catch (error: unknown) {
