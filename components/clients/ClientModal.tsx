@@ -29,12 +29,12 @@ interface ClientModalProps {
 }
 
 // Normalize gender value from DB to form values
-function normalizeGender(spol: string | undefined | null): string {
+function normalizeGender(spol: string | undefined | null): Gender | '' {
   const v = (spol || '').toLowerCase().trim();
   if (v === 'male' || v === 'moški' || v === 'moski') return 'moški';
   if (v === 'female' || v === 'ženska' || v === 'zenska') return 'ženska';
   if (v === 'other' || v === 'drugo') return 'drugo';
-  return spol || '';
+  return '';
 }
 
 // Validation helpers
