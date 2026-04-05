@@ -28,6 +28,15 @@ interface ClientModalProps {
   isSaving?: boolean;
 }
 
+// Normalize gender value from DB to form values
+function normalizeGender(spol: string | undefined | null): string {
+  const v = (spol || '').toLowerCase().trim();
+  if (v === 'male' || v === 'moški' || v === 'moski') return 'moški';
+  if (v === 'female' || v === 'ženska' || v === 'zenska') return 'ženska';
+  if (v === 'other' || v === 'drugo') return 'drugo';
+  return spol || '';
+}
+
 // Validation helpers
 function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -84,7 +93,7 @@ function ClientModal({
         setFormData({
           ime: client.ime || '',
           priimek: client.priimek || '',
-          spol: client.spol || '',
+          spol: normalizeGender(client.spol),
           email: client.email || '',
           telefon: client.telefon || '',
           opombe: opombe,

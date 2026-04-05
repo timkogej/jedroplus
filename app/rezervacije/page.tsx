@@ -352,13 +352,14 @@ export default function RezervacijePage() {
                           key={design.id}
                           className="w-64 sm:w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-md transition-all"
                         >
-                          <div className="relative h-[120px] mb-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                          <div className="mb-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
                             <Image
                               src={design.image}
                               alt={`${design.name} booking dizajn`}
-                              fill
+                              width={320}
+                              height={200}
                               sizes="(max-width: 640px) 256px, 320px"
-                              className="object-cover"
+                              className="w-full h-auto block"
                             />
                           </div>
                           <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
@@ -447,13 +448,14 @@ export default function RezervacijePage() {
                           className="w-64 sm:w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-violet-200 hover:shadow-md transition-all"
                           style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.03), rgba(6,182,212,0.03))' }}
                         >
-                          <div className="relative h-[120px] mb-3 overflow-hidden rounded-lg border border-violet-200 bg-violet-50/30">
+                          <div className="mb-3 overflow-hidden rounded-lg border border-violet-200 bg-violet-50/30">
                             <Image
                               src={design.image}
                               alt={`${design.name} booking dizajn`}
-                              fill
+                              width={320}
+                              height={200}
                               sizes="(max-width: 640px) 256px, 320px"
-                              className="object-cover"
+                              className="w-full h-auto block"
                             />
                           </div>
                           <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>

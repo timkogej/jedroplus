@@ -26,11 +26,15 @@ interface PlanData {
   name: string;
 }
 
+const PLAN_PRICES: Record<string, { monthly: number; yearly: number; savings: number }> = {
+  JEDRO_PLUS:    { monthly: 19,  yearly: 190,  savings: 38  },
+  JEDRO_PRO:     { monthly: 39,  yearly: 390,  savings: 78  },
+  JEDRO_PREMIUM: { monthly: 99,  yearly: 990,  savings: 198 },
+};
+
 interface Plan {
   code: string;
   name: string;
-  price: string;
-  period: string;
   description: string;
   tagline: string;
   features: string[];
@@ -42,8 +46,6 @@ const PLANS: Plan[] = [
   {
     code: 'JEDRO_PLUS',
     name: 'Jedro Plus',
-    price: '19 €',
-    period: '/ mesec',
     description: 'Za podjetja, ki želijo urejen sistem in jasen pregled',
     tagline: 'Koledar, baze in opomniki, ki brez zapletov uredijo vsakdan.',
     features: [
@@ -60,8 +62,6 @@ const PLANS: Plan[] = [
   {
     code: 'JEDRO_PRO',
     name: 'Jedro Pro',
-    price: '39 €',
-    period: '/ mesec',
     description: 'Za podjetja, ki želijo več zasedenosti in manj praznih terminov',
     tagline: 'Vključuje AI pomočnike, Lost Leads in SMS opomnike.',
     popular: true,
@@ -77,8 +77,6 @@ const PLANS: Plan[] = [
   {
     code: 'JEDRO_PREMIUM',
     name: 'Jedro Premium',
-    price: '?? €',
-    period: '/ mesec',
     description: 'Za podjetja, ki želijo maksimalno avtomatizacijo',
     tagline: 'Celoten nabor AI funkcij za rast in komunikacijo.',
     features: [
@@ -93,8 +91,6 @@ const PLANS: Plan[] = [
   {
     code: 'ENTERPRISE',
     name: 'Enterprise',
-    price: 'po dogovoru',
-    period: '',
     description: 'Za podjetja s posebnimi zahtevami in prilagoditvami',
     tagline: 'Prilagoditve funkcij, AI in booking okolja po meri.',
     isEnterprise: true,
@@ -331,6 +327,7 @@ function BillingPageContent() {
   const { user } = useAuth();
   const { role } = useRolePermissions();
   const isStaff = role === 'staff';
+  const [isYearly, setIsYearly] = useState(true);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -480,7 +477,7 @@ function BillingPageContent() {
       }
 
       const companyUuidValue = companyData.id;
-      const result = await startCheckout(companyUuidValue, planCode, user.email);
+      const result = await startCheckout(companyUuidValue, planCode, user.email, isYearly ? 'yearly' : 'monthly');
 
       if (result.ok && result.checkout_url) {
         const checkoutUrl = result.checkout_url;
@@ -708,6 +705,44 @@ function BillingPageContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
+            {/* Billing Period Toggle */}
+            <div className="flex items-center justify-center gap-3 mb-8">
+              <span className={`text-sm font-medium transition-colors ${!isYearly ? 'text-gray-900' : 'text-gray-400'}`}>
+                Mesečno
+              </span>
+              <button
+                onClick={() => setIsYearly(v => !v)}
+                className="relative w-14 h-7 rounded-full transition-colors duration-300 focus:outline-none"
+                style={isYearly
+                  ? { background: 'linear-gradient(135deg, #8B5CF6, #06B6D4)' }
+                  : { background: '#E5E7EB' }
+                }
+              >
+                <motion.div
+                  layout
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  className="absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-sm"
+                  style={isYearly ? { right: '2px' } : { left: '2px' }}
+                />
+              </button>
+              <span className={`text-sm font-medium transition-colors ${isYearly ? 'text-gray-900' : 'text-gray-400'}`}>
+                Letno
+              </span>
+              <AnimatePresence>
+                {isYearly && (
+                  <motion.span
+                    initial={{ scale: 0.7, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.7, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    className="text-xs font-semibold px-2.5 py-1 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-full"
+                  >
+                    2 meseca brezplačno
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+
             <div className="max-w-6xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
                 {PLANS.map((plan, index) => {
@@ -740,17 +775,52 @@ function BillingPageContent() {
                       </div>
 
                       {/* Price */}
-                      <div className="mb-2">
-                        <span className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                          {plan.price}
-                        </span>
-                        {plan.period && (
-                          <span className="text-base font-normal text-gray-500 ml-1">{plan.period}</span>
-                        )}
-                      </div>
+                      {(() => {
+                        const priceData = PLAN_PRICES[plan.code];
+                        const displayPrice = priceData
+                          ? `${isYearly ? priceData.yearly : priceData.monthly} €`
+                          : 'po dogovoru';
+                        const displayPeriod = plan.isEnterprise ? '' : isYearly ? '/ leto' : '/ mesec';
+                        return (
+                          <>
+                            <div className="overflow-hidden mb-0">
+                              <AnimatePresence mode="popLayout" initial={false}>
+                                <motion.div
+                                  key={isYearly ? 'yearly' : 'monthly'}
+                                  initial={{ y: isYearly ? 16 : -16, opacity: 0 }}
+                                  animate={{ y: 0, opacity: 1 }}
+                                  exit={{ y: isYearly ? -16 : 16, opacity: 0 }}
+                                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                                  className="flex items-baseline gap-1"
+                                >
+                                  <span className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                                    {displayPrice}
+                                  </span>
+                                  {displayPeriod && (
+                                    <span className="text-base font-normal text-gray-500">{displayPeriod}</span>
+                                  )}
+                                </motion.div>
+                              </AnimatePresence>
+                            </div>
+                            <AnimatePresence>
+                              {isYearly && priceData && (
+                                <motion.p
+                                  initial={{ opacity: 0, y: 4 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: 4 }}
+                                  transition={{ duration: 0.15 }}
+                                  className="text-xs font-semibold text-emerald-600 mb-1"
+                                >
+                                  Prihranite {priceData.savings} €
+                                </motion.p>
+                              )}
+                            </AnimatePresence>
+                          </>
+                        );
+                      })()}
 
                       {/* Description */}
-                      <p className="text-sm text-gray-700 font-medium mb-1">{plan.description}</p>
+                      <p className="text-sm text-gray-700 font-medium mb-1 mt-1">{plan.description}</p>
 
                       {/* Tagline */}
                       <p className="text-xs text-gray-500 italic mb-5">&ldquo;{plan.tagline}&rdquo;</p>

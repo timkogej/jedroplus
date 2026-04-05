@@ -283,7 +283,8 @@ export interface CheckoutResult {
 export async function startCheckout(
   companyUuid: string,
   planCode: string,
-  email?: string
+  email?: string,
+  billingPeriod: 'monthly' | 'yearly' = 'monthly'
 ): Promise<CheckoutResult> {
   const appBaseUrl = typeof window !== 'undefined' ? window.location.origin : '';
 
@@ -292,6 +293,7 @@ export async function startCheckout(
     body: JSON.stringify({
       company_id: companyUuid,
       plan_code: planCode,
+      billing_period: billingPeriod,
       success_url: `${appBaseUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appBaseUrl}/billing/cancel`
     })
