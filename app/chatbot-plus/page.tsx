@@ -1256,6 +1256,19 @@ export default function ChatbotPlusPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Help text */}
+                  <div className="mt-5 pt-4 border-t border-gray-100 text-center">
+                    <p className="text-xs text-gray-400">
+                      Potrebujete pomoč pri implementaciji chatbota na vašo spletno stran?{' '}
+                      <a
+                        href="mailto:help@jedroplus.com"
+                        className="font-medium text-violet-600 hover:text-violet-700 transition-colors"
+                      >
+                        help@jedroplus.com
+                      </a>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

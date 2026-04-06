@@ -84,7 +84,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       onClick={handleCopy}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
+      className="rounded-lg p-2 border border-gray-200 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
       title={`Kopiraj ${label}`}
     >
       {copied ? (

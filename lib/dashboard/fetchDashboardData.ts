@@ -641,6 +641,11 @@ async function fetchTopServices(companyId: string): Promise<TopService[]> {
 
     if (bookings.length === 0) return [];
 
+    // Current month range
+    const today = new Date();
+    const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
+    const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
+
     // Build services lookup map
     const servicesMap = new Map<string, { naziv: string; barva: string }>();
     for (const s of services) {
@@ -650,10 +655,26 @@ async function fetchTopServices(companyId: string): Promise<TopService[]> {
       if (id) servicesMap.set(id, { naziv, barva });
     }
 
-    // Count service occurrences across all 3 columns
+    // Count service occurrences across all 3 columns (current month only)
     const serviceCounts = new Map<string, number>();
 
     for (const apt of bookings) {
+      // Filter by current month
+      const schema = detectBookingSchema(apt);
+      const dateValue = schema.dateField ? apt[schema.dateField] : null;
+      let bookingDateStr = '';
+      if (typeof dateValue === 'string') {
+        if (dateValue.includes('T')) {
+          bookingDateStr = dateValue.split('T')[0];
+        } else if (dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          bookingDateStr = dateValue;
+        } else if (dateValue.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+          const parts = dateValue.split('.');
+          bookingDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+      if (!bookingDateStr || bookingDateStr < monthStart || bookingDateStr > monthEnd) continue;
+
       // Count primary service
       const serviceId1 = String(pickFirst(apt, ['ID storitev', 'ID storitve', 'storitev_id', 'service_id']) ?? '');
       if (serviceId1) {
@@ -716,6 +737,11 @@ async function fetchTopEmployees(companyId: string): Promise<TopEmployee[]> {
 
     if (bookings.length === 0) return [];
 
+    // Current month range
+    const today = new Date();
+    const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
+    const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
+
     // Build staff lookup map
     const staffMap = new Map<string, { ime: string; priimek: string; barva: string }>();
     for (const e of staff) {
@@ -726,10 +752,26 @@ async function fetchTopEmployees(companyId: string): Promise<TopEmployee[]> {
       if (id) staffMap.set(id, { ime, priimek, barva });
     }
 
-    // Count employee occurrences
+    // Count employee occurrences (current month only)
     const employeeCounts = new Map<string, number>();
 
     for (const apt of bookings) {
+      // Filter by current month
+      const schema = detectBookingSchema(apt);
+      const dateValue = schema.dateField ? apt[schema.dateField] : null;
+      let bookingDateStr = '';
+      if (typeof dateValue === 'string') {
+        if (dateValue.includes('T')) {
+          bookingDateStr = dateValue.split('T')[0];
+        } else if (dateValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          bookingDateStr = dateValue;
+        } else if (dateValue.match(/^\d{1,2}\.\d{1,2}\.\d{4}$/)) {
+          const parts = dateValue.split('.');
+          bookingDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+      if (!bookingDateStr || bookingDateStr < monthStart || bookingDateStr > monthEnd) continue;
+
       const employeeId = String(pickFirst(apt, ['ID osebja', 'ID osebe', 'ID Osebe', 'oseba_id', 'person_id']) ?? '');
       if (employeeId) {
         employeeCounts.set(employeeId, (employeeCounts.get(employeeId) || 0) + 1);

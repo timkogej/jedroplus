@@ -879,7 +879,7 @@ function AppointmentModal({
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="relative w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl mx-2 sm:mx-0"
+          className="relative w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl"
         >
           {/* Gradient header */}
           <div className="bg-gradient-to-r from-violet-500 to-cyan-500 px-6 py-5">
@@ -897,7 +897,7 @@ function AppointmentModal({
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
+          <form onSubmit={handleSubmit} className="px-4 py-5 sm:px-6 space-y-5 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
             {/* Client search - First field */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
@@ -1214,7 +1214,7 @@ function AppointmentModal({
                     type="date"
                     value={formData.datum}
                     onChange={(e) => setFormData((prev) => ({ ...prev, datum: e.target.value }))}
-                    className={`w-full min-w-0 rounded-xl border bg-white px-2 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm text-[#1A1F36]
+                    className={`w-full max-w-full min-w-0 rounded-xl border bg-white px-2 py-2 text-sm text-[#1A1F36]
                                focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20
                                ${errors.datum ? 'border-red-300' : 'border-gray-200'}`}
                   />
@@ -1226,8 +1226,8 @@ function AppointmentModal({
             </div>
 
             {/* Time fields - Both start and end time are manually selectable */}
-            <div className="flex gap-3 sm:gap-4">
-              <div className="flex-1">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="min-w-0">
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Čas začetka
                 </label>
@@ -1245,7 +1245,7 @@ function AppointmentModal({
                         setFormData((prev) => ({ ...prev, cas_zacetek: e.target.value }));
                         setEndTimeManuallySet(false);
                       }}
-                      className={`w-full rounded-xl border sm:border-2 bg-white px-2 py-2 sm:px-4 sm:py-2.5 text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
+                      className={`w-full max-w-full min-w-0 rounded-xl border bg-white px-2 py-2 text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
                     />
                     {errors.cas_zacetek && (
                       <p className="mt-1 text-xs text-red-500">{errors.cas_zacetek}</p>
@@ -1253,7 +1253,7 @@ function AppointmentModal({
                   </>
                 )}
               </div>
-              <div className="flex-1">
+              <div className="min-w-0">
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                   Čas konca
                 </label>
@@ -1271,7 +1271,7 @@ function AppointmentModal({
                         setFormData((prev) => ({ ...prev, cas_konec: e.target.value }));
                         setEndTimeManuallySet(true);
                       }}
-                      className={`w-full rounded-xl border sm:border-2 bg-white px-2 py-2 sm:px-4 sm:py-2.5 text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
+                      className={`w-full max-w-full min-w-0 rounded-xl border bg-white px-2 py-2 text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
                     />
                     {errors.cas_konec && (
                       <p className="mt-1 text-xs text-red-500">{errors.cas_konec}</p>

@@ -45,10 +45,10 @@ export function TopServicesCard({ services }: TopServicesCardProps) {
                 className="flex flex-col justify-center p-3 rounded-xl bg-gray-50 min-h-[72px]"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div
                       className="w-3 h-3 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: service.color }}
+                      style={{ background: service.color }}
                     />
                     <span className="text-sm font-medium text-gray-900 truncate">
                       {service.name}
@@ -62,13 +62,13 @@ export function TopServicesCard({ services }: TopServicesCardProps) {
                   </div>
                 </div>
                 {/* Progress bar */}
-                <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: service.color + '33' }}>
+                <div className="h-2 rounded-full overflow-hidden bg-gray-200">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${service.percentage}%` }}
                     transition={{ duration: 0.5, delay: index * 0.1 }}
                     className="h-full rounded-full"
-                    style={{ backgroundColor: service.color }}
+                    style={{ background: service.color }}
                   />
                 </div>
               </motion.div>

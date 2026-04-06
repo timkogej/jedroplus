@@ -231,9 +231,20 @@ function AppointmentViewModal({
 
               {/* Končna cena */}
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-                <span className="text-sm font-medium text-gray-700">Končna cena</span>
+                <div>
+                  <span className="text-sm font-medium text-gray-700">Končna cena</span>
+                  {appointment.popust != null && appointment.popust !== 0 && appointment.cena != null && (
+                    <div className="text-xs text-gray-400 mt-0.5">
+                      {Number(appointment.cena).toFixed(2)} - {Number(appointment.popust).toFixed(2)}{appointment.popust_tip ? ` ${appointment.popust_tip}` : ''}
+                    </div>
+                  )}
+                </div>
                 <span className="text-xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                  {appointment.koncna_cena || appointment.cena || '0.00'} €
+                  {appointment.koncna_cena != null
+                    ? Number(appointment.koncna_cena).toFixed(2)
+                    : appointment.cena != null
+                      ? Number(appointment.cena).toFixed(2)
+                      : (appointment.storitev?.cena != null ? Number(appointment.storitev.cena).toFixed(2) : '0.00')} €
                 </span>
               </div>
             </div>
@@ -298,68 +309,40 @@ function AppointmentViewModal({
 
               {/* Email */}
               {appointment.stranka_email && (
-                <div className="p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
-                        <Envelope className="w-5 h-5 text-white" weight="fill" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-blue-600 font-semibold">Email</div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {appointment.stranka_email}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <CopyButton text={appointment.stranka_email} label="email" />
-
-                      <motion.a
-                        href={`mailto:${appointment.stranka_email}`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md"
-                      >
-                        <Envelope className="w-4 h-4" weight="bold" />
-                        Email
-                      </motion.a>
+                <motion.a
+                  href={`mailto:${appointment.stranka_email}`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 transition-transform cursor-pointer"
+                >
+                  <Envelope className="w-5 h-5 text-gray-400 flex-shrink-0" weight="regular" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</div>
+                    <div className="text-base font-semibold text-gray-900 truncate mt-0.5">
+                      {appointment.stranka_email}
                     </div>
                   </div>
-                </div>
+                  <CopyButton text={appointment.stranka_email} label="email" />
+                </motion.a>
               )}
 
               {/* Phone */}
               {appointment.stranka_telefon && (
-                <div className="p-4 bg-green-50 rounded-xl border-2 border-green-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center">
-                        <Phone className="w-5 h-5 text-white" weight="fill" />
-                      </div>
-                      <div>
-                        <div className="text-xs text-green-600 font-semibold">Telefon</div>
-                        <div className="text-sm font-medium text-gray-900">
-                          {appointment.stranka_telefon}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <CopyButton text={appointment.stranka_telefon} label="telefon" />
-
-                      <motion.a
-                        href={`tel:${appointment.stranka_telefon}`}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md"
-                      >
-                        <Phone className="w-4 h-4" weight="bold" />
-                        Kliči
-                      </motion.a>
+                <motion.a
+                  href={`tel:${appointment.stranka_telefon}`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4 transition-transform cursor-pointer"
+                >
+                  <Phone className="w-5 h-5 text-gray-400 flex-shrink-0" weight="regular" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Telefon</div>
+                    <div className="text-base font-semibold text-gray-900 truncate mt-0.5">
+                      {appointment.stranka_telefon}
                     </div>
                   </div>
-                </div>
+                  <CopyButton text={appointment.stranka_telefon} label="telefon" />
+                </motion.a>
               )}
 
               {/* No contact info message */}
@@ -371,34 +354,24 @@ function AppointmentViewModal({
             </div>
 
             {/* Notes */}
-            {appointment.opombe && (
-              <div className="p-5 bg-gray-50 rounded-2xl border border-gray-200">
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
-                  Opombe
-                </div>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                  {appointment.opombe}
-                </p>
+            <div className="p-5 bg-gray-50 rounded-2xl border border-gray-200">
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                Opombe
               </div>
-            )}
+              <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                {appointment.opombe || '-'}
+              </p>
+            </div>
 
-            {/* Internal Notes */}
-            {(() => {
-              const notes = appointment.interne_opombe
-                || (appointment as unknown as Record<string, unknown>)['Interne opombe'] as string
-                || '';
-              if (!notes) return null;
-              return (
-                <div className="p-5 bg-white rounded-2xl border-2 border-yellow-200">
-                  <div className="text-xs font-bold text-yellow-700 uppercase tracking-wide mb-2">
-                    Interne opombe
-                  </div>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
-                    {notes}
-                  </p>
-                </div>
-              );
-            })()}
+            {/* Internal Notes - always show */}
+            <div className="p-5 bg-white rounded-2xl border-2 border-yellow-200">
+              <div className="text-xs font-bold text-yellow-700 uppercase tracking-wide mb-2">
+                Interne opombe
+              </div>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+                {appointment.interne_opombe || '-'}
+              </p>
+            </div>
           </div>
 
           {/* FOOTER - No Zapri button, only action buttons */}

@@ -4,6 +4,9 @@ import { detectBookingSchema, pickFirst } from '@/lib/dashboardHelpers';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import { supabase } from '@/lib/supabaseClient';
 
+// If the 'absences' table doesn't exist skip future queries to avoid repeated 400 errors.
+let absencesTableMissing = false;
+
 // Absence type with employee details
 export interface Absence {
   id: string;
@@ -122,6 +125,29 @@ function parseStaff(row: Record<string, unknown>): (Zaposleni & { initials: stri
     barva: barva || undefined,
     storitve,
   };
+}
+
+// Extract pricing fields from raw booking row
+function extractPricingFields(row: Record<string, unknown>): {
+  koncna_cena: number | null;
+  cena: number | null;
+  popust: number | null;
+  popust_tip: string | null;
+} {
+  const toNum = (v: unknown): number | null => {
+    if (v === null || v === undefined || v === '' || String(v) === 'null') return null;
+    const n = Number(v);
+    return isNaN(n) ? null : n;
+  };
+  const koncna_cena = toNum(pickFirst(row, ['Final cena', 'final_cena', 'koncna_cena', 'Končna cena']));
+  const cena = toNum(pickFirst(row, ['Cena', 'cena', 'price', 'Price']));
+  const popust = toNum(pickFirst(row, ['Popust', 'popust', 'discount']));
+  const popustTipRaw = pickFirst(row, ['Popust type', 'popust_tip', 'Popust_tip', 'discount_type']);
+  const popust_tip =
+    popustTipRaw !== null && popustTipRaw !== undefined && String(popustTipRaw).trim() !== '' && String(popustTipRaw) !== 'null'
+      ? String(popustTipRaw).trim()
+      : null;
+  return { koncna_cena, cena, popust, popust_tip };
 }
 
 // Extract additional service IDs (2 and 3) from raw booking row
@@ -340,6 +366,9 @@ export async function fetchAppointmentsForMonth(
       const storitev2 = serviceId2 ? (serviceMap.get(serviceId2) || null) : null;
       const storitev3 = serviceId3 ? (serviceMap.get(serviceId3) || null) : null;
 
+      // Extract pricing fields
+      const pricing = extractPricingFields(row);
+
       appointments.push({
         id,
         datum: bookingDate.toISOString(),
@@ -357,6 +386,10 @@ export async function fetchAppointmentsForMonth(
         status: normalizedStatus,
         opombe: notes || undefined,
         interne_opombe: interneOpombe || undefined,
+        cena: pricing.cena,
+        popust: pricing.popust,
+        popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,
+        koncna_cena: pricing.koncna_cena,
         storitev: serviceData,
         storitev_2: storitev2,
         storitev_3: storitev3,
@@ -567,6 +600,9 @@ export async function fetchAppointmentById(
     // Extract additional service IDs from raw row
     const { serviceId2, serviceId3 } = extractAdditionalServiceIds(booking);
 
+    // Extract pricing fields
+    const pricing = extractPricingFields(booking);
+
     const appointment: AppointmentWithDetails = {
       id,
       datum: bookingDate?.toISOString() ?? new Date().toISOString(),
@@ -583,6 +619,10 @@ export async function fetchAppointmentById(
       status: normalizedStatus,
       opombe: notes || undefined,
       interne_opombe: interneOpombe || undefined,
+      cena: pricing.cena,
+      popust: pricing.popust,
+      popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,
+      koncna_cena: pricing.koncna_cena,
       storitev: serviceData,
       zaposleni: staffMap.get(staffId) || null,
     };
@@ -743,6 +783,9 @@ export async function fetchAllAppointments(
       const storitev2 = serviceId2 ? (serviceMap.get(serviceId2) || null) : null;
       const storitev3 = serviceId3 ? (serviceMap.get(serviceId3) || null) : null;
 
+      // Extract pricing fields
+      const pricing = extractPricingFields(row);
+
       appointments.push({
         id,
         datum: bookingDate.toISOString(),
@@ -760,6 +803,10 @@ export async function fetchAllAppointments(
         status: normalizedStatus,
         opombe: notes || undefined,
         interne_opombe: interneOpombe || undefined,
+        cena: pricing.cena,
+        popust: pricing.popust,
+        popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,
+        koncna_cena: pricing.koncna_cena,
         storitev: serviceData,
         storitev_2: storitev2,
         storitev_3: storitev3,
@@ -787,6 +834,10 @@ export async function fetchAllAppointments(
 export async function fetchAbsences(
   companyId: string
 ): Promise<{ data: Absence[] | null; error: Error | null }> {
+  if (absencesTableMissing) {
+    return { data: [], error: null };
+  }
+
   try {
     console.log('[fetchAbsences] Fetching absences for company_id:', companyId);
 
@@ -799,7 +850,11 @@ export async function fetchAbsences(
     console.log('[fetchAbsences] Query result - error:', absencesError, 'data count:', absencesData?.length ?? 0);
 
     if (absencesError) {
-      // Maybe the table doesn't exist or RLS issue — log and continue with empty
+      if (absencesError.code === '42P01' || absencesError.message?.includes('relation "absences" does not exist')) {
+        absencesTableMissing = true;
+        return { data: [], error: null };
+      }
+      // RLS or other issue — log and continue with empty
       console.warn('[fetchAbsences] Error querying absences:', absencesError.message);
       absencesData = [];
     }

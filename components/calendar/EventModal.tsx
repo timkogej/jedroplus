@@ -13,9 +13,8 @@ import {
   Clock,
   MapPin,
   TextAlignLeft,
-  Eye,
-  EyeSlash,
 } from '@phosphor-icons/react';
+import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { CalendarEvent } from '@/types/events';
 import {
   EVENT_COLOR_PRESETS,
@@ -237,7 +236,7 @@ function EventModal({
             {/* ── Form (white) ─────────────────────────────────────────────── */}
             <form
               onSubmit={handleSubmit}
-              className="flex-1 overflow-y-auto px-6 py-5 space-y-5"
+              className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 space-y-5"
               style={{ background: '#fff', scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.1) transparent' }}
             >
               {/* Errors */}
@@ -270,7 +269,7 @@ function EventModal({
               </div>
 
               {/* Date row */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
                   <label className={labelClass}>
                     <CalendarBlank className="inline h-3 w-3 mr-1" weight="bold" />
@@ -280,7 +279,7 @@ function EventModal({
                     type="date"
                     value={eventDate}
                     onChange={(e) => setEventDate(e.target.value)}
-                    className={inputClass}
+                    className={`${inputClass} max-w-full`}
                   />
                 </div>
                 <div>
@@ -293,7 +292,7 @@ function EventModal({
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     min={eventDate}
-                    className={inputClass}
+                    className={`${inputClass} max-w-full`}
                   />
                 </div>
               </div>
@@ -325,36 +324,28 @@ function EventModal({
 
               {/* Time inputs */}
               {!allDay && (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className={labelClass}>
                       <Clock className="inline h-3 w-3 mr-1" weight="bold" />
                       Začetna ura
                     </label>
-                    <select
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      className={`${inputClass} cursor-pointer`}
-                    >
+                    <Select value={startTime} setValue={setStartTime} placeholder="Izberi uro">
                       {TIME_OPTIONS.map((t) => (
-                        <option key={t} value={t}>{t}</option>
+                        <SelectOption key={t} value={t}>{t}</SelectOption>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                   <div>
                     <label className={labelClass}>
                       <Clock className="inline h-3 w-3 mr-1" weight="bold" />
                       Končna ura
                     </label>
-                    <select
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      className={`${inputClass} cursor-pointer`}
-                    >
+                    <Select value={endTime} setValue={setEndTime} placeholder="Izberi uro">
                       {TIME_OPTIONS.map((t) => (
-                        <option key={t} value={t}>{t}</option>
+                        <SelectOption key={t} value={t}>{t}</SelectOption>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                 </div>
               )}
@@ -453,12 +444,7 @@ function EventModal({
                       }`}
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-[#1A1F36] transition-colors flex items-center gap-1.5">
-                    {isVisible ? (
-                      <Eye style={{ width: 14, height: 14 }} weight="regular" />
-                    ) : (
-                      <EyeSlash style={{ width: 14, height: 14 }} weight="regular" />
-                    )}
+                  <span className="text-sm font-medium text-gray-600 group-hover:text-[#1A1F36] transition-colors">
                     Vidno v koledarju
                   </span>
                 </button>

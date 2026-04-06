@@ -362,9 +362,9 @@ export default function RezervacijePage() {
                               className="w-full h-auto block"
                             />
                           </div>
-                          <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
-                          <p className="text-xs text-center text-gray-500 mt-0.5">{design.subtitle}</p>
-                          <p className="text-[10px] text-center text-gray-400 mt-1 mb-3 leading-relaxed">{design.description}</p>
+                          <h3 className="font-semibold text-left text-gray-900 text-sm">{design.name}</h3>
+                          <p className="text-xs text-left text-gray-500 mt-0.5">{design.subtitle}</p>
+                          <p className="text-[10px] text-left text-gray-400 mt-1 mb-3 leading-relaxed">{design.description}</p>
                           <div className="space-y-2">
                             <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
                               <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">Booking link</p>
@@ -458,9 +458,9 @@ export default function RezervacijePage() {
                               className="w-full h-auto block"
                             />
                           </div>
-                          <h3 className="font-semibold text-center text-gray-900 text-sm">{design.name}</h3>
-                          <p className="text-xs text-center text-gray-500 mt-0.5">{design.subtitle}</p>
-                          <p className="text-[10px] text-center text-gray-400 mt-1 mb-3 leading-relaxed">{design.description}</p>
+                          <h3 className="font-semibold text-left text-gray-900 text-sm">{design.name}</h3>
+                          <p className="text-xs text-left text-gray-500 mt-0.5">{design.subtitle}</p>
+                          <p className="text-[10px] text-left text-gray-400 mt-1 mb-3 leading-relaxed">{design.description}</p>
                           <div className="space-y-2">
                             <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
                               <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">Booking link</p>

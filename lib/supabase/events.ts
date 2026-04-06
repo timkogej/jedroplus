@@ -1,6 +1,10 @@
 import { supabase } from '@/lib/supabaseClient';
 import type { CalendarEvent } from '@/types/events';
 
+// If the 'events' table doesn't exist we skip all future queries to avoid
+// repeated 400 errors on every calendar view/date change.
+let eventsTableMissing = false;
+
 /**
  * Fetch events from Supabase for the active company within the visible date range.
  *
@@ -16,6 +20,10 @@ export async function fetchEvents(
   dateFrom: string,
   dateTo: string,
 ): Promise<{ data: CalendarEvent[] | null; error: Error | null }> {
+  if (eventsTableMissing) {
+    return { data: [], error: null };
+  }
+
   try {
     const { data, error } = await supabase
       .from('events')
@@ -24,6 +32,11 @@ export async function fetchEvents(
       .lte('event_date', dateTo);
 
     if (error) {
+      // Supabase error code 42P01 = table does not exist
+      if (error.code === '42P01' || error.message?.includes('relation "events" does not exist')) {
+        eventsTableMissing = true;
+        return { data: [], error: null };
+      }
       console.warn('[fetchEvents] Supabase error:', error.message);
       return { data: null, error: new Error(error.message) };
     }

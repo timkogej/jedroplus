@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -81,6 +81,15 @@ function AbsenceModal({
   // Validation errors
   const [errors, setErrors] = useState<string[]>([]);
 
+  // Mobile detection for native time picker
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   // Validate form
   const validate = useCallback(() => {
     const newErrors: string[] = [];
@@ -120,8 +129,8 @@ function AbsenceModal({
       dateFrom,
       dateTo: singleDay ? dateFrom : dateTo,
       singleDay,
-      timeFrom: singleDay ? timeFrom : undefined,
-      timeTo: singleDay ? timeTo : undefined,
+      timeFrom: singleDay ? timeFrom : '05:00',
+      timeTo: singleDay ? timeTo : '23:59',
       reason: reason.trim() || undefined,
     });
   }, [validate, onSave, selectedEmployeeId, dateFrom, dateTo, singleDay, timeFrom, timeTo, reason]);
@@ -197,7 +206,7 @@ function AbsenceModal({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="max-h-[calc(90vh-200px)] overflow-y-auto p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="max-h-[calc(90vh-200px)] overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 space-y-5">
               {/* Errors */}
               {errors.length > 0 && (
                 <div className="rounded-xl bg-red-50 border border-red-200 p-4">
@@ -217,7 +226,7 @@ function AbsenceModal({
                 <label className="text-sm font-medium text-[#1A1F36]">
                   Zaposleni
                 </label>
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto overflow-x-hidden p-1">
                   {employees.map((employee, idx) => {
                     const isSelected = selectedEmployeeId === employee.id;
                     const color = extractColor(employee.barva || '');
@@ -277,7 +286,7 @@ function AbsenceModal({
 
               {/* Date selection */}
               <div className="space-y-3">
-                <div className={singleDay ? '' : 'grid grid-cols-2 gap-3'}>
+                <div className={singleDay ? '' : 'grid grid-cols-1 gap-3 sm:grid-cols-2'}>
                   <div>
                     <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
                       {singleDay ? 'Datum' : 'Od datuma'}
@@ -286,7 +295,7 @@ function AbsenceModal({
                       type="date"
                       value={dateFrom}
                       onChange={(e) => setDateFrom(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[#1A1F36]
+                      className="w-full max-w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-[#1A1F36]
                                focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                     />
                   </div>
@@ -300,47 +309,55 @@ function AbsenceModal({
                         value={dateTo}
                         onChange={(e) => setDateTo(e.target.value)}
                         min={dateFrom}
-                        className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[#1A1F36]
+                        className="w-full max-w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-[#1A1F36]
                                  focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                       />
                     </div>
                   )}
                 </div>
 
-                {/* Time selection (only for single day) - using same Select design as appointment form */}
+                {/* Time selection (only for single day) */}
                 {singleDay && (
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
+                    <div className="min-w-0">
                       <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
                         Od ure
                       </label>
-                      <Select
-                        value={timeFrom}
-                        setValue={setTimeFrom}
-                        placeholder="Izberi uro"
-                      >
-                        {TIME_OPTIONS.map((time) => (
-                          <SelectOption key={time} value={time}>
-                            {time}
-                          </SelectOption>
-                        ))}
-                      </Select>
+                      {isMobile ? (
+                        <input
+                          type="time"
+                          value={timeFrom}
+                          onChange={(e) => setTimeFrom(e.target.value)}
+                          className="w-full max-w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-[#1A1F36]
+                                   focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        />
+                      ) : (
+                        <Select value={timeFrom} setValue={setTimeFrom} placeholder="Izberi uro">
+                          {TIME_OPTIONS.map((time) => (
+                            <SelectOption key={time} value={time}>{time}</SelectOption>
+                          ))}
+                        </Select>
+                      )}
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
                         Do ure
                       </label>
-                      <Select
-                        value={timeTo}
-                        setValue={setTimeTo}
-                        placeholder="Izberi uro"
-                      >
-                        {TIME_OPTIONS.map((time) => (
-                          <SelectOption key={time} value={time}>
-                            {time}
-                          </SelectOption>
-                        ))}
-                      </Select>
+                      {isMobile ? (
+                        <input
+                          type="time"
+                          value={timeTo}
+                          onChange={(e) => setTimeTo(e.target.value)}
+                          className="w-full max-w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-[#1A1F36]
+                                   focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        />
+                      ) : (
+                        <Select value={timeTo} setValue={setTimeTo} placeholder="Izberi uro">
+                          {TIME_OPTIONS.map((time) => (
+                            <SelectOption key={time} value={time}>{time}</SelectOption>
+                          ))}
+                        </Select>
+                      )}
                     </div>
                   </div>
                 )}

@@ -14,12 +14,11 @@ import {
   Warning,
   Palette,
   Check,
-  Info,
   CaretLeft,
   CaretRight,
 } from '@phosphor-icons/react';
-import type { Service, ServiceFormData, PriceType } from '@/types/services';
-import { DURATION_OPTIONS, PRICE_TYPE_OPTIONS } from '@/types/services';
+import type { Service, ServiceFormData } from '@/types/services';
+import { DURATION_OPTIONS } from '@/types/services';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/constants/serviceGradients';
 
@@ -573,74 +572,38 @@ function ServiceModal({
                   )}
                 </div>
 
-                {/* Price Type */}
+                {/* Price (always fixed) */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Tip cene *
+                    Cena (fiksna)
                   </label>
                   <div className="relative">
-                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <CurrencyEur className="h-4 w-4" weight="regular" />
-                    </div>
-                    <Select
-                      value={formData.tip_cene}
-                      setValue={(value) => handleChange('tip_cene', value as PriceType)}
-                      placeholder="Izberi tip cene"
-                      className="[&>button]:pl-10"
-                    >
-                      {PRICE_TYPE_OPTIONS.map((opt) => (
-                        <SelectOption key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectOption>
-                      ))}
-                    </Select>
+                    <CurrencyEur className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                    <input
+                      type="number"
+                      value={formData.cena}
+                      onChange={(e) => handleChange('cena', e.target.value)}
+                      placeholder="35.00"
+                      step="0.01"
+                      min={0}
+                      className={`w-full rounded-xl border py-2.5 pl-10 pr-16 text-sm text-[#1A1F36] placeholder-gray-400
+                                 transition-all focus:outline-none focus:ring-2
+                                 ${errors.cena
+                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                                   : 'border-gray-200 focus:border-violet-400 focus:ring-violet-100'
+                                 }`}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
+                      {currency}
+                    </span>
                   </div>
-                </div>
-
-                {/* Price Input (only if fixed price) */}
-                {formData.tip_cene === 'fiksna' && (
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Cena
-                    </label>
-                    <div className="relative">
-                      <CurrencyEur className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                      <input
-                        type="number"
-                        value={formData.cena}
-                        onChange={(e) => handleChange('cena', e.target.value)}
-                        placeholder="35.00"
-                        step="0.01"
-                        min={0}
-                        className={`w-full rounded-xl border py-2.5 pl-10 pr-16 text-sm text-[#1A1F36] placeholder-gray-400
-                                   transition-all focus:outline-none focus:ring-2
-                                   ${errors.cena
-                                     ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                     : 'border-gray-200 focus:border-violet-400 focus:ring-violet-100'
-                                   }`}
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
-                        {currency}
-                      </span>
-                    </div>
-                    {errors.cena && (
-                      <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                        <Warning className="h-3 w-3" weight="fill" />
-                        {errors.cena}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Price by Agreement Message */}
-                {formData.tip_cene === 'po_dogovoru' && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                    <p className="text-sm text-blue-800 flex items-center gap-2">
-                      <Info className="h-4 w-4" />
-                      Cena bo določena ob dogovoru s stranko
+                  {errors.cena && (
+                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
+                      <Warning className="h-3 w-3" weight="fill" />
+                      {errors.cena}
                     </p>
-                  </div>
-                )}
+                  )}
+                </div>
 
                 {/* Description */}
                 <div>

@@ -12,8 +12,6 @@ import {
   Clock,
   MapPin,
   TextAlignLeft,
-  Eye,
-  EyeSlash,
   Note,
 } from '@phosphor-icons/react';
 import type { CalendarEvent } from '@/types/events';
@@ -184,23 +182,6 @@ function EventViewModal({
                 </div>
               )}
 
-              {/* Visibility */}
-              <div className="flex items-center gap-3">
-                {event.is_visible ? (
-                  <Eye
-                    weight="regular"
-                    style={{ width: 18, height: 18, color: '#6B7280', flexShrink: 0 }}
-                  />
-                ) : (
-                  <EyeSlash
-                    weight="regular"
-                    style={{ width: 18, height: 18, color: '#9CA3AF', flexShrink: 0 }}
-                  />
-                )}
-                <p className={`text-sm ${event.is_visible ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
-                  {event.is_visible ? 'Vidno v koledarju' : 'Skrito v koledarju'}
-                </p>
-              </div>
             </div>
 
             {/* ── Footer ──────────────────────────────────────────────────────── */}

@@ -110,13 +110,8 @@ function HourlyOccupancyHeatmap({
                     whileHover={{ scale: 1.1 }}
                     className={`mx-0.5 flex h-8 w-10 cursor-pointer items-center justify-center rounded transition-all ${getIntensityColor(pct, maxPct)}`}
                     title={`${day} ${hour}:00–${hour + 1}:00 · ${pct.toFixed(1)}% zasedenosti`}
-                  >
-                    {pct >= 0.5 && (
-                      <span className={`text-[10px] font-semibold ${getTextColor(pct, maxPct)}`}>
-                        {pct.toFixed(0)}%
-                      </span>
-                    )}
-                  </motion.div>
+                  />
+
                 );
               })}
             </div>

@@ -63,7 +63,12 @@ export default function LoginPage() {
       }
     } catch (error: unknown) {
       console.error('Login error:', error);
-      toast.error('Napačen email ali geslo');
+      const msg = error instanceof Error ? error.message : '';
+      if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials') || msg.toLowerCase().includes('password')) {
+        toast.error('Napačen email ali geslo');
+      } else {
+        toast.error('Napaka pri prijavi. Poskusite znova.');
+      }
       setLoading(false);
     }
   };

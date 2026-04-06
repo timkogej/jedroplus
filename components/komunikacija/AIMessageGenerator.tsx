@@ -14,7 +14,6 @@ interface AIMessageGeneratorProps {
 const TONE_OPTIONS = [
   { value: 'prijazen', label: 'Prijazen' },
   { value: 'profesionalen', label: 'Profesionalen' },
-  { value: 'formalen', label: 'Formalen' },
 ];
 
 export default function AIMessageGenerator({

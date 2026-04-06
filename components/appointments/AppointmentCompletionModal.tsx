@@ -204,71 +204,63 @@ export default function AppointmentCompletionModal({
             {/* Content */}
             <div className="p-6 space-y-6">
               {/* Appointment details */}
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <CalendarBlank className="h-4 w-4 text-gray-400" weight="regular" />
-                    <div>
-                      <div className="text-gray-500 text-xs">Datum</div>
-                      <div className="font-medium text-gray-900">
-                        {formatDate(appointment.datum)}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-gray-400" weight="regular" />
-                    <div>
-                      <div className="text-gray-500 text-xs">Čas</div>
-                      <div className="font-medium text-gray-900">
-                        {formatTime(appointment.cas_zacetek)}
-                        {appointment.cas_konec && ` - ${formatTime(appointment.cas_konec)}`}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2 col-span-2">
-                    <Scissors className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" weight="regular" />
-                    <div className="flex-1">
-                      <div className="text-gray-500 text-xs mb-1">Storitev</div>
-                      <div className="space-y-1">
-                        {appointment.storitev && (
-                          <div className="flex items-center gap-2">
-                            {appointment.storitev.barva && (
-                              <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva }} />
-                            )}
-                            <span className="font-medium text-gray-900 text-sm">{appointment.storitev.naziv}</span>
-                          </div>
+              <div className="p-4 bg-gray-50 rounded-xl space-y-3 text-sm">
+                {/* Datum */}
+                <div className="flex items-center gap-3">
+                  <CalendarBlank className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                  <span className="text-gray-500 w-20 flex-shrink-0">Datum</span>
+                  <span className="font-medium text-gray-900">{formatDate(appointment.datum)}</span>
+                </div>
+                {/* Čas */}
+                <div className="flex items-center gap-3">
+                  <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                  <span className="text-gray-500 w-20 flex-shrink-0">Čas</span>
+                  <span className="font-medium text-gray-900">
+                    {formatTime(appointment.cas_zacetek)}
+                    {appointment.cas_konec && ` – ${formatTime(appointment.cas_konec)}`}
+                  </span>
+                </div>
+                {/* Storitev */}
+                <div className="flex items-start gap-3">
+                  <Scissors className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" weight="regular" />
+                  <span className="text-gray-500 w-20 flex-shrink-0 mt-0.5">Storitev</span>
+                  <div className="space-y-1">
+                    {appointment.storitev && (
+                      <div className="flex items-center gap-2">
+                        {appointment.storitev.barva && (
+                          <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva }} />
                         )}
-                        {appointment.storitev_2 && (
-                          <div className="flex items-center gap-2">
-                            {appointment.storitev_2.barva && (
-                              <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev_2.barva }} />
-                            )}
-                            <span className="font-medium text-gray-900 text-sm">{appointment.storitev_2.naziv}</span>
-                          </div>
-                        )}
-                        {appointment.storitev_3 && (
-                          <div className="flex items-center gap-2">
-                            {appointment.storitev_3.barva && (
-                              <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev_3.barva }} />
-                            )}
-                            <span className="font-medium text-gray-900 text-sm">{appointment.storitev_3.naziv}</span>
-                          </div>
-                        )}
-                        {!appointment.storitev && <span className="font-medium text-gray-900 text-sm">-</span>}
+                        <span className="font-medium text-gray-900">{appointment.storitev.naziv}</span>
                       </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-gray-400" weight="regular" />
-                    <div>
-                      <div className="text-gray-500 text-xs">Zaposleni</div>
-                      <div className="font-medium text-gray-900">
-                        {appointment.zaposleni
-                          ? `${appointment.zaposleni.ime} ${appointment.zaposleni.priimek}`
-                          : '-'}
+                    )}
+                    {appointment.storitev_2 && (
+                      <div className="flex items-center gap-2">
+                        {appointment.storitev_2.barva && (
+                          <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev_2.barva }} />
+                        )}
+                        <span className="font-medium text-gray-900">{appointment.storitev_2.naziv}</span>
                       </div>
-                    </div>
+                    )}
+                    {appointment.storitev_3 && (
+                      <div className="flex items-center gap-2">
+                        {appointment.storitev_3.barva && (
+                          <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev_3.barva }} />
+                        )}
+                        <span className="font-medium text-gray-900">{appointment.storitev_3.naziv}</span>
+                      </div>
+                    )}
+                    {!appointment.storitev && <span className="font-medium text-gray-900">-</span>}
                   </div>
+                </div>
+                {/* Zaposleni */}
+                <div className="flex items-center gap-3">
+                  <User className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                  <span className="text-gray-500 w-20 flex-shrink-0">Zaposleni</span>
+                  <span className="font-medium text-gray-900">
+                    {appointment.zaposleni
+                      ? `${appointment.zaposleni.ime} ${appointment.zaposleni.priimek}`
+                      : '-'}
+                  </span>
                 </div>
               </div>
 

@@ -179,7 +179,7 @@ export function getDurationHeight(startTime: string, endTime: string): number {
   const startMinutes = parseTimeToMinutes(startTime);
   const endMinutes = parseTimeToMinutes(endTime);
   const durationMinutes = endMinutes - startMinutes;
-  return Math.max((durationMinutes / 60) * HOUR_HEIGHT, 40); // Minimum 40px height (30 min at 80px/hr)
+  return Math.max((durationMinutes / 60) * HOUR_HEIGHT, 6); // Minimum 6px (colour-only strip for ≤10 min)
 }
 
 // Generate time slots for grid (supports half-hour start like 5:30)

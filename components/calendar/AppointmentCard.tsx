@@ -353,7 +353,36 @@ function AppointmentCard({
         : '')
     : null;
 
-  // ── Ultra-mini (< 15 min) ──────────────────────────────────────────────────
+  // ── Color-only (≤ 10 min) ─────────────────────────────────────────────────
+  if (appointmentDuration <= 10) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        className="group absolute cursor-pointer overflow-hidden rounded-sm
+                   transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
+        style={{
+          background: serviceGradient,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+          ...style,
+        }}
+      >
+        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-md" />
+        {isNoShow && (
+          <div
+            className="absolute inset-0 pointer-events-none rounded-md"
+            style={{
+              background: 'repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(55,55,55,0.18) 4px, rgba(55,55,55,0.18) 7px)',
+            }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // ── Ultra-mini (11-14 min) ─────────────────────────────────────────────────
   if (isUltraMini) {
     return (
       <div
@@ -366,7 +395,6 @@ function AppointmentCard({
         style={{
           background: serviceGradient,
           boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-          minHeight: '20px',
           ...style,
         }}
       >

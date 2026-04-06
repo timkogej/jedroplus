@@ -40,12 +40,12 @@ function parseClient(row: Record<string, unknown>): Client | null {
   if (schema.genderField) {
     const genderValue = row[schema.genderField];
     if (typeof genderValue === 'string') {
-      const genderLower = genderValue.toLowerCase();
-      if (genderLower === 'moški' || genderLower === 'moški') {
+      const genderLower = genderValue.toLowerCase().trim();
+      if (genderLower === 'moški' || genderLower === 'moski' || genderLower === 'male' || genderLower === 'm') {
         spol = 'moški';
-      } else if (genderLower === 'ženska' || genderLower === 'zenska') {
+      } else if (genderLower === 'ženska' || genderLower === 'zenska' || genderLower === 'female' || genderLower === 'f') {
         spol = 'ženska';
-      } else if (genderLower === 'drugo') {
+      } else if (genderLower === 'drugo' || genderLower === 'other' || genderLower === 'o') {
         spol = 'drugo';
       }
     }

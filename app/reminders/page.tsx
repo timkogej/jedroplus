@@ -317,7 +317,7 @@ export default function RemindersPage() {
                 >
                   <div className="bg-white rounded-[13px] p-6">
                     <div className="flex items-center justify-between">
-                      <div className="text-3xl font-bold text-gray-900 leading-none">{stats.sentToday}</div>
+                      <div className="text-3xl font-bold text-gray-900 leading-none">{enabledBefore ? stats.sentToday : 0}</div>
                       <Bell className="h-6 w-6 text-gray-900" weight="bold" />
                     </div>
                     <div className="mt-3 text-left">
@@ -353,7 +353,7 @@ export default function RemindersPage() {
                 >
                   <div className="bg-white rounded-[13px] p-6">
                     <div className="flex items-center justify-between">
-                      <div className="text-3xl font-bold text-gray-900 leading-none">{stats.afterVisitsToday}</div>
+                      <div className="text-3xl font-bold text-gray-900 leading-none">{enabledAfter ? stats.afterVisitsToday : 0}</div>
                       <CheckCircle className="h-6 w-6 text-gray-900" weight="bold" />
                     </div>
                     <div className="mt-3 text-left">

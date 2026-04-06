@@ -40,11 +40,10 @@ function EmployeeAvatar({
     <div
       className={`rounded-full flex items-center justify-center select-none flex-shrink-0 ${sizeClasses[size]} ${className}`}
       style={{
-        background: `white`,
-        boxShadow: `0 0 0 2px transparent`,
+        backgroundColor: 'white',
+        boxShadow: '0 0 0 2px transparent',
         border: '2px solid transparent',
-        backgroundClip: 'padding-box',
-        outline: `2px solid transparent`,
+        outline: '2px solid transparent',
         position: 'relative',
       }}
     >
@@ -72,7 +71,7 @@ function EmployeeAvatar({
       <span
         className="font-bold relative"
         style={{
-          background: gradientStyle,
+          backgroundImage: gradientStyle,
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',

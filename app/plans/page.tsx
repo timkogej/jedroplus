@@ -67,8 +67,8 @@ const PLANS: Plan[] = [
   {
     code: 'JEDRO_PREMIUM',
     name: 'Jedro Premium',
-    price: '99 €',
-    period: '/ mesec',
+    price: '',
+    period: '',
     description: 'Največ avtomatizacije in AI funkcij.',
     features: [
       'vse iz Jedro Pro',
@@ -102,6 +102,7 @@ export default function PlansPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [currentPlanData, setCurrentPlanData] = useState<PlanData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isYearly, setIsYearly] = useState(false);
 
   // Fetch current plan from n8n billing status endpoint
   useEffect(() => {
@@ -199,6 +200,15 @@ export default function PlansPage() {
   };
 
   const currentCode = currentPlanData?.code || contextPlanCode || 'FREE';
+
+  const getPlanPrice = (plan: Plan) => {
+    if (plan.code === 'JEDRO_PREMIUM' || plan.isEnterprise) return null;
+    if (isYearly) {
+      if (plan.code === 'JEDRO_PLUS') return '15 €';
+      if (plan.code === 'JEDRO_PRO') return '31 €';
+    }
+    return plan.price || null;
+  };
 
   const isCurrentPlan = (planCode: string) => {
     return planCode === currentCode && isPlanActive;
@@ -366,6 +376,23 @@ export default function PlansPage() {
           </div>
         </motion.div>
 
+        {/* Billing Toggle */}
+        <div className="flex items-center justify-center gap-4 mb-10">
+          <span className={`text-sm font-medium ${!isYearly ? 'text-gray-900' : 'text-gray-400'}`}>Mesečno</span>
+          <button
+            onClick={() => setIsYearly(!isYearly)}
+            className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${isYearly ? 'bg-violet-500' : 'bg-gray-300'}`}
+          >
+            <span
+              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${isYearly ? 'translate-x-6' : 'translate-x-0'}`}
+            />
+          </button>
+          <span className={`text-sm font-medium ${isYearly ? 'text-gray-900' : 'text-gray-400'}`}>
+            Letno
+            <span className="ml-2 text-xs font-semibold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">prihrani do 20%</span>
+          </span>
+        </div>
+
         {/* Plans Grid */}
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -399,8 +426,17 @@ export default function PlansPage() {
 
                   {/* Price */}
                   <div className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent mb-3">
-                    {plan.price}
-                    {plan.period && <span className="text-lg font-normal text-gray-500"> {plan.period}</span>}
+                    {plan.isEnterprise ? (
+                      <span>{plan.price}</span>
+                    ) : getPlanPrice(plan) ? (
+                      <>
+                        {getPlanPrice(plan)}
+                        <span className="text-lg font-normal text-gray-500"> / mesec</span>
+                        {isYearly && <span className="block text-xs font-normal text-gray-400 mt-0.5">obračunano letno</span>}
+                      </>
+                    ) : (
+                      <span className="text-gray-400">?</span>
+                    )}
                   </div>
 
                   {/* Description */}
