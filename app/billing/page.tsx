@@ -26,10 +26,11 @@ interface PlanData {
   name: string;
 }
 
-const PLAN_PRICES: Record<string, { monthly: number; yearly: number; savings: number }> = {
-  JEDRO_PLUS:    { monthly: 19,  yearly: 190,  savings: 38  },
-  JEDRO_PRO:     { monthly: 39,  yearly: 390,  savings: 78  },
-  JEDRO_PREMIUM: { monthly: 99,  yearly: 990,  savings: 198 },
+// monthlyEquiv = discounted monthly price when billed yearly
+const PLAN_PRICES: Record<string, { monthly: number; monthlyEquiv: number }> = {
+  JEDRO_PLUS:    { monthly: 19, monthlyEquiv: 15 },
+  JEDRO_PRO:     { monthly: 39, monthlyEquiv: 31 },
+  // JEDRO_PREMIUM: prices not yet set — shows ??
 };
 
 interface Plan {
@@ -334,6 +335,7 @@ function BillingPageContent() {
   const [currentPlanData, setCurrentPlanData] = useState<PlanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEnterpriseModal, setShowEnterpriseModal] = useState(false);
+  const [hasUsedTrial, setHasUsedTrial] = useState(true);
   const [emailUsed, setEmailUsed] = useState(0);
   const [emailTotal, setEmailTotal] = useState(0);
   const [smsUsed, setSmsUsed] = useState(0);
@@ -357,6 +359,16 @@ function BillingPageContent() {
           });
         } else {
           setCurrentPlanData({ id: '', code: 'FREE', name: 'Brezplačni' });
+        }
+
+        // Check has_used_trial
+        const { data: companyRow } = await supabase
+          .from('companies')
+          .select('has_used_trial')
+          .eq('company_id', companyId)
+          .maybeSingle();
+        if (companyRow && companyRow.has_used_trial === false) {
+          setHasUsedTrial(false);
         }
       } catch (err) {
         console.error('Error fetching plan:', err);
@@ -728,19 +740,6 @@ function BillingPageContent() {
               <span className={`text-sm font-medium transition-colors ${isYearly ? 'text-gray-900' : 'text-gray-400'}`}>
                 Letno
               </span>
-              <AnimatePresence>
-                {isYearly && (
-                  <motion.span
-                    initial={{ scale: 0.7, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.7, opacity: 0 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                    className="text-xs font-semibold px-2.5 py-1 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-full"
-                  >
-                    2 meseca brezplačno
-                  </motion.span>
-                )}
-              </AnimatePresence>
             </div>
 
             <div className="max-w-6xl mx-auto">
@@ -777,45 +776,34 @@ function BillingPageContent() {
                       {/* Price */}
                       {(() => {
                         const priceData = PLAN_PRICES[plan.code];
-                        const displayPrice = priceData
-                          ? `${isYearly ? priceData.yearly : priceData.monthly} €`
-                          : 'po dogovoru';
-                        const displayPeriod = plan.isEnterprise ? '' : isYearly ? '/ leto' : '/ mesec';
+                        // Always show monthly price; for yearly billing show discounted monthly equiv
+                        const isPremium = plan.code === 'JEDRO_PREMIUM';
+                        const price = isPremium
+                          ? '??'
+                          : priceData
+                            ? `${isYearly ? priceData.monthlyEquiv : priceData.monthly} €`
+                            : 'po dogovoru';
+                        const period = plan.isEnterprise ? '' : '/ mesec';
                         return (
-                          <>
-                            <div className="overflow-hidden mb-0">
-                              <AnimatePresence mode="popLayout" initial={false}>
-                                <motion.div
-                                  key={isYearly ? 'yearly' : 'monthly'}
-                                  initial={{ y: isYearly ? 16 : -16, opacity: 0 }}
-                                  animate={{ y: 0, opacity: 1 }}
-                                  exit={{ y: isYearly ? -16 : 16, opacity: 0 }}
-                                  transition={{ duration: 0.18, ease: 'easeOut' }}
-                                  className="flex items-baseline gap-1"
-                                >
-                                  <span className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                                    {displayPrice}
-                                  </span>
-                                  {displayPeriod && (
-                                    <span className="text-base font-normal text-gray-500">{displayPeriod}</span>
-                                  )}
-                                </motion.div>
-                              </AnimatePresence>
-                            </div>
-                            <AnimatePresence>
-                              {isYearly && priceData && (
-                                <motion.p
-                                  initial={{ opacity: 0, y: 4 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  exit={{ opacity: 0, y: 4 }}
-                                  transition={{ duration: 0.15 }}
-                                  className="text-xs font-semibold text-emerald-600 mb-1"
-                                >
-                                  Prihranite {priceData.savings} €
-                                </motion.p>
-                              )}
+                          <div className="overflow-hidden mb-1" style={{ minHeight: 44 }}>
+                            <AnimatePresence mode="popLayout" initial={false}>
+                              <motion.div
+                                key={`${plan.code}-${isYearly ? 'y' : 'm'}`}
+                                initial={{ y: isYearly ? 14 : -14, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                exit={{ y: isYearly ? -14 : 14, opacity: 0 }}
+                                transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+                                className="flex items-baseline gap-1"
+                              >
+                                <span className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                                  {price}
+                                </span>
+                                {period && !isPremium && (
+                                  <span className="text-base font-normal text-gray-500">{period}</span>
+                                )}
+                              </motion.div>
                             </AnimatePresence>
-                          </>
+                          </div>
                         );
                       })()}
 
@@ -837,12 +825,12 @@ function BillingPageContent() {
 
                       {/* CTA Button */}
                       {plan.code === 'JEDRO_PREMIUM' && !isCurrent ? (
-                        <button
-                          disabled
-                          className="w-full rounded-xl px-6 py-3 font-semibold text-sm bg-gray-50 text-gray-400 cursor-not-allowed border border-dashed border-gray-200"
+                        <a
+                          href="mailto:info@jedroplus.com"
+                          className="block w-full rounded-xl px-6 py-3 font-semibold text-sm text-center bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md transition-all"
                         >
-                          Prihaja kmalu
-                        </button>
+                          Kontaktiraj nas
+                        </a>
                       ) : isStaff ? null : (
                         <motion.button
                           whileHover={{ scale: isCurrent ? 1 : 1.05 }}
@@ -872,6 +860,8 @@ function BillingPageContent() {
                             </span>
                           ) : plan.isEnterprise ? (
                             'Pošlji Povpraševanje'
+                          ) : plan.code === 'JEDRO_PLUS' && !hasUsedTrial ? (
+                            'Preizkusi Brezplačno'
                           ) : (
                             'Izberi paket'
                           )}

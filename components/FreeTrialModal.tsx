@@ -1,18 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, CheckCircle, CalendarBlank, Bell, ChartBar, Users, Link } from '@phosphor-icons/react';
+import { X, Bell, Globe, ChatCircleText, Robot, ChartLineUp } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 
 const SESSION_KEY = 'jedroplus_trial_modal_dismissed';
 
 const FEATURES = [
-  { icon: CalendarBlank, text: 'Baza terminov in strank' },
-  { icon: Users, text: 'Baza storitev in osebja' },
-  { icon: Bell, text: 'Personalizirani opomniki pred in po terminu' },
-  { icon: ChartBar, text: 'Celotna analitika poslovanja' },
-  { icon: Link, text: 'Booking link za spletne rezervacije' },
+  {
+    icon: Bell,
+    title: 'Personalizirani opomniki',
+    desc: 'Avtomatski opomniki strankam pred in po vsakem terminu — brez ročnega dela.',
+  },
+  {
+    icon: Globe,
+    title: 'Spletno naročanje + različni dizajni',
+    desc: 'Booking link z izborom dizajna strani — stranke se naročajo same, kadarkoli.',
+  },
+  {
+    icon: ChatCircleText,
+    title: 'Komunikacija s strankami',
+    desc: 'Funkcija, ki poenostavi vso komunikacijo — SMS, email in opomniki na enem mestu.',
+  },
+  {
+    icon: Robot,
+    title: 'Asistent+',
+    desc: 'AI asistent za upravljanje terminov, strank in odgovarjanje na poizvedbe.',
+  },
+  {
+    icon: ChartLineUp,
+    title: 'Celotna analitika',
+    desc: 'Pregled prihodkov, zasedenosti, rasti strank in uspešnosti poslovanja.',
+  },
 ];
 
 interface FreeTrialModalProps {
@@ -31,13 +50,23 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
   const handleTry = () => {
     sessionStorage.setItem(SESSION_KEY, '1');
     onDismiss();
-    router.push('/plans');
+    router.push('/billing');
   };
 
   return (
     <AnimatePresence>
       {show && (
         <>
+          {/* Hidden SVG gradient definition — used by all icons below */}
+          <svg width="0" height="0" style={{ position: 'absolute', overflow: 'hidden' }}>
+            <defs>
+              <linearGradient id="trial-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#8B5CF6" />
+                <stop offset="100%" stopColor="#06B6D4" />
+              </linearGradient>
+            </defs>
+          </svg>
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -68,35 +97,42 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
                 >
                   <X className="h-4 w-4" weight="bold" />
                 </button>
-                <div className="mb-3">
-                  <span className="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
-                    🎁 Brezplačna preizkušnja
-                  </span>
-                  <h2 className="text-2xl font-bold text-white leading-tight">
-                    Izkoristite brezplačno<br />preizkušnjo Jedro Plus!
-                  </h2>
-                  <p className="text-white/80 text-sm mt-2">
-                    Odkrijte vse prednosti in dvignite svoje poslovanje na višjo raven — brez tveganja.
-                  </p>
-                </div>
+                <span className="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                  🎁 Brezplačna preizkušnja
+                </span>
+                <h2 className="text-2xl font-bold text-white leading-tight">
+                  Izkoristite brezplačno<br />preizkušnjo Jedro Plus!
+                </h2>
+                <p className="text-white/80 text-sm mt-2">
+                  Vse kar potrebujete za urejeno poslovanje — brez tveganja, brez obveznosti.
+                </p>
               </div>
 
               {/* Features */}
-              <div className="px-6 py-5 space-y-3">
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Kaj dobite z Jedro Plus</p>
-                {FEATURES.map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-violet-50">
-                      <Icon className="h-4 w-4 text-violet-500" weight="duotone" />
+              <div className="px-6 py-5 space-y-4">
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
+                  Kaj dobite z Jedro Plus
+                </p>
+                {FEATURES.map(({ icon: Icon, title, desc }) => (
+                  <div key={title} className="flex items-start gap-3">
+                    {/* Gradient icon — outline, no fill */}
+                    <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-50 ring-1 ring-gray-100">
+                      <Icon
+                        className="h-[18px] w-[18px]"
+                        weight="regular"
+                        style={{ stroke: 'url(#trial-icon-grad)', fill: 'none', color: 'transparent' }}
+                      />
                     </div>
-                    <span className="text-sm text-gray-700">{text}</span>
-                    <CheckCircle className="ml-auto h-4 w-4 flex-shrink-0 text-emerald-500" weight="fill" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 leading-snug">{title}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
 
               {/* Actions */}
-              <div className="px-6 pb-6 flex flex-col gap-3">
+              <div className="px-6 pb-6 pt-1 flex flex-col gap-2.5">
                 <motion.button
                   type="button"
                   onClick={handleTry}
@@ -110,7 +146,7 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
                 <button
                   type="button"
                   onClick={handleDismiss}
-                  className="w-full rounded-xl py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                  className="w-full rounded-xl py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   Mogoče kasneje
                 </button>
