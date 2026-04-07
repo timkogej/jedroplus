@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import {
-  SpinnerGap,
   CalendarBlank,
   EnvelopeSimple,
   ChatCircleText
@@ -103,8 +102,9 @@ export default function PlansPage() {
   const [currentPlanData, setCurrentPlanData] = useState<PlanData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isYearly, setIsYearly] = useState(false);
+  const [hasUsedTrial, setHasUsedTrial] = useState<boolean>(true); // default true = don't show trial button
 
-  // Fetch current plan from n8n billing status endpoint
+  // Fetch current plan from n8n billing status endpoint + has_used_trial
   useEffect(() => {
     const fetchCurrentPlan = async () => {
       if (!companyId) {
@@ -116,8 +116,6 @@ export default function PlansPage() {
         // Use n8n billing status endpoint which has proper access
         const result = await getBillingStatus(false);
 
-        console.log('Billing status result:', result);
-
         if (result.ok && result.plan) {
           setCurrentPlanData({
             id: result.subscription?.plan_id || '',
@@ -125,8 +123,17 @@ export default function PlansPage() {
             name: result.plan.name || 'Brezplačni',
           });
         } else {
-          // Default to FREE if no subscription found
           setCurrentPlanData({ id: '', code: 'FREE', name: 'Brezplačni' });
+        }
+
+        // Check has_used_trial from companies table
+        const { data: companyData } = await supabase
+          .from('companies')
+          .select('has_used_trial')
+          .eq('company_id', companyId)
+          .maybeSingle();
+        if (companyData && companyData.has_used_trial === false) {
+          setHasUsedTrial(false);
         }
       } catch (error) {
         console.error('Error fetching plan:', error);
@@ -389,7 +396,6 @@ export default function PlansPage() {
           </button>
           <span className={`text-sm font-medium ${isYearly ? 'text-gray-900' : 'text-gray-400'}`}>
             Letno
-            <span className="ml-2 text-xs font-semibold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">prihrani do 20%</span>
           </span>
         </div>
 
@@ -425,17 +431,22 @@ export default function PlansPage() {
                   </h3>
 
                   {/* Price */}
-                  <div className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent mb-3">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent mb-3 min-h-[44px] flex items-center">
                     {plan.isEnterprise ? (
                       <span>{plan.price}</span>
                     ) : getPlanPrice(plan) ? (
-                      <>
+                      <motion.span
+                        key={isYearly ? 'yearly' : 'monthly'}
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.22, ease: 'easeOut' }}
+                        className="flex items-baseline gap-1"
+                      >
                         {getPlanPrice(plan)}
                         <span className="text-lg font-normal text-gray-500"> / mesec</span>
-                        {isYearly && <span className="block text-xs font-normal text-gray-400 mt-0.5">obračunano letno</span>}
-                      </>
+                      </motion.span>
                     ) : (
-                      <span className="text-gray-400">?</span>
+                      <span className="text-gray-400">??</span>
                     )}
                   </div>
 
@@ -458,38 +469,49 @@ export default function PlansPage() {
                   </ul>
 
                   {/* CTA Button */}
-                  <motion.button
-                    whileHover={{ scale: isCurrent ? 1 : 1.05 }}
-                    whileTap={{ scale: isCurrent ? 1 : 0.98 }}
-                    onClick={() => handleSelectPlan(plan.code)}
-                    disabled={isCurrent || isLoading}
-                    className={`w-full rounded-xl px-6 py-3 font-semibold transition-all ${
-                      plan.isEnterprise
-                        ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white hover:shadow-lg'
-                        : isCurrent
-                          ? 'relative bg-white cursor-default'
-                          : 'bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md'
-                    }`}
-                    style={isCurrent && !plan.isEnterprise ? {
-                      background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4) border-box',
-                      border: '2px solid transparent',
-                    } : undefined}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                        Nalagam...
-                      </span>
-                    ) : isCurrent ? (
-                      <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent font-semibold">
-                        Trenutni paket
-                      </span>
-                    ) : plan.isEnterprise ? (
-                      'Pošlji povpraševanje'
-                    ) : (
-                      'Izberi paket'
-                    )}
-                  </motion.button>
+                  {plan.code === 'JEDRO_PREMIUM' ? (
+                    <a
+                      href="mailto:info@jedroplus.com"
+                      className="block w-full rounded-xl px-6 py-3 font-semibold text-center bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md transition-all"
+                    >
+                      Kontaktiraj nas
+                    </a>
+                  ) : (
+                    <motion.button
+                      whileHover={{ scale: isCurrent ? 1 : 1.05 }}
+                      whileTap={{ scale: isCurrent ? 1 : 0.98 }}
+                      onClick={() => handleSelectPlan(plan.code)}
+                      disabled={isCurrent || isLoading}
+                      className={`w-full rounded-xl px-6 py-3 font-semibold transition-all ${
+                        plan.isEnterprise
+                          ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white hover:shadow-lg'
+                          : isCurrent
+                            ? 'relative bg-white cursor-default'
+                            : 'bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md'
+                      }`}
+                      style={isCurrent && !plan.isEnterprise ? {
+                        background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4) border-box',
+                        border: '2px solid transparent',
+                      } : undefined}
+                    >
+                      {isLoading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent inline-block" />
+                          Nalagam...
+                        </span>
+                      ) : isCurrent ? (
+                        <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent font-semibold">
+                          Trenutni paket
+                        </span>
+                      ) : plan.isEnterprise ? (
+                        'Pošlji povpraševanje'
+                      ) : plan.code === 'JEDRO_PLUS' && !hasUsedTrial ? (
+                        'Preizkusi Brezplačno'
+                      ) : (
+                        'Izberi paket'
+                      )}
+                    </motion.button>
+                  )}
 
                   {/* Enterprise Note */}
                   {plan.note && (

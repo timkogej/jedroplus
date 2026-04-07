@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from '@phosphor-icons/react';
+import { PageSpinner } from '@/components/ui/GradientSpinner';
 import { AssistantChat } from '@/components/asistent/AssistantChat';
 import { InfoModal } from '@/components/asistent/InfoModal';
 import { useCompany } from '@/app/company-context';
@@ -69,9 +70,7 @@ export default function AsistentPlusPage() {
   if (loading) {
     return (
       <ProtectedLayout>
-        <div className="h-[calc(100vh-4rem)] flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: '#8B5CF6', borderTopColor: 'transparent' }} />
-        </div>
+        <PageSpinner />
       </ProtectedLayout>
     );
   }

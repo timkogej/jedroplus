@@ -29,6 +29,8 @@ interface EmployeeCardProps {
   canEdit?: boolean;
   /** If false, hides delete button */
   canDelete?: boolean;
+  /** Highlight this card with a gradient border (the user's connected employee) */
+  isConnected?: boolean;
 }
 
 function EmployeeCard({
@@ -42,8 +44,10 @@ function EmployeeCard({
   index = 0,
   canEdit = true,
   canDelete = true,
+  isConnected = false,
 }: EmployeeCardProps) {
   const fullName = `${employee.ime} ${employee.priimek}`.trim();
+  const gradient = employee.barva || 'linear-gradient(135deg, #8B5CF6, #06B6D4)';
 
   return (
     <motion.div
@@ -51,8 +55,14 @@ function EmployeeCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
       whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }}
-      className={`group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100
-                  transition-all ${!employee.aktivna ? 'opacity-60' : ''}`}
+      className={`group relative overflow-hidden rounded-2xl bg-white shadow-sm transition-all ${!employee.aktivna ? 'opacity-60' : ''}`}
+      style={isConnected ? {
+        border: '2px solid transparent',
+        background: `linear-gradient(white, white) padding-box, ${gradient} border-box`,
+      } : {
+        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+        border: '1px solid rgb(243 244 246)',
+      }}
     >
       {/* Content */}
       <div className="p-5">

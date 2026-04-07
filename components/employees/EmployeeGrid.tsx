@@ -17,6 +17,7 @@ interface EmployeeGridProps {
   showConnectButton?: boolean;
   canEdit?: boolean;
   canDelete?: boolean;
+  connectedPersonId?: string | null;
 }
 
 function EmployeeGrid({
@@ -30,6 +31,7 @@ function EmployeeGrid({
   showConnectButton = false,
   canEdit = true,
   canDelete = true,
+  connectedPersonId,
 }: EmployeeGridProps) {
   if (isLoading) {
     return (
@@ -77,6 +79,7 @@ function EmployeeGrid({
             index={index}
             canEdit={canEdit}
             canDelete={canDelete}
+            isConnected={!!connectedPersonId && employee.id === connectedPersonId}
           />
         ))}
       </AnimatePresence>

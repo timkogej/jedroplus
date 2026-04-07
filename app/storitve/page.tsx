@@ -43,6 +43,7 @@ import { TABLES } from '@/lib/data';
 import ServiceGrid from '@/components/services/ServiceGrid';
 import ServiceModal from '@/components/services/ServiceModal';
 import DeleteServiceModal from '@/components/services/DeleteServiceModal';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 // Black & White icon color options
 type IconColor = 'black' | 'darkGray' | 'mediumGray' | 'slate';
@@ -569,11 +570,8 @@ export default function StoritvePage() {
   // Loading state
   if (companyLoading || !companyId) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F7F8FA]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#1A1F36] border-t-transparent" />
-          <p className="text-sm text-gray-500">Nalagam...</p>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <GradientSpinner />
       </div>
     );
   }

@@ -8,9 +8,9 @@ import {
   Microphone,
   CalendarBlank,
   ChartBar,
-  CalendarPlus,
+  ClockCountdown,
   MagnifyingGlass,
-  PaperPlaneTilt,
+  PencilSimpleLine,
   SquaresFour,
 } from '@phosphor-icons/react';
 import { supabase } from '@/lib/supabaseClient';
@@ -54,8 +54,8 @@ const QUICK_ACTIONS = [
   { label: 'Kateri termini so danes?', icon: CalendarBlank },
   { label: 'Prikaži statistike', icon: ChartBar },
   { label: 'Najdi stranko', icon: MagnifyingGlass },
-  { label: 'Dodaj nov termin', icon: CalendarPlus },
-  { label: 'Pošlji sporočilo', icon: PaperPlaneTilt },
+  { label: 'Povej zgodovino stranke', icon: ClockCountdown },
+  { label: 'Oblikuj sporočilo', icon: PencilSimpleLine },
   { label: 'Današnji pregled', icon: SquaresFour },
 ];
 

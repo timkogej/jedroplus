@@ -62,7 +62,7 @@ export default function ConnectEmployeeModal({
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5">
                 <div className="flex items-center gap-3">
-                  <LinkSimple className="h-6 w-6 text-violet-500 flex-shrink-0" weight="bold" />
+                  <LinkSimple className="h-6 w-6 text-gray-900 flex-shrink-0" weight="bold" />
                   <div>
                     <h2 className="text-base font-semibold text-[#1A1F36]">Poveži račun</h2>
                     <p className="text-xs text-gray-500">z zaposlenim v podjetju</p>
@@ -101,13 +101,13 @@ export default function ConnectEmployeeModal({
                   <p className="text-sm font-medium text-[#1A1F36]">Kaj pomeni ta povezava?</p>
                   <div className="space-y-2">
                     <div className="flex items-start gap-3">
-                      <CalendarBlank className="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-500" weight="regular" />
+                      <CalendarBlank className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-900" weight="regular" />
                       <p className="text-sm text-gray-600">
                         Na <span className="font-medium">Koledarju</span> in <span className="font-medium">Nadzorni plošči</span> bodo privzeto prikazani termini tega zaposlenega.
                       </p>
                     </div>
                     <div className="flex items-start gap-3">
-                      <UserCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-500" weight="regular" />
+                      <UserCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-900" weight="regular" />
                       <p className="text-sm text-gray-600">
                         Vaš račun bo povezan z osebo <span className="font-medium">{fullName}</span> v podjetju.
                       </p>
@@ -116,7 +116,17 @@ export default function ConnectEmployeeModal({
                 </div>
 
                 {/* Agreement checkbox */}
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-4 transition-colors hover:border-violet-300 hover:bg-violet-50/50">
+                <label
+                  className="flex cursor-pointer items-start gap-3 rounded-xl p-4 transition-colors hover:bg-gray-50/80"
+                  style={{
+                    border: agreed
+                      ? `2px solid transparent`
+                      : '2px solid #E5E7EB',
+                    background: agreed
+                      ? `linear-gradient(white, white) padding-box, ${employee.barva || 'linear-gradient(135deg, #8B5CF6, #06B6D4)'} border-box`
+                      : undefined,
+                  }}
+                >
                   <div className="relative mt-0.5 flex-shrink-0">
                     <input
                       type="checkbox"
@@ -126,7 +136,7 @@ export default function ConnectEmployeeModal({
                     />
                     <div className={`flex h-5 w-5 items-center justify-center rounded-md border-2 transition-colors ${
                       agreed
-                        ? 'border-violet-500 bg-violet-500'
+                        ? 'bg-gray-900 border-gray-900'
                         : 'border-gray-300 bg-white'
                     }`}>
                       {agreed && <CheckCircle className="h-3.5 w-3.5 text-white" weight="bold" />}
@@ -167,7 +177,7 @@ export default function ConnectEmployeeModal({
                     </>
                   ) : (
                     <>
-                      <LinkSimple className="h-4 w-4" weight="bold" />
+                      <LinkSimple className="h-4 w-4 text-white" weight="bold" />
                       Poveži račun
                     </>
                   )}

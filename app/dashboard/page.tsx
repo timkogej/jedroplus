@@ -507,7 +507,7 @@ export default function DashboardPage() {
   const { companyId, companySettings, loading: companyLoading, reloadSettings } = useCompany();
   const { user, loading: authLoading } = useAuth();
   const userPersonId = useUserPersonId(user?.id);
-  const { role, personId: rolePersonId, permissions } = useRolePermissions();
+  const { role, personId: rolePersonId, permissions, loading: roleLoading } = useRolePermissions();
 
   // RBAC: appointment permissions for staff
   const canCreateAppointment = role !== 'staff' || (permissions?.can_create_appointments ?? true);
@@ -598,6 +598,21 @@ export default function DashboardPage() {
           .eq('id', currentUser.id)
           .maybeSingle();
         if (!profile?.default_company_id) { window.location.href = '/onboarding'; return; }
+
+        // If localStorage has no company_id yet (fresh login), pre-populate it so
+        // CompanyProvider can load without needing the onboarding redirect cycle.
+        if (!localStorage.getItem('jedroplus_company_id')) {
+          const { data: company } = await supabase
+            .from('companies')
+            .select('company_id')
+            .eq('id', profile.default_company_id)
+            .maybeSingle();
+          if (company?.company_id) {
+            localStorage.setItem('jedroplus_company_id', company.company_id);
+            document.cookie = `company_id=${company.company_id}; path=/; max-age=31536000`;
+          }
+        }
+
         setInitialCheckDone(true);
       } catch (err) {
         console.error('Access check error:', err);
@@ -620,10 +635,21 @@ export default function DashboardPage() {
     if (!companyId) return;
     // Wait until personId is resolved (undefined = still loading)
     if (userPersonId === undefined) return;
+    // Also wait for role/permissions to finish loading to avoid showing wrong appointments
+    if (roleLoading) return;
+
+    // For staff with view-own-only permission, use rolePersonId as the filter
+    // so we never show other appointments even briefly
+    const staffViewOwnOnly =
+      role === 'staff' &&
+      (permissions?.can_view_only_own_appointments === true ||
+        permissions?.can_view_all_appointments === false);
+    const effectivePersonId = staffViewOwnOnly ? (rolePersonId ?? userPersonId) : userPersonId;
+
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDashboardData(companyId, userPersonId);
+      const data = await fetchDashboardData(companyId, effectivePersonId);
       setDashboardData(data);
     } catch (err) {
       console.error("Error loading dashboard data:", err);
@@ -631,7 +657,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  }, [companyId, userPersonId]);
+  }, [companyId, userPersonId, roleLoading, role, permissions, rolePersonId]);
 
   useEffect(() => {
     loadDashboard();

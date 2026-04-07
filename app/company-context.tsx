@@ -149,8 +149,42 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
+
+    // No company in localStorage — check if the logged-in user has one in profiles.
+    // This avoids the dashboard→onboarding→dashboard redirect cycle on fresh login.
     if (!stored || stored.trim() === "") {
-      setLoading(false);
+      const tryAutoLoad = async () => {
+        try {
+          const { createClient } = await import("@/lib/supabase/client");
+          const authClient = createClient();
+          const { data: { user: authUser } } = await authClient.auth.getUser();
+          if (!authUser) { setLoading(false); return; }
+
+          const { data: profile } = await authClient
+            .from("profiles")
+            .select("default_company_id")
+            .eq("id", authUser.id)
+            .maybeSingle();
+          if (!profile?.default_company_id) { setLoading(false); return; }
+
+          const { data: company } = await authClient
+            .from("companies")
+            .select("company_id")
+            .eq("id", profile.default_company_id)
+            .maybeSingle();
+          if (!company?.company_id) { setLoading(false); return; }
+
+          // Found — store and re-trigger with the real company_id
+          const cid = company.company_id as string;
+          localStorage.setItem(STORAGE_KEY, cid);
+          document.cookie = `company_id=${cid}; path=/; max-age=31536000`;
+          // Reload the page so CompanyProvider re-reads localStorage cleanly.
+          window.location.reload();
+        } catch {
+          setLoading(false);
+        }
+      };
+      tryAutoLoad();
       return;
     }
 

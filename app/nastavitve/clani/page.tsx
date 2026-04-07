@@ -14,6 +14,7 @@ import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { callN8nAction } from '@/src/lib/n8nClient';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -336,7 +337,7 @@ export default function ClaniPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <CircleNotch className="w-8 h-8 text-indigo-500 animate-spin" />
+        <GradientSpinner size={32} />
       </div>
     );
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useCompany } from "@/app/company-context";
@@ -13,6 +13,7 @@ import RoleAccessGate from "@/components/RoleAccessGate";
 import { useRolePermissions } from "@/app/role-permission-context";
 import { supabase } from "@/lib/supabaseClient";
 import type { StaffPermissions } from "@/types/roles";
+import FreeTrialModal, { TRIAL_MODAL_SESSION_KEY } from "@/components/FreeTrialModal";
 
 // ============================================================================
 // Inner layout that uses sidebar context
@@ -20,8 +21,27 @@ import type { StaffPermissions } from "@/types/roles";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { isCollapsed, sidebarWidth, isMobile, setNotificationCount } = useSidebar();
-  const { companyUuid } = useCompany();
+  const { companyId, companyUuid } = useCompany();
   const pathname = usePathname();
+  const [showTrialModal, setShowTrialModal] = useState(false);
+
+  // Check has_used_trial once company is loaded
+  useEffect(() => {
+    if (!companyId) return;
+    if (sessionStorage.getItem(TRIAL_MODAL_SESSION_KEY)) return;
+
+    const checkTrial = async () => {
+      const { data } = await supabase
+        .from('companies')
+        .select('has_used_trial')
+        .eq('company_id', companyId)
+        .maybeSingle();
+      if (data && data.has_used_trial === false) {
+        setShowTrialModal(true);
+      }
+    };
+    checkTrial();
+  }, [companyId]);
 
   // Calculate content margin based on sidebar state
   const contentMargin = isMobile ? 0 : (isCollapsed ? 80 : sidebarWidth);
@@ -81,6 +101,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Search Modal */}
       <SearchModal />
+
+      {/* Free Trial Modal */}
+      <FreeTrialModal show={showTrialModal} onDismiss={() => setShowTrialModal(false)} />
     </div>
   );
 }

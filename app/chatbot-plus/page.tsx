@@ -30,6 +30,7 @@ import { useRolePermissions } from '@/app/role-permission-context';
 import { supabaseReadOnly as supabase } from '@/src/lib/supabaseReadOnly';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { ChatbotSettingsModal } from '@/components/chatbot/ChatbotSettingsModal';
+import { PageSpinner } from '@/components/ui/GradientSpinner';
 import { defaultChatbotDesign } from '@/types/settings';
 import type { ChatbotDesign } from '@/types/settings';
 
@@ -671,12 +672,7 @@ export default function ChatbotPlusPage() {
   if (companyLoading || loading) {
     return (
       <ProtectedLayout>
-        <div className="min-h-screen flex items-center justify-center" style={{ background: '#FAFBFF' }}>
-          <div
-            className="h-8 w-8 animate-spin rounded-full border-2"
-            style={{ borderColor: '#8B5CF6', borderTopColor: 'transparent' }}
-          />
-        </div>
+        <PageSpinner />
       </ProtectedLayout>
     );
   }

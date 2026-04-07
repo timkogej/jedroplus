@@ -855,6 +855,7 @@ export default function OsebjePage() {
               showConnectButton={userPersonId === null}
               canEdit={canEditStaff}
               canDelete={canDeleteStaff}
+              connectedPersonId={userPersonId}
             />
           )}
         </div>

@@ -574,7 +574,8 @@ function AppointmentTable({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between border-t border-gray-100 px-4 py-3.5">
-          <p className="text-sm text-gray-500">
+          {/* X–Y od Z: hidden on mobile */}
+          <p className="hidden sm:block text-sm text-gray-500">
             <span className="font-medium text-[#1A1F36]">
               {(currentPage - 1) * itemsPerPage + 1}
             </span>{' '}
@@ -584,6 +585,8 @@ function AppointmentTable({
             </span>{' '}
             od <span className="font-medium text-[#1A1F36]">{sortedAppointments.length}</span>
           </p>
+          {/* On mobile the counter is hidden; flex layout stays consistent */}
+          <div className="sm:hidden" />
 
           <div className="flex items-center gap-1">
             {/* First page */}
@@ -612,39 +615,50 @@ function AppointmentTable({
               <CaretLeft className="h-4 w-4" weight="bold" />
             </motion.button>
 
-            {/* Page indicator */}
-            <div className="flex items-center gap-1 px-2">
-              {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                let pageNum: number;
+            {/* Page numbers with ellipsis for large page counts */}
+            <div className="flex items-center gap-1 px-1">
+              {(() => {
+                const pages: (number | 'ellipsis-left' | 'ellipsis-right')[] = [];
                 if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1;
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
+                  for (let i = 1; i <= totalPages; i++) pages.push(i);
                 } else {
-                  pageNum = currentPage - 2 + i;
+                  // Always show first page
+                  pages.push(1);
+                  if (currentPage > 3) pages.push('ellipsis-left');
+                  // Show pages around current
+                  const start = Math.max(2, currentPage - 1);
+                  const end = Math.min(totalPages - 1, currentPage + 1);
+                  for (let i = start; i <= end; i++) pages.push(i);
+                  if (currentPage < totalPages - 2) pages.push('ellipsis-right');
+                  // Always show last page
+                  pages.push(totalPages);
                 }
-
-                return (
-                  <motion.button
-                    key={pageNum}
-                    type="button"
-                    onClick={() => setCurrentPage(pageNum)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium
-                               transition-all
-                               ${
-                                 currentPage === pageNum
-                                   ? 'bg-black text-white shadow-md'
-                                   : 'text-gray-500 hover:bg-gray-100 hover:text-[#1A1F36]'
-                               }`}
-                  >
-                    {pageNum}
-                  </motion.button>
-                );
-              })}
+                return pages.map((p, idx) => {
+                  if (p === 'ellipsis-left' || p === 'ellipsis-right') {
+                    return (
+                      <span key={`${p}-${idx}`} className="flex h-8 w-6 items-end justify-center pb-0.5 text-gray-400 text-sm select-none">
+                        …
+                      </span>
+                    );
+                  }
+                  return (
+                    <motion.button
+                      key={p}
+                      type="button"
+                      onClick={() => setCurrentPage(p)}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium transition-all ${
+                        currentPage === p
+                          ? 'bg-black text-white shadow-md'
+                          : 'text-gray-500 hover:bg-gray-100 hover:text-[#1A1F36]'
+                      }`}
+                    >
+                      {p}
+                    </motion.button>
+                  );
+                });
+              })()}
             </div>
 
             {/* Next page */}
