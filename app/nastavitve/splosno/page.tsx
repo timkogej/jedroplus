@@ -24,9 +24,10 @@ export default function GeneralSettingsPage() {
   const [userName, setUserName] = useState('');
   const userEmail = user?.email || '';
 
-  // Company data for ID and Join Code
+  // Company data for ID and Join Codes
   const [companyIdDisplay, setCompanyIdDisplay] = useState('');
-  const [joinCode, setJoinCode] = useState('');
+  const [adminCode, setAdminCode] = useState('');
+  const [staffCode, setStaffCode] = useState('');
   const [companySlug, setCompanySlug] = useState('');
 
   // Notification settings
@@ -34,7 +35,8 @@ export default function GeneralSettingsPage() {
 
   // Copy states
   const [copiedId, setCopiedId] = useState(false);
-  const [copiedJoinCode, setCopiedJoinCode] = useState(false);
+  const [copiedAdminCode, setCopiedAdminCode] = useState(false);
+  const [copiedStaffCode, setCopiedStaffCode] = useState(false);
 
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -58,17 +60,18 @@ export default function GeneralSettingsPage() {
         const { data } = await loadCompanyRow(companyId);
         if (data) {
           setCompanyIdDisplay(String(data['ID Podjetja'] ?? data['id_podjetja'] ?? companyId));
-          setJoinCode(String(data['join_code'] ?? data['Join_code'] ?? ''));
         }
 
-        // Load slug from companies table
+        // Load join codes and slug from companies table
         const { data: companyRow } = await supabaseReadOnly
           .from('companies')
-          .select('slug')
+          .select('slug, join_code_admin, join_code_staff')
           .eq('company_id', companyId)
           .maybeSingle();
-        if (companyRow?.slug) {
-          setCompanySlug(String(companyRow.slug));
+        if (companyRow) {
+          if (companyRow.slug) setCompanySlug(String(companyRow.slug));
+          if (companyRow.join_code_admin) setAdminCode(String(companyRow.join_code_admin));
+          if (companyRow.join_code_staff) setStaffCode(String(companyRow.join_code_staff));
         }
       } catch (error) {
         console.error('Error loading settings:', error);
@@ -118,15 +121,18 @@ export default function GeneralSettingsPage() {
   }, [saveSettings]);
 
   // Copy to clipboard
-  const copyToClipboard = async (text: string, type: 'id' | 'joinCode') => {
+  const copyToClipboard = async (text: string, type: 'id' | 'adminCode' | 'staffCode') => {
     try {
       await navigator.clipboard.writeText(text);
       if (type === 'id') {
         setCopiedId(true);
         setTimeout(() => setCopiedId(false), 2000);
+      } else if (type === 'adminCode') {
+        setCopiedAdminCode(true);
+        setTimeout(() => setCopiedAdminCode(false), 2000);
       } else {
-        setCopiedJoinCode(true);
-        setTimeout(() => setCopiedJoinCode(false), 2000);
+        setCopiedStaffCode(true);
+        setTimeout(() => setCopiedStaffCode(false), 2000);
       }
     } catch (error) {
       console.error('Failed to copy:', error);
@@ -321,17 +327,17 @@ export default function GeneralSettingsPage() {
                   <p className="text-sm font-semibold text-gray-800 mb-0.5">Admin code</p>
                   <p className="text-xs text-gray-500 mb-2">Za dodajanje administratorjev v vaše podjetje. Administrator ima popoln dostop: vidi in ureja vse termine, stranke, storitve, osebje, analitiko, nastavitve in pakete.</p>
                   <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                    {joinCode || '—'}
+                    {adminCode || '—'}
                   </div>
                 </div>
-                {joinCode && (
+                {adminCode && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => copyToClipboard(joinCode, 'joinCode')}
+                    onClick={() => copyToClipboard(adminCode, 'adminCode')}
                     className="p-2 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    {copiedJoinCode ? (
+                    {copiedAdminCode ? (
                       <Check className="w-5 h-5 text-green-500" weight="bold" />
                     ) : (
                       <Copy className="w-5 h-5 text-gray-500" />
@@ -348,10 +354,24 @@ export default function GeneralSettingsPage() {
                 <div className="flex-1">
                   <p className="text-sm font-semibold text-gray-800 mb-0.5">Employee code</p>
                   <p className="text-xs text-gray-500 mb-2">Za dodajanje zaposlenih v vaše podjetje. Zaposleni vidi le svoj urnik in termine, ki so mu dodeljeni. Nima dostopa do nastavitev, analitike ali podatkov o drugih zaposlenih.</p>
-                  <div className="text-2xl font-bold text-gray-300">
-                    —
+                  <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                    {staffCode || '—'}
                   </div>
                 </div>
+                {staffCode && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => copyToClipboard(staffCode, 'staffCode')}
+                    className="p-2 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    {copiedStaffCode ? (
+                      <Check className="w-5 h-5 text-green-500" weight="bold" />
+                    ) : (
+                      <Copy className="w-5 h-5 text-gray-500" />
+                    )}
+                  </motion.button>
+                )}
               </div>
 
               {/* Divider */}
