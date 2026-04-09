@@ -49,6 +49,10 @@ export default function ClientDialog({
   const [columns, setColumns] = useState<ColumnMap>({});
   const [error, setError] = useState<string | null>(null);
   const [localLoading, setLocalLoading] = useState(false);
+  const [contactWarning, setContactWarning] = useState<{
+    missingEmail: boolean;
+    missingPhone: boolean;
+  } | null>(null);
 
   const [firstName, setFirstName] = useState(
     client && columns.firstName ? String(client[columns.firstName] ?? "") : ""
@@ -182,10 +186,63 @@ export default function ClientDialog({
     []
   );
 
+  const executeSave = async (forceNullEmail = false, forceNullPhone = false) => {
+    setLocalLoading(true);
+    setContactWarning(null);
+    try {
+      const payload: Record<string, unknown> = {};
+      const companyColumn = await getCompanyColumnForTable(tableName, companyId);
+      payload[companyColumn] = companyId;
+
+      if (!client) {
+        const idColumn = await detectIdColumn(tableName, [
+          "client_id",
+          "ID stranke",
+        ]);
+        if (idColumn) {
+          payload[idColumn] = await getNextPrefixedId(tableName, idColumn, "CLI");
+        }
+      }
+
+      if (columns.firstName) payload[columns.firstName] = firstName.trim();
+      if (columns.lastName) payload[columns.lastName] = lastName.trim();
+      if (columns.fullName) {
+        payload[columns.fullName] =
+          fullName.trim() || `${firstName} ${lastName}`.trim();
+      }
+      if (columns.email) {
+        payload[columns.email] = forceNullEmail ? null : (email.trim() || null);
+      }
+      if (columns.phone) {
+        payload[columns.phone] = forceNullPhone ? null : (phone.trim() || null);
+      }
+      if (columns.gender && gender) payload[columns.gender] = gender;
+      if (columns.status) payload[columns.status] = status || "Aktiven";
+      if (columns.notes && notes) payload[columns.notes] = notes.trim();
+      if (columns.tags && tags) payload[columns.tags] = tags.trim();
+      if (columns.lastInteraction && !client) {
+        payload[columns.lastInteraction] = new Date().toISOString();
+      }
+      if (columns.custom && custom) {
+        payload[columns.custom] = JSON.parse(custom);
+      }
+      if (columns.barva && !client) {
+        payload[columns.barva] = getRandomGradient();
+      }
+
+      await onSave(payload);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Save failed.");
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isLoading || localLoading) return;
     setError(null);
+    setContactWarning(null);
 
     if (!firstName.trim() || !lastName.trim()) {
       setError("First name and last name are required.");
@@ -219,51 +276,24 @@ export default function ClientDialog({
       }
     }
 
-    setLocalLoading(true);
-    try {
-      const payload: Record<string, unknown> = {};
-      const companyColumn = await getCompanyColumnForTable(tableName, companyId);
-      payload[companyColumn] = companyId;
+    const hasEmailCol = !!columns.email;
+    const hasPhoneCol = !!columns.phone;
+    const hasEmail = !!email.trim();
+    const hasPhone = !!phone.trim();
 
-      if (!client) {
-        const idColumn = await detectIdColumn(tableName, [
-          "client_id",
-          "ID stranke",
-        ]);
-        if (idColumn) {
-          payload[idColumn] = await getNextPrefixedId(tableName, idColumn, "CLI");
-        }
-      }
-
-      if (columns.firstName) payload[columns.firstName] = firstName.trim();
-      if (columns.lastName) payload[columns.lastName] = lastName.trim();
-      if (columns.fullName) {
-        payload[columns.fullName] =
-          fullName.trim() || `${firstName} ${lastName}`.trim();
-      }
-      if (columns.email && email) payload[columns.email] = email.trim();
-      if (columns.phone && phone) payload[columns.phone] = phone.trim();
-      if (columns.gender && gender) payload[columns.gender] = gender;
-      if (columns.status) payload[columns.status] = status || "Aktiven";
-      if (columns.notes && notes) payload[columns.notes] = notes.trim();
-      if (columns.tags && tags) payload[columns.tags] = tags.trim();
-      if (columns.lastInteraction && !client) {
-        payload[columns.lastInteraction] = new Date().toISOString();
-      }
-      if (columns.custom && custom) {
-        payload[columns.custom] = JSON.parse(custom);
-      }
-      // Assign random gradient color to new clients
-      if (columns.barva && !client) {
-        payload[columns.barva] = getRandomGradient();
-      }
-
-      await onSave(payload);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed.");
-    } finally {
-      setLocalLoading(false);
+    // Block if both columns exist but neither is filled
+    if (hasEmailCol && hasPhoneCol && !hasEmail && !hasPhone) {
+      setError("Vnesti je treba vsaj email ali telefonsko številko stranke.");
+      return;
     }
+
+    // Warn if one exists but is missing (while the other is present)
+    if (hasEmailCol && hasPhoneCol && (!hasEmail || !hasPhone)) {
+      setContactWarning({ missingEmail: !hasEmail, missingPhone: !hasPhone });
+      return;
+    }
+
+    await executeSave();
   };
 
   return (
@@ -357,6 +387,43 @@ export default function ClientDialog({
             rows={3}
           />
         ) : null}
+        {contactWarning && (
+          <div className="border border-amber-500 bg-amber-50 px-3 py-3 flex flex-col gap-2">
+            <p className="text-xs uppercase font-medium text-amber-800">
+              {contactWarning.missingEmail && contactWarning.missingPhone
+                ? "Manjkata email in telefonska številka."
+                : contactWarning.missingEmail
+                ? "Manjka email naslov."
+                : "Manjka telefonska številka."}
+            </p>
+            <p className="text-xs text-amber-700 normal-case leading-relaxed">
+              {contactWarning.missingEmail
+                ? "Brez e-poštnega naslova stranki ne bo mogoče pošiljati e-poštnih sporočil in obvestil."
+                : ""}
+              {contactWarning.missingPhone
+                ? " Brez telefonske številke stranki ne bo mogoče pošiljati SMS sporočil."
+                : ""}
+              {" "}To lahko vpliva na avtomatska sporočila, opomnike in komunikacijo s stranko.
+            </p>
+            <div className="flex gap-2 mt-1">
+              <button
+                type="button"
+                onClick={() => setContactWarning(null)}
+                className="flex-1 border border-black px-3 py-2 text-xs uppercase tracking-widest"
+              >
+                Prekliči
+              </button>
+              <button
+                type="button"
+                disabled={isLoading || localLoading}
+                onClick={() => executeSave(contactWarning.missingEmail, contactWarning.missingPhone)}
+                className="flex-1 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
+              >
+                {isLoading || localLoading ? "Shranjujem..." : "Vseeno shrani"}
+              </button>
+            </div>
+          </div>
+        )}
         <button
           type="submit"
           disabled={isLoading || localLoading}
