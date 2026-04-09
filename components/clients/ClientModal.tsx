@@ -74,6 +74,10 @@ function ClientModal({
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [showInternalNotes, setShowInternalNotes] = useState(false);
+  const [contactWarning, setContactWarning] = useState<{
+    missingEmail: boolean;
+    missingPhone: boolean;
+  } | null>(null);
 
   // Initialize form when modal opens
   useEffect(() => {
@@ -112,6 +116,7 @@ function ClientModal({
       }
       setErrors({});
       setEmailExists(false);
+      setContactWarning(null);
       setShowInternalNotes(mode === 'edit');
     }
   }, [isOpen, mode, client]);
@@ -131,8 +136,7 @@ function ClientModal({
         if (!value) return 'Spol je obvezen';
         return '';
       case 'email':
-        if (!value.trim()) return 'Email je obvezen';
-        if (!validateEmail(value)) return 'Neveljaven email naslov';
+        if (value.trim() && !validateEmail(value)) return 'Neveljaven email naslov';
         return '';
       case 'telefon':
         if (value && !validatePhone(value)) return 'Neveljavna telefonska številka';
@@ -207,6 +211,12 @@ function ClientModal({
       isValid = false;
     }
 
+    // Block if both email and phone are empty
+    if (!formData.email.trim() && !formData.telefon.trim()) {
+      newErrors.email = 'Vnesti je treba vsaj email ali telefonsko številko';
+      isValid = false;
+    }
+
     setErrors(newErrors);
     return isValid;
   }, [formData, validateField, emailExists]);
@@ -214,8 +224,18 @@ function ClientModal({
   // Handle submit
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+    setContactWarning(null);
 
     if (!validateForm()) return;
+
+    const hasEmail = !!formData.email.trim();
+    const hasPhone = !!formData.telefon.trim();
+
+    // Warn if one of email/phone is missing (but not both — that's caught in validateForm)
+    if (!hasEmail || !hasPhone) {
+      setContactWarning({ missingEmail: !hasEmail, missingPhone: !hasPhone });
+      return;
+    }
 
     await onSave(formData);
   }, [formData, validateForm, onSave]);
@@ -369,7 +389,7 @@ function ClientModal({
                 {/* Email */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Email *
+                    Email <span className="text-gray-400 normal-case font-normal">(vsaj email ali telefon)</span>
                   </label>
                   <div className="relative">
                     <Envelope className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -504,6 +524,53 @@ function ClientModal({
                   </motion.button>
                 )}
               </div>
+
+              {/* Contact warning panel */}
+              {contactWarning && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4"
+                >
+                  <div className="flex items-start gap-2 mb-2">
+                    <Warning className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" weight="fill" />
+                    <p className="text-sm font-semibold text-amber-800">
+                      {contactWarning.missingEmail ? 'Manjka email naslov' : 'Manjka telefonska številka'}
+                    </p>
+                  </div>
+                  <p className="text-xs text-amber-700 leading-relaxed mb-3">
+                    {contactWarning.missingEmail
+                      ? 'Brez e-poštnega naslova stranki ne bo mogoče pošiljati e-poštnih sporočil, računov in avtomatskih obvestil. To lahko vpliva na avtomatsko komunikacijo in opomnike preko emaila.'
+                      : 'Brez telefonske številke stranki ne bo mogoče pošiljati sporočil in avtomatskih obvestil. To lahko vpliva na avtomatsko komunikacijo in opomnike preko SMS.'}
+                  </p>
+                  <div className="flex gap-2">
+                    <motion.button
+                      type="button"
+                      onClick={() => setContactWarning(null)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex-1 rounded-lg border border-amber-400 px-3 py-2 text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors"
+                    >
+                      Prekliči
+                    </motion.button>
+                    <motion.button
+                      type="button"
+                      onClick={() => onSave(formData)}
+                      disabled={isSaving}
+                      whileHover={{ scale: isSaving ? 1 : 1.02 }}
+                      whileTap={{ scale: isSaving ? 1 : 0.98 }}
+                      className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-3 py-2 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-70 transition-colors"
+                    >
+                      {isSaving ? (
+                        <SpinnerGap className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <FloppyDisk className="h-3.5 w-3.5" weight="bold" />
+                      )}
+                      Vseeno shrani
+                    </motion.button>
+                  </div>
+                </motion.div>
+              )}
 
               {/* Footer */}
               <div className="mt-6 flex items-center justify-end gap-3">
