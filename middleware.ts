@@ -1,10 +1,35 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
-// The middleware only refreshes the session cookies on every request.
-// Route protection (auth redirects) is handled client-side by ProtectedLayout.
+// Paths that don't require a company to be set up
+const PUBLIC_PATHS = ['/login', '/register', '/onboarding', '/logout'];
+
+function isPublicPath(pathname: string) {
+  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'));
+}
+
 export async function middleware(request: NextRequest) {
-  const { supabaseResponse } = await updateSession(request);
+  const { supabaseResponse, user, supabase } = await updateSession(request);
+  const { pathname } = request.nextUrl;
+
+  // Skip company check for unauthenticated users or public paths
+  if (!user || isPublicPath(pathname)) {
+    return supabaseResponse;
+  }
+
+  // Check if the authenticated user has a company assigned in their profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('default_company_id')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (!profile?.default_company_id) {
+    const onboardingUrl = request.nextUrl.clone();
+    onboardingUrl.pathname = '/onboarding';
+    return NextResponse.redirect(onboardingUrl);
+  }
+
   return supabaseResponse;
 }
 
