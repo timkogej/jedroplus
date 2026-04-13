@@ -51,7 +51,7 @@ const searchItems: SearchItem[] = [
   { id: 'reminders', name: 'Opomniki', href: '/reminders', icon: Bell, category: 'Strani', keywords: ['notifications', 'alerts', 'obvestila'] },
   { id: 'lost-leads', name: 'Lost Leads', href: '/lost-leads', icon: TrendDown, category: 'Strani', keywords: ['leads', 'izgubljeni'] },
   { id: 'analytics', name: 'Analitika', href: '/analytics', icon: ChartLine, category: 'Strani', keywords: ['reports', 'statistics', 'poročila'] },
-  { id: 'asistent', name: 'Asistent+', href: '/asistent', icon: Sparkle, category: 'Strani', keywords: ['ai', 'assistant', 'help'] },
+  // Asistent+ - začasno skrito: { id: 'asistent', name: 'Asistent+', href: '/asistent', icon: Sparkle, category: 'Strani', keywords: ['ai', 'assistant', 'help'] },
   { id: 'nastavitve', name: 'Nastavitve', href: '/nastavitve', icon: Gear, category: 'Strani', keywords: ['settings', 'preferences', 'config'] },
 
   // Quick actions

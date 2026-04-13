@@ -1,5 +1,17 @@
 'use client';
 
+// ── Začasno skrito – stran bo dodana nazaj ──────────────────────────────────
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function AsistentPlusPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace('/dashboard'); }, [router]);
+  return null;
+}
+
+// ── Originalna koda (ohranjena za pozneje) ────────────────────────────────────
+/*
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X } from '@phosphor-icons/react';
@@ -77,7 +89,6 @@ export default function AsistentPlusPage() {
 
   return (
     <ProtectedLayout>
-      {/* Full-height chat surface with mesh gradient background */}
       <div
         className="h-[calc(100vh-4rem)] flex overflow-hidden"
         style={{
@@ -98,7 +109,6 @@ export default function AsistentPlusPage() {
         )}
       </div>
 
-      {/* Info Modal */}
       <AnimatePresence>
         {showInfo && (
           <motion.div
@@ -133,3 +143,4 @@ export default function AsistentPlusPage() {
     </ProtectedLayout>
   );
 }
+*/

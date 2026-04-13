@@ -43,7 +43,7 @@ const navItems: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: House, group: 'Glavno' },
   { name: 'Koledar', href: '/koledar', icon: CalendarBlank, group: 'Glavno' },
   // AI
-  { name: 'Asistent+', href: '/asistent', icon: Sparkle, group: 'AI' },
+  // Asistent+ - začasno skrito: { name: 'Asistent+', href: '/asistent', icon: Sparkle, group: 'AI' },
   // Komunikacija
   { name: 'Opomniki', href: '/reminders', icon: Bell, group: 'Komunikacija' },
   { name: 'Lost Leads', href: '/lost-leads', icon: TrendDown, group: 'Komunikacija' },

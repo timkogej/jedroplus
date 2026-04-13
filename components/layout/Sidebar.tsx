@@ -74,7 +74,8 @@ const navigationSectionsPaid: NavSection[] = [
   {
     label: 'AI',
     items: [
-      { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'Novo' },
+      // Asistent+ - začasno skrito, logika ohranjena v /asistent
+      // { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'Novo' },
       { name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'Novo' },
       // Receptionist+ - začasno skrito, logika ohranjena v /receptionist-plus
       // { name: 'Receptionist+', href: '/receptionist-plus', icon: Phone, badge: 'Novo' },
@@ -130,7 +131,8 @@ const navigationSectionsFree: NavSection[] = [
   {
     label: 'AI',
     items: [
-      { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'Novo' },
+      // Asistent+ - začasno skrito, logika ohranjena v /asistent
+      // { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'Novo' },
       { name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'Novo' },
     ],
   },
