@@ -1,17 +1,18 @@
 /**
  * Reset Password page (/auth/reset-password)
  *
- * Step 2 of the password reset flow. The user arrives here via the link in the
- * Supabase recovery email. The URL contains a PKCE `code` query parameter that
- * is exchanged for a recovery session. Once the session is established the user
- * can set a new password.
+ * Step 2 of the password reset flow. The user arrives here from the Supabase
+ * recovery email. Supabase sends the link with `token_hash` and `type=recovery`
+ * query params (email OTP flow). We verify the token via verifyOtp(), which
+ * establishes a recovery session, then let the user set a new password.
  *
  * Flow:
- *   1. Read `code` from URL search params on mount.
- *   2. Exchange code → recovery session via supabase.auth.exchangeCodeForSession().
- *   3. Render the new-password form.
- *   4. On submit call supabase.auth.updateUser({ password }).
- *   5. On success, sign out (so the recovery session is cleared) and redirect to /login.
+ *   1. Read `token_hash` + `type` from URL search params on mount.
+ *   2. Validate that type === "recovery" and token_hash is present.
+ *   3. Call supabase.auth.verifyOtp({ token_hash, type: "recovery" }).
+ *   4. On success, render the new-password form.
+ *   5. On submit, call supabase.auth.updateUser({ password }).
+ *   6. Sign out (clears recovery session) and redirect to /login.
  */
 
 'use client';
@@ -31,7 +32,7 @@ import { CheckCircle, WarningCircle, LockKey, ArrowLeft } from '@phosphor-icons/
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
 
-  // Session exchange state
+  // Token verification state
   const [sessionReady, setSessionReady] = useState(false);
   const [sessionError, setSessionError] = useState('');
 
@@ -42,11 +43,13 @@ function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // ── Exchange the recovery code for a session on mount ────────────────────
+  // ── Verify the recovery token from the email link on mount ───────────────
   useEffect(() => {
-    const code = searchParams.get('code');
+    const tokenHash = searchParams.get('token_hash');
+    const type = searchParams.get('type');
 
-    if (!code) {
+    // Guard: both params must be present and type must be "recovery"
+    if (!tokenHash || type !== 'recovery') {
       setSessionError(
         'Povezava za ponastavitev gesla je neveljavna ali je potekla. Zahtevajte novo povezavo.'
       );
@@ -55,16 +58,20 @@ function ResetPasswordForm() {
 
     const supabase = createClient();
 
-    supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-      if (error) {
-        console.error('Code exchange error:', error.message);
-        setSessionError(
-          'Povezava za ponastavitev gesla je neveljavna ali je potekla. Zahtevajte novo povezavo.'
-        );
-      } else {
-        setSessionReady(true);
-      }
-    });
+    // verifyOtp establishes a short-lived recovery session that allows
+    // updateUser() to change the password without the old one being known.
+    supabase.auth
+      .verifyOtp({ token_hash: tokenHash, type: 'recovery' })
+      .then(({ error }) => {
+        if (error) {
+          console.error('Token verification error:', error.message);
+          setSessionError(
+            'Povezava za ponastavitev gesla je neveljavna ali je potekla. Zahtevajte novo povezavo.'
+          );
+        } else {
+          setSessionReady(true);
+        }
+      });
   }, [searchParams]);
 
   // ── Submit new password ──────────────────────────────────────────────────
@@ -99,12 +106,12 @@ function ResetPasswordForm() {
         return;
       }
 
-      // Clear the recovery session so the user must log in with the new password.
+      // Clear the recovery session — user must log in with the new password.
       await supabase.auth.signOut();
 
       setSuccess(true);
 
-      // Redirect to login after a short delay so the user can read the message.
+      // Redirect after a short delay so the user can read the success message.
       setTimeout(() => {
         window.location.href = '/login';
       }, 2500);
@@ -141,14 +148,14 @@ function ResetPasswordForm() {
     );
   }
 
-  // Validating code (session not yet ready and no error)
+  // Verifying token (not yet ready and no error)
   if (!sessionReady) {
     return (
       <div className="text-center py-4">
         <div className="flex justify-center mb-4">
           <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="text-sm text-gray-500">Preverjam povezavo...</p>
+        <p className="text-sm text-gray-500">Preverjamo povezavo za ponastavitev gesla ...</p>
       </div>
     );
   }
