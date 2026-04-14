@@ -120,7 +120,15 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Geslo</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-semibold text-gray-900">Geslo</label>
+              <Link
+                href="/forgot-password"
+                className="text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
+              >
+                Pozabljeno geslo?
+              </Link>
+            </div>
             <Input
               type="password"
               value={password}

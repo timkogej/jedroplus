@@ -82,12 +82,12 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className="pointer-events-auto w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden"
+              className="pointer-events-auto w-full max-w-md max-h-[90vh] rounded-2xl bg-white shadow-2xl overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Gradient header */}
               <div
-                className="relative px-6 pt-8 pb-6"
+                className="relative px-6 pt-7 pb-5 flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 60%, #06B6D4 100%)' }}
               >
                 <button
@@ -97,25 +97,24 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
                 >
                   <X className="h-4 w-4" weight="bold" />
                 </button>
-                <span className="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                <span className="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-2.5">
                   🎁 Brezplačna preizkušnja
                 </span>
-                <h2 className="text-2xl font-bold text-white leading-tight">
+                <h2 className="text-xl font-bold text-white leading-tight">
                   Izkoristite brezplačno<br />preizkušnjo Jedro Plus!
                 </h2>
-                <p className="text-white/80 text-sm mt-2">
+                <p className="text-white/80 text-sm mt-1.5">
                   Vse kar potrebujete za urejeno poslovanje — brez tveganja, brez obveznosti.
                 </p>
               </div>
 
-              {/* Features */}
-              <div className="px-6 py-5 space-y-4">
+              {/* Features — scrollable */}
+              <div className="px-6 py-4 space-y-3 overflow-y-auto flex-1">
                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
                   Kaj dobite z Jedro Plus
                 </p>
                 {FEATURES.map(({ icon: Icon, title, desc }) => (
                   <div key={title} className="flex items-start gap-3">
-                    {/* Gradient icon — outline, no fill */}
                     <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-50 ring-1 ring-gray-100">
                       <Icon
                         className="h-[18px] w-[18px]"
@@ -132,7 +131,7 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
               </div>
 
               {/* Actions */}
-              <div className="px-6 pb-6 pt-1 flex flex-col gap-2.5">
+              <div className="px-6 pb-5 pt-1 flex flex-col gap-2 flex-shrink-0">
                 <motion.button
                   type="button"
                   onClick={handleTry}

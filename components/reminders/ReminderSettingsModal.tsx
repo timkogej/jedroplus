@@ -316,12 +316,12 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Nastavitve opomnikov</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Kako in kdaj pošiljati opomnike strankam</p>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 gap-3">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-semibold text-gray-900 truncate">Nastavitve opomnikov</h2>
+                <p className="text-sm text-gray-500 mt-0.5 truncate">Kako in kdaj pošiljati opomnike strankam</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-shrink-0">
                 <SaveIndicator saving={saving} lastSaved={lastSaved} />
                 <button
                   onClick={onClose}
@@ -333,7 +333,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               {isLoading ? (
                 <div className="space-y-6">
                   {[1, 2, 3, 4].map((i) => (
@@ -594,8 +594,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                               <div className="space-y-4">
                                 <p className="text-xs text-gray-500">AI bo sestavil SMS na podlagi izbranih podatkov:</p>
 
-                                <div className="flex items-start justify-between gap-3">
-                                  <div>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="min-w-0 flex-1">
                                     <span className="text-sm text-gray-700">Vključi storitev</span>
                                     <p className="text-xs text-gray-400 mt-0.5">Omeni storitev termina v opomniku.</p>
                                   </div>
@@ -608,8 +608,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   </button>
                                 </div>
 
-                                <div className="flex items-start justify-between gap-3">
-                                  <div>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="min-w-0 flex-1">
                                     <span className="text-sm text-gray-700">Vključi opombe o terminu</span>
                                     <p className="text-xs text-gray-400 mt-0.5">Vključi opombe termina in morebitne opombe stranke.</p>
                                   </div>
@@ -622,8 +622,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   </button>
                                 </div>
 
-                                <div className="flex items-start justify-between gap-3">
-                                  <div>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="min-w-0 flex-1">
                                     <span className="text-sm text-gray-700">Vključi navodila za opomnike</span>
                                     <p className="text-xs text-gray-400 mt-0.5">Vpišite spodaj navodila, ki jih AI upošteva pri sestavljanju opomnika.</p>
                                   </div>
@@ -784,8 +784,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                               <div className="space-y-4">
                                 <p className="text-xs text-gray-500">AI bo sestavil SMS na podlagi izbranih podatkov:</p>
 
-                                <div className="flex items-start justify-between gap-3">
-                                  <div>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="min-w-0 flex-1">
                                     <span className="text-sm text-gray-700">Vključi storitev</span>
                                     <p className="text-xs text-gray-400 mt-0.5">Omeni storitev termina v sporočilu po obisku.</p>
                                   </div>
@@ -798,8 +798,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   </button>
                                 </div>
 
-                                <div className="flex items-start justify-between gap-3">
-                                  <div>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="min-w-0 flex-1">
                                     <span className="text-sm text-gray-700">Vključi opombe po terminu</span>
                                     <p className="text-xs text-gray-400 mt-0.5">Vključi opombe, ki jih napišete ob zaključku termina.</p>
                                   </div>
@@ -812,8 +812,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   </button>
                                 </div>
 
-                                <div className="flex items-start justify-between gap-3">
-                                  <div>
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="min-w-0 flex-1">
                                     <span className="text-sm text-gray-700">Vključi navodila za opomnike</span>
                                     <p className="text-xs text-gray-400 mt-0.5">Vpišite spodaj navodila, ki jih AI upošteva pri sestavljanju sporočila po terminu.</p>
                                   </div>

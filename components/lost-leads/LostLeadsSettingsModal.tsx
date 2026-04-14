@@ -161,12 +161,12 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Lost Leads nastavitve</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Sledenje in ponovno pridobivanje izgubljenih strank</p>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 gap-3">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-semibold text-gray-900 truncate">Lost Leads nastavitve</h2>
+                <p className="text-sm text-gray-500 mt-0.5 truncate">Sledenje in ponovno pridobivanje izgubljenih strank</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-shrink-0">
                 <SaveIndicator saving={saving} lastSaved={lastSaved} />
                 <button
                   onClick={onClose}
@@ -178,7 +178,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
               {isLoading ? (
                 <div className="space-y-6">
                   {[1, 2, 3].map((i) => (
@@ -194,17 +194,17 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   {/* Enable Lost Leads */}
-                  <div className="mb-6 p-6 bg-gradient-to-r from-violet-50 to-cyan-50 border-2 border-violet-200 rounded-xl">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-lg font-bold text-gray-900">
+                  <div className="mb-6 p-5 bg-gradient-to-r from-violet-50 to-cyan-50 border-2 border-violet-200 rounded-xl">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="text-base font-bold text-gray-900">
                           Omogoči sledenje Lost Leads
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
                           Avtomatsko zaznavanje in kontaktiranje neaktivnih strank
                         </div>
                       </div>
-                      <div className="scale-125">
+                      <div className="flex-shrink-0">
                         <Switch
                           checked={enabled}
                           onChange={setEnabled}
