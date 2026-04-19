@@ -201,11 +201,14 @@ export default function SporocilaPage() {
       const fourteenDaysAgo = new Date();
       fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
+      const hardCutoff = new Date('2026-04-20T00:00:00.000Z');
+      const lowerBound = fourteenDaysAgo > hardCutoff ? fourteenDaysAgo : hardCutoff;
+
       const { data, error } = await supabaseReadOnly
         .from('message_outbox')
         .select('id, entity_type, channel, to, status, body, subject, sent_at')
         .eq('company_id', companyUuid)
-        .gte('sent_at', fourteenDaysAgo.toISOString())
+        .gte('sent_at', lowerBound.toISOString())
         .order('sent_at', { ascending: false });
 
       if (!error && data) {
