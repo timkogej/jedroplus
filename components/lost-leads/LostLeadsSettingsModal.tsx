@@ -121,7 +121,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
-        throw new Error('Napaka pri shranjevanju');
+        throw new Error('Prišlo je do napake pri shranjevanju');
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));

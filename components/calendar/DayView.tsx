@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { CalendarBlank } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Zaposleni, Storitev } from '@/types/appointments';
 import type { Absence } from '@/lib/supabase/appointments';
@@ -39,6 +39,18 @@ interface DayViewProps {
   companySchedule?: CompanySchedule | null;
   showAllDays?: boolean;
   isMobile?: boolean;
+  onAppointmentReschedule?: (appointment: AppointmentWithDetails, newDate: string, newStartTime: string, newEndTime: string) => void;
+}
+
+interface DragInfo {
+  apt: AppointmentWithDetails;
+  duration: number;
+  offsetY: number;
+}
+
+interface DropTarget {
+  startTime: string;
+  endTime: string;
 }
 
 // Calculate overlapping appointments and assign columns (same as WeekView)
@@ -108,7 +120,12 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true, isMobile = false }: DayViewProps) {
+function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true, isMobile = false, onAppointmentReschedule }: DayViewProps) {
+  // Drag state
+  const [dragging, setDragging] = useState<DragInfo | null>(null);
+  const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(null);
+  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
+  const gridScrollRef = useRef<HTMLDivElement>(null);
   // If showAllDays=false and it's a weekend, show "not a working day" state
   const isWeekend = currentDate.getDay() === 0 || currentDate.getDay() === 6;
   const skipDay = !showAllDays && isWeekend;
@@ -199,6 +216,76 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
     const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
     onGridSlotClick(currentDate, time);
   }, [onGridSlotClick, currentDate]);
+
+  // ── Drag handlers ─────────────────────────────────────────────────────────
+  const handleAppointmentLongPress = useCallback((
+    apt: AppointmentWithDetails,
+    info: { clientX: number; clientY: number; cardRect: DOMRect }
+  ) => {
+    if (!onAppointmentReschedule) return;
+    const [sh, sm] = apt.cas_zacetek.split(':').map(Number);
+    const [eh, em] = apt.cas_konec.split(':').map(Number);
+    const duration = (eh * 60 + em) - (sh * 60 + sm);
+    const offsetY = info.clientY - info.cardRect.top;
+    setDragging({ apt, duration, offsetY });
+    setGhostPos({ x: info.clientX, y: info.clientY });
+    setDropTarget(null);
+  }, [onAppointmentReschedule]);
+
+  const calcDropTarget = useCallback((clientY: number, offsetY: number, duration: number): DropTarget | null => {
+    const gridEl = gridScrollRef.current;
+    if (!gridEl) return null;
+    const rect = gridEl.getBoundingClientRect();
+    if (clientY < rect.top || clientY > rect.bottom) return null;
+
+    const relativeY = clientY - rect.top + gridEl.scrollTop - offsetY;
+    const rawMinutes = (relativeY / HOUR_HEIGHT) * 60 + START_HOUR * 60;
+    const roundedStart = Math.max(START_HOUR * 60, Math.round(rawMinutes / 15) * 15);
+    const roundedEnd = roundedStart + duration;
+    const sh = Math.floor(roundedStart / 60);
+    const sm = roundedStart % 60;
+    const eh = Math.floor(roundedEnd / 60);
+    const em = roundedEnd % 60;
+    return {
+      startTime: `${String(sh).padStart(2, '0')}:${String(sm).padStart(2, '0')}`,
+      endTime: `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`,
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!dragging) return;
+
+    let currentDrop: DropTarget | null = null;
+    const dateKey = getLocalDateKey(currentDate);
+
+    const handleMove = (e: PointerEvent) => {
+      setGhostPos({ x: e.clientX, y: e.clientY });
+      currentDrop = calcDropTarget(e.clientY, dragging.offsetY, dragging.duration);
+      setDropTarget(currentDrop);
+    };
+
+    const handleUp = () => {
+      if (currentDrop && onAppointmentReschedule) {
+        const changed = currentDrop.startTime !== dragging.apt.cas_zacetek || dateKey !== dragging.apt.datum.slice(0, 10);
+        if (changed) {
+          onAppointmentReschedule(dragging.apt, dateKey, currentDrop.startTime, currentDrop.endTime);
+        }
+      }
+      setDragging(null);
+      setGhostPos(null);
+      setDropTarget(null);
+    };
+
+    window.addEventListener('pointermove', handleMove, { passive: true });
+    window.addEventListener('pointerup', handleUp);
+    window.addEventListener('pointercancel', handleUp);
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', handleUp);
+      window.removeEventListener('pointercancel', handleUp);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging]);
 
   if (skipDay) {
     return (
@@ -345,7 +432,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
       />
 
       {/* Time grid with appointments by employee */}
-      <TimeGrid columnCount={columnCount} showCurrentTime={isCurrentDay}>
+      <TimeGrid columnCount={columnCount} showCurrentTime={isCurrentDay} gridScrollRef={gridScrollRef}>
         {displayEmployees.length > 0 ? (
           <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}>
             {displayEmployees.map((employee, empIndex) => {
@@ -451,6 +538,21 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                     );
                   })()}
 
+                  {/* Drop indicator */}
+                  {dragging && dropTarget && (
+                    <div
+                      className="pointer-events-none absolute left-1 right-1 rounded-lg"
+                      style={{
+                        top: `${getTimePosition(dropTarget.startTime)}px`,
+                        height: `${Math.max(getDurationHeight(dropTarget.startTime, dropTarget.endTime), 20)}px`,
+                        background: dragging.apt.storitev?.barva || '#6366F1',
+                        opacity: 0.35,
+                        border: '2px dashed rgba(255,255,255,0.6)',
+                        zIndex: 25,
+                      }}
+                    />
+                  )}
+
                   {/* Render appointments */}
                   {employeeAppointments.map((apt) => {
                     const startMinutes = parseTimeToMinutes(apt.cas_zacetek);
@@ -475,6 +577,8 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                         onClick={onAppointmentClick}
                         variant="grid"
                         services={services}
+                        onLongPress={onAppointmentReschedule ? handleAppointmentLongPress : undefined}
+                        isDragging={dragging?.apt.id === apt.id}
                         style={{
                           top: `${top}px`,
                           height: `${Math.max(height, 50)}px`,
@@ -607,6 +711,28 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
           </div>
         )}
       </TimeGrid>
+
+      {/* Drag ghost element */}
+      {dragging && ghostPos && (
+        <div
+          className="pointer-events-none fixed z-[200] rounded-lg shadow-2xl select-none"
+          style={{
+            left: ghostPos.x - 40,
+            top: ghostPos.y - dragging.offsetY,
+            width: 120,
+            background: dragging.apt.storitev?.barva || 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%)',
+            opacity: 0.88,
+            transform: 'rotate(2deg) scale(1.04)',
+            padding: '8px 10px',
+            minHeight: 36,
+          }}
+        >
+          <div className="text-white text-xs font-bold truncate leading-tight">{dragging.apt.stranka_ime}</div>
+          {dropTarget && (
+            <div className="text-white/80 text-[10px] mt-0.5">{dropTarget.startTime} – {dropTarget.endTime}</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

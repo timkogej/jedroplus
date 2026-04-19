@@ -62,12 +62,12 @@ export default function AIMessageGenerator({
           : [];
         onGenerate(subject, message, variables);
       } else {
-        const msg = result.error || 'Napaka pri generiranju sporočila';
+        const msg = 'Prišlo je do napake pri generiranju sporočila';
         onError?.(msg);
       }
     } catch (err) {
       console.error('AI generation error:', err);
-      onError?.('Napaka pri generiranju sporočila');
+      onError?.('Prišlo je do napake pri generiranju sporočila');
     } finally {
       setIsGenerating(false);
     }

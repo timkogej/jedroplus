@@ -72,16 +72,11 @@ export async function callN8nAction(
       }
       // Read the response body to get the actual error message
       try {
-        const errText = await response.text();
-        if (errText) {
-          const errJson = JSON.parse(errText);
-          const errMsg = errJson?.error || errJson?.message || `HTTP ${response.status}`;
-          return { ok: false, error: errMsg };
-        }
+        await response.text(); // consume body
       } catch {
-        // ignore parse errors
+        // ignore
       }
-      return { ok: false, error: `HTTP ${response.status}` };
+      return { ok: false, error: 'Prišlo je do napake' };
     }
     
     const text = await response.text();
@@ -109,7 +104,7 @@ export async function callN8nAction(
   } catch (error) {
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Webhook failed",
+      error: 'Prišlo je do napake',
     };
   }
 }

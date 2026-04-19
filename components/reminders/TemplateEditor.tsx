@@ -47,6 +47,27 @@ function parseTemplate(template: string): Array<{ type: 'text' | 'token'; value:
   return segments;
 }
 
+/**
+ * Computes the effective SMS character count of a template, substituting
+ * variable tokens with their estimated real-world lengths.
+ */
+export function computeEffectiveLength(
+  template: string,
+  varLengths: Record<string, number> = {}
+): number {
+  const segments = parseTemplate(template);
+  let length = 0;
+  for (const seg of segments) {
+    if (seg.type === 'token') {
+      // Use the estimated length if provided, otherwise count the raw token chars
+      length += seg.value in varLengths ? varLengths[seg.value] : seg.value.length;
+    } else {
+      length += seg.value.length;
+    }
+  }
+  return length;
+}
+
 // Inline styles for token spans rendered inside contentEditable
 const TOKEN_OUTER = [
   'display:inline-flex',
@@ -126,14 +147,17 @@ interface TemplateEditorProps {
   maxLength?: number;
   placeholder?: string;
   rows?: number;
+  /** Estimated real-world character lengths per token (e.g. { '{{cas}}': 5 }) */
+  varLengths?: Record<string, number>;
 }
 
 export function TemplateEditor({
   value,
   onChange,
-  maxLength = 160,
+  maxLength = 155,
   placeholder = '',
   rows = 4,
+  varLengths = {},
 }: TemplateEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalRef = useRef(false);
@@ -173,12 +197,13 @@ export function TemplateEditor({
       const printable = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey;
       if (printable) {
         const raw = extractTemplate(editorRef.current);
-        if (raw.length >= maxLength) {
+        const effectiveLen = computeEffectiveLength(raw, varLengths);
+        if (effectiveLen >= maxLength) {
           e.preventDefault();
         }
       }
     },
-    [maxLength]
+    [maxLength, varLengths]
   );
 
   const insertToken = useCallback(
@@ -187,7 +212,9 @@ export function TemplateEditor({
 
       if (maxLength) {
         const raw = extractTemplate(editorRef.current);
-        if (raw.length + token.length > maxLength) return;
+        const currentEffective = computeEffectiveLength(raw, varLengths);
+        const tokenEffectiveLen = token in varLengths ? varLengths[token] : token.length;
+        if (currentEffective + tokenEffectiveLen > maxLength) return;
       }
 
       const label = VAR_LABEL_MAP[token] || token;
@@ -223,10 +250,10 @@ export function TemplateEditor({
 
       handleInput();
     },
-    [handleInput, maxLength]
+    [handleInput, maxLength, varLengths]
   );
 
-  const currentLength = value.length;
+  const currentLength = computeEffectiveLength(value, varLengths);
   const isOverLimit = maxLength ? currentLength > maxLength : false;
 
   return (
@@ -293,14 +320,25 @@ export function TemplateEditor({
 
       {/* Character counter */}
       {maxLength && (
-        <div className="flex justify-end">
-          <span
-            className={`text-xs font-medium ${
-              isOverLimit ? 'text-red-500' : 'text-gray-400'
-            }`}
-          >
-            {currentLength}/{maxLength}
-          </span>
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-400">
+              Ocenjeno število znakov (spremenljivke se štejejo glede na dejansko vrednost)
+            </span>
+            <span
+              className={`text-xs font-semibold ${
+                isOverLimit ? 'text-red-500' : currentLength > maxLength * 0.9 ? 'text-amber-500' : 'text-gray-400'
+              }`}
+            >
+              {currentLength}/{maxLength}
+            </span>
+          </div>
+          {isOverLimit && (
+            <div className="flex items-center gap-1.5 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <span className="font-semibold">Sporočilo je predolgo!</span>
+              <span>Predloga presega {maxLength} znakov. Skrajšajte del besedila.</span>
+            </div>
+          )}
         </div>
       )}
     </div>

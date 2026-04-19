@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { SpinnerGap } from '@phosphor-icons/react';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -98,11 +99,11 @@ export default function SignupPage() {
 
     } catch (error: unknown) {
       console.error('Signup error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Napaka pri registraciji';
+      const errorMessage = error instanceof Error ? error.message : 'Prišlo je do napake pri registraciji';
       if (errorMessage.includes('already registered')) {
         toast.error('Ta email naslov je že registriran');
       } else if (error instanceof Error && (error.name === 'AuthRetryableFetchError' || error.message === 'Load failed')) {
-        toast.error('Napaka pri povezavi. Prosimo, poskusite znova.');
+        toast.error('Prišlo je do napake pri povezavi. Prosimo, poskusite znova.');
       } else {
         toast.error(errorMessage);
       }
@@ -186,7 +187,12 @@ export default function SignupPage() {
               background: 'linear-gradient(to right, #8B5CF6, #06B6D4)',
             }}
           >
-            {loading ? 'Ustvarjam račun...' : 'Registracija'}
+            {loading ? (
+              <>
+                <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                Ustvarjam račun...
+              </>
+            ) : 'Registracija'}
           </Button>
 
           {/* Divider */}

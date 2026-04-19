@@ -308,7 +308,7 @@ export default function ClientsPage() {
       setClients(clientsRes.data ?? []);
       setStats(statsRes.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Napaka pri nalaganju podatkov');
+      setError('Prišlo je do napake pri nalaganju podatkov');
     } finally {
       setIsLoading(false);
     }
@@ -423,7 +423,7 @@ export default function ClientsPage() {
         );
 
         if (!result.ok) {
-          throw new Error('Napaka pri posodabljanju stranke');
+          throw new Error('Prišlo je do napake pri posodabljanju stranke');
         }
 
         showToast('Stranka uspešno posodobljena', 'success');
@@ -467,20 +467,20 @@ export default function ClientsPage() {
         });
 
         if (!result.ok) {
-          throw new Error('Napaka pri ustvarjanju stranke');
+          throw new Error('Prišlo je do napake pri ustvarjanju stranke');
         }
 
         showToast('Stranka uspešno dodana', 'success');
       }
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for system to process
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       closeModal();
       loadData();
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Napaka pri shranjevanju stranke',
+        'Prišlo je do napake pri shranjevanju stranke',
         'error'
       );
     } finally {
@@ -518,18 +518,18 @@ export default function ClientsPage() {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri brisanju stranke');
+        throw new Error('Prišlo je do napake pri brisanju stranke');
       }
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for system to process
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       showToast('Stranka uspešno izbrisana', 'success');
       closeDeleteModal();
       loadData();
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Napaka pri brisanju stranke',
+        'Prišlo je do napake pri brisanju stranke',
         'error'
       );
     } finally {

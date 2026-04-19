@@ -74,6 +74,12 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
   const [lastnaPrelogaPred, setLastnaPrelogaPred] = useState('');
   const [lastnaPredlogaPo, setLastnaPredlogaPo] = useState('');
 
+  // Company data for variable length estimation
+  const [kompanyEmail, setKompanyEmail] = useState('');
+  const [nazivPodjetja, setNazivPodjetja] = useState('');
+  const [naslovPodjetja, setNaslovPodjetja] = useState('');
+  const [apptManagementLink, setApptManagementLink] = useState('');
+
   // SMS Supabase column values for before/after
   const [smsStoritevPred, setSmsStoritevPred] = useState(false);
   const [smsOpombePred, setSmsOpombePred] = useState(false);
@@ -94,6 +100,21 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
   const [isLoading, setIsLoading] = useState(true);
 
   const actor = user?.email ?? 'unknown';
+
+  // Variable estimated lengths for SMS character counting
+  const smsVarLengths: Record<string, number> = {
+    '{{cas}}': 5,
+    '{{datum}}': 6,
+    '{{telefon_podjetja}}': 9,
+    '{{email_podjetja}}': kompanyEmail.length || 20,
+    '{{ime}}': 10,
+    '{{priimek}}': 10,
+    '{{ime_izvajalca}}': 20,
+    '{{ime_podjetja}}': nazivPodjetja.length || 15,
+    '{{naslov}}': naslovPodjetja.length || 20,
+    '{{leto}}': 4,
+    '{{povezava_prenarocanje}}': apptManagementLink.length || 30,
+  };
 
   // Load settings
   useEffect(() => {
@@ -160,6 +181,12 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           } else {
             setSmsSenderId(String(data['sms_sender_id'] ?? ''));
           }
+
+          // Load company data for variable length estimation
+          setKompanyEmail(String(data['Kontaktni email'] ?? data['kontaktni_email'] ?? data['from_email'] ?? ''));
+          setNazivPodjetja(String(data['Naziv podjetja'] ?? data['Naziv Podjetja'] ?? data['naziv_podjetja'] ?? ''));
+          setNaslovPodjetja(String(data['Naslov podjetja'] ?? data['naslov_podjetja'] ?? data['Naslov'] ?? ''));
+          setApptManagementLink(String(data['appt_management_link'] ?? ''));
 
           // SMS Supabase columns - use true/yes for enabled
           const parseBool = (v: unknown) => {
@@ -280,7 +307,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
-        throw new Error('Napaka pri shranjevanju');
+        throw new Error('Prišlo je do napake pri shranjevanju');
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -657,13 +684,14 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
 
                             {smsModePred === 'manual' && (
                               <div className="space-y-2">
-                                <p className="text-xs text-gray-500">Predloga SMS sporočila (max 160 znakov)</p>
+                                <p className="text-xs text-gray-500">Predloga SMS sporočila (max 155 znakov)</p>
                                 <TemplateEditor
                                   value={smsTemplatePred}
                                   onChange={setSmsTemplatePred}
-                                  maxLength={160}
+                                  maxLength={155}
                                   placeholder="Npr: Spomin na vaš termin jutri ob {{cas}}. {{ime_podjetja}}. Za odpoved pokličite {{telefon_podjetja}}."
                                   rows={4}
+                                  varLengths={smsVarLengths}
                                 />
                                 <p className="text-xs text-gray-400">Brez emojijev in posebnih znakov.</p>
                               </div>
@@ -847,13 +875,14 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
 
                             {smsModePo === 'manual' && (
                               <div className="space-y-2">
-                                <p className="text-xs text-gray-500">Predloga SMS sporočila (max 160 znakov)</p>
+                                <p className="text-xs text-gray-500">Predloga SMS sporočila (max 155 znakov)</p>
                                 <TemplateEditor
                                   value={smsTemplatePo}
                                   onChange={setSmsTemplatePo}
-                                  maxLength={160}
+                                  maxLength={155}
                                   placeholder="Npr: Hvala za obisk! Za naslednji termin nas kontaktirajte na {{telefon_podjetja}}."
                                   rows={4}
+                                  varLengths={smsVarLengths}
                                 />
                                 <p className="text-xs text-gray-400">Brez emojijev in posebnih znakov.</p>
                               </div>
@@ -876,42 +905,46 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           </div>
                         )}
 
+                        {/* Discount option — hidden when SMS LP (custom template handles its own content) */}
+                        {!(chanelPo === 'sms' && smsModePo === 'manual') && (
+                          <>
+                            <div className="flex items-center justify-between p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+                              <div>
+                                <div className="font-semibold text-gray-900">
+                                  Vključi popust v sporočilo
+                                </div>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  Ponudi popust za naslednji obisk
+                                </div>
+                              </div>
+                              <Switch
+                                checked={showDiscountField}
+                                onChange={setShowDiscountField}
+                              />
+                            </div>
+
+                            {showDiscountField && (
+                              <SettingRow
+                                label="Popust / Akcija"
+                                description="Opis popusta ki se vključi v sporočilo"
+                                fullWidth
+                              >
+                                <Input
+                                  value={popustPo}
+                                  onChange={(e) => setPopustPo(e.target.value)}
+                                  placeholder="10% popust na naslednji obisk"
+                                />
+                              </SettingRow>
+                            )}
+                          </>
+                        )}
+
                         <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
                           <div className="font-semibold text-gray-900 mb-1">Čas pošiljanja</div>
                           <div className="text-sm text-gray-700">
                             Fiksno: <strong>Takoj po zaključenem terminu</strong>
                           </div>
                         </div>
-
-                        {/* Discount option */}
-                        <div className="flex items-center justify-between p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
-                          <div>
-                            <div className="font-semibold text-gray-900">
-                              Vključi popust v sporočilo
-                            </div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              Ponudi popust za naslednji obisk
-                            </div>
-                          </div>
-                          <Switch
-                            checked={showDiscountField}
-                            onChange={setShowDiscountField}
-                          />
-                        </div>
-
-                        {showDiscountField && (
-                          <SettingRow
-                            label="Popust / Akcija"
-                            description="Opis popusta ki se vključi v sporočilo"
-                            fullWidth
-                          >
-                            <Input
-                              value={popustPo}
-                              onChange={(e) => setPopustPo(e.target.value)}
-                              placeholder="10% popust na naslednji obisk"
-                            />
-                          </SettingRow>
-                        )}
                       </>
                     )}
                   </SettingsSection>

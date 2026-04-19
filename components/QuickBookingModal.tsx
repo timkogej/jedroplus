@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { SpinnerGap } from "@phosphor-icons/react";
 
 type QuickBookingModalProps = {
   open: boolean;
@@ -95,8 +96,9 @@ export default function QuickBookingModal({
           <button
             type="submit"
             disabled={loading}
-            className="border border-black px-3 py-2 text-xs uppercase tracking-widest"
+            className="flex items-center justify-center gap-2 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
           >
+            {loading && <SpinnerGap className="h-3.5 w-3.5 animate-spin" />}
             {loading ? "Saving..." : "Create booking"}
           </button>
         </form>

@@ -184,7 +184,7 @@ function TerminiPageInner() {
       setServices(servicesRes.data ?? []);
       setEmployees(employeesRes.data ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Napaka pri nalaganju podatkov');
+      setError('Prišlo je do napake pri nalaganju podatkov.');
     } finally {
       setIsLoading(false);
     }
@@ -471,7 +471,7 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error(result.error || 'Napaka pri shranjevanju termina');
+        throw new Error('Prišlo je do napake pri shranjevanju termina.');
       }
 
       // Wait 1 second for system to process
@@ -480,7 +480,7 @@ function TerminiPageInner() {
       await loadData();
       handleCloseModal();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri shranjevanju');
+      setActionError('Prišlo je do napake pri shranjevanju termina.');
     } finally {
       setIsSaving(false);
     }
@@ -507,7 +507,7 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri brisanju termina');
+        throw new Error('Prišlo je do napake pri brisanju termina.');
       }
 
       // Wait 1 second for system to process
@@ -516,7 +516,7 @@ function TerminiPageInner() {
       await loadData();
       setDeleteTarget(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri brisanju');
+      setActionError('Prišlo je do napake pri brisanju termina.');
     } finally {
       setIsDeleting(false);
     }
@@ -555,7 +555,7 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri označevanju kot No Show');
+        throw new Error('Prišlo je do napake pri označevanju kot No Show.');
       }
 
       setSuccessMessage('Termin označen kot No Show');
@@ -564,7 +564,7 @@ function TerminiPageInner() {
       await new Promise((resolve) => setTimeout(resolve, 700));
       await loadData();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri No Show');
+      setActionError('Prišlo je do napake pri označevanju kot No Show.');
     } finally {
       setIsDeleting(false);
     }
@@ -599,7 +599,7 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri odpovedi termina');
+        throw new Error('Prišlo je do napake pri odpovedi termina.');
       }
 
       setSuccessMessage('Termin uspešno odpovedan');
@@ -608,7 +608,7 @@ function TerminiPageInner() {
       await new Promise((resolve) => setTimeout(resolve, 700));
       await loadData();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri odpovedi');
+      setActionError('Prišlo je do napake pri odpovedi termina.');
     } finally {
       setIsDeleting(false);
     }
@@ -654,7 +654,7 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri zaključevanju termina');
+        throw new Error('Prišlo je do napake pri zaključevanju termina.');
       }
 
       setSuccessMessage('Termin uspešno zaključen');
@@ -667,7 +667,7 @@ function TerminiPageInner() {
       setCompleteTarget(null);
       setCompletionNotes(''); // Reset notes after completion
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri zaključevanju');
+      setActionError('Prišlo je do napake pri zaključevanju termina.');
     } finally {
       setIsCompleting(false);
     }

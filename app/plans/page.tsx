@@ -190,17 +190,17 @@ export default function PlansPage() {
         const checkoutUrl = result.checkout_url;
         if (!checkoutUrl.startsWith('http')) {
           console.error('Invalid checkout URL received:', checkoutUrl);
-          alert('Napaka: Neveljaven URL za plačilo. Prosimo, poskusite znova.');
+          alert('Prišlo je do napake pri plačilu. Prosimo, poskusite znova.');
           return;
         }
         window.location.assign(checkoutUrl);
       } else {
         console.error('Failed to start checkout:', result.error);
-        alert(result.error || 'Napaka pri ustvarjanju plačilne seje');
+        alert('Prišlo je do napake pri ustvarjanju plačilne seje.');
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Napaka pri povezavi s strežnikom');
+      alert('Prišlo je do napake pri povezavi s strežnikom.');
     } finally {
       setLoadingPlan(null);
     }

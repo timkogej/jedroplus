@@ -8,6 +8,7 @@ import {
   Gear,
   Buildings,
   UsersThree,
+  ChatTeardrop,
 } from '@phosphor-icons/react';
 import type { SettingsSection } from '@/types/settings';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
@@ -26,6 +27,7 @@ const settingsTabs: TabItem[] = [
   { id: 'splosno', label: 'Splošno', icon: Gear, path: '/nastavitve/splosno' },
   { id: 'podjetje', label: 'Podjetje', icon: Buildings, path: '/nastavitve/podjetje' },
   { id: 'clani', label: 'Člani', icon: UsersThree, path: '/nastavitve/clani', ownerOnly: true },
+  { id: 'sporocila', label: 'Sporočila', icon: ChatTeardrop, path: '/nastavitve/sporocila' },
 ];
 
 export function SettingsSidebar() {

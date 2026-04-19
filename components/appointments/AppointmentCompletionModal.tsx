@@ -120,7 +120,7 @@ export default function AppointmentCompletionModal({
       const result = await callN8nAction(payload);
 
       if (!result.ok) {
-        throw new Error('Napaka pri zaključevanju termina');
+        throw new Error('Prišlo je do napake pri zaključevanju termina.');
       }
 
       // Also update client's last interaction if client ID exists
@@ -141,7 +141,7 @@ export default function AppointmentCompletionModal({
       onComplete();
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Napaka pri zaključevanju termina');
+      setError('Prišlo je do napake pri zaključevanju termina.');
     } finally {
       setSaving(false);
     }

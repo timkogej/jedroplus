@@ -334,7 +334,7 @@ export default function OsebjePage() {
       }
     } catch (error) {
       console.error('Error loading employees:', error);
-      setToast({ message: 'Napaka pri nalaganju zaposlenih', type: 'error' });
+      setToast({ message: 'Prišlo je do napake pri nalaganju zaposlenih', type: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -420,7 +420,7 @@ export default function OsebjePage() {
         );
 
         if (!result.ok) {
-          setToast({ message: 'Napaka pri posodabljanju zaposlenega', type: 'error' });
+          setToast({ message: 'Prišlo je do napake pri posodabljanju zaposlenega', type: 'error' });
           return;
         }
 
@@ -472,7 +472,7 @@ export default function OsebjePage() {
         );
 
         if (!result.ok) {
-          setToast({ message: 'Napaka pri ustvarjanju zaposlenega', type: 'error' });
+          setToast({ message: 'Prišlo je do napake pri ustvarjanju zaposlenega', type: 'error' });
           return;
         }
 
@@ -487,7 +487,7 @@ export default function OsebjePage() {
       loadEmployees();
     } catch (error) {
       console.error('Error saving employee:', error);
-      setToast({ message: 'Napaka pri shranjevanju', type: 'error' });
+      setToast({ message: 'Prišlo je do napake pri shranjevanju', type: 'error' });
     } finally {
       setIsSaving(false);
     }
@@ -518,7 +518,7 @@ export default function OsebjePage() {
       );
 
       if (!result.ok) {
-        setToast({ message: 'Napaka pri brisanju zaposlenega', type: 'error' });
+        setToast({ message: 'Prišlo je do napake pri brisanju zaposlenega', type: 'error' });
         return;
       }
 
@@ -531,7 +531,7 @@ export default function OsebjePage() {
       loadEmployees();
     } catch (error) {
       console.error('Error deleting employee:', error);
-      setToast({ message: 'Napaka pri brisanju', type: 'error' });
+      setToast({ message: 'Prišlo je do napake pri brisanju', type: 'error' });
     }
   };
 
@@ -567,7 +567,7 @@ export default function OsebjePage() {
 
       if (!result.ok) {
         setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: employee.aktivna } : e));
-        setToast({ message: 'Napaka pri spreminjanju statusa', type: 'error' });
+        setToast({ message: 'Prišlo je do napake pri spreminjanju statusa', type: 'error' });
         return;
       }
 
@@ -578,7 +578,7 @@ export default function OsebjePage() {
     } catch (error) {
       console.error('Error toggling active:', error);
       setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: employee.aktivna } : e));
-      setToast({ message: 'Napaka pri spreminjanju statusa', type: 'error' });
+      setToast({ message: 'Prišlo je do napake pri spreminjanju statusa', type: 'error' });
     }
   };
 
@@ -624,7 +624,7 @@ export default function OsebjePage() {
       });
 
       if (!response.ok) {
-        setToast({ message: 'Napaka pri povezovanju računa', type: 'error' });
+        setToast({ message: 'Prišlo je do napake pri povezovanju računa', type: 'error' });
         return;
       }
 
@@ -633,7 +633,7 @@ export default function OsebjePage() {
       setConnectEmployee(null);
       setToast({ message: 'Račun uspešno povezan z zaposlenim', type: 'success' });
     } catch {
-      setToast({ message: 'Napaka pri povezovanju računa', type: 'error' });
+      setToast({ message: 'Prišlo je do napake pri povezovanju računa', type: 'error' });
     } finally {
       setIsConnecting(false);
     }
@@ -696,7 +696,7 @@ export default function OsebjePage() {
       );
 
       if (!result.ok) {
-        setToast({ message: 'Napaka pri shranjevanju nastavitev', type: 'error' });
+        setToast({ message: 'Prišlo je do napake pri shranjevanju nastavitev', type: 'error' });
         return;
       }
 
@@ -710,7 +710,7 @@ export default function OsebjePage() {
       loadEmployees();
     } catch (error) {
       console.error('Error saving settings:', error);
-      setToast({ message: 'Napaka pri shranjevanju nastavitev', type: 'error' });
+      setToast({ message: 'Prišlo je do napake pri shranjevanju nastavitev', type: 'error' });
     } finally {
       setIsSaving(false);
     }

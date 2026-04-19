@@ -653,7 +653,7 @@ export default function DashboardPage() {
       setDashboardData(data);
     } catch (err) {
       console.error("Error loading dashboard data:", err);
-      setError("Napaka pri nalaganju podatkov");
+      setError("Prišlo je do napake pri nalaganju podatkov.");
     } finally {
       setLoading(false);
     }
@@ -792,7 +792,7 @@ export default function DashboardPage() {
       });
 
       const result = await callN8nAction(buildPayload(event, 'appointments', enhancedData));
-      if (!result.ok) throw new Error(result.error || 'Napaka pri shranjevanju termina');
+      if (!result.ok) throw new Error('Prišlo je do napake pri shranjevanju termina.');
 
       setSuccessMessage(isNew ? 'Termin uspešno dodan' : 'Termin uspešno posodobljen');
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -802,7 +802,7 @@ export default function DashboardPage() {
       if (isNew) setShowNewAppointmentModal(false);
       else setEditingAppointment(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri shranjevanju');
+      setActionError('Prišlo je do napake pri shranjevanju.');
     } finally {
       setter(false);
     }
@@ -824,7 +824,7 @@ export default function DashboardPage() {
       const customerAppointmentsCount = await getCustomerAppointmentsCount(companyId, completeTarget.stranka_id || completeTarget.stranka_ime);
       const bookingRowUpdated = { ...completeTarget, status: 'Zaključen', booking_id: completeTarget.id, appointment_id: completeTarget.id, opombe: completionNotesValue, completion_notes: completionNotesValue };
       const result = await callN8nAction(buildPayload('ZAKLJUCITEV_TERMINA', 'appointments', buildBookingCompleteData({ companyId, userEmail: actor, companyProfile: companyPayload, bookingRowUpdated, customerAppointmentsCount })));
-      if (!result.ok) throw new Error('Napaka pri zaključevanju termina');
+      if (!result.ok) throw new Error('Prišlo je do napake pri zaključevanju termina.');
       setSuccessMessage('Termin uspešno zaključen');
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -832,7 +832,7 @@ export default function DashboardPage() {
       setCompleteTarget(null);
       setCompletionNotes('');
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri zaključevanju');
+      setActionError('Prišlo je do napake pri zaključevanju termina.');
     } finally {
       setIsCompleting(false);
     }
@@ -851,13 +851,13 @@ export default function DashboardPage() {
         stranka_ime: appointment.stranka_ime, stranka_id: appointment.stranka_id,
         datum: appointment.datum, cas_zacetek: appointment.cas_zacetek,
       }));
-      if (!result.ok) throw new Error('Napaka pri označevanju kot No Show');
+      if (!result.ok) throw new Error('Prišlo je do napake pri označevanju kot No Show.');
       setSuccessMessage('Termin označen kot No Show');
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 500));
       await loadDashboard();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri No Show');
+      setActionError('Prišlo je do napake pri označevanju kot No Show.');
     } finally {
       setIsDeleting(false);
     }
@@ -876,13 +876,13 @@ export default function DashboardPage() {
         stranka_ime: appointment.stranka_ime, stranka_id: appointment.stranka_id,
         datum: appointment.datum, cas_zacetek: appointment.cas_zacetek,
       }));
-      if (!result.ok) throw new Error('Napaka pri odpovedi termina');
+      if (!result.ok) throw new Error('Prišlo je do napake pri odpovedi termina.');
       setSuccessMessage('Termin uspešno odpovedan');
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 500));
       await loadDashboard();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri odpovedi');
+      setActionError('Prišlo je do napake pri odpovedi termina.');
     } finally {
       setIsDeleting(false);
     }
@@ -900,12 +900,12 @@ export default function DashboardPage() {
     setActionError(null);
     try {
       const result = await callN8nAction(buildPayload('IZBRIS_TERMINA', 'appointments', buildBookingDeleteData({ companyId, userEmail: actor, companyProfile: companyPayload, appointmentId: deleteTarget.id })));
-      if (!result.ok) throw new Error('Napaka pri brisanju termina');
+      if (!result.ok) throw new Error('Prišlo je do napake pri brisanju termina.');
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await loadDashboard();
       setDeleteTarget(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri brisanju');
+      setActionError('Prišlo je do napake pri brisanju.');
     } finally {
       setIsDeleting(false);
     }
@@ -930,14 +930,14 @@ export default function DashboardPage() {
         const nextId = await getNextClientId(companyId);
         return { ...payload, data: buildClientCreateData({ companyId, userEmail: actor, companyProfile: companyPayload, clientRow: { ...newRow, 'ID stranke': nextId } }) };
       });
-      if (!result.ok) throw new Error('Napaka pri ustvarjanju stranke');
+      if (!result.ok) throw new Error('Prišlo je do napake pri ustvarjanju stranke.');
       setSuccessMessage('Stranka uspešno dodana');
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setShowNewClientModal(false);
       await loadDashboard();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri shranjevanju stranke');
+      setActionError('Prišlo je do napake pri shranjevanju stranke.');
     } finally {
       setIsNewClientSaving(false);
     }

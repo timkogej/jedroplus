@@ -257,7 +257,7 @@ export default function ServiceDialog({
       if (columns.colorTo) payload[columns.colorTo] = colorTo.trim();
       await onSave(payload);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed.");
+      setError("Prišlo je do napake pri shranjevanju.");
     } finally {
       setLocalLoading(false);
     }

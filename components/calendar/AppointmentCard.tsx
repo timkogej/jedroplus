@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useRef, useLayoutEffect, useState, useCallback } from 'react';
+import { memo, useMemo, useRef, useLayoutEffect, useState, useCallback, useEffect } from 'react';
 import { X } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import { formatTime, getGradientCSS } from '@/lib/utils/calendar';
@@ -164,6 +164,8 @@ interface AppointmentCardProps {
   condensed?: boolean;
   services?: Storitev[];
   timeOnly?: boolean;
+  onLongPress?: (appointment: AppointmentWithDetails, info: { clientX: number; clientY: number; cardRect: DOMRect }) => void;
+  isDragging?: boolean;
 }
 
 function AppointmentCard({
@@ -175,6 +177,8 @@ function AppointmentCard({
   condensed = false,
   services = [],
   timeOnly = false,
+  onLongPress,
+  isDragging = false,
 }: AppointmentCardProps) {
   const isCompleted = ['completed', 'Zaključen', 'zaključen', 'no_show', 'Ni prišel'].includes(appointment.status || '');
   const isNoShow = appointment.status === 'no_show' || appointment.status === 'Ni prišel';
@@ -209,7 +213,73 @@ function AppointmentCard({
     return createCombinedGradient(allColors);
   }, [appointment, services, isCompleted]);
 
-  const handleClick = (e: React.MouseEvent) => { e.stopPropagation(); onClick(appointment); };
+  // Long press refs – must be declared before any early returns
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressStartPos = useRef<{ x: number; y: number } | null>(null);
+  const longPressActivated = useRef(false);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    };
+  }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (!onLongPress || variant !== 'grid') return;
+    longPressStartPos.current = { x: e.clientX, y: e.clientY };
+    longPressActivated.current = false;
+    // Capture these synchronously — e.currentTarget and e.clientX/Y become null after the handler returns
+    const cardEl = e.currentTarget as HTMLElement;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    longPressTimerRef.current = setTimeout(() => {
+      longPressActivated.current = true;
+      const cardRect = cardEl.getBoundingClientRect();
+      if (navigator.vibrate) navigator.vibrate(40);
+      onLongPress(appointment, { clientX: startX, clientY: startY, cardRect });
+    }, 500);
+  }, [onLongPress, appointment, variant]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!longPressTimerRef.current || !longPressStartPos.current) return;
+    const dist = Math.hypot(e.clientX - longPressStartPos.current.x, e.clientY - longPressStartPos.current.y);
+    if (dist > 8) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    if (onLongPress && variant === 'grid') e.preventDefault();
+  }, [onLongPress, variant]);
+
+  const longPressActive = !!(onLongPress && variant === 'grid');
+  const longPressHandlers = longPressActive ? {
+    onPointerDown: handlePointerDown,
+    onPointerMove: handlePointerMove,
+    onPointerUp: handlePointerUp,
+    onPointerCancel: handlePointerUp,
+    onContextMenu: handleContextMenu,
+  } : {};
+  const longPressTouchStyle: React.CSSProperties = longPressActive ? { touchAction: 'none' } : {};
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (longPressActivated.current) {
+      longPressActivated.current = false;
+      e.stopPropagation();
+      return;
+    }
+    e.stopPropagation();
+    onClick(appointment);
+  };
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -361,12 +431,15 @@ function AppointmentCard({
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        {...longPressHandlers}
         className="group absolute cursor-pointer overflow-hidden rounded-sm
                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
         style={{
           background: serviceGradient,
           boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+          opacity: isDragging ? 0.3 : undefined,
           ...style,
+          ...longPressTouchStyle,
         }}
       >
         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-md" />
@@ -390,12 +463,15 @@ function AppointmentCard({
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        {...longPressHandlers}
         className="group absolute cursor-pointer overflow-hidden rounded-md
                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
         style={{
           background: serviceGradient,
           boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+          opacity: isDragging ? 0.3 : undefined,
           ...style,
+          ...longPressTouchStyle,
         }}
       >
         <div className="px-1.5 h-full flex items-center gap-1" style={{ color: '#FFFFFF' }}>
@@ -433,13 +509,16 @@ function AppointmentCard({
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        {...longPressHandlers}
         className="group absolute cursor-pointer overflow-hidden rounded-lg
                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
         style={{
           background: serviceGradient,
           boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
           minHeight: '24px',
+          opacity: isDragging ? 0.3 : undefined,
           ...style,
+          ...longPressTouchStyle,
         }}
       >
         <div className="px-2.5 py-1.5 h-full flex items-center gap-1.5" style={{ color: '#FFFFFF' }}>
@@ -480,13 +559,16 @@ function AppointmentCard({
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
+        {...longPressHandlers}
         className="group absolute cursor-pointer overflow-hidden rounded-lg
                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
         style={{
           background: serviceGradient,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           minHeight: '40px',
+          opacity: isDragging ? 0.3 : undefined,
           ...style,
+          ...longPressTouchStyle,
         }}
       >
         <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
@@ -531,13 +613,16 @@ function AppointmentCard({
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      {...longPressHandlers}
       className="group absolute cursor-pointer overflow-hidden rounded-lg
                  transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
       style={{
         background: serviceGradient,
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         minHeight: '60px',
+        opacity: isDragging ? 0.3 : undefined,
         ...style,
+        ...longPressTouchStyle,
       }}
     >
       <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>

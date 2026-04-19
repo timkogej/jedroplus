@@ -252,16 +252,16 @@ export default function CreateCompanyPage() {
             window.location.href = '/dashboard';
           }, 1500);
         } else {
-          toast.error('Napaka pri nalaganju podjetja. Prosimo, poskusite znova.');
+          toast.error('Prišlo je do napake pri nalaganju podjetja. Prosimo, poskusite znova.');
           setLoading(false);
         }
       } else {
-        toast.error(result.error || 'Napaka pri ustvarjanju podjetja');
+        toast.error('Prišlo je do napake pri ustvarjanju podjetja');
         setLoading(false);
       }
     } catch (error) {
       console.error('Create company error:', error);
-      toast.error('Napaka pri ustvarjanju podjetja');
+      toast.error('Prišlo je do napake pri ustvarjanju podjetja');
       setLoading(false);
     }
   };

@@ -617,6 +617,14 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   const [deleteTarget, setDeleteTarget] = useState<AppointmentWithDetails | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Reschedule (drag-and-drop) confirmation state
+  const [rescheduleConfirm, setRescheduleConfirm] = useState<{
+    appointment: AppointmentWithDetails;
+    newDate: string;
+    newStartTime: string;
+    newEndTime: string;
+  } | null>(null);
+
   // Action feedback
   const [actionError, setActionError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -825,7 +833,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     const result = await fetchAppointmentsForMonth(companyId, year, month);
 
     if (result.error) {
-      setError(result.error.message);
+      setError('Prišlo je do napake pri nalaganju terminov.');
     } else {
       setAppointments(result.data || []);
     }
@@ -921,14 +929,14 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         updated_by: actor,
       };
       const result = await sendEventWebhook(payload);
-      if (!result.ok) throw new Error(result.error || 'Napaka pri brisanju');
+      if (!result.ok) throw new Error('Prišlo je do napake pri brisanju dogodka.');
       await new Promise((r) => setTimeout(r, 800));
       await loadEvents();
       handleCloseEventViewModal();
       setSuccessMessage('Dogodek izbrisan');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri brisanju');
+      setActionError('Prišlo je do napake pri brisanju dogodka.');
     } finally {
       setIsEventDeleting(false);
     }
@@ -960,7 +968,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       };
 
       const result = await sendEventWebhook(payload);
-      if (!result.ok) throw new Error(result.error || 'Napaka pri shranjevanju');
+      if (!result.ok) throw new Error('Prišlo je do napake pri shranjevanju dogodka.');
 
       // Give n8n a moment to write to Supabase before re-fetching
       await new Promise((r) => setTimeout(r, 800));
@@ -969,7 +977,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       setSuccessMessage(isEdit ? 'Dogodek posodobljen' : 'Dogodek ustvarjen');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri shranjevanju');
+      setActionError('Prišlo je do napake pri shranjevanju dogodka.');
     } finally {
       setIsSaving(false);
     }
@@ -989,7 +997,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       };
 
       const result = await sendEventWebhook(payload);
-      if (!result.ok) throw new Error(result.error || 'Napaka pri brisanju');
+      if (!result.ok) throw new Error('Prišlo je do napake pri brisanju dogodka.');
 
       await new Promise((r) => setTimeout(r, 800));
       await loadEvents();
@@ -997,7 +1005,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       setSuccessMessage('Dogodek izbrisan');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri brisanju');
+      setActionError('Prišlo je do napake pri brisanju dogodka.');
     } finally {
       setIsEventDeleting(false);
     }
@@ -1228,7 +1236,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri zaključevanju termina');
+        throw new Error('Prišlo je do napake pri zaključevanju termina.');
       }
 
       setSuccessMessage('Termin uspešno zaključen');
@@ -1241,7 +1249,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       setCompleteTarget(null);
       setCompletionNotes('');
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri zaključevanju');
+      setActionError('Prišlo je do napake pri zaključevanju termina.');
     } finally {
       setIsCompleting(false);
     }
@@ -1274,7 +1282,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri označevanju kot No Show');
+        throw new Error('Prišlo je do napake pri označevanju kot No Show.');
       }
 
       setSuccessMessage('Termin označen kot No Show');
@@ -1283,7 +1291,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       await new Promise((resolve) => setTimeout(resolve, 700));
       await loadAppointments();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri No Show');
+      setActionError('Prišlo je do napake pri označevanju kot No Show.');
     } finally {
       setIsDeleting(false);
     }
@@ -1316,7 +1324,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri odpovedi termina');
+        throw new Error('Prišlo je do napake pri odpovedi termina.');
       }
 
       setSuccessMessage('Termin uspešno odpovedan');
@@ -1325,7 +1333,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       await new Promise((resolve) => setTimeout(resolve, 700));
       await loadAppointments();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri odpovedi');
+      setActionError('Prišlo je do napake pri odpovedi termina.');
     } finally {
       setIsDeleting(false);
     }
@@ -1358,7 +1366,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri brisanju termina');
+        throw new Error('Prišlo je do napake pri brisanju termina.');
       }
 
       // Wait 1 second for system to process
@@ -1367,7 +1375,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       await loadAppointments();
       setDeleteTarget(null);
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri brisanju');
+      setActionError('Prišlo je do napake pri brisanju termina.');
     } finally {
       setIsDeleting(false);
     }
@@ -1554,7 +1562,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error(result.error || 'Napaka pri shranjevanju termina');
+        throw new Error('Prišlo je do napake pri shranjevanju termina.');
       }
 
       // Wait 1 second for system to process
@@ -1563,11 +1571,129 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       await loadAppointments();
       handleCloseModal();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Napaka pri shranjevanju');
+      setActionError('Prišlo je do napake pri shranjevanju termina.');
     } finally {
       setIsSaving(false);
     }
   }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal]);
+
+  // Drag-and-drop reschedule: callback from WeekView/DayView
+  const handleAppointmentDropped = useCallback((
+    apt: AppointmentWithDetails,
+    newDate: string,
+    newStartTime: string,
+    newEndTime: string
+  ) => {
+    setRescheduleConfirm({ appointment: apt, newDate, newStartTime, newEndTime });
+  }, []);
+
+  // Send POSODOBITEV_TERMINA identical to handleSaveAppointment but using embedded appointment data
+  const handleRescheduleAppointment = useCallback(async (
+    appointment: AppointmentWithDetails,
+    newDate: string,
+    newStartTime: string,
+    newEndTime: string
+  ) => {
+    if (!companyId) {
+      setActionError('Prišlo je do napake pri prestavljanju termina.');
+      return;
+    }
+    setIsSaving(true);
+    setActionError(null);
+
+    try {
+      const selectedService = appointment.storitev;
+      const selectedService2 = appointment.storitev_2 || null;
+      const selectedService3 = appointment.storitev_3 || null;
+      const selectedEmployee = appointment.zaposleni;
+
+      // Convert popust_tip from DB format to webhook format
+      const popustTip = appointment.popust_tip === 'eur' ? '€' : appointment.popust_tip === 'percent' ? '%' : undefined;
+
+      const appointmentData = {
+        id: appointment.id,
+        datum: newDate,
+        cas_zacetek: newStartTime,
+        cas_konec: newEndTime,
+        stranka_id: appointment.stranka_id ? String(appointment.stranka_id) : undefined,
+        stranka_ime: appointment.stranka_ime,
+        stranka_email: appointment.stranka_email || undefined,
+        stranka_telefon: appointment.stranka_telefon || undefined,
+        storitev_id: appointment.storitev_id ? String(appointment.storitev_id) : (appointment.storitev?.id || ''),
+        storitev_id_2: appointment.storitev_id_2 ? String(appointment.storitev_id_2) : undefined,
+        storitev_id_3: appointment.storitev_id_3 ? String(appointment.storitev_id_3) : undefined,
+        zaposleni_id: appointment.zaposleni_id ? String(appointment.zaposleni_id) : (appointment.zaposleni?.id || ''),
+        status: appointment.status || 'scheduled',
+        opombe: appointment.opombe || undefined,
+        internal_opombe: appointment.interne_opombe || undefined,
+        cena: appointment.cena ?? undefined,
+        popust: appointment.popust ?? undefined,
+        popust_tip: popustTip as '€' | '%' | undefined,
+        valuta: undefined,
+      };
+
+      const enhancedData = buildEnhancedAppointmentData({
+        companyId,
+        userEmail: actor,
+        companyProfile: companyPayload,
+        appointmentData,
+        serviceDetails: selectedService ? {
+          id: selectedService.id,
+          naziv: selectedService.naziv,
+          trajanje: selectedService.trajanje,
+          cena: selectedService.cena,
+          barva: selectedService.barva,
+        } : null,
+        serviceDetails2: selectedService2 ? {
+          id: selectedService2.id,
+          naziv: selectedService2.naziv,
+          trajanje: selectedService2.trajanje,
+          cena: null,
+          barva: selectedService2.barva,
+        } : null,
+        serviceDetails3: selectedService3 ? {
+          id: selectedService3.id,
+          naziv: selectedService3.naziv,
+          trajanje: selectedService3.trajanje,
+          cena: null,
+          barva: selectedService3.barva,
+        } : null,
+        employeeDetails: selectedEmployee ? {
+          id: selectedEmployee.id,
+          ime: selectedEmployee.ime,
+          priimek: selectedEmployee.priimek,
+          email: selectedEmployee.email,
+          barva: selectedEmployee.barva,
+        } : null,
+        clientDetails: null,
+      });
+
+      const result = await callN8nAction(
+        buildPayload('POSODOBITEV_TERMINA', 'appointments', enhancedData)
+      );
+
+      if (!result.ok) {
+        throw new Error('Prišlo je do napake pri prestavljanju termina.');
+      }
+
+      setSuccessMessage('Termin uspešno prestavljen');
+      setTimeout(() => setSuccessMessage(null), 3000);
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await loadAppointments();
+    } catch (err) {
+      setActionError('Prišlo je do napake pri prestavljanju termina.');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments]);
+
+  const handleConfirmReschedule = useCallback(async () => {
+    if (!rescheduleConfirm) return;
+    const { appointment, newDate, newStartTime, newEndTime } = rescheduleConfirm;
+    setRescheduleConfirm(null);
+    await handleRescheduleAppointment(appointment, newDate, newStartTime, newEndTime);
+  }, [rescheduleConfirm, handleRescheduleAppointment]);
 
   // Handle absence modal
   const handleOpenAbsenceModal = useCallback(() => {
@@ -1616,7 +1742,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       });
 
       if (!result.ok) {
-        throw new Error('Napaka pri shranjevanju odsotnosti');
+        throw new Error('Prišlo je do napake pri shranjevanju odsotnosti.');
       }
 
       handleCloseAbsenceModal();
@@ -1661,7 +1787,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         timestamp: new Date().toISOString(),
         meta: { app: 'Integrate' as const, version: '1.0' as const },
       });
-      if (!result.ok) throw new Error('Napaka pri brisanju odsotnosti');
+      if (!result.ok) throw new Error('Prišlo je do napake pri brisanju odsotnosti.');
       handleAbsenceDetailClose();
       await new Promise((r) => setTimeout(r, 700));
       await refreshAbsences();
@@ -1695,7 +1821,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         timestamp: new Date().toISOString(),
         meta: { app: 'Integrate' as const, version: '1.0' as const },
       });
-      if (!result.ok) throw new Error('Napaka pri urejanju odsotnosti');
+      if (!result.ok) throw new Error('Prišlo je do napake pri urejanju odsotnosti.');
       handleAbsenceDetailClose();
       await new Promise((r) => setTimeout(r, 700));
       await refreshAbsences();
@@ -1863,6 +1989,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                   showAllDays={showAllDays}
                   onGridSlotClick={handleGridSlotClick}
                   companySchedule={companySchedule}
+                  onAppointmentReschedule={handleAppointmentDropped}
                 />
               )}
               {currentView === 'day' && (
@@ -1901,6 +2028,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                       companySchedule={companySchedule}
                       showAllDays={showAllDays}
                       isMobile={isMobile}
+                      onAppointmentReschedule={handleAppointmentDropped}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -2276,6 +2404,103 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
             >
               <X className="h-4 w-4" weight="bold" />
             </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reschedule confirmation dialog */}
+      <AnimatePresence>
+        {rescheduleConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+            onClick={() => { if (!isSaving) setRescheduleConfirm(null); }}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 36 }}
+              className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-6 py-5 border-b border-gray-100">
+                <h3 className="text-base font-semibold text-[#1A1F36]">Prestavi termin?</h3>
+                <p className="text-sm font-medium text-[#1A1F36] mt-1">
+                  {rescheduleConfirm.appointment.stranka_ime} {rescheduleConfirm.appointment.stranka_priimek || ''}
+                </p>
+              </div>
+              <div className="px-6 py-4 space-y-3">
+                {/* Service */}
+                {rescheduleConfirm.appointment.storitev && (
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Storitev</div>
+                    <div className="space-y-1.5">
+                      {[
+                        rescheduleConfirm.appointment.storitev,
+                        rescheduleConfirm.appointment.storitev_2,
+                        rescheduleConfirm.appointment.storitev_3,
+                      ].filter(Boolean).map((s, i) => s && (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: s.barva || '#6366F1' }} />
+                          <span className="text-sm font-medium text-[#1A1F36]">{s.naziv}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* Employee */}
+                {rescheduleConfirm.appointment.zaposleni && (
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Oseba</div>
+                    <div className="flex items-center gap-2.5 rounded-xl bg-[#F7F8FA] px-3 py-2">
+                      <span
+                        className="text-base font-bold flex-shrink-0"
+                        style={{
+                          background: rescheduleConfirm.appointment.zaposleni.barva || 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }}
+                      >
+                        {rescheduleConfirm.appointment.zaposleni.initials}
+                      </span>
+                      <span className="text-sm font-medium text-[#1A1F36]">
+                        {rescheduleConfirm.appointment.zaposleni.ime} {rescheduleConfirm.appointment.zaposleni.priimek}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {/* New time */}
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Nov čas</div>
+                  <div className="rounded-xl bg-[#F7F8FA] px-4 py-3 text-sm font-semibold text-[#1A1F36]">
+                    {rescheduleConfirm.newDate.split('-').reverse().join('.')} · {rescheduleConfirm.newStartTime} – {rescheduleConfirm.newEndTime}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 px-6 pb-5">
+                <button
+                  type="button"
+                  onClick={() => setRescheduleConfirm(null)}
+                  disabled={isSaving}
+                  className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Prekliči
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmReschedule}
+                  disabled={isSaving}
+                  className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
+                >
+                  {isSaving ? 'Prestavljam...' : 'Prestavi'}
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

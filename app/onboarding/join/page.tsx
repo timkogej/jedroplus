@@ -140,7 +140,7 @@ export default function JoinCompanyPage() {
 
         if (!companyUUID) {
           console.error('Join company: missing company UUID in response', result);
-          toast.error('Napaka pri pridruževanju');
+          toast.error('Prišlo je do napake pri pridruževanju');
           setLoading(false);
           return;
         }
@@ -153,7 +153,7 @@ export default function JoinCompanyPage() {
 
           if (profileError) {
             console.error('Join company: failed to update profile', profileError);
-            toast.error('Napaka pri shranjevanju profila');
+            toast.error('Prišlo je do napake pri shranjevanju profila');
             setLoading(false);
             return;
           }
@@ -178,7 +178,7 @@ export default function JoinCompanyPage() {
         }
 
         if (!companyPublicId) {
-          toast.error('Napaka pri nalaganju podjetja');
+          toast.error('Prišlo je do napake pri nalaganju podjetja');
           setLoading(false);
           return;
         }
@@ -202,13 +202,13 @@ export default function JoinCompanyPage() {
         } else if (result.reason === 'company_not_found') {
           toast.error('Podjetje s tem ID-jem ne obstaja');
         } else {
-          toast.error(result.reason || result.error || 'Napaka pri pridruževanju');
+          toast.error(result.reason || 'Prišlo je do napake pri pridruževanju');
         }
         setLoading(false);
       }
     } catch (error) {
       console.error('Join company error:', error);
-      toast.error('Napaka pri pridruževanju');
+      toast.error('Prišlo je do napake pri pridruževanju');
       setLoading(false);
     }
   };

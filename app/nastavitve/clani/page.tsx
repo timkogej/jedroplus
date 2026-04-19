@@ -259,7 +259,7 @@ export default function ClaniPage() {
       setMaxUsers(limitsData?.max_users ?? null);
     } catch (err) {
       console.error('[ClaniPage] fetchData error:', err);
-      setError('Napaka pri nalaganju podatkov.');
+      setError('Prišlo je do napake pri nalaganju podatkov.');
     } finally {
       setLoading(false);
     }
@@ -326,7 +326,7 @@ export default function ClaniPage() {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } else {
-      setSaveError(result.error ?? 'Napaka pri shranjevanju.');
+      setSaveError('Prišlo je do napake pri shranjevanju.');
     }
 
     setSaving(false);

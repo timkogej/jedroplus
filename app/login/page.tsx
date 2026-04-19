@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { SpinnerGap } from '@phosphor-icons/react';
 
 const STORAGE_KEY = "jedroplus_company_id";
 
@@ -67,7 +68,7 @@ export default function LoginPage() {
       if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials') || msg.toLowerCase().includes('password')) {
         toast.error('Napačen email ali geslo');
       } else {
-        toast.error('Napaka pri prijavi. Poskusite znova.');
+        toast.error('Prišlo je do napake pri prijavi. Poskusite znova.');
       }
       setLoading(false);
     }
@@ -147,7 +148,12 @@ export default function LoginPage() {
               background: 'linear-gradient(to right, #8B5CF6, #06B6D4)',
             }}
           >
-            {loading ? 'Prijavljam...' : 'Prijava'}
+            {loading ? (
+              <>
+                <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                Prijavljam...
+              </>
+            ) : 'Prijava'}
           </Button>
 
           {/* Divider */}

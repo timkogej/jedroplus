@@ -377,14 +377,14 @@ export default function ObvestilaPage() {
 
       if (fetchError) {
         console.error('Error fetching notifications:', fetchError);
-        setError('Napaka pri nalaganju obvestil');
+        setError('Prišlo je do napake pri nalaganju obvestil');
         return;
       }
 
       setNotifications(data || []);
     } catch (err) {
       console.error('Error fetching notifications:', err);
-      setError('Napaka pri nalaganju obvestil');
+      setError('Prišlo je do napake pri nalaganju obvestil');
     } finally {
       setLoading(false);
     }

@@ -91,7 +91,7 @@ export default function PersonSettingsDialog({
       payload.person_permissions = permissions || null;
       await onSave(payload);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed.");
+      setError("Prišlo je do napake pri shranjevanju.");
     } finally {
       setLocalLoading(false);
     }

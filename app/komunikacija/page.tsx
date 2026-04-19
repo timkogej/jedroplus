@@ -474,13 +474,13 @@ export default function KomunikacijaPage() {
         });
       } else {
         setToast({
-          message: result.error || 'Napaka pri pošiljanju sporočila',
+          message: 'Prišlo je do napake pri pošiljanju sporočila',
           type: 'error',
         });
       }
     } catch (err) {
       console.error('Send error:', err);
-      setToast({ message: 'Napaka pri pošiljanju sporočila', type: 'error' });
+      setToast({ message: 'Prišlo je do napake pri pošiljanju sporočila', type: 'error' });
     } finally {
       setIsSending(false);
     }

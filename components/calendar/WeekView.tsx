@@ -37,6 +37,19 @@ interface WeekViewProps {
   showAllDays?: boolean;
   onGridSlotClick?: (date: Date, time: string) => void;
   companySchedule?: CompanySchedule | null;
+  onAppointmentReschedule?: (appointment: AppointmentWithDetails, newDate: string, newStartTime: string, newEndTime: string) => void;
+}
+
+interface DragInfo {
+  apt: AppointmentWithDetails;
+  duration: number; // minutes
+  offsetY: number; // pixels from card top where pointer started
+}
+
+interface DropTarget {
+  dateKey: string;
+  startTime: string;
+  endTime: string;
 }
 
 // Calculate overlapping appointments and assign columns
@@ -111,11 +124,16 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function WeekView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, showAllDays = true, onGridSlotClick, companySchedule }: WeekViewProps) {
+function WeekView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, showAllDays = true, onGridSlotClick, companySchedule, onAppointmentReschedule }: WeekViewProps) {
   const [isMobile, setIsMobile] = useState(false);
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const gridScrollRef = useRef<HTMLDivElement>(null);
   const isSyncing = useRef(false);
+
+  // ── Drag state ────────────────────────────────────────────────────────────
+  const [dragging, setDragging] = useState<DragInfo | null>(null);
+  const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(null);
+  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null);
 
   // Detect mobile
   useEffect(() => {
@@ -254,6 +272,88 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
     const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
     onGridSlotClick(day, time);
   }, [onGridSlotClick]);
+
+  // ── Drag handlers ─────────────────────────────────────────────────────────
+  const handleAppointmentLongPress = useCallback((
+    apt: AppointmentWithDetails,
+    info: { clientX: number; clientY: number; cardRect: DOMRect }
+  ) => {
+    if (!onAppointmentReschedule) return;
+    const [sh, sm] = apt.cas_zacetek.split(':').map(Number);
+    const [eh, em] = apt.cas_konec.split(':').map(Number);
+    const duration = (eh * 60 + em) - (sh * 60 + sm);
+    const offsetY = info.clientY - info.cardRect.top;
+    setDragging({ apt, duration, offsetY });
+    setGhostPos({ x: info.clientX, y: info.clientY });
+    setDropTarget(null);
+  }, [onAppointmentReschedule]);
+
+  const calcDropTarget = useCallback((clientX: number, clientY: number, offsetY: number, duration: number): DropTarget | null => {
+    const gridEl = gridScrollRef.current;
+    if (!gridEl) return null;
+    const rect = gridEl.getBoundingClientRect();
+    if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) return null;
+
+    // Calculate time from Y position (accounting for scroll and pointer offset in card)
+    const relativeY = clientY - rect.top + gridEl.scrollTop - offsetY;
+    const rawMinutes = (relativeY / HOUR_HEIGHT) * 60 + START_HOUR * 60;
+    const roundedStart = Math.max(START_HOUR * 60, Math.round(rawMinutes / 15) * 15);
+    const roundedEnd = roundedStart + duration;
+    const sh = Math.floor(roundedStart / 60);
+    const sm = roundedStart % 60;
+    const eh = Math.floor(roundedEnd / 60);
+    const em = roundedEnd % 60;
+    const startTime = `${String(sh).padStart(2, '0')}:${String(sm).padStart(2, '0')}`;
+    const endTime = `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`;
+
+    // Find which date column the cursor is over using data-date attribute
+    const elements = document.elementsFromPoint(clientX, clientY);
+    let dateKey: string | null = null;
+    for (const el of elements) {
+      if (el instanceof HTMLElement && el.dataset.date) {
+        dateKey = el.dataset.date;
+        break;
+      }
+    }
+    if (!dateKey) return null;
+    return { dateKey, startTime, endTime };
+  }, []);
+
+  // Window-level pointer events during drag
+  useEffect(() => {
+    if (!dragging) return;
+
+    let currentDrop: DropTarget | null = null;
+
+    const handleMove = (e: PointerEvent) => {
+      setGhostPos({ x: e.clientX, y: e.clientY });
+      currentDrop = calcDropTarget(e.clientX, e.clientY, dragging.offsetY, dragging.duration);
+      setDropTarget(currentDrop);
+    };
+
+    const handleUp = () => {
+      if (currentDrop && onAppointmentReschedule) {
+        const originalDate = dragging.apt.datum.slice(0, 10);
+        const changed = currentDrop.dateKey !== originalDate || currentDrop.startTime !== dragging.apt.cas_zacetek;
+        if (changed) {
+          onAppointmentReschedule(dragging.apt, currentDrop.dateKey, currentDrop.startTime, currentDrop.endTime);
+        }
+      }
+      setDragging(null);
+      setGhostPos(null);
+      setDropTarget(null);
+    };
+
+    window.addEventListener('pointermove', handleMove, { passive: true });
+    window.addEventListener('pointerup', handleUp);
+    window.addEventListener('pointercancel', handleUp);
+    return () => {
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', handleUp);
+      window.removeEventListener('pointercancel', handleUp);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging]);
 
   return (
     <div className="flex h-full flex-col">
@@ -397,12 +497,13 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
             return (
               <div
                 key={dateKey}
+                data-date={dateKey}
                 className={`relative
                            ${isCurrentDay ? 'bg-[#1A1F36]/[0.015]' : ''}
                            ${dayIndex < weekDays.length - 1 ? 'border-r' : ''}
-                           ${onGridSlotClick ? 'cursor-pointer' : ''}`}
+                           ${onGridSlotClick && !dragging ? 'cursor-pointer' : ''}`}
                 style={dayIndex < weekDays.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
-                onClick={onGridSlotClick ? (e) => handleColumnClick(e, day) : undefined}
+                onClick={onGridSlotClick && !dragging ? (e) => handleColumnClick(e, day) : undefined}
               >
                 {/* Company schedule: shade off-hours */}
                 {offRanges.map((range, i) => {
@@ -490,6 +591,21 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                   );
                 })}
 
+                {/* Drop indicator */}
+                {dragging && dropTarget && dropTarget.dateKey === dateKey && (
+                  <div
+                    className="pointer-events-none absolute left-1 right-1 rounded-lg z-25"
+                    style={{
+                      top: `${getTimePosition(dropTarget.startTime)}px`,
+                      height: `${Math.max(getDurationHeight(dropTarget.startTime, dropTarget.endTime), 20)}px`,
+                      background: dragging.apt.storitev?.barva || '#6366F1',
+                      opacity: 0.35,
+                      border: '2px dashed rgba(255,255,255,0.6)',
+                      zIndex: 25,
+                    }}
+                  />
+                )}
+
                 {/* Render appointments */}
                 {dayAppointments.map((apt) => {
                   const startMinutes = parseTimeToMinutes(apt.cas_zacetek);
@@ -511,6 +627,8 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                       onClick={onAppointmentClick}
                       variant="grid"
                       services={services}
+                      onLongPress={onAppointmentReschedule ? handleAppointmentLongPress : undefined}
+                      isDragging={dragging?.apt.id === apt.id}
                       style={{
                         top: `${top}px`,
                         height: `${height}px`,
@@ -526,6 +644,28 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
           })}
         </div>
       </TimeGrid>
+
+      {/* Drag ghost element – fixed position, follows cursor */}
+      {dragging && ghostPos && (
+        <div
+          className="pointer-events-none fixed z-[200] rounded-lg shadow-2xl select-none"
+          style={{
+            left: ghostPos.x - 40,
+            top: ghostPos.y - dragging.offsetY,
+            width: 120,
+            background: dragging.apt.storitev?.barva || 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%)',
+            opacity: 0.88,
+            transform: 'rotate(2deg) scale(1.04)',
+            padding: '8px 10px',
+            minHeight: 36,
+          }}
+        >
+          <div className="text-white text-xs font-bold truncate leading-tight">{dragging.apt.stranka_ime}</div>
+          {dropTarget && (
+            <div className="text-white/80 text-[10px] mt-0.5">{dropTarget.startTime} – {dropTarget.endTime}</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

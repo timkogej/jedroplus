@@ -287,7 +287,7 @@ export default function StoritvePage() {
       setServices(servicesRes.data ?? []);
       setStats(statsRes.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Napaka pri nalaganju podatkov');
+      setError('Prišlo je do napake pri nalaganju podatkov');
     } finally {
       setIsLoading(false);
     }
@@ -403,7 +403,7 @@ export default function StoritvePage() {
         );
 
         if (!result.ok) {
-          throw new Error('Napaka pri posodabljanju storitve');
+          throw new Error('Prišlo je do napake pri posodabljanju storitve');
         }
 
         showToast('Storitev uspešno posodobljena', 'success');
@@ -453,7 +453,7 @@ export default function StoritvePage() {
         });
 
         if (!result.ok) {
-          throw new Error('Napaka pri ustvarjanju storitve');
+          throw new Error('Prišlo je do napake pri ustvarjanju storitve');
         }
 
         showToast('Storitev uspešno dodana', 'success');
@@ -463,7 +463,7 @@ export default function StoritvePage() {
       loadData();
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Napaka pri shranjevanju storitve',
+        'Prišlo je do napake pri shranjevanju storitve',
         'error'
       );
     } finally {
@@ -507,7 +507,7 @@ export default function StoritvePage() {
 
       if (!result.ok) {
         setServices(prev => prev.map(s => s.id === service.id ? { ...s, aktivna: service.aktivna } : s));
-        throw new Error('Napaka pri spremembi statusa');
+        throw new Error('Prišlo je do napake pri spremembi statusa');
       }
 
       showToast(
@@ -517,7 +517,7 @@ export default function StoritvePage() {
     } catch (err) {
       setServices(prev => prev.map(s => s.id === service.id ? { ...s, aktivna: service.aktivna } : s));
       showToast(
-        err instanceof Error ? err.message : 'Napaka pri spremembi statusa',
+        'Prišlo je do napake pri spremembi statusa',
         'error'
       );
     }
@@ -543,7 +543,7 @@ export default function StoritvePage() {
       );
 
       if (!result.ok) {
-        throw new Error('Napaka pri brisanju storitve');
+        throw new Error('Prišlo je do napake pri brisanju storitve');
       }
 
       showToast('Storitev uspešno izbrisana', 'success');
@@ -551,7 +551,7 @@ export default function StoritvePage() {
       loadData();
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : 'Napaka pri brisanju storitve',
+        'Prišlo je do napake pri brisanju storitve',
         'error'
       );
     } finally {

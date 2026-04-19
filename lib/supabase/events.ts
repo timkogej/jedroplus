@@ -91,7 +91,7 @@ export async function sendEventWebhook(
   } catch (err) {
     return {
       ok: false,
-      error: err instanceof Error ? err.message : 'Webhook failed',
+      error: 'Prišlo je do napake',
     };
   }
 }

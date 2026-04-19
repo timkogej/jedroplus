@@ -23,7 +23,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Link from 'next/link';
-import { CheckCircle, WarningCircle, LockKey, ArrowLeft } from '@phosphor-icons/react';
+import { CheckCircle, WarningCircle, LockKey, ArrowLeft, SpinnerGap } from '@phosphor-icons/react';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  Inner component — needs access to useSearchParams()                        */
@@ -102,7 +102,7 @@ function ResetPasswordForm() {
 
       if (error) {
         console.error('Password update error:', error.message);
-        setFormError('Napaka pri posodobitvi gesla. Prosimo, poskusite znova.');
+        setFormError('Prišlo je do napake pri posodobitvi gesla. Prosimo, poskusite znova.');
         return;
       }
 
@@ -250,7 +250,12 @@ function ResetPasswordForm() {
           background: 'linear-gradient(to right, #8B5CF6, #06B6D4)',
         }}
       >
-        {loading ? 'Shranjujem...' : 'Nastavi novo geslo'}
+        {loading ? (
+          <>
+            <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+            Shranjujem...
+          </>
+        ) : 'Nastavi novo geslo'}
       </Button>
     </form>
   );

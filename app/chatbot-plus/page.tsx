@@ -659,7 +659,7 @@ export default function ChatbotPlusPage() {
         });
       } catch (err) {
         console.error('Error loading chatbot data:', err);
-        setError('Napaka pri nalaganju podatkov');
+        setError('Prišlo je do napake pri nalaganju podatkov');
       } finally {
         setLoading(false);
       }

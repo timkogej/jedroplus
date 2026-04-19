@@ -689,7 +689,7 @@ function AppointmentModal({
       });
 
       if (!result.ok) {
-        throw new Error('Napaka pri ustvarjanju stranke');
+        throw new Error('Prišlo je do napake pri ustvarjanju stranke');
       }
 
       // Close client modal

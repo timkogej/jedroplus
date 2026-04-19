@@ -447,10 +447,10 @@ function BillingPageContent() {
       if (result.ok && portalUrl && portalUrl.startsWith('http')) {
         window.location.assign(portalUrl);
       } else {
-        setError(result.error || 'Napaka pri pridobivanju portala za plačila');
+        setError('Prišlo je do napake pri pridobivanju portala za plačila');
       }
     } catch {
-      setError('Napaka pri povezavi s strežnikom');
+      setError('Prišlo je do napake pri povezavi s strežnikom');
     } finally {
       setIsLoadingPortal(false);
     }
@@ -483,7 +483,7 @@ function BillingPageContent() {
         .single();
 
       if (companyError || !companyData?.id) {
-        setError('Napaka pri pridobivanju podatkov podjetja');
+        setError('Prišlo je do napake pri pridobivanju podatkov podjetja');
         setLoadingPlan(null);
         return;
       }
@@ -500,11 +500,11 @@ function BillingPageContent() {
         }
         window.location.assign(checkoutUrl);
       } else {
-        setError(result.error || 'Napaka pri ustvarjanju plačilne seje');
+        setError('Prišlo je do napake pri ustvarjanju plačilne seje');
         setLoadingPlan(null);
       }
     } catch (err) {
-      setError('Napaka pri povezavi s strežnikom');
+      setError('Prišlo je do napake pri povezavi s strežnikom');
       setLoadingPlan(null);
     }
   };

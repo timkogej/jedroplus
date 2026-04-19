@@ -303,7 +303,7 @@ export default function BookingsPage() {
     setBookings({
       data: result.data ?? [],
       loading: false,
-      error: result.error ? String(result.error.message ?? result.error) : null,
+      error: result.error ? 'Prišlo je do napake pri nalaganju rezervacij.' : null,
     });
   };
 
@@ -313,7 +313,7 @@ export default function BookingsPage() {
     setClients({
       data: result.data ?? [],
       loading: false,
-      error: result.error ? String(result.error.message ?? result.error) : null,
+      error: result.error ? 'Prišlo je do napake pri nalaganju strank.' : null,
     });
   };
 

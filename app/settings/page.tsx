@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
+import { SpinnerGap } from "@phosphor-icons/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import { useCompany } from "@/app/company-context";
@@ -538,7 +539,7 @@ function SettingsContent() {
       }
       await reloadSettings();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed.");
+      setError("Prišlo je do napake pri shranjevanju.");
     } finally {
       setSaving(false);
     }
@@ -728,8 +729,9 @@ function SettingsContent() {
               type="button"
               onClick={() => handleSave("general")}
               disabled={saving}
-              className="mt-6 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
+              className="mt-6 flex items-center gap-2 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
             >
+              {saving && <SpinnerGap className="h-3.5 w-3.5 animate-spin" />}
               {saving ? "Saving..." : "Save general settings"}
             </button>
           </section>
@@ -791,8 +793,9 @@ function SettingsContent() {
               type="button"
               onClick={() => handleSave("company")}
               disabled={saving}
-              className="mt-6 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
+              className="mt-6 flex items-center gap-2 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
             >
+              {saving && <SpinnerGap className="h-3.5 w-3.5 animate-spin" />}
               {saving ? "Saving..." : "Save company settings"}
             </button>
           </section>
@@ -839,8 +842,9 @@ function SettingsContent() {
               type="button"
               onClick={() => handleSave("bookings")}
               disabled={saving}
-              className="mt-6 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
+              className="mt-6 flex items-center gap-2 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
             >
+              {saving && <SpinnerGap className="h-3.5 w-3.5 animate-spin" />}
               {saving ? "Saving..." : "Save bookings settings"}
             </button>
           </section>
@@ -968,8 +972,9 @@ function SettingsContent() {
               type="button"
               onClick={() => handleSave("chatbot")}
               disabled={saving}
-              className="mt-6 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
+              className="mt-6 flex items-center gap-2 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
             >
+              {saving && <SpinnerGap className="h-3.5 w-3.5 animate-spin" />}
               {saving ? "Saving..." : "Save chatbot settings"}
             </button>
           </section>
@@ -1020,8 +1025,9 @@ function SettingsContent() {
               type="button"
               onClick={() => handleSave("kpis")}
               disabled={saving}
-              className="mt-6 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
+              className="mt-6 flex items-center gap-2 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
             >
+              {saving && <SpinnerGap className="h-3.5 w-3.5 animate-spin" />}
               {saving ? "Saving..." : "Save KPI settings"}
             </button>
           </section>
@@ -1119,8 +1125,9 @@ function SettingsContent() {
               type="button"
               onClick={() => handleSave("reminders")}
               disabled={saving}
-              className="mt-6 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
+              className="mt-6 flex items-center gap-2 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
             >
+              {saving && <SpinnerGap className="h-3.5 w-3.5 animate-spin" />}
               {saving ? "Saving..." : "Save reminders"}
             </button>
           </section>
@@ -1187,8 +1194,9 @@ function SettingsContent() {
               type="button"
               onClick={() => handleSave("lost-leads")}
               disabled={saving}
-              className="mt-6 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
+              className="mt-6 flex items-center gap-2 border border-black px-3 py-2 text-xs uppercase tracking-widest disabled:opacity-60"
             >
+              {saving && <SpinnerGap className="h-3.5 w-3.5 animate-spin" />}
               {saving ? "Saving..." : "Save lost leads"}
             </button>
           </section>
