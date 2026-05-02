@@ -4,7 +4,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Bell, Globe, ChatCircleText, Robot, ChartLineUp } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 
-const SESSION_KEY = 'jedroplus_trial_modal_dismissed';
+export const TRIAL_MODAL_SESSION_KEY = 'jedroplus_trial_modal_shown';
+
+function markShownToday() {
+  localStorage.setItem(TRIAL_MODAL_SESSION_KEY, new Date().toDateString());
+}
+
+export function wasShownToday(): boolean {
+  return localStorage.getItem(TRIAL_MODAL_SESSION_KEY) === new Date().toDateString();
+}
 
 const FEATURES = [
   {
@@ -43,12 +51,12 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
   const router = useRouter();
 
   const handleDismiss = () => {
-    sessionStorage.setItem(SESSION_KEY, '1');
+    markShownToday();
     onDismiss();
   };
 
   const handleTry = () => {
-    sessionStorage.setItem(SESSION_KEY, '1');
+    markShownToday();
     onDismiss();
     router.push('/billing');
   };

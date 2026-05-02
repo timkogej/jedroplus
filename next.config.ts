@@ -31,7 +31,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://tikej.app.n8n.cloud wss://*.supabase.co",
+      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://n8n.jedroplus.com wss://*.supabase.co",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -67,7 +67,7 @@ const embeddableHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://tikej.app.n8n.cloud wss://*.supabase.co",
+      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://n8n.jedroplus.com wss://*.supabase.co",
       "frame-ancestors *", // Dovoli embedding iz vseh domen
       "form-action 'self'",
       "base-uri 'self'",

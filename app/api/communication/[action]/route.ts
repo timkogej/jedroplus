@@ -7,7 +7,7 @@ import { rateLimit } from "@/lib/rateLimit";
 
 export const maxDuration = 60;
 
-const N8N_BASE = "https://tikej.app.n8n.cloud/webhook/communication";
+const N8N_BASE = "https://n8n.jedroplus.com/webhook/communication";
 const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 
 const ALLOWED_ACTIONS = new Set(["generate", "send"]);

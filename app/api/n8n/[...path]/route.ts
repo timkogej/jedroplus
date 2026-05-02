@@ -4,7 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/rateLimit';
 
-const N8N_BASE_URL = process.env.N8N_WEBHOOK_URL || 'https://tikej.app.n8n.cloud/webhook';
+const N8N_BASE_URL = process.env.N8N_WEBHOOK_URL || 'https://n8n.jedroplus.com/webhook';
 const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 
 /**

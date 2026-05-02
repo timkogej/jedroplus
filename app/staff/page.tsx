@@ -612,7 +612,7 @@ export default function OsebjePage() {
 
     setIsConnecting(true);
     try {
-      const response = await fetch('https://tikej.app.n8n.cloud/webhook/connect-user', {
+      const response = await fetch('https://n8n.jedroplus.com/webhook/connect-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

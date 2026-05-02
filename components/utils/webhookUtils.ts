@@ -9,7 +9,7 @@ export interface WebhookPayload {
   data: Record<string, unknown>;
 }
 
-const WEBHOOK_URL = 'https://tikej.app.n8n.cloud/webhook/main_povezava';
+const WEBHOOK_URL = 'https://n8n.jedroplus.com/webhook/main_povezava';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
 

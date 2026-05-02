@@ -13,7 +13,7 @@ import RoleAccessGate from "@/components/RoleAccessGate";
 import { useRolePermissions } from "@/app/role-permission-context";
 import { supabase } from "@/lib/supabaseClient";
 import type { StaffPermissions } from "@/types/roles";
-import FreeTrialModal, { TRIAL_MODAL_SESSION_KEY } from "@/components/FreeTrialModal";
+import FreeTrialModal, { wasShownToday } from "@/components/FreeTrialModal";
 
 // ============================================================================
 // Inner layout that uses sidebar context
@@ -28,7 +28,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   // Check has_used_trial once company is loaded
   useEffect(() => {
     if (!companyId) return;
-    if (sessionStorage.getItem(TRIAL_MODAL_SESSION_KEY)) return;
+    if (wasShownToday()) return;
 
     const checkTrial = async () => {
       const { data } = await supabase
