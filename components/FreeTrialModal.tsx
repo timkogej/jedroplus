@@ -165,5 +165,3 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
     </AnimatePresence>
   );
 }
-
-export { SESSION_KEY as TRIAL_MODAL_SESSION_KEY };
