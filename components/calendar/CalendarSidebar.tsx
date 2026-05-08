@@ -443,7 +443,7 @@ function CalendarSidebar({
                   Legenda storitev
                 </h3>
                 <div className="space-y-2">
-                  {services.slice(0, 8).map((service, idx) => {
+                  {services.map((service, idx) => {
                     const colorStyle = service.barva?.includes('gradient')
                       ? { background: service.barva }
                       : { background: service.barva || '#6366F1' };
@@ -472,9 +472,6 @@ function CalendarSidebar({
                       </div>
                     );
                   })}
-                  {services.length > 8 && (
-                    <p className="text-xs text-gray-400 pl-2">+{services.length - 8} več storitev</p>
-                  )}
                   {services.length === 0 && (
                     <p className="text-sm text-gray-400 text-center py-4">Ni storitev za prikaz</p>
                   )}

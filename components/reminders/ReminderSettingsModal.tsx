@@ -148,8 +148,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           setShowDiscountField(popustStr !== '' && popustStr !== '0');
           setPopustPo(popustStr);
 
-          setBrandPrimaryColor(String(data['from_email_primary_color'] ?? data['brand_primary_color'] ?? '#7C75FC'));
-          setBrandSecondaryColor(String(data['from_email_secondary_color'] ?? data['brand_secondary_color'] ?? '#50C3D2'));
+          setBrandPrimaryColor(String(data['brand_primary'] ?? data['from_email_primary_color'] ?? data['brand_primary_color'] ?? '#7C75FC'));
+          setBrandSecondaryColor(String(data['brand_second'] ?? data['from_email_secondary_color'] ?? data['brand_secondary_color'] ?? '#50C3D2'));
 
           const nsVal = String(data['Nastveti_storitev'] ?? 'auto').toLowerCase().trim();
           setNastvetiStoritev(nsVal === 'yes' ? 'yes' : nsVal === 'no' ? 'no' : 'auto');

@@ -26,6 +26,31 @@ const LANGUAGES = [
 
 const DAYS = ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja'];
 
+const PANOGE = [
+  'Frizerstvo',
+  'Kozmetika in nega',
+  'Masaže in wellness',
+  'Zobozdravstvo',
+  'Medicina in zdravstvo',
+  'Fizioterapija',
+  'Psihologija in coaching',
+  'Veterina',
+  'Osebno treniranje / fitnes',
+  'Yoga in pilates',
+  'Lepotni salon',
+  'Manikura in pedikura',
+  'Tetovaže in piercings',
+  'Arhitektura in oblikovanje',
+  'Fotografija',
+  'Pravo in svetovanje',
+  'Računovodstvo',
+  'IT storitve',
+  'Izobraževanje in poučevanje',
+  'Avtoservis',
+  'Čiščenje in vzdrževanje',
+  'Drugo',
+];
+
 const DEFAULT_URNIK: Record<string, UrnikDay> = {
   Ponedeljek: { enabled: true,  intervals: [{ start: '08:00', end: '16:00' }] },
   Torek:      { enabled: true,  intervals: [{ start: '08:00', end: '16:00' }] },
@@ -142,7 +167,9 @@ export default function CreateCompanyPage() {
   const [companyName, setCompanyName] = useState('');
 
   // Step 2: industry
-  const [panoga, setPanoga] = useState('');
+  const [selectedPanoga, setSelectedPanoga] = useState('');
+  const [customPanoga, setCustomPanoga] = useState('');
+  const panoga = selectedPanoga === 'Drugo' ? customPanoga.trim() : selectedPanoga;
 
   // Step 3: schedule
   const [urnik, setUrnik] = useState<Record<string, UrnikDay>>(
@@ -377,15 +404,37 @@ export default function CreateCompanyPage() {
 
           {/* STEP 2 — Industry */}
           {step === 2 && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Panoga / dejavnost</label>
-              <Input
-                value={panoga}
-                onChange={e => setPanoga(e.target.value)}
-                placeholder="npr. Frizerstvo, Zobozdravstvo, IT storitve…"
-                autoFocus
-                onKeyDown={e => e.key === 'Enter' && canAdvance() && handleNext()}
-              />
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-gray-900">Panoga / dejavnost</label>
+              <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
+                {PANOGE.map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => { setSelectedPanoga(p); if (p !== 'Drugo') setCustomPanoga(''); }}
+                    className="text-left px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-150"
+                    style={
+                      selectedPanoga === p
+                        ? { borderColor: '#8B5CF6', background: 'rgba(139,92,246,0.06)', color: '#7C3AED' }
+                        : { borderColor: '#E5E7EB', background: '#FAFAFA', color: '#374151' }
+                    }
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+              {selectedPanoga === 'Drugo' && (
+                <div className="mt-1">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Opišite svojo dejavnost</label>
+                  <Input
+                    value={customPanoga}
+                    onChange={e => setCustomPanoga(e.target.value)}
+                    placeholder="npr. Moja specifična dejavnost…"
+                    autoFocus
+                    onKeyDown={e => e.key === 'Enter' && canAdvance() && handleNext()}
+                  />
+                </div>
+              )}
             </div>
           )}
 

@@ -224,29 +224,23 @@ export default function AppointmentCompletionModal({
                 <div className="flex items-start gap-3">
                   <Scissors className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" weight="regular" />
                   <span className="text-gray-500 w-20 flex-shrink-0 mt-0.5">Storitev</span>
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     {appointment.storitev && (
                       <div className="flex items-center gap-2">
-                        {appointment.storitev.barva && (
-                          <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva }} />
-                        )}
-                        <span className="font-medium text-gray-900">{appointment.storitev.naziv}</span>
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
+                        <span className="font-medium text-gray-900 leading-none">{appointment.storitev.naziv}</span>
                       </div>
                     )}
                     {appointment.storitev_2 && (
                       <div className="flex items-center gap-2">
-                        {appointment.storitev_2.barva && (
-                          <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev_2.barva }} />
-                        )}
-                        <span className="font-medium text-gray-900">{appointment.storitev_2.naziv}</span>
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev_2.barva || '#6366F1' }} />
+                        <span className="font-medium text-gray-900 leading-none">{appointment.storitev_2.naziv}</span>
                       </div>
                     )}
                     {appointment.storitev_3 && (
                       <div className="flex items-center gap-2">
-                        {appointment.storitev_3.barva && (
-                          <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: appointment.storitev_3.barva }} />
-                        )}
-                        <span className="font-medium text-gray-900">{appointment.storitev_3.naziv}</span>
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev_3.barva || '#6366F1' }} />
+                        <span className="font-medium text-gray-900 leading-none">{appointment.storitev_3.naziv}</span>
                       </div>
                     )}
                     {!appointment.storitev && <span className="font-medium text-gray-900">-</span>}

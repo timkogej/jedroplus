@@ -31,7 +31,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://n8n.jedroplus.com wss://*.supabase.co",
+      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://n8n.jedroplus.com https://tikej.app.n8n.cloud wss://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -67,7 +67,7 @@ const embeddableHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://n8n.jedroplus.com wss://*.supabase.co",
+      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://n8n.jedroplus.com https://tikej.app.n8n.cloud wss://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io https://*.ingest.de.sentry.io",
       "frame-ancestors *", // Dovoli embedding iz vseh domen
       "form-action 'self'",
       "base-uri 'self'",
@@ -79,7 +79,19 @@ const embeddableHeaders = [
 const nextConfig: NextConfig = {
   async headers() {
     return [
-      // 🔓 Embeddable poti - dovoli iframe embedding
+      // 🔓 Chatbot subdomena — vse poti so embeddable (chatbot.jedroplus.com/*)
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "chatbot.jedroplus.com" }],
+        headers: embeddableHeaders,
+      },
+      // 🔓 Booking subdomena — vse poti so embeddable (booking.jedroplus.com/*)
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "booking.jedroplus.com" }],
+        headers: embeddableHeaders,
+      },
+      // 🔓 Embeddable poti po URL poti (za primer ko je na isti domeni)
       {
         source: "/chatbot/:path*",
         headers: embeddableHeaders,
@@ -88,7 +100,7 @@ const nextConfig: NextConfig = {
         source: "/booking/:path*",
         headers: embeddableHeaders,
       },
-      
+
       // 🔒 Vse ostale poti - stroga varnost
       {
         source: "/:path*",

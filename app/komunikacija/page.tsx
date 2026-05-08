@@ -242,7 +242,7 @@ export default function KomunikacijaPage() {
         // Get email usage
         const { data: usageData } = await supabaseReadOnly
           .from('company_email_usage')
-          .select('sent_count')
+          .select('sent_count, period_end')
           .eq('company_id', companyUuid)
           .maybeSingle();
 
@@ -263,9 +263,15 @@ export default function KomunikacijaPage() {
           emailTotal = planData?.email_quota_monthly ?? 0;
         }
 
-        const now = new Date();
-        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        const resetDate = nextMonth.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' });
+        let resetDate = '';
+        if (usageData?.period_end) {
+          const periodEnd = new Date(usageData.period_end);
+          resetDate = periodEnd.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' });
+        } else {
+          const now = new Date();
+          const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+          resetDate = nextMonth.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
 
         setEmailQuota({
           used: usageData?.sent_count ?? 0,

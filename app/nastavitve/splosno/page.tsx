@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Copy, Check, Lock } from '@phosphor-icons/react';
+import { QRCodeCard } from '@/components/qr/QRCodeCard';
 import {
   SettingsSection,
   SettingRow,
@@ -402,6 +403,20 @@ export default function GeneralSettingsPage() {
             </div>
           </div>
         </SettingsSection>
+        {/* QR koda */}
+        <SettingsSection title="QR koda za registracijo strank" description="Stranke skenirajo kodo in se registrirajo v vaš sistem">
+          <div className="flex flex-col items-center gap-3 py-2">
+            {companySlug ? (
+              <QRCodeCard slug={companySlug} size={160} compact />
+            ) : (
+              <p className="text-sm text-gray-400">Slug podjetja ni nastavljen.</p>
+            )}
+            <p className="text-sm text-gray-400 text-center">
+              Stranke skenirajo kodo in se registrirajo v vaš sistem.
+            </p>
+          </div>
+        </SettingsSection>
+
       </motion.div>
     </div>
   );
