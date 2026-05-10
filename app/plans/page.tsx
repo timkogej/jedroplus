@@ -22,7 +22,10 @@ interface PlanData {
 interface Plan {
   code: string;
   name: string;
+  subtitle?: string;
   price: string;
+  yearlyPrice?: string;
+  yearlySaving?: string;
   period: string;
   description: string;
   features: string[];
@@ -35,61 +38,72 @@ const PLANS: Plan[] = [
   {
     code: 'JEDRO_PLUS',
     name: 'Jedro Plus',
+    subtitle: 'Za podjetja, ki želijo urejen sistem in jasen pregled',
     price: '19 €',
+    yearlyPrice: '16 €',
+    yearlySaving: 'prihranek 38 € na leto',
     period: '/ mesec',
-    description: 'Osnovni paket za urejene termine in komunikacijo.',
+    description: 'Koledar, baze in opomniki, ki brez zapletov uredijo vsakdan.',
     features: [
-      'baza strank',
-      'baza terminov',
-      'baza storitev in osebja',
-      'personalizirani opomniki pred in po terminu',
-      'email pošiljanje',
-      'celotna analitika',
-      'booking link',
+      'Baza strank in terminov',
+      'Baza storitev in osebja',
+      'Personalizirani opomniki pred in po terminu',
+      'Email pošiljanje (500 email/mesec)',
+      'Komunikacija',
+      'Celotna analitika',
+      'Spletno naročanje',
+      'Različni dizajni spletnega naročanja',
     ],
   },
   {
     code: 'JEDRO_PRO',
     name: 'Jedro Pro',
-    price: '39 €',
+    subtitle: 'Za podjetja, ki želijo več zasedenosti in manj praznih terminov',
+    price: '35 €',
+    yearlyPrice: '29 €',
+    yearlySaving: 'prihranek 20%',
     period: '/ mesec',
-    description: 'Napredne AI funkcije in Lost Leads za več zasedenosti.',
+    description: 'Vključuje obveščanje izgubljenih strank, SMS opomnike in napredne komunikacijske funkcije.',
     popular: true,
     features: [
-      'vse iz Jedro Plus',
-      'Asistent+',
-      'Lost Leads sistem',
-      'sms pošiljanje',
-      'email pošiljanje',
+      'Vse iz Jedro Plus',
+      'Obveščanje izgubljenih strank',
+      'SMS pošiljanje (200 sms/mesec)',
+      'Email pošiljanje (2000 email/mesec)',
+      'Dodatni dizajni spletnega naročanja',
     ],
   },
   {
     code: 'JEDRO_PREMIUM',
     name: 'Jedro Premium',
-    price: '',
-    period: '',
-    description: 'Največ avtomatizacije in AI funkcij.',
+    subtitle: 'Za podjetja, ki želijo maksimalno avtomatizacijo',
+    price: '99 €',
+    yearlyPrice: '83 €',
+    yearlySaving: 'prihranek 192 € na leto',
+    period: '/ mesec',
+    description: 'Celoten nabor AI funkcij za rast in komunikacijo.',
     features: [
-      'vse iz Jedro Pro',
-      'Receptionist+',
-      'Chatbot+',
-      'SMS pošiljanje (višja kvota)',
-      'Email pošiljanje (višja kvota)',
+      'Vse iz Jedro Pro',
+      'Premium AI funkcije',
+      'Najvišja email kvota',
+      'Najvišja SMS kvota',
+      'Premium dizajn spletnega naročanja',
     ],
   },
   {
     code: 'ENTERPRISE',
     name: 'Enterprise',
+    subtitle: 'Za podjetja s posebnimi zahtevami in prilagoditvami',
     price: 'po dogovoru',
     period: '',
-    description: 'Prilagoditve funkcij in AI po meri podjetja.',
+    description: 'Prilagodimo custom dizajne, custom funkcije in celoten sistem vašemu poslovanju.',
     isEnterprise: true,
-    note: 'Za Enterprise pripravimo ponudbo po meri.',
     features: [
-      'Custom AI funkcije prilagojene podjetju',
-      'Premium booking page',
-      'SMS in Email pošiljanje po meri',
-      'Integracije z drugimi orodji',
+      'Custom AI funkcije (chatbot, asistent, receptionist in več)',
+      'Custom booking dizajni z obdelavo slik in naprednimi elementi',
+      'Avtomatizacije poslovnih procesov po meri',
+      'Neomejena email in SMS kvota',
+      'Dedicirani manager in prioritetna podpora',
     ],
   },
 ];
@@ -209,11 +223,8 @@ export default function PlansPage() {
   const currentCode = currentPlanData?.code || contextPlanCode || 'FREE';
 
   const getPlanPrice = (plan: Plan) => {
-    if (plan.code === 'JEDRO_PREMIUM' || plan.isEnterprise) return null;
-    if (isYearly) {
-      if (plan.code === 'JEDRO_PLUS') return '15 €';
-      if (plan.code === 'JEDRO_PRO') return '31 €';
-    }
+    if (plan.isEnterprise) return null;
+    if (isYearly && plan.yearlyPrice) return plan.yearlyPrice;
     return plan.price || null;
   };
 
@@ -426,12 +437,17 @@ export default function PlansPage() {
                   )}
 
                   {/* Plan Name */}
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">
                     {plan.name}
                   </h3>
 
+                  {/* Subtitle */}
+                  {plan.subtitle && (
+                    <p className="text-xs text-gray-500 mb-3 leading-snug">{plan.subtitle}</p>
+                  )}
+
                   {/* Price */}
-                  <div className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent mb-3 min-h-[44px] flex items-center">
+                  <div className="text-3xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent min-h-[44px] flex items-center">
                     {plan.isEnterprise ? (
                       <span>{plan.price}</span>
                     ) : getPlanPrice(plan) ? (
@@ -445,13 +461,25 @@ export default function PlansPage() {
                         {getPlanPrice(plan)}
                         <span className="text-lg font-normal text-gray-500"> / mesec</span>
                       </motion.span>
-                    ) : (
-                      <span className="text-gray-400">??</span>
+                    ) : null}
+                  </div>
+
+                  {/* Yearly saving note */}
+                  <div className="h-5 mb-3">
+                    {isYearly && plan.yearlySaving && (
+                      <motion.p
+                        key="saving"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-xs text-green-600 font-medium"
+                      >
+                        {plan.yearlySaving}
+                      </motion.p>
                     )}
                   </div>
 
                   {/* Description */}
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-600 mb-6 text-sm">
                     {plan.description}
                   </p>
 
@@ -469,49 +497,40 @@ export default function PlansPage() {
                   </ul>
 
                   {/* CTA Button */}
-                  {plan.code === 'JEDRO_PREMIUM' ? (
-                    <a
-                      href="mailto:info@jedroplus.com"
-                      className="block w-full rounded-xl px-6 py-3 font-semibold text-center bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md transition-all"
-                    >
-                      Kontaktiraj nas
-                    </a>
-                  ) : (
-                    <motion.button
-                      whileHover={{ scale: isCurrent ? 1 : 1.05 }}
-                      whileTap={{ scale: isCurrent ? 1 : 0.98 }}
-                      onClick={() => handleSelectPlan(plan.code)}
-                      disabled={isCurrent || isLoading}
-                      className={`w-full rounded-xl px-6 py-3 font-semibold transition-all ${
-                        plan.isEnterprise
-                          ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white hover:shadow-lg'
-                          : isCurrent
-                            ? 'relative bg-white cursor-default'
-                            : 'bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md'
-                      }`}
-                      style={isCurrent && !plan.isEnterprise ? {
-                        background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4) border-box',
-                        border: '2px solid transparent',
-                      } : undefined}
-                    >
-                      {isLoading ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent inline-block" />
-                          Nalagam...
-                        </span>
-                      ) : isCurrent ? (
-                        <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent font-semibold">
-                          Trenutni paket
-                        </span>
-                      ) : plan.isEnterprise ? (
-                        'Pošlji povpraševanje'
-                      ) : plan.code === 'JEDRO_PLUS' && !hasUsedTrial ? (
-                        'Preizkusi Brezplačno'
-                      ) : (
-                        'Izberi paket'
-                      )}
-                    </motion.button>
-                  )}
+                  <motion.button
+                    whileHover={{ scale: isCurrent ? 1 : 1.05 }}
+                    whileTap={{ scale: isCurrent ? 1 : 0.98 }}
+                    onClick={() => handleSelectPlan(plan.code)}
+                    disabled={isCurrent || isLoading}
+                    className={`w-full rounded-xl px-6 py-3 font-semibold transition-all ${
+                      plan.isEnterprise
+                        ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white hover:shadow-lg'
+                        : isCurrent
+                          ? 'relative bg-white cursor-default'
+                          : 'bg-gray-100 text-gray-900 hover:bg-gray-200 hover:shadow-md'
+                    }`}
+                    style={isCurrent && !plan.isEnterprise ? {
+                      background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4) border-box',
+                      border: '2px solid transparent',
+                    } : undefined}
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent inline-block" />
+                        Nalagam...
+                      </span>
+                    ) : isCurrent ? (
+                      <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent font-semibold">
+                        Trenutni paket
+                      </span>
+                    ) : plan.isEnterprise ? (
+                      'Pošlji povpraševanje'
+                    ) : plan.code === 'JEDRO_PLUS' && !hasUsedTrial ? (
+                      'Preizkusi Brezplačno'
+                    ) : (
+                      'Izberi paket'
+                    )}
+                  </motion.button>
 
                   {/* Enterprise Note */}
                   {plan.note && (
