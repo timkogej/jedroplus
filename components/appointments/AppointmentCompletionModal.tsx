@@ -224,23 +224,23 @@ export default function AppointmentCompletionModal({
                 <div className="flex items-start gap-3">
                   <Scissors className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" weight="regular" />
                   <span className="text-gray-500 w-20 flex-shrink-0 mt-0.5">Storitev</span>
-                  <div className="space-y-1.5">
+                  <div className="flex flex-col items-end space-y-1.5">
                     {appointment.storitev && (
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
                         <span className="font-medium text-gray-900 leading-none">{appointment.storitev.naziv}</span>
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
                       </div>
                     )}
                     {appointment.storitev_2 && (
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev_2.barva || '#6366F1' }} />
                         <span className="font-medium text-gray-900 leading-none">{appointment.storitev_2.naziv}</span>
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev_2.barva || '#6366F1' }} />
                       </div>
                     )}
                     {appointment.storitev_3 && (
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev_3.barva || '#6366F1' }} />
                         <span className="font-medium text-gray-900 leading-none">{appointment.storitev_3.naziv}</span>
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev_3.barva || '#6366F1' }} />
                       </div>
                     )}
                     {!appointment.storitev && <span className="font-medium text-gray-900">-</span>}
