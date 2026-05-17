@@ -10,9 +10,9 @@ function getClient() {
   });
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { naziv, dnevi_v_tednu, cas_zacetek, cas_konec, tip_popusta, vrednost, vse_storitve, aktiven, storitev_ids } = body;
 
@@ -42,9 +42,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const supabase = getClient();
 
     const { error } = await supabase.from('happy_hours').delete().eq('id', id);

@@ -20,7 +20,7 @@ import FreeTrialModal, { wasShownToday } from "@/components/FreeTrialModal";
 // ============================================================================
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { isCollapsed, sidebarWidth, isMobile, setNotificationCount } = useSidebar();
+  const { isMobile, isCollapsed, setNotificationCount } = useSidebar();
   const { companyId, companyUuid } = useCompany();
   const pathname = usePathname();
   const [showTrialModal, setShowTrialModal] = useState(false);
@@ -43,8 +43,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     checkTrial();
   }, [companyId]);
 
-  // Calculate content margin based on sidebar state
-  const contentMargin = isMobile ? 0 : (isCollapsed ? 80 : sidebarWidth);
+  const contentMargin = isMobile ? 0 : isCollapsed ? 64 : 240;
 
   // Fetch unread notification count and keep badge updated
   useEffect(() => {
@@ -80,7 +79,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         <AppBar />
 
         {/* Main content with padding for app bar */}
-        <main className="flex-1 pt-16 overflow-hidden">
+        <main className="flex-1 pt-14 overflow-hidden">
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={pathname}

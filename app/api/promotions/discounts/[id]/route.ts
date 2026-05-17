@@ -10,9 +10,9 @@ function getClient() {
   });
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
     const { naziv, tip_popusta, vrednost, datum_zacetek, datum_konec, aktiven, storitev_ids } = body;
 
@@ -58,9 +58,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const supabase = getClient();
 
     const { error } = await supabase.from('popusti').delete().eq('id', id);

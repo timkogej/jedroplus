@@ -15,22 +15,14 @@ import {
   TrendDown,
   ChartLine,
   Gear,
-  CaretLeft,
-  CaretRight,
   X,
   SignOut,
   Bell,
   Envelope,
-  Sparkle,
-  Question,
-  Info,
-  CreditCard,
-  Robot,
-  Phone,
-  ChatCircleDots,
   Package,
   Lock,
   Tag,
+  CaretLeft,
 } from '@phosphor-icons/react';
 import Image from 'next/image';
 import { useSidebar } from './sidebar-context';
@@ -56,7 +48,6 @@ interface NavSection {
   label: string;
   items: NavItem[];
 }
-
 
 // ============================================================================
 // Navigation config
@@ -183,30 +174,11 @@ const sidebarVariants = {
   hidden: { x: '-100%' },
   visible: {
     x: 0,
-    transition: {
-      type: 'spring' as const,
-      damping: 25,
-      stiffness: 300,
-      staggerChildren: 0.05,
-      delayChildren: 0.1,
-    }
+    transition: { type: 'spring' as const, damping: 25, stiffness: 300 },
   },
   exit: {
     x: '-100%',
-    transition: {
-      type: 'spring' as const,
-      damping: 30,
-      stiffness: 300
-    }
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { type: 'spring' as const, damping: 20, stiffness: 300 }
+    transition: { type: 'spring' as const, damping: 30, stiffness: 300 },
   },
 };
 
@@ -217,26 +189,86 @@ const backdropVariants = {
 };
 
 // ============================================================================
+// NavItem sub-component
+// ============================================================================
+
+interface NavItemProps {
+  item: NavItem;
+  active: boolean;
+  locked: boolean;
+  hasAlert: boolean;
+  collapsed?: boolean;
+  onClick?: () => void;
+}
+
+function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: NavItemProps) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      data-active={active ? 'true' : undefined}
+      onClick={onClick}
+      title={collapsed ? item.name : undefined}
+      className={cn(
+        'group relative flex items-center rounded-lg text-sm transition-colors duration-150',
+        collapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2',
+        active
+          ? 'bg-gray-100 text-gray-900 font-medium'
+          : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50',
+        locked && 'opacity-50 pointer-events-none'
+      )}
+    >
+      {!collapsed && active && (
+        <motion.span
+          layoutId="sidebar-active-bar"
+          className="absolute left-0 top-2 bottom-2 w-0.5 bg-[#6D5EF7] rounded-r-full"
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
+        />
+      )}
+
+      <div className="relative flex-shrink-0">
+        <Icon
+          weight="regular"
+          className={cn(
+            'w-5 h-5 transition-colors',
+            active ? 'text-[#6D5EF7]' : 'text-gray-400 group-hover:text-gray-700'
+          )}
+        />
+        {collapsed && hasAlert && (
+          <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full" />
+        )}
+      </div>
+
+      {!collapsed && (
+        <>
+          <span className="truncate flex-1">{item.name}</span>
+          {locked ? (
+            <Lock weight="regular" className="ml-auto w-3.5 h-3.5 text-gray-400" />
+          ) : hasAlert ? (
+            <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+          ) : item.badge === 'Novo' ? (
+            <span className="ml-auto px-1.5 py-0.5 text-[10px] font-medium text-[#6D5EF7] bg-[#6D5EF7]/10 rounded-full">
+              Novo
+            </span>
+          ) : null}
+        </>
+      )}
+    </Link>
+  );
+}
+
+// ============================================================================
 // Component
 // ============================================================================
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const sidebarRef = useRef<HTMLElement>(null);
   const desktopNavRef = useRef<HTMLElement>(null);
-  const mobileNavRef = useRef<HTMLElement>(null);
 
-  const {
-    isOpen,
-    isCollapsed,
-    isMobile,
-    close,
-    setCollapsed,
-    sidebarWidth,
-  } = useSidebar();
+  const { isOpen, isMobile, close, isCollapsed, toggleCollapse } = useSidebar();
 
-  const { companySettings, switchCompany, companyId } = useCompany();
+  const { companySettings } = useCompany();
   const { user, signOut } = useAuth();
   const { planCode } = useCompanyPlan();
   const { role, permissions } = useRolePermissions();
@@ -267,12 +299,6 @@ export function Sidebar() {
 
   // ── Role-based nav filtering ─────────────────────────────────────────────
 
-  /**
-   * Returns true if this nav item should be visible for the current role.
-   * Owner → always visible.
-   * Admin → everything except /billing.
-   * Staff → filtered by staff_role_permissions.
-   */
   function isNavVisible(href: string): boolean {
     if (role === 'owner' || role === null) return true;
 
@@ -281,10 +307,9 @@ export function Sidebar() {
     }
 
     if (role === 'staff') {
-      // /billing is always hidden for staff (nav shows "Paketi" item added separately below)
       if (href === '/billing') return false;
 
-      if (!permissions) return true; // no perms record → allow (fallback)
+      if (!permissions) return true;
 
       const staffMap: Partial<Record<string, keyof StaffPermissions>> = {
         '/analytics': 'can_view_analytics',
@@ -305,7 +330,6 @@ export function Sidebar() {
     return true;
   }
 
-  // Build filtered sections + staff "Paketi" item
   const navigationSections = baseNavigationSections
     .map((section) => ({
       ...section,
@@ -313,7 +337,6 @@ export function Sidebar() {
     }))
     .filter((section) => section.items.length > 0);
 
-  // Staff gets a "Paketi" item in place of "Paketi in kvote"
   const staffPaketiSection: NavSection | null =
     role === 'staff'
       ? { label: 'Račun', items: [{ name: 'Paketi', href: '/billing', icon: Package }] }
@@ -324,7 +347,8 @@ export function Sidebar() {
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Uporabnik';
   const userEmail = user?.email || '';
   const userInitials = userName
-    .split(' ')
+    .split(/\s+/)
+    .filter(Boolean)
     .map((n: string) => n[0])
     .join('')
     .toUpperCase()
@@ -356,11 +380,6 @@ export function Sidebar() {
     return pathname.startsWith(href);
   };
 
-  // Check if the page is an AI page (should have gradient styling)
-  const isAIPage = (href: string) => {
-    return href === '/asistent' || href === '/chatbot-plus' || href === '/receptionist-plus';
-  };
-
   // -------------------------------------------------------------------------
   // Handlers
   // -------------------------------------------------------------------------
@@ -371,285 +390,161 @@ export function Sidebar() {
     router.replace('/login');
   };
 
-  const handleSwitchCompany = () => {
-    close();
-    switchCompany();
-  };
-
   // -------------------------------------------------------------------------
-  // Determine effective width
+  // Shared nav sections list
   // -------------------------------------------------------------------------
 
-  const effectiveWidth = isCollapsed ? 80 : sidebarWidth;
+  const allSections = [...navigationSections, ...(staffPaketiSection ? [staffPaketiSection] : [])];
 
   // -------------------------------------------------------------------------
-  // Render
-  // -------------------------------------------------------------------------
-
   // Desktop sidebar
+  // -------------------------------------------------------------------------
+
   const DesktopSidebar = (
-    <aside
-      ref={sidebarRef}
-      style={{ width: effectiveWidth }}
-      className={cn(
-        'hidden md:flex fixed left-0 top-0 bottom-0 z-40 flex-col transition-all duration-300 overflow-hidden',
-        'bg-white border-r border-gray-200'
-      )}
+    <motion.aside
+      animate={{ width: isCollapsed ? 64 : 240 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+      className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 bg-white border-r border-gray-100 z-40 overflow-hidden"
     >
       {/* Header */}
-      <div className="h-16 px-4 flex items-center justify-between border-b border-gray-100 flex-shrink-0">
-        {!isCollapsed ? (
-          <>
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex-shrink-0"
-              >
-                <Image src="/brand/logo.png" alt="Jedro+" width={56} height={56} priority />
-              </motion.div>
-              <div className="min-w-0 flex-1">
-                <h1
-                  className="text-lg font-bold"
-                  style={{
-                    background: 'linear-gradient(90deg, #7C75FC 0%, #50C3D2 50%, #44D0C6 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  Jedro+
-                </h1>
-                <p className="text-xs text-gray-500 truncate">{companyName}</p>
-              </div>
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setCollapsed(true)}
-              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 ml-2"
-              aria-label="Skrči sidebar"
-            >
-              <CaretLeft className="w-4 h-4 text-gray-400" />
-            </motion.button>
-          </>
-        ) : (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setCollapsed(false)}
-            className="w-full flex justify-center"
-            aria-label="Razširi sidebar"
-          >
-            <Image src="/brand/logo.png" alt="Jedro+" width={48} height={48} priority />
-          </motion.button>
+      <div className={cn(
+        'flex items-center border-b border-gray-100 flex-shrink-0',
+        isCollapsed ? 'justify-center p-4' : 'gap-3 p-5'
+      )}>
+        <div
+          className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #6D5EF7, #2F80ED, #2AD4C5)' }}
+        >
+          <Image src="/brand/logo.png" alt="Jedro+" width={20} height={20} priority />
+        </div>
+        {!isCollapsed && (
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">Jedro+</p>
+            <p className="text-xs text-gray-400 truncate">{companyName}</p>
+          </div>
         )}
       </div>
 
-      {/* User info card - only when not collapsed */}
-      {!isCollapsed && (
-        <div className="px-4 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-11 h-11 rounded-full p-[2px] bg-gradient-to-br from-violet-500 to-cyan-500">
-                <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                  <span className="text-sm font-semibold text-gray-700">{userInitials}</span>
-                </div>
-              </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{userName}</p>
-              <p className="text-xs text-gray-500 truncate">{userEmail}</p>
-            </div>
+      {/* User card */}
+      <div className={cn(
+        'flex items-center border-b border-gray-100 flex-shrink-0',
+        isCollapsed ? 'justify-center py-3.5 px-0' : 'gap-3 px-4 py-3.5'
+      )}>
+        <div className="relative flex-shrink-0" title={isCollapsed ? userName : undefined}>
+          <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
+            <span className="text-xs font-medium text-gray-700">{userInitials}</span>
           </div>
+          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
         </div>
-      )}
+        {!isCollapsed && (
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+            <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+          </div>
+        )}
+      </div>
 
       {/* Navigation */}
-      <nav ref={desktopNavRef} className="flex-1 overflow-y-auto py-4 px-3">
-        {[...navigationSections, ...(staffPaketiSection ? [staffPaketiSection] : [])].map((section) => (
-          <div key={section.label} className="mb-6">
+      <nav ref={desktopNavRef} className={cn('flex-1 overflow-y-auto py-3', isCollapsed ? 'px-1' : 'px-3')}>
+        {allSections.map((section) => (
+          <div key={section.label} className={isCollapsed ? 'mb-1' : 'mb-6'}>
             {!isCollapsed && (
-              <div className="px-3 pb-2">
-                <h3 className="text-[11px] font-semibold text-gray-400 tracking-wider">
-                  {section.label.toUpperCase()}
-                </h3>
-              </div>
+              <p className="px-3 pb-2 text-[11px] font-medium text-gray-400 tracking-wide">
+                {section.label.toUpperCase()}
+              </p>
             )}
-
-            <div className="space-y-1">
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
-                const useGradient = isAIPage(item.href);
-                const locked = isLocked(item.href);
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    data-active={active ? 'true' : undefined}
-                    className={cn(
-                      'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200',
-                      isCollapsed && 'justify-center',
-                      locked && 'opacity-50',
-                      active
-                        ? 'bg-gray-100'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 hover:scale-[1.01]'
-                    )}
-                  >
-                    {active ? (
-                      <Icon className="w-5 h-5 flex-shrink-0 text-gray-900" weight="fill" />
-                    ) : (
-                      <Icon
-                        className="w-5 h-5 transition-all flex-shrink-0 text-gray-500 group-hover:text-gray-700"
-                        weight="regular"
-                      />
-                    )}
-
-                    {!isCollapsed && (
-                      <>
-                        {active ? (
-                          <span className="font-semibold text-sm flex-1 text-gray-900">
-                            {item.name}
-                          </span>
-                        ) : (
-                          <span className="font-medium text-sm flex-1">
-                            {item.name}
-                          </span>
-                        )}
-
-                        {locked ? (
-                          <Lock className="w-3.5 h-3.5 text-gray-400" weight="regular" />
-                        ) : getAlertBadge(item.href) ? (
-                          <span className="w-5 h-5 flex items-center justify-center text-white bg-orange-500 rounded-full text-[10px] font-bold flex-shrink-0">!</span>
-                        ) : item.badge ? (
-                          <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full">
-                            {item.badge}
-                          </span>
-                        ) : null}
-                      </>
-                    )}
-
-                    {/* Alert dot for collapsed state */}
-                    {isCollapsed && getAlertBadge(item.href) && (
-                      <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 bg-orange-500 rounded-full border border-white" />
-                    )}
-
-                    {/* Tooltip for collapsed state */}
-                    {isCollapsed && (
-                      <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg">
-                        {item.name}
-                        {locked ? (
-                          <Lock className="inline-block ml-1.5 w-3 h-3" weight="regular" />
-                        ) : getAlertBadge(item.href) ? (
-                          <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-orange-500/80 rounded font-bold">!</span>
-                        ) : item.badge ? (
-                          <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-white/20 rounded">
-                            {item.badge}
-                          </span>
-                        ) : null}
-                      </div>
-                    )}
-                  </Link>
-                );
-              })}
+            <div className="space-y-0.5">
+              {section.items.map((item) => (
+                <NavItemLink
+                  key={item.href}
+                  item={item}
+                  active={isActive(item.href)}
+                  locked={isLocked(item.href)}
+                  hasAlert={getAlertBadge(item.href)}
+                  collapsed={isCollapsed}
+                />
+              ))}
             </div>
           </div>
         ))}
       </nav>
 
-      {/* Bottom section */}
-      <div className="border-t border-gray-100 bg-gray-50/50 flex-shrink-0">
-        {/* Settings */}
+      {/* Footer */}
+      <div className={cn('border-t border-gray-100 space-y-0.5 flex-shrink-0', isCollapsed ? 'p-1' : 'p-3')}>
         <Link
           href="/nastavitve"
+          title={isCollapsed ? 'Nastavitve' : undefined}
           className={cn(
-            'group relative flex items-center gap-3 px-3 py-2.5 mx-3 rounded-xl transition-all duration-200',
-            isCollapsed && 'justify-center px-0 mx-0',
+            'group relative flex items-center rounded-lg text-sm transition-colors duration-150',
+            isCollapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2',
             isActive('/nastavitve')
-              ? 'bg-gray-100'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'bg-gray-100 text-gray-900 font-medium'
+              : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
           )}
         >
+          {!isCollapsed && isActive('/nastavitve') && (
+            <motion.span
+              layoutId="sidebar-active-bar"
+              className="absolute left-0 top-2 bottom-2 w-0.5 bg-[#6D5EF7] rounded-r-full"
+              transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
+            />
+          )}
           <div className="relative flex-shrink-0">
-            {isActive('/nastavitve') ? (
-              <Gear className="w-5 h-5 text-gray-900" weight="fill" />
-            ) : (
-              <Gear className="w-5 h-5 transition-all text-gray-500" weight="regular" />
-            )}
+            <Gear
+              weight="regular"
+              className={cn(
+                'w-5 h-5 transition-colors',
+                isActive('/nastavitve') ? 'text-[#6D5EF7]' : 'text-gray-400 group-hover:text-gray-700'
+              )}
+            />
             {any_incomplete && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-orange-500 rounded-full border border-white" />
+              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full" />
             )}
           </div>
           {!isCollapsed && (
             <>
-              {isActive('/nastavitve') ? (
-                <span className="font-semibold text-sm text-gray-900 flex-1">
-                  Nastavitve
-                </span>
-              ) : (
-                <span className="font-medium text-sm flex-1">Nastavitve</span>
-              )}
+              <span className="flex-1 truncate">Nastavitve</span>
               {any_incomplete && (
-                <span className="w-5 h-5 flex items-center justify-center text-white bg-orange-500 rounded-full text-[10px] font-bold flex-shrink-0">!</span>
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
               )}
             </>
           )}
-
-          {isCollapsed && (
-            <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg">
-              Nastavitve
-              {any_incomplete && <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-orange-500/80 rounded font-bold">!</span>}
-            </div>
-          )}
         </Link>
 
-        {/* Logout button */}
-        {!isCollapsed ? (
-          <div className="px-4 py-4">
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
-            >
-              <SignOut className="w-4 h-4" />
-              <span>Odjava</span>
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={handleLogout}
-            className="w-full flex justify-center py-3 hover:bg-gray-100 transition-all group relative"
-          >
-            <SignOut className="w-5 h-5 text-red-500" />
-            <div className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg">
-              Odjava
-            </div>
-          </button>
-        )}
+        <button
+          onClick={handleLogout}
+          title={isCollapsed ? 'Odjava' : undefined}
+          className={cn(
+            'w-full flex items-center rounded-lg text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-150',
+            isCollapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2'
+          )}
+        >
+          <SignOut weight="regular" className="w-5 h-5 text-gray-400" />
+          {!isCollapsed && <span>Odjava</span>}
+        </button>
 
-        {/* Version info */}
-        {!isCollapsed && (
-          <div className="px-6 py-3 border-t border-gray-100">
-            <div className="flex items-center justify-between text-xs text-gray-400">
-              <span>v1.0.0</span>
-              <div className="flex items-center gap-2">
-                <button className="hover:text-gray-600 transition-colors">
-                  <Question className="w-4 h-4" />
-                </button>
-                <button className="hover:text-gray-600 transition-colors">
-                  <Info className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Collapse toggle */}
+        <button
+          onClick={toggleCollapse}
+          title={isCollapsed ? 'Razširi' : 'Skrči'}
+          className={cn(
+            'w-full flex items-center rounded-lg text-sm text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-150',
+            isCollapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2'
+          )}
+        >
+          <CaretLeft
+            weight="bold"
+            className={cn('w-4 h-4 transition-transform duration-200', isCollapsed && 'rotate-180')}
+          />
+        </button>
       </div>
-
-    </aside>
+    </motion.aside>
   );
 
-  // Mobile sidebar (overlay) - WHITE BACKGROUND
+  // -------------------------------------------------------------------------
+  // Mobile sidebar
+  // -------------------------------------------------------------------------
+
   const MobileSidebar = (
     <AnimatePresence>
       {isMobile && isOpen && (
@@ -660,196 +555,124 @@ export function Sidebar() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
             onClick={close}
           />
 
-          {/* Sidebar - WHITE BACKGROUND */}
+          {/* Panel */}
           <motion.aside
-            ref={sidebarRef}
             variants={sidebarVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed left-0 top-0 bottom-0 w-80 bg-white border-r border-gray-200 z-50 flex flex-col overflow-hidden md:hidden"
+            className="fixed left-0 top-0 bottom-0 w-72 bg-white border-r border-gray-100 z-50 flex flex-col overflow-hidden shadow-lg md:hidden"
           >
-            {/* Header - WHITE */}
-            <div className="h-16 flex items-center justify-between px-5 border-b border-gray-100 flex-shrink-0 bg-white">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <Image src="/brand/logo.png" alt="Jedro+" width={56} height={56} priority />
-                <span
-                  className="text-xl font-bold"
-                  style={{
-                    background: 'linear-gradient(90deg, #7C75FC 0%, #50C3D2 50%, #44D0C6 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
+                <div
+                  className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg, #6D5EF7, #2F80ED, #2AD4C5)' }}
                 >
-                  Jedro+
-                </span>
+                  <Image src="/brand/logo.png" alt="Jedro+" width={20} height={20} priority />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">Jedro+</p>
+                  <p className="text-xs text-gray-400 truncate">{companyName}</p>
+                </div>
               </div>
-
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+              <button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   close();
                 }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 -mr-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
                 type="button"
               >
-                <X className="w-5 h-5 text-gray-600" weight="bold" />
-              </motion.button>
+                <X weight="regular" className="w-5 h-5" />
+              </button>
             </div>
 
-            {/* User info card - WHITE */}
-            <div className="p-5 border-b border-gray-100 flex-shrink-0 bg-white">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full p-[2px] bg-gradient-to-r from-violet-500 to-cyan-500">
-                  <div className="w-full h-full rounded-full bg-white flex items-center justify-center">
-                    <span className="text-gray-700 font-bold">{userInitials}</span>
-                  </div>
+            {/* User card */}
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100 flex-shrink-0">
+              <div className="relative flex-shrink-0">
+                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
+                  <span className="text-xs font-medium text-gray-700">{userInitials}</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-gray-900 font-semibold truncate">{userName}</div>
-                  <div className="text-xs text-gray-500 truncate">{userEmail}</div>
-                </div>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+                <p className="text-xs text-gray-500 truncate">{userEmail}</p>
               </div>
             </div>
 
-            {/* Navigation - WHITE */}
-            <nav ref={mobileNavRef} className="flex-1 p-4 overflow-y-auto bg-white">
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  visible: {
-                    transition: {
-                      staggerChildren: 0.05,
-                    },
-                  },
-                }}
-              >
-                {[...navigationSections, ...(staffPaketiSection ? [staffPaketiSection] : [])].map((section) => (
-                  <div key={section.label} className="mb-6">
-                    <div className="text-xs font-semibold text-gray-400 tracking-wider mb-2 px-3">
-                      {section.label.toUpperCase()}
-                    </div>
-
-                    {section.items.map((item) => {
-                      const active = isActive(item.href);
-                      const Icon = item.icon;
-                      const useGradient = isAIPage(item.href);
-                      const locked = isLocked(item.href);
-
-                      return (
-                        <motion.div key={item.href} variants={itemVariants}>
-                          <Link
-                            href={item.href}
-                            onClick={close}
-                            className={cn(
-                              'flex items-center gap-3 px-3 py-3 rounded-xl mb-1 transition-all',
-                              locked && 'opacity-50',
-                              active
-                                ? 'bg-gray-100'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                            )}
-                          >
-                            {active ? (
-                              <Icon className="w-5 h-5 text-gray-900" weight="fill" />
-                            ) : (
-                              <Icon className="w-5 h-5 text-gray-500" weight="regular" />
-                            )}
-                            {active ? (
-                              <span className="flex-1 font-semibold text-gray-900">{item.name}</span>
-                            ) : (
-                              <span className="flex-1 font-medium">{item.name}</span>
-                            )}
-                            {locked ? (
-                              <Lock className="w-3.5 h-3.5 text-gray-400" weight="regular" />
-                            ) : getAlertBadge(item.href) ? (
-                              <span className="w-5 h-5 flex items-center justify-center text-white bg-orange-500 rounded-full text-[10px] font-bold flex-shrink-0">!</span>
-                            ) : item.badge ? (
-                              <span className="px-2 py-0.5 text-[10px] font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full">
-                                {item.badge}
-                              </span>
-                            ) : null}
-                            {active && (
-                              useGradient ? (
-                                <span
-                                  style={{
-                                    background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                  }}
-                                >
-                                  <CaretRight className="w-4 h-4" weight="bold" />
-                                </span>
-                              ) : (
-                                <CaretRight className="w-4 h-4 text-gray-900" weight="bold" />
-                              )
-                            )}
-                          </Link>
-                        </motion.div>
-                      );
-                    })}
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto py-3 px-3">
+              {allSections.map((section) => (
+                <div key={section.label} className="mb-6">
+                  <p className="px-3 pb-2 text-[11px] font-medium text-gray-400 tracking-wide">
+                    {section.label.toUpperCase()}
+                  </p>
+                  <div className="space-y-0.5">
+                    {section.items.map((item) => (
+                      <NavItemLink
+                        key={item.href}
+                        item={item}
+                        active={isActive(item.href)}
+                        locked={isLocked(item.href)}
+                        hasAlert={getAlertBadge(item.href)}
+                        onClick={close}
+                      />
+                    ))}
                   </div>
-                ))}
-
-                {/* Settings in mobile nav */}
-                <motion.div variants={itemVariants}>
-                  <Link
-                    href="/nastavitve"
-                    onClick={close}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-3 rounded-xl transition-all',
-                      isActive('/nastavitve')
-                        ? 'bg-gray-100'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    )}
-                  >
-                    <div className="relative flex-shrink-0">
-                      {isActive('/nastavitve') ? (
-                        <Gear className="w-5 h-5 text-gray-900" weight="fill" />
-                      ) : (
-                        <Gear className="w-5 h-5 text-gray-500" weight="regular" />
-                      )}
-                      {any_incomplete && (
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-orange-500 rounded-full border border-white" />
-                      )}
-                    </div>
-                    {isActive('/nastavitve') ? (
-                      <span className="flex-1 font-semibold text-gray-900">
-                        Nastavitve
-                      </span>
-                    ) : (
-                      <span className="flex-1 font-medium">Nastavitve</span>
-                    )}
-                    {any_incomplete && (
-                      <span className="w-5 h-5 flex items-center justify-center text-white bg-orange-500 rounded-full text-[10px] font-bold flex-shrink-0">!</span>
-                    )}
-                    {isActive('/nastavitve') && (
-                      <CaretRight className="w-4 h-4 text-gray-900" weight="bold" />
-                    )}
-                  </Link>
-                </motion.div>
-              </motion.div>
+                </div>
+              ))}
             </nav>
 
-            {/* Footer - WHITE */}
-            <div className="p-5 border-t border-gray-100 flex-shrink-0 bg-gray-50">
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-                <span>{companyName}</span>
-                <span>v1.0.0</span>
-              </div>
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-100 space-y-0.5 flex-shrink-0">
+              <Link
+                href="/nastavitve"
+                onClick={close}
+                className={cn(
+                  'group relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-150',
+                  isActive('/nastavitve')
+                    ? 'bg-gray-100 text-gray-900 font-medium'
+                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'
+                )}
+              >
+                {isActive('/nastavitve') && (
+                  <motion.span
+                    layoutId="sidebar-active-bar-mobile"
+                    className="absolute left-0 top-2 bottom-2 w-0.5 bg-[#6D5EF7] rounded-r-full"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
+                  />
+                )}
+                <div className="relative flex-shrink-0">
+                  <Gear
+                    weight="regular"
+                    className={cn(
+                      'w-5 h-5 transition-colors',
+                      isActive('/nastavitve') ? 'text-[#6D5EF7]' : 'text-gray-400 group-hover:text-gray-700'
+                    )}
+                  />
+                  {any_incomplete && (
+                    <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full" />
+                  )}
+                </div>
+                <span className="flex-1 truncate">Nastavitve</span>
+                {any_incomplete && (
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+                )}
+              </Link>
 
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-150"
               >
-                <SignOut className="w-4 h-4" weight="bold" />
+                <SignOut weight="regular" className="w-5 h-5 text-gray-400" />
                 <span>Odjava</span>
               </button>
             </div>
@@ -859,11 +682,12 @@ export function Sidebar() {
     </AnimatePresence>
   );
 
-  // Spacer for content
+  // Spacer for content offset
   const Spacer = (
-    <div
-      className="hidden md:block flex-shrink-0 transition-all duration-300"
-      style={{ width: effectiveWidth }}
+    <motion.div
+      animate={{ width: isCollapsed ? 64 : 240 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 280 }}
+      className="hidden md:block flex-shrink-0"
     />
   );
 
