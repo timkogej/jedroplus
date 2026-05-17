@@ -78,11 +78,11 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 
 export function AppBar() {
   const pathname = usePathname();
-  const { toggle, isMobile, isOpen, openSearch, notificationCount } = useSidebar();
+  const { toggle, isMobile, isOpen, isCollapsed, openSearch, notificationCount } = useSidebar();
   const { user, signOut } = useAuth();
   const { companySettings, switchCompany } = useCompany();
 
-  const leftOffset = isMobile ? 0 : 240;
+  const leftOffset = isMobile ? 0 : isCollapsed ? 64 : 240;
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);

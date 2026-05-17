@@ -215,7 +215,7 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
         active
           ? 'bg-gray-100 text-gray-900 font-medium'
           : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50',
-        locked && 'opacity-50 pointer-events-none'
+        locked && 'opacity-50'
       )}
     >
       {!collapsed && active && (
@@ -440,14 +440,9 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav ref={desktopNavRef} className={cn('flex-1 overflow-y-auto py-3', isCollapsed ? 'px-1' : 'px-3')}>
+      <nav ref={desktopNavRef} className={cn('flex-1 overflow-y-auto py-3 [&::-webkit-scrollbar]:hidden', isCollapsed ? 'px-1' : 'px-3')}>
         {allSections.map((section) => (
-          <div key={section.label} className={isCollapsed ? 'mb-1' : 'mb-6'}>
-            {!isCollapsed && (
-              <p className="px-3 pb-2 text-[11px] font-medium text-gray-400 tracking-wide">
-                {section.label.toUpperCase()}
-              </p>
-            )}
+          <div key={section.label} className={isCollapsed ? 'mb-1' : 'mb-4'}>
             <div className="space-y-0.5">
               {section.items.map((item) => (
                 <NavItemLink
@@ -528,7 +523,7 @@ export function Sidebar() {
           )}
         >
           <CaretLeft
-            weight="bold"
+            weight="regular"
             className={cn('w-4 h-4 transition-transform duration-200', isCollapsed && 'rotate-180')}
           />
         </button>
@@ -601,10 +596,7 @@ export function Sidebar() {
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto py-3 px-3">
               {allSections.map((section) => (
-                <div key={section.label} className="mb-6">
-                  <p className="px-3 pb-2 text-[11px] font-medium text-gray-400 tracking-wide">
-                    {section.label.toUpperCase()}
-                  </p>
+                <div key={section.label} className="mb-4">
                   <div className="space-y-0.5">
                     {section.items.map((item) => (
                       <NavItemLink
