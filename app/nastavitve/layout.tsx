@@ -19,7 +19,7 @@ export default function SettingsLayout({
             animate={{ opacity: 1, y: 0 }}
             className="mb-6"
           >
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#1A1F36]">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 tracking-tight">
               Nastavitve
             </h1>
             <p className="text-sm text-gray-500 mt-1">

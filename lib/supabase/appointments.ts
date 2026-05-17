@@ -127,6 +127,32 @@ function parseStaff(row: Record<string, unknown>): (Zaposleni & { initials: stri
   };
 }
 
+// Extract promotion fields from raw booking row
+function extractPromotionFields(row: Record<string, unknown>): {
+  promocija_tip: 'popust' | 'happy_hour' | 'add_on' | null;
+  promocija_naziv: string | null;
+  popust_id: string | null;
+  happy_hour_id: string | null;
+} {
+  const toString = (v: unknown): string | null => {
+    if (v === null || v === undefined || v === '' || String(v) === 'null') return null;
+    return String(v).trim();
+  };
+
+  const rawTip = toString(pickFirst(row, ['promocija_tip', 'Promocija tip', 'promo_type', 'promo_tip']));
+  const validTips = ['popust', 'happy_hour', 'add_on'] as const;
+  const promocija_tip = validTips.includes(rawTip as typeof validTips[number])
+    ? (rawTip as 'popust' | 'happy_hour' | 'add_on')
+    : null;
+
+  return {
+    promocija_tip,
+    promocija_naziv: toString(pickFirst(row, ['promocija_naziv', 'Promocija naziv', 'promo_name', 'promo_naziv'])),
+    popust_id: toString(pickFirst(row, ['popust_id', 'Popust ID', 'discount_id'])),
+    happy_hour_id: toString(pickFirst(row, ['happy_hour_id', 'Happy hour ID', 'happyhour_id'])),
+  };
+}
+
 // Extract pricing fields from raw booking row
 function extractPricingFields(row: Record<string, unknown>): {
   koncna_cena: number | null;
@@ -366,8 +392,9 @@ export async function fetchAppointmentsForMonth(
       const storitev2 = serviceId2 ? (serviceMap.get(serviceId2) || null) : null;
       const storitev3 = serviceId3 ? (serviceMap.get(serviceId3) || null) : null;
 
-      // Extract pricing fields
+      // Extract pricing and promotion fields
       const pricing = extractPricingFields(row);
+      const promo = extractPromotionFields(row);
 
       appointments.push({
         id,
@@ -390,6 +417,10 @@ export async function fetchAppointmentsForMonth(
         popust: pricing.popust,
         popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,
         koncna_cena: pricing.koncna_cena,
+        promocija_tip: promo.promocija_tip,
+        promocija_naziv: promo.promocija_naziv,
+        popust_id: promo.popust_id,
+        happy_hour_id: promo.happy_hour_id,
         storitev: serviceData,
         storitev_2: storitev2,
         storitev_3: storitev3,
@@ -783,8 +814,9 @@ export async function fetchAllAppointments(
       const storitev2 = serviceId2 ? (serviceMap.get(serviceId2) || null) : null;
       const storitev3 = serviceId3 ? (serviceMap.get(serviceId3) || null) : null;
 
-      // Extract pricing fields
+      // Extract pricing and promotion fields
       const pricing = extractPricingFields(row);
+      const promo = extractPromotionFields(row);
 
       appointments.push({
         id,
@@ -807,6 +839,10 @@ export async function fetchAllAppointments(
         popust: pricing.popust,
         popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,
         koncna_cena: pricing.koncna_cena,
+        promocija_tip: promo.promocija_tip,
+        promocija_naziv: promo.promocija_naziv,
+        popust_id: promo.popust_id,
+        happy_hour_id: promo.happy_hour_id,
         storitev: serviceData,
         storitev_2: storitev2,
         storitev_3: storitev3,

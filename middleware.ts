@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
     .eq('id', user.id)
     .maybeSingle();
 
-  if (!profile?.default_company_id) {
+  if (!profile?.default_company_id && !pathname.startsWith('/api/')) {
     const onboardingUrl = request.nextUrl.clone();
     onboardingUrl.pathname = '/onboarding';
     return NextResponse.redirect(onboardingUrl);

@@ -119,6 +119,14 @@ body {
   background-clip: text;
 }
 
+/* Company identity gradient — used only on big ID values in /nastavitve/splosno */
+.gradient-text {
+  background: linear-gradient(135deg, #6D5EF7, #2F80ED, #2AD4C5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* Animation for loading skeleton */
 @keyframes shimmer {
   0% {

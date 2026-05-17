@@ -22,7 +22,7 @@ export function SettingRow({ label, description, children, error, fullWidth = fa
       <div className={fullWidth ? 'w-full' : 'w-full sm:w-72 flex-shrink-0'}>
         {children}
         {error && (
-          <p className="text-sm text-red-600 mt-1">{error}</p>
+          <p className="text-xs text-red-600 mt-1">{error}</p>
         )}
       </div>
     </div>

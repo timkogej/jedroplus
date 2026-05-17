@@ -18,6 +18,8 @@ import {
   DotsThreeVertical,
   CalendarBlank,
   Clock,
+  Tag,
+  Plus,
   ListChecks,
   Envelope,
   Phone,
@@ -402,21 +404,95 @@ function AppointmentDetailModal({
             </div>
           )}
 
-          {/* Price */}
+          {/* PRICE SECTION */}
           {(() => {
-            const apt = appointment as unknown as Record<string, unknown>;
-            const cena = (apt['Final cena'] as number) ?? (apt['final_cena'] as number) ?? (apt['koncna_cena'] as number) ?? appointment.koncna_cena ?? appointment.cena ?? appointment.storitev?.cena;
-            if (cena && Number(cena) > 0) {
-              return (
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-                  <span className="text-sm font-medium text-gray-700">Cena</span>
-                  <span className="text-xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                    {Number(cena).toFixed(2)} €
-                  </span>
-                </div>
-              );
-            }
-            return null;
+            const apt = appointment;
+            const originalCena = apt.cena ?? 0;
+            const popustVrednost = apt.popust ?? 0;
+            const finalCena = apt.koncna_cena ?? originalCena;
+            const popustTip = apt.popust_tip ?? '€';
+            const imaPopust = popustVrednost > 0;
+
+            const getBadge = () => {
+              if (apt.promocija_tip === 'happy_hour') return { label: 'Happy Hour', bg: '#F59E0B', Icon: Clock };
+              if (apt.promocija_tip === 'add_on')     return { label: 'Add-on',     bg: '#3B82F6', Icon: Plus };
+              if (imaPopust)                           return { label: apt.promocija_naziv ?? 'Popust', bg: '#6D5EF7', Icon: Tag };
+              return null;
+            };
+            const badge = getBadge();
+
+            const fmt = (val: number) =>
+              new Intl.NumberFormat('sl-SI', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+
+            if (originalCena === 0 && !imaPopust) return null;
+
+            return (
+              <div className="space-y-3">
+                {imaPopust ? (
+                  <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                    {badge && (
+                      <div
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-xs font-semibold"
+                        style={{ backgroundColor: badge.bg }}
+                      >
+                        <badge.Icon size={11} />
+                        <span>{badge.label}</span>
+                      </div>
+                    )}
+                    <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-2.5">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Originalna cena</span>
+                        <span className="text-gray-400 line-through">{fmt(originalCena)} EUR</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Popust</span>
+                        <span className="font-medium text-red-500">
+                          − {popustTip === '%' ? `${popustVrednost}%` : `${fmt(popustVrednost)} EUR`}
+                        </span>
+                      </div>
+                      <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
+                        <span className="font-semibold text-gray-900">Cena z popustom</span>
+                        <span className="text-xl font-bold text-green-600">{fmt(finalCena)} EUR</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <p className="text-2xl font-bold text-gray-900">{fmt(originalCena)} EUR</p>
+                )}
+
+                {/* ADD-ON section */}
+                {apt.storitev_2 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2"
+                  >
+                    <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm mb-2">
+                      <Plus size={14} />
+                      <span>Dodatna storitev</span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-800">{apt.storitev_2.naziv}</p>
+                    {apt.add_on_final_cena && (
+                      <>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Popust</span>
+                          <span className="text-red-500">
+                            − {apt.add_on_popust_tip === '%'
+                              ? `${apt.add_on_popust}%`
+                              : `${fmt(parseFloat(apt.add_on_popust ?? '0'))} EUR`}
+                          </span>
+                        </div>
+                        <div className="flex justify-between font-semibold">
+                          <span className="text-gray-700">Cena z popustom</span>
+                          <span className="text-green-600">{fmt(parseFloat(apt.add_on_final_cena))} EUR</span>
+                        </div>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+              </div>
+            );
           })()}
 
           {/* Notes */}

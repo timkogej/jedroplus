@@ -66,6 +66,15 @@ export interface AppointmentWithDetails {
   popust?: number | null; // Discount amount
   popust_tip?: 'eur' | 'percent' | null; // Discount type
   koncna_cena?: number | null; // Final price after discount
+  // Promotion fields
+  promocija_tip?: 'popust' | 'happy_hour' | 'add_on' | null;
+  promocija_naziv?: string | null;
+  popust_id?: string | null;
+  happy_hour_id?: string | null;
+  add_on_popust?: string | null;
+  add_on_popust_tip?: string | null;
+  add_on_final_cena?: string | null;
+  valuta?: string | null;
   // Service details
   storitev: {
     id: string;

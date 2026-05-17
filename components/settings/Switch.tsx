@@ -18,12 +18,9 @@ export function Switch({ checked, onChange, disabled = false }: SwitchProps) {
       onClick={() => !disabled && onChange(!checked)}
       className={`
         relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200
-        focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20 focus-visible:ring-offset-2
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        ${checked
-          ? 'bg-gradient-to-r from-purple-500 to-pink-500'
-          : 'bg-gray-200 hover:bg-gray-300'
-        }
+        ${checked ? 'bg-[#0a0a0a]' : 'bg-gray-200 hover:bg-gray-300'}
       `}
     >
       <motion.span

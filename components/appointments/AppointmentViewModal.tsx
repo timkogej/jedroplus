@@ -1,12 +1,13 @@
 'use client';
 
-import { memo, useState } from 'react';
+import { memo, useState, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
   Calendar,
   Clock,
-  User,
+  Tag,
+  Plus,
   Briefcase,
   Envelope,
   Phone,
@@ -19,6 +20,7 @@ import { format } from 'date-fns';
 import { sl } from 'date-fns/locale';
 import type { AppointmentWithDetails } from '@/types/appointments';
 import StatusBadge from './StatusBadge';
+import { formatCurrency, formatDiscount, computeAddOnOriginalPrice } from '@/lib/formatPromotion';
 
 interface AppointmentViewModalProps {
   isOpen: boolean;
@@ -26,6 +28,26 @@ interface AppointmentViewModalProps {
   appointment: AppointmentWithDetails | null;
   onEdit?: () => void;
   onDelete?: () => void;
+}
+
+// Promotion badge shown in detail view
+function PromotionBadge({ type, naziv }: { type: string; naziv?: string | null }) {
+  const configs: Record<string, { label: string; bgColor: string; icon: ReactNode }> = {
+    popust: { label: 'Popust', bgColor: '#6D5EF7', icon: <Tag className="w-3.5 h-3.5" weight="fill" /> },
+    happy_hour: { label: 'Happy Hour', bgColor: '#F59E0B', icon: <Clock className="w-3.5 h-3.5" weight="fill" /> },
+    add_on: { label: 'Add-on', bgColor: '#3B82F6', icon: <Plus className="w-3.5 h-3.5" weight="bold" /> },
+  };
+  const config = configs[type];
+  if (!config) return null;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white text-sm font-medium"
+      style={{ backgroundColor: config.bgColor }}
+    >
+      {config.icon}
+      {naziv || config.label}
+    </span>
+  );
 }
 
 // Copy button component
@@ -73,7 +95,39 @@ function AppointmentViewModal({
 }: AppointmentViewModalProps) {
   if (!isOpen || !appointment) return null;
 
+  const apt = appointment as unknown as Record<string, unknown>;
+
   const duration = calculateDuration(appointment.cas_zacetek, appointment.cas_konec || '');
+
+  // Pricing — handle both typed fields and raw Supabase column names
+  const valuta = appointment.valuta || (apt['Valuta'] as string) || 'EUR';
+  const baseCena = appointment.cena ?? (apt['Cena'] != null ? Number(apt['Cena']) : null);
+  const rawDiscountValue = appointment.popust ?? (apt['Popust'] != null ? Number(apt['Popust']) : null);
+  const discountAmount = rawDiscountValue != null ? String(rawDiscountValue) : null;
+  const rawDiscountType = (apt['Popust type'] as string) || appointment.popust_tip || '';
+  const discountType = (rawDiscountType === '%' || rawDiscountType === 'percent') ? '%' : '€';
+  const finalCena = appointment.koncna_cena ?? (apt['Final cena'] != null ? Number(apt['Final cena']) : null);
+
+  const addOnHasDiscount = !!(appointment.add_on_popust && parseFloat(appointment.add_on_popust || '0') > 0);
+  const addOnOriginalPrice = computeAddOnOriginalPrice(
+    appointment.add_on_final_cena,
+    appointment.add_on_popust,
+    appointment.add_on_popust_tip
+  );
+
+  const hasMultipleServices = !!(appointment.storitev_id_2 || appointment.storitev_id_3);
+  const hasDiscount = !!(appointment.promocija_tip || (rawDiscountValue != null && rawDiscountValue > 0));
+  const promotionType = appointment.promocija_tip || (hasDiscount ? 'popust' : null);
+  const showPriceSummary = hasMultipleServices;
+
+  const totalOriginal =
+    baseCena != null || addOnOriginalPrice != null
+      ? (baseCena ?? 0) + (addOnOriginalPrice ?? 0)
+      : null;
+  const mainFinal = finalCena ?? baseCena;
+  const addOnFinalNum = appointment.add_on_final_cena ? parseFloat(appointment.add_on_final_cena) : 0;
+  const totalFinal = mainFinal != null ? mainFinal + (hasMultipleServices ? addOnFinalNum : 0) : null;
+  const totalSaving = totalOriginal != null && totalFinal != null ? Math.max(0, totalOriginal - totalFinal) : 0;
 
   // Animation variants
   const backdropVariants = {
@@ -229,24 +283,147 @@ function AppointmentViewModal({
                 </div>
               )}
 
-              {/* Končna cena */}
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-                <div>
-                  <span className="text-sm font-medium text-gray-700">Končna cena</span>
-                  {appointment.popust != null && appointment.popust !== 0 && appointment.cena != null && (
-                    <div className="text-xs text-gray-400 mt-0.5">
-                      {Number(appointment.cena).toFixed(2)} - {Number(appointment.popust).toFixed(2)}{appointment.popust_tip ? ` ${appointment.popust_tip}` : ''}
+              {/* Price section */}
+              {(() => {
+                const rawCena = apt['Cena'] ?? appointment.cena ?? '';
+                const rawPopust = apt['Popust'] ?? appointment.popust ?? '';
+                const rawFinalCena = apt['Final cena'] ?? appointment.koncna_cena ?? '';
+                const rawPopustType = (apt['Popust type'] as string) || appointment.popust_tip || '%';
+                const currencyCode = (apt['Valuta'] as string) || appointment.valuta || 'EUR';
+                const promocijaTip = appointment.promocija_tip ?? null;
+                const promocijaNaziv = appointment.promocija_naziv ?? null;
+
+                const originalCena = parseFloat(String(rawCena)) || 0;
+                const popustVrednost = parseFloat(String(rawPopust)) || 0;
+                const finalCenaVal = parseFloat(String(rawFinalCena)) || originalCena;
+                const imaPopust = popustVrednost > 0;
+
+                const formatPrice = (val: number) =>
+                  new Intl.NumberFormat('sl-SI', { style: 'currency', currency: currencyCode }).format(val);
+
+                const badgeBg = promocijaTip === 'happy_hour' ? '#F59E0B'
+                  : promocijaTip === 'add_on' ? '#3B82F6' : '#6D5EF7';
+                const badgeLabel = promocijaTip === 'happy_hour' ? 'Happy Hour'
+                  : promocijaTip === 'add_on' ? 'Add-on'
+                  : (promocijaNaziv || 'Popust');
+
+                if (originalCena === 0 && !imaPopust) return null;
+
+                return (
+                  <div className="space-y-3">
+                    {imaPopust ? (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-3"
+                      >
+                        {/* Promotion badge */}
+                        <div
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-xs font-semibold"
+                          style={{ backgroundColor: badgeBg }}
+                        >
+                          {promocijaTip === 'happy_hour' ? <Clock size={11} weight="fill" /> :
+                           promocijaTip === 'add_on' ? <Plus size={11} weight="bold" /> :
+                           <Tag size={11} weight="fill" />}
+                          <span>{badgeLabel}</span>
+                        </div>
+
+                        {/* Price breakdown */}
+                        <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-2.5">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500">Originalna cena</span>
+                            <span className="text-gray-400 line-through">{formatPrice(originalCena)}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-500">Popust</span>
+                            <span className="font-medium text-red-500">
+                              − {rawPopustType === '%'
+                                ? `${popustVrednost}%`
+                                : formatPrice(popustVrednost)}
+                            </span>
+                          </div>
+                          <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
+                            <span className="font-semibold text-gray-900">Cena z popustom</span>
+                            <span className="text-xl font-bold text-green-600">{formatPrice(finalCenaVal)}</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+                        <span className="text-sm font-medium text-gray-700">Cena</span>
+                        <span className="text-xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                          {formatPrice(originalCena)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Add-on service section */}
+              {appointment.storitev_id_2 && appointment.add_on_final_cena && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="p-4 rounded-xl bg-blue-50 border border-blue-100 space-y-2">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                      <Plus className="w-3.5 h-3.5" weight="bold" />
+                      <span>Dodatna storitev</span>
+                    </div>
+                    {appointment.storitev_2 && (
+                      <p className="text-sm font-medium text-gray-900">{appointment.storitev_2.naziv}</p>
+                    )}
+                    {addOnHasDiscount ? (
+                      <div className="space-y-1">
+                        {addOnOriginalPrice != null && (
+                          <div className="flex justify-between text-sm text-gray-500">
+                            <span>Originalna cena</span>
+                            <span className="line-through">{formatCurrency(addOnOriginalPrice, valuta)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm text-red-500">
+                          <span>Popust</span>
+                          <span>-{formatDiscount(appointment.add_on_popust, appointment.add_on_popust_tip, valuta)}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-gray-900 pt-1 border-t border-blue-200">
+                          <span>Cena z popustom</span>
+                          <span className="text-green-600">{formatCurrency(appointment.add_on_final_cena, valuta)}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Cena</span>
+                        <span className="font-semibold text-gray-900">{formatCurrency(appointment.add_on_final_cena, valuta)}</span>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Price summary — shown for 2+ services or any promotion */}
+              {showPriceSummary && totalFinal != null && (
+                <div className="space-y-1 pt-2 border-t border-gray-200">
+                  {totalOriginal != null && (
+                    <div className="flex justify-between text-sm text-gray-500">
+                      <span>Skupaj (originalno)</span>
+                      <span>{formatCurrency(totalOriginal, valuta)}</span>
                     </div>
                   )}
+                  {totalSaving > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Prihranek</span>
+                      <span>-{formatCurrency(totalSaving, valuta)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-bold text-gray-900 text-base pt-1">
+                    <span>Skupaj za plačilo</span>
+                    <span>{formatCurrency(totalFinal, valuta)}</span>
+                  </div>
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                  {appointment.koncna_cena != null
-                    ? Number(appointment.koncna_cena).toFixed(2)
-                    : appointment.cena != null
-                      ? Number(appointment.cena).toFixed(2)
-                      : (appointment.storitev?.cena != null ? Number(appointment.storitev.cena).toFixed(2) : '0.00')} €
-                </span>
-              </div>
+              )}
             </div>
 
             {/* Service & Employee - Side by side */}

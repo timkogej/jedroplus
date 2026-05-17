@@ -22,6 +22,7 @@ import {
 import { getNextClientId } from '@/src/lib/idGenerators';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
+import { addMinutesToTime } from '@/lib/promotions';
 
 type ModalMode = 'view' | 'edit' | 'create';
 
@@ -62,6 +63,14 @@ export interface AppointmentFormData {
   popust_tip?: '€' | '%'; // Changed from 'eur' | 'percent' to match n8n requirements
   koncna_cena?: number;
   valuta?: string;
+  // Promotion fields
+  promocija_tip?: 'popust' | 'happy_hour' | 'add_on' | null;
+  promocija_naziv?: string | null;
+  popust_id?: string | null;
+  happy_hour_id?: string | null;
+  add_on_popust?: string | null;
+  add_on_popust_tip?: string | null;
+  add_on_final_cena?: string | null;
 }
 
 const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
@@ -203,6 +212,38 @@ function AppointmentModal({
 
   // Discount toggle state
   const [hasDiscount, setHasDiscount] = useState(false);
+
+  // Promotion state
+  interface PromoResult {
+    found: boolean;
+    type: 'popust' | 'happy_hour' | null;
+    id: string | null;
+    naziv: string | null;
+    tip_popusta: 'percentage' | 'fixed' | null;
+    vrednost: number | null;
+    original_cena: string;
+    popust_vrednost: string;
+    final_cena: string;
+    popust_type_label: '%' | 'valuta' | null;
+  }
+  interface AvailableAddOn {
+    id: string;
+    storitev_id: string;
+    naziv: string;
+    original_cena: number;
+    final_cena: number;
+    tip_popusta: 'percentage' | 'fixed';
+    vrednost_popusta: number;
+    trajanje: number;
+    valuta: string;
+  }
+  const [promotions, setPromotions] = useState<{
+    slot1: PromoResult | null;
+    slot2: PromoResult | null;
+    slot3: PromoResult | null;
+  }>({ slot1: null, slot2: null, slot3: null });
+  const [availableAddOns, setAvailableAddOns] = useState<AvailableAddOn[]>([]);
+  const [selectedAddOnId, setSelectedAddOnId] = useState<string | null>(null);
 
   // Internal notes toggle state (for create mode only)
   const [showInternalNotes, setShowInternalNotes] = useState(false);
@@ -429,7 +470,79 @@ function AppointmentModal({
   // Reset manual flag when creating new appointment or opening existing one
   useEffect(() => {
     setEndTimeManuallySet(false);
+    setPromotions({ slot1: null, slot2: null, slot3: null });
+    setAvailableAddOns([]);
+    setSelectedAddOnId(null);
   }, [isOpen, appointment]);
+
+  // Promotion check: independently check each service slot for promotions
+  useEffect(() => {
+    if (!formData.datum || !formData.cas_zacetek || !companyId || mode === 'view') return;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      const checkSlot = async (storitev_id: string): Promise<PromoResult | null> => {
+        if (!storitev_id) return null;
+        try {
+          const res = await fetch('/api/promotions/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ company_id: companyId, storitev_id, datum: formData.datum, cas: formData.cas_zacetek }),
+            signal: controller.signal,
+          });
+          return await res.json() as PromoResult;
+        } catch { return null; }
+      };
+
+      const [result1, result2, result3] = await Promise.all([
+        checkSlot(formData.storitev_id),
+        (serviceCount >= 2 && formData.storitev_id_2) ? checkSlot(formData.storitev_id_2) : Promise.resolve(null),
+        (serviceCount >= 3 && formData.storitev_id_3) ? checkSlot(formData.storitev_id_3) : Promise.resolve(null),
+      ]);
+
+      setPromotions({ slot1: result1, slot2: result2, slot3: result3 });
+
+      // Sum per-slot euro discount amounts (API returns computed popust_vrednost per service price)
+      const discount1 = result1?.found ? parseFloat(result1.popust_vrednost) : 0;
+      const discount2 = result2?.found ? parseFloat(result2.popust_vrednost) : 0;
+      const discount3 = result3?.found ? parseFloat(result3.popust_vrednost) : 0;
+      const totalDiscount = discount1 + discount2 + discount3;
+      const anyFound = !!(result1?.found || result2?.found || result3?.found);
+
+      if (anyFound) setHasDiscount(true);
+
+      setFormData((prev) => ({
+        ...prev,
+        ...(anyFound && { popust: Number(totalDiscount.toFixed(2)), popust_tip: '€' }),
+        promocija_tip: result1?.found ? result1.type : null,
+        promocija_naziv: result1?.found ? result1.naziv : null,
+        popust_id: (result1?.found && result1.type === 'popust') ? result1.id : null,
+        happy_hour_id: (result1?.found && result1.type === 'happy_hour') ? result1.id : null,
+      }));
+    }, 400);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3, formData.datum, formData.cas_zacetek, companyId, mode, serviceCount]);
+
+  // Add-on availability check
+  useEffect(() => {
+    if (!formData.storitev_id || !formData.zaposleni_id || !formData.datum || !formData.cas_konec || !companyId || mode === 'view' || serviceCount > 1) {
+      setAvailableAddOns([]);
+      return;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/promotions/add-ons/available', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ company_id: companyId, main_storitev_id: formData.storitev_id, zaposleni_id: formData.zaposleni_id, datum: formData.datum, cas_konec: formData.cas_konec }),
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        setAvailableAddOns(data.data || []);
+      } catch { /* aborted */ }
+    }, 500);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [formData.storitev_id, formData.zaposleni_id, formData.datum, formData.cas_konec, companyId, mode, serviceCount]);
 
   // Auto-fill price from all selected services when any service changes
   useEffect(() => {
@@ -586,6 +699,44 @@ function AppointmentModal({
     setServiceCount((prev) => Math.max(prev - 1, 1));
     setEndTimeManuallySet(false);
   }, []);
+
+  // Add-on selection handler
+  const handleSelectAddOn = useCallback((addOn: { id: string; storitev_id: string; final_cena: number; tip_popusta: 'percentage' | 'fixed'; vrednost_popusta: number; trajanje: number; valuta: string } | null) => {
+    if (!addOn) {
+      setSelectedAddOnId(null);
+      setFormData((prev) => ({
+        ...prev,
+        storitev_id_2: '',
+        add_on_popust: null,
+        add_on_popust_tip: null,
+        add_on_final_cena: null,
+      }));
+      setEndTimeManuallySet(false);
+      return;
+    }
+    if (selectedAddOnId === addOn.id) {
+      // Deselect
+      handleSelectAddOn(null);
+      return;
+    }
+    setSelectedAddOnId(addOn.id);
+    setFormData((prev) => {
+      const newKonec = addMinutesToTime(prev.cas_konec, addOn.trajanje);
+      const addOnTip = addOn.tip_popusta === 'percentage' ? '%' : '€';
+      return {
+        ...prev,
+        storitev_id_2: addOn.storitev_id,
+        stevilo_storitev: 2,
+        cas_konec: newKonec,
+        add_on_popust: String(addOn.vrednost_popusta),
+        add_on_popust_tip: addOnTip,
+        add_on_final_cena: String(addOn.final_cena.toFixed(2)),
+        promocija_tip: prev.promocija_tip ?? 'add_on',
+        promocija_naziv: prev.promocija_tip ? prev.promocija_naziv : 'Add-on',
+      };
+    });
+    setEndTimeManuallySet(true);
+  }, [selectedAddOnId]);
 
   // Handle employee change - check if current service can still be done by the new employee
   const handleEmployeeChange = useCallback((employeeId: string) => {
@@ -1051,6 +1202,26 @@ function AppointmentModal({
                     {errors.storitev_id && (
                       <p className="mt-1 text-xs text-red-500">{errors.storitev_id}</p>
                     )}
+                    <AnimatePresence>
+                      {promotions.slot1?.found && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -8 }}
+                          className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium ${
+                            promotions.slot1.type === 'happy_hour'
+                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                              : 'bg-violet-50 text-violet-800 border border-violet-200'
+                          }`}
+                        >
+                          <span>{promotions.slot1.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
+                          <span>{promotions.slot1.naziv || (promotions.slot1.type === 'happy_hour' ? 'Happy Hour' : 'Popust')}</span>
+                          <span className="ml-auto font-semibold">
+                            {promotions.slot1.tip_popusta === 'percentage' ? `${promotions.slot1.vrednost}%` : `${promotions.slot1.vrednost} €`} popust
+                          </span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   {/* Second service selector */}
@@ -1087,6 +1258,26 @@ function AppointmentModal({
                             </SelectOption>
                           ))}
                       </Select>
+                      <AnimatePresence>
+                        {promotions.slot2?.found && (
+                          <motion.div
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -8 }}
+                            className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium ${
+                              promotions.slot2.type === 'happy_hour'
+                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                : 'bg-violet-50 text-violet-800 border border-violet-200'
+                            }`}
+                          >
+                            <span>{promotions.slot2.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
+                            <span>{promotions.slot2.naziv || (promotions.slot2.type === 'happy_hour' ? 'Happy Hour' : 'Popust')}</span>
+                            <span className="ml-auto font-semibold">
+                              {promotions.slot2.tip_popusta === 'percentage' ? `${promotions.slot2.vrednost}%` : `${promotions.slot2.vrednost} €`} popust
+                            </span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   )}
 
@@ -1124,11 +1315,31 @@ function AppointmentModal({
                             </SelectOption>
                           ))}
                       </Select>
+                      <AnimatePresence>
+                        {promotions.slot3?.found && (
+                          <motion.div
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -8 }}
+                            className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium ${
+                              promotions.slot3.type === 'happy_hour'
+                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                                : 'bg-violet-50 text-violet-800 border border-violet-200'
+                            }`}
+                          >
+                            <span>{promotions.slot3.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
+                            <span>{promotions.slot3.naziv || (promotions.slot3.type === 'happy_hour' ? 'Happy Hour' : 'Popust')}</span>
+                            <span className="ml-auto font-semibold">
+                              {promotions.slot3.tip_popusta === 'percentage' ? `${promotions.slot3.vrednost}%` : `${promotions.slot3.vrednost} €`} popust
+                            </span>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   )}
 
-                  {/* Add service button (max 3) */}
-                  {serviceCount < 3 && (
+                  {/* Add service button (max 3) — hide when add-on is selected */}
+                  {serviceCount < 3 && !selectedAddOnId && (
                     <motion.button
                       type="button"
                       onClick={handleAddService}
@@ -1141,6 +1352,51 @@ function AppointmentModal({
                       <span className="text-sm font-medium">Dodaj storitev</span>
                     </motion.button>
                   )}
+
+                  {/* Add-on suggestions — shown when serviceCount is 1 and add-ons are available */}
+                  <AnimatePresence>
+                    {serviceCount === 1 && availableAddOns.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
+                        className="rounded-xl border border-blue-100 bg-blue-50/50 overflow-hidden"
+                      >
+                        <div className="px-3 py-2 border-b border-blue-100">
+                          <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider">➕ Dodaj storitev</p>
+                        </div>
+                        <div className="p-2 space-y-1.5">
+                          {availableAddOns.map((ao) => {
+                            const isSelected = selectedAddOnId === ao.id;
+                            const discount = ao.tip_popusta === 'percentage'
+                              ? `${ao.vrednost_popusta}%`
+                              : `${ao.vrednost_popusta} ${ao.valuta || '€'}`;
+                            return (
+                              <motion.button
+                                key={ao.id}
+                                type="button"
+                                onClick={() => handleSelectAddOn(ao)}
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.99 }}
+                                className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between transition-all ${
+                                  isSelected
+                                    ? 'bg-white border-2 border-violet-400 shadow-sm'
+                                    : 'bg-white border border-gray-200 hover:border-violet-300'
+                                }`}
+                              >
+                                <span className="text-sm font-medium text-gray-900">{ao.naziv}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-gray-400 line-through">{ao.original_cena.toFixed(2)} €</span>
+                                  <span className="text-sm font-semibold text-gray-900">{ao.final_cena.toFixed(2)} €</span>
+                                  <span className="text-xs font-medium text-emerald-600">-{discount}</span>
+                                </div>
+                              </motion.button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Total duration display when multiple services */}
                   {serviceCount > 1 && totalDuration > 0 && (

@@ -240,11 +240,11 @@ export default function CompanySettingsPage() {
     return (
       <div className="space-y-6">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse">
-            <div className="h-6 bg-gray-200 rounded w-1/4 mb-6" />
+          <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
+            <div className="h-5 bg-gray-100 rounded w-1/4 mb-6" />
             <div className="space-y-4">
-              <div className="h-10 bg-gray-100 rounded" />
-              <div className="h-10 bg-gray-100 rounded" />
+              <div className="h-10 bg-gray-50 rounded-lg" />
+              <div className="h-10 bg-gray-50 rounded-lg" />
             </div>
           </div>
         ))}
@@ -256,8 +256,8 @@ export default function CompanySettingsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Podatki o podjetju</h2>
-          <p className="text-sm text-gray-500 mt-1">Osnovni podatki in nastavitve vašega podjetja</p>
+          <h2 className="text-base font-semibold text-gray-900">Podatki o podjetju</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Osnovni podatki in nastavitve vašega podjetja</p>
         </div>
         <SaveIndicator saving={saving} lastSaved={lastSaved} />
       </div>
@@ -358,10 +358,10 @@ export default function CompanySettingsPage() {
               const dayHours = workingHours[day] || { enabled: false, intervals: [{ start: '08:00', end: '17:00' }] };
 
               return (
-                <div key={day} className="border-2 border-gray-200 rounded-xl p-4 space-y-3">
+                <div key={day} className="border border-gray-100 rounded-2xl p-5 space-y-3">
                   {/* Day header with enable toggle */}
                   <div className="flex items-center justify-between">
-                    <span className="text-base font-semibold text-gray-900">{day}</span>
+                    <span className="text-sm font-semibold text-gray-900">{day}</span>
                     <Switch
                       checked={dayHours.enabled}
                       onChange={(enabled) => updateWorkingHours(day, { enabled })}
@@ -387,28 +387,26 @@ export default function CompanySettingsPage() {
 
                           {/* Remove interval button (only if more than 1) */}
                           {dayHours.intervals.length > 1 && (
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
+                            <button
+                              type="button"
                               onClick={() => removeInterval(day, idx)}
-                              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                              className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             >
-                              <X className="w-4 h-4" weight="bold" />
-                            </motion.button>
+                              <X className="w-3.5 h-3.5" />
+                            </button>
                           )}
                         </div>
                       ))}
 
                       {/* Add interval button */}
-                      <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
+                      <button
+                        type="button"
                         onClick={() => addInterval(day)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-violet-600 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                       >
-                        <Plus className="w-4 h-4" weight="bold" />
+                        <Plus className="w-4 h-4" />
                         Interval
-                      </motion.button>
+                      </button>
                     </div>
                   )}
 
@@ -427,16 +425,12 @@ export default function CompanySettingsPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            whileHover={{ scale: saving ? 1 : 1.02 }}
-            whileTap={{ scale: saving ? 1 : 0.98 }}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
-                       px-6 py-3 text-sm font-medium text-white shadow-lg shadow-violet-500/25
-                       transition-shadow hover:shadow-xl hover:shadow-violet-500/30
-                       disabled:cursor-not-allowed disabled:opacity-50"
+            whileTap={{ scale: 0.98 }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] active:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {saving ? (
               <>
-                <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+                <SpinnerGap className="h-4 w-4 animate-spin" />
                 Shranjujem...
               </>
             ) : (

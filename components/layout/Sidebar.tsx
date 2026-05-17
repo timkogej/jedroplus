@@ -30,6 +30,7 @@ import {
   ChatCircleDots,
   Package,
   Lock,
+  Tag,
 } from '@phosphor-icons/react';
 import Image from 'next/image';
 import { useSidebar } from './sidebar-context';
@@ -99,6 +100,12 @@ const navigationSectionsPaid: NavSection[] = [
     ],
   },
   {
+    label: 'Promocije',
+    items: [
+      { name: 'Promocije', href: '/promotions', icon: Tag },
+    ],
+  },
+  {
     label: 'Analitika',
     items: [
       { name: 'Analitika', href: '/analytics', icon: ChartLine },
@@ -127,6 +134,12 @@ const navigationSectionsFree: NavSection[] = [
     items: [
       { name: 'Storitve', href: '/services', icon: Briefcase },
       { name: 'Osebje', href: '/staff', icon: UserCircle },
+    ],
+  },
+  {
+    label: 'Promocije',
+    items: [
+      { name: 'Promocije', href: '/promotions', icon: Tag },
     ],
   },
   // AI sekcija začasno skrita - bo dodana kasneje

@@ -84,14 +84,14 @@ export function SettingsSidebar() {
             href={tab.path}
             className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
               isActive
-                ? 'text-[#1A1F36]'
+                ? 'text-gray-900'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             {isActive && (
               <motion.div
                 layoutId="settings-tab-bg"
-                className="absolute inset-0 bg-white rounded-lg shadow-sm"
+                className="absolute inset-0 bg-white rounded-lg"
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}

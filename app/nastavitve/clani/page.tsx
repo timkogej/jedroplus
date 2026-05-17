@@ -136,20 +136,20 @@ const permissionSections: {
 function RoleBadge({ role }: { role: MemberRole }) {
   if (role === 'owner') {
     return (
-      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
         Lastnik
       </span>
     );
   }
   if (role === 'admin') {
     return (
-      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
         Admin
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
       Zaposleni
     </span>
   );
@@ -349,10 +349,10 @@ export default function ClaniPage() {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl bg-amber-50 border border-amber-200 p-8 text-center"
+        className="rounded-2xl bg-amber-50 border border-amber-100 p-8 text-center"
       >
-        <Warning className="w-10 h-10 text-amber-500 mx-auto mb-3" weight="fill" />
-        <h2 className="text-lg font-semibold text-amber-800 mb-1">Dostop omejen</h2>
+        <Warning className="w-8 h-8 text-amber-500 mx-auto mb-3" weight="fill" />
+        <h2 className="text-base font-semibold text-amber-900 mb-1">Dostop omejen</h2>
         <p className="text-sm text-amber-700">
           To stran lahko vidijo samo lastniki podjetja.
         </p>
@@ -364,8 +364,8 @@ export default function ClaniPage() {
 
   if (error) {
     return (
-      <div className="rounded-2xl bg-red-50 border border-red-200 p-6 text-center">
-        <Warning className="w-8 h-8 text-red-500 mx-auto mb-2" weight="fill" />
+      <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
+        <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
         <p className="text-sm text-red-700">{error}</p>
       </div>
     );
@@ -380,15 +380,15 @@ export default function ClaniPage() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl border border-gray-200 px-6 py-4 flex items-center justify-between gap-4"
+          className="bg-white rounded-2xl border border-gray-100 px-6 py-4 flex items-center justify-between gap-4"
         >
           <div>
-            <p className="text-sm font-medium text-gray-500">Največje število uporabnikov aplikacije</p>
-            <p className="text-2xl font-bold text-[#1A1F36] mt-0.5">{maxUsers}</p>
+            <p className="text-xs font-medium text-gray-500 tracking-wide">Največje število uporabnikov aplikacije</p>
+            <p className="text-xl font-semibold text-gray-900 mt-1">{maxUsers}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-500">Trenutno v ekipi</p>
-            <p className="text-2xl font-bold text-[#1A1F36] mt-0.5">{members.length}</p>
+            <p className="text-xs font-medium text-gray-500 tracking-wide">Trenutno v ekipi</p>
+            <p className="text-xl font-semibold text-gray-900 mt-1">{members.length}</p>
           </div>
         </motion.div>
       )}
@@ -397,17 +397,17 @@ export default function ClaniPage() {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
       >
         <div className="px-6 py-5 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-[#1A1F36]">Člani</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h2 className="text-sm font-semibold text-gray-900">Člani</h2>
+          <p className="text-xs text-gray-500 mt-0.5">
             Vsi uporabniki, ki so del tega podjetja
           </p>
         </div>
 
         {members.length === 0 ? (
-          <div className="px-6 py-10 text-center text-sm text-gray-400">
+          <div className="px-6 py-12 text-center text-sm text-gray-400">
             Ni najdenih članov.
           </div>
         ) : (
@@ -415,7 +415,7 @@ export default function ClaniPage() {
             {members.map((member) => (
               <li key={member.id} className="px-6 py-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
+                  <p className="text-sm font-medium text-gray-900 truncate">
                     {member.display_name || member.user_id}
                   </p>
                   {member.email && (
@@ -434,13 +434,13 @@ export default function ClaniPage() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
+        className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
       >
         <div className="px-6 py-5 border-b border-gray-100">
-          <h2 className="text-base font-semibold text-[#1A1F36]">
+          <h2 className="text-sm font-semibold text-gray-900">
             Dovoljenja za zaposlene (Staff)
           </h2>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <p className="text-xs text-gray-500 mt-0.5">
             Nastavite, kaj lahko vidijo in urejajo zaposleni
           </p>
         </div>
@@ -454,7 +454,7 @@ export default function ClaniPage() {
             <div className="divide-y divide-gray-100">
               {permissionSections.map((section) => (
                 <div key={section.label} className="px-6 py-5">
-                  <h3 className="text-xs font-semibold text-gray-400 tracking-wider uppercase mb-4">
+                  <h3 className="text-xs font-semibold text-gray-500 tracking-wide mb-4">
                     {section.label}
                   </h3>
                   <div className="space-y-3">
@@ -477,17 +477,17 @@ export default function ClaniPage() {
             </div>
 
             {/* Save footer */}
-            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-4">
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/60 flex items-center justify-between gap-4">
               <div className="text-sm">
                 {saveSuccess && (
-                  <span className="flex items-center gap-1.5 text-emerald-600 font-medium">
-                    <CheckCircle className="w-4 h-4" weight="fill" />
+                  <span className="flex items-center gap-1.5 text-gray-500">
+                    <CheckCircle className="w-3.5 h-3.5 text-gray-400" weight="fill" />
                     Nastavitve so bile shranjene.
                   </span>
                 )}
                 {saveError && (
                   <span className="flex items-center gap-1.5 text-red-600">
-                    <Warning className="w-4 h-4" weight="fill" />
+                    <Warning className="w-3.5 h-3.5" weight="fill" />
                     {saveError}
                   </span>
                 )}
@@ -496,7 +496,7 @@ export default function ClaniPage() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-[#1A1F36] text-white hover:bg-[#252c48] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? (
                   <>

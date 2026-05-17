@@ -1,7 +1,8 @@
 'use client';
 
 import { memo, useMemo, useRef, useLayoutEffect, useState, useCallback, useEffect } from 'react';
-import { X } from '@phosphor-icons/react';
+import { motion } from 'motion/react';
+import { X, Tag, Clock, Plus } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import { formatTime, getGradientCSS } from '@/lib/utils/calendar';
 
@@ -287,6 +288,38 @@ function AppointmentCard({
     }
   };
 
+  const _hasPromotion = (appointment.popust ?? 0) > 0 || !!appointment.promocija_tip;
+  const _promoType: 'popust' | 'happy_hour' | 'add_on' =
+    (appointment.promocija_tip as 'popust' | 'happy_hour' | 'add_on') || 'popust';
+  const _promoLabel = appointment.promocija_naziv
+    ? appointment.promocija_naziv
+    : _promoType === 'happy_hour' ? 'Happy Hour'
+    : _promoType === 'add_on' ? 'Add-on'
+    : 'Popust';
+
+  const PromoIcon = () => {
+    if (!_hasPromotion) return null;
+    const badgeColor =
+      _promoType === 'happy_hour' ? '#F59E0B' :
+      _promoType === 'add_on' ? '#3B82F6' : '#6D5EF7';
+    const icon =
+      _promoType === 'happy_hour' ? <Clock size={10} weight="fill" /> :
+      _promoType === 'add_on' ? <Plus size={10} weight="bold" /> :
+      <Tag size={10} weight="fill" />;
+    return (
+      <motion.div
+        animate={{ scale: [1, 1.15, 1] }}
+        transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
+        className="absolute top-1 right-1 rounded-full flex items-center justify-center pointer-events-none z-10 text-white"
+        style={{ width: 18, height: 18, backgroundColor: badgeColor }}
+        title={_promoLabel}
+        aria-hidden
+      >
+        {icon}
+      </motion.div>
+    );
+  };
+
   const StatusIndicator = () => {
     if (isCompleted) return null;
     if (appointment.status === 'cancelled' || appointment.status === 'Odpovedan') {
@@ -510,7 +543,7 @@ function AppointmentCard({
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         {...longPressHandlers}
-        className="group absolute cursor-pointer overflow-hidden rounded-lg
+        className="group absolute cursor-pointer rounded-lg
                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
         style={{
           background: serviceGradient,
@@ -521,6 +554,7 @@ function AppointmentCard({
           ...longPressTouchStyle,
         }}
       >
+        <PromoIcon />
         <div className="px-2.5 py-1.5 h-full flex items-center gap-1.5" style={{ color: '#FFFFFF' }}>
           <SmartClientName
             fullName={appointment.stranka_ime}
@@ -560,7 +594,7 @@ function AppointmentCard({
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         {...longPressHandlers}
-        className="group absolute cursor-pointer overflow-hidden rounded-lg
+        className="group absolute cursor-pointer rounded-lg
                    transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
         style={{
           background: serviceGradient,
@@ -571,6 +605,7 @@ function AppointmentCard({
           ...longPressTouchStyle,
         }}
       >
+        <PromoIcon />
         <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
           {/* Row 1: client name + initials */}
           <div className="flex items-center gap-1.5 min-w-0">
@@ -614,7 +649,7 @@ function AppointmentCard({
       onClick={handleClick}
       onKeyDown={handleKeyDown}
       {...longPressHandlers}
-      className="group absolute cursor-pointer overflow-hidden rounded-lg
+      className="group absolute cursor-pointer rounded-lg
                  transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:z-30"
       style={{
         background: serviceGradient,
@@ -625,6 +660,7 @@ function AppointmentCard({
         ...longPressTouchStyle,
       }}
     >
+      <PromoIcon />
       <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
         {/* Row 1: client name + initials */}
         <div className="flex items-center gap-1.5 min-w-0">

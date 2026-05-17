@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, CircleNotch } from '@phosphor-icons/react';
+import { Check } from '@phosphor-icons/react';
 
 interface SaveIndicatorProps {
   saving: boolean;
@@ -29,7 +29,7 @@ export function SaveIndicator({ saving, lastSaved }: SaveIndicatorProps) {
           exit={{ opacity: 0 }}
           className="flex items-center gap-2 text-gray-500"
         >
-          <CircleNotch className="w-4 h-4 animate-spin" />
+          <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300 border-t-gray-900 animate-spin" />
           <span className="text-sm">Shranjevanje...</span>
         </motion.div>
       ) : lastSaved ? (
@@ -38,9 +38,9 @@ export function SaveIndicator({ saving, lastSaved }: SaveIndicatorProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="flex items-center gap-2 text-green-600"
+          className="flex items-center gap-2 text-gray-500"
         >
-          <Check className="w-4 h-4" />
+          <Check className="w-3.5 h-3.5 text-gray-400" />
           <span className="text-sm">Shranjeno {formatRelativeTime(lastSaved)}</span>
         </motion.div>
       ) : null}

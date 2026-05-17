@@ -144,11 +144,11 @@ export default function GeneralSettingsPage() {
     return (
       <div className="space-y-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 animate-pulse">
-            <div className="h-6 bg-gray-200 rounded w-1/4 mb-6" />
+          <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
+            <div className="h-5 bg-gray-100 rounded w-1/4 mb-6" />
             <div className="space-y-4">
-              <div className="h-10 bg-gray-100 rounded" />
-              <div className="h-10 bg-gray-100 rounded" />
+              <div className="h-10 bg-gray-50 rounded-lg" />
+              <div className="h-10 bg-gray-50 rounded-lg" />
             </div>
           </div>
         ))}
@@ -161,8 +161,8 @@ export default function GeneralSettingsPage() {
       {/* Header with save indicator */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">Splošne nastavitve</h2>
-          <p className="text-sm text-gray-500 mt-1">Osnovne nastavitve aplikacije in vašega računa</p>
+          <h2 className="text-base font-semibold text-gray-900">Splošne nastavitve</h2>
+          <p className="text-sm text-gray-500 mt-0.5">Osnovne nastavitve aplikacije in vašega računa</p>
         </div>
         <SaveIndicator saving={saving} lastSaved={lastSaved} />
       </div>
@@ -186,7 +186,7 @@ export default function GeneralSettingsPage() {
                 className="bg-gray-50 cursor-not-allowed"
               />
               <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="h-4 w-4" weight="bold" />
+                <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
@@ -203,7 +203,7 @@ export default function GeneralSettingsPage() {
                 className="bg-gray-50 cursor-not-allowed"
               />
               <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="h-4 w-4" weight="bold" />
+                <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
@@ -222,7 +222,7 @@ export default function GeneralSettingsPage() {
                 className="bg-gray-50 cursor-not-allowed"
               />
               <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="h-4 w-4" weight="bold" />
+                <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
@@ -238,7 +238,7 @@ export default function GeneralSettingsPage() {
                 className="bg-gray-50 cursor-not-allowed"
               />
               <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="h-4 w-4" weight="bold" />
+                <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
@@ -254,7 +254,7 @@ export default function GeneralSettingsPage() {
                 className="bg-gray-50 cursor-not-allowed"
               />
               <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="h-4 w-4" weight="bold" />
+                <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
@@ -270,7 +270,7 @@ export default function GeneralSettingsPage() {
                 className="bg-gray-50 cursor-not-allowed"
               />
               <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="h-4 w-4" weight="bold" />
+                <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
@@ -295,96 +295,92 @@ export default function GeneralSettingsPage() {
 
         {/* Company ID & Codes - New Section with Gradient */}
         <SettingsSection title="Podatki podjetja" description="ID podjetja in kode za dodajanje uporabnikov">
-          <div className="relative p-[2px] rounded-xl bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500">
-            <div className="bg-white rounded-xl p-6 space-y-6">
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
               {/* Company ID */}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-1">ID podjetja</p>
-                  <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  <p className="text-xs font-medium text-gray-500 mb-1">ID podjetja</p>
+                  <div className="text-2xl font-bold gradient-text tracking-tight">
                     {companyIdDisplay || companyId}
                   </div>
                 </div>
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => copyToClipboard(companyIdDisplay || companyId || '', 'id')}
-                  className="p-2 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
                 >
                   {copiedId ? (
-                    <Check className="w-5 h-5 text-green-500" weight="bold" />
+                    <Check className="w-4 h-4 text-gray-900" weight="bold" />
                   ) : (
-                    <Copy className="w-5 h-5 text-gray-500" />
+                    <Copy className="w-4 h-4 text-gray-500" />
                   )}
                 </motion.button>
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-200" />
+              <div className="border-t border-gray-100" />
 
               {/* Admin Code */}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-800 mb-0.5">Admin code</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Admin code</p>
                   <p className="text-xs text-gray-500 mb-2">Za dodajanje administratorjev v vaše podjetje. Administrator ima popoln dostop: vidi in ureja vse termine, stranke, storitve, osebje, analitiko, nastavitve in pakete.</p>
-                  <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  <div className="text-2xl font-bold gradient-text tracking-tight">
                     {adminCode || '—'}
                   </div>
                 </div>
                 {adminCode && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => copyToClipboard(adminCode, 'adminCode')}
-                    className="p-2 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
                   >
                     {copiedAdminCode ? (
-                      <Check className="w-5 h-5 text-green-500" weight="bold" />
+                      <Check className="w-4 h-4 text-gray-900" weight="bold" />
                     ) : (
-                      <Copy className="w-5 h-5 text-gray-500" />
+                      <Copy className="w-4 h-4 text-gray-500" />
                     )}
                   </motion.button>
                 )}
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-200" />
+              <div className="border-t border-gray-100" />
 
               {/* Employee Code */}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-800 mb-0.5">Employee code</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Employee code</p>
                   <p className="text-xs text-gray-500 mb-2">Za dodajanje zaposlenih v vaše podjetje. Zaposleni vidi le svoj urnik in termine, ki so mu dodeljeni. Nima dostopa do nastavitev, analitike ali podatkov o drugih zaposlenih.</p>
-                  <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  <div className="text-2xl font-bold gradient-text tracking-tight">
                     {staffCode || '—'}
                   </div>
                 </div>
                 {staffCode && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => copyToClipboard(staffCode, 'staffCode')}
-                    className="p-2 border-2 border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
                   >
                     {copiedStaffCode ? (
-                      <Check className="w-5 h-5 text-green-500" weight="bold" />
+                      <Check className="w-4 h-4 text-gray-900" weight="bold" />
                     ) : (
-                      <Copy className="w-5 h-5 text-gray-500" />
+                      <Copy className="w-4 h-4 text-gray-500" />
                     )}
                   </motion.button>
                 )}
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-200" />
+              <div className="border-t border-gray-100" />
 
               {/* Company Slug */}
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-1">Slug podjetja</p>
+                  <p className="text-xs font-medium text-gray-500 mb-1">Slug podjetja</p>
                   <p className="text-xs text-gray-400 mb-2">Končnica, ki se uporablja pri booking linkih in pri chatbotu na spletni strani</p>
                   {companySlug ? (
-                    <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                    <div className="text-2xl font-bold gradient-text tracking-tight">
                       {companySlug}
                     </div>
                   ) : (
@@ -394,24 +390,23 @@ export default function GeneralSettingsPage() {
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-200" />
+              <div className="border-t border-gray-100" />
 
               {/* Explanation */}
               <div className="text-xs text-gray-400">
                 Kode delite le z zaupanja vrednimi osebami. Administrator ima polni dostop do sistema, zaposleni pa le do svojih terminov.
               </div>
-            </div>
           </div>
         </SettingsSection>
         {/* QR koda */}
         <SettingsSection title="QR koda za registracijo strank" description="Stranke skenirajo kodo in se registrirajo v vaš sistem">
-          <div className="flex flex-col items-center gap-3 py-2">
+          <div className="flex flex-col items-center gap-3 py-4">
             {companySlug ? (
               <QRCodeCard slug={companySlug} size={160} compact />
             ) : (
-              <p className="text-sm text-gray-400">Slug podjetja ni nastavljen.</p>
+              <p className="text-xs text-gray-400">Slug podjetja ni nastavljen.</p>
             )}
-            <p className="text-sm text-gray-400 text-center">
+            <p className="text-xs text-gray-400 text-center">
               Stranke skenirajo kodo in se registrirajo v vaš sistem.
             </p>
           </div>
