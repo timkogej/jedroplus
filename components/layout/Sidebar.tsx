@@ -24,8 +24,8 @@ import {
   Tag,
   CaretLeft,
 } from '@phosphor-icons/react';
-import Image from 'next/image';
 import { useSidebar } from './sidebar-context';
+import { JedroLogo } from '@/components/ui/JedroLogo';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useCompanyPlan } from '@/hooks/useCompanyPlan';
@@ -411,12 +411,7 @@ export function Sidebar() {
         'flex items-center border-b border-gray-100 flex-shrink-0',
         isCollapsed ? 'justify-center p-4' : 'gap-3 p-5'
       )}>
-        <div
-          className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #6D5EF7, #2F80ED, #2AD4C5)' }}
-        >
-          <Image src="/brand/logo.png" alt="Jedro+" width={20} height={20} priority />
-        </div>
+        <JedroLogo size={28} className="flex-shrink-0" />
         {!isCollapsed && (
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 truncate">Jedro+</p>
@@ -570,12 +565,7 @@ export function Sidebar() {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
               <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #6D5EF7, #2F80ED, #2AD4C5)' }}
-                >
-                  <Image src="/brand/logo.png" alt="Jedro+" width={20} height={20} priority />
-                </div>
+                <JedroLogo size={28} className="flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">Jedro+</p>
                   <p className="text-xs text-gray-400 truncate">{companyName}</p>

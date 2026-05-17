@@ -447,7 +447,7 @@ function AppointmentDetailModal({
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Popust</span>
                         <span className="font-medium text-red-500">
-                          − {popustTip === '%' ? `${popustVrednost}%` : `${fmt(popustVrednost)} EUR`}
+                          − {popustTip === 'percent' ? `${popustVrednost}%` : `${fmt(popustVrednost)} EUR`}
                         </span>
                       </div>
                       <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
