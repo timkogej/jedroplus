@@ -20,6 +20,7 @@ import {
 import { useSidebar } from './sidebar-context';
 import { useAuth } from '@/app/auth-context';
 import { useCompany } from '@/app/company-context';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 // ============================================================================
 // Types
@@ -318,6 +319,11 @@ export function AppBar() {
                       <span>Paketi</span>
                     </Link>
                   </div>
+
+                  {/* Language switcher */}
+                  <div className="border-t border-gray-100 my-1" />
+                  <LanguageSwitcher />
+                  <div className="border-t border-gray-100 my-1" />
 
                   {/* Logout */}
                   <div className="border-t border-gray-100 py-1">
