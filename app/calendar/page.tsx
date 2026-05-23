@@ -1,3 +1,4 @@
+// TODO(i18n-review): confirm if this dev page should be removed, kept English-only, or included in i18n.
 "use client";
 
 import { useEffect } from "react";
