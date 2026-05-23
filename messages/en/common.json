@@ -1,1 +1,91 @@
-{}
+{
+  "buttons": {
+    "save": "[EN PENDING] Shrani",
+    "cancel": "[EN PENDING] Prekliči",
+    "edit": "[EN PENDING] Uredi",
+    "delete": "[EN PENDING] Izbriši",
+    "close": "[EN PENDING] Zapri",
+    "back": "[EN PENDING] Nazaj",
+    "next": "[EN PENDING] Naprej",
+    "confirm": "[EN PENDING] Potrdi",
+    "discard": "[EN PENDING] Razveljavi",
+    "submit": "[EN PENDING] Pošlji",
+    "tryAgain": "[EN PENDING] Poskusite znova",
+    "viewAll": "[EN PENDING] Prikaži vse",
+    "add": "[EN PENDING] Dodaj",
+    "create": "[EN PENDING] Ustvari",
+    "update": "[EN PENDING] Posodobi",
+    "search": "[EN PENDING] Iskanje",
+    "filter": "[EN PENDING] Filter",
+    "export": "[EN PENDING] Izvozi",
+    "import": "[EN PENDING] Uvozi",
+    "copy": "[EN PENDING] Kopiraj",
+    "share": "[EN PENDING] Deli"
+  },
+  "status": {
+    "active": "[EN PENDING] Aktiven",
+    "inactive": "[EN PENDING] Neaktiven",
+    "expired": "[EN PENDING] Potekel",
+    "confirmed": "[EN PENDING] Potrjeno",
+    "cancelled": "[EN PENDING] Preklicano",
+    "pending": "[EN PENDING] V obdelavi",
+    "completed": "[EN PENDING] Zaključeno",
+    "loading": "[EN PENDING] Nalaganje...",
+    "saving": "[EN PENDING] Shranjevanje..."
+  },
+  "confirm": {
+    "title": "[EN PENDING] Ali ste prepričani?",
+    "cannotUndo": "[EN PENDING] Te akcije ni mogoče razveljaviti.",
+    "yes": "[EN PENDING] Da",
+    "no": "[EN PENDING] Ne"
+  },
+  "roles": {
+    "owner": "[EN PENDING] Lastnik",
+    "admin": "[EN PENDING] Admin",
+    "staff": "[EN PENDING] Zaposleni",
+    "receptionist": "[EN PENDING] Recepcija"
+  },
+  "errors": {
+    "generic": "[EN PENDING] Prišlo je do napake. Poskusite znova.",
+    "loadFailed": "[EN PENDING] Napaka pri nalaganju",
+    "noResults": "[EN PENDING] Ni rezultatov",
+    "networkError": "[EN PENDING] Težave s povezavo",
+    "unauthorized": "[EN PENDING] Nimate dovoljenja za to akcijo",
+    "fillAllFields": "[EN PENDING] Izpolnite vsa polja"
+  },
+  "time": {
+    "today": "[EN PENDING] Danes",
+    "yesterday": "[EN PENDING] Včeraj",
+    "tomorrow": "[EN PENDING] Jutri",
+    "now": "[EN PENDING] Zdaj"
+  },
+  "daysShort": {
+    "mon": "[EN PENDING] Pon",
+    "tue": "[EN PENDING] Tor",
+    "wed": "[EN PENDING] Sre",
+    "thu": "[EN PENDING] Čet",
+    "fri": "[EN PENDING] Pet",
+    "sat": "[EN PENDING] Sob",
+    "sun": "[EN PENDING] Ned"
+  },
+  "daysLong": {
+    "mon": "[EN PENDING] Ponedeljek",
+    "tue": "[EN PENDING] Torek",
+    "wed": "[EN PENDING] Sreda",
+    "thu": "[EN PENDING] Četrtek",
+    "fri": "[EN PENDING] Petek",
+    "sat": "[EN PENDING] Sobota",
+    "sun": "[EN PENDING] Nedelja"
+  },
+  "search": {
+    "placeholder": "[EN PENDING] Iskanje...",
+    "noResults": "[EN PENDING] Ni zadetkov"
+  },
+  "divider": {
+    "or": "[EN PENDING] ali"
+  },
+  "pagination": {
+    "previous": "[EN PENDING] Prejšnja",
+    "next": "[EN PENDING] Naslednja"
+  }
+}

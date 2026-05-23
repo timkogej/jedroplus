@@ -5,10 +5,14 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { SpinnerGap } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 export default function SignupPage() {
+  const t = useTranslations('auth.signup');
+  const tCommon = useTranslations('common');
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -33,17 +37,17 @@ export default function SignupPage() {
     e.preventDefault();
 
     if (!formData.fullName || !formData.email || !formData.confirmEmail || !formData.password) {
-      toast.error('Izpolnite vsa polja');
+      toast.error(t('errors.fillAllFields'));
       return;
     }
 
     if (formData.email !== formData.confirmEmail) {
-      toast.error('Email naslova se ne ujemata');
+      toast.error(t('errors.emailMismatch'));
       return;
     }
 
     if (formData.password.length < 6) {
-      toast.error('Geslo mora biti dolgo vsaj 6 znakov');
+      toast.error(t('errors.passwordTooShort'));
       return;
     }
 
@@ -91,7 +95,7 @@ export default function SignupPage() {
       }
 
       if (signUpData?.user) {
-        toast.success('Račun ustvarjen!');
+        toast.success(t('toasts.success'));
         // Redirect to the check-email screen so the user knows to confirm their inbox.
         // DO NOT redirect to /onboarding or /dashboard here — the account is not yet confirmed.
         window.location.href = '/auth/check-email';
@@ -99,11 +103,11 @@ export default function SignupPage() {
 
     } catch (error: unknown) {
       console.error('Signup error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Prišlo je do napake pri registraciji';
+      const errorMessage = error instanceof Error ? error.message : t('errors.generic');
       if (errorMessage.includes('already registered')) {
-        toast.error('Ta email naslov je že registriran');
+        toast.error(t('errors.alreadyRegistered'));
       } else if (error instanceof Error && (error.name === 'AuthRetryableFetchError' || error.message === 'Load failed')) {
-        toast.error('Prišlo je do napake pri povezavi. Prosimo, poskusite znova.');
+        toast.error(t('errors.networkError'));
       } else {
         toast.error(errorMessage);
       }
@@ -126,24 +130,24 @@ export default function SignupPage() {
           >
             Jedro+
           </h1>
-          <p className="text-gray-600">Ustvarite nov račun</p>
+          <p className="text-gray-600">{t('subtitle')}</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSignup} className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Ime in priimek</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('fullNameLabel')}</label>
             <Input
               type="text"
               value={formData.fullName}
               onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-              placeholder="Janez Novak"
+              placeholder={t('fullNamePlaceholder')}
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('emailLabel')}</label>
             <Input
               type="email"
               value={formData.email}
@@ -155,7 +159,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Potrdi email</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('confirmEmailLabel')}</label>
             <Input
               type="email"
               value={formData.confirmEmail}
@@ -167,7 +171,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Geslo</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('passwordLabel')}</label>
             <Input
               type="password"
               value={formData.password}
@@ -176,7 +180,7 @@ export default function SignupPage() {
               disabled={loading}
               autoComplete="new-password"
             />
-            <p className="text-xs text-gray-500 mt-1">Najmanj 6 znakov</p>
+            <p className="text-xs text-gray-500 mt-1">{t('passwordHint')}</p>
           </div>
 
           <Button
@@ -190,15 +194,15 @@ export default function SignupPage() {
             {loading ? (
               <>
                 <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                Ustvarjam račun...
+                {t('submittingButton')}
               </>
-            ) : 'Registracija'}
+            ) : t('submitButton')}
           </Button>
 
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium">ali</span>
+            <span className="text-xs text-gray-400 font-medium">{tCommon('divider.or')}</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
@@ -216,15 +220,15 @@ export default function SignupPage() {
               <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
               <path fill="none" d="M0 0h48v48H0z"/>
             </svg>
-            {googleLoading ? 'Prijavljam...' : 'Registracija z Google'}
+            {googleLoading ? t('googleLoading') : t('googleButton')}
           </button>
         </form>
 
         {/* Login Link */}
         <p className="text-center mt-6 text-sm text-gray-600">
-          Že imate račun?{' '}
+          {t('hasAccount')}{' '}
           <Link href="/login" className="font-semibold text-violet-600 hover:text-violet-700 transition-colors">
-            Prijavite se
+            {t('loginLink')}
           </Link>
         </p>
       </div>

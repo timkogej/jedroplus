@@ -10,13 +10,16 @@
  * an error. They can go back to /login or try registering again at /signup.
  */
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { WarningCircle } from '@phosphor-icons/react/dist/ssr';
+import { getTranslations } from 'next-intl/server';
 
 const GRADIENT = 'linear-gradient(to right, #7C75FC, #4F8CFF, #50C3D2)';
 
-export default function ConfirmErrorPage() {
+export default async function ConfirmErrorPage() {
+  const t = await getTranslations('auth.confirmError');
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
@@ -47,12 +50,12 @@ export default function ConfirmErrorPage() {
 
           {/* Eyebrow */}
           <p className="text-xs font-semibold uppercase tracking-widest text-red-400 -mb-2">
-            Potrjevanje ni uspelo
+            {t('eyebrow')}
           </p>
 
           {/* Heading */}
           <h2 className="text-2xl font-bold text-gray-900 leading-snug">
-            Potrditvena povezava{' '}
+            {t('heading')}{' '}
             <span
               style={{
                 background: GRADIENT,
@@ -62,21 +65,21 @@ export default function ConfirmErrorPage() {
                 color: 'transparent',
               }}
             >
-              ni veljavna
+              {t('headingHighlight')}
             </span>
           </h2>
 
           {/* Body */}
           <p className="text-sm text-gray-600 leading-relaxed">
-            Potrditvene povezave ni bilo mogoče preveriti. Možni razlogi:
+            {t('body')}
           </p>
 
           {/* Reason list */}
           <ul className="w-full text-left space-y-2 -mt-2">
             {[
-              'Povezava je potekla (veljavna je 24 ur)',
-              'Povezava je bila že uporabljena',
-              'URL je bil spremenjen ali poškodovan',
+              t('reasons.expired'),
+              t('reasons.alreadyUsed'),
+              t('reasons.tampered'),
             ].map((reason) => (
               <li
                 key={reason}
@@ -101,7 +104,7 @@ export default function ConfirmErrorPage() {
                 className="w-full h-12 text-white font-medium transition-all duration-300 ease-in-out hover:opacity-90 hover:shadow-lg"
                 style={{ background: GRADIENT }}
               >
-                Nazaj na prijavo
+                {t('backToLoginButton')}
               </Button>
             </Link>
 
@@ -110,14 +113,14 @@ export default function ConfirmErrorPage() {
                 variant="outline"
                 className="w-full h-12 font-medium text-gray-700 border-gray-200 hover:bg-gray-50 transition-colors"
               >
-                Poskusi znova
+                {t('tryAgainButton')}
               </Button>
             </Link>
           </div>
 
           {/* Support */}
           <p className="text-xs text-gray-400 leading-relaxed">
-            Težava se ponavlja?{' '}
+            {t('support')}{' '}
             <a
               href="mailto:help@jedroplus.com"
               className="font-medium text-gray-500 hover:text-gray-700 underline underline-offset-2 transition-colors"
@@ -133,7 +136,7 @@ export default function ConfirmErrorPage() {
             href="/"
             className="hover:text-gray-700 transition-colors underline underline-offset-2"
           >
-            Nazaj na začetek
+            {t('backToStart')}
           </Link>
         </p>
 

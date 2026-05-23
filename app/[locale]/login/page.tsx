@@ -5,12 +5,17 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import Link from 'next/link';
+import { Link, useRouter } from '@/i18n/navigation';
 import { SpinnerGap } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
-const STORAGE_KEY = "jedroplus_company_id";
+const STORAGE_KEY = 'jedroplus_company_id';
 
 export default function LoginPage() {
+  const t = useTranslations('auth.login');
+  const tCommon = useTranslations('common');
+  const router = useRouter();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,7 +25,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error('Izpolnite vsa polja');
+      toast.error(t('errors.fillAllFields'));
       return;
     }
 
@@ -35,7 +40,7 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      toast.success('Prijavljeni!');
+      toast.success(t('toasts.success'));
 
       if (authData.user) {
         const { data: profile } = await supabase
@@ -54,21 +59,25 @@ export default function LoginPage() {
           if (company?.company_id) {
             localStorage.setItem(STORAGE_KEY, company.company_id);
             document.cookie = `company_id=${company.company_id}; path=/; max-age=31536000`;
-            setTimeout(() => { window.location.href = '/dashboard'; }, 500);
+            setTimeout(() => { router.push('/dashboard'); }, 500);
           } else {
-            setTimeout(() => { window.location.href = '/onboarding'; }, 500);
+            setTimeout(() => { router.push('/onboarding'); }, 500);
           }
         } else {
-          setTimeout(() => { window.location.href = '/onboarding'; }, 500);
+          setTimeout(() => { router.push('/onboarding'); }, 500);
         }
       }
     } catch (error: unknown) {
       console.error('Login error:', error);
       const msg = error instanceof Error ? error.message : '';
-      if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials') || msg.toLowerCase().includes('password')) {
-        toast.error('Napačen email ali geslo');
+      if (
+        msg.toLowerCase().includes('invalid') ||
+        msg.toLowerCase().includes('credentials') ||
+        msg.toLowerCase().includes('password')
+      ) {
+        toast.error(t('errors.invalidCredentials'));
       } else {
-        toast.error('Prišlo je do napake pri prijavi. Poskusite znova.');
+        toast.error(t('errors.generic'));
       }
       setLoading(false);
     }
@@ -103,13 +112,13 @@ export default function LoginPage() {
           >
             Jedro+
           </h1>
-          <p className="text-gray-600">Prijava v sistem</p>
+          <p className="text-gray-600">{t('subtitle')}</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleLogin} className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('emailLabel')}</label>
             <Input
               type="email"
               value={email}
@@ -122,12 +131,12 @@ export default function LoginPage() {
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-semibold text-gray-900">Geslo</label>
+              <label className="block text-sm font-semibold text-gray-900">{t('passwordLabel')}</label>
               <Link
                 href="/forgot-password"
                 className="text-xs font-medium text-violet-600 hover:text-violet-700 transition-colors"
               >
-                Pozabljeno geslo?
+                {t('forgotPassword')}
               </Link>
             </div>
             <Input
@@ -151,15 +160,15 @@ export default function LoginPage() {
             {loading ? (
               <>
                 <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                Prijavljam...
+                {t('submittingButton')}
               </>
-            ) : 'Prijava'}
+            ) : t('submitButton')}
           </Button>
 
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium">ali</span>
+            <span className="text-xs text-gray-400 font-medium">{tCommon('divider.or')}</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
@@ -177,15 +186,15 @@ export default function LoginPage() {
               <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
               <path fill="none" d="M0 0h48v48H0z"/>
             </svg>
-            {googleLoading ? 'Prijavljam...' : 'Prijava z Google'}
+            {googleLoading ? t('googleLoading') : t('googleButton')}
           </button>
         </form>
 
         {/* Signup Link */}
         <p className="text-center mt-6 text-sm text-gray-600">
-          Nimate računa?{' '}
+          {t('noAccount')}{' '}
           <Link href="/signup" className="font-semibold text-violet-600 hover:text-violet-700 transition-colors">
-            Registrirajte se
+            {t('registerLink')}
           </Link>
         </p>
       </div>

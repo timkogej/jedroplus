@@ -22,14 +22,16 @@ import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { CheckCircle, WarningCircle, LockKey, ArrowLeft, SpinnerGap } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  Inner component — needs access to useSearchParams()                        */
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 function ResetPasswordForm() {
+  const t = useTranslations('auth.resetPassword');
   const searchParams = useSearchParams();
 
   // Token verification state
@@ -50,9 +52,7 @@ function ResetPasswordForm() {
 
     // Guard: both params must be present and type must be "recovery"
     if (!tokenHash || type !== 'recovery') {
-      setSessionError(
-        'Povezava za ponastavitev gesla je neveljavna ali je potekla. Zahtevajte novo povezavo.'
-      );
+      setSessionError(t('errors.invalidLink'));
       return;
     }
 
@@ -65,9 +65,7 @@ function ResetPasswordForm() {
       .then(({ error }) => {
         if (error) {
           console.error('Token verification error:', error.message);
-          setSessionError(
-            'Povezava za ponastavitev gesla je neveljavna ali je potekla. Zahtevajte novo povezavo.'
-          );
+          setSessionError(t('errors.invalidLink'));
         } else {
           setSessionReady(true);
         }
@@ -80,17 +78,17 @@ function ResetPasswordForm() {
     setFormError('');
 
     if (!password || !confirmPassword) {
-      setFormError('Izpolnite obe polji.');
+      setFormError(t('errors.fillBothFields'));
       return;
     }
 
     if (password.length < 6) {
-      setFormError('Geslo mora biti dolgo vsaj 6 znakov.');
+      setFormError(t('errors.passwordTooShort'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setFormError('Gesli se ne ujemata.');
+      setFormError(t('errors.passwordMismatch'));
       return;
     }
 
@@ -102,7 +100,7 @@ function ResetPasswordForm() {
 
       if (error) {
         console.error('Password update error:', error.message);
-        setFormError('Prišlo je do napake pri posodobitvi gesla. Prosimo, poskusite znova.');
+        setFormError(t('errors.updateFailed'));
         return;
       }
 
@@ -117,7 +115,7 @@ function ResetPasswordForm() {
       }, 2500);
     } catch (err) {
       console.error('Unexpected error:', err);
-      setFormError('Prišlo je do napake. Prosimo, poskusite znova.');
+      setFormError(t('errors.generic'));
     } finally {
       setLoading(false);
     }
@@ -135,14 +133,14 @@ function ResetPasswordForm() {
           </div>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Neveljavna povezava</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('invalidLink.title')}</h2>
           <p className="text-sm text-gray-600 leading-relaxed">{sessionError}</p>
         </div>
         <Link
           href="/forgot-password"
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors mt-2"
         >
-          Zahtevaj novo povezavo
+          {t('invalidLink.requestNew')}
         </Link>
       </div>
     );
@@ -155,7 +153,7 @@ function ResetPasswordForm() {
         <div className="flex justify-center mb-4">
           <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
         </div>
-        <p className="text-sm text-gray-500">Preverjamo povezavo za ponastavitev gesla ...</p>
+        <p className="text-sm text-gray-500">{t('verifying')}</p>
       </div>
     );
   }
@@ -170,9 +168,9 @@ function ResetPasswordForm() {
           </div>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Geslo posodobljeno</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('success.title')}</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
-            Geslo je bilo uspešno posodobljeno. Preusmerjamo vas na prijavo...
+            {t('success.message')}
           </p>
         </div>
         <div className="flex justify-center">
@@ -186,12 +184,12 @@ function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">Nastavite novo geslo</h2>
-        <p className="text-sm text-gray-500">Vnesite novo geslo za svoj račun.</p>
+        <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('form.title')}</h2>
+        <p className="text-sm text-gray-500">{t('form.description')}</p>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Novo geslo</label>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">{t('form.newPasswordLabel')}</label>
         <div className="relative">
           <LockKey
             size={16}
@@ -210,11 +208,11 @@ function ResetPasswordForm() {
             className="pl-9"
           />
         </div>
-        <p className="text-xs text-gray-500 mt-1">Najmanj 6 znakov</p>
+        <p className="text-xs text-gray-500 mt-1">{t('form.passwordHint')}</p>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">Potrdi geslo</label>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">{t('form.confirmPasswordLabel')}</label>
         <div className="relative">
           <LockKey
             size={16}
@@ -253,9 +251,9 @@ function ResetPasswordForm() {
         {loading ? (
           <>
             <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-            Shranjujem...
+            {t('form.submittingButton')}
           </>
-        ) : 'Nastavi novo geslo'}
+        ) : t('form.submitButton')}
       </Button>
     </form>
   );
@@ -266,6 +264,8 @@ function ResetPasswordForm() {
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 export default function ResetPasswordPage() {
+  const t = useTranslations('auth.resetPassword');
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
@@ -283,7 +283,7 @@ export default function ResetPasswordPage() {
           >
             Jedro+
           </h1>
-          <p className="text-gray-600">Ponastavitev gesla</p>
+          <p className="text-gray-600">{t('subtitle')}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8">
@@ -293,7 +293,7 @@ export default function ResetPasswordPage() {
                 <div className="flex justify-center mb-4">
                   <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-sm text-gray-500">Nalagam...</p>
+                <p className="text-sm text-gray-500">{t('loading')}</p>
               </div>
             }
           >
@@ -308,7 +308,7 @@ export default function ResetPasswordPage() {
             className="inline-flex items-center gap-1.5 font-semibold text-violet-600 hover:text-violet-700 transition-colors"
           >
             <ArrowLeft size={14} />
-            Nazaj na prijavo
+            {t('backToLogin')}
           </Link>
         </p>
       </div>

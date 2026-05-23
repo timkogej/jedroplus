@@ -18,12 +18,15 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { useTranslations } from 'next-intl';
 
 const GRADIENT = 'linear-gradient(to right, #7C75FC, #4F8CFF, #50C3D2)';
 
 function ConfirmInner() {
+  const t = useTranslations('auth.confirm');
   const router = useRouter();
   const params = useSearchParams();
 
@@ -103,16 +106,16 @@ function ConfirmInner() {
               color: 'transparent',
             }}
           >
-            Potrjevanje
+            {t('eyebrow')}
           </p>
 
           {/* Main message */}
           <h2 className="text-xl font-bold text-gray-900 -mt-2">
-            Potrjujemo vaš email&nbsp;&hellip;
+            {t('heading')}
           </h2>
 
           <p className="text-sm text-gray-500 leading-relaxed">
-            Prosimo, počakajte trenutek.
+            {t('waitMessage')}
           </p>
         </div>
       </div>

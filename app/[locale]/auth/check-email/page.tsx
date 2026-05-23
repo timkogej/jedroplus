@@ -7,13 +7,16 @@
 
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { EnvelopeSimple } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 const GRADIENT = 'linear-gradient(to right, #7C75FC, #4F8CFF, #50C3D2)';
 
 export default function CheckEmailPage() {
+  const t = useTranslations('auth.checkEmail');
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
@@ -56,12 +59,12 @@ export default function CheckEmailPage() {
               color: 'transparent',
             }}
           >
-            Skoraj končano
+            {t('eyebrow')}
           </p>
 
           {/* Heading */}
           <h2 className="text-2xl font-bold text-gray-900 leading-snug -mt-2">
-            Na vaš email smo poslali{' '}
+            {t('heading')}{' '}
             <span
               style={{
                 background: GRADIENT,
@@ -71,22 +74,20 @@ export default function CheckEmailPage() {
                 color: 'transparent',
               }}
             >
-              potrditveno povezavo
+              {t('headingHighlight')}
             </span>
           </h2>
 
           {/* Body */}
           <p className="text-sm text-gray-600 leading-relaxed">
-            Za dokončanje registracije odprite svoj email in kliknite potrditveno
-            povezavo. Ko potrdite svoj email, boste lahko nadaljevali z uporabo
-            aplikacije.
+            {t('body')}
           </p>
 
           {/* Spam hint */}
           <p className="text-sm text-gray-500">
-            Če sporočila ne najdete, preverite tudi{' '}
-            <span className="font-medium text-gray-700">vsiljeno pošto</span> ali{' '}
-            <span className="font-medium text-gray-700">promocije</span>.
+            {t('spamHint')}{' '}
+            <span className="font-medium text-gray-700">{t('spamFolder')}</span> ali{' '}
+            <span className="font-medium text-gray-700">{t('promotionsFolder')}</span>.
           </p>
 
           {/* Divider */}
@@ -100,7 +101,7 @@ export default function CheckEmailPage() {
                 className="w-full h-12 text-white font-medium transition-all duration-300 ease-in-out hover:opacity-90 hover:shadow-lg"
                 style={{ background: GRADIENT }}
               >
-                Odpri prijavo
+                {t('openLoginButton')}
               </Button>
             </Link>
 
@@ -110,22 +111,22 @@ export default function CheckEmailPage() {
               variant="outline"
               disabled
               className="w-full h-12 font-medium text-gray-400 border-gray-200 cursor-not-allowed"
-              title="Funkcija bo na voljo kmalu"
+              title={t('resendTooltip')}
             >
-              Ponovno pošlji email
+              {t('resendButton')}
             </Button>
           </div>
 
           {/* Muted note */}
           <p className="text-xs text-gray-400 leading-relaxed -mt-1">
-            Ko potrdite email, se lahko vrnete v aplikacijo in nadaljujete.
+            {t('afterConfirm')}
           </p>
         </div>
 
         {/* Back to home */}
         <p className="text-center mt-6 text-sm text-gray-500">
           <Link href="/" className="hover:text-gray-700 transition-colors underline underline-offset-2">
-            Nazaj na začetek
+            {t('backToStart')}
           </Link>
         </p>
 

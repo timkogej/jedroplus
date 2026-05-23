@@ -356,7 +356,7 @@ export default function LostLeadsPage() {
               <div className="p-12 text-center">
                 <UserCheck className="h-16 w-16 text-emerald-300 mx-auto mb-4" />
                 <p className="text-gray-500 text-lg font-medium">
-                  There are currently no inactive customers.
+                  Trenutno ni neaktivnih strank.
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
                   Vse stranke so imele interakcijo v zadnjih {inactivityDays} dneh.

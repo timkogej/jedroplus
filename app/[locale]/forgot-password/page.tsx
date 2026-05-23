@@ -12,10 +12,13 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { EnvelopeSimple, ArrowLeft, CheckCircle } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 export default function ForgotPasswordPage() {
+  const t = useTranslations('auth.forgotPassword');
+
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -27,7 +30,7 @@ export default function ForgotPasswordPage() {
 
     const trimmed = email.trim();
     if (!trimmed) {
-      setError('Vnesite email naslov.');
+      setError(t('errors.emptyEmail'));
       return;
     }
 
@@ -47,7 +50,7 @@ export default function ForgotPasswordPage() {
       setSubmitted(true);
     } catch (err) {
       console.error('Unexpected error:', err);
-      setError('Prišlo je do napake. Prosimo, poskusite znova.');
+      setError(t('errors.generic'));
     } finally {
       setLoading(false);
     }
@@ -70,7 +73,7 @@ export default function ForgotPasswordPage() {
           >
             Jedro+
           </h1>
-          <p className="text-gray-600">Ponastavitev gesla</p>
+          <p className="text-gray-600">{t('subtitle')}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8">
@@ -83,10 +86,9 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Preverite svojo pošto</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('success.title')}</h2>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  Če račun s tem email naslovom obstaja, smo vam poslali povezavo za ponastavitev gesla.
-                  Preverite tudi mapo z neželeno pošto.
+                  {t('success.message')}
                 </p>
               </div>
               <Link
@@ -94,22 +96,22 @@ export default function ForgotPasswordPage() {
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors mt-2"
               >
                 <ArrowLeft size={14} />
-                Nazaj na prijavo
+                {t('backToLogin')}
               </Link>
             </div>
           ) : (
             /* ── Request form ── */
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-1">Pozabljeno geslo</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('title')}</h2>
                 <p className="text-sm text-gray-500">
-                  Vnesite svoj email naslov in poslali vam bomo povezavo za ponastavitev gesla.
+                  {t('description')}
                 </p>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Email naslov
+                  {t('emailLabel')}
                 </label>
                 <div className="relative">
                   <EnvelopeSimple
@@ -142,7 +144,7 @@ export default function ForgotPasswordPage() {
                   background: 'linear-gradient(to right, #8B5CF6, #06B6D4)',
                 }}
               >
-                {loading ? 'Pošiljam...' : 'Pošlji povezavo za ponastavitev'}
+                {loading ? t('submittingButton') : t('submitButton')}
               </Button>
             </form>
           )}
@@ -151,12 +153,12 @@ export default function ForgotPasswordPage() {
         {/* Back to login */}
         {!submitted && (
           <p className="text-center mt-6 text-sm text-gray-600">
-            Ste se spomnili gesla?{' '}
+            {t('rememberPassword')}{' '}
             <Link
               href="/login"
               className="font-semibold text-violet-600 hover:text-violet-700 transition-colors"
             >
-              Prijavite se
+              {t('loginLink')}
             </Link>
           </p>
         )}
