@@ -13,15 +13,13 @@ export function SettingsSection({ title, description, children }: SettingsSectio
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-gray-100 p-5 sm:p-6 mb-6"
+      className="bg-white rounded-2xl border border-gray-100 p-5 mb-5"
     >
-      <div className="mb-6 pb-4 border-b border-gray-100">
-        <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-        {description && (
-          <p className="text-sm text-gray-500 mt-1">{description}</p>
-        )}
-      </div>
-      <div className="space-y-6">
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{title}</p>
+      {description && (
+        <p className="text-xs text-gray-500 mb-3 -mt-1">{description}</p>
+      )}
+      <div className="space-y-4">
         {children}
       </div>
     </motion.div>

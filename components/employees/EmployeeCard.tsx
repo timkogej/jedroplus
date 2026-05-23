@@ -77,7 +77,7 @@ function EmployeeCard({
           />
 
           {/* Name */}
-          <h3 className="mt-4 text-lg font-semibold text-[#1A1F36] line-clamp-1">
+          <h3 className="mt-4 text-lg font-normal text-[#1A1F36] line-clamp-1">
             {fullName}
           </h3>
 
@@ -121,17 +121,17 @@ function EmployeeCard({
         {/* Stats: Danes, Teden, Mesec */}
         <div className="mt-4 flex items-center justify-center gap-4 border-t border-gray-100 pt-4">
           <div className="text-center">
-            <p className="text-lg font-bold text-[#1A1F36]">{employee.appointments_today || 0}</p>
+            <p className="text-lg font-normal text-[#1A1F36]">{employee.appointments_today || 0}</p>
             <p className="text-xs text-gray-500">Danes</p>
           </div>
           <div className="h-8 w-px bg-gray-200" />
           <div className="text-center">
-            <p className="text-lg font-bold text-[#1A1F36]">{employee.appointments_week || 0}</p>
+            <p className="text-lg font-normal text-[#1A1F36]">{employee.appointments_week || 0}</p>
             <p className="text-xs text-gray-500">Teden</p>
           </div>
           <div className="h-8 w-px bg-gray-200" />
           <div className="text-center">
-            <p className="text-lg font-bold text-[#1A1F36]">{employee.appointments_month || employee.total_appointments || 0}</p>
+            <p className="text-lg font-normal text-[#1A1F36]">{employee.appointments_month || employee.total_appointments || 0}</p>
             <p className="text-xs text-gray-500">Mesec</p>
           </div>
         </div>

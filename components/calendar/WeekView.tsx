@@ -383,7 +383,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                   style={isMobile ? { scrollSnapAlign: 'start' } as React.CSSProperties : undefined}
                 >
                   <span
-                    className="text-[10px] font-semibold uppercase tracking-wider"
+                    className="text-[10px] font-normal uppercase tracking-wider"
                     style={isCurrentDay ? {
                       background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                       WebkitBackgroundClip: 'text',
@@ -395,9 +395,9 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                   <button
                     type="button"
                     onClick={() => onDateClick?.(day)}
-                    className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold
+                    className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-sm font-normal
                                transition-all duration-200 hover:bg-gray-100
-                               ${isCurrentDay ? 'font-bold' : 'text-[#1A1F36]'}`}
+                               ${isCurrentDay ? '' : 'text-[#1A1F36]'}`}
                     style={isCurrentDay ? {
                       background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                       WebkitBackgroundClip: 'text',

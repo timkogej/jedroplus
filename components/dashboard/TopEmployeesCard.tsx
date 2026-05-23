@@ -27,9 +27,9 @@ export function TopEmployeesCard({ employees }: TopEmployeesCardProps) {
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
           {/* Icon only - no circle background */}
-          <Trophy size={24} weight="bold" className="text-gray-900" />
+          <Trophy size={24} weight="regular" className="text-gray-900" />
           <div>
-            <h3 className="font-semibold text-gray-900">Top Zaposleni</h3>
+            <h3 className="font-normal text-gray-900">Top Zaposleni</h3>
             <p className="text-sm text-gray-500">Po opravljenih terminih</p>
           </div>
         </div>
@@ -52,7 +52,7 @@ export function TopEmployeesCard({ employees }: TopEmployeesCardProps) {
               className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors"
             >
               {/* Rank */}
-              <span className="flex h-6 w-6 items-center justify-center text-sm font-semibold text-gray-400">
+              <span className="flex h-6 w-6 items-center justify-center text-sm font-normal text-gray-400">
                 #{index + 1}
               </span>
 

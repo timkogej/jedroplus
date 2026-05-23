@@ -46,7 +46,7 @@ export function MetricCard({
         <p className="text-sm font-medium text-gray-500">
           {title}
         </p>
-        <p className="mt-2 text-3xl font-bold text-gray-900">
+        <p className="mt-2 text-3xl font-normal text-gray-900">
           {value}
         </p>
         {subtitle && (
@@ -73,7 +73,7 @@ export function MetricCard({
       <div className="text-gray-900">
         <Icon
           size={24}
-          weight="bold"
+          weight="regular"
         />
       </div>
     </div>
@@ -84,7 +84,7 @@ export function MetricCard({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative rounded-2xl p-[2px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 overflow-hidden"
+        className="relative rounded-2xl p-[1.3px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 overflow-hidden"
       >
         <div className="h-full w-full rounded-[14px] bg-white p-6">
           {content}

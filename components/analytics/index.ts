@@ -8,3 +8,4 @@ export { default as HourlyOccupancyHeatmap } from './HourlyOccupancyHeatmap';
 export { default as ClientGrowthChart } from './ClientGrowthChart';
 export { default as TopPerformersTable } from './TopPerformersTable';
 export { default as RetentionCancellationAnalysis } from './RetentionCancellationAnalysis';
+export { default as PromotionsAnalytics } from './PromotionsAnalytics';

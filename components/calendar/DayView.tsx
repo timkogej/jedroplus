@@ -308,7 +308,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
           {/* Date circle */}
           <div className="flex flex-col items-center flex-shrink-0 pt-0.5">
             <div
-              className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold ${isCurrentDay ? '' : 'text-[#1A1F36]'}`}
+              className={`flex h-10 w-10 items-center justify-center rounded-full text-lg font-normal ${isCurrentDay ? '' : 'text-[#1A1F36]'}`}
               style={isCurrentDay ? {
                 background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                 WebkitBackgroundClip: 'text',
@@ -319,7 +319,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
             </div>
           </div>
           <div className="flex-shrink-0">
-            <p className="text-base font-semibold text-[#1A1F36]">
+            <p className="text-base font-normal text-[#1A1F36]">
               {DAYS_FULL[currentDate.getDay()]}
             </p>
             <p className="text-xs text-gray-400">

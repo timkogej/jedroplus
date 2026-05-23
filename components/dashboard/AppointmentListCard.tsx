@@ -193,7 +193,7 @@ function AppointmentDetailModal({
           className="relative flex items-center justify-between px-5 py-3.5"
           style={{ background: getGradientBackground() }}
         >
-          <h3 className="text-base font-semibold text-white truncate pr-3">
+          <h3 className="text-base font-normal text-white truncate pr-3">
             {appointment.clientName}
           </h3>
           <motion.button
@@ -212,17 +212,17 @@ function AppointmentDetailModal({
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Status */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Status</label>
-            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(appointment.status || 'scheduled')}`}>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Status</label>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
               {getStatusLabel(appointment.status || 'scheduled')}
             </span>
           </div>
 
           {/* Client */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Stranka</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Stranka</label>
             <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-              <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
+              <span className="text-lg font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
                 {appointment.clientName?.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
               </span>
               <div className="min-w-0">
@@ -241,7 +241,7 @@ function AppointmentDetailModal({
 
           {/* Service */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Storitev</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Storitev</label>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.serviceColor || '#6366F1' }} />
               <p className="text-sm font-medium text-[#1A1F36]">{appointment.serviceName}</p>
@@ -251,10 +251,10 @@ function AppointmentDetailModal({
           {/* Employee */}
           {appointment.employeeName && appointment.employeeName !== 'Nedoločeno' && (
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Oseba</label>
+              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Oseba</label>
               <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
                 <span
-                  className="text-lg font-bold flex-shrink-0"
+                  className="text-lg font-normal flex-shrink-0"
                   style={{
                     background: appointment.employeeColor || 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
                     WebkitBackgroundClip: 'text',
@@ -271,7 +271,7 @@ function AppointmentDetailModal({
 
           {/* Time */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Čas</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Čas</label>
             <p className="text-sm font-medium text-[#1A1F36]">
               {appointment.time}{appointment.endTime ? ` – ${appointment.endTime}` : ''}
             </p>
@@ -281,7 +281,7 @@ function AppointmentDetailModal({
           {duration !== null && (
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
               <span className="text-sm font-medium text-gray-700">Trajanje</span>
-              <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+              <span className="text-lg font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                 {duration} min
               </span>
             </div>
@@ -324,14 +324,14 @@ export function AppointmentListCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Icon only - no circle background */}
-            <Calendar size={24} weight="bold" className="text-gray-900" />
+            <Calendar size={24} weight="regular" className="text-gray-900" />
             <div>
-              <h3 className="font-semibold text-gray-900">{title}</h3>
+              <h3 className="font-normal text-gray-900">{title}</h3>
               <p className="text-sm text-gray-500">{subtitle}</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 text-gray-500">
-            <span className="text-lg font-semibold text-gray-900">{appointments.length}</span>
+            <span className="text-lg font-normal text-gray-900">{appointments.length}</span>
           </div>
         </div>
       </div>
@@ -357,7 +357,7 @@ export function AppointmentListCard({
               <div className="flex items-center gap-3">
                 {/* Time */}
                 <div className="flex-shrink-0">
-                  <div className="text-lg font-bold text-gray-900">
+                  <div className="text-lg font-normal text-gray-900">
                     {appointment.time}
                   </div>
                   {appointment.endTime && (
@@ -369,14 +369,14 @@ export function AppointmentListCard({
 
                 {/* Client - no initials, just name and service */}
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-gray-900 truncate">
+                  <div className="font-normal text-gray-900 truncate">
                     {appointment.clientName}
                   </div>
                   <div className="flex items-center gap-1 text-sm text-gray-600">
                     <span className="truncate">{appointment.serviceName}</span>
                     {((appointment.serviceId2 ? 1 : 0) + (appointment.serviceId3 ? 1 : 0)) > 0 && (
                       <span
-                        className="text-sm font-bold flex-shrink-0"
+                        className="text-sm font-normal flex-shrink-0"
                         style={{
                           backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                           WebkitBackgroundClip: 'text',
@@ -428,7 +428,7 @@ export function AppointmentListCard({
         animate={{ opacity: 1, y: 0 }}
         className={
           gradientOutline
-            ? "relative rounded-2xl p-[2px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 overflow-hidden"
+            ? "relative rounded-2xl p-[1.3px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 overflow-hidden"
             : "rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden"
         }
       >

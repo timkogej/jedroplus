@@ -30,9 +30,9 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
           {/* Icon only - no circle background */}
-          <ChartBar size={24} weight="bold" className="text-gray-900" />
+          <ChartBar size={24} weight="regular" className="text-gray-900" />
           <div>
-            <h3 className="font-semibold text-gray-900">Termini - 7 Dni</h3>
+            <h3 className="font-normal text-gray-900">Termini - 7 Dni</h3>
             <p className="text-sm text-gray-500">Pregled zadnjih 7 dni</p>
           </div>
         </div>

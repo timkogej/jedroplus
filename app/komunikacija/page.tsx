@@ -9,10 +9,9 @@ import {
   X,
   Warning,
   ArrowLeft,
-  ArrowRight,
+  CaretRight,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import EmailQuotaCard from '@/components/komunikacija/EmailQuotaCard';
 import CustomerList from '@/components/komunikacija/CustomerList';
 import AIMessageGenerator from '@/components/komunikacija/AIMessageGenerator';
 import MessageComposer from '@/components/komunikacija/MessageComposer';
@@ -505,59 +504,46 @@ export default function KomunikacijaPage() {
 
   return (
     <ProtectedLayout>
-      {/* SVG gradient definition for button icons */}
-      <svg width="0" height="0" className="absolute" aria-hidden="true">
-        <defs>
-          <linearGradient id="btn-icon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#8B5CF6" />
-            <stop offset="50%" stopColor="#3B82F6" />
-            <stop offset="100%" stopColor="#06B6D4" />
-          </linearGradient>
-        </defs>
-      </svg>
-
       <main className="min-h-screen bg-[#F7F8FA]">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 py-6 sm:py-8">
 
-          {/* Page Header */}
-          <div className="mb-6">
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="text-2xl font-bold text-[#1A1F36]">Komunikacija</h1>
-              <p className="text-sm text-gray-500">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">Komunikacija</h1>
+              <p className="text-sm text-gray-500 mt-1">
                 Pošljite sporočila svojim strankam hitro in enostavno
               </p>
-            </motion.div>
+            </div>
+            {/* Email quota inline */}
+            {emailQuota.total > 0 && (
+              <div className="text-right flex-shrink-0">
+                <p className="text-xs text-gray-400">Email kvota</p>
+                <p className="text-sm font-medium text-gray-700 mt-0.5">
+                  <span className="text-gray-900">{emailQuota.used}</span>
+                  <span className="text-gray-400"> / {emailQuota.total}</span>
+                </p>
+              </div>
+            )}
           </div>
-
-          {/* Email Quota */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mb-6"
-          >
-            <EmailQuotaCard
-              used={emailQuota.used}
-              total={emailQuota.total}
-              resetDate={emailQuota.resetDate}
-            />
-          </motion.div>
 
           {/* Stepped Flow */}
           <AnimatePresence mode="wait">
             {step === 1 ? (
               <motion.div
                 key="step1"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.25 }}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
               >
-                {/* Step 1: Customer Selection */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                {/* Customer selection card */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4">
                   <div className="flex items-center gap-2 mb-4">
-                    <Users className="h-5 w-5 text-[#1A1F36]" weight="bold" />
-                    <h2 className="text-lg font-medium text-[#1A1F36]">Izbira strank</h2>
+                    <Users className="h-4 w-4 text-gray-400" weight="regular" />
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Izbira strank
+                    </p>
                   </div>
                   <CustomerList
                     customers={customers}
@@ -568,88 +554,62 @@ export default function KomunikacijaPage() {
                 </div>
 
                 {/* Continue button */}
-                <div className="mt-4">
-                  <motion.button
-                    type="button"
-                    onClick={() => setStep(2)}
-                    disabled={selectedIds.size === 0}
-                    whileHover={{ scale: selectedIds.size > 0 ? 1.01 : 1 }}
-                    whileTap={{ scale: selectedIds.size > 0 ? 0.99 : 1 }}
-                    className={`w-full py-3.5 rounded-xl flex items-center justify-center gap-2 font-normal text-sm transition-all duration-200 ${
-                      selectedIds.size > 0
-                        ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
-                        : 'bg-gray-100 text-gray-400 cursor-not-allowed border border-transparent'
-                    }`}
-                  >
-                    <span
-                      className="flex items-center gap-2"
-                      style={
-                        selectedIds.size > 0
-                          ? {
-                              backgroundImage:
-                                'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                              WebkitBackgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                            }
-                          : undefined
-                      }
-                    >
-                      {selectedIds.size > 0
-                        ? `Naprej z ${selectedIds.size} ${
-                            selectedIds.size === 1
-                              ? 'stranko'
-                              : 'strankami'
-                          }`
-                        : 'Izberite stranke za nadaljevanje'}
-                      {selectedIds.size > 0 && (
-                        <ArrowRight
-                          className="h-4 w-4"
-                          weight="bold"
-                          style={{ fill: 'url(#btn-icon-grad)' }}
-                        />
-                      )}
-                    </span>
-                  </motion.button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  disabled={selectedIds.size === 0}
+                  className="w-full py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {selectedIds.size > 0 ? (
+                    <>
+                      Naprej z {selectedIds.size}{' '}
+                      {selectedIds.size === 1 ? 'stranko' : selectedIds.size < 5 ? 'strankami' : 'strankami'}
+                      <CaretRight className="h-3.5 w-3.5" weight="bold" />
+                    </>
+                  ) : (
+                    'Izberite stranke za nadaljevanje'
+                  )}
+                </button>
               </motion.div>
             ) : (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.25 }}
-                className="space-y-5"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="space-y-4"
               >
-                {/* Summary bar */}
+                {/* Step nav */}
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => { setStep(1); setSendResult(null); }}
-                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
                   >
-                    <ArrowLeft className="h-4 w-4" weight="bold" />
-                    Nazaj na izbiro strank
+                    <ArrowLeft className="h-3.5 w-3.5" weight="bold" />
+                    Nazaj na izbiro
                   </button>
-                  <span className="px-3 py-1 rounded-lg bg-violet-50 text-xs font-semibold text-violet-600 border border-violet-100">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
                     {selectedIds.size}{' '}
                     {selectedIds.size === 1
-                      ? 'stranka izbrana'
+                      ? 'stranka'
                       : selectedIds.size < 5
-                      ? 'stranke izbrane'
-                      : 'strank izbranih'}
+                      ? 'stranke'
+                      : 'strank'}
                   </span>
                 </div>
 
                 {/* Composer card */}
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <div className="bg-white rounded-2xl border border-gray-100 p-5">
                   <div className="flex items-center gap-2 mb-5">
-                    <PaperPlaneTilt className="h-5 w-5 text-[#1A1F36]" weight="bold" />
-                    <h2 className="text-lg font-medium text-[#1A1F36]">Sestavi sporočilo</h2>
+                    <PaperPlaneTilt className="h-4 w-4 text-gray-400" weight="regular" />
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      Sestavi sporočilo
+                    </p>
                   </div>
 
-                  {/* AI Generator */}
-                  <div className="mb-6">
+                  <div className="mb-5">
                     <AIMessageGenerator
                       onGenerate={handleAIGenerate}
                       onError={(msg) => setToast({ message: msg, type: 'error' })}
@@ -658,7 +618,6 @@ export default function KomunikacijaPage() {
                     />
                   </div>
 
-                  {/* Message Composer */}
                   <MessageComposer
                     subject={subject}
                     onSubjectChange={setSubject}

@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
-import { SpinnerGap, FloppyDisk, Plus, X } from '@phosphor-icons/react';
+import { CaretLeft, SpinnerGap, Plus, X } from '@phosphor-icons/react';
 import {
   SettingsSection,
   SettingRow,
@@ -43,6 +44,7 @@ export default function CompanySettingsPage() {
   const [workingHours, setWorkingHours] = useState<Record<string, WorkingHoursDay>>(defaultWorkingHoursDay);
 
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -173,6 +175,8 @@ export default function CompanySettingsPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       setLastSaved(new Date());
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
     } catch (error) {
       console.error('Error saving company data:', error);
     } finally {
@@ -238,26 +242,26 @@ export default function CompanySettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
-            <div className="h-5 bg-gray-100 rounded w-1/4 mb-6" />
-            <div className="space-y-4">
-              <div className="h-10 bg-gray-50 rounded-lg" />
-              <div className="h-10 bg-gray-50 rounded-lg" />
-            </div>
-          </div>
-        ))}
+      <div className="flex items-center justify-center py-16">
+        <div className="w-8 h-8 border-2 border-[#6D5EF7] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div>
+      <Link
+        href="/nastavitve"
+        className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-4"
+      >
+        <CaretLeft className="w-3.5 h-3.5" weight="regular" />
+        Nastavitve
+      </Link>
+
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-base font-semibold text-gray-900">Podatki o podjetju</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Osnovni podatki in nastavitve vašega podjetja</p>
+          <h1 className="text-xl font-semibold text-gray-900">Podjetje</h1>
+          <p className="text-sm text-gray-500 mt-1">Osnovni podatki in nastavitve vašega podjetja</p>
         </div>
         <SaveIndicator saving={saving} lastSaved={lastSaved} />
       </div>
@@ -419,8 +423,8 @@ export default function CompanySettingsPage() {
           </div>
         </SettingsSection>
 
-        {/* Save Button */}
-        <div className="flex justify-end pt-6">
+        {/* Action row */}
+        <div className="flex items-center gap-3 mt-6">
           <motion.button
             type="button"
             onClick={handleSave}
@@ -433,13 +437,18 @@ export default function CompanySettingsPage() {
                 <SpinnerGap className="h-4 w-4 animate-spin" />
                 Shranjujem...
               </>
+            ) : saveSuccess ? (
+              'Shranjeno ✓'
             ) : (
-              <>
-                <FloppyDisk className="h-4 w-4" weight="bold" />
-                Shrani spremembe
-              </>
+              'Shrani spremembe'
             )}
           </motion.button>
+          <Link
+            href="/nastavitve"
+            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            Prekliči
+          </Link>
         </div>
       </motion.div>
     </div>

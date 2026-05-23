@@ -68,7 +68,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: delay * 0.1 + 0.2 }}
-            className="text-3xl font-bold text-gray-900 mb-1"
+            className="text-3xl text-gray-900 mb-1"
           >
             {value}
           </motion.p>
@@ -108,7 +108,7 @@ function EmptyState({ onCreateClient }: { onCreateClient: () => void }) {
                    text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
                    hover:shadow-xl hover:shadow-cyan-500/30"
       >
-        <UserPlus className="h-5 w-5" weight="bold" />
+        <UserPlus className="h-5 w-5" weight="regular" />
         Dodaj prvo stranko
       </motion.button>
     </motion.div>
@@ -140,7 +140,7 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
         className="mt-4 flex items-center gap-1.5 text-sm font-medium text-purple-600 hover:text-purple-700"
       >
         Počisti iskanje
-        <ArrowRight className="h-4 w-4" weight="bold" />
+        <ArrowRight className="h-4 w-4" weight="regular" />
       </motion.button>
     </motion.div>
   );
@@ -173,9 +173,9 @@ function Toast({
                   }`}
     >
       {type === 'success' ? (
-        <CalendarBlank className="h-5 w-5" weight="bold" />
+        <CalendarBlank className="h-5 w-5" weight="regular" />
       ) : (
-        <Warning className="h-5 w-5" weight="bold" />
+        <Warning className="h-5 w-5" weight="regular" />
       )}
       <span className="text-sm font-medium">{message}</span>
       <button
@@ -183,7 +183,7 @@ function Toast({
         onClick={onClose}
         className="ml-2 rounded-full p-0.5 transition-colors hover:bg-white/20"
       >
-        <X className="h-4 w-4" weight="bold" />
+        <X className="h-4 w-4" weight="regular" />
       </button>
     </motion.div>
   );
@@ -556,7 +556,7 @@ export default function ClientsPage() {
               <motion.h1
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-3xl font-bold text-[#1A1F36]"
+                className="text-2xl font-normal text-[#1A1F36]"
               >
                 Stranke
               </motion.h1>
@@ -587,9 +587,9 @@ export default function ClientsPage() {
                              text-sm font-medium text-gray-700 shadow-sm transition-all
                              hover:bg-gray-50 hover:shadow-md"
                 >
-                  <DownloadSimple className="h-4 w-4" weight="bold" />
+                  <DownloadSimple className="h-4 w-4" weight="regular" />
                   <span className="hidden md:inline">Import CRM</span>
-                  <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${importDropdownOpen ? 'rotate-180' : ''}`} weight="bold" />
+                  <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${importDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
                 </motion.button>
 
                 <AnimatePresence>
@@ -651,9 +651,9 @@ export default function ClientsPage() {
                              text-sm font-medium text-gray-700 shadow-sm transition-all
                              hover:bg-gray-50 hover:shadow-md"
                 >
-                  <UploadSimple className="h-4 w-4" weight="bold" />
+                  <UploadSimple className="h-4 w-4" weight="regular" />
                   <span className="hidden md:inline">Export CRM</span>
-                  <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} weight="bold" />
+                  <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
                 </motion.button>
 
                 <AnimatePresence>
@@ -711,7 +711,7 @@ export default function ClientsPage() {
                            text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
                            hover:shadow-xl hover:shadow-cyan-500/30"
               >
-                <Plus className="h-5 w-5 flex-shrink-0" weight="bold" />
+                <Plus className="h-5 w-5 flex-shrink-0" weight="regular" />
                 <span className="whitespace-nowrap">Nova stranka</span>
               </motion.button>
             </div>
@@ -721,19 +721,19 @@ export default function ClientsPage() {
           {stats && (
             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <StatCard
-                icon={<Users className="h-6 w-6" weight="bold" />}
+                icon={<Users className="h-6 w-6" weight="regular" />}
                 value={stats.total}
                 label="Skupaj strank"
                 delay={0}
               />
               <StatCard
-                icon={<CalendarBlank className="h-6 w-6" weight="bold" />}
+                icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
                 value={stats.withAppointments}
                 label="S termini"
                 delay={1}
               />
               <StatCard
-                icon={<UserPlus className="h-6 w-6" weight="bold" />}
+                icon={<UserPlus className="h-6 w-6" weight="regular" />}
                 value={stats.newThisMonth}
                 label="Novih ta mesec"
                 delay={2}
@@ -769,7 +769,7 @@ export default function ClientsPage() {
                   className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1
                              text-gray-400 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
                 >
-                  <X className="h-4 w-4" weight="bold" />
+                  <X className="h-4 w-4" weight="regular" />
                 </button>
               )}
             </div>

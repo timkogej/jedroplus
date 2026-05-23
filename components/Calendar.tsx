@@ -1973,7 +1973,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 <CaretLeft className="h-[14px] w-[14px] md:h-4 md:w-4" weight="bold" />
               </motion.button>
 
-              <h1 className="w-[140px] text-center text-[15px] font-semibold text-[#1A1F36]
+              <h1 className="w-[140px] text-center text-[15px] font-normal text-[#1A1F36]
                              md:w-[170px] md:text-[17px]">
                 {headerTitle}
               </h1>

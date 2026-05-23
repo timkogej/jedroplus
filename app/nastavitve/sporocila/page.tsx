@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'motion/react';
 import {
+  CaretLeft,
   EnvelopeSimple,
   DeviceMobile,
   CaretDown,
@@ -232,11 +234,19 @@ export default function SporocilaPage() {
 
   return (
     <div>
+      <Link
+        href="/nastavitve"
+        className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-4"
+      >
+        <CaretLeft className="w-3.5 h-3.5" weight="regular" />
+        Nastavitve
+      </Link>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-base font-semibold text-gray-900">Zgodovina sporočil</h2>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <h1 className="text-xl font-semibold text-gray-900">Sporočila</h1>
+          <p className="text-sm text-gray-500 mt-1">
             Prikazana je samo zgodovina zadnjih 14 dni
           </p>
         </div>

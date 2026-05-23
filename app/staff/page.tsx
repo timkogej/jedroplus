@@ -84,11 +84,11 @@ function StatCard({
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+          <p className="text-3xl font-normal text-gray-900 mb-1">{value}</p>
           <p className="text-sm font-medium text-gray-600">{label}</p>
         </div>
         <div className="text-black flex-shrink-0">
-          <Icon className="h-6 w-6" weight="bold" />
+          <Icon className="h-6 w-6" weight="regular" />
         </div>
       </div>
     </motion.div>
@@ -728,7 +728,7 @@ export default function OsebjePage() {
           {/* Header */}
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-[#1A1F36]">Osebje</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">Osebje</h1>
               <p className="mt-1 text-gray-500">
                 Upravljajte z vašimi zaposlenimi in njihovimi termini
               </p>

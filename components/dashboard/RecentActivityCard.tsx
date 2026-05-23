@@ -57,11 +57,11 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
         <div className="flex items-center gap-3">
           <ClockCounterClockwise
             size={24}
-            weight="bold"
+            weight="regular"
             className="text-gray-900"
           />
           <div>
-            <h3 className="font-semibold text-gray-900">Zadnja Interakcija</h3>
+            <h3 className="font-normal text-gray-900">Zadnja Interakcija</h3>
             <p className="text-sm text-gray-500">Zadnji zaključeni termini</p>
           </div>
         </div>
@@ -93,7 +93,7 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
                   <div
                     className={`flex h-9 w-9 items-center justify-center rounded-full flex-shrink-0 ${colorClass}`}
                   >
-                    <Icon size={18} weight="bold" />
+                    <Icon size={18} weight="regular" />
                   </div>
 
                   {/* Client and Service Info */}
@@ -106,7 +106,7 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
                     </p>
                     {/* Time range */}
                     <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">
-                      <Clock size={12} weight="bold" />
+                      <Clock size={12} weight="regular" />
                       <span>
                         {activity.startTime}
                         {activity.endTime ? ` - ${activity.endTime}` : ''}
@@ -135,7 +135,7 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
                 <div
                   className={`flex h-9 w-9 items-center justify-center rounded-full ${colorClass}`}
                 >
-                  <Icon size={18} weight="bold" />
+                  <Icon size={18} weight="regular" />
                 </div>
 
                 {/* Description */}

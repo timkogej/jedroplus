@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
+  CaretLeft,
   Crown,
   ShieldStar,
   UserCircle,
@@ -346,17 +348,26 @@ export default function ClaniPage() {
 
   if (currentRole !== 'owner') {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl bg-amber-50 border border-amber-100 p-8 text-center"
-      >
-        <Warning className="w-8 h-8 text-amber-500 mx-auto mb-3" weight="fill" />
-        <h2 className="text-base font-semibold text-amber-900 mb-1">Dostop omejen</h2>
-        <p className="text-sm text-amber-700">
-          To stran lahko vidijo samo lastniki podjetja.
-        </p>
-      </motion.div>
+      <div className="space-y-4">
+        <Link
+          href="/nastavitve"
+          className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <CaretLeft className="w-3.5 h-3.5" weight="regular" />
+          Nastavitve
+        </Link>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl bg-amber-50 border border-amber-100 p-8 text-center"
+        >
+          <Warning className="w-8 h-8 text-amber-500 mx-auto mb-3" weight="fill" />
+          <h2 className="text-base font-semibold text-amber-900 mb-1">Dostop omejen</h2>
+          <p className="text-sm text-amber-700">
+            To stran lahko vidijo samo lastniki podjetja.
+          </p>
+        </motion.div>
+      </div>
     );
   }
 
@@ -364,9 +375,18 @@ export default function ClaniPage() {
 
   if (error) {
     return (
-      <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
-        <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
-        <p className="text-sm text-red-700">{error}</p>
+      <div className="space-y-4">
+        <Link
+          href="/nastavitve"
+          className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <CaretLeft className="w-3.5 h-3.5" weight="regular" />
+          Nastavitve
+        </Link>
+        <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
+          <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
       </div>
     );
   }
@@ -375,6 +395,18 @@ export default function ClaniPage() {
 
   return (
     <div className="space-y-6">
+      <Link
+        href="/nastavitve"
+        className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <CaretLeft className="w-3.5 h-3.5" weight="regular" />
+        Nastavitve
+      </Link>
+
+      <div>
+        <h1 className="text-xl font-semibold text-gray-900">Člani</h1>
+        <p className="text-sm text-gray-500 mt-1">Ekipa, vloge in dovoljenja za zaposlene</p>
+      </div>
       {/* User limit banner */}
       {maxUsers !== null && (
         <motion.div

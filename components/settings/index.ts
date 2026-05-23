@@ -8,4 +8,3 @@ export { Textarea } from './Textarea';
 export { TimePicker } from './TimePicker';
 export { ColorPicker } from './ColorPicker';
 export { SaveIndicator } from './SaveIndicator';
-export { SettingsSidebar } from './SettingsSidebar';

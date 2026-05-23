@@ -126,7 +126,7 @@ function UpgradePrompt({ requiredPlan, feature }: UpgradePromptProps) {
       </p>
 
       <Link
-        href="/plans"
+        href="/nastavitve/paketi"
         className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-shadow"
       >
         Oglej si pakete

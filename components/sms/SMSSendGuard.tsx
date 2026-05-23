@@ -54,7 +54,7 @@ export function SMSSendGuard({
           <p className="text-xs text-gray-600 mb-3">{getReasonText(reason)}</p>
           {planCode !== 'premium' && (
             <Link
-              href="/plans"
+              href="/nastavitve/paketi"
               className="inline-flex items-center gap-1 text-xs font-medium text-violet-600 hover:text-violet-700"
             >
               Nadgradi paket

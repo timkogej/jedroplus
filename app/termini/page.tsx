@@ -75,7 +75,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: delay * 0.1 + 0.2 }}
-            className="text-3xl font-bold text-gray-900 mb-1"
+            className="text-3xl text-gray-900 mb-1"
           >
             {value}
           </motion.p>
@@ -717,7 +717,7 @@ function TerminiPageInner() {
             className="mb-8 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1F36]">Termini</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">Termini</h1>
               <p className="mt-1 text-sm text-gray-500">
                 Upravljajte vse termine na enem mestu
               </p>
@@ -740,19 +740,19 @@ function TerminiPageInner() {
           {/* Stats cards */}
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
-              icon={<CalendarBlank className="h-6 w-6" weight="bold" />}
+              icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
               value={currentMonthCount}
               label="Termini ta mesec"
               delay={0}
             />
             <StatCard
-              icon={<Clock className="h-6 w-6" weight="bold" />}
+              icon={<Clock className="h-6 w-6" weight="regular" />}
               value={todayCount}
               label="Danes"
               delay={1}
             />
             <StatCard
-              icon={<ArrowRight className="h-6 w-6" weight="bold" />}
+              icon={<ArrowRight className="h-6 w-6" weight="regular" />}
               value={upcomingCount}
               label="Prihajajoči"
               delay={2}

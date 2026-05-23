@@ -218,7 +218,7 @@ export default function LostLeadsPage() {
             className="mb-8 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1F36]">Izgubljene stranke</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">Izgubljene stranke</h1>
               <p className="mt-1 text-sm text-gray-500">
                 Pregled nastavitev in neaktivnih strank
               </p>
@@ -267,14 +267,14 @@ export default function LostLeadsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0 }}
-                  className="relative rounded-2xl p-[3px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500"
+                  className="relative rounded-2xl p-[1px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500"
                 >
-                  <div className="rounded-[13px] bg-white p-6 shadow-sm">
+                  <div className="rounded-[15px] bg-white p-6 shadow-sm">
                     <div className="flex items-center justify-between">
-                      <div className="text-3xl font-bold text-gray-900 leading-none">
+                      <div className="text-3xl text-gray-900 leading-none">
                         {stats.inactiveClients}
                       </div>
-                      <TrendDown className="h-6 w-6 text-gray-900" weight="bold" />
+                      <TrendDown className="h-6 w-6 text-gray-900" weight="regular" />
                     </div>
                     <div className="mt-3 text-left">
                       <div className="text-sm font-medium text-gray-600">Neaktivne Stranke</div>
@@ -291,10 +291,10 @@ export default function LostLeadsPage() {
                   className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="text-3xl font-bold text-gray-900 leading-none">
+                    <div className="text-3xl text-gray-900 leading-none">
                       {notifiedThisMonthCount}
                     </div>
-                    <PaperPlaneRight className="h-6 w-6 text-gray-900" weight="bold" />
+                    <PaperPlaneRight className="h-6 w-6 text-gray-900" weight="regular" />
                   </div>
                   <div className="mt-3 text-left">
                     <div className="text-sm font-medium text-gray-600">Obveščeni stranke</div>
@@ -310,10 +310,10 @@ export default function LostLeadsPage() {
                   className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="text-3xl font-bold text-gray-900 leading-none">
+                    <div className="text-3xl text-gray-900 leading-none">
                       {inactivityDays}
                     </div>
-                    <CalendarX className="h-6 w-6 text-gray-900" weight="bold" />
+                    <CalendarX className="h-6 w-6 text-gray-900" weight="regular" />
                   </div>
                   <div className="mt-3 text-left">
                     <div className="text-sm font-medium text-gray-600">Dnevi neaktivnosti</div>
@@ -411,19 +411,19 @@ export default function LostLeadsPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <EnvelopeSimple className="h-4 w-4 text-gray-400" />
+                            <div className="flex items-center gap-2 text-sm text-gray-900">
+                              <EnvelopeSimple className="h-4 w-4 text-gray-900" />
                               {getClientEmail(client)}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Phone className="h-4 w-4 text-gray-400" />
+                            <div className="flex items-center gap-2 text-sm text-gray-900">
+                              <Phone className="h-4 w-4 text-gray-900" />
                               {getClientPhone(client)}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-semibold text-orange-600">
+                            <span className="text-sm text-orange-600">
                               {daysInactive} dni
                             </span>
                           </td>
@@ -434,7 +434,7 @@ export default function LostLeadsPage() {
                                 Da
                               </span>
                             ) : (
-                              <span className="text-sm font-medium text-gray-500">
+                              <span className="text-sm text-gray-900">
                                 Ne
                               </span>
                             )}
@@ -469,11 +469,11 @@ export default function LostLeadsPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                   <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
-                    <TrendDown className="w-4 h-4 text-gray-400 flex-shrink-0" weight="regular" />
-                    <span className="text-sm font-medium text-gray-700">Status</span>
+                    <TrendDown className="w-4 h-4 flex-shrink-0 text-gray-900" weight="regular" />
+                    <span className="text-sm text-gray-700">Status</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-sm font-semibold ${enabled ? 'text-green-600' : 'text-red-500'}`}>
+                    <span className={`text-sm ${enabled ? 'text-green-600' : 'text-red-500'}`}>
                       {enabled ? 'Omogočeno' : 'Onemogočeno'}
                     </span>
                     <div className={`w-2.5 h-2.5 rounded-full ${enabled ? 'bg-green-500' : 'bg-red-400'}`} />
@@ -482,27 +482,27 @@ export default function LostLeadsPage() {
 
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                   <div className="flex items-center gap-2">
-                    <CalendarX className="w-4 h-4 text-gray-400" weight="regular" />
-                    <span className="text-sm font-medium text-gray-700">Prag neaktivnosti</span>
+                    <CalendarX className="w-4 h-4 text-gray-900" weight="regular" />
+                    <span className="text-sm text-gray-700">Prag neaktivnosti</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">{inactivityDays} dni</span>
+                  <span className="text-sm text-gray-900">{inactivityDays} dni</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                   <div className="flex items-center gap-2">
-                    <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
-                    <span className="text-sm font-medium text-gray-700">Ton komunikacije</span>
+                    <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
+                    <span className="text-sm text-gray-700">Ton komunikacije</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-900">{getToneLabel(tone)}</span>
+                  <span className="text-sm text-gray-900">{getToneLabel(tone)}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-gray-400" weight="regular" />
-                    <span className="text-sm font-medium text-gray-700">Popust za vrnitev</span>
+                    <Users className="w-4 h-4 text-gray-900" weight="regular" />
+                    <span className="text-sm text-gray-700">Popust za vrnitev</span>
                   </div>
                   {hasDiscount && discountText ? (
-                    <span className="text-sm font-semibold text-gray-900">{discountText}</span>
+                    <span className="text-sm text-gray-900">{discountText}</span>
                   ) : (
                     <span className="text-sm text-gray-400">Ni nastavljeno</span>
                   )}
@@ -510,8 +510,8 @@ export default function LostLeadsPage() {
 
                 <div className="flex items-start justify-between gap-4 py-2.5">
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <EnvelopeSimple className="w-4 h-4 text-gray-400" weight="regular" />
-                    <span className="text-sm font-medium text-gray-700">Navodila AI-ju</span>
+                    <EnvelopeSimple className="w-4 h-4 text-gray-900" weight="regular" />
+                    <span className="text-sm text-gray-700">Navodila AI-ju</span>
                   </div>
                   {instructions ? (
                     <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{instructions}</p>

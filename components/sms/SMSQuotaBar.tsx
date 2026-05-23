@@ -123,7 +123,7 @@ export function SMSQuotaBar({ showUpgradeLink = true, compact = false }: SMSQuot
       {/* Upgrade Link */}
       {showUpgradeLink && (isDepleted || isCritical) && planCode !== 'PREMIUM' && planCode !== 'premium' && (
         <Link
-          href="/plans"
+          href="/nastavitve/paketi"
           className="inline-flex items-center gap-1 text-sm font-medium text-violet-600 hover:text-violet-700 transition-colors"
         >
           Nadgradi za več SMS-ov

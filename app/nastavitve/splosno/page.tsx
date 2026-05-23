@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { motion } from 'motion/react';
-import { Copy, Check, Lock } from '@phosphor-icons/react';
+import { CaretLeft, Copy, Check, Lock } from '@phosphor-icons/react';
 import { QRCodeCard } from '@/components/qr/QRCodeCard';
 import {
   SettingsSection,
@@ -142,27 +143,27 @@ export default function GeneralSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse">
-            <div className="h-5 bg-gray-100 rounded w-1/4 mb-6" />
-            <div className="space-y-4">
-              <div className="h-10 bg-gray-50 rounded-lg" />
-              <div className="h-10 bg-gray-50 rounded-lg" />
-            </div>
-          </div>
-        ))}
+      <div className="flex items-center justify-center py-16">
+        <div className="w-8 h-8 border-2 border-[#6D5EF7] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div>
+      <Link
+        href="/nastavitve"
+        className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-4"
+      >
+        <CaretLeft className="w-3.5 h-3.5" weight="regular" />
+        Nastavitve
+      </Link>
+
       {/* Header with save indicator */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-base font-semibold text-gray-900">Splošne nastavitve</h2>
-          <p className="text-sm text-gray-500 mt-0.5">Osnovne nastavitve aplikacije in vašega računa</p>
+          <h1 className="text-xl font-semibold text-gray-900">Splošno</h1>
+          <p className="text-sm text-gray-500 mt-1">Osnovne nastavitve aplikacije in vašega računa</p>
         </div>
         <SaveIndicator saving={saving} lastSaved={lastSaved} />
       </div>

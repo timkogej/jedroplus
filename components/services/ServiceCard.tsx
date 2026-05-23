@@ -72,7 +72,7 @@ function ServiceCard({
       {/* Content */}
       <div className="p-4">
         {/* Service name */}
-        <h3 className="text-lg font-semibold text-[#1A1F36] line-clamp-1">
+        <h3 className="text-lg font-normal text-[#1A1F36] line-clamp-1">
           {service.naziv}
         </h3>
 

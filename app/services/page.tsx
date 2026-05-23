@@ -74,7 +74,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: delay * 0.1 + 0.2 }}
-            className="text-3xl font-bold text-gray-900 mb-1"
+            className="text-3xl font-normal text-gray-900 mb-1"
           >
             {value}
           </motion.p>
@@ -632,7 +632,7 @@ export default function StoritvePage() {
               <motion.h1
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-3xl font-bold text-[#1A1F36]"
+                className="text-2xl font-normal text-[#1A1F36]"
               >
                 Storitve
               </motion.h1>
@@ -665,25 +665,25 @@ export default function StoritvePage() {
           {stats && (
             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
-                icon={<Briefcase className="h-7 w-7" weight="bold" />}
+                icon={<Briefcase className="h-7 w-7" weight="regular" />}
                 value={stats.total}
                 label="Skupaj storitev"
                 delay={0}
               />
               <StatCard
-                icon={<ChartLineUp className="h-7 w-7" weight="bold" />}
+                icon={<ChartLineUp className="h-7 w-7" weight="regular" />}
                 value={stats.active}
                 label="Aktivnih storitev"
                 delay={1}
               />
               <StatCard
-                icon={<Clock className="h-7 w-7" weight="bold" />}
+                icon={<Clock className="h-7 w-7" weight="regular" />}
                 value={`${stats.averageDuration} min`}
                 label="Povprečno trajanje"
                 delay={2}
               />
               <StatCard
-                icon={<CurrencyEur className="h-7 w-7" weight="bold" />}
+                icon={<CurrencyEur className="h-7 w-7" weight="regular" />}
                 value={stats.highestPrice > 0 ? `€${stats.highestPrice.toFixed(2)}` : '-'}
                 label="Najdražja storitev"
                 delay={3}

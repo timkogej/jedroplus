@@ -13,6 +13,7 @@ import {
   ClientGrowthChart,
   TopPerformersTable,
   RetentionCancellationAnalysis,
+  PromotionsAnalytics,
 } from '@/components/analytics';
 import {
   type TimePeriod,
@@ -132,6 +133,9 @@ export default function AnalyticsPage() {
           timePeriod={timePeriod}
           customRange={customRange}
         />
+
+        {/* Promotions Analytics */}
+        <PromotionsAnalytics companyId={companyId} />
       </main>
     </ProtectedLayout>
   );

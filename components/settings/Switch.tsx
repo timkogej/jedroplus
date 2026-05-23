@@ -6,9 +6,10 @@ interface SwitchProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
+  variant?: 'default' | 'brand';
 }
 
-export function Switch({ checked, onChange, disabled = false }: SwitchProps) {
+export function Switch({ checked, onChange, disabled = false, variant = 'default' }: SwitchProps) {
   return (
     <button
       type="button"
@@ -20,7 +21,10 @@ export function Switch({ checked, onChange, disabled = false }: SwitchProps) {
         relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20 focus-visible:ring-offset-2
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        ${checked ? 'bg-[#0a0a0a]' : 'bg-gray-200 hover:bg-gray-300'}
+        ${checked
+          ? variant === 'brand' ? 'bg-[#6D5EF7]' : 'bg-[#0a0a0a]'
+          : 'bg-gray-200 hover:bg-gray-300'
+        }
       `}
     >
       <motion.span

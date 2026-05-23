@@ -94,7 +94,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
             key={index}
             className="flex h-9 items-center justify-center"
           >
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+            <span className="text-[10px] font-normal uppercase tracking-wider text-gray-400">
               {day}
             </span>
           </div>
@@ -141,7 +141,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                   type="button"
                   onClick={() => onDateClick(day)}
                   className={`flex h-7 w-7 items-center justify-center rounded-full text-xs transition-all
-                             ${isCurrentDay ? 'font-bold' : 'font-medium'}
+                             ${isCurrentDay ? 'font-normal' : 'font-normal'}
                              ${!isCurrentMonth ? 'text-gray-300' : ''}
                              ${!isCurrentDay && isCurrentMonth ? 'text-[#1A1F36] hover:bg-gray-100' : ''}`}
                   style={isCurrentDay ? {

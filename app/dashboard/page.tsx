@@ -216,7 +216,7 @@ function AppointmentDetailModal({
           className="relative flex items-center justify-between px-5 py-3.5"
           style={{ background: getGradientBackground() }}
         >
-          <h3 className="text-base font-semibold text-white truncate pr-3">
+          <h3 className="text-base font-normal text-white truncate pr-3">
             {appointment.stranka_ime || 'Neznana stranka'}
           </h3>
           <motion.button
@@ -235,18 +235,18 @@ function AppointmentDetailModal({
         <div className="flex-1 overflow-y-auto min-h-0 p-5 space-y-4">
           {/* Status */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Status</label>
-            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(appointment.status || 'scheduled')}`}>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Status</label>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
               {getStatusLabel(appointment.status || 'scheduled')}
             </span>
           </div>
 
           {/* Client */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Stranka</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Stranka</label>
             <div className="space-y-2">
               <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-                <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
+                <span className="text-lg font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
                   {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
                 </span>
                 <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
@@ -288,7 +288,7 @@ function AppointmentDetailModal({
             const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
             return (
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Storitev</label>
+                <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Storitev</label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
@@ -319,10 +319,10 @@ function AppointmentDetailModal({
           {/* Employee */}
           {appointment.zaposleni && (
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Oseba</label>
+              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Oseba</label>
               <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
                 <span
-                  className="text-lg font-bold flex-shrink-0"
+                  className="text-lg font-normal flex-shrink-0"
                   style={{
                     background: appointment.zaposleni.barva || 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
                     WebkitBackgroundClip: 'text',
@@ -341,13 +341,13 @@ function AppointmentDetailModal({
 
           {/* Date */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Datum</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Datum</label>
             <p className="text-sm font-medium text-[#1A1F36]">{formatModalDate(appointment.datum)}</p>
           </div>
 
           {/* Time */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Čas</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Čas</label>
             <p className="text-sm font-medium text-[#1A1F36]">
               {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
             </p>
@@ -357,7 +357,7 @@ function AppointmentDetailModal({
           {appointment.cas_zacetek && appointment.cas_konec && (
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
               <span className="text-sm font-medium text-gray-700">Trajanje</span>
-              <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+              <span className="text-lg font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                 {(() => {
                   try {
                     const [sh, sm] = appointment.cas_zacetek.split(':').map(Number);
@@ -377,7 +377,7 @@ function AppointmentDetailModal({
               return (
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
                   <span className="text-sm font-medium text-gray-700">Cena</span>
-                  <span className="text-xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                  <span className="text-xl font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                     {Number(cena).toFixed(2)} €
                   </span>
                 </div>
@@ -389,7 +389,7 @@ function AppointmentDetailModal({
           {/* Notes */}
           {appointment.opombe && (
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Opombe</label>
+              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Opombe</label>
               <div className="p-4 bg-gray-50 rounded-xl">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.opombe}</p>
               </div>
@@ -404,7 +404,7 @@ function AppointmentDetailModal({
             if (!notes) return null;
             return (
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Interne opombe</label>
+                <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Interne opombe</label>
                 <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
                 </div>
@@ -1028,7 +1028,7 @@ export default function DashboardPage() {
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-normal text-gray-900">
                   {welcomeGreeting}{" "}
                   <span className="bg-gradient-to-r from-violet-600 to-cyan-500 bg-clip-text text-transparent">
                     {displayName}
@@ -1090,7 +1090,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <ClockCountdown className="w-5 h-5 text-black flex-shrink-0" weight="regular" />
-                      <span className="text-sm font-semibold text-gray-700">Naslednji termin</span>
+                      <span className="text-sm font-normal text-gray-700">Naslednji termin</span>
                     </div>
                     {nextAppointment && (
                       <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-50 text-violet-600">
@@ -1129,19 +1129,19 @@ export default function DashboardPage() {
                       />
                       {/* Time */}
                       <div className="flex-shrink-0">
-                        <div className="text-lg font-bold text-gray-900">{nextAppointment.time}</div>
+                        <div className="text-lg font-normal text-gray-900">{nextAppointment.time}</div>
                         {nextAppointment.endTime && (
                           <div className="text-xs text-gray-500">{nextAppointment.endTime}</div>
                         )}
                       </div>
                       {/* Client + service */}
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-gray-900 truncate">{nextAppointment.clientName}</div>
+                        <div className="font-normal text-gray-900 truncate">{nextAppointment.clientName}</div>
                         <div className="flex items-center gap-1 text-sm text-gray-600">
                           <span className="truncate">{nextAppointment.serviceName}</span>
                           {((nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0)) > 0 && (
                             <span
-                              className="text-sm font-bold flex-shrink-0"
+                              className="text-sm font-normal flex-shrink-0"
                               style={{
                                 backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
                                 WebkitBackgroundClip: 'text',
@@ -1252,7 +1252,7 @@ export default function DashboardPage() {
           >
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="font-semibold text-gray-900">Potrebujete več podrobnosti?</h3>
+                <h3 className="font-normal text-gray-900">Potrebujete več podrobnosti?</h3>
                 <p className="text-sm text-gray-500">
                   Preglejte celoten koledar ali analitiko za podrobnejši vpogled
                 </p>
@@ -1378,7 +1378,7 @@ export default function DashboardPage() {
                 </motion.button>
                 <CheckCircle className="h-10 w-10 text-emerald-500" weight="fill" />
                 <div className="text-center">
-                  <h2 className="text-lg font-semibold text-[#1A1F36]">Zaključi termin</h2>
+                  <h2 className="text-lg font-normal text-[#1A1F36]">Zaključi termin</h2>
                   <p className="text-sm text-gray-500">Potrdite zaključitev termina</p>
                 </div>
               </div>
@@ -1386,12 +1386,12 @@ export default function DashboardPage() {
               {/* Content */}
               <div className="p-6 space-y-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-lg font-bold flex-shrink-0 bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                  <span className="text-lg font-normal flex-shrink-0 bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                     {completeTarget.stranka_ime?.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
                   </span>
                   <div>
                     <p className="text-xs text-gray-500">Stranka</p>
-                    <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.stranka_ime}</p>
+                    <p className="text-sm font-normal text-[#1A1F36]">{completeTarget.stranka_ime}</p>
                   </div>
                 </div>
                 {completeTarget.storitev && (
@@ -1400,17 +1400,17 @@ export default function DashboardPage() {
                     <div className="flex-1">
                       <p className="text-xs text-gray-500">Storitev</p>
                       <div className="space-y-1 mt-0.5">
-                        <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev.naziv}</p>
+                        <p className="text-sm font-normal text-[#1A1F36]">{completeTarget.storitev.naziv}</p>
                         {completeTarget.storitev_2 && (
                           <div className="flex items-center gap-2">
                             <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: completeTarget.storitev_2.barva || '#6366F1' }} />
-                            <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev_2.naziv}</p>
+                            <p className="text-sm font-normal text-[#1A1F36]">{completeTarget.storitev_2.naziv}</p>
                           </div>
                         )}
                         {completeTarget.storitev_3 && (
                           <div className="flex items-center gap-2">
                             <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: completeTarget.storitev_3.barva || '#6366F1' }} />
-                            <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev_3.naziv}</p>
+                            <p className="text-sm font-normal text-[#1A1F36]">{completeTarget.storitev_3.naziv}</p>
                           </div>
                         )}
                       </div>
@@ -1421,7 +1421,7 @@ export default function DashboardPage() {
                   <CalendarBlank className="h-[18px] w-[18px] text-emerald-500 flex-shrink-0" weight="regular" />
                   <div>
                     <p className="text-xs text-gray-500">Datum</p>
-                    <p className="text-sm font-semibold text-[#1A1F36]">
+                    <p className="text-sm font-normal text-[#1A1F36]">
                       {new Date(completeTarget.datum).toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
@@ -1430,13 +1430,13 @@ export default function DashboardPage() {
                   <Clock className="h-[18px] w-[18px] text-emerald-500 flex-shrink-0" weight="regular" />
                   <div>
                     <p className="text-xs text-gray-500">Čas</p>
-                    <p className="text-sm font-semibold text-[#1A1F36]">
+                    <p className="text-sm font-normal text-[#1A1F36]">
                       {completeTarget.cas_zacetek?.substring(0, 5)} - {completeTarget.cas_konec?.substring(0, 5)}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="completion-notes" className="block text-sm font-semibold text-gray-700 mb-2">
+                  <label htmlFor="completion-notes" className="block text-sm font-normal text-gray-700 mb-2">
                     Sporočilo stranki oz. navodila po terminu
                   </label>
                   <textarea

@@ -202,7 +202,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
                   className="flex flex-col items-center gap-[3px]"
                 >
                   <span
-                    className="text-[9px] font-semibold uppercase tracking-wider"
+                    className="text-[9px] font-normal uppercase tracking-wider"
                     style={isPrimary ? {
                       background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
                       WebkitBackgroundClip: 'text',
@@ -214,7 +214,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
                   </span>
                   <div className="w-[30px] h-[30px] flex items-center justify-center">
                     <span
-                      className="text-[14px] font-semibold leading-none"
+                      className="text-[14px] font-normal leading-none"
                       style={isPrimary ? {
                         background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
                         WebkitBackgroundClip: 'text',

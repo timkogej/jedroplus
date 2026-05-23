@@ -2,7 +2,7 @@
 
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, CalendarBlank, LockSimple, Plus, Minus, Envelope, Phone } from '@phosphor-icons/react';
+import { X, Clock, CalendarBlank, LockSimple, Plus, Minus, Envelope, Phone, Tag } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { ScrollTimePicker } from '@/components/ui/ScrollTimePicker';
 import ClientSearch from './ClientSearch';
@@ -474,6 +474,13 @@ function AppointmentModal({
     setAvailableAddOns([]);
     setSelectedAddOnId(null);
   }, [isOpen, appointment]);
+
+  // Debug: log raw appointment fields in view mode to confirm exact column names
+  useEffect(() => {
+    if (mode === 'view' && appointment) {
+      console.warn('[AppointmentModal view] raw appointment object:', appointment);
+    }
+  }, [appointment, mode]);
 
   // Promotion check: independently check each service slot for promotions
   useEffect(() => {
@@ -1586,9 +1593,132 @@ function AppointmentModal({
                 Cena
               </label>
               {isViewMode ? (
-                <p className="text-sm font-medium text-[#1A1F36]">
-                  {formData.cena ? `${formData.cena.toFixed(2)} €` : '-'}
-                </p>
+                (() => {
+                  const originalCena = formData.cena ?? 0;
+                  const popustVrednost = formData.popust ?? 0;
+                  const finalCena =
+                    formData.koncna_cena ??
+                    (popustVrednost > 0
+                      ? formData.popust_tip === '%'
+                        ? originalCena * (1 - popustVrednost / 100)
+                        : originalCena - popustVrednost
+                      : originalCena);
+                  const imaPopust = popustVrednost > 0;
+                  const promocijaTip = appointment?.promocija_tip ?? null;
+                  const promocijaNaziv = appointment?.promocija_naziv ?? null;
+
+                  const badgeBg =
+                    promocijaTip === 'happy_hour'
+                      ? '#F59E0B'
+                      : promocijaTip === 'add_on'
+                        ? '#3B82F6'
+                        : '#6D5EF7';
+                  const badgeLabel =
+                    promocijaTip === 'happy_hour'
+                      ? 'Happy Hour'
+                      : promocijaTip === 'add_on'
+                        ? 'Add-on'
+                        : (promocijaNaziv || 'Popust');
+                  const BadgeIcon =
+                    promocijaTip === 'happy_hour' ? Clock
+                      : promocijaTip === 'add_on' ? Plus : Tag;
+                  const badgeWeight: 'bold' | 'fill' =
+                    promocijaTip === 'add_on' ? 'bold' : 'fill';
+
+                  const fmtPrice = (val: number) =>
+                    new Intl.NumberFormat('sl-SI', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }).format(val);
+
+                  return (
+                    <div className="space-y-3">
+                      {imaPopust ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="space-y-3"
+                        >
+                          {/* Promotion badge */}
+                          <div
+                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-xs font-semibold"
+                            style={{ backgroundColor: badgeBg }}
+                          >
+                            <BadgeIcon size={11} weight={badgeWeight} />
+                            <span>{badgeLabel}</span>
+                          </div>
+
+                          {/* Price breakdown */}
+                          <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-2.5">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Originalna cena</span>
+                              <span className="text-gray-400 line-through">
+                                {fmtPrice(originalCena)} €
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-500">Popust</span>
+                              <span className="font-medium text-red-500">
+                                − {formData.popust_tip === '%'
+                                  ? `${popustVrednost}%`
+                                  : `${fmtPrice(popustVrednost)} €`}
+                              </span>
+                            </div>
+                            <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
+                              <span className="font-semibold text-gray-900">Cena z popustom</span>
+                              <span className="text-xl font-bold text-green-600">
+                                {fmtPrice(finalCena)} €
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <p className="text-sm font-medium text-[#1A1F36]">
+                          {originalCena > 0 ? `${fmtPrice(originalCena)} €` : '-'}
+                        </p>
+                      )}
+
+                      {/* Add-on section */}
+                      {appointment?.storitev_2 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2"
+                        >
+                          <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm">
+                            <Plus size={14} weight="bold" />
+                            <span>Dodatna storitev</span>
+                          </div>
+                          <p className="text-sm font-medium text-gray-800">
+                            {appointment.storitev_2?.naziv ?? 'Add-on storitev'}
+                          </p>
+                          {appointment?.add_on_final_cena && (
+                            <>
+                              {appointment?.add_on_popust &&
+                                parseFloat(appointment.add_on_popust) > 0 && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-500">Popust</span>
+                                    <span className="text-red-500">
+                                      − {appointment.add_on_popust_tip === '%'
+                                        ? `${appointment.add_on_popust}%`
+                                        : `${fmtPrice(parseFloat(appointment.add_on_popust ?? '0'))} €`}
+                                    </span>
+                                  </div>
+                                )}
+                              <div className="flex justify-between font-semibold pt-1 border-t border-blue-200">
+                                <span className="text-gray-700">Cena z popustom</span>
+                                <span className="text-green-600">
+                                  {fmtPrice(parseFloat(appointment.add_on_final_cena))} €
+                                </span>
+                              </div>
+                            </>
+                          )}
+                        </motion.div>
+                      )}
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="flex items-center gap-3">
                   {/* Decrease button */}

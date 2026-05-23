@@ -401,18 +401,18 @@ function ClientDetailsPanel({
                 <div className="grid grid-cols-3 gap-3">
                   {/* Skupaj */}
                   <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
-                    <p className="text-2xl font-bold text-[#1A1F36]">{stats.total}</p>
-                    <p className="text-xs font-medium text-[#1A1F36]">Skupaj</p>
+                    <p className="text-2xl text-[#1A1F36]">{stats.total}</p>
+                    <p className="text-xs text-[#1A1F36]">Skupaj</p>
                   </div>
                   {/* Ni prišel */}
                   <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
-                    <p className="text-2xl font-bold text-[#1A1F36]">{stats.noShow}</p>
-                    <p className="text-xs font-medium text-[#1A1F36]">Ni prišel</p>
+                    <p className="text-2xl text-[#1A1F36]">{stats.noShow}</p>
+                    <p className="text-xs text-[#1A1F36]">Ni prišel</p>
                   </div>
                   {/* Odpovedanih */}
                   <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
-                    <p className="text-2xl font-bold text-[#1A1F36]">{stats.cancelled}</p>
-                    <p className="text-xs font-medium text-[#1A1F36]">Odpovedanih</p>
+                    <p className="text-2xl text-[#1A1F36]">{stats.cancelled}</p>
+                    <p className="text-xs text-[#1A1F36]">Odpovedanih</p>
                   </div>
                 </div>
               </div>

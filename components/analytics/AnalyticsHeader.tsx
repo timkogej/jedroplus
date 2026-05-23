@@ -40,7 +40,7 @@ function AnalyticsHeader({
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Title */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analitika</h1>
+          <h1 className="text-2xl font-normal text-[#1A1F36]">Analitika</h1>
           <p className="mt-1 text-gray-600">Pregled poslovanja in ključnih metrik</p>
         </div>
 

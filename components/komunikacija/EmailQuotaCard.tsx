@@ -17,7 +17,7 @@ export default function EmailQuotaCard({ used, total, resetDate }: EmailQuotaCar
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-3.5"
+      className="rounded-2xl bg-white border border-gray-100 px-5 py-3.5"
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-baseline gap-1.5">
@@ -41,7 +41,7 @@ export default function EmailQuotaCard({ used, total, resetDate }: EmailQuotaCar
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-          className="h-full rounded-full bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500"
+          className="h-full rounded-full bg-[#6D5EF7]"
         />
       </div>
     </motion.div>
