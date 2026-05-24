@@ -35,7 +35,7 @@ export function LanguageSwitcher() {
           await supabase
             .from('Podatki podjetij')
             .update({ preferred_language: newLocale })
-            .eq('company_id', companyId);
+            .eq('ID Podjetja', companyId);
         }
       } catch (e) {
         console.warn('Failed to save language preference:', e);
