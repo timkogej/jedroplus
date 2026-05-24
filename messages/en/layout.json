@@ -1,1 +1,92 @@
-{}
+{
+  "sidebar": {
+    "sections": {
+      "main": "Main",
+      "ai": "AI",
+      "communication": "Communication",
+      "modules": "Modules",
+      "promotions": "Promotions",
+      "analytics": "Analytics",
+      "account": "Account",
+      "billing": "Plans & Quotas",
+      "settings": "Settings"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "calendar": "Calendar",
+      "appointments": "Appointments",
+      "clients": "Clients",
+      "communication": "Communication",
+      "reminders": "Reminders",
+      "reservations": "Bookings",
+      "lostLeads": "Lost Leads",
+      "services": "Services",
+      "staff": "Staff",
+      "promotions": "Promotions",
+      "analytics": "Analytics",
+      "billing": "Plans & Quotas",
+      "plans": "Plans",
+      "settings": "Settings",
+      "signOut": "Sign out",
+      "new": "New",
+      "newAppointment": "New appointment",
+      "newClient": "New client",
+      "newService": "New service"
+    },
+    "tooltips": {
+      "expand": "Expand",
+      "collapse": "Collapse"
+    },
+    "stats": {
+      "today": "Today",
+      "week": "Week",
+      "month": "Month"
+    }
+  },
+  "appbar": {
+    "home": "Home",
+    "search": "Search...",
+    "profile": "My profile",
+    "plans": "Plans",
+    "signOut": "Sign out",
+    "aria": {
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "search": "Search"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "calendar": "Calendar",
+      "appointments": "Appointments",
+      "clients": "Clients",
+      "services": "Services",
+      "staff": "Staff",
+      "reminders": "Reminders",
+      "lostLeads": "Lost Leads",
+      "analytics": "Analytics",
+      "asistent": "Asistent+",
+      "chatbotPlus": "Chatbot+",
+      "settings": "Settings",
+      "billing": "Plans",
+      "notifications": "Notifications",
+      "reservations": "Bookings"
+    }
+  },
+  "search": {
+    "placeholder": "Search pages, actions...",
+    "escHint": "close",
+    "navHint": "navigate",
+    "openHint": "open",
+    "shortcutHint": "K to search",
+    "categories": {
+      "pages": "Pages",
+      "quickActions": "Quick actions",
+      "recent": "Recent searches"
+    },
+    "empty": "No results for \"{query}\""
+  },
+  "fallbacks": {
+    "companyName": "My Company",
+    "userName": "User"
+  }
+}

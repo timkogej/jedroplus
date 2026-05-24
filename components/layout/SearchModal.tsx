@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   MagnifyingGlass,
@@ -36,29 +37,7 @@ interface SearchItem {
   keywords?: string[];
 }
 
-// ============================================================================
-// Search items
-// ============================================================================
-
-const searchItems: SearchItem[] = [
-  // Pages
-  { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: ChartBar, category: 'Strani', keywords: ['pregled', 'home', 'domov'] },
-  { id: 'koledar', name: 'Koledar', href: '/koledar', icon: CalendarBlank, category: 'Strani', keywords: ['calendar', 'schedule', 'urnik'] },
-  { id: 'termini', name: 'Termini', href: '/termini', icon: ClipboardText, category: 'Strani', keywords: ['appointments', 'booking', 'rezervacije'] },
-  { id: 'clients', name: 'Stranke', href: '/clients', icon: Users, category: 'Strani', keywords: ['customers', 'clients', 'uporabniki'] },
-  { id: 'services', name: 'Storitve', href: '/services', icon: Briefcase, category: 'Strani', keywords: ['services', 'offerings'] },
-  { id: 'staff', name: 'Osebje', href: '/staff', icon: UserCircle, category: 'Strani', keywords: ['employees', 'team', 'zaposleni'] },
-  { id: 'reminders', name: 'Opomniki', href: '/reminders', icon: Bell, category: 'Strani', keywords: ['notifications', 'alerts', 'obvestila'] },
-  { id: 'lost-leads', name: 'Lost Leads', href: '/lost-leads', icon: TrendDown, category: 'Strani', keywords: ['leads', 'izgubljeni'] },
-  { id: 'analytics', name: 'Analitika', href: '/analytics', icon: ChartLine, category: 'Strani', keywords: ['reports', 'statistics', 'poročila'] },
-  // Asistent+ - začasno skrito: { id: 'asistent', name: 'Asistent+', href: '/asistent', icon: Sparkle, category: 'Strani', keywords: ['ai', 'assistant', 'help'] },
-  { id: 'nastavitve', name: 'Nastavitve', href: '/nastavitve', icon: Gear, category: 'Strani', keywords: ['settings', 'preferences', 'config'] },
-
-  // Quick actions
-  { id: 'new-booking', name: 'Nov termin', href: '/koledar?action=new', icon: CalendarBlank, category: 'Hitri dostop', keywords: ['new', 'booking', 'nova rezervacija'] },
-  { id: 'new-client', name: 'Nova stranka', href: '/clients?action=new', icon: Users, category: 'Hitri dostop', keywords: ['new', 'client', 'nov uporabnik'] },
-  { id: 'new-service', name: 'Nova storitev', href: '/services?action=new', icon: Briefcase, category: 'Hitri dostop', keywords: ['new', 'service'] },
-];
+// searchItems are built inside the component to support translations
 
 // ============================================================================
 // Utility
@@ -74,6 +53,7 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 
 export function SearchModal() {
   const router = useRouter();
+  const t = useTranslations('layout');
   const { isSearchOpen, closeSearch } = useSidebar();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -81,6 +61,26 @@ export function SearchModal() {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  const searchItems = useMemo<SearchItem[]>(() => [
+    // Pages
+    { id: 'dashboard', name: t('sidebar.items.dashboard'), href: '/dashboard', icon: ChartBar, category: t('search.categories.pages'), keywords: ['pregled', 'home', 'domov'] },
+    { id: 'koledar', name: t('sidebar.items.calendar'), href: '/koledar', icon: CalendarBlank, category: t('search.categories.pages'), keywords: ['calendar', 'schedule', 'urnik'] },
+    { id: 'termini', name: t('sidebar.items.appointments'), href: '/termini', icon: ClipboardText, category: t('search.categories.pages'), keywords: ['appointments', 'booking', 'rezervacije'] },
+    { id: 'clients', name: t('sidebar.items.clients'), href: '/clients', icon: Users, category: t('search.categories.pages'), keywords: ['customers', 'clients', 'uporabniki'] },
+    { id: 'services', name: t('sidebar.items.services'), href: '/services', icon: Briefcase, category: t('search.categories.pages'), keywords: ['services', 'offerings'] },
+    { id: 'staff', name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle, category: t('search.categories.pages'), keywords: ['employees', 'team', 'zaposleni'] },
+    { id: 'reminders', name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell, category: t('search.categories.pages'), keywords: ['notifications', 'alerts', 'obvestila'] },
+    { id: 'lost-leads', name: 'Lost Leads', href: '/lost-leads', icon: TrendDown, category: t('search.categories.pages'), keywords: ['leads', 'izgubljeni', 'lost leads'] },
+    { id: 'analytics', name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine, category: t('search.categories.pages'), keywords: ['reports', 'statistics', 'poročila'] },
+    // Asistent+ - začasno skrito: { id: 'asistent', name: 'Asistent+', href: '/asistent', icon: Sparkle, category: t('search.categories.pages'), keywords: ['ai', 'assistant', 'help'] },
+    { id: 'nastavitve', name: t('sidebar.items.settings'), href: '/nastavitve', icon: Gear, category: t('search.categories.pages'), keywords: ['settings', 'preferences', 'config'] },
+
+    // Quick actions
+    { id: 'new-booking', name: t('sidebar.items.newAppointment'), href: '/koledar?action=new', icon: CalendarBlank, category: t('search.categories.quickActions'), keywords: ['new', 'booking', 'nova rezervacija'] },
+    { id: 'new-client', name: t('sidebar.items.newClient'), href: '/clients?action=new', icon: Users, category: t('search.categories.quickActions'), keywords: ['new', 'client', 'nov uporabnik'] },
+    { id: 'new-service', name: t('sidebar.items.newService'), href: '/services?action=new', icon: Briefcase, category: t('search.categories.quickActions'), keywords: ['new', 'service'] },
+  ], [t]);
 
   // -------------------------------------------------------------------------
   // Load recent searches from localStorage
@@ -241,12 +241,12 @@ export function SearchModal() {
                     setQuery(e.target.value);
                     setSelectedIndex(0);
                   }}
-                  placeholder="Išči strani, akcije..."
+                  placeholder={t('search.placeholder')}
                   className="flex-1 text-base outline-none bg-transparent placeholder:text-gray-400"
                 />
                 <div className="flex items-center gap-1 text-xs text-gray-400">
                   <span className="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] font-medium">ESC</span>
-                  <span>zapri</span>
+                  <span>{t('search.escHint')}</span>
                 </div>
               </div>
 
@@ -255,7 +255,7 @@ export function SearchModal() {
                 {flatItems.length === 0 ? (
                   <div className="py-12 text-center text-gray-500">
                     <MagnifyingGlass className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">Ni rezultatov za "{query}"</p>
+                    <p className="text-sm">{t('search.empty', { query })}</p>
                   </div>
                 ) : (
                   Object.entries(groupedItems).map(([category, items]) => (
@@ -311,7 +311,7 @@ export function SearchModal() {
                   <div className="border-t border-gray-100 pt-2 mt-2">
                     <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                       <Clock className="w-3 h-3" />
-                      Nedavna iskanja
+                      {t('search.categories.recent')}
                     </div>
                     {recentSearches.map((search, idx) => (
                       <button
@@ -334,16 +334,16 @@ export function SearchModal() {
                     <span className="flex items-center gap-1">
                       <span className="px-1 py-0.5 bg-gray-200 rounded text-[10px] font-medium">↑</span>
                       <span className="px-1 py-0.5 bg-gray-200 rounded text-[10px] font-medium">↓</span>
-                      <span className="ml-1">navigacija</span>
+                      <span className="ml-1">{t('search.navHint')}</span>
                     </span>
                     <span className="flex items-center gap-1">
                       <span className="px-1.5 py-0.5 bg-gray-200 rounded text-[10px] font-medium">↵</span>
-                      <span className="ml-1">odpri</span>
+                      <span className="ml-1">{t('search.openHint')}</span>
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Command className="w-3 h-3" />
-                    <span>K za iskanje</span>
+                    <span>{t('search.shortcutHint')}</span>
                   </div>
                 </div>
               </div>

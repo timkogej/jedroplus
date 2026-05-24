@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { usePathname } from '@/i18n/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   List,
@@ -35,31 +36,13 @@ interface BreadcrumbItem {
 // Route to breadcrumb mapping
 // ============================================================================
 
-const routeLabels: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/koledar': 'Koledar',
-  '/termini': 'Termini',
-  '/clients': 'Stranke',
-  '/services': 'Storitve',
-  '/staff': 'Osebje',
-  '/reminders': 'Opomniki',
-  '/lost-leads': 'Lost Leads',
-  '/analytics': 'Analitika',
-  '/asistent': 'Asistent+',
-  '/chatbot-plus': 'Chatbot+',
-  '/nastavitve': 'Nastavitve',
-  '/billing': 'Paketi',
-  '/obvestila': 'Obvestila',
-  '/rezervacije': 'Rezervacije',
-};
-
-function getBreadcrumbs(pathname: string): BreadcrumbItem[] {
+function getBreadcrumbs(pathname: string, labels: Record<string, string>): BreadcrumbItem[] {
   const segments = pathname.split('/').filter(Boolean);
   const breadcrumbs: BreadcrumbItem[] = [];
   let currentPath = '';
   for (const segment of segments) {
     currentPath += `/${segment}`;
-    const label = routeLabels[currentPath] || segment.charAt(0).toUpperCase() + segment.slice(1);
+    const label = labels[currentPath] || segment.charAt(0).toUpperCase() + segment.slice(1);
     breadcrumbs.push({ label, href: currentPath });
   }
   return breadcrumbs;
@@ -79,6 +62,7 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 
 export function AppBar() {
   const pathname = usePathname();
+  const t = useTranslations('layout');
   const { toggle, isMobile, isOpen, isCollapsed, openSearch, notificationCount } = useSidebar();
   const { user, signOut } = useAuth();
   const { companySettings, switchCompany } = useCompany();
@@ -88,10 +72,28 @@ export function AppBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const breadcrumbs = getBreadcrumbs(pathname);
+  const routeLabels = useMemo<Record<string, string>>(() => ({
+    '/dashboard': t('appbar.breadcrumbs.dashboard'),
+    '/koledar': t('appbar.breadcrumbs.calendar'),
+    '/termini': t('appbar.breadcrumbs.appointments'),
+    '/clients': t('appbar.breadcrumbs.clients'),
+    '/services': t('appbar.breadcrumbs.services'),
+    '/staff': t('appbar.breadcrumbs.staff'),
+    '/reminders': t('appbar.breadcrumbs.reminders'),
+    '/lost-leads': t('appbar.breadcrumbs.lostLeads'),
+    '/analytics': t('appbar.breadcrumbs.analytics'),
+    '/asistent': t('appbar.breadcrumbs.asistent'),
+    '/chatbot-plus': t('appbar.breadcrumbs.chatbotPlus'),
+    '/nastavitve': t('appbar.breadcrumbs.settings'),
+    '/billing': t('appbar.breadcrumbs.billing'),
+    '/obvestila': t('appbar.breadcrumbs.notifications'),
+    '/rezervacije': t('appbar.breadcrumbs.reservations'),
+  }), [t]);
+
+  const breadcrumbs = getBreadcrumbs(pathname, routeLabels);
 
   // User info
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Uporabnik';
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('fallbacks.userName');
   const userEmail = user?.email || '';
   const userInitials = userName
     .split(/\s+/)
@@ -142,7 +144,7 @@ export function AppBar() {
           <button
             onClick={toggle}
             className="md:hidden p-2 -ml-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-            aria-label={isOpen ? 'Zapri meni' : 'Odpri meni'}
+            aria-label={isOpen ? t('appbar.aria.closeMenu') : t('appbar.aria.openMenu')}
           >
             <AnimatePresence mode="wait" initial={false}>
               {isOpen ? (
@@ -182,7 +184,7 @@ export function AppBar() {
               href="/dashboard"
               className="text-gray-400 hover:text-gray-700 transition-colors font-medium"
             >
-              Domov
+              {t('appbar.home')}
             </Link>
 
             {breadcrumbs.map((crumb, index) => (
@@ -213,7 +215,7 @@ export function AppBar() {
           >
             <MagnifyingGlass weight="regular" className="w-4 h-4 text-gray-400 group-hover:text-gray-600 flex-shrink-0 transition-colors" />
             <span className="text-gray-400 group-hover:text-gray-600 transition-colors min-w-[120px] text-left">
-              Iskanje...
+              {t('appbar.search')}
             </span>
             <span className="flex items-center gap-0.5 text-[11px] text-gray-300 ml-1">
               <Command weight="regular" className="w-3 h-3" />
@@ -225,7 +227,7 @@ export function AppBar() {
           <button
             onClick={openSearch}
             className="md:hidden p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-            aria-label="Iskanje"
+            aria-label={t('appbar.aria.search')}
           >
             <MagnifyingGlass weight="regular" className="w-5 h-5" />
           </button>
@@ -308,7 +310,7 @@ export function AppBar() {
                       className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                     >
                       <User weight="regular" className="w-4 h-4" />
-                      <span>Moj profil</span>
+                      <span>{t('appbar.profile')}</span>
                     </Link>
                     <Link
                       href="/billing"
@@ -316,7 +318,7 @@ export function AppBar() {
                       className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                     >
                       <Package weight="regular" className="w-4 h-4" />
-                      <span>Paketi</span>
+                      <span>{t('appbar.plans')}</span>
                     </Link>
                   </div>
 
@@ -332,7 +334,7 @@ export function AppBar() {
                       className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                     >
                       <SignOut weight="regular" className="w-4 h-4" />
-                      <span>Odjava</span>
+                      <span>{t('appbar.signOut')}</span>
                     </button>
                   </div>
                 </motion.div>

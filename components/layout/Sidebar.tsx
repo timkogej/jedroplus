@@ -3,6 +3,7 @@
 import { useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChartBar,
@@ -53,110 +54,116 @@ interface NavSection {
 // Navigation config
 // ============================================================================
 
-const navigationSectionsPaid: NavSection[] = [
-  {
-    label: 'Glavno',
-    items: [
-      { name: 'Dashboard', href: '/dashboard', icon: ChartBar },
-      { name: 'Koledar', href: '/koledar', icon: CalendarBlank },
-      { name: 'Termini', href: '/termini', icon: ClipboardText },
-      { name: 'Stranke', href: '/clients', icon: Users },
-    ],
-  },
-  {
-    label: 'AI',
-    items: [
-      // Asistent+ - začasno skrito, logika ohranjena v /asistent
-      // { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'Novo' },
-      // Chatbot+ - začasno skrito, bo dodano kasneje
-      // { name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'Novo' },
-      // Receptionist+ - začasno skrito, logika ohranjena v /receptionist-plus
-      // { name: 'Receptionist+', href: '/receptionist-plus', icon: Phone, badge: 'Novo' },
-    ],
-  },
-  {
-    label: 'Komunikacija',
-    items: [
-      { name: 'Komunikacija', href: '/komunikacija', icon: Envelope },
-      { name: 'Opomniki', href: '/reminders', icon: Bell },
-      { name: 'Rezervacije', href: '/rezervacije', icon: CalendarCheck },
-      { name: 'Izgubljene stranke', href: '/lost-leads', icon: TrendDown },
-    ],
-  },
-  {
-    label: 'Moduli',
-    items: [
-      { name: 'Storitve', href: '/services', icon: Briefcase },
-      { name: 'Osebje', href: '/staff', icon: UserCircle },
-    ],
-  },
-  {
-    label: 'Promocije',
-    items: [
-      { name: 'Promocije', href: '/promotions', icon: Tag },
-    ],
-  },
-  {
-    label: 'Analitika',
-    items: [
-      { name: 'Analitika', href: '/analytics', icon: ChartLine },
-    ],
-  },
-  {
-    label: 'Račun',
-    items: [
-      { name: 'Paketi in kvote', href: '/billing', icon: Package },
-    ],
-  },
-];
+type T = ReturnType<typeof useTranslations<'layout'>>;
 
-const navigationSectionsFree: NavSection[] = [
-  {
-    label: 'Glavno',
-    items: [
-      { name: 'Dashboard', href: '/dashboard', icon: ChartBar },
-      { name: 'Koledar', href: '/koledar', icon: CalendarBlank },
-      { name: 'Termini', href: '/termini', icon: ClipboardText },
-      { name: 'Stranke', href: '/clients', icon: Users },
-    ],
-  },
-  {
-    label: 'Moduli',
-    items: [
-      { name: 'Storitve', href: '/services', icon: Briefcase },
-      { name: 'Osebje', href: '/staff', icon: UserCircle },
-    ],
-  },
-  {
-    label: 'Promocije',
-    items: [
-      { name: 'Promocije', href: '/promotions', icon: Tag },
-    ],
-  },
-  // AI sekcija začasno skrita - bo dodana kasneje
-  // { label: 'AI', items: [{ name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'Novo' }] },
-  {
-    label: 'Komunikacija',
-    items: [
-      { name: 'Komunikacija', href: '/komunikacija', icon: Envelope },
-      { name: 'Opomniki', href: '/reminders', icon: Bell },
-      { name: 'Rezervacije', href: '/rezervacije', icon: CalendarCheck },
-      { name: 'Izgubljene stranke', href: '/lost-leads', icon: TrendDown },
-    ],
-  },
-  {
-    label: 'Analitika',
-    items: [
-      { name: 'Analitika', href: '/analytics', icon: ChartLine },
-    ],
-  },
-  {
-    label: 'Paketi in kvote',
-    items: [
-      { name: 'Paketi in kvote', href: '/billing', icon: Package },
-    ],
-  },
-];
+function buildNavigationSectionsPaid(t: T): NavSection[] {
+  return [
+    {
+      label: t('sidebar.sections.main'),
+      items: [
+        { name: t('sidebar.items.dashboard'), href: '/dashboard', icon: ChartBar },
+        { name: t('sidebar.items.calendar'), href: '/koledar', icon: CalendarBlank },
+        { name: t('sidebar.items.appointments'), href: '/termini', icon: ClipboardText },
+        { name: t('sidebar.items.clients'), href: '/clients', icon: Users },
+      ],
+    },
+    {
+      label: t('sidebar.sections.ai'),
+      items: [
+        // Asistent+ - začasno skrito, logika ohranjena v /asistent
+        // { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'new' },
+        // Chatbot+ - začasno skrito, bo dodano kasneje
+        // { name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'new' },
+        // Receptionist+ - začasno skrito, logika ohranjena v /receptionist-plus
+        // { name: 'Receptionist+', href: '/receptionist-plus', icon: Phone, badge: 'new' },
+      ],
+    },
+    {
+      label: t('sidebar.sections.communication'),
+      items: [
+        { name: t('sidebar.items.communication'), href: '/komunikacija', icon: Envelope },
+        { name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell },
+        { name: t('sidebar.items.reservations'), href: '/rezervacije', icon: CalendarCheck },
+        { name: t('sidebar.items.lostLeads'), href: '/lost-leads', icon: TrendDown },
+      ],
+    },
+    {
+      label: t('sidebar.sections.modules'),
+      items: [
+        { name: t('sidebar.items.services'), href: '/services', icon: Briefcase },
+        { name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle },
+      ],
+    },
+    {
+      label: t('sidebar.sections.promotions'),
+      items: [
+        { name: t('sidebar.items.promotions'), href: '/promotions', icon: Tag },
+      ],
+    },
+    {
+      label: t('sidebar.sections.analytics'),
+      items: [
+        { name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine },
+      ],
+    },
+    {
+      label: t('sidebar.sections.account'),
+      items: [
+        { name: t('sidebar.items.billing'), href: '/billing', icon: Package },
+      ],
+    },
+  ];
+}
+
+function buildNavigationSectionsFree(t: T): NavSection[] {
+  return [
+    {
+      label: t('sidebar.sections.main'),
+      items: [
+        { name: t('sidebar.items.dashboard'), href: '/dashboard', icon: ChartBar },
+        { name: t('sidebar.items.calendar'), href: '/koledar', icon: CalendarBlank },
+        { name: t('sidebar.items.appointments'), href: '/termini', icon: ClipboardText },
+        { name: t('sidebar.items.clients'), href: '/clients', icon: Users },
+      ],
+    },
+    {
+      label: t('sidebar.sections.modules'),
+      items: [
+        { name: t('sidebar.items.services'), href: '/services', icon: Briefcase },
+        { name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle },
+      ],
+    },
+    {
+      label: t('sidebar.sections.promotions'),
+      items: [
+        { name: t('sidebar.items.promotions'), href: '/promotions', icon: Tag },
+      ],
+    },
+    // AI sekcija začasno skrita - bo dodana kasneje
+    // { label: t('sidebar.sections.ai'), items: [{ name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'new' }] },
+    {
+      label: t('sidebar.sections.communication'),
+      items: [
+        { name: t('sidebar.items.communication'), href: '/komunikacija', icon: Envelope },
+        { name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell },
+        { name: t('sidebar.items.reservations'), href: '/rezervacije', icon: CalendarCheck },
+        { name: t('sidebar.items.lostLeads'), href: '/lost-leads', icon: TrendDown },
+      ],
+    },
+    {
+      label: t('sidebar.sections.analytics'),
+      items: [
+        { name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine },
+      ],
+    },
+    {
+      label: t('sidebar.sections.billing'),
+      items: [
+        { name: t('sidebar.items.billing'), href: '/billing', icon: Package },
+      ],
+    },
+  ];
+}
 
 // ============================================================================
 // Utility
@@ -202,6 +209,7 @@ interface NavItemProps {
 }
 
 function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: NavItemProps) {
+  const t = useTranslations('layout');
   const Icon = item.icon;
   return (
     <Link
@@ -246,9 +254,9 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
             <Lock weight="regular" className="ml-auto w-3.5 h-3.5 text-gray-400" />
           ) : hasAlert ? (
             <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
-          ) : item.badge === 'Novo' ? (
+          ) : item.badge === 'new' ? (
             <span className="ml-auto px-1.5 py-0.5 text-[10px] font-medium text-[#6D5EF7] bg-[#6D5EF7]/10 rounded-full">
-              Novo
+              {t('sidebar.items.new')}
             </span>
           ) : null}
         </>
@@ -265,6 +273,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const desktopNavRef = useRef<HTMLElement>(null);
+  const t = useTranslations('layout');
 
   const { isOpen, isMobile, close, isCollapsed, toggleCollapse } = useSidebar();
 
@@ -274,7 +283,7 @@ export function Sidebar() {
   const { role, permissions } = useRolePermissions();
 
   const isFree = planCode === 'FREE';
-  const baseNavigationSections = isFree ? navigationSectionsFree : navigationSectionsPaid;
+  const baseNavigationSections = isFree ? buildNavigationSectionsFree(t) : buildNavigationSectionsPaid(t);
 
   const isLocked = (href: string) => !hasAccessToRoute(href, planCode);
 
@@ -339,12 +348,12 @@ export function Sidebar() {
 
   const staffPaketiSection: NavSection | null =
     role === 'staff'
-      ? { label: 'Račun', items: [{ name: 'Paketi', href: '/billing', icon: Package }] }
+      ? { label: t('sidebar.sections.account'), items: [{ name: t('sidebar.items.plans'), href: '/billing', icon: Package }] }
       : null;
 
   // User info
-  const companyName = String(companySettings?.['Naziv Podjetja'] || companySettings?.['ID Podjetja'] || 'Moje Podjetje');
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Uporabnik';
+  const companyName = String(companySettings?.['Naziv Podjetja'] || companySettings?.['ID Podjetja'] || t('fallbacks.companyName'));
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('fallbacks.userName');
   const userEmail = user?.email || '';
   const userInitials = userName
     .split(/\s+/)
@@ -463,7 +472,7 @@ export function Sidebar() {
       <div className={cn('border-t border-gray-100 space-y-0.5 flex-shrink-0', isCollapsed ? 'p-1' : 'p-3')}>
         <Link
           href="/nastavitve"
-          title={isCollapsed ? 'Nastavitve' : undefined}
+          title={isCollapsed ? t('sidebar.items.settings') : undefined}
           className={cn(
             'group relative flex items-center rounded-lg text-sm transition-colors duration-150',
             isCollapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2',
@@ -493,7 +502,7 @@ export function Sidebar() {
           </div>
           {!isCollapsed && (
             <>
-              <span className="flex-1 truncate">Nastavitve</span>
+              <span className="flex-1 truncate">{t('sidebar.items.settings')}</span>
               {any_incomplete && (
                 <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
               )}
@@ -503,20 +512,20 @@ export function Sidebar() {
 
         <button
           onClick={handleLogout}
-          title={isCollapsed ? 'Odjava' : undefined}
+          title={isCollapsed ? t('sidebar.items.signOut') : undefined}
           className={cn(
             'w-full flex items-center rounded-lg text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-150',
             isCollapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2'
           )}
         >
           <SignOut weight="regular" className="w-5 h-5 text-gray-400" />
-          {!isCollapsed && <span>Odjava</span>}
+          {!isCollapsed && <span>{t('sidebar.items.signOut')}</span>}
         </button>
 
         {/* Collapse toggle */}
         <button
           onClick={toggleCollapse}
-          title={isCollapsed ? 'Razširi' : 'Skrči'}
+          title={isCollapsed ? t('sidebar.tooltips.expand') : t('sidebar.tooltips.collapse')}
           className={cn(
             'w-full flex items-center rounded-lg text-sm text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors duration-150',
             isCollapsed ? 'justify-center py-2.5' : 'gap-3 px-3 py-2'
@@ -644,7 +653,7 @@ export function Sidebar() {
                     <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full" />
                   )}
                 </div>
-                <span className="flex-1 truncate">Nastavitve</span>
+                <span className="flex-1 truncate">{t('sidebar.items.settings')}</span>
                 {any_incomplete && (
                   <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
                 )}
@@ -655,7 +664,7 @@ export function Sidebar() {
                 className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors duration-150"
               >
                 <SignOut weight="regular" className="w-5 h-5 text-gray-400" />
-                <span>Odjava</span>
+                <span>{t('sidebar.items.signOut')}</span>
               </button>
             </div>
           </motion.aside>
