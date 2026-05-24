@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useMemo, useId } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Eye,
@@ -136,6 +137,7 @@ function ClientTable({
   canEditClient = true,
   canDeleteClient = true,
 }: ClientTableProps) {
+  const t = useTranslations('clients');
   const [sortField, setSortField] = useState<ClientSortField>('priimek');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -216,9 +218,9 @@ function ClientTable({
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-pink-100 to-purple-100">
           <CalendarBlank className="h-8 w-8 text-purple-500" weight="duotone" />
         </div>
-        <h3 className="text-lg font-semibold text-[#1A1F36]">Ni rezultatov</h3>
+        <h3 className="text-lg font-semibold text-[#1A1F36]">{t('table.empty.title')}</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Ni najdenih strank, ki ustrezajo iskanju
+          {t('table.empty.message')}
         </p>
       </div>
     );
@@ -236,7 +238,7 @@ function ClientTable({
                   onClick={() => handleSort('priimek')}
                   className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:text-[#1A1F36]"
                 >
-                  Stranka
+                  {t('table.headers.client')}
                   <SortIcon field="priimek" currentField={sortField} direction={sortDirection} />
                 </button>
               </th>
@@ -252,7 +254,7 @@ function ClientTable({
               </th>
               <th className="px-4 py-4 text-left">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                  Telefon
+                  {t('table.headers.phone')}
                 </span>
               </th>
               <th className="px-4 py-4 text-left">
@@ -261,7 +263,7 @@ function ClientTable({
                   onClick={() => handleSort('appointment_count')}
                   className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:text-[#1A1F36]"
                 >
-                  Termini
+                  {t('table.headers.appointments')}
                   <SortIcon field="appointment_count" currentField={sortField} direction={sortDirection} />
                 </button>
               </th>
@@ -271,13 +273,13 @@ function ClientTable({
                   onClick={() => handleSort('created_at')}
                   className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 transition-colors hover:text-[#1A1F36]"
                 >
-                  Zadnja interakcija
+                  {t('table.headers.lastInteraction')}
                   <SortIcon field="created_at" currentField={sortField} direction={sortDirection} />
                 </button>
               </th>
               <th className="px-4 py-4 text-right">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                  Akcije
+                  {t('table.headers.actions')}
                 </span>
               </th>
             </tr>
@@ -347,7 +349,7 @@ function ClientTable({
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
                           className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                          title="Podrobnosti"
+                          title={t('table.actions.view')}
                         >
                           <Eye className="h-4 w-4" weight="bold" />
                         </motion.button>
@@ -359,7 +361,7 @@ function ClientTable({
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
                           className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-amber-50 hover:text-amber-600"
-                          title="Uredi"
+                          title={t('table.actions.edit')}
                         >
                           <PencilSimple className="h-4 w-4" weight="bold" />
                         </motion.button>
@@ -371,7 +373,7 @@ function ClientTable({
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.95 }}
                           className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                          title="Izbriši"
+                          title={t('table.actions.delete')}
                         >
                           <Trash className="h-4 w-4" weight="bold" />
                         </motion.button>
@@ -396,7 +398,7 @@ function ClientTable({
             <span className="font-medium text-[#1A1F36]">
               {Math.min(currentPage * itemsPerPage, sortedClients.length)}
             </span>{' '}
-            od <span className="font-medium text-[#1A1F36]">{sortedClients.length}</span>
+            {t('table.pagination.of')} <span className="font-medium text-[#1A1F36]">{sortedClients.length}</span>
           </p>
           <div className="flex items-center gap-1">
             <button

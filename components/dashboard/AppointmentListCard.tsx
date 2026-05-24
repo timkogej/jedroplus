@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Calendar, ArrowRight, X, Copy, Check } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { AppointmentItem } from "@/lib/dashboard/fetchDashboardData";
 
 function extractFirstColor(barva: string): string {
@@ -68,6 +69,7 @@ interface AppointmentListCardProps {
 
 // Copy button for contact info
 function CopyButton({ text, label }: { text: string; label: string }) {
+  const t = useTranslations('dashboard');
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -81,7 +83,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       type="button"
       onClick={handleCopy}
       className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
-      title={`Kopiraj ${label}`}
+      title={t('copyButton', { label })}
     >
       {copied ? (
         <Check className="h-4 w-4 text-emerald-500" weight="bold" />
@@ -100,6 +102,7 @@ function AppointmentDetailModal({
   appointment: AppointmentItem;
   onClose: () => void;
 }) {
+  const t = useTranslations('dashboard');
   const getGradientBackground = () => {
     const extractFirst = (barva: string): string => {
       if (!barva) return '#6366F1';
@@ -140,12 +143,12 @@ function AppointmentDetailModal({
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'scheduled': return 'Načrtovano';
-      case 'confirmed': return 'Potrjeno';
-      case 'completed': return 'Zaključeno';
-      case 'cancelled': return 'Preklicano';
-      case 'pending': return 'Čakajoč';
-      case 'no_show': return 'Ni prišel/a';
+      case 'scheduled': return t('detailModal.status.scheduled');
+      case 'confirmed': return t('detailModal.status.confirmed');
+      case 'completed': return t('detailModal.status.completed');
+      case 'cancelled': return t('detailModal.status.cancelled');
+      case 'pending': return t('detailModal.status.pending');
+      case 'no_show': return t('detailModal.status.noShow');
       default: return status;
     }
   };
@@ -202,7 +205,7 @@ function AppointmentDetailModal({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             className="rounded-full bg-white/20 p-2 text-white transition-colors hover:bg-white/30 flex-shrink-0"
-            aria-label="Zapri"
+            aria-label={t('detailModal.actions.close')}
           >
             <X className="h-5 w-5" weight="bold" />
           </motion.button>
@@ -212,7 +215,7 @@ function AppointmentDetailModal({
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Status */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Status</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.status')}</label>
             <span className={`px-2.5 py-1 rounded-full text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
               {getStatusLabel(appointment.status || 'scheduled')}
             </span>
@@ -220,7 +223,7 @@ function AppointmentDetailModal({
 
           {/* Client */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Stranka</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.client')}</label>
             <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
               <span className="text-lg font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
                 {appointment.clientName?.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
@@ -241,7 +244,7 @@ function AppointmentDetailModal({
 
           {/* Service */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Storitev</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.service')}</label>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.serviceColor || '#6366F1' }} />
               <p className="text-sm font-medium text-[#1A1F36]">{appointment.serviceName}</p>
@@ -251,7 +254,7 @@ function AppointmentDetailModal({
           {/* Employee */}
           {appointment.employeeName && appointment.employeeName !== 'Nedoločeno' && (
             <div>
-              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Oseba</label>
+              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.employee')}</label>
               <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
                 <span
                   className="text-lg font-normal flex-shrink-0"
@@ -271,7 +274,7 @@ function AppointmentDetailModal({
 
           {/* Time */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Čas</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.time')}</label>
             <p className="text-sm font-medium text-[#1A1F36]">
               {appointment.time}{appointment.endTime ? ` – ${appointment.endTime}` : ''}
             </p>
@@ -280,7 +283,7 @@ function AppointmentDetailModal({
           {/* Duration */}
           {duration !== null && (
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-              <span className="text-sm font-medium text-gray-700">Trajanje</span>
+              <span className="text-sm font-medium text-gray-700">{t('detailModal.fields.duration')}</span>
               <span className="text-lg font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                 {duration} min
               </span>
@@ -294,7 +297,7 @@ function AppointmentDetailModal({
             <Link
               href={`/termini?id=${appointment.id}`}
               className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-              title="Odpri v Termini"
+              title={t('detailModal.openInAppointments')}
             >
               <ArrowRight className="h-4.5 w-4.5" weight="regular" />
             </Link>
@@ -309,12 +312,14 @@ export function AppointmentListCard({
   title,
   subtitle,
   appointments,
-  emptyMessage = "Ni terminov",
+  emptyMessage,
   showViewAll = true,
   viewAllHref = "/termini",
   gradientOutline = false,
   onAppointmentClick,
 }: AppointmentListCardProps) {
+  const t = useTranslations('dashboard');
+  const resolvedEmptyMessage = emptyMessage ?? t('appointmentList.defaultEmpty');
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentItem | null>(null);
 
   const cardContent = (
@@ -341,7 +346,7 @@ export function AppointmentListCard({
         {appointments.length === 0 ? (
           <div className="p-6 text-center text-gray-400">
             <Calendar size={32} className="mx-auto mb-2 opacity-50" />
-            <p>{emptyMessage}</p>
+            <p>{resolvedEmptyMessage}</p>
           </div>
         ) : (
           appointments.slice(0, 5).map((appointment, index) => (
@@ -414,7 +419,7 @@ export function AppointmentListCard({
           href={viewAllHref}
           className="flex items-center justify-center gap-2 p-4 border-t border-gray-100 text-sm font-medium text-violet-600 hover:bg-violet-50 transition-colors"
         >
-          Poglej vse termine
+          {t('appointmentList.viewAll')}
           <ArrowRight size={16} weight="bold" />
         </Link>
       )}

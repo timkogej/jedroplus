@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { Users, Trophy } from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import type { TopEmployee } from "@/lib/dashboard/fetchDashboardData";
 
 interface TopEmployeesCardProps {
@@ -9,6 +10,7 @@ interface TopEmployeesCardProps {
 }
 
 export function TopEmployeesCard({ employees }: TopEmployeesCardProps) {
+  const t = useTranslations('dashboard');
   const gradients = [
     "from-violet-500 to-purple-600",
     "from-cyan-500 to-blue-600",
@@ -29,8 +31,8 @@ export function TopEmployeesCard({ employees }: TopEmployeesCardProps) {
           {/* Icon only - no circle background */}
           <Trophy size={24} weight="regular" className="text-gray-900" />
           <div>
-            <h3 className="font-normal text-gray-900">Top Zaposleni</h3>
-            <p className="text-sm text-gray-500">Po opravljenih terminih</p>
+            <h3 className="font-normal text-gray-900">{t('topEmployees.title')}</h3>
+            <p className="text-sm text-gray-500">{t('topEmployees.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -40,7 +42,7 @@ export function TopEmployeesCard({ employees }: TopEmployeesCardProps) {
         {employees.length === 0 ? (
           <div className="py-8 text-center text-gray-400">
             <Users size={32} className="mx-auto mb-2 opacity-50" />
-            <p>Ni podatkov</p>
+            <p>{t('topEmployees.empty')}</p>
           </div>
         ) : (
           employees.slice(0, 3).map((employee, index) => (
@@ -76,7 +78,7 @@ export function TopEmployeesCard({ employees }: TopEmployeesCardProps) {
                   {employee.name}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {employee.appointmentCount} terminov
+                  {t('topEmployees.appointmentCount', { count: employee.appointmentCount })}
                 </p>
               </div>
 

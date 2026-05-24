@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Clock,
 } from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import type { RecentActivity } from "@/lib/dashboard/fetchDashboardData";
 
 interface RecentActivityCardProps {
@@ -16,6 +17,7 @@ interface RecentActivityCardProps {
 }
 
 export function RecentActivityCard({ activities }: RecentActivityCardProps) {
+  const t = useTranslations('dashboard');
   const getActivityIcon = (type: RecentActivity["type"]) => {
     switch (type) {
       case "completed":
@@ -61,8 +63,8 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
             className="text-gray-900"
           />
           <div>
-            <h3 className="font-normal text-gray-900">Zadnja Interakcija</h3>
-            <p className="text-sm text-gray-500">Zadnji zaključeni termini</p>
+            <h3 className="font-normal text-gray-900">{t('recentActivity.title')}</h3>
+            <p className="text-sm text-gray-500">{t('recentActivity.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -72,7 +74,7 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
         {activities.length === 0 ? (
           <div className="p-6 text-center text-gray-400">
             <ClockCounterClockwise size={32} className="mx-auto mb-2 opacity-50" />
-            <p>Ni nedavne aktivnosti</p>
+            <p>{t('recentActivity.empty')}</p>
           </div>
         ) : (
           activities.map((activity, index) => {
@@ -99,10 +101,10 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
                   {/* Client and Service Info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">
-                      {activity.clientName || 'Neznana stranka'}
+                      {activity.clientName || t('recentActivity.unknownClient')}
                     </p>
                     <p className="text-sm text-gray-500 truncate">
-                      {activity.serviceName || 'Storitev'}
+                      {activity.serviceName || t('recentActivity.serviceLabel')}
                     </p>
                     {/* Time range */}
                     <div className="flex items-center gap-1 mt-1 text-xs text-gray-400">

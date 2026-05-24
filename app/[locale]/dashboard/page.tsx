@@ -69,9 +69,11 @@ import { getCompanyColumnForTable } from "@/lib/companyScope";
 import { TABLES } from "@/lib/data";
 import { useUserPersonId } from "@/hooks/useUserPersonId";
 import { useRolePermissions } from "@/app/role-permission-context";
+import { useTranslations } from "next-intl";
 
 // ─── Copy button (reused in detail modal) ────────────────────────────────────
 function CopyButton({ text, label }: { text: string; label: string }) {
+  const t = useTranslations('dashboard');
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     await navigator.clipboard.writeText(text);
@@ -85,7 +87,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className="rounded-lg p-2 border border-gray-200 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-      title={`Kopiraj ${label}`}
+      title={t('copyButton', { label })}
     >
       {copied ? (
         <Check className="h-4 w-4 text-emerald-500" weight="bold" />
@@ -116,6 +118,7 @@ function AppointmentDetailModal({
   onCancel?: (appointment: AppointmentWithDetails) => void;
   onDelete?: (appointment: AppointmentWithDetails) => void;
 }) {
+  const t = useTranslations('dashboard');
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
   const getGradientBackground = () => {
@@ -171,12 +174,12 @@ function AppointmentDetailModal({
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'scheduled': return 'Načrtovano';
-      case 'confirmed': return 'Potrjeno';
-      case 'completed': return 'Zaključeno';
-      case 'cancelled': return 'Preklicano';
-      case 'pending': return 'Čakajoč';
-      case 'no_show': return 'Ni prišel/a';
+      case 'scheduled': return t('detailModal.status.scheduled');
+      case 'confirmed': return t('detailModal.status.confirmed');
+      case 'completed': return t('detailModal.status.completed');
+      case 'cancelled': return t('detailModal.status.cancelled');
+      case 'pending': return t('detailModal.status.pending');
+      case 'no_show': return t('detailModal.status.noShow');
       default: return status;
     }
   };
@@ -217,7 +220,7 @@ function AppointmentDetailModal({
           style={{ background: getGradientBackground() }}
         >
           <h3 className="text-base font-normal text-white truncate pr-3">
-            {appointment.stranka_ime || 'Neznana stranka'}
+            {appointment.stranka_ime || t('recentActivity.unknownClient')}
           </h3>
           <motion.button
             type="button"
@@ -225,7 +228,7 @@ function AppointmentDetailModal({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             className="rounded-full bg-white/20 p-2 text-white transition-colors hover:bg-white/30 flex-shrink-0"
-            aria-label="Zapri"
+            aria-label={t('detailModal.actions.close')}
           >
             <X className="h-5 w-5" weight="bold" />
           </motion.button>
@@ -235,7 +238,7 @@ function AppointmentDetailModal({
         <div className="flex-1 overflow-y-auto min-h-0 p-5 space-y-4">
           {/* Status */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Status</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.status')}</label>
             <span className={`px-2.5 py-1 rounded-full text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
               {getStatusLabel(appointment.status || 'scheduled')}
             </span>
@@ -243,7 +246,7 @@ function AppointmentDetailModal({
 
           {/* Client */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Stranka</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.client')}</label>
             <div className="space-y-2">
               <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
                 <span className="text-lg font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
@@ -272,7 +275,7 @@ function AppointmentDetailModal({
                     >
                       <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                       <div className="min-w-0">
-                        <div className="text-[10px] text-gray-500">Telefon</div>
+                        <div className="text-[10px] text-gray-500">{t('detailModal.fields.phone')}</div>
                         <div className="text-xs font-medium text-[#1A1F36] truncate">{appointment.stranka_telefon}</div>
                       </div>
                     </a>
@@ -288,7 +291,7 @@ function AppointmentDetailModal({
             const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
             return (
               <div>
-                <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Storitev</label>
+                <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.service')}</label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
@@ -319,7 +322,7 @@ function AppointmentDetailModal({
           {/* Employee */}
           {appointment.zaposleni && (
             <div>
-              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Oseba</label>
+              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.employee')}</label>
               <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
                 <span
                   className="text-lg font-normal flex-shrink-0"
@@ -341,13 +344,13 @@ function AppointmentDetailModal({
 
           {/* Date */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Datum</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.date')}</label>
             <p className="text-sm font-medium text-[#1A1F36]">{formatModalDate(appointment.datum)}</p>
           </div>
 
           {/* Time */}
           <div>
-            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Čas</label>
+            <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.time')}</label>
             <p className="text-sm font-medium text-[#1A1F36]">
               {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
             </p>
@@ -356,7 +359,7 @@ function AppointmentDetailModal({
           {/* Duration */}
           {appointment.cas_zacetek && appointment.cas_konec && (
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-              <span className="text-sm font-medium text-gray-700">Trajanje</span>
+              <span className="text-sm font-medium text-gray-700">{t('detailModal.fields.duration')}</span>
               <span className="text-lg font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                 {(() => {
                   try {
@@ -376,7 +379,7 @@ function AppointmentDetailModal({
             if (cena && Number(cena) > 0) {
               return (
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-                  <span className="text-sm font-medium text-gray-700">Cena</span>
+                  <span className="text-sm font-medium text-gray-700">{t('detailModal.fields.price')}</span>
                   <span className="text-xl font-normal bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                     {Number(cena).toFixed(2)} €
                   </span>
@@ -389,7 +392,7 @@ function AppointmentDetailModal({
           {/* Notes */}
           {appointment.opombe && (
             <div>
-              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Opombe</label>
+              <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.notes')}</label>
               <div className="p-4 bg-gray-50 rounded-xl">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.opombe}</p>
               </div>
@@ -404,7 +407,7 @@ function AppointmentDetailModal({
             if (!notes) return null;
             return (
               <div>
-                <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">Interne opombe</label>
+                <label className="mb-1.5 block text-xs font-normal uppercase tracking-wider text-gray-500">{t('detailModal.fields.internalNotes')}</label>
                 <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
                 </div>
@@ -423,7 +426,7 @@ function AppointmentDetailModal({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
-                title="Zaključi"
+                title={t('detailModal.actions.complete')}
               >
                 <CheckCircle className="h-4.5 w-4.5" weight="regular" />
               </motion.button>
@@ -435,7 +438,7 @@ function AppointmentDetailModal({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                title="Uredi"
+                title={t('detailModal.actions.edit')}
               >
                 <NotePencil className="h-4.5 w-4.5" weight="regular" />
               </motion.button>
@@ -447,7 +450,7 @@ function AppointmentDetailModal({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                title="Več možnosti"
+                title={t('detailModal.actions.moreOptions')}
               >
                 <DotsThreeVertical className="h-4.5 w-4.5" weight="bold" />
               </motion.button>
@@ -467,7 +470,7 @@ function AppointmentDetailModal({
                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-amber-50 hover:text-amber-700"
                       >
                         <WarningCircle className="h-4 w-4" weight="regular" />
-                        Ni prišel
+                        {t('detailModal.actions.noShow')}
                       </button>
                     )}
                     {onCancel && (
@@ -477,7 +480,7 @@ function AppointmentDetailModal({
                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
                       >
                         <XCircle className="h-4 w-4" weight="regular" />
-                        Odpoved
+                        {t('detailModal.actions.cancel')}
                       </button>
                     )}
                     {onDelete && (
@@ -487,7 +490,7 @@ function AppointmentDetailModal({
                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
                       >
                         <Trash className="h-4 w-4" weight="regular" />
-                        Izbriši
+                        {t('detailModal.actions.delete')}
                       </button>
                     )}
                   </motion.div>
@@ -503,6 +506,7 @@ function AppointmentDetailModal({
 
 // ─── Main Dashboard Page ──────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const t = useTranslations('dashboard');
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading, reloadSettings } = useCompany();
   const { user, loading: authLoading } = useAuth();
@@ -653,7 +657,7 @@ export default function DashboardPage() {
       setDashboardData(data);
     } catch (err) {
       console.error("Error loading dashboard data:", err);
-      setError("Prišlo je do napake pri nalaganju podatkov.");
+      setError(t('toast.loadError'));
     } finally {
       setLoading(false);
     }
@@ -794,7 +798,7 @@ export default function DashboardPage() {
       const result = await callN8nAction(buildPayload(event, 'appointments', enhancedData));
       if (!result.ok) throw new Error('Prišlo je do napake pri shranjevanju termina.');
 
-      setSuccessMessage(isNew ? 'Termin uspešno dodan' : 'Termin uspešno posodobljen');
+      setSuccessMessage(isNew ? t('toast.appointmentAdded') : t('toast.appointmentUpdated'));
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await loadDashboard();
@@ -802,7 +806,7 @@ export default function DashboardPage() {
       if (isNew) setShowNewAppointmentModal(false);
       else setEditingAppointment(null);
     } catch (err) {
-      setActionError('Prišlo je do napake pri shranjevanju.');
+      setActionError(t('toast.saveError'));
     } finally {
       setter(false);
     }
@@ -825,14 +829,14 @@ export default function DashboardPage() {
       const bookingRowUpdated = { ...completeTarget, status: 'Zaključen', booking_id: completeTarget.id, appointment_id: completeTarget.id, opombe: completionNotesValue, completion_notes: completionNotesValue };
       const result = await callN8nAction(buildPayload('ZAKLJUCITEV_TERMINA', 'appointments', buildBookingCompleteData({ companyId, userEmail: actor, companyProfile: companyPayload, bookingRowUpdated, customerAppointmentsCount })));
       if (!result.ok) throw new Error('Prišlo je do napake pri zaključevanju termina.');
-      setSuccessMessage('Termin uspešno zaključen');
+      setSuccessMessage(t('toast.appointmentCompleted'));
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 1500));
       await loadDashboard();
       setCompleteTarget(null);
       setCompletionNotes('');
     } catch (err) {
-      setActionError('Prišlo je do napake pri zaključevanju termina.');
+      setActionError(t('toast.completeError'));
     } finally {
       setIsCompleting(false);
     }
@@ -852,12 +856,12 @@ export default function DashboardPage() {
         datum: appointment.datum, cas_zacetek: appointment.cas_zacetek,
       }));
       if (!result.ok) throw new Error('Prišlo je do napake pri označevanju kot No Show.');
-      setSuccessMessage('Termin označen kot No Show');
+      setSuccessMessage(t('toast.appointmentNoShow'));
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 500));
       await loadDashboard();
     } catch (err) {
-      setActionError('Prišlo je do napake pri označevanju kot No Show.');
+      setActionError(t('toast.noShowError'));
     } finally {
       setIsDeleting(false);
     }
@@ -877,12 +881,12 @@ export default function DashboardPage() {
         datum: appointment.datum, cas_zacetek: appointment.cas_zacetek,
       }));
       if (!result.ok) throw new Error('Prišlo je do napake pri odpovedi termina.');
-      setSuccessMessage('Termin uspešno odpovedan');
+      setSuccessMessage(t('toast.appointmentCancelled'));
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 500));
       await loadDashboard();
     } catch (err) {
-      setActionError('Prišlo je do napake pri odpovedi termina.');
+      setActionError(t('toast.cancelError'));
     } finally {
       setIsDeleting(false);
     }
@@ -905,7 +909,7 @@ export default function DashboardPage() {
       await loadDashboard();
       setDeleteTarget(null);
     } catch (err) {
-      setActionError('Prišlo je do napake pri brisanju.');
+      setActionError(t('toast.deleteError'));
     } finally {
       setIsDeleting(false);
     }
@@ -931,13 +935,13 @@ export default function DashboardPage() {
         return { ...payload, data: buildClientCreateData({ companyId, userEmail: actor, companyProfile: companyPayload, clientRow: { ...newRow, 'ID stranke': nextId } }) };
       });
       if (!result.ok) throw new Error('Prišlo je do napake pri ustvarjanju stranke.');
-      setSuccessMessage('Stranka uspešno dodana');
+      setSuccessMessage(t('toast.clientAdded'));
       setTimeout(() => setSuccessMessage(null), 3000);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setShowNewClientModal(false);
       await loadDashboard();
     } catch (err) {
-      setActionError('Prišlo je do napake pri shranjevanju stranke.');
+      setActionError(t('toast.clientSaveError'));
     } finally {
       setIsNewClientSaving(false);
     }
@@ -958,7 +962,7 @@ export default function DashboardPage() {
         if (combined) return combined;
       }
     }
-    if (!user?.email) return "Uporabnik";
+    if (!user?.email) return t('defaultUser');
     const emailPrefix = user.email.split("@")[0];
     return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
   }, [user]);
@@ -968,10 +972,11 @@ export default function DashboardPage() {
   // ── Greeting based on time of day ────────────────────────────────────────
   const welcomeGreeting = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return 'Dobro jutro,';
-    if (hour >= 12 && hour < 18) return 'Dober dan,';
-    return 'Dober večer,';
-  }, []);
+    if (hour >= 5 && hour < 11) return t('greeting.morning');
+    if (hour >= 11 && hour < 14) return t('greeting.day');
+    if (hour >= 14 && hour < 18) return t('greeting.afternoon');
+    return t('greeting.evening');
+  }, [t]);
 
   // ── Loading state ─────────────────────────────────────────────────────────
   if (!initialCheckDone || companyLoading || loading) {
@@ -1002,13 +1007,13 @@ export default function DashboardPage() {
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <Warning size={48} className="text-red-500 mx-auto mb-4" />
-            <p className="text-gray-700 font-medium mb-2">Prišlo je do napake</p>
+            <p className="text-gray-700 font-medium mb-2">{t('errorState.title')}</p>
             <p className="text-gray-500 mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors"
             >
-              Poskusi znova
+              {t('errorState.retry')}
             </button>
           </div>
         </div>
@@ -1046,7 +1051,7 @@ export default function DashboardPage() {
                     className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-medium shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all"
                   >
                     <Plus size={18} weight="bold" />
-                    <span className="hidden sm:inline">Nov Termin</span>
+                    <span className="hidden sm:inline">{t('quickActions.newAppointment')}</span>
                   </button>
                 )}
                 <button
@@ -1055,7 +1060,7 @@ export default function DashboardPage() {
                   className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
                 >
                   <UserPlus size={18} weight="bold" />
-                  <span className="hidden sm:inline">Nova Stranka</span>
+                  <span className="hidden sm:inline">{t('quickActions.newClient')}</span>
                 </button>
               </div>
             </div>
@@ -1065,17 +1070,17 @@ export default function DashboardPage() {
           {role === 'staff' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <MetricCard
-                title="Termini danes"
+                title={t('metrics.appointmentsToday')}
                 value={dashboardData?.stats.todayAppointments ?? 0}
-                subtitle="Načrtovanih terminov"
+                subtitle={t('metrics.appointmentsTodaySubtitle')}
                 icon={CalendarCheck}
                 iconColor="black"
                 gradientOutline
               />
               <MetricCard
-                title="Aktivni termini"
+                title={t('metrics.activeAppointments')}
                 value={dashboardData?.stats.activeAppointments ?? 0}
-                subtitle="Načrtovanih terminov"
+                subtitle={t('metrics.appointmentsTodaySubtitle')}
                 icon={Clock}
                 iconColor="darkGray"
               />
@@ -1090,11 +1095,11 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <ClockCountdown className="w-5 h-5 text-black flex-shrink-0" weight="regular" />
-                      <span className="text-sm font-normal text-gray-700">Naslednji termin</span>
+                      <span className="text-sm font-normal text-gray-700">{t('nextAppointment.title')}</span>
                     </div>
                     {nextAppointment && (
                       <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-50 text-violet-600">
-                        {nextAppointment.isToday ? 'Danes' : 'Jutri'}
+                        {nextAppointment.isToday ? t('nextAppointment.today') : t('nextAppointment.tomorrow')}
                       </span>
                     )}
                   </div>
@@ -1170,7 +1175,7 @@ export default function DashboardPage() {
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center gap-2 py-4">
                       <CalendarBlank className="w-5 h-5 text-gray-300" weight="regular" />
-                      <p className="text-sm text-gray-400">Ni prihajajočih terminov</p>
+                      <p className="text-sm text-gray-400">{t('nextAppointment.empty')}</p>
                     </div>
                   )}
                 </div>
@@ -1179,31 +1184,31 @@ export default function DashboardPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <MetricCard
-                title="Termini danes"
+                title={t('metrics.appointmentsToday')}
                 value={dashboardData?.stats.todayAppointments ?? 0}
-                subtitle="Načrtovanih terminov"
+                subtitle={t('metrics.appointmentsTodaySubtitle')}
                 icon={CalendarCheck}
                 iconColor="black"
                 gradientOutline
               />
               <MetricCard
-                title="Aktivni termini"
+                title={t('metrics.activeAppointments')}
                 value={dashboardData?.stats.activeAppointments ?? 0}
-                subtitle="Načrtovanih terminov"
+                subtitle={t('metrics.appointmentsTodaySubtitle')}
                 icon={Clock}
                 iconColor="darkGray"
               />
               <MetricCard
-                title="Nove stranke"
+                title={t('metrics.newClients')}
                 value={dashboardData?.stats.newClientsThisMonth ?? 0}
-                subtitle="Ta mesec"
+                subtitle={t('metrics.thisMonth')}
                 icon={UsersThree}
                 iconColor="mediumGray"
               />
               <MetricCard
-                title="Prihodki"
+                title={t('metrics.revenue')}
                 value={`${(dashboardData?.stats.revenueThisMonth ?? 0).toFixed(2)} €`}
-                subtitle="Ta mesec"
+                subtitle={t('metrics.thisMonth')}
                 icon={CurrencyCircleDollar}
                 iconColor="slate"
               />
@@ -1213,19 +1218,19 @@ export default function DashboardPage() {
           {/* Today and Tomorrow Appointments */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <AppointmentListCard
-              title="Termini Danes"
+              title={t('appointmentList.todayTitle')}
               subtitle={format(new Date(), "d. MMMM", { locale: sl })}
               appointments={dashboardData?.todayAppointments ?? []}
-              emptyMessage="Danes ni terminov"
+              emptyMessage={t('appointmentList.todayEmpty')}
               gradientOutline
               viewAllHref={`/termini?dateFrom=${format(new Date(), "yyyy-MM-dd")}&dateTo=${format(new Date(), "yyyy-MM-dd")}`}
               onAppointmentClick={handleAppointmentClick}
             />
             <AppointmentListCard
-              title="Termini Jutri"
+              title={t('appointmentList.tomorrowTitle')}
               subtitle={format(new Date(Date.now() + 86400000), "d. MMMM", { locale: sl })}
               appointments={dashboardData?.tomorrowAppointments ?? []}
-              emptyMessage="Jutri ni terminov"
+              emptyMessage={t('appointmentList.tomorrowEmpty')}
               viewAllHref={`/termini?dateFrom=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}&dateTo=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}`}
               onAppointmentClick={handleAppointmentClick}
             />
@@ -1252,9 +1257,9 @@ export default function DashboardPage() {
           >
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <h3 className="font-normal text-gray-900">Potrebujete več podrobnosti?</h3>
+                <h3 className="font-normal text-gray-900">{t('footer.heading')}</h3>
                 <p className="text-sm text-gray-500">
-                  Preglejte celoten koledar ali analitiko za podrobnejši vpogled
+                  {t('footer.body')}
                 </p>
               </div>
               <div className="flex gap-3">
@@ -1262,14 +1267,14 @@ export default function DashboardPage() {
                   href="/koledar"
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-violet-600 hover:text-violet-700 transition-colors"
                 >
-                  Odpri Koledar
+                  {t('footer.openCalendar')}
                   <ArrowRight size={16} weight="bold" />
                 </Link>
                 <Link
                   href="/analytics"
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
                 >
-                  Odpri Analitiko
+                  {t('footer.openAnalytics')}
                   <ArrowRight size={16} weight="bold" />
                 </Link>
               </div>
@@ -1341,8 +1346,8 @@ export default function DashboardPage() {
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Izbriši termin"
-        message="Ali ste prepričani, da želite izbrisati ta termin?"
+        title={t('deleteModal.title')}
+        message={t('deleteModal.message')}
         appointment={deleteTarget}
         isDeleting={isDeleting}
       />
@@ -1378,8 +1383,8 @@ export default function DashboardPage() {
                 </motion.button>
                 <CheckCircle className="h-10 w-10 text-emerald-500" weight="fill" />
                 <div className="text-center">
-                  <h2 className="text-lg font-normal text-[#1A1F36]">Zaključi termin</h2>
-                  <p className="text-sm text-gray-500">Potrdite zaključitev termina</p>
+                  <h2 className="text-lg font-normal text-[#1A1F36]">{t('completeModal.title')}</h2>
+                  <p className="text-sm text-gray-500">{t('completeModal.subtitle')}</p>
                 </div>
               </div>
 
@@ -1390,7 +1395,7 @@ export default function DashboardPage() {
                     {completeTarget.stranka_ime?.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
                   </span>
                   <div>
-                    <p className="text-xs text-gray-500">Stranka</p>
+                    <p className="text-xs text-gray-500">{t('completeModal.client')}</p>
                     <p className="text-sm font-normal text-[#1A1F36]">{completeTarget.stranka_ime}</p>
                   </div>
                 </div>
@@ -1398,7 +1403,7 @@ export default function DashboardPage() {
                   <div className="flex items-start gap-3">
                     <div className="h-3 w-3 rounded-full flex-shrink-0 mt-1" style={{ background: completeTarget.storitev.barva || '#6366F1' }} />
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500">Storitev</p>
+                      <p className="text-xs text-gray-500">{t('completeModal.service')}</p>
                       <div className="space-y-1 mt-0.5">
                         <p className="text-sm font-normal text-[#1A1F36]">{completeTarget.storitev.naziv}</p>
                         {completeTarget.storitev_2 && (
@@ -1420,7 +1425,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <CalendarBlank className="h-[18px] w-[18px] text-emerald-500 flex-shrink-0" weight="regular" />
                   <div>
-                    <p className="text-xs text-gray-500">Datum</p>
+                    <p className="text-xs text-gray-500">{t('completeModal.date')}</p>
                     <p className="text-sm font-normal text-[#1A1F36]">
                       {new Date(completeTarget.datum).toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
@@ -1429,7 +1434,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <Clock className="h-[18px] w-[18px] text-emerald-500 flex-shrink-0" weight="regular" />
                   <div>
-                    <p className="text-xs text-gray-500">Čas</p>
+                    <p className="text-xs text-gray-500">{t('completeModal.time')}</p>
                     <p className="text-sm font-normal text-[#1A1F36]">
                       {completeTarget.cas_zacetek?.substring(0, 5)} - {completeTarget.cas_konec?.substring(0, 5)}
                     </p>
@@ -1437,13 +1442,13 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <label htmlFor="completion-notes" className="block text-sm font-normal text-gray-700 mb-2">
-                    Sporočilo stranki oz. navodila po terminu
+                    {t('completeModal.messageLabel')}
                   </label>
                   <textarea
                     id="completion-notes"
                     value={completionNotes}
                     onChange={(e) => setCompletionNotes(e.target.value)}
-                    placeholder="Vnesite sporočilo ali navodila po zaključenem terminu (opcijsko)..."
+                    placeholder={t('completeModal.messagePlaceholder')}
                     rows={4}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 resize-none"
                   />
@@ -1458,7 +1463,7 @@ export default function DashboardPage() {
                   disabled={isCompleting}
                   className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Prekliči
+                  {t('completeModal.cancel')}
                 </button>
                 <motion.button
                   type="button"
@@ -1471,12 +1476,12 @@ export default function DashboardPage() {
                   {isCompleting ? (
                     <>
                       <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }} className="h-4 w-4 rounded-full border-2 border-white border-t-transparent" />
-                      Zaključujem...
+                      {t('completeModal.completing')}
                     </>
                   ) : (
                     <>
                       <CheckCircle className="h-4 w-4" weight="bold" />
-                      Zaključi
+                      {t('completeModal.confirm')}
                     </>
                   )}
                 </motion.button>

@@ -1,1 +1,155 @@
-{}
+{
+  "page": {
+    "title": "Clients",
+    "subtitle": "Your complete client database",
+    "newClient": "New client",
+    "searchPlaceholder": "Search clients by name, email or phone...",
+    "showingCount": "Showing {shown} of {total} clients",
+    "disabledCreateMessage": "The company owner has disabled adding new clients. Contact them to enable this."
+  },
+  "crm": {
+    "importCsv": "Import from CSV",
+    "importExcel": "Import from Excel",
+    "importOther": "Import from another CRM",
+    "exportCsv": "Export to CSV",
+    "exportExcel": "Export to Excel",
+    "exportPdf": "Export to PDF"
+  },
+  "stats": {
+    "total": "Total clients",
+    "withAppointments": "With appointments",
+    "newThisMonth": "New this month"
+  },
+  "emptyState": {
+    "noClients": "No clients yet",
+    "noClientsSubtitle": "Start by adding your first client to manage appointments and contacts.",
+    "addFirst": "Add first client",
+    "noResults": "No results for \"{term}\"",
+    "noResultsSubtitle": "Try a different search or clear the filter",
+    "clearSearch": "Clear search"
+  },
+  "errors": {
+    "loadError": "An error occurred while loading data",
+    "saveError": "An error occurred while saving the client",
+    "deleteError": "An error occurred while deleting the client",
+    "retry": "Try again"
+  },
+  "toast": {
+    "created": "Client added successfully",
+    "updated": "Client updated successfully",
+    "deleted": "Client deleted successfully"
+  },
+  "modal": {
+    "title": {
+      "create": "New client",
+      "edit": "Edit client"
+    },
+    "subtitle": {
+      "create": "Add a new client",
+      "edit": "Edit client details"
+    },
+    "fields": {
+      "firstNameRequired": "First name *",
+      "lastNameRequired": "Last name *",
+      "genderRequired": "Gender *",
+      "emailHint": "(at least email or phone)",
+      "phone": "Phone",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes about this client...",
+      "notesHint": "Notes are used in reminders and messaging",
+      "internalNotes": "Internal notes",
+      "internalNotesPlaceholder": "Internal notes (not sent to the client)..."
+    },
+    "gender": {
+      "placeholder": "Select gender",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "addInternalNotes": "+ Internal notes",
+    "warning": {
+      "missingEmail": "Missing email address",
+      "missingPhone": "Missing phone number",
+      "missingEmailDesc": "Without an email address, you won't be able to send emails, invoices, or automated notifications to this client. This may affect automated communication and email reminders.",
+      "missingPhoneDesc": "Without a phone number, you won't be able to send messages or automated notifications to this client. This may affect automated communication and SMS reminders."
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "saveAnyway": "Save anyway",
+      "save": "Save client",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameRequired": "Last name is required",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "genderRequired": "Gender is required",
+      "emailInvalid": "Invalid email address",
+      "phoneInvalid": "Invalid phone number",
+      "notesMaxLength": "Notes can contain a maximum of 500 characters",
+      "internalNotesMaxLength": "Internal notes can contain a maximum of 500 characters",
+      "emailExists": "This email address is already in use",
+      "contactRequired": "At least an email or phone number is required"
+    }
+  },
+  "details": {
+    "added": "Added:",
+    "edit": "Edit",
+    "delete": "Delete",
+    "contactInfo": "Contact details",
+    "gender": "Gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderOther": "Other",
+    "genderUnknown": "Not specified",
+    "notes": "Notes",
+    "internalNotes": "Internal notes",
+    "stats": "Statistics",
+    "statTotal": "Total",
+    "statNoShow": "No Show",
+    "statCancelled": "Cancelled",
+    "appointmentHistory": "Appointment history",
+    "newAppointment": "New appointment",
+    "noAppointments": "No appointments",
+    "addFirstAppointment": "Add first appointment",
+    "showingLast": "Showing the last 10 of {total} appointments",
+    "aptNotes": "Notes",
+    "aptInternalNotes": "Internal notes",
+    "aptCompletionNotes": "Post-completion notes",
+    "finalPrice": "Final price"
+  },
+  "deleteModal": {
+    "title": "Delete client",
+    "areYouSure": "Are you sure?",
+    "warningPrefix": "Deleting",
+    "warningSuffix": "is permanent. This action cannot be undone.",
+    "appointmentWarningPrefix": "This client has",
+    "appointmentCount": "{count, plural, =1 {1 appointment} other {{count} appointments}}",
+    "appointmentWarningSuffix": "The appointments will remain in the system but without a client link.",
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "deleteButton": "Delete client"
+  },
+  "table": {
+    "headers": {
+      "client": "Client",
+      "phone": "Phone",
+      "appointments": "Appointments",
+      "lastInteraction": "Last interaction",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No results",
+      "message": "No clients found matching your search"
+    },
+    "actions": {
+      "view": "Details",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "pagination": {
+      "of": "of"
+    }
+  }
+}

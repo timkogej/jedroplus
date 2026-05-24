@@ -23,6 +23,7 @@ import { getNextClientId } from '@/src/lib/idGenerators';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { addMinutesToTime } from '@/lib/promotions';
+import { useTranslations } from 'next-intl';
 
 type ModalMode = 'view' | 'edit' | 'create';
 
@@ -72,15 +73,6 @@ export interface AppointmentFormData {
   add_on_popust_tip?: string | null;
   add_on_final_cena?: string | null;
 }
-
-const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
-  { value: 'scheduled', label: 'Načrtovan' },
-  { value: 'confirmed', label: 'Potrjen' },
-  { value: 'pending', label: 'Čakajoč' },
-  { value: 'completed', label: 'Zaključen' },
-  { value: 'cancelled', label: 'Odpovedan' },
-  { value: 'no_show', label: 'Ni prišel' },
-];
 
 // Get status dot color for select options
 const getStatusDotColor = (status: AppointmentStatus): string => {
@@ -168,9 +160,18 @@ function AppointmentModal({
   initialEmployeeId,
   lockEmployee = false,
 }: AppointmentModalProps) {
+  const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
   const { personId } = useRolePermissions();
+  const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
+    { value: 'scheduled', label: t('status.scheduled') },
+    { value: 'confirmed', label: t('status.confirmed') },
+    { value: 'pending', label: t('status.pending') },
+    { value: 'completed', label: t('status.completed') },
+    { value: 'cancelled', label: t('status.cancelled') },
+    { value: 'no_show', label: t('status.noShow') },
+  ];
 
   // Detect mobile (< 768px) for time picker variant
   const [isMobile, setIsMobile] = useState(false);
@@ -847,7 +848,7 @@ function AppointmentModal({
       });
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri ustvarjanju stranke');
+        throw new Error(t('errors.clientCreateError'));
       }
 
       // Close client modal
@@ -889,13 +890,13 @@ function AppointmentModal({
     const newErrors: Partial<Record<keyof AppointmentFormData, string>> = {};
 
     if (!formData.datum) {
-      newErrors.datum = 'Datum je obvezen';
+      newErrors.datum = t('modal.validation.dateRequired');
     }
     if (!formData.cas_zacetek) {
-      newErrors.cas_zacetek = 'Čas začetka je obvezen';
+      newErrors.cas_zacetek = t('modal.validation.startTimeRequired');
     }
     if (!formData.cas_konec) {
-      newErrors.cas_konec = 'Čas konca je obvezen';
+      newErrors.cas_konec = t('modal.validation.endTimeRequired');
     }
     // Validate end time is after start time
     if (formData.cas_zacetek && formData.cas_konec) {
@@ -904,17 +905,17 @@ function AppointmentModal({
       const startMins = startH * 60 + startM;
       const endMins = endH * 60 + endM;
       if (endMins <= startMins) {
-        newErrors.cas_konec = 'Čas konca mora biti po času začetka';
+        newErrors.cas_konec = t('modal.validation.endTimeAfterStart');
       }
     }
     if (!formData.stranka_ime.trim() && !selectedClient) {
-      newErrors.stranka_ime = 'Stranka je obvezna';
+      newErrors.stranka_ime = t('modal.validation.clientRequired');
     }
     if (!formData.storitev_id) {
-      newErrors.storitev_id = 'Storitev je obvezna';
+      newErrors.storitev_id = t('modal.validation.serviceRequired');
     }
     if (!formData.zaposleni_id) {
-      newErrors.zaposleni_id = 'Zaposleni je obvezen';
+      newErrors.zaposleni_id = t('modal.validation.employeeRequired');
     }
 
     setErrors(newErrors);
@@ -969,7 +970,7 @@ function AppointmentModal({
             className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl p-6 text-center space-y-4"
           >
             <p className="text-sm font-medium text-[#1A1F36]">
-              Za dodajanje termina potrebujete vsaj eno storitev in enega zaposlenega.
+              {t('modal.emptyState.message')}
             </p>
             <div className="flex flex-col gap-2">
               {services.length === 0 && (
@@ -977,7 +978,7 @@ function AppointmentModal({
                   href="/services"
                   className="block w-full rounded-xl bg-[#1A1F36] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#2D3461] transition-colors"
                 >
-                  Dodaj storitev
+                  {t('modal.emptyState.addService')}
                 </a>
               )}
               {employees.length === 0 && (
@@ -985,7 +986,7 @@ function AppointmentModal({
                   href="/staff"
                   className="block w-full rounded-xl bg-[#1A1F36] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#2D3461] transition-colors"
                 >
-                  Dodaj zaposlenega
+                  {t('modal.emptyState.addEmployee')}
                 </a>
               )}
               <button
@@ -993,7 +994,7 @@ function AppointmentModal({
                 onClick={onClose}
                 className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
               >
-                Zapri
+                {t('modal.emptyState.close')}
               </button>
             </div>
           </motion.div>
@@ -1005,10 +1006,10 @@ function AppointmentModal({
   const isViewMode = mode === 'view';
   const title =
     mode === 'create'
-      ? 'Nov termin'
+      ? t('modal.title.create')
       : mode === 'edit'
-        ? 'Uredi termin'
-        : 'Podrobnosti termina';
+        ? t('modal.title.edit')
+        : t('modal.title.view');
 
   const selectedService = services.find((s) => s.id === formData.storitev_id);
   const selectedService2 = services.find((s) => s.id === formData.storitev_id_2);
@@ -1059,7 +1060,7 @@ function AppointmentModal({
             {/* Client search - First field */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Stranka
+                {t('modal.fields.client')}
               </label>
               {isViewMode ? (
                 <div className="space-y-2">
@@ -1092,7 +1093,7 @@ function AppointmentModal({
                         >
                           <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                           <div className="min-w-0">
-                            <div className="text-[10px] text-gray-500">Telefon</div>
+                            <div className="text-[10px] text-gray-500">{t('modal.fields.phone')}</div>
                             <div className="text-xs font-medium text-[#1A1F36] truncate">{formData.stranka_telefon}</div>
                           </div>
                         </a>
@@ -1117,7 +1118,7 @@ function AppointmentModal({
             {/* Service - Second field (supports up to 3 services) */}
             <div className="space-y-3">
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Storitev
+                {t('modal.fields.service')}
               </label>
               {isViewMode ? (
                 <div className="space-y-2">
@@ -1179,7 +1180,7 @@ function AppointmentModal({
                   {/* Total duration if multiple services */}
                   {(selectedService2 || selectedService3) && (
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                      <span className="text-xs font-medium text-gray-500">Skupno trajanje:</span>
+                      <span className="text-xs font-medium text-gray-500">{t('modal.totalDuration')}</span>
                       <span className="text-sm font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                         {totalDuration} min
                       </span>
@@ -1193,7 +1194,7 @@ function AppointmentModal({
                     <Select
                       value={formData.storitev_id}
                       setValue={(value) => handleServiceChange(value, 1)}
-                      placeholder="Izberi storitev"
+                      placeholder={t('modal.placeholders.service')}
                     >
                       {filteredServices.map((service, idx) => (
                         <SelectOption
@@ -1222,9 +1223,9 @@ function AppointmentModal({
                           }`}
                         >
                           <span>{promotions.slot1.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
-                          <span>{promotions.slot1.naziv || (promotions.slot1.type === 'happy_hour' ? 'Happy Hour' : 'Popust')}</span>
+                          <span>{promotions.slot1.naziv || (promotions.slot1.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                           <span className="ml-auto font-semibold">
-                            {promotions.slot1.tip_popusta === 'percentage' ? `${promotions.slot1.vrednost}%` : `${promotions.slot1.vrednost} €`} popust
+                            {promotions.slot1.tip_popusta === 'percentage' ? `${promotions.slot1.vrednost}%` : `${promotions.slot1.vrednost} €`} {t('modal.promotions.discountSuffix')}
                           </span>
                         </motion.div>
                       )}
@@ -1236,7 +1237,7 @@ function AppointmentModal({
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                          Storitev 2
+                          {t('modal.fields.service2')}
                         </label>
                         <button
                           type="button"
@@ -1244,13 +1245,13 @@ function AppointmentModal({
                           className="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1"
                         >
                           <Minus className="h-3 w-3" weight="bold" />
-                          Odstrani
+                          {t('modal.remove')}
                         </button>
                       </div>
                       <Select
                         value={formData.storitev_id_2 || ''}
                         setValue={(value) => handleServiceChange(value, 2)}
-                        placeholder="Izberi drugo storitev"
+                        placeholder={t('modal.placeholders.service2')}
                       >
                         {filteredServices
                           .filter((s) => s.id !== formData.storitev_id)
@@ -1278,9 +1279,9 @@ function AppointmentModal({
                             }`}
                           >
                             <span>{promotions.slot2.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
-                            <span>{promotions.slot2.naziv || (promotions.slot2.type === 'happy_hour' ? 'Happy Hour' : 'Popust')}</span>
+                            <span>{promotions.slot2.naziv || (promotions.slot2.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                             <span className="ml-auto font-semibold">
-                              {promotions.slot2.tip_popusta === 'percentage' ? `${promotions.slot2.vrednost}%` : `${promotions.slot2.vrednost} €`} popust
+                              {promotions.slot2.tip_popusta === 'percentage' ? `${promotions.slot2.vrednost}%` : `${promotions.slot2.vrednost} €`} {t('modal.promotions.discountSuffix')}
                             </span>
                           </motion.div>
                         )}
@@ -1293,7 +1294,7 @@ function AppointmentModal({
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
                         <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                          Storitev 3
+                          {t('modal.fields.service3')}
                         </label>
                         <button
                           type="button"
@@ -1301,13 +1302,13 @@ function AppointmentModal({
                           className="text-xs text-red-500 hover:text-red-700 font-medium flex items-center gap-1"
                         >
                           <Minus className="h-3 w-3" weight="bold" />
-                          Odstrani
+                          {t('modal.remove')}
                         </button>
                       </div>
                       <Select
                         value={formData.storitev_id_3 || ''}
                         setValue={(value) => handleServiceChange(value, 3)}
-                        placeholder="Izberi tretjo storitev"
+                        placeholder={t('modal.placeholders.service3')}
                       >
                         {filteredServices
                           .filter((s) => s.id !== formData.storitev_id && s.id !== formData.storitev_id_2)
@@ -1335,9 +1336,9 @@ function AppointmentModal({
                             }`}
                           >
                             <span>{promotions.slot3.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
-                            <span>{promotions.slot3.naziv || (promotions.slot3.type === 'happy_hour' ? 'Happy Hour' : 'Popust')}</span>
+                            <span>{promotions.slot3.naziv || (promotions.slot3.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                             <span className="ml-auto font-semibold">
-                              {promotions.slot3.tip_popusta === 'percentage' ? `${promotions.slot3.vrednost}%` : `${promotions.slot3.vrednost} €`} popust
+                              {promotions.slot3.tip_popusta === 'percentage' ? `${promotions.slot3.vrednost}%` : `${promotions.slot3.vrednost} €`} {t('modal.promotions.discountSuffix')}
                             </span>
                           </motion.div>
                         )}
@@ -1356,7 +1357,7 @@ function AppointmentModal({
                                  text-gray-600 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
                     >
                       <Plus className="h-4 w-4" weight="bold" />
-                      <span className="text-sm font-medium">Dodaj storitev</span>
+                      <span className="text-sm font-medium">{t('modal.addService')}</span>
                     </motion.button>
                   )}
 
@@ -1408,7 +1409,7 @@ function AppointmentModal({
                   {/* Total duration display when multiple services */}
                   {serviceCount > 1 && totalDuration > 0 && (
                     <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-                      <span className="text-sm font-medium text-gray-700">Skupno trajanje:</span>
+                      <span className="text-sm font-medium text-gray-700">{t('modal.totalDuration')}</span>
                       <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                         {totalDuration} min
                       </span>
@@ -1421,7 +1422,7 @@ function AppointmentModal({
             {/* Employee - Third field */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Osebje
+                {t('modal.fields.employee')}
               </label>
               {isViewMode || lockEmployee ? (
                 <div className="flex items-center gap-3">
@@ -1446,7 +1447,7 @@ function AppointmentModal({
                   <Select
                     value={formData.zaposleni_id}
                     setValue={handleEmployeeChange}
-                    placeholder="Izberi osebje"
+                    placeholder={t('modal.placeholders.employee')}
                   >
                     {filteredEmployees.map((employee, idx) => (
                       <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
@@ -1464,7 +1465,7 @@ function AppointmentModal({
             {/* Date field */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Datum
+                {t('modal.fields.date')}
               </label>
               {isViewMode ? (
                 <p className="flex items-center gap-2 text-sm font-medium text-[#1A1F36]">
@@ -1492,7 +1493,7 @@ function AppointmentModal({
             <div className="grid grid-cols-2 gap-3">
               <div className="min-w-0">
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Čas začetka
+                  {t('modal.fields.startTime')}
                 </label>
                 {isViewMode ? (
                   <p className="flex items-center gap-2 text-sm font-medium text-[#1A1F36]">
@@ -1518,7 +1519,7 @@ function AppointmentModal({
               </div>
               <div className="min-w-0">
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Čas konca
+                  {t('modal.fields.endTime')}
                 </label>
                 {isViewMode ? (
                   <p className="flex items-center gap-2 text-sm font-medium text-[#1A1F36]">
@@ -1547,13 +1548,13 @@ function AppointmentModal({
             {/* Duration info display */}
             {formData.cas_zacetek && formData.cas_konec && (
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-                <span className="text-sm font-medium text-gray-700">Trajanje termina</span>
+                <span className="text-sm font-medium text-gray-700">{t('modal.appointmentDuration')}</span>
                 <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                   {(() => {
                     const [startH, startM] = formData.cas_zacetek.split(':').map(Number);
                     const [endH, endM] = formData.cas_konec.split(':').map(Number);
                     const durationMins = (endH * 60 + endM) - (startH * 60 + startM);
-                    return durationMins > 0 ? `${durationMins} minut` : '-';
+                    return durationMins > 0 ? t('modal.duration', { mins: durationMins }) : '-';
                   })()}
                 </span>
               </div>
@@ -1563,7 +1564,7 @@ function AppointmentModal({
             {(isViewMode || mode === 'edit') && (
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Status
+                  {t('modal.fields.status')}
                 </label>
                 {isViewMode ? (
                   <StatusBadge status={formData.status} variant="gradient" />
@@ -1571,7 +1572,7 @@ function AppointmentModal({
                   <Select
                     value={formData.status}
                     setValue={(value) => setFormData((prev) => ({ ...prev, status: value }))}
-                    placeholder="Izberi status"
+                    placeholder={t('modal.placeholders.status')}
                   >
                     {STATUS_OPTIONS.map((option) => (
                       <SelectOption
@@ -1590,7 +1591,7 @@ function AppointmentModal({
             {/* Price field - auto-filled from service */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Cena
+                {t('modal.fields.price')}
               </label>
               {isViewMode ? (
                 (() => {
@@ -1651,13 +1652,13 @@ function AppointmentModal({
                           {/* Price breakdown */}
                           <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-2.5">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Originalna cena</span>
+                              <span className="text-gray-500">{t('modal.price.original')}</span>
                               <span className="text-gray-400 line-through">
                                 {fmtPrice(originalCena)} €
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Popust</span>
+                              <span className="text-gray-500">{t('modal.price.discount')}</span>
                               <span className="font-medium text-red-500">
                                 − {formData.popust_tip === '%'
                                   ? `${popustVrednost}%`
@@ -1665,7 +1666,7 @@ function AppointmentModal({
                               </span>
                             </div>
                             <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
-                              <span className="font-semibold text-gray-900">Cena z popustom</span>
+                              <span className="font-semibold text-gray-900">{t('modal.price.withDiscount')}</span>
                               <span className="text-xl font-bold text-green-600">
                                 {fmtPrice(finalCena)} €
                               </span>
@@ -1688,17 +1689,17 @@ function AppointmentModal({
                         >
                           <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm">
                             <Plus size={14} weight="bold" />
-                            <span>Dodatna storitev</span>
+                            <span>{t('modal.price.addOnLabel')}</span>
                           </div>
                           <p className="text-sm font-medium text-gray-800">
-                            {appointment.storitev_2?.naziv ?? 'Add-on storitev'}
+                            {appointment.storitev_2?.naziv ?? t('modal.price.addOnFallback')}
                           </p>
                           {appointment?.add_on_final_cena && (
                             <>
                               {appointment?.add_on_popust &&
                                 parseFloat(appointment.add_on_popust) > 0 && (
                                   <div className="flex justify-between text-sm">
-                                    <span className="text-gray-500">Popust</span>
+                                    <span className="text-gray-500">{t('modal.price.discount')}</span>
                                     <span className="text-red-500">
                                       − {appointment.add_on_popust_tip === '%'
                                         ? `${appointment.add_on_popust}%`
@@ -1707,7 +1708,7 @@ function AppointmentModal({
                                   </div>
                                 )}
                               <div className="flex justify-between font-semibold pt-1 border-t border-blue-200">
-                                <span className="text-gray-700">Cena z popustom</span>
+                                <span className="text-gray-700">{t('modal.price.withDiscount')}</span>
                                 <span className="text-green-600">
                                   {fmtPrice(parseFloat(appointment.add_on_final_cena))} €
                                 </span>
@@ -1773,8 +1774,8 @@ function AppointmentModal({
                 {/* Toggle to enable discount */}
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                   <div>
-                    <div className="font-semibold text-gray-900">Dodaj popust</div>
-                    <div className="text-sm text-gray-600">Znižaj ceno termina</div>
+                    <div className="font-semibold text-gray-900">{t('modal.discount.add')}</div>
+                    <div className="text-sm text-gray-600">{t('modal.discount.lower')}</div>
                   </div>
                   <button
                     type="button"
@@ -1802,7 +1803,7 @@ function AppointmentModal({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="relative">
                       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Znesek
+                        {t('modal.discount.amount')}
                       </label>
                       <input
                         type="number"
@@ -1824,7 +1825,7 @@ function AppointmentModal({
                     </div>
                     <div>
                       <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                        Tip
+                        {t('modal.discount.type')}
                       </label>
                       {/* Toggle buttons for discount type */}
                       <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl h-[46px]">
@@ -1861,7 +1862,7 @@ function AppointmentModal({
             {((formData.cena && formData.cena > 0) || (formData.popust && formData.popust > 0)) && (
               <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700">Končna cena</span>
+                  <span className="text-sm font-medium text-gray-700">{t('modal.discount.final')}</span>
                   {formData.popust && formData.popust > 0 && (
                     <span className="text-xs text-gray-400 line-through">
                       {(formData.cena ?? 0).toFixed(2)} €
@@ -1877,7 +1878,7 @@ function AppointmentModal({
             {/* Notes */}
             <div>
               <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Opombe
+                {t('modal.fields.notes')}
               </label>
               {isViewMode ? (
                 formData.opombe ? (
@@ -1892,13 +1893,13 @@ function AppointmentModal({
                   <textarea
                     value={formData.opombe}
                     onChange={(e) => setFormData((prev) => ({ ...prev, opombe: e.target.value }))}
-                    placeholder="Opombe za stranko..."
+                    placeholder={t('modal.notesPlaceholder')}
                     rows={3}
                     className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm
                                text-[#1A1F36] placeholder-gray-400 focus:outline-none
                                focus:ring-2 focus:ring-[#1A1F36]/20"
                   />
-                  <p className="mt-1 text-xs text-gray-400">Opombe se uporabljajo pri opomnikih in sporočanju</p>
+                  <p className="mt-1 text-xs text-gray-400">{t('modal.notesHint')}</p>
                 </>
               )}
             </div>
@@ -1909,7 +1910,7 @@ function AppointmentModal({
               formData.internal_opombe ? (
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Interne opombe
+                    {t('modal.fields.internalNotes')}
                   </label>
                   <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">{formData.internal_opombe}</p>
@@ -1920,12 +1921,12 @@ function AppointmentModal({
               // Edit mode: always show internal notes field
               <div>
                 <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Interne opombe
+                  {t('modal.fields.internalNotes')}
                 </label>
                 <textarea
                   value={formData.internal_opombe}
                   onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
-                  placeholder="Interne opombe (ne pošiljajo se stranki)..."
+                  placeholder={t('modal.internalNotesPlaceholder')}
                   rows={3}
                   className="w-full rounded-xl border-2 border-yellow-300 bg-white px-4 py-2.5 text-sm
                              text-[#1A1F36] placeholder-gray-400 focus:outline-none
@@ -1937,12 +1938,12 @@ function AppointmentModal({
               showInternalNotes ? (
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Interne opombe
+                    {t('modal.fields.internalNotes')}
                   </label>
                   <textarea
                     value={formData.internal_opombe}
                     onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
-                    placeholder="Interne opombe (ne pošiljajo se stranki)..."
+                    placeholder={t('modal.internalNotesPlaceholder')}
                     rows={3}
                     className="w-full rounded-xl border-2 border-yellow-300 bg-white px-4 py-2.5 text-sm
                                text-[#1A1F36] placeholder-gray-400 focus:outline-none
@@ -1958,7 +1959,7 @@ function AppointmentModal({
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-yellow-300
                              text-yellow-700 hover:bg-yellow-50 transition-colors"
                 >
-                  <span className="text-sm font-medium">+ Interne opombe</span>
+                  <span className="text-sm font-medium">{t('modal.addInternalNotes')}</span>
                 </motion.button>
               )
             )}
@@ -1973,7 +1974,7 @@ function AppointmentModal({
                   className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600
                              transition-colors hover:bg-gray-100"
                 >
-                  Prekliči
+                  {t('modal.actions.cancel')}
                 </motion.button>
                 <motion.button
                   type="submit"
@@ -1987,7 +1988,7 @@ function AppointmentModal({
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white
                                     border-t-transparent" />
                   )}
-                  {mode === 'create' ? 'Ustvari' : 'Shrani'}
+                  {mode === 'create' ? t('modal.actions.create') : t('modal.actions.save')}
                 </motion.button>
               </div>
             )}

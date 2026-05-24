@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, memo, useCallback } from 'react';
+import { useState, useEffect, memo, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -145,6 +146,8 @@ function ClientDetailsPanel({
   onDelete,
   onNewAppointment,
 }: ClientDetailsPanelProps) {
+  const t = useTranslations('clients');
+  const tAppt = useTranslations('appointments');
   const [clientData, setClientData] = useState<ClientWithAppointments | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -163,6 +166,15 @@ function ClientDetailsPanel({
       setClientData(null);
     }
   }, [isOpen, client, companyId]);
+
+  const getStatusLabel = useCallback((status: string): string => {
+    const normalized = status.toLowerCase();
+    if (normalized.includes('confirm') || normalized.includes('potrj')) return tAppt('status.confirmed');
+    if (normalized.includes('complet') || normalized.includes('zakljuc') || normalized.includes('done')) return tAppt('status.completed');
+    if (normalized.includes('cancel') || normalized.includes('odpoved')) return tAppt('status.cancelled');
+    if (normalized.includes('no_show') || normalized.includes('ni_prisel')) return tAppt('status.noShow');
+    return tAppt('status.scheduled');
+  }, [tAppt]);
 
   // Calculate stats
   const stats = clientData ? {
@@ -227,7 +239,7 @@ function ClientDetailsPanel({
                   </h2>
                   {/* Date added - from created_at */}
                   <div className="text-white/90 text-sm">
-                    Dodano: {formatDate(client.created_at || '')}
+                    {t('details.added')} {formatDate(client.created_at || '')}
                   </div>
                 </div>
                 <motion.button
@@ -252,7 +264,7 @@ function ClientDetailsPanel({
                              transition-colors hover:bg-white/30"
                 >
                   <PencilSimple className="h-4 w-4" weight="bold" />
-                  Uredi
+                  {t('details.edit')}
                 </motion.button>
                 <motion.button
                   type="button"
@@ -263,7 +275,7 @@ function ClientDetailsPanel({
                              transition-colors hover:bg-white/30"
                 >
                   <Trash className="h-4 w-4" weight="bold" />
-                  Izbriši
+                  {t('details.delete')}
                 </motion.button>
               </div>
             </div>
@@ -273,7 +285,7 @@ function ClientDetailsPanel({
               {/* Contact info */}
               <div className="space-y-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Kontaktni podatki
+                  {t('details.contactInfo')}
                 </h3>
 
                 {/* Email */}
@@ -332,11 +344,11 @@ function ClientDetailsPanel({
                       weight="regular"
                     />
                     <div>
-                      <div className="text-xs text-gray-500">Spol</div>
+                      <div className="text-xs text-gray-500">{t('details.gender')}</div>
                       <div className="text-sm font-medium text-gray-900">
-                        {client.spol === 'ženska' ? 'Ženska' :
-                         client.spol === 'drugo' ? 'Drugo' :
-                         client.spol ? 'Moški' : 'Ni navedeno'}
+                        {client.spol === 'ženska' ? t('details.genderFemale') :
+                         client.spol === 'drugo' ? t('details.genderOther') :
+                         client.spol ? t('details.genderMale') : t('details.genderUnknown')}
                       </div>
                     </div>
                   </div>
@@ -372,7 +384,7 @@ function ClientDetailsPanel({
                         <div className="flex items-center gap-3">
                           <PencilSimple className="h-5 w-5 text-[#1A1F36] flex-shrink-0" weight="regular" />
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs text-gray-500">Opombe</div>
+                            <div className="text-xs text-gray-500">{t('details.notes')}</div>
                             <p className="text-sm text-[#1A1F36] whitespace-pre-wrap mt-1">{opombeText || '-'}</p>
                           </div>
                         </div>
@@ -383,7 +395,7 @@ function ClientDetailsPanel({
                         <div className="flex items-center gap-3">
                           <LockKey className="h-5 w-5 text-[#1A1F36] flex-shrink-0" weight="regular" />
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs text-gray-500">Interne opombe</div>
+                            <div className="text-xs text-gray-500">{t('details.internalNotes')}</div>
                             <p className="text-sm text-[#1A1F36] whitespace-pre-wrap mt-1">{interneOpombeText || '-'}</p>
                           </div>
                         </div>
@@ -396,23 +408,20 @@ function ClientDetailsPanel({
               {/* Statistics - white boxes with gradient text */}
               <div className="mt-8">
                 <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  Statistika
+                  {t('details.stats')}
                 </h3>
                 <div className="grid grid-cols-3 gap-3">
-                  {/* Skupaj */}
                   <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
                     <p className="text-2xl text-[#1A1F36]">{stats.total}</p>
-                    <p className="text-xs text-[#1A1F36]">Skupaj</p>
+                    <p className="text-xs text-[#1A1F36]">{t('details.statTotal')}</p>
                   </div>
-                  {/* Ni prišel */}
                   <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
                     <p className="text-2xl text-[#1A1F36]">{stats.noShow}</p>
-                    <p className="text-xs text-[#1A1F36]">Ni prišel</p>
+                    <p className="text-xs text-[#1A1F36]">{t('details.statNoShow')}</p>
                   </div>
-                  {/* Odpovedanih */}
                   <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
                     <p className="text-2xl text-[#1A1F36]">{stats.cancelled}</p>
-                    <p className="text-xs text-[#1A1F36]">Odpovedanih</p>
+                    <p className="text-xs text-[#1A1F36]">{t('details.statCancelled')}</p>
                   </div>
                 </div>
               </div>
@@ -421,7 +430,7 @@ function ClientDetailsPanel({
               <div className="mt-8">
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Zgodovina terminov
+                    {t('details.appointmentHistory')}
                   </h3>
                   {onNewAppointment && (
                     <motion.button
@@ -433,7 +442,7 @@ function ClientDetailsPanel({
                                  text-xs font-medium text-white shadow-sm transition-all hover:shadow-md"
                     >
                       <Plus className="h-3 w-3" weight="bold" />
-                      Nov termin
+                      {t('details.newAppointment')}
                     </motion.button>
                   )}
                 </div>
@@ -450,7 +459,7 @@ function ClientDetailsPanel({
                 ) : clientData?.appointments.length === 0 ? (
                   <div className="flex flex-col items-center justify-center rounded-xl bg-gray-50 py-8">
                     <CalendarBlank className="h-10 w-10 text-gray-300" weight="duotone" />
-                    <p className="mt-2 text-sm text-gray-500">Ni terminov</p>
+                    <p className="mt-2 text-sm text-gray-500">{t('details.noAppointments')}</p>
                     {onNewAppointment && (
                       <motion.button
                         type="button"
@@ -459,7 +468,7 @@ function ClientDetailsPanel({
                         whileTap={{ scale: 0.98 }}
                         className="mt-3 flex items-center gap-1 text-sm font-medium text-purple-600 hover:text-purple-700"
                       >
-                        Dodaj prvi termin
+                        {t('details.addFirstAppointment')}
                         <ArrowRight className="h-4 w-4" weight="bold" />
                       </motion.button>
                     )}
@@ -521,7 +530,7 @@ function ClientDetailsPanel({
                               className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${statusConfig.bgClass} ${statusConfig.textClass}`}
                             >
                               <span className={`h-2 w-2 rounded-full ${statusConfig.dotClass}`} />
-                              {statusConfig.label}
+                              {getStatusLabel(apt.status)}
                             </span>
                           </div>
                           {(appointmentNotes || appointmentInternalNotes || appointmentCompletionNotes || hasFinalPrice) && (
@@ -530,7 +539,7 @@ function ClientDetailsPanel({
                                 <div className="rounded-lg bg-gray-50 p-3">
                                   <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                     <NotePencil className="h-3 w-3" weight="fill" />
-                                    Opombe
+                                    {t('details.aptNotes')}
                                   </div>
                                   <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">
                                     {appointmentNotes}
@@ -549,7 +558,7 @@ function ClientDetailsPanel({
                                         backgroundClip: 'text',
                                       }}
                                     >
-                                      Interne opombe
+                                      {t('details.aptInternalNotes')}
                                     </span>
                                   </div>
                                   <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">
@@ -561,7 +570,7 @@ function ClientDetailsPanel({
                                 <div className="rounded-lg bg-blue-50 p-3">
                                   <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-blue-600">
                                     <CheckCircle className="h-3 w-3" weight="fill" />
-                                    Opombe po zaključku
+                                    {t('details.aptCompletionNotes')}
                                   </div>
                                   <p className="mt-1 text-sm text-gray-700 whitespace-pre-wrap">
                                     {appointmentCompletionNotes}
@@ -570,7 +579,7 @@ function ClientDetailsPanel({
                               )}
                               {hasFinalPrice && (
                                 <div className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-500">
-                                  <span className="font-semibold uppercase tracking-wider">Končna cena</span>
+                                  <span className="font-semibold uppercase tracking-wider">{t('details.finalPrice')}</span>
                                   <span
                                     className="text-sm font-semibold"
                                     style={{
@@ -591,7 +600,7 @@ function ClientDetailsPanel({
                     })}
                     {clientData && clientData.appointments.length > 10 && (
                       <p className="text-center text-xs text-gray-500">
-                        Prikazanih je zadnjih 10 terminov od {clientData.appointments.length}
+                        {t('details.showingLast', { total: clientData.appointments.length })}
                       </p>
                     )}
                   </div>

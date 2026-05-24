@@ -1,1 +1,155 @@
-{}
+{
+  "page": {
+    "title": "Stranke",
+    "subtitle": "Pregledna baza vaših strank",
+    "newClient": "Nova stranka",
+    "searchPlaceholder": "Išči stranke po imenu, emailu ali telefonu...",
+    "showingCount": "Prikazujem {shown} od {total} strank",
+    "disabledCreateMessage": "Lastnik podjetja je onemogočil dodajanje novih strank. Obrnite se nanj, da vam to omogoči."
+  },
+  "crm": {
+    "importCsv": "Uvozi iz CSV",
+    "importExcel": "Uvozi iz Excel",
+    "importOther": "Uvozi iz drugega CRM",
+    "exportCsv": "Izvozi v CSV",
+    "exportExcel": "Izvozi v Excel",
+    "exportPdf": "Izvozi v PDF"
+  },
+  "stats": {
+    "total": "Skupaj strank",
+    "withAppointments": "S termini",
+    "newThisMonth": "Novih ta mesec"
+  },
+  "emptyState": {
+    "noClients": "Še nimate strank",
+    "noClientsSubtitle": "Začnite z dodajanjem vaše prve stranke za upravljanje terminov in kontaktov.",
+    "addFirst": "Dodaj prvo stranko",
+    "noResults": "Ni rezultatov za \"{term}\"",
+    "noResultsSubtitle": "Poskusite z drugim iskanjem ali počistite filter",
+    "clearSearch": "Počisti iskanje"
+  },
+  "errors": {
+    "loadError": "Prišlo je do napake pri nalaganju podatkov",
+    "saveError": "Prišlo je do napake pri shranjevanju stranke",
+    "deleteError": "Prišlo je do napake pri brisanju stranke",
+    "retry": "Poskusi znova"
+  },
+  "toast": {
+    "created": "Stranka uspešno dodana",
+    "updated": "Stranka uspešno posodobljena",
+    "deleted": "Stranka uspešno izbrisana"
+  },
+  "modal": {
+    "title": {
+      "create": "Nova stranka",
+      "edit": "Uredi stranko"
+    },
+    "subtitle": {
+      "create": "Dodajte novo stranko",
+      "edit": "Uredite podatke stranke"
+    },
+    "fields": {
+      "firstNameRequired": "Ime *",
+      "lastNameRequired": "Priimek *",
+      "genderRequired": "Spol *",
+      "emailHint": "(vsaj email ali telefon)",
+      "phone": "Telefon",
+      "notes": "Opombe",
+      "notesPlaceholder": "Opombe o stranki...",
+      "notesHint": "Opombe se uporabljajo pri opomnikih in sporočanju",
+      "internalNotes": "Interne opombe",
+      "internalNotesPlaceholder": "Interne opombe (ne pošiljajo se stranki)..."
+    },
+    "gender": {
+      "placeholder": "Izberi spol",
+      "male": "Moški",
+      "female": "Ženska",
+      "other": "Drugo"
+    },
+    "addInternalNotes": "+ Interne opombe",
+    "warning": {
+      "missingEmail": "Manjka email naslov",
+      "missingPhone": "Manjka telefonska številka",
+      "missingEmailDesc": "Brez e-poštnega naslova stranki ne bo mogoče pošiljati e-poštnih sporočil, računov in avtomatskih obvestil. To lahko vpliva na avtomatsko komunikacijo in opomnike preko emaila.",
+      "missingPhoneDesc": "Brez telefonske številke stranki ne bo mogoče pošiljati sporočil in avtomatskih obvestil. To lahko vpliva na avtomatsko komunikacijo in opomnike preko SMS."
+    },
+    "actions": {
+      "cancel": "Prekliči",
+      "saveAnyway": "Vseeno shrani",
+      "save": "Shrani stranko",
+      "saving": "Shranjujem..."
+    },
+    "validation": {
+      "firstNameRequired": "Ime je obvezno",
+      "firstNameMinLength": "Ime mora imeti vsaj 2 znaka",
+      "lastNameRequired": "Priimek je obvezen",
+      "lastNameMinLength": "Priimek mora imeti vsaj 2 znaka",
+      "genderRequired": "Spol je obvezen",
+      "emailInvalid": "Neveljaven email naslov",
+      "phoneInvalid": "Neveljavna telefonska številka",
+      "notesMaxLength": "Opombe lahko vsebujejo največ 500 znakov",
+      "internalNotesMaxLength": "Interne opombe lahko vsebujejo največ 500 znakov",
+      "emailExists": "Ta email naslov je že v uporabi",
+      "contactRequired": "Vnesti je treba vsaj email ali telefonsko številko"
+    }
+  },
+  "details": {
+    "added": "Dodano:",
+    "edit": "Uredi",
+    "delete": "Izbriši",
+    "contactInfo": "Kontaktni podatki",
+    "gender": "Spol",
+    "genderMale": "Moški",
+    "genderFemale": "Ženska",
+    "genderOther": "Drugo",
+    "genderUnknown": "Ni navedeno",
+    "notes": "Opombe",
+    "internalNotes": "Interne opombe",
+    "stats": "Statistika",
+    "statTotal": "Skupaj",
+    "statNoShow": "Ni prišel",
+    "statCancelled": "Odpovedanih",
+    "appointmentHistory": "Zgodovina terminov",
+    "newAppointment": "Nov termin",
+    "noAppointments": "Ni terminov",
+    "addFirstAppointment": "Dodaj prvi termin",
+    "showingLast": "Prikazanih je zadnjih 10 terminov od {total}",
+    "aptNotes": "Opombe",
+    "aptInternalNotes": "Interne opombe",
+    "aptCompletionNotes": "Opombe po zaključku",
+    "finalPrice": "Končna cena"
+  },
+  "deleteModal": {
+    "title": "Brisanje stranke",
+    "areYouSure": "Ali ste prepričani?",
+    "warningPrefix": "Brisanje stranke",
+    "warningSuffix": "bo trajno. Ta akcija se ne da razveljaviti.",
+    "appointmentWarningPrefix": "Ta stranka ima",
+    "appointmentCount": "{count, plural, =1 {1 termin} =2 {{count} termine} few {{count} termine} other {{count} terminov}}",
+    "appointmentWarningSuffix": "Termini bodo ostali v sistemu, vendar brez povezave na stranko.",
+    "cancel": "Prekliči",
+    "deleting": "Brišem...",
+    "deleteButton": "Izbriši stranko"
+  },
+  "table": {
+    "headers": {
+      "client": "Stranka",
+      "phone": "Telefon",
+      "appointments": "Termini",
+      "lastInteraction": "Zadnja interakcija",
+      "actions": "Akcije"
+    },
+    "empty": {
+      "title": "Ni rezultatov",
+      "message": "Ni najdenih strank, ki ustrezajo iskanju"
+    },
+    "actions": {
+      "view": "Podrobnosti",
+      "edit": "Uredi",
+      "delete": "Izbriši"
+    },
+    "pagination": {
+      "of": "od"
+    }
+  }
+}

@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { IconProps } from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 
 // Black & White icon color options
 type IconColor = 'black' | 'darkGray' | 'mediumGray' | 'slate' | 'lightGray' | 'charcoal';
@@ -40,6 +41,7 @@ export function MetricCard({
   gradient = false,
   gradientOutline = false,
 }: MetricCardProps) {
+  const t = useTranslations('dashboard');
   const content = (
     <div className="relative flex items-start justify-between">
       <div className="flex-1">
@@ -63,7 +65,7 @@ export function MetricCard({
             <span>{trend.isPositive ? "↑" : "↓"}</span>
             <span>{Math.abs(trend.value)}%</span>
             <span className="text-gray-400">
-              vs prejšnji mesec
+              {t('metrics.trend')}
             </span>
           </div>
         )}

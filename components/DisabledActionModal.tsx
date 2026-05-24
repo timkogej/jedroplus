@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { LockSimple, X } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 interface DisabledActionModalProps {
   isOpen: boolean;
@@ -16,8 +17,10 @@ interface DisabledActionModalProps {
 export default function DisabledActionModal({
   isOpen,
   onClose,
-  message = 'Lastnik podjetja je onemogočil to dejanje. Obrnite se nanj, da vam to omogoči.',
+  message,
 }: DisabledActionModalProps) {
+  const t = useTranslations('appointments');
+  const resolvedMessage = message ?? t('disabledModal.defaultMessage');
   return (
     <AnimatePresence>
       {isOpen && (
@@ -49,15 +52,15 @@ export default function DisabledActionModal({
                 <LockSimple className="h-7 w-7 text-gray-500" weight="fill" />
               </div>
               <div>
-                <h3 className="text-base font-semibold text-gray-900">Dejanje onemogočeno</h3>
-                <p className="mt-1 text-sm text-gray-500">{message}</p>
+                <h3 className="text-base font-semibold text-gray-900">{t('disabledModal.title')}</h3>
+                <p className="mt-1 text-sm text-gray-500">{resolvedMessage}</p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
                 className="mt-2 rounded-xl bg-gray-100 px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200"
               >
-                Razumem
+                {t('disabledModal.button')}
               </button>
             </div>
           </motion.div>

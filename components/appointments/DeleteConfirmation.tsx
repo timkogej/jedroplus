@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Warning, Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { AppointmentWithDetails } from '@/types/appointments';
 
 interface DeleteConfirmationProps {
@@ -27,6 +28,7 @@ function DeleteConfirmation({
   isDeleting = false,
   appointment,
 }: DeleteConfirmationProps) {
+  const t = useTranslations('appointments');
   // Animation variants
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -86,7 +88,7 @@ function DeleteConfirmation({
                     {title}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Ali ste prepričani?
+                    {t('deleteConfirmation.areYouSure')}
                   </p>
                 </div>
               </div>
@@ -112,7 +114,7 @@ function DeleteConfirmation({
                   <div className="flex items-center gap-3">
                     <div>
                       <p className="font-semibold text-[#1A1F36]">
-                        {appointment.stranka_ime || 'Neznana stranka'}
+                        {appointment.stranka_ime || t('deleteConfirmation.unknownClient')}
                       </p>
                       {appointment.stranka_email && (
                         <p className="text-sm text-gray-500">{appointment.stranka_email}</p>
@@ -173,7 +175,7 @@ function DeleteConfirmation({
                   {message}
                 </p>
                 <p className="mt-2 text-sm font-semibold text-red-600">
-                  To dejanje je nepovratno!
+                  {t('deleteConfirmation.irreversible')}
                 </p>
               </div>
             </div>
@@ -189,7 +191,7 @@ function DeleteConfirmation({
                 className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100
                            disabled:opacity-50"
               >
-                Prekliči
+                {t('deleteConfirmation.cancel')}
               </motion.button>
               <motion.button
                 type="button"
@@ -204,12 +206,12 @@ function DeleteConfirmation({
                 {isDeleting ? (
                   <>
                     <SpinnerGap className="h-4 w-4 animate-spin" />
-                    Brišem...
+                    {t('deleteConfirmation.deleting')}
                   </>
                 ) : (
                   <>
                     <Trash className="h-4 w-4" weight="bold" />
-                    Izbriši termin
+                    {t('deleteConfirmation.deleteButton')}
                   </>
                 )}
               </motion.button>

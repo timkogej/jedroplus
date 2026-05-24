@@ -1,1 +1,136 @@
-{}
+{
+  "greeting": {
+    "morning": "Dobro jutro,",
+    "day": "Dober dan,",
+    "afternoon": "Dobro popoldne,",
+    "evening": "Dober večer,"
+  },
+  "quickActions": {
+    "newAppointment": "Nov Termin",
+    "newClient": "Nova Stranka"
+  },
+  "metrics": {
+    "appointmentsToday": "Termini danes",
+    "appointmentsTodaySubtitle": "Načrtovanih terminov",
+    "activeAppointments": "Aktivni termini",
+    "newClients": "Nove stranke",
+    "thisMonth": "Ta mesec",
+    "revenue": "Prihodki",
+    "trend": "vs prejšnji mesec"
+  },
+  "nextAppointment": {
+    "title": "Naslednji termin",
+    "today": "Danes",
+    "tomorrow": "Jutri",
+    "empty": "Ni prihajajočih terminov"
+  },
+  "appointmentList": {
+    "todayTitle": "Termini Danes",
+    "todayEmpty": "Danes ni terminov",
+    "tomorrowTitle": "Termini Jutri",
+    "tomorrowEmpty": "Jutri ni terminov",
+    "defaultEmpty": "Ni terminov",
+    "viewAll": "Poglej vse termine"
+  },
+  "footer": {
+    "heading": "Potrebujete več podrobnosti?",
+    "body": "Preglejte celoten koledar ali analitiko za podrobnejši vpogled",
+    "openCalendar": "Odpri Koledar",
+    "openAnalytics": "Odpri Analitiko"
+  },
+  "detailModal": {
+    "status": {
+      "scheduled": "Načrtovano",
+      "confirmed": "Potrjeno",
+      "completed": "Zaključeno",
+      "cancelled": "Preklicano",
+      "pending": "Čakajoč",
+      "noShow": "Ni prišel/a"
+    },
+    "fields": {
+      "status": "Status",
+      "client": "Stranka",
+      "service": "Storitev",
+      "employee": "Oseba",
+      "date": "Datum",
+      "time": "Čas",
+      "duration": "Trajanje",
+      "price": "Cena",
+      "notes": "Opombe",
+      "internalNotes": "Interne opombe",
+      "phone": "Telefon"
+    },
+    "actions": {
+      "complete": "Zaključi",
+      "edit": "Uredi",
+      "moreOptions": "Več možnosti",
+      "noShow": "Ni prišel",
+      "cancel": "Odpoved",
+      "delete": "Izbriši",
+      "close": "Zapri"
+    },
+    "openInAppointments": "Odpri v Termini"
+  },
+  "completeModal": {
+    "title": "Zaključi termin",
+    "subtitle": "Potrdite zaključitev termina",
+    "client": "Stranka",
+    "service": "Storitev",
+    "date": "Datum",
+    "time": "Čas",
+    "messageLabel": "Sporočilo stranki oz. navodila po terminu",
+    "messagePlaceholder": "Vnesite sporočilo ali navodila po zaključenem terminu (opcijsko)...",
+    "cancel": "Prekliči",
+    "completing": "Zaključujem...",
+    "confirm": "Zaključi"
+  },
+  "deleteModal": {
+    "title": "Izbriši termin",
+    "message": "Ali ste prepričani, da želite izbrisati ta termin?"
+  },
+  "toast": {
+    "appointmentAdded": "Termin uspešno dodan",
+    "appointmentUpdated": "Termin uspešno posodobljen",
+    "appointmentCompleted": "Termin uspešno zaključen",
+    "appointmentNoShow": "Termin označen kot No Show",
+    "appointmentCancelled": "Termin uspešno odpovedan",
+    "clientAdded": "Stranka uspešno dodana",
+    "loadError": "Prišlo je do napake pri nalaganju podatkov.",
+    "saveError": "Prišlo je do napake pri shranjevanju.",
+    "completeError": "Prišlo je do napake pri zaključevanju termina.",
+    "noShowError": "Prišlo je do napake pri označevanju kot No Show.",
+    "cancelError": "Prišlo je do napake pri odpovedi termina.",
+    "deleteError": "Prišlo je do napake pri brisanju.",
+    "clientSaveError": "Prišlo je do napake pri shranjevanju stranke."
+  },
+  "errorState": {
+    "title": "Prišlo je do napake",
+    "retry": "Poskusi znova"
+  },
+  "defaultUser": "Uporabnik",
+  "copyButton": "Kopiraj {label}",
+  "topServices": {
+    "title": "Top Storitve",
+    "subtitle": "Ta mesec",
+    "empty": "Ni podatkov"
+  },
+  "topEmployees": {
+    "title": "Top Zaposleni",
+    "subtitle": "Po opravljenih terminih",
+    "empty": "Ni podatkov",
+    "appointmentCount": "{count, plural, =1 {1 termin} =2 {2 termina} few {{count} termine} other {{count} terminov}}"
+  },
+  "recentActivity": {
+    "title": "Zadnja Interakcija",
+    "subtitle": "Zadnji zaključeni termini",
+    "empty": "Ni nedavne aktivnosti",
+    "unknownClient": "Neznana stranka",
+    "serviceLabel": "Storitev"
+  },
+  "weeklyChart": {
+    "title": "Termini - 7 Dni",
+    "subtitle": "Pregled zadnjih 7 dni",
+    "tooltipValue": "{value, plural, =1 {1 termin} =2 {2 termina} few {{value} termine} other {{value} terminov}}",
+    "tooltipLabel": "Št. terminov"
+  }
+}

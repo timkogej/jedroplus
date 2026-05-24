@@ -1,1 +1,187 @@
-{}
+{
+  "status": {
+    "scheduled": "Načrtovan",
+    "confirmed": "Potrjen",
+    "pending": "Čakajoč",
+    "completed": "Zaključen",
+    "cancelled": "Odpovedan",
+    "noShow": "Ni prišel"
+  },
+  "page": {
+    "title": "Termini",
+    "subtitle": "Upravljajte vse termine na enem mestu",
+    "newAppointment": "Nov termin",
+    "stats": {
+      "thisMonth": "Termini ta mesec",
+      "today": "Danes",
+      "upcoming": "Prihajajoči"
+    },
+    "disabledCreateMessage": "Lastnik podjetja je onemogočil ustvarjanje novih terminov. Obrnite se nanj, da vam to omogoči."
+  },
+  "completeModal": {
+    "title": "Zaključitev termina",
+    "subtitle": "Potrdite zaključitev termina",
+    "client": "Stranka",
+    "service": "Storitev",
+    "employee": "Oseba",
+    "date": "Datum",
+    "time": "Čas",
+    "notesLabel": "Sporočilo stranki oz. navodila po terminu",
+    "notesPlaceholder": "Vnesite sporočilo ali navodila po zaključenem terminu (opcijsko)...",
+    "cancel": "Prekliči",
+    "completing": "Zaključujem...",
+    "confirm": "Zaključi"
+  },
+  "deleteModal": {
+    "title": "Izbriši termin",
+    "message": "Ali ste prepričani, da želite izbrisati ta termin?"
+  },
+  "deleteConfirmation": {
+    "areYouSure": "Ali ste prepričani?",
+    "unknownClient": "Neznana stranka",
+    "irreversible": "To dejanje je nepovratno!",
+    "cancel": "Prekliči",
+    "deleting": "Brišem...",
+    "deleteButton": "Izbriši termin"
+  },
+  "toast": {
+    "noShow": "Termin označen kot No Show",
+    "cancelled": "Termin uspešno odpovedan",
+    "completed": "Termin uspešno zaključen"
+  },
+  "errors": {
+    "loadError": "Prišlo je do napake pri nalaganju podatkov.",
+    "saveError": "Prišlo je do napake pri shranjevanju termina.",
+    "deleteError": "Prišlo je do napake pri brisanju termina.",
+    "completeError": "Prišlo je do napake pri zaključevanju termina.",
+    "noShowError": "Prišlo je do napake pri označevanju kot No Show.",
+    "cancelError": "Prišlo je do napake pri odpovedi termina.",
+    "clientCreateError": "Prišlo je do napake pri ustvarjanju stranke"
+  },
+  "disabledModal": {
+    "title": "Dejanje onemogočeno",
+    "defaultMessage": "Lastnik podjetja je onemogočil to dejanje. Obrnite se nanj, da vam to omogoči.",
+    "button": "Razumem"
+  },
+  "modal": {
+    "title": {
+      "create": "Nov termin",
+      "edit": "Uredi termin",
+      "view": "Podrobnosti termina"
+    },
+    "emptyState": {
+      "message": "Za dodajanje termina potrebujete vsaj eno storitev in enega zaposlenega.",
+      "addService": "Dodaj storitev",
+      "addEmployee": "Dodaj zaposlenega",
+      "close": "Zapri"
+    },
+    "fields": {
+      "client": "Stranka",
+      "service": "Storitev",
+      "service2": "Storitev 2",
+      "service3": "Storitev 3",
+      "employee": "Osebje",
+      "date": "Datum",
+      "startTime": "Čas začetka",
+      "endTime": "Čas konca",
+      "status": "Status",
+      "price": "Cena",
+      "notes": "Opombe",
+      "internalNotes": "Interne opombe",
+      "phone": "Telefon"
+    },
+    "placeholders": {
+      "service": "Izberi storitev",
+      "service2": "Izberi drugo storitev",
+      "service3": "Izberi tretjo storitev",
+      "employee": "Izberi osebje",
+      "status": "Izberi status"
+    },
+    "totalDuration": "Skupno trajanje:",
+    "remove": "Odstrani",
+    "addService": "Dodaj storitev",
+    "appointmentDuration": "Trajanje termina",
+    "duration": "{mins, plural, =1 {1 minuta} =2 {2 minuti} few {{mins} minute} other {{mins} minut}}",
+    "promotions": {
+      "discountSuffix": "popust"
+    },
+    "price": {
+      "original": "Originalna cena",
+      "discount": "Popust",
+      "withDiscount": "Cena z popustom",
+      "addOnLabel": "Dodatna storitev",
+      "addOnFallback": "Add-on storitev"
+    },
+    "discount": {
+      "add": "Dodaj popust",
+      "lower": "Znižaj ceno termina",
+      "amount": "Znesek",
+      "type": "Tip",
+      "final": "Končna cena"
+    },
+    "notesPlaceholder": "Opombe za stranko...",
+    "notesHint": "Opombe se uporabljajo pri opomnikih in sporočanju",
+    "internalNotesPlaceholder": "Interne opombe (ne pošiljajo se stranki)...",
+    "addInternalNotes": "+ Interne opombe",
+    "actions": {
+      "cancel": "Prekliči",
+      "create": "Ustvari",
+      "save": "Shrani"
+    },
+    "validation": {
+      "dateRequired": "Datum je obvezen",
+      "startTimeRequired": "Čas začetka je obvezen",
+      "endTimeRequired": "Čas konca je obvezen",
+      "endTimeAfterStart": "Čas konca mora biti po času začetka",
+      "clientRequired": "Stranka je obvezna",
+      "serviceRequired": "Storitev je obvezna",
+      "employeeRequired": "Zaposleni je obvezen"
+    }
+  },
+  "table": {
+    "headers": {
+      "date": "Datum",
+      "time": "Čas",
+      "client": "Stranka",
+      "service": "Storitev",
+      "employee": "Zaposleni",
+      "status": "Status",
+      "actions": "Akcije"
+    },
+    "empty": {
+      "title": "Ni terminov",
+      "message": "Trenutno ni nobenih terminov za prikaz. Dodajte nov termin ali spremenite filtre."
+    },
+    "actions": {
+      "complete": "Zaključi termin",
+      "view": "Podrobnosti",
+      "edit": "Uredi",
+      "moreOptions": "Več možnosti",
+      "cancel": "Odpoved",
+      "delete": "Izbriši"
+    },
+    "pagination": {
+      "of": "od"
+    }
+  },
+  "filters": {
+    "status": {
+      "all": "Vsi statusi"
+    },
+    "searchPlaceholder": "Išči po imenu stranke, storitvi...",
+    "button": "Filtri",
+    "clear": "Počisti",
+    "employeeLabel": "Zaposleni",
+    "serviceLabel": "Storitev",
+    "dateFromLabel": "Datum od",
+    "dateToLabel": "Datum do",
+    "employeePlaceholder": "Zaposleni",
+    "allEmployees": "Vsi zaposleni",
+    "allServices": "Vse storitve",
+    "activeStatus": "Status: {label}",
+    "activeEmployee": "Zaposleni: {name}",
+    "activeService": "Storitev: {name}",
+    "activeFrom": "Od: {date}",
+    "activeTo": "Do: {date}"
+  }
+}
