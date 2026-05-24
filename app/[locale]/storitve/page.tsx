@@ -18,6 +18,7 @@ import {
   CaretDown,
   Palette,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
@@ -98,6 +99,7 @@ function StatCard({ icon, value, label, iconColor = 'black', delay = 0 }: StatCa
 
 // Empty state component
 function EmptyState({ onCreateService }: { onCreateService: () => void }) {
+  const t = useTranslations('services');
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -107,9 +109,9 @@ function EmptyState({ onCreateService }: { onCreateService: () => void }) {
       <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-violet-100">
         <Palette className="h-10 w-10 text-violet-500" weight="duotone" />
       </div>
-      <h3 className="text-xl font-semibold text-[#1A1F36]">Še nimate dodanih storitev</h3>
+      <h3 className="text-xl font-semibold text-[#1A1F36]">{t('emptyState.title')}</h3>
       <p className="mt-2 text-center text-sm text-gray-500">
-        Začnite z dodajanjem vaše prve storitve za upravljanje terminov.
+        {t('emptyState.subtitle')}
       </p>
       <motion.button
         type="button"
@@ -121,7 +123,7 @@ function EmptyState({ onCreateService }: { onCreateService: () => void }) {
                    hover:shadow-xl hover:shadow-violet-500/30"
       >
         <Plus className="h-5 w-5" weight="bold" />
-        Dodaj prvo storitev
+        {t('emptyState.addFirst')}
       </motion.button>
     </motion.div>
   );
@@ -129,6 +131,7 @@ function EmptyState({ onCreateService }: { onCreateService: () => void }) {
 
 // Search empty state
 function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear: () => void }) {
+  const t = useTranslations('services');
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -139,10 +142,10 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
         <MagnifyingGlass className="h-8 w-8 text-gray-400" weight="duotone" />
       </div>
       <h3 className="text-lg font-semibold text-[#1A1F36]">
-        Ni rezultatov za &quot;{searchTerm}&quot;
+        {t('searchEmpty.title', { term: searchTerm })}
       </h3>
       <p className="mt-2 text-center text-sm text-gray-500">
-        Poskusite z drugim iskanjem ali počistite filter
+        {t('searchEmpty.subtitle')}
       </p>
       <motion.button
         type="button"
@@ -151,7 +154,7 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
         whileTap={{ scale: 0.98 }}
         className="mt-4 flex items-center gap-1.5 text-sm font-medium text-violet-600 hover:text-violet-700"
       >
-        Počisti iskanje
+        {t('searchEmpty.clear')}
         <ArrowRight className="h-4 w-4" weight="bold" />
       </motion.button>
     </motion.div>
@@ -205,6 +208,7 @@ export default function StoritvePage() {
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
+  const t = useTranslations('services');
 
   // Data states
   const [services, setServices] = useState<Service[]>([]);
@@ -287,11 +291,11 @@ export default function StoritvePage() {
       setServices(servicesRes.data ?? []);
       setStats(statsRes.data);
     } catch (err) {
-      setError('Prišlo je do napake pri nalaganju podatkov');
+      setError(t('page.loadError'));
     } finally {
       setIsLoading(false);
     }
-  }, [companyId]);
+  }, [companyId, t]);
 
   useEffect(() => {
     loadData();
@@ -403,10 +407,10 @@ export default function StoritvePage() {
         );
 
         if (!result.ok) {
-          throw new Error('Prišlo je do napake pri posodabljanju storitve');
+          throw new Error(t('toasts.errorUpdate'));
         }
 
-        showToast('Storitev uspešno posodobljena', 'success');
+        showToast(t('toasts.updated'), 'success');
       } else {
         // Create new service
         const serviceId = await getNextServiceId(companyId);
@@ -453,19 +457,16 @@ export default function StoritvePage() {
         });
 
         if (!result.ok) {
-          throw new Error('Prišlo je do napake pri ustvarjanju storitve');
+          throw new Error(t('toasts.errorCreate'));
         }
 
-        showToast('Storitev uspešno dodana', 'success');
+        showToast(t('toasts.created'), 'success');
       }
 
       closeModal();
       loadData();
     } catch (err) {
-      showToast(
-        'Prišlo je do napake pri shranjevanju storitve',
-        'error'
-      );
+      showToast(t('toasts.errorSave'), 'error');
     } finally {
       setIsSaving(false);
     }
@@ -479,6 +480,8 @@ export default function StoritvePage() {
     showToast,
     closeModal,
     loadData,
+    t,
+    services,
   ]);
 
   // Toggle service active status
@@ -507,21 +510,15 @@ export default function StoritvePage() {
 
       if (!result.ok) {
         setServices(prev => prev.map(s => s.id === service.id ? { ...s, aktivna: service.aktivna } : s));
-        throw new Error('Prišlo je do napake pri spremembi statusa');
+        throw new Error(t('toasts.errorStatus'));
       }
 
-      showToast(
-        newActive ? 'Storitev aktivirana' : 'Storitev deaktivirana',
-        'success'
-      );
+      showToast(newActive ? t('toasts.activated') : t('toasts.deactivated'), 'success');
     } catch (err) {
       setServices(prev => prev.map(s => s.id === service.id ? { ...s, aktivna: service.aktivna } : s));
-      showToast(
-        'Prišlo je do napake pri spremembi statusa',
-        'error'
-      );
+      showToast(t('toasts.errorStatus'), 'error');
     }
-  }, [companyId, actor, companyPayload, buildPayload, showToast]);
+  }, [companyId, actor, companyPayload, buildPayload, showToast, t]);
 
   // Delete service
   const handleDeleteService = useCallback(async () => {
@@ -543,21 +540,18 @@ export default function StoritvePage() {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri brisanju storitve');
+        throw new Error(t('toasts.errorDelete'));
       }
 
-      showToast('Storitev uspešno izbrisana', 'success');
+      showToast(t('toasts.deleted'), 'success');
       closeDeleteModal();
       loadData();
     } catch (err) {
-      showToast(
-        'Prišlo je do napake pri brisanju storitve',
-        'error'
-      );
+      showToast(t('toasts.errorDelete'), 'error');
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, deleteService, actor, companyPayload, buildPayload, showToast, closeDeleteModal, loadData]);
+  }, [companyId, deleteService, actor, companyPayload, buildPayload, showToast, closeDeleteModal, loadData, t]);
 
 
   // Deactivate service (instead of delete when it has appointments)
@@ -588,7 +582,7 @@ export default function StoritvePage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-2xl font-normal text-[#1A1F36]"
               >
-                Storitve
+                {t('page.title')}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -596,7 +590,7 @@ export default function StoritvePage() {
                 transition={{ delay: 0.1 }}
                 className="mt-1 text-gray-500"
               >
-                Upravljanje storitev
+                {t('page.subtitle')}
               </motion.p>
             </div>
             <motion.button
@@ -611,7 +605,7 @@ export default function StoritvePage() {
                          hover:shadow-xl hover:shadow-violet-500/30"
             >
               <Plus className="h-5 w-5" weight="bold" />
-              Nova storitev
+              {t('page.newButton')}
             </motion.button>
           </div>
 
@@ -621,28 +615,28 @@ export default function StoritvePage() {
               <StatCard
                 icon={<Briefcase className="h-6 w-6" weight="regular" />}
                 value={stats.total}
-                label="Skupaj storitev"
+                label={t('stats.total')}
                 iconColor="black"
                 delay={0}
               />
               <StatCard
                 icon={<ChartLineUp className="h-6 w-6" weight="regular" />}
                 value={stats.active}
-                label="Aktivnih storitev"
+                label={t('stats.active')}
                 iconColor="darkGray"
                 delay={1}
               />
               <StatCard
                 icon={<Clock className="h-6 w-6" weight="regular" />}
                 value={`${stats.averageDuration} min`}
-                label="Povprečno trajanje"
+                label={t('stats.avgDuration')}
                 iconColor="mediumGray"
                 delay={2}
               />
               <StatCard
                 icon={<CurrencyEur className="h-6 w-6" weight="regular" />}
                 value={stats.highestPrice > 0 ? `€${stats.highestPrice.toFixed(2)}` : '-'}
-                label="Najdražja storitev"
+                label={t('stats.highestPrice')}
                 iconColor="slate"
                 delay={3}
               />
@@ -664,7 +658,7 @@ export default function StoritvePage() {
               />
               <input
                 type="text"
-                placeholder="Išči storitve po nazivu..."
+                placeholder={t('page.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-xl border-0 bg-white py-3 pl-12 pr-12 text-sm text-[#1A1F36]
@@ -695,7 +689,7 @@ export default function StoritvePage() {
                            : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'
                          }`}
             >
-              {showInactive ? 'Vse storitve' : 'Samo aktivne'}
+              {showInactive ? t('page.showAll') : t('page.showActiveOnly')}
               <CaretDown className={`h-4 w-4 transition-transform ${showInactive ? 'rotate-180' : ''}`} />
             </motion.button>
           </motion.div>
@@ -703,7 +697,7 @@ export default function StoritvePage() {
           {/* Results count */}
           {debouncedSearch && filteredServices.length > 0 && (
             <p className="mb-4 text-sm text-gray-500">
-              Prikazujem {filteredServices.length} od {services.length} storitev
+              {t('page.resultsCount', { current: filteredServices.length, total: services.length })}
             </p>
           )}
 
@@ -721,7 +715,7 @@ export default function StoritvePage() {
                 onClick={loadData}
                 className="ml-auto text-sm font-medium text-red-600 hover:text-red-700"
               >
-                Poskusi znova
+                {t('page.retry')}
               </button>
             </motion.div>
           )}

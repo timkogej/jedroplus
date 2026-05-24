@@ -10,6 +10,7 @@ import {
   ToggleLeft,
   CalendarBlank,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { Service } from '@/types/services';
 import { generateGradient } from '@/lib/utils/colors';
 
@@ -32,6 +33,8 @@ function DeleteServiceModal({
   onDeactivate,
   isDeleting = false,
 }: DeleteServiceModalProps) {
+  const t = useTranslations('services');
+  const tCommon = useTranslations('common');
   const hasAppointments = appointmentCount > 0;
 
   const backdropVariants = {
@@ -83,7 +86,7 @@ function DeleteServiceModal({
                   </div>
                   <div>
                     <h2 className="text-lg font-semibold text-white">
-                      {hasAppointments ? 'Storitev ima termine' : 'Izbriši storitev'}
+                      {hasAppointments ? t('deleteModal.titleHasAppointments') : t('deleteModal.titleDelete')}
                     </h2>
                     <p className="text-sm text-white/80">
                       {service.naziv}
@@ -111,10 +114,10 @@ function DeleteServiceModal({
                     <CalendarBlank className="h-5 w-5 flex-shrink-0 text-amber-500" weight="fill" />
                     <div>
                       <p className="text-sm font-medium text-amber-800">
-                        Ta storitev ima {appointmentCount} {appointmentCount === 1 ? 'termin' : 'terminov'}
+                        {t('deleteModal.warningCount', { count: appointmentCount })}
                       </p>
                       <p className="mt-1 text-sm text-amber-700">
-                        Storitve s termini ni mogoče izbrisati. Lahko jo deaktivirate, da ne bo več na voljo za nove termine.
+                        {t('deleteModal.warningDesc')}
                       </p>
                     </div>
                   </div>
@@ -128,7 +131,7 @@ function DeleteServiceModal({
                       whileTap={{ scale: 0.98 }}
                       className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
                     >
-                      Prekliči
+                      {tCommon('buttons.cancel')}
                     </motion.button>
                     <motion.button
                       type="button"
@@ -143,12 +146,12 @@ function DeleteServiceModal({
                       {isDeleting ? (
                         <>
                           <SpinnerGap className="h-4 w-4 animate-spin" />
-                          Deaktiviram...
+                          {t('deleteModal.deactivating')}
                         </>
                       ) : (
                         <>
                           <ToggleLeft className="h-4 w-4" weight="bold" />
-                          Deaktiviraj storitev
+                          {t('deleteModal.deactivate')}
                         </>
                       )}
                     </motion.button>
@@ -158,8 +161,9 @@ function DeleteServiceModal({
                 <div className="space-y-4">
                   {/* Confirmation message */}
                   <p className="text-sm text-gray-600">
-                    Ali ste prepričani, da želite izbrisati storitev <span className="font-semibold">&quot;{service.naziv}&quot;</span>?
-                    To dejanje ni mogoče razveljaviti.
+                    {t('deleteModal.confirmPrefix')}{' '}
+                    <span className="font-semibold">&quot;{service.naziv}&quot;</span>?{' '}
+                    {t('deleteModal.confirmSuffix')}
                   </p>
 
                   {/* Action buttons */}
@@ -171,7 +175,7 @@ function DeleteServiceModal({
                       whileTap={{ scale: 0.98 }}
                       className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
                     >
-                      Prekliči
+                      {tCommon('buttons.cancel')}
                     </motion.button>
                     <motion.button
                       type="button"
@@ -186,12 +190,12 @@ function DeleteServiceModal({
                       {isDeleting ? (
                         <>
                           <SpinnerGap className="h-4 w-4 animate-spin" />
-                          Brišem...
+                          {t('deleteModal.deleting')}
                         </>
                       ) : (
                         <>
                           <Trash className="h-4 w-4" weight="bold" />
-                          Izbriši storitev
+                          {t('deleteModal.delete')}
                         </>
                       )}
                     </motion.button>

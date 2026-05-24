@@ -1,1 +1,95 @@
-{}
+{
+  "page": {
+    "title": "Services",
+    "subtitle": "Manage your services",
+    "newButton": "New service",
+    "searchPlaceholder": "Search services by name...",
+    "showAll": "All services",
+    "showActiveOnly": "Active only",
+    "resultsCount": "Showing {current} of {total} services",
+    "loadError": "Failed to load data",
+    "retry": "Try again"
+  },
+  "stats": {
+    "total": "Total services",
+    "active": "Active services",
+    "avgDuration": "Avg. duration",
+    "highestPrice": "Highest price"
+  },
+  "emptyState": {
+    "title": "No services yet",
+    "subtitle": "Start by adding your first service to manage appointments.",
+    "addFirst": "Add first service"
+  },
+  "searchEmpty": {
+    "title": "No results for \"{term}\"",
+    "subtitle": "Try a different search or clear the filter",
+    "clear": "Clear search"
+  },
+  "card": {
+    "inactive": "Inactive",
+    "toggleActive": "Active",
+    "toggleInactive": "Inactive"
+  },
+  "modal": {
+    "createTitle": "New service",
+    "editTitle": "Edit service",
+    "createSubtitle": "Add a new service",
+    "editSubtitle": "Edit service details",
+    "nameLabel": "Service name *",
+    "namePlaceholder": "e.g. Haircut, Hair care, Massage...",
+    "categoryLabel": "Category *",
+    "categorySelectPlaceholder": "Select category",
+    "categoryInputPlaceholder": "Enter new category...",
+    "categoryNewOption": "+ New category...",
+    "categoryBackToExisting": "Back to existing categories",
+    "categoryFirstPlaceholder": "e.g. Hair, Beauty, Massage...",
+    "colorLabel": "Service color *",
+    "colorSelected": "Selected color",
+    "colorCustom": "Custom",
+    "colorHint": "This gradient will appear on the calendar and service list",
+    "durationLabel": "Service duration *",
+    "durationSelectPlaceholder": "Select duration",
+    "durationCustomOption": "Custom...",
+    "durationUnit": "minutes",
+    "durationBackToPreset": "Back to preset values",
+    "priceLabel": "Price (fixed)",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Brief service description...",
+    "saving": "Saving...",
+    "save": "Save service",
+    "validationNameRequired": "Service name is required",
+    "validationNameMinLength": "Name must be at least 2 characters",
+    "validationNameMaxLength": "Name can be at most 100 characters",
+    "validationCategoryRequired": "Category is required",
+    "validationColorInvalid": "Invalid color",
+    "validationDurationMin": "Duration must be greater than 0",
+    "validationDurationMax": "Duration cannot exceed 8 hours (480 min)",
+    "validationPriceInvalid": "Price must be a positive number",
+    "validationDescriptionMaxLength": "Description can be at most 500 characters"
+  },
+  "deleteModal": {
+    "titleHasAppointments": "Service has appointments",
+    "titleDelete": "Delete service",
+    "warningCount": "{count, plural, =1 {This service has 1 appointment} other {This service has {count} appointments}}",
+    "warningDesc": "A service with appointments cannot be deleted. You can deactivate it so it's no longer available for new appointments.",
+    "confirmPrefix": "Are you sure you want to delete the service",
+    "confirmSuffix": "This action cannot be undone.",
+    "deactivating": "Deactivating...",
+    "deactivate": "Deactivate service",
+    "deleting": "Deleting...",
+    "delete": "Delete service"
+  },
+  "toasts": {
+    "created": "Service added successfully",
+    "updated": "Service updated successfully",
+    "deleted": "Service deleted successfully",
+    "activated": "Service activated",
+    "deactivated": "Service deactivated",
+    "errorCreate": "Failed to create service",
+    "errorUpdate": "Failed to update service",
+    "errorSave": "Failed to save service",
+    "errorDelete": "Failed to delete service",
+    "errorStatus": "Failed to change service status"
+  }
+}
