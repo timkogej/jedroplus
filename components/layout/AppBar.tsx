@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { AnimatePresence, motion } from 'motion/react';
