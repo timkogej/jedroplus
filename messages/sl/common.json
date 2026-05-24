@@ -1,0 +1,91 @@
+{
+  "buttons": {
+    "save": "Shrani",
+    "cancel": "Prekliči",
+    "edit": "Uredi",
+    "delete": "Izbriši",
+    "close": "Zapri",
+    "back": "Nazaj",
+    "next": "Naprej",
+    "confirm": "Potrdi",
+    "discard": "Razveljavi",
+    "submit": "Pošlji",
+    "tryAgain": "Poskusite znova",
+    "viewAll": "Prikaži vse",
+    "add": "Dodaj",
+    "create": "Ustvari",
+    "update": "Posodobi",
+    "search": "Iskanje",
+    "filter": "Filter",
+    "export": "Izvozi",
+    "import": "Uvozi",
+    "copy": "Kopiraj",
+    "share": "Deli"
+  },
+  "status": {
+    "active": "Aktiven",
+    "inactive": "Neaktiven",
+    "expired": "Potekel",
+    "confirmed": "Potrjeno",
+    "cancelled": "Preklicano",
+    "pending": "V obdelavi",
+    "completed": "Zaključeno",
+    "loading": "Nalaganje...",
+    "saving": "Shranjevanje..."
+  },
+  "confirm": {
+    "title": "Ali ste prepričani?",
+    "cannotUndo": "Te akcije ni mogoče razveljaviti.",
+    "yes": "Da",
+    "no": "Ne"
+  },
+  "roles": {
+    "owner": "Lastnik",
+    "admin": "Admin",
+    "staff": "Zaposleni",
+    "receptionist": "Recepcija"
+  },
+  "errors": {
+    "generic": "Prišlo je do napake. Poskusite znova.",
+    "loadFailed": "Napaka pri nalaganju",
+    "noResults": "Ni rezultatov",
+    "networkError": "Težave s povezavo",
+    "unauthorized": "Nimate dovoljenja za to akcijo",
+    "fillAllFields": "Izpolnite vsa polja"
+  },
+  "time": {
+    "today": "Danes",
+    "yesterday": "Včeraj",
+    "tomorrow": "Jutri",
+    "now": "Zdaj"
+  },
+  "daysShort": {
+    "mon": "Pon",
+    "tue": "Tor",
+    "wed": "Sre",
+    "thu": "Čet",
+    "fri": "Pet",
+    "sat": "Sob",
+    "sun": "Ned"
+  },
+  "daysLong": {
+    "mon": "Ponedeljek",
+    "tue": "Torek",
+    "wed": "Sreda",
+    "thu": "Četrtek",
+    "fri": "Petek",
+    "sat": "Sobota",
+    "sun": "Nedelja"
+  },
+  "search": {
+    "placeholder": "Iskanje...",
+    "noResults": "Ni zadetkov"
+  },
+  "divider": {
+    "or": "ali"
+  },
+  "pagination": {
+    "previous": "Prejšnja",
+    "next": "Naslednja"
+  }
+}

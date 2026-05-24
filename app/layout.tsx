@@ -1,51 +1,5 @@
-import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
-import "./globals.css";
-import { Providers } from "./providers";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-serif",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-};
-
-export const metadata: Metadata = {
-  title: "Jedro+",
-  description: "Jedro+ - Sistem za upravljanje terminov",
-  // Icons are resolved via App Router file conventions:
-  // app/icon.png → <link rel="icon"> (512×512)
-  // app/apple-icon.png → <link rel="apple-touch-icon"> (180×180)
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}
-      >
-        <Providers>{children}</Providers>
-      </body>
-    </html>
-  );
+// Minimal root layout — the <html> shell lives in app/[locale]/layout.tsx
+// so it can set lang={locale} correctly.
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

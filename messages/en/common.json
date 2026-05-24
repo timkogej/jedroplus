@@ -1,0 +1,91 @@
+{
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "discard": "Undo",
+    "submit": "Send",
+    "tryAgain": "Try again",
+    "viewAll": "Show all",
+    "add": "Add",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "copy": "Copy",
+    "share": "Share"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "expired": "Expired",
+    "confirmed": "Confirmed",
+    "cancelled": "Canceled",
+    "pending": "Pending",
+    "completed": "Completed",
+    "loading": "Loading...",
+    "saving": "Saving..."
+  },
+  "confirm": {
+    "title": "Are you sure?",
+    "cannotUndo": "This action can't be undone.",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "staff": "Staff",
+    "receptionist": "Receptionist"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "loadFailed": "Failed to load",
+    "noResults": "No results",
+    "networkError": "Connection issue",
+    "unauthorized": "You don't have permission for this action",
+    "fillAllFields": "Fill in all fields"
+  },
+  "time": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "now": "Now"
+  },
+  "daysShort": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "daysLong": {
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday",
+    "fri": "Friday",
+    "sat": "Saturday",
+    "sun": "Sunday"
+  },
+  "search": {
+    "placeholder": "Search...",
+    "noResults": "No matches"
+  },
+  "divider": {
+    "or": "or"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
+  }
+}
