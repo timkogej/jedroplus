@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { useTranslations } from 'next-intl';
 
 export type AppointmentStatus =
   | 'scheduled'
@@ -102,8 +103,18 @@ export function getStatusConfig(status: AppointmentStatus): {
 }
 
 function StatusBadge({ status, size = 'md', variant = 'default' }: StatusBadgeProps) {
+  const t = useTranslations('appointments');
   const normalizedStatus = normalizeStatus(status);
   const config = getStatusConfig(normalizedStatus);
+  const statusLabels: Record<AppointmentStatus, string> = {
+    scheduled: t('status.scheduled'),
+    confirmed: t('status.confirmed'),
+    pending: t('status.pending'),
+    completed: t('status.completed'),
+    cancelled: t('status.cancelled'),
+    no_show: t('status.noShow'),
+  };
+  const label = statusLabels[normalizedStatus];
 
   const sizeClasses = {
     sm: 'px-2 py-0.5 text-[10px]',
@@ -123,7 +134,7 @@ function StatusBadge({ status, size = 'md', variant = 'default' }: StatusBadgePr
         className={`inline-flex items-center gap-1.5 rounded-full font-medium text-white
                    shadow-sm ${sizeClasses[size]} ${config.gradientClass}`}
       >
-        {config.label}
+        {label}
       </span>
     );
   }
@@ -134,7 +145,7 @@ function StatusBadge({ status, size = 'md', variant = 'default' }: StatusBadgePr
                  ${sizeClasses[size]} ${config.bgClass} ${config.textClass}`}
     >
       <span className={`rounded-full ${dotSizes[size]} ${config.dotClass}`} />
-      {config.label}
+      {label}
     </span>
   );
 }

@@ -1,1 +1,187 @@
-{}
+{
+  "status": {
+    "scheduled": "Scheduled",
+    "confirmed": "Confirmed",
+    "pending": "Pending",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "noShow": "No Show"
+  },
+  "page": {
+    "title": "Appointments",
+    "subtitle": "Manage all appointments in one place",
+    "newAppointment": "New Appointment",
+    "stats": {
+      "thisMonth": "Appointments this month",
+      "today": "Today",
+      "upcoming": "Upcoming"
+    },
+    "disabledCreateMessage": "The company owner has disabled creating new appointments. Contact them to enable this."
+  },
+  "completeModal": {
+    "title": "Complete Appointment",
+    "subtitle": "Confirm appointment completion",
+    "client": "Client",
+    "service": "Service",
+    "employee": "Employee",
+    "date": "Date",
+    "time": "Time",
+    "notesLabel": "Message to client or post-appointment instructions",
+    "notesPlaceholder": "Enter a message or instructions after the appointment (optional)...",
+    "cancel": "Cancel",
+    "completing": "Completing...",
+    "confirm": "Complete"
+  },
+  "deleteModal": {
+    "title": "Delete Appointment",
+    "message": "Are you sure you want to delete this appointment?"
+  },
+  "deleteConfirmation": {
+    "areYouSure": "Are you sure?",
+    "unknownClient": "Unknown client",
+    "irreversible": "This action is irreversible!",
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "deleteButton": "Delete appointment"
+  },
+  "toast": {
+    "noShow": "Appointment marked as No Show",
+    "cancelled": "Appointment successfully cancelled",
+    "completed": "Appointment successfully completed"
+  },
+  "errors": {
+    "loadError": "An error occurred while loading data.",
+    "saveError": "An error occurred while saving the appointment.",
+    "deleteError": "An error occurred while deleting the appointment.",
+    "completeError": "An error occurred while completing the appointment.",
+    "noShowError": "An error occurred while marking as No Show.",
+    "cancelError": "An error occurred while cancelling the appointment.",
+    "clientCreateError": "An error occurred while creating the client"
+  },
+  "disabledModal": {
+    "title": "Action Disabled",
+    "defaultMessage": "The company owner has disabled this action. Contact them to enable it.",
+    "button": "Understood"
+  },
+  "modal": {
+    "title": {
+      "create": "New Appointment",
+      "edit": "Edit Appointment",
+      "view": "Appointment Details"
+    },
+    "emptyState": {
+      "message": "You need at least one service and one employee to add an appointment.",
+      "addService": "Add Service",
+      "addEmployee": "Add Employee",
+      "close": "Close"
+    },
+    "fields": {
+      "client": "Client",
+      "service": "Service",
+      "service2": "Service 2",
+      "service3": "Service 3",
+      "employee": "Employee",
+      "date": "Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "status": "Status",
+      "price": "Price",
+      "notes": "Notes",
+      "internalNotes": "Internal Notes",
+      "phone": "Phone"
+    },
+    "placeholders": {
+      "service": "Select service",
+      "service2": "Select second service",
+      "service3": "Select third service",
+      "employee": "Select employee",
+      "status": "Select status"
+    },
+    "totalDuration": "Total duration:",
+    "remove": "Remove",
+    "addService": "Add Service",
+    "appointmentDuration": "Appointment Duration",
+    "duration": "{mins, plural, =1 {1 minute} other {{mins} minutes}}",
+    "promotions": {
+      "discountSuffix": "discount"
+    },
+    "price": {
+      "original": "Original price",
+      "discount": "Discount",
+      "withDiscount": "Price with discount",
+      "addOnLabel": "Additional service",
+      "addOnFallback": "Add-on service"
+    },
+    "discount": {
+      "add": "Add discount",
+      "lower": "Lower appointment price",
+      "amount": "Amount",
+      "type": "Type",
+      "final": "Final price"
+    },
+    "notesPlaceholder": "Notes for the client...",
+    "notesHint": "Notes are used for reminders and communication",
+    "internalNotesPlaceholder": "Internal notes (not sent to client)...",
+    "addInternalNotes": "+ Internal Notes",
+    "actions": {
+      "cancel": "Cancel",
+      "create": "Create",
+      "save": "Save"
+    },
+    "validation": {
+      "dateRequired": "Date is required",
+      "startTimeRequired": "Start time is required",
+      "endTimeRequired": "End time is required",
+      "endTimeAfterStart": "End time must be after start time",
+      "clientRequired": "Client is required",
+      "serviceRequired": "Service is required",
+      "employeeRequired": "Employee is required"
+    }
+  },
+  "table": {
+    "headers": {
+      "date": "Date",
+      "time": "Time",
+      "client": "Client",
+      "service": "Service",
+      "employee": "Employee",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No appointments",
+      "message": "There are currently no appointments to display. Add a new appointment or change the filters."
+    },
+    "actions": {
+      "complete": "Complete appointment",
+      "view": "Details",
+      "edit": "Edit",
+      "moreOptions": "More options",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "pagination": {
+      "of": "of"
+    }
+  },
+  "filters": {
+    "status": {
+      "all": "All statuses"
+    },
+    "searchPlaceholder": "Search by client name, service...",
+    "button": "Filters",
+    "clear": "Clear",
+    "employeeLabel": "Employee",
+    "serviceLabel": "Service",
+    "dateFromLabel": "Date from",
+    "dateToLabel": "Date to",
+    "employeePlaceholder": "Employee",
+    "allEmployees": "All employees",
+    "allServices": "All services",
+    "activeStatus": "Status: {label}",
+    "activeEmployee": "Employee: {name}",
+    "activeService": "Service: {name}",
+    "activeFrom": "From: {date}",
+    "activeTo": "To: {date}"
+  }
+}

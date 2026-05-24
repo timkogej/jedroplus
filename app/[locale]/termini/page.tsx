@@ -41,6 +41,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useUserPersonId } from '@/hooks/useUserPersonId';
 import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
+import { useTranslations } from 'next-intl';
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -92,6 +93,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
 }
 
 function TerminiPageInner() {
+  const t = useTranslations('appointments');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
@@ -184,7 +186,7 @@ function TerminiPageInner() {
       setServices(servicesRes.data ?? []);
       setEmployees(employeesRes.data ?? []);
     } catch (err) {
-      setError('Prišlo je do napake pri nalaganju podatkov.');
+      setError(t('errors.loadError'));
     } finally {
       setIsLoading(false);
     }
@@ -471,7 +473,7 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri shranjevanju termina.');
+        throw new Error(t('errors.saveError'));
       }
 
       // Wait 1 second for system to process
@@ -480,7 +482,7 @@ function TerminiPageInner() {
       await loadData();
       handleCloseModal();
     } catch (err) {
-      setActionError('Prišlo je do napake pri shranjevanju termina.');
+      setActionError(t('errors.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -507,7 +509,7 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri brisanju termina.');
+        throw new Error(t('errors.deleteError'));
       }
 
       // Wait 1 second for system to process
@@ -516,7 +518,7 @@ function TerminiPageInner() {
       await loadData();
       setDeleteTarget(null);
     } catch (err) {
-      setActionError('Prišlo je do napake pri brisanju termina.');
+      setActionError(t('errors.deleteError'));
     } finally {
       setIsDeleting(false);
     }
@@ -555,16 +557,16 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri označevanju kot No Show.');
+        throw new Error(t('errors.noShowError'));
       }
 
-      setSuccessMessage('Termin označen kot No Show');
+      setSuccessMessage(t('toast.noShow'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       await new Promise((resolve) => setTimeout(resolve, 700));
       await loadData();
     } catch (err) {
-      setActionError('Prišlo je do napake pri označevanju kot No Show.');
+      setActionError(t('errors.noShowError'));
     } finally {
       setIsDeleting(false);
     }
@@ -599,16 +601,16 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri odpovedi termina.');
+        throw new Error(t('errors.cancelError'));
       }
 
-      setSuccessMessage('Termin uspešno odpovedan');
+      setSuccessMessage(t('toast.cancelled'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       await new Promise((resolve) => setTimeout(resolve, 700));
       await loadData();
     } catch (err) {
-      setActionError('Prišlo je do napake pri odpovedi termina.');
+      setActionError(t('errors.cancelError'));
     } finally {
       setIsDeleting(false);
     }
@@ -654,10 +656,10 @@ function TerminiPageInner() {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri zaključevanju termina.');
+        throw new Error(t('errors.completeError'));
       }
 
-      setSuccessMessage('Termin uspešno zaključen');
+      setSuccessMessage(t('toast.completed'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       // Wait 1.5 seconds for system to process completion
@@ -667,7 +669,7 @@ function TerminiPageInner() {
       setCompleteTarget(null);
       setCompletionNotes(''); // Reset notes after completion
     } catch (err) {
-      setActionError('Prišlo je do napake pri zaključevanju termina.');
+      setActionError(t('errors.completeError'));
     } finally {
       setIsCompleting(false);
     }
@@ -717,9 +719,9 @@ function TerminiPageInner() {
             className="mb-8 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">Termini</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
               <p className="mt-1 text-sm text-gray-500">
-                Upravljajte vse termine na enem mestu
+                {t('page.subtitle')}
               </p>
             </div>
 
@@ -733,7 +735,7 @@ function TerminiPageInner() {
                          transition-shadow hover:shadow-xl hover:shadow-cyan-500/30"
             >
               <Plus className="h-4 w-4" weight="bold" />
-              <span>Nov termin</span>
+              <span>{t('page.newAppointment')}</span>
             </motion.button>
           </motion.div>
 
@@ -742,19 +744,19 @@ function TerminiPageInner() {
             <StatCard
               icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
               value={currentMonthCount}
-              label="Termini ta mesec"
+              label={t('page.stats.thisMonth')}
               delay={0}
             />
             <StatCard
               icon={<Clock className="h-6 w-6" weight="regular" />}
               value={todayCount}
-              label="Danes"
+              label={t('page.stats.today')}
               delay={1}
             />
             <StatCard
               icon={<ArrowRight className="h-6 w-6" weight="regular" />}
               value={upcomingCount}
-              label="Prihajajoči"
+              label={t('page.stats.upcoming')}
               delay={2}
             />
           </div>
@@ -844,8 +846,8 @@ function TerminiPageInner() {
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Izbriši termin"
-        message="Ali ste prepričani, da želite izbrisati ta termin?"
+        title={t('deleteModal.title')}
+        message={t('deleteModal.message')}
         appointment={deleteTarget}
         isDeleting={isDeleting}
       />
@@ -877,8 +879,8 @@ function TerminiPageInner() {
               <div className="relative flex items-center gap-3 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-5">
                 <CheckCircle className="h-8 w-8 text-emerald-500 flex-shrink-0" weight="regular" />
                 <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F36]">Zaključitev termina</h2>
-                  <p className="text-sm text-gray-500">Potrdite zaključitev termina</p>
+                  <h2 className="text-lg font-semibold text-[#1A1F36]">{t('completeModal.title')}</h2>
+                  <p className="text-sm text-gray-500">{t('completeModal.subtitle')}</p>
                 </div>
                 <motion.button
                   type="button"
@@ -904,7 +906,7 @@ function TerminiPageInner() {
                     {completeTarget.stranka_ime?.split(' ').map((n: string) => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
                   </span>
                   <div>
-                    <p className="text-xs text-gray-500">Stranka</p>
+                    <p className="text-xs text-gray-500">{t('completeModal.client')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.stranka_ime}</p>
                   </div>
                 </div>
@@ -917,7 +919,7 @@ function TerminiPageInner() {
                       style={{ background: completeTarget.storitev.barva || '#6366F1' }}
                     />
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500">Storitev</p>
+                      <p className="text-xs text-gray-500">{t('completeModal.service')}</p>
                       <div className="space-y-1 mt-0.5">
                         <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev.naziv}</p>
                         {completeTarget.storitev_2 && (
@@ -957,7 +959,7 @@ function TerminiPageInner() {
                       {completeTarget.zaposleni.ime?.charAt(0)}{completeTarget.zaposleni.priimek?.charAt(0)}
                     </span>
                     <div>
-                      <p className="text-xs text-gray-500">Oseba</p>
+                      <p className="text-xs text-gray-500">{t('completeModal.employee')}</p>
                       <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.zaposleni.ime} {completeTarget.zaposleni.priimek}</p>
                     </div>
                   </div>
@@ -967,7 +969,7 @@ function TerminiPageInner() {
                 <div className="flex items-center gap-3">
                   <CalendarBlank className="h-[18px] w-[18px] text-emerald-500 flex-shrink-0" weight="regular" />
                   <div>
-                    <p className="text-xs text-gray-500">Datum</p>
+                    <p className="text-xs text-gray-500">{t('completeModal.date')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
                       {new Date(completeTarget.datum).toLocaleDateString('sl-SI', {
                         weekday: 'long',
@@ -983,7 +985,7 @@ function TerminiPageInner() {
                 <div className="flex items-center gap-3">
                   <Clock className="h-[18px] w-[18px] text-emerald-500 flex-shrink-0" weight="regular" />
                   <div>
-                    <p className="text-xs text-gray-500">Čas</p>
+                    <p className="text-xs text-gray-500">{t('completeModal.time')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
                       {completeTarget.cas_zacetek?.substring(0, 5)} - {completeTarget.cas_konec?.substring(0, 5)}
                     </p>
@@ -993,13 +995,13 @@ function TerminiPageInner() {
                 {/* Notes field (optional) */}
                 <div>
                   <label htmlFor="completion-notes" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Sporočilo stranki oz. navodila po terminu
+                    {t('completeModal.notesLabel')}
                   </label>
                   <textarea
                     id="completion-notes"
                     value={completionNotes}
                     onChange={(e) => setCompletionNotes(e.target.value)}
-                    placeholder="Vnesite sporočilo ali navodila po zaključenem terminu (opcijsko)..."
+                    placeholder={t('completeModal.notesPlaceholder')}
                     rows={4}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 resize-none"
                   />
@@ -1017,7 +1019,7 @@ function TerminiPageInner() {
                   disabled={isCompleting}
                   className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Prekliči
+                  {t('completeModal.cancel')}
                 </button>
                 <motion.button
                   type="button"
@@ -1034,12 +1036,12 @@ function TerminiPageInner() {
                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                         className="h-4 w-4 rounded-full border-2 border-white border-t-transparent"
                       />
-                      Zaključujem...
+                      {t('completeModal.completing')}
                     </>
                   ) : (
                     <>
                       <CheckCircle className="h-4 w-4" weight="bold" />
-                      Zaključi
+                      {t('completeModal.confirm')}
                     </>
                   )}
                 </motion.button>
@@ -1074,7 +1076,7 @@ function TerminiPageInner() {
       <DisabledActionModal
         isOpen={showDisabledCreateModal}
         onClose={() => setShowDisabledCreateModal(false)}
-        message="Lastnik podjetja je onemogočil ustvarjanje novih terminov. Obrnite se nanj, da vam to omogoči."
+        message={t('page.disabledCreateMessage')}
       />
     </ProtectedLayout>
   );

@@ -3,6 +3,7 @@
 import { memo, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MagnifyingGlass, X, Funnel, CalendarBlank } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { Storitev, Zaposleni } from '@/types/appointments';
 import type { AppointmentStatus } from './StatusBadge';
@@ -26,14 +27,6 @@ interface AppointmentFiltersProps {
   staffViewOwnOnly?: boolean;
 }
 
-const STATUS_OPTIONS: { value: AppointmentStatus | 'all'; label: string }[] = [
-  { value: 'all', label: 'Vsi statusi' },
-  { value: 'scheduled', label: 'Načrtovan' },
-  { value: 'completed', label: 'Zaključen' },
-  { value: 'cancelled', label: 'Odpovedan' },
-  { value: 'no_show', label: 'Ni prišel' },
-];
-
 function AppointmentFilters({
   filters,
   onFiltersChange,
@@ -42,6 +35,14 @@ function AppointmentFilters({
   restrictedEmployeeId,
   staffViewOwnOnly,
 }: AppointmentFiltersProps) {
+  const t = useTranslations('appointments');
+  const STATUS_OPTIONS: { value: AppointmentStatus | 'all'; label: string }[] = [
+    { value: 'all', label: t('filters.status.all') },
+    { value: 'scheduled', label: t('status.scheduled') },
+    { value: 'completed', label: t('status.completed') },
+    { value: 'cancelled', label: t('status.cancelled') },
+    { value: 'no_show', label: t('status.noShow') },
+  ];
   const [isExpanded, setIsExpanded] = useState(false);
 
   const updateFilter = useCallback(
@@ -77,24 +78,24 @@ function AppointmentFilters({
 
   if (filters.status !== 'all') {
     const statusOption = STATUS_OPTIONS.find((s) => s.value === filters.status);
-    activeFilters.push({ key: 'status', label: `Status: ${statusOption?.label}` });
+    activeFilters.push({ key: 'status', label: t('filters.activeStatus', { label: statusOption?.label ?? '' }) });
   }
   if (!staffViewOwnOnly && filters.employeeId) {
     const employee = employees.find((e) => e.id === filters.employeeId);
     activeFilters.push({
       key: 'employeeId',
-      label: `Zaposleni: ${employee?.ime} ${employee?.priimek}`,
+      label: t('filters.activeEmployee', { name: `${employee?.ime} ${employee?.priimek}` }),
     });
   }
   if (filters.serviceId) {
     const service = services.find((s) => s.id === filters.serviceId);
-    activeFilters.push({ key: 'serviceId', label: `Storitev: ${service?.naziv}` });
+    activeFilters.push({ key: 'serviceId', label: t('filters.activeService', { name: service?.naziv ?? '' }) });
   }
   if (filters.dateFrom) {
-    activeFilters.push({ key: 'dateFrom', label: `Od: ${filters.dateFrom}` });
+    activeFilters.push({ key: 'dateFrom', label: t('filters.activeFrom', { date: filters.dateFrom }) });
   }
   if (filters.dateTo) {
-    activeFilters.push({ key: 'dateTo', label: `Do: ${filters.dateTo}` });
+    activeFilters.push({ key: 'dateTo', label: t('filters.activeTo', { date: filters.dateTo }) });
   }
 
   const removeFilter = (key: keyof FilterState) => {
@@ -135,7 +136,7 @@ function AppointmentFilters({
           />
           <input
             type="text"
-            placeholder="Išči po imenu stranke, storitvi..."
+            placeholder={t('filters.searchPlaceholder')}
             value={filters.search}
             onChange={(e) => updateFilter('search', e.target.value)}
             className="w-full rounded-xl border-0 bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
@@ -186,7 +187,7 @@ function AppointmentFilters({
                      }`}
         >
           <Funnel className="h-4 w-4" weight="bold" />
-          Filtri
+          {t('filters.button')}
           {activeFilterCount > 0 && (
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-xs">
               {activeFilterCount}
@@ -207,7 +208,7 @@ function AppointmentFilters({
                          text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
             >
               <X className="h-4 w-4" weight="bold" />
-              Počisti
+              {t('filters.clear')}
             </motion.button>
           )}
         </AnimatePresence>
@@ -226,13 +227,13 @@ function AppointmentFilters({
               {/* Employee filter */}
               <div className="flex flex-col gap-1.5 min-w-[180px]">
                 <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                  Zaposleni
+                  {t('filters.employeeLabel')}
                 </label>
                 {restrictedEmployeeId ? (
                   <Select
                     value={filters.employeeId || ''}
                     setValue={() => {}}
-                    placeholder="Zaposleni"
+                    placeholder={t('filters.employeePlaceholder')}
                   >
                     {employees.map((employee, idx) => (
                       <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
@@ -244,9 +245,9 @@ function AppointmentFilters({
                   <Select
                     value={filters.employeeId || ''}
                     setValue={(value) => updateFilter('employeeId', value || null)}
-                    placeholder="Vsi zaposleni"
+                    placeholder={t('filters.allEmployees')}
                   >
-                    <SelectOption key="all-employees" value="">Vsi zaposleni</SelectOption>
+                    <SelectOption key="all-employees" value="">{t('filters.allEmployees')}</SelectOption>
                     {employees.map((employee, idx) => (
                       <SelectOption key={`emp-${idx}-${employee.id}`} value={employee.id}>
                         {employee.ime} {employee.priimek}
@@ -259,14 +260,14 @@ function AppointmentFilters({
               {/* Service filter */}
               <div className="flex flex-col gap-1.5 min-w-[180px]">
                 <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                  Storitev
+                  {t('filters.serviceLabel')}
                 </label>
                 <Select
                   value={filters.serviceId || ''}
                   setValue={(value) => updateFilter('serviceId', value || null)}
-                  placeholder="Vse storitve"
+                  placeholder={t('filters.allServices')}
                 >
-                  <SelectOption key="all-services" value="">Vse storitve</SelectOption>
+                  <SelectOption key="all-services" value="">{t('filters.allServices')}</SelectOption>
                   {services.map((service, idx) => (
                     <SelectOption
                       key={`svc-${idx}-${service.id}`}
@@ -282,7 +283,7 @@ function AppointmentFilters({
               {/* Date range */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                  Datum od
+                  {t('filters.dateFromLabel')}
                 </label>
                 <div className="relative">
                   <CalendarBlank
@@ -302,7 +303,7 @@ function AppointmentFilters({
 
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                  Datum do
+                  {t('filters.dateToLabel')}
                 </label>
                 <div className="relative">
                   <CalendarBlank

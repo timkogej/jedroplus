@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useMemo, useId } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Eye,
@@ -159,6 +160,7 @@ function AppointmentTable({
   canEditAppointment,
   canDeleteAppointment = true,
 }: AppointmentTableProps) {
+  const t = useTranslations('appointments');
   const [sortField, setSortField] = useState<SortField>('datum');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -261,9 +263,9 @@ function AppointmentTable({
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-slate-100">
             <CalendarBlank className="h-8 w-8 text-gray-400" weight="regular" />
           </div>
-          <h3 className="mb-1 text-lg font-semibold text-[#1A1F36]">Ni terminov</h3>
+          <h3 className="mb-1 text-lg font-semibold text-[#1A1F36]">{t('table.empty.title')}</h3>
           <p className="text-sm text-gray-500">
-            Trenutno ni nobenih terminov za prikaz. Dodajte nov termin ali spremenite filtre.
+            {t('table.empty.message')}
           </p>
         </div>
       </motion.div>
@@ -282,25 +284,25 @@ function AppointmentTable({
           <thead>
             <tr className="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-slate-50">
               <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-wider text-gray-500">
-                <SortHeader field="datum">Datum</SortHeader>
+                <SortHeader field="datum">{t('table.headers.date')}</SortHeader>
               </th>
               <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-wider text-gray-500">
-                <SortHeader field="cas_zacetek">Čas</SortHeader>
+                <SortHeader field="cas_zacetek">{t('table.headers.time')}</SortHeader>
               </th>
               <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-wider text-gray-500">
-                <SortHeader field="stranka_ime">Stranka</SortHeader>
+                <SortHeader field="stranka_ime">{t('table.headers.client')}</SortHeader>
               </th>
               <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-wider text-gray-500">
-                <SortHeader field="storitev">Storitev</SortHeader>
+                <SortHeader field="storitev">{t('table.headers.service')}</SortHeader>
               </th>
               <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-wider text-gray-500">
-                <SortHeader field="zaposleni">Zaposleni</SortHeader>
+                <SortHeader field="zaposleni">{t('table.headers.employee')}</SortHeader>
               </th>
               <th className="px-4 py-3.5 text-left text-[11px] uppercase tracking-wider text-gray-500">
-                <SortHeader field="status">Status</SortHeader>
+                <SortHeader field="status">{t('table.headers.status')}</SortHeader>
               </th>
               <th className="px-4 py-3.5 text-right text-[11px] uppercase tracking-wider text-gray-500">
-                Akcije
+                {t('table.headers.actions')}
               </th>
             </tr>
           </thead>
@@ -460,7 +462,7 @@ function AppointmentTable({
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
                               className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
-                              title="Zaključi termin"
+                              title={t('table.actions.complete')}
                             >
                               <CheckCircle className="h-4 w-4" weight="regular" />
                             </motion.button>
@@ -472,7 +474,7 @@ function AppointmentTable({
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.95 }}
                             className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-violet-50 hover:text-violet-600"
-                            title="Podrobnosti"
+                            title={t('table.actions.view')}
                           >
                             <Eye className="h-4 w-4" weight="regular" />
                           </motion.button>
@@ -484,7 +486,7 @@ function AppointmentTable({
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.95 }}
                               className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                              title="Uredi"
+                              title={t('table.actions.edit')}
                             >
                               <PencilSimple className="h-4 w-4" weight="regular" />
                             </motion.button>
@@ -498,7 +500,7 @@ function AppointmentTable({
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.95 }}
                                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                                title="Več možnosti"
+                                title={t('table.actions.moreOptions')}
                               >
                                 <DotsThreeVertical className="h-4 w-4" weight="bold" />
                               </motion.button>
@@ -538,7 +540,7 @@ function AppointmentTable({
                                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-orange-50 hover:text-orange-700"
                                       >
                                         <XCircle className="h-4 w-4" weight="regular" />
-                                        Odpoved
+                                        {t('table.actions.cancel')}
                                       </button>
                                     )}
                                     {/* Delete */}
@@ -552,7 +554,7 @@ function AppointmentTable({
                                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
                                       >
                                         <Trash className="h-4 w-4" weight="regular" />
-                                        Izbriši
+                                        {t('table.actions.delete')}
                                       </button>
                                     )}
                                   </motion.div>
@@ -583,7 +585,8 @@ function AppointmentTable({
             <span className="font-medium text-[#1A1F36]">
               {Math.min(currentPage * itemsPerPage, sortedAppointments.length)}
             </span>{' '}
-            od <span className="font-medium text-[#1A1F36]">{sortedAppointments.length}</span>
+            {t('table.pagination.of')}{' '}
+            <span className="font-medium text-[#1A1F36]">{sortedAppointments.length}</span>
           </p>
           {/* On mobile the counter is hidden; flex layout stays consistent */}
           <div className="sm:hidden" />
