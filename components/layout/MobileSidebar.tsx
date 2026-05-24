@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import {
   X,
@@ -38,27 +39,7 @@ interface NavItem {
   group: string;
 }
 
-const navItems: NavItem[] = [
-  // Glavno
-  { name: 'Dashboard', href: '/dashboard', icon: House, group: 'Glavno' },
-  { name: 'Koledar', href: '/koledar', icon: CalendarBlank, group: 'Glavno' },
-  // AI
-  // Asistent+ - začasno skrito: { name: 'Asistent+', href: '/asistent', icon: Sparkle, group: 'AI' },
-  // Komunikacija
-  { name: 'Opomniki', href: '/reminders', icon: Bell, group: 'Komunikacija' },
-  { name: 'Lost Leads', href: '/lost-leads', icon: TrendDown, group: 'Komunikacija' },
-  // Moduli
-  { name: 'Termini', href: '/termini', icon: ClipboardText, group: 'Moduli' },
-  { name: 'Stranke', href: '/clients', icon: Users, group: 'Moduli' },
-  { name: 'Storitve', href: '/services', icon: Briefcase, group: 'Moduli' },
-  { name: 'Osebje', href: '/staff', icon: UserCircle, group: 'Moduli' },
-  // Analitika
-  { name: 'Analitika', href: '/analytics', icon: ChartLine, group: 'Analitika' },
-  // Nastavitve
-  { name: 'Nastavitve', href: '/nastavitve', icon: Gear, group: 'Nastavitve' },
-];
-
-const groupOrder = ['Glavno', 'AI', 'Komunikacija', 'Moduli', 'Analitika', 'Nastavitve'];
+// navItems and groupOrder are built inside the component to support translations
 
 function cn(...classes: (string | boolean | undefined)[]) {
   return classes.filter(Boolean).join(' ');
@@ -67,8 +48,40 @@ function cn(...classes: (string | boolean | undefined)[]) {
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations('layout');
   const { companyId, companySettings } = useCompany();
   const { user, signOut } = useAuth();
+
+  const navItems: NavItem[] = [
+    // Glavno
+    { name: t('sidebar.items.dashboard'), href: '/dashboard', icon: House, group: 'main' },
+    { name: t('sidebar.items.calendar'), href: '/koledar', icon: CalendarBlank, group: 'main' },
+    // AI
+    // Asistent+ - začasno skrito: { name: 'Asistent+', href: '/asistent', icon: Sparkle, group: 'ai' },
+    // Komunikacija
+    { name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell, group: 'communication' },
+    { name: 'Lost Leads', href: '/lost-leads', icon: TrendDown, group: 'communication' },
+    // Moduli
+    { name: t('sidebar.items.appointments'), href: '/termini', icon: ClipboardText, group: 'modules' },
+    { name: t('sidebar.items.clients'), href: '/clients', icon: Users, group: 'modules' },
+    { name: t('sidebar.items.services'), href: '/services', icon: Briefcase, group: 'modules' },
+    { name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle, group: 'modules' },
+    // Analitika
+    { name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine, group: 'analytics' },
+    // Nastavitve
+    { name: t('sidebar.items.settings'), href: '/nastavitve', icon: Gear, group: 'settings' },
+  ];
+
+  const groupLabels: Record<string, string> = {
+    main: t('sidebar.sections.main'),
+    ai: t('sidebar.sections.ai'),
+    communication: t('sidebar.sections.communication'),
+    modules: t('sidebar.sections.modules'),
+    analytics: t('sidebar.sections.analytics'),
+    settings: t('sidebar.sections.settings'),
+  };
+
+  const groupOrder = ['main', 'ai', 'communication', 'modules', 'analytics', 'settings'];
 
   // Stats state for appointment counts
   const [stats, setStats] = useState({ today: 0, week: 0, month: 0 });
@@ -186,7 +199,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     return pathname.startsWith(href);
   };
 
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Uporabnik';
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('fallbacks.userName');
   const userEmail = user?.email || '';
   const userInitials = userName
     .split(' ')
@@ -197,7 +210,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
   // Group nav items
   const groupedItems = groupOrder.map((group) => ({
-    label: group,
+    label: groupLabels[group] ?? group,
     items: navItems.filter((item) => item.group === group),
   }));
 
@@ -255,19 +268,19 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                   <div className="text-gray-900 font-bold">
                     {statsLoading ? '...' : stats.today}
                   </div>
-                  <div className="text-xs text-gray-600">Danes</div>
+                  <div className="text-xs text-gray-600">{t('sidebar.stats.today')}</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2 text-center">
                   <div className="text-gray-900 font-bold">
                     {statsLoading ? '...' : stats.week}
                   </div>
-                  <div className="text-xs text-gray-600">Teden</div>
+                  <div className="text-xs text-gray-600">{t('sidebar.stats.week')}</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2 text-center">
                   <div className="text-gray-900 font-bold">
                     {statsLoading ? '...' : stats.month}
                   </div>
-                  <div className="text-xs text-gray-600">Mesec</div>
+                  <div className="text-xs text-gray-600">{t('sidebar.stats.month')}</div>
                 </div>
               </div>
             </div>

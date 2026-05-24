@@ -1,1 +1,92 @@
-{}
+{
+  "sidebar": {
+    "sections": {
+      "main": "Glavno",
+      "ai": "AI",
+      "communication": "Komunikacija",
+      "modules": "Moduli",
+      "promotions": "Promocije",
+      "analytics": "Analitika",
+      "account": "Račun",
+      "billing": "Paketi in kvote",
+      "settings": "Nastavitve"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "calendar": "Koledar",
+      "appointments": "Termini",
+      "clients": "Stranke",
+      "communication": "Komunikacija",
+      "reminders": "Opomniki",
+      "reservations": "Rezervacije",
+      "lostLeads": "Izgubljene stranke",
+      "services": "Storitve",
+      "staff": "Osebje",
+      "promotions": "Promocije",
+      "analytics": "Analitika",
+      "billing": "Paketi in kvote",
+      "plans": "Paketi",
+      "settings": "Nastavitve",
+      "signOut": "Odjava",
+      "new": "Novo",
+      "newAppointment": "Nov termin",
+      "newClient": "Nova stranka",
+      "newService": "Nova storitev"
+    },
+    "tooltips": {
+      "expand": "Razširi",
+      "collapse": "Skrči"
+    },
+    "stats": {
+      "today": "Danes",
+      "week": "Teden",
+      "month": "Mesec"
+    }
+  },
+  "appbar": {
+    "home": "Domov",
+    "search": "Iskanje...",
+    "profile": "Moj profil",
+    "plans": "Paketi",
+    "signOut": "Odjava",
+    "aria": {
+      "openMenu": "Odpri meni",
+      "closeMenu": "Zapri meni",
+      "search": "Iskanje"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "calendar": "Koledar",
+      "appointments": "Termini",
+      "clients": "Stranke",
+      "services": "Storitve",
+      "staff": "Osebje",
+      "reminders": "Opomniki",
+      "lostLeads": "Lost Leads",
+      "analytics": "Analitika",
+      "asistent": "Asistent+",
+      "chatbotPlus": "Chatbot+",
+      "settings": "Nastavitve",
+      "billing": "Paketi",
+      "notifications": "Obvestila",
+      "reservations": "Rezervacije"
+    }
+  },
+  "search": {
+    "placeholder": "Išči strani, akcije...",
+    "escHint": "zapri",
+    "navHint": "navigacija",
+    "openHint": "odpri",
+    "shortcutHint": "K za iskanje",
+    "categories": {
+      "pages": "Strani",
+      "quickActions": "Hitri dostop",
+      "recent": "Nedavna iskanja"
+    },
+    "empty": "Ni rezultatov za \"{query}\""
+  },
+  "fallbacks": {
+    "companyName": "Moje Podjetje",
+    "userName": "Uporabnik"
+  }
+}
