@@ -1,7 +1,8 @@
 {
   "greeting": {
     "morning": "Dobro jutro,",
-    "afternoon": "Dober dan,",
+    "day": "Dober dan,",
+    "afternoon": "Dobro popoldne,",
     "evening": "Dober večer,"
   },
   "quickActions": {

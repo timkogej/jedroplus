@@ -972,8 +972,9 @@ export default function DashboardPage() {
   // ── Greeting based on time of day ────────────────────────────────────────
   const welcomeGreeting = useMemo(() => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return t('greeting.morning');
-    if (hour >= 12 && hour < 18) return t('greeting.afternoon');
+    if (hour >= 5 && hour < 11) return t('greeting.morning');
+    if (hour >= 11 && hour < 14) return t('greeting.day');
+    if (hour >= 14 && hour < 18) return t('greeting.afternoon');
     return t('greeting.evening');
   }, [t]);
 

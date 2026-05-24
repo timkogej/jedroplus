@@ -1,6 +1,7 @@
 {
   "greeting": {
     "morning": "Good morning,",
+    "day": "Good afternoon,",
     "afternoon": "Good afternoon,",
     "evening": "Good evening,"
   },
