@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google';
 import '../globals.css';
 import { Providers } from '../providers';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
@@ -51,6 +51,9 @@ export default async function LocaleLayout({
   if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
     notFound();
   }
+
+  // ⭐ KEY FIX: enable next-intl locale context for RSC/getRequestConfig
+  setRequestLocale(locale);
 
   const messages = await getMessages();
 
