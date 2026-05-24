@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { Scissors, TrendUp } from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import type { TopService } from "@/lib/dashboard/fetchDashboardData";
 
 interface TopServicesCardProps {
@@ -9,6 +10,7 @@ interface TopServicesCardProps {
 }
 
 export function TopServicesCard({ services }: TopServicesCardProps) {
+  const t = useTranslations('dashboard');
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -21,8 +23,8 @@ export function TopServicesCard({ services }: TopServicesCardProps) {
           {/* Icon only - no circle background */}
           <Scissors size={24} weight="regular" className="text-gray-900" />
           <div>
-            <h3 className="font-normal text-gray-900">Top Storitve</h3>
-            <p className="text-sm text-gray-500">Ta mesec</p>
+            <h3 className="font-normal text-gray-900">{t('topServices.title')}</h3>
+            <p className="text-sm text-gray-500">{t('topServices.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -32,7 +34,7 @@ export function TopServicesCard({ services }: TopServicesCardProps) {
         {services.length === 0 ? (
           <div className="py-8 text-center text-gray-400">
             <TrendUp size={32} className="mx-auto mb-2 opacity-50" />
-            <p>Ni podatkov</p>
+            <p>{t('topServices.empty')}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3 flex-1">

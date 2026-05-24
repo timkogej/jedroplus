@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { ChartBar } from "@phosphor-icons/react";
+import { useTranslations } from "next-intl";
 import {
   BarChart,
   Bar,
@@ -18,6 +19,7 @@ interface WeeklyChartProps {
 }
 
 export function WeeklyChart({ data }: WeeklyChartProps) {
+  const t = useTranslations('dashboard');
   const maxValue = Math.max(...data.map((d) => d.termini), 1);
 
   return (
@@ -32,8 +34,8 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
           {/* Icon only - no circle background */}
           <ChartBar size={24} weight="regular" className="text-gray-900" />
           <div>
-            <h3 className="font-normal text-gray-900">Termini - 7 Dni</h3>
-            <p className="text-sm text-gray-500">Pregled zadnjih 7 dni</p>
+            <h3 className="font-normal text-gray-900">{t('weeklyChart.title')}</h3>
+            <p className="text-sm text-gray-500">{t('weeklyChart.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -70,8 +72,8 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                   boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
                 }}
                 formatter={(value) => [
-                  `${value} terminov`,
-                  "Št. terminov",
+                  t('weeklyChart.tooltipValue', { value: Number(value) }),
+                  t('weeklyChart.tooltipLabel'),
                 ]}
                 labelStyle={{ color: "#111827", fontWeight: 600 }}
               />

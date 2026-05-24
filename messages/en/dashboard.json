@@ -1,1 +1,135 @@
-{}
+{
+  "greeting": {
+    "morning": "Good morning,",
+    "afternoon": "Good afternoon,",
+    "evening": "Good evening,"
+  },
+  "quickActions": {
+    "newAppointment": "New Appointment",
+    "newClient": "New Client"
+  },
+  "metrics": {
+    "appointmentsToday": "Appointments Today",
+    "appointmentsTodaySubtitle": "Scheduled appointments",
+    "activeAppointments": "Active Appointments",
+    "newClients": "New Clients",
+    "thisMonth": "This month",
+    "revenue": "Revenue",
+    "trend": "vs previous month"
+  },
+  "nextAppointment": {
+    "title": "Next Appointment",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "empty": "No upcoming appointments"
+  },
+  "appointmentList": {
+    "todayTitle": "Today's Appointments",
+    "todayEmpty": "No appointments today",
+    "tomorrowTitle": "Tomorrow's Appointments",
+    "tomorrowEmpty": "No appointments tomorrow",
+    "defaultEmpty": "No appointments",
+    "viewAll": "View all appointments"
+  },
+  "footer": {
+    "heading": "Need more details?",
+    "body": "Check the full calendar or analytics for a deeper insight",
+    "openCalendar": "Open Calendar",
+    "openAnalytics": "Open Analytics"
+  },
+  "detailModal": {
+    "status": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "pending": "Pending",
+      "noShow": "No Show"
+    },
+    "fields": {
+      "status": "Status",
+      "client": "Client",
+      "service": "Service",
+      "employee": "Employee",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "price": "Price",
+      "notes": "Notes",
+      "internalNotes": "Internal notes",
+      "phone": "Phone"
+    },
+    "actions": {
+      "complete": "Complete",
+      "edit": "Edit",
+      "moreOptions": "More options",
+      "noShow": "No Show",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "close": "Close"
+    },
+    "openInAppointments": "Open in Appointments"
+  },
+  "completeModal": {
+    "title": "Complete Appointment",
+    "subtitle": "Confirm appointment completion",
+    "client": "Client",
+    "service": "Service",
+    "date": "Date",
+    "time": "Time",
+    "messageLabel": "Message to client or post-appointment instructions",
+    "messagePlaceholder": "Enter a message or instructions after the appointment (optional)...",
+    "cancel": "Cancel",
+    "completing": "Completing...",
+    "confirm": "Complete"
+  },
+  "deleteModal": {
+    "title": "Delete Appointment",
+    "message": "Are you sure you want to delete this appointment?"
+  },
+  "toast": {
+    "appointmentAdded": "Appointment successfully added",
+    "appointmentUpdated": "Appointment successfully updated",
+    "appointmentCompleted": "Appointment successfully completed",
+    "appointmentNoShow": "Appointment marked as No Show",
+    "appointmentCancelled": "Appointment successfully cancelled",
+    "clientAdded": "Client successfully added",
+    "loadError": "An error occurred while loading data.",
+    "saveError": "An error occurred while saving.",
+    "completeError": "An error occurred while completing the appointment.",
+    "noShowError": "An error occurred while marking as No Show.",
+    "cancelError": "An error occurred while cancelling the appointment.",
+    "deleteError": "An error occurred while deleting.",
+    "clientSaveError": "An error occurred while saving the client."
+  },
+  "errorState": {
+    "title": "An error occurred",
+    "retry": "Try again"
+  },
+  "defaultUser": "User",
+  "copyButton": "Copy {label}",
+  "topServices": {
+    "title": "Top Services",
+    "subtitle": "This month",
+    "empty": "No data"
+  },
+  "topEmployees": {
+    "title": "Top Employees",
+    "subtitle": "By completed appointments",
+    "empty": "No data",
+    "appointmentCount": "{count, plural, =1 {1 appointment} other {{count} appointments}}"
+  },
+  "recentActivity": {
+    "title": "Recent Activity",
+    "subtitle": "Latest completed appointments",
+    "empty": "No recent activity",
+    "unknownClient": "Unknown client",
+    "serviceLabel": "Service"
+  },
+  "weeklyChart": {
+    "title": "Appointments - 7 Days",
+    "subtitle": "Last 7 days overview",
+    "tooltipValue": "{value, plural, =1 {1 appointment} other {{value} appointments}}",
+    "tooltipLabel": "No. of appointments"
+  }
+}
