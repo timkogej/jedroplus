@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Link, useRouter } from '@/i18n/navigation';
 import { SpinnerGap } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 const STORAGE_KEY = 'jedroplus_company_id';
 
@@ -15,6 +15,7 @@ export default function LoginPage() {
   const t = useTranslations('auth.login');
   const tCommon = useTranslations('common');
   const router = useRouter();
+  const locale = useLocale();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -59,7 +60,22 @@ export default function LoginPage() {
           if (company?.company_id) {
             localStorage.setItem(STORAGE_KEY, company.company_id);
             document.cookie = `company_id=${company.company_id}; path=/; max-age=31536000`;
-            setTimeout(() => { router.push('/dashboard'); }, 500);
+
+            const { data: companyData } = await supabase
+              .from('Podatki podjetij')
+              .select('preferred_language')
+              .eq('ID Podjetja', company.company_id)
+              .maybeSingle();
+
+            const preferred = (companyData?.preferred_language ?? 'sl') as 'sl' | 'en';
+
+            setTimeout(() => {
+              if (preferred !== locale) {
+                router.push('/dashboard', { locale: preferred });
+              } else {
+                router.push('/dashboard');
+              }
+            }, 500);
           } else {
             setTimeout(() => { router.push('/onboarding'); }, 500);
           }
