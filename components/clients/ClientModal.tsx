@@ -12,6 +12,7 @@ import {
   Warning,
   GenderIntersex,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { Client, ClientFormData, Gender } from '@/types/clients';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { checkEmailExists } from '@/lib/supabase/clients';
@@ -59,6 +60,8 @@ function ClientModal({
   onSave,
   isSaving = false,
 }: ClientModalProps) {
+  const t = useTranslations('clients');
+
   // Form state
   const [formData, setFormData] = useState<ClientFormData>({
     ime: '',
@@ -125,27 +128,27 @@ function ClientModal({
   const validateField = useCallback((name: keyof ClientFormData, value: string): string => {
     switch (name) {
       case 'ime':
-        if (!value.trim()) return 'Ime je obvezno';
-        if (value.trim().length < 2) return 'Ime mora imeti vsaj 2 znaka';
+        if (!value.trim()) return t('modal.validation.firstNameRequired');
+        if (value.trim().length < 2) return t('modal.validation.firstNameMinLength');
         return '';
       case 'priimek':
-        if (!value.trim()) return 'Priimek je obvezen';
-        if (value.trim().length < 2) return 'Priimek mora imeti vsaj 2 znaka';
+        if (!value.trim()) return t('modal.validation.lastNameRequired');
+        if (value.trim().length < 2) return t('modal.validation.lastNameMinLength');
         return '';
       case 'spol':
-        if (!value) return 'Spol je obvezen';
+        if (!value) return t('modal.validation.genderRequired');
         return '';
       case 'email':
-        if (value.trim() && !validateEmail(value)) return 'Neveljaven email naslov';
+        if (value.trim() && !validateEmail(value)) return t('modal.validation.emailInvalid');
         return '';
       case 'telefon':
-        if (value && !validatePhone(value)) return 'Neveljavna telefonska številka';
+        if (value && !validatePhone(value)) return t('modal.validation.phoneInvalid');
         return '';
       case 'opombe':
-        if (value.length > 500) return 'Opombe lahko vsebujejo največ 500 znakov';
+        if (value.length > 500) return t('modal.validation.notesMaxLength');
         return '';
       case 'interne_opombe':
-        if (value.length > 500) return 'Interne opombe lahko vsebujejo največ 500 znakov';
+        if (value.length > 500) return t('modal.validation.internalNotesMaxLength');
         return '';
       default:
         return '';
@@ -179,10 +182,10 @@ function ClientModal({
       );
       if (result.exists) {
         setEmailExists(true);
-        setErrors((prev) => ({ ...prev, email: 'Ta email naslov je že v uporabi' }));
+        setErrors((prev) => ({ ...prev, email: t('modal.validation.emailExists') }));
       } else {
         setEmailExists(false);
-        if (errors.email === 'Ta email naslov je že v uporabi') {
+        if (errors.email === t('modal.validation.emailExists')) {
           setErrors((prev) => ({ ...prev, email: '' }));
         }
       }
@@ -207,13 +210,13 @@ function ClientModal({
     });
 
     if (emailExists) {
-      newErrors.email = 'Ta email naslov je že v uporabi';
+      newErrors.email = t('modal.validation.emailExists');
       isValid = false;
     }
 
     // Block if both email and phone are empty
     if (!formData.email.trim() && !formData.telefon.trim()) {
-      newErrors.email = 'Vnesti je treba vsaj email ali telefonsko številko';
+      newErrors.email = t('modal.validation.contactRequired');
       isValid = false;
     }
 
@@ -281,10 +284,10 @@ function ClientModal({
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-white">
-                    {mode === 'create' ? 'Nova stranka' : 'Uredi stranko'}
+                    {mode === 'create' ? t('modal.title.create') : t('modal.title.edit')}
                   </h2>
                   <p className="mt-1 text-sm text-white/80">
-                    {mode === 'create' ? 'Dodajte novo stranko' : 'Uredite podatke stranke'}
+                    {mode === 'create' ? t('modal.subtitle.create') : t('modal.subtitle.edit')}
                   </p>
                 </div>
                 <motion.button
@@ -305,7 +308,7 @@ function ClientModal({
                 {/* First name */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Ime *
+                    {t('modal.fields.firstNameRequired')}
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -333,7 +336,7 @@ function ClientModal({
                 {/* Last name */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Priimek *
+                    {t('modal.fields.lastNameRequired')}
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -361,7 +364,7 @@ function ClientModal({
                 {/* Gender */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Spol *
+                    {t('modal.fields.genderRequired')}
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -370,12 +373,12 @@ function ClientModal({
                     <Select
                       value={formData.spol}
                       setValue={(value) => handleChange('spol', value)}
-                      placeholder="Izberi spol"
+                      placeholder={t('modal.gender.placeholder')}
                       className="[&>button]:pl-10"
                     >
-                      <SelectOption value="moški">Moški</SelectOption>
-                      <SelectOption value="ženska">Ženska</SelectOption>
-                      <SelectOption value="drugo">Drugo</SelectOption>
+                      <SelectOption value="moški">{t('modal.gender.male')}</SelectOption>
+                      <SelectOption value="ženska">{t('modal.gender.female')}</SelectOption>
+                      <SelectOption value="drugo">{t('modal.gender.other')}</SelectOption>
                     </Select>
                   </div>
                   {errors.spol && (
@@ -389,7 +392,7 @@ function ClientModal({
                 {/* Email */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Email <span className="text-gray-400 normal-case font-normal">(vsaj email ali telefon)</span>
+                    Email <span className="text-gray-400 normal-case font-normal">{t('modal.fields.emailHint')}</span>
                   </label>
                   <div className="relative">
                     <Envelope className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -421,7 +424,7 @@ function ClientModal({
                 {/* Phone */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Telefon
+                    {t('modal.fields.phone')}
                   </label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -449,12 +452,12 @@ function ClientModal({
                 {/* Notes */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Opombe
+                    {t('modal.fields.notes')}
                   </label>
                   <textarea
                     value={formData.opombe}
                     onChange={(e) => handleChange('opombe', e.target.value)}
-                    placeholder="Opombe o stranki..."
+                    placeholder={t('modal.fields.notesPlaceholder')}
                     rows={3}
                     className={`w-full resize-none rounded-xl border py-2.5 px-4 text-sm text-[#1A1F36]
                                placeholder-gray-400 transition-all focus:outline-none focus:ring-2
@@ -470,7 +473,7 @@ function ClientModal({
                         {errors.opombe}
                       </p>
                     ) : (
-                      <p className="text-xs text-gray-400">Opombe se uporabljajo pri opomnikih in sporočanju</p>
+                      <p className="text-xs text-gray-400">{t('modal.fields.notesHint')}</p>
                     )}
                     <span className="text-xs text-gray-400">
                       {formData.opombe.length}/500
@@ -482,13 +485,13 @@ function ClientModal({
                 {showInternalNotes ? (
                   <div>
                     <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Interne opombe
+                      {t('modal.fields.internalNotes')}
                     </label>
                     <div className="relative">
                       <textarea
                         value={formData.interne_opombe}
                         onChange={(e) => handleChange('interne_opombe', e.target.value)}
-                        placeholder="Interne opombe (ne pošiljajo se stranki)..."
+                        placeholder={t('modal.fields.internalNotesPlaceholder')}
                         rows={3}
                         className={`w-full resize-none rounded-xl border-2 border-yellow-300 bg-white py-2.5 px-4 text-sm text-[#1A1F36]
                                    placeholder-gray-400 transition-all focus:outline-none focus:ring-2
@@ -520,7 +523,7 @@ function ClientModal({
                     whileTap={{ scale: 0.99 }}
                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-yellow-300 text-yellow-700 hover:bg-yellow-50 transition-colors"
                   >
-                    <span className="text-sm font-medium">+ Interne opombe</span>
+                    <span className="text-sm font-medium">{t('modal.addInternalNotes')}</span>
                   </motion.button>
                 )}
               </div>
@@ -535,13 +538,13 @@ function ClientModal({
                   <div className="flex items-start gap-2 mb-2">
                     <Warning className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" weight="fill" />
                     <p className="text-sm font-semibold text-amber-800">
-                      {contactWarning.missingEmail ? 'Manjka email naslov' : 'Manjka telefonska številka'}
+                      {contactWarning.missingEmail ? t('modal.warning.missingEmail') : t('modal.warning.missingPhone')}
                     </p>
                   </div>
                   <p className="text-xs text-amber-700 leading-relaxed mb-3">
                     {contactWarning.missingEmail
-                      ? 'Brez e-poštnega naslova stranki ne bo mogoče pošiljati e-poštnih sporočil, računov in avtomatskih obvestil. To lahko vpliva na avtomatsko komunikacijo in opomnike preko emaila.'
-                      : 'Brez telefonske številke stranki ne bo mogoče pošiljati sporočil in avtomatskih obvestil. To lahko vpliva na avtomatsko komunikacijo in opomnike preko SMS.'}
+                      ? t('modal.warning.missingEmailDesc')
+                      : t('modal.warning.missingPhoneDesc')}
                   </p>
                   <div className="flex gap-2">
                     <motion.button
@@ -551,7 +554,7 @@ function ClientModal({
                       whileTap={{ scale: 0.98 }}
                       className="flex-1 rounded-lg border border-amber-400 px-3 py-2 text-xs font-medium text-amber-800 hover:bg-amber-100 transition-colors"
                     >
-                      Prekliči
+                      {t('modal.actions.cancel')}
                     </motion.button>
                     <motion.button
                       type="button"
@@ -566,7 +569,7 @@ function ClientModal({
                       ) : (
                         <FloppyDisk className="h-3.5 w-3.5" weight="bold" />
                       )}
-                      Vseeno shrani
+                      {t('modal.actions.saveAnyway')}
                     </motion.button>
                   </div>
                 </motion.div>
@@ -581,7 +584,7 @@ function ClientModal({
                   whileTap={{ scale: 0.98 }}
                   className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
                 >
-                  Prekliči
+                  {t('modal.actions.cancel')}
                 </motion.button>
                 <motion.button
                   type="submit"
@@ -595,12 +598,12 @@ function ClientModal({
                   {isSaving ? (
                     <>
                       <SpinnerGap className="h-4 w-4 animate-spin" />
-                      Shranjujem...
+                      {t('modal.actions.saving')}
                     </>
                   ) : (
                     <>
                       <FloppyDisk className="h-4 w-4" weight="bold" />
-                      Shrani stranko
+                      {t('modal.actions.save')}
                     </>
                   )}
                 </motion.button>

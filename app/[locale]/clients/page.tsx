@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -86,6 +87,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
 
 // Empty state component
 function EmptyState({ onCreateClient }: { onCreateClient: () => void }) {
+  const t = useTranslations('clients');
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -95,9 +97,9 @@ function EmptyState({ onCreateClient }: { onCreateClient: () => void }) {
       <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
         <Users className="h-10 w-10 text-gray-600" weight="duotone" />
       </div>
-      <h3 className="text-xl font-semibold text-[#1A1F36]">Še nimate strank</h3>
+      <h3 className="text-xl font-semibold text-[#1A1F36]">{t('emptyState.noClients')}</h3>
       <p className="mt-2 text-center text-sm text-gray-500">
-        Začnite z dodajanjem vaše prve stranke za upravljanje terminov in kontaktov.
+        {t('emptyState.noClientsSubtitle')}
       </p>
       <motion.button
         type="button"
@@ -109,7 +111,7 @@ function EmptyState({ onCreateClient }: { onCreateClient: () => void }) {
                    hover:shadow-xl hover:shadow-cyan-500/30"
       >
         <UserPlus className="h-5 w-5" weight="regular" />
-        Dodaj prvo stranko
+        {t('emptyState.addFirst')}
       </motion.button>
     </motion.div>
   );
@@ -117,6 +119,7 @@ function EmptyState({ onCreateClient }: { onCreateClient: () => void }) {
 
 // Search empty state
 function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear: () => void }) {
+  const t = useTranslations('clients');
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -127,10 +130,10 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
         <MagnifyingGlass className="h-8 w-8 text-gray-400" weight="duotone" />
       </div>
       <h3 className="text-lg font-semibold text-[#1A1F36]">
-        Ni rezultatov za &quot;{searchTerm}&quot;
+        {t('emptyState.noResults', { term: searchTerm })}
       </h3>
       <p className="mt-2 text-center text-sm text-gray-500">
-        Poskusite z drugim iskanjem ali počistite filter
+        {t('emptyState.noResultsSubtitle')}
       </p>
       <motion.button
         type="button"
@@ -139,7 +142,7 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
         whileTap={{ scale: 0.98 }}
         className="mt-4 flex items-center gap-1.5 text-sm font-medium text-purple-600 hover:text-purple-700"
       >
-        Počisti iskanje
+        {t('emptyState.clearSearch')}
         <ArrowRight className="h-4 w-4" weight="regular" />
       </motion.button>
     </motion.div>
@@ -191,6 +194,7 @@ function Toast({
 
 export default function ClientsPage() {
   const router = useRouter();
+  const t = useTranslations('clients');
   const { companyId, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
   const { role, permissions } = useRolePermissions();
@@ -308,7 +312,7 @@ export default function ClientsPage() {
       setClients(clientsRes.data ?? []);
       setStats(statsRes.data);
     } catch (err) {
-      setError('Prišlo je do napake pri nalaganju podatkov');
+      setError(t('errors.loadError'));
     } finally {
       setIsLoading(false);
     }
@@ -423,10 +427,10 @@ export default function ClientsPage() {
         );
 
         if (!result.ok) {
-          throw new Error('Prišlo je do napake pri posodabljanju stranke');
+          throw new Error('update failed');
         }
 
-        showToast('Stranka uspešno posodobljena', 'success');
+        showToast(t('toast.updated'), 'success');
       } else {
         // Create new client with 7-digit unique ID
         const clientId = await getNextClientId(companyId);
@@ -467,10 +471,10 @@ export default function ClientsPage() {
         });
 
         if (!result.ok) {
-          throw new Error('Prišlo je do napake pri ustvarjanju stranke');
+          throw new Error('create failed');
         }
 
-        showToast('Stranka uspešno dodana', 'success');
+        showToast(t('toast.created'), 'success');
       }
 
       // Wait for system to process
@@ -479,10 +483,7 @@ export default function ClientsPage() {
       closeModal();
       loadData();
     } catch (err) {
-      showToast(
-        'Prišlo je do napake pri shranjevanju stranke',
-        'error'
-      );
+      showToast(t('errors.saveError'), 'error');
     } finally {
       setIsSaving(false);
     }
@@ -518,20 +519,17 @@ export default function ClientsPage() {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri brisanju stranke');
+        throw new Error('delete failed');
       }
 
       // Wait for system to process
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      showToast('Stranka uspešno izbrisana', 'success');
+      showToast(t('toast.deleted'), 'success');
       closeDeleteModal();
       loadData();
     } catch (err) {
-      showToast(
-        'Prišlo je do napake pri brisanju stranke',
-        'error'
-      );
+      showToast(t('errors.deleteError'), 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -558,7 +556,7 @@ export default function ClientsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="text-2xl font-normal text-[#1A1F36]"
               >
-                Stranke
+                {t('page.title')}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -566,7 +564,7 @@ export default function ClientsPage() {
                 transition={{ delay: 0.1 }}
                 className="mt-1 text-gray-500"
               >
-                Pregledna baza vaših strank
+                {t('page.subtitle')}
               </motion.p>
             </div>
 
@@ -608,7 +606,7 @@ export default function ClientsPage() {
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        Uvozi iz CSV
+                        {t('crm.importCsv')}
                       </button>
                       <button
                         type="button"
@@ -618,7 +616,7 @@ export default function ClientsPage() {
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        Uvozi iz Excel
+                        {t('crm.importExcel')}
                       </button>
                       <button
                         type="button"
@@ -628,7 +626,7 @@ export default function ClientsPage() {
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        Uvozi iz drugega CRM
+                        {t('crm.importOther')}
                       </button>
                     </motion.div>
                   )}
@@ -672,7 +670,7 @@ export default function ClientsPage() {
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        Izvozi v CSV
+                        {t('crm.exportCsv')}
                       </button>
                       <button
                         type="button"
@@ -682,7 +680,7 @@ export default function ClientsPage() {
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        Izvozi v Excel
+                        {t('crm.exportExcel')}
                       </button>
                       <button
                         type="button"
@@ -692,7 +690,7 @@ export default function ClientsPage() {
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                        Izvozi v PDF
+                        {t('crm.exportPdf')}
                       </button>
                     </motion.div>
                   )}
@@ -712,7 +710,7 @@ export default function ClientsPage() {
                            hover:shadow-xl hover:shadow-cyan-500/30"
               >
                 <Plus className="h-5 w-5 flex-shrink-0" weight="regular" />
-                <span className="whitespace-nowrap">Nova stranka</span>
+                <span className="whitespace-nowrap">{t('page.newClient')}</span>
               </motion.button>
             </div>
           </div>
@@ -723,19 +721,19 @@ export default function ClientsPage() {
               <StatCard
                 icon={<Users className="h-6 w-6" weight="regular" />}
                 value={stats.total}
-                label="Skupaj strank"
+                label={t('stats.total')}
                 delay={0}
               />
               <StatCard
                 icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
                 value={stats.withAppointments}
-                label="S termini"
+                label={t('stats.withAppointments')}
                 delay={1}
               />
               <StatCard
                 icon={<UserPlus className="h-6 w-6" weight="regular" />}
                 value={stats.newThisMonth}
-                label="Novih ta mesec"
+                label={t('stats.newThisMonth')}
                 delay={2}
               />
             </div>
@@ -755,7 +753,7 @@ export default function ClientsPage() {
               />
               <input
                 type="text"
-                placeholder="Išči stranke po imenu, emailu ali telefonu..."
+                placeholder={t('page.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full rounded-xl border-0 bg-white py-3 pl-12 pr-12 text-sm text-[#1A1F36]
@@ -775,7 +773,7 @@ export default function ClientsPage() {
             </div>
             {debouncedSearch && filteredClients.length > 0 && (
               <p className="mt-2 text-sm text-gray-500">
-                Prikazujem {filteredClients.length} od {clients.length} strank
+                {t('page.showingCount', { shown: filteredClients.length, total: clients.length })}
               </p>
             )}
           </motion.div>
@@ -794,7 +792,7 @@ export default function ClientsPage() {
                 onClick={loadData}
                 className="ml-auto text-sm font-medium text-red-600 hover:text-red-700"
               >
-                Poskusi znova
+                {t('errors.retry')}
               </button>
             </motion.div>
           )}
@@ -873,7 +871,7 @@ export default function ClientsPage() {
       <DisabledActionModal
         isOpen={showDisabledCreateModal}
         onClose={() => setShowDisabledCreateModal(false)}
-        message="Lastnik podjetja je onemogočil dodajanje novih strank. Obrnite se nanj, da vam to omogoči."
+        message={t('page.disabledCreateMessage')}
       />
     </ProtectedLayout>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import { Warning, Trash, X, SpinnerGap, CalendarBlank } from '@phosphor-icons/react';
 import type { Client } from '@/types/clients';
@@ -39,6 +40,8 @@ function DeleteClientModal({
     exit: { opacity: 0, scale: 0.95, y: 20 },
   };
 
+  const t = useTranslations('clients');
+
   if (!client) return null;
 
   const appointmentCount = client.appointment_count || 0;
@@ -68,10 +71,10 @@ function DeleteClientModal({
                 <Warning className="h-6 w-6 text-red-600 flex-shrink-0" weight="regular" />
                 <div>
                   <h2 className="text-lg font-semibold text-[#1A1F36]">
-                    Brisanje stranke
+                    {t('deleteModal.title')}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    Ali ste prepričani?
+                    {t('deleteModal.areYouSure')}
                   </p>
                 </div>
               </div>
@@ -109,8 +112,7 @@ function DeleteClientModal({
               {/* Warning message */}
               <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4">
                 <p className="text-sm text-red-800">
-                  Brisanje stranke <strong>{client.ime} {client.priimek}</strong> bo trajno.
-                  Ta akcija se ne da razveljaviti.
+                  {t('deleteModal.warningPrefix')} <strong>{client.ime} {client.priimek}</strong> {t('deleteModal.warningSuffix')}
                 </p>
               </div>
 
@@ -119,8 +121,7 @@ function DeleteClientModal({
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-amber-100 bg-amber-50 p-4">
                   <CalendarBlank className="h-5 w-5 flex-shrink-0 text-amber-600" weight="duotone" />
                   <p className="text-sm text-amber-800">
-                    Ta stranka ima <strong>{appointmentCount} {appointmentCount === 1 ? 'termin' : appointmentCount < 5 ? 'termine' : 'terminov'}</strong>.
-                    Termini bodo ostali v sistemu, vendar brez povezave na stranko.
+                    {t('deleteModal.appointmentWarningPrefix')} <strong>{t('deleteModal.appointmentCount', { count: appointmentCount })}</strong>. {t('deleteModal.appointmentWarningSuffix')}
                   </p>
                 </div>
               )}
@@ -137,7 +138,7 @@ function DeleteClientModal({
                 className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100
                            disabled:opacity-50"
               >
-                Prekliči
+                {t('deleteModal.cancel')}
               </motion.button>
               <motion.button
                 type="button"
@@ -152,12 +153,12 @@ function DeleteClientModal({
                 {isDeleting ? (
                   <>
                     <SpinnerGap className="h-4 w-4 animate-spin" />
-                    Brišem...
+                    {t('deleteModal.deleting')}
                   </>
                 ) : (
                   <>
                     <Trash className="h-4 w-4" weight="bold" />
-                    Izbriši stranko
+                    {t('deleteModal.deleteButton')}
                   </>
                 )}
               </motion.button>
