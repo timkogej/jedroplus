@@ -1,21 +1,18 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
-const KOMUNIKACIJA_VARS = [
-  { token: '{{ime}}', label: 'Ime stranke' },
-  { token: '{{priimek}}', label: 'Priimek stranke' },
-  { token: '{{ime_podjetja}}', label: 'Ime podjetja' },
-  { token: '{{naslov}}', label: 'Naslov podjetja' },
-  { token: '{{telefon_podjetja}}', label: 'Telefon podjetja' },
-  { token: '{{email_podjetja}}', label: 'Email podjetja' },
-  { token: '{{leto}}', label: 'Leto' },
-  { token: '{{povezava_prenarocanje}}', label: 'Povezava za prenaročanje' },
-];
-
-const VAR_LABEL_MAP: Record<string, string> = Object.fromEntries(
-  KOMUNIKACIJA_VARS.map((v) => [v.token, v.label])
-);
+const TOKEN_KEYS = [
+  { token: '{{ime}}', tKey: 'varClientFirstName' },
+  { token: '{{priimek}}', tKey: 'varClientLastName' },
+  { token: '{{ime_podjetja}}', tKey: 'varCompanyName' },
+  { token: '{{naslov}}', tKey: 'varCompanyAddress' },
+  { token: '{{telefon_podjetja}}', tKey: 'varCompanyPhone' },
+  { token: '{{email_podjetja}}', tKey: 'varCompanyEmail' },
+  { token: '{{leto}}', tKey: 'varYear' },
+  { token: '{{povezava_prenarocanje}}', tKey: 'varRescheduleLink' },
+] as const;
 
 const TOKEN_OUTER = [
   'display:inline-block',
@@ -61,12 +58,12 @@ function parseTemplate(template: string): Array<{ type: 'text' | 'token'; value:
   return segments;
 }
 
-function buildHTML(template: string): string {
+function buildHTML(template: string, labelMap: Record<string, string>): string {
   const segments = parseTemplate(template);
   return segments
     .map((seg) => {
       if (seg.type === 'token') {
-        const label = VAR_LABEL_MAP[seg.value] || seg.value;
+        const label = labelMap[seg.value] || seg.value;
         const safeToken = seg.value.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         return `<span data-token="${safeToken}" contenteditable="false" style="${TOKEN_OUTER}"><span style="${TOKEN_INNER}">${label}</span></span>`;
       }
@@ -83,7 +80,7 @@ function extractTemplate(el: HTMLElement): string {
   let result = '';
   function walk(node: Node) {
     if (node.nodeType === Node.TEXT_NODE) {
-      result += (node.textContent || '').replace(/\u00A0/g, ' ');
+      result += (node.textContent || '').replace(/ /g, ' ');
     } else if (node.nodeType === Node.ELEMENT_NODE) {
       const elem = node as HTMLElement;
       const token = elem.getAttribute('data-token');
@@ -117,13 +114,21 @@ export default function MessageComposer({
   message,
   onMessageChange,
 }: MessageComposerProps) {
+  const t = useTranslations('communication');
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalRef = useRef(false);
   const lastRawRef = useRef(message);
 
+  const varLabelMap = useMemo(
+    () => Object.fromEntries(TOKEN_KEYS.map((v) => [v.token, t(`composer.${v.tKey}`)])),
+    [t]
+  );
+  const varLabelMapRef = useRef(varLabelMap);
+  varLabelMapRef.current = varLabelMap;
+
   useEffect(() => {
     if (!editorRef.current) return;
-    editorRef.current.innerHTML = buildHTML(message);
+    editorRef.current.innerHTML = buildHTML(message, varLabelMapRef.current);
     lastRawRef.current = message;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -136,7 +141,7 @@ export default function MessageComposer({
     }
     if (lastRawRef.current === message) return;
     lastRawRef.current = message;
-    editorRef.current.innerHTML = buildHTML(message);
+    editorRef.current.innerHTML = buildHTML(message, varLabelMapRef.current);
   }, [message]);
 
   const handleInput = useCallback(() => {
@@ -151,7 +156,7 @@ export default function MessageComposer({
     (token: string) => {
       if (!editorRef.current) return;
 
-      const label = VAR_LABEL_MAP[token] || token;
+      const label = varLabelMapRef.current[token] || token;
 
       const span = document.createElement('span');
       span.setAttribute('data-token', token);
@@ -194,20 +199,20 @@ export default function MessageComposer({
       {/* Subject line */}
       <div>
         <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-          Zadeva
+          {t('composer.subjectLabel')}
         </label>
         <input
           type="text"
           value={subject}
           onChange={(e) => onSubjectChange(e.target.value)}
-          placeholder="Vnesite zadevo sporočila..."
+          placeholder={t('composer.subjectPlaceholder')}
           className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#1A1F36] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
         />
       </div>
 
       {/* Message body */}
       <div>
-        <label className="text-sm font-medium text-gray-700 mb-1.5 block">Sporočilo</label>
+        <label className="text-sm font-medium text-gray-700 mb-1.5 block">{t('composer.messageLabel')}</label>
 
         <div className="relative">
           {!message && (
@@ -215,7 +220,7 @@ export default function MessageComposer({
               className="absolute top-3 left-4 text-sm text-gray-400 pointer-events-none select-none z-10"
               aria-hidden="true"
             >
-              Vaše sporočilo strankam...
+              {t('composer.messagePlaceholder')}
             </div>
           )}
           <div
@@ -229,17 +234,17 @@ export default function MessageComposer({
         </div>
 
         <div className="flex justify-end text-xs text-gray-400 mt-1.5">
-          <span>{charCount} znakov</span>
+          <span>{t('composer.charCount', { count: charCount })}</span>
         </div>
       </div>
 
       {/* Variable chips */}
       <div>
         <p className="text-xs text-gray-400 mb-2">
-          Kliknite na spremenljivko da jo dodate v besedilo:
+          {t('composer.variableHint')}
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {KOMUNIKACIJA_VARS.map((v) => (
+          {TOKEN_KEYS.map((v) => (
             <button
               key={v.token}
               type="button"
@@ -261,7 +266,7 @@ export default function MessageComposer({
                   backgroundClip: 'text',
                 }}
               >
-                {v.label}
+                {varLabelMap[v.token]}
               </span>
             </button>
           ))}

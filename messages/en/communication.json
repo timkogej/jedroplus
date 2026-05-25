@@ -1,1 +1,110 @@
-{}
+{
+  "page": {
+    "title": "Communication",
+    "subtitle": "Send messages to your clients quickly and easily",
+    "emailQuotaLabel": "Email quota",
+    "step1SectionTitle": "Select clients",
+    "step1ContinueDisabled": "Select clients to continue",
+    "step1Continue": "{count, plural, =1 {Continue with 1 client} other {Continue with {count} clients}}",
+    "step2BackButton": "Back to selection",
+    "step2SelectedBadge": "{count, plural, =1 {1 client} other {{count} clients}}",
+    "step2SectionTitle": "Compose message"
+  },
+  "result": {
+    "title": "Messages sent",
+    "requested": "Requested",
+    "requestedDetail": "{clients} clients · {messages} messages",
+    "sent": "Sent",
+    "skipped": "Skipped",
+    "skippedLabel": "Skipped:",
+    "newMessage": "Send new message"
+  },
+  "customerList": {
+    "searchPlaceholder": "Search by name, email or phone...",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "selectedCount": "Selected: {count}",
+    "resultCount": "{count, plural, =1 {1 client} other {{count} clients}}",
+    "empty": "No clients to display",
+    "emptyHint": "Change filters or search"
+  },
+  "filters": {
+    "sectionLabel": "Appointments",
+    "all": "All clients",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "advanced": "Advanced filters",
+    "serviceLabel": "Service",
+    "allServices": "All services",
+    "dateRangeLabel": "Appointment period"
+  },
+  "ai": {
+    "title": "Asistent+",
+    "subtitle": "Describe what you want to say to your clients",
+    "toneLabel": "Message tone",
+    "toneFriendly": "Friendly",
+    "toneProfessional": "Professional",
+    "promptPlaceholder": "E.g.: Let clients know we have a 20% discount on all services this weekend.",
+    "generateButton": "Generate message",
+    "generatingButton": "Generating...",
+    "generateError": "Something went wrong while generating the message"
+  },
+  "composer": {
+    "subjectLabel": "Subject",
+    "subjectPlaceholder": "Enter message subject...",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Your message to clients...",
+    "charCount": "{count} characters",
+    "variableHint": "Click a variable to insert it into the text:",
+    "varClientFirstName": "Client first name",
+    "varClientLastName": "Client last name",
+    "varCompanyName": "Company name",
+    "varCompanyAddress": "Company address",
+    "varCompanyPhone": "Company phone",
+    "varCompanyEmail": "Company email",
+    "varYear": "Year",
+    "varRescheduleLink": "Reschedule link"
+  },
+  "preview": {
+    "toggleButton": "Message preview",
+    "subjectLabel": "Subject:",
+    "noSubject": "No subject",
+    "empty": "Preview will appear once you enter a message...",
+    "note": "Variables are replaced with client data"
+  },
+  "send": {
+    "recipientsLabel": "Recipients",
+    "recipientCount": "{count, plural, =1 {1 client} other {{count} clients}}",
+    "remainingQuotaLabel": "Remaining quota",
+    "remainingEmails": "{count} emails",
+    "warnNoSubject": "Enter message subject",
+    "warnNoMessage": "Enter message content",
+    "warnQuotaExceeded": "Email quota exceeded",
+    "sendButton": "Send message",
+    "sendingButton": "Sending...",
+    "sendNote": "Message will be sent to the email addresses of selected clients"
+  },
+  "sms": {
+    "quotaTitle": "SMS quota",
+    "quotaDepleted": "You've reached your SMS limit. Upgrade your plan to continue sending.",
+    "quotaCritical": "You only have {remaining} SMS remaining this month.",
+    "upgradeLink": "Upgrade for more SMS",
+    "blockedTitle": "SMS sending blocked",
+    "blockedUpgrade": "Upgrade plan",
+    "reasonQuota": "You've reached your monthly SMS limit",
+    "reasonNoSubscription": "You don't have an active subscription",
+    "reasonInactive": "Your subscription is not active",
+    "reasonDefault": "SMS sending is not available"
+  },
+  "toasts": {
+    "selectAtLeastOne": "Select at least one client",
+    "enterSubject": "Enter message subject",
+    "enterMessage": "Enter message content",
+    "invalidId": "Client \"{name}\" has no valid numeric ID (Clients.id)",
+    "someInvalidIds": "Some clients have no valid ID",
+    "sent": "Sent {sent} / {requested} messages",
+    "sendError": "Something went wrong while sending the message"
+  }
+}

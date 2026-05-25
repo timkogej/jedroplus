@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MagicWand, CircleNotch } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 interface AIMessageGeneratorProps {
   onGenerate: (subject: string, message: string, variables: string[]) => void;
@@ -11,20 +12,21 @@ interface AIMessageGeneratorProps {
   actor?: string;
 }
 
-const TONE_OPTIONS = [
-  { value: 'prijazen', label: 'Prijazen' },
-  { value: 'profesionalen', label: 'Profesionalen' },
-];
-
 export default function AIMessageGenerator({
   onGenerate,
   onError,
   companyId,
   actor,
 }: AIMessageGeneratorProps) {
+  const t = useTranslations('communication');
   const [prompt, setPrompt] = useState('');
   const [tone, setTone] = useState('prijazen');
   const [isGenerating, setIsGenerating] = useState(false);
+
+  const toneOptions = [
+    { value: 'prijazen', label: t('ai.toneFriendly') },
+    { value: 'profesionalen', label: t('ai.toneProfessional') },
+  ];
 
   const handleGenerate = async () => {
     if (!prompt.trim() || isGenerating) return;
@@ -62,12 +64,11 @@ export default function AIMessageGenerator({
           : [];
         onGenerate(subject, message, variables);
       } else {
-        const msg = 'Prišlo je do napake pri generiranju sporočila';
-        onError?.(msg);
+        onError?.(t('ai.generateError'));
       }
     } catch (err) {
       console.error('AI generation error:', err);
-      onError?.('Prišlo je do napake pri generiranju sporočila');
+      onError?.(t('ai.generateError'));
     } finally {
       setIsGenerating(false);
     }
@@ -87,22 +88,22 @@ export default function AIMessageGenerator({
           >
             Asistent+
           </h3>
-          <p className="text-xs text-gray-500">Opiši, kaj želiš sporočiti strankam</p>
+          <p className="text-xs text-gray-500">{t('ai.subtitle')}</p>
         </div>
       </div>
 
       <textarea
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Npr: Sporoči strankam, da imamo 20% popust na vse storitve ta vikend."
+        placeholder={t('ai.promptPlaceholder')}
         className="w-full h-24 px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#1A1F36] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 resize-none"
       />
 
       {/* Tone selector */}
       <div className="mt-3">
-        <p className="text-xs text-gray-500 mb-2">Ton sporočila</p>
+        <p className="text-xs text-gray-500 mb-2">{t('ai.toneLabel')}</p>
         <div className="flex gap-2">
-          {TONE_OPTIONS.map((option) => (
+          {toneOptions.map((option) => (
             <button
               key={option.value}
               type="button"
@@ -148,7 +149,7 @@ export default function AIMessageGenerator({
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                Generiram...
+                {t('ai.generatingButton')}
               </span>
             </motion.div>
           ) : (
@@ -165,7 +166,7 @@ export default function AIMessageGenerator({
               } : undefined}
             >
               <MagicWand className="h-5 w-5" weight="bold" style={prompt.trim() ? { fill: 'url(#btn-icon-grad)' } : undefined} />
-              <span>Generiraj sporočilo</span>
+              <span>{t('ai.generateButton')}</span>
             </motion.div>
           )}
         </AnimatePresence>

@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { ChatTeardropText, Warning, ArrowRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useCompany } from '@/app/company-context';
+import { useTranslations } from 'next-intl';
 
 interface SMSQuotaBarProps {
   showUpgradeLink?: boolean;
@@ -11,6 +12,7 @@ interface SMSQuotaBarProps {
 }
 
 export function SMSQuotaBar({ showUpgradeLink = true, compact = false }: SMSQuotaBarProps) {
+  const t = useTranslations('communication');
   const { smsQuota, planCode } = useCompany();
 
   if (!smsQuota) {
@@ -68,7 +70,7 @@ export function SMSQuotaBar({ showUpgradeLink = true, compact = false }: SMSQuot
             }`}
             weight="fill"
           />
-          <span className="font-semibold text-gray-900">SMS kvota</span>
+          <span className="font-semibold text-gray-900">{t('sms.quotaTitle')}</span>
         </div>
         <span
           className={`text-sm font-medium ${
@@ -106,7 +108,7 @@ export function SMSQuotaBar({ showUpgradeLink = true, compact = false }: SMSQuot
         <div className="flex items-start gap-2 mb-3">
           <Warning className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" weight="fill" />
           <p className="text-sm text-red-700">
-            Dosegli ste SMS limit. Nadgradite paket za nadaljevanje pošiljanja.
+            {t('sms.quotaDepleted')}
           </p>
         </div>
       )}
@@ -115,7 +117,7 @@ export function SMSQuotaBar({ showUpgradeLink = true, compact = false }: SMSQuot
         <div className="flex items-start gap-2 mb-3">
           <Warning className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" weight="fill" />
           <p className="text-sm text-amber-700">
-            Ostalo vam je samo še {remaining} SMS-ov ta mesec.
+            {t('sms.quotaCritical', { remaining })}
           </p>
         </div>
       )}
@@ -126,7 +128,7 @@ export function SMSQuotaBar({ showUpgradeLink = true, compact = false }: SMSQuot
           href="/nastavitve/paketi"
           className="inline-flex items-center gap-1 text-sm font-medium text-violet-600 hover:text-violet-700 transition-colors"
         >
-          Nadgradi za več SMS-ov
+          {t('sms.upgradeLink')}
           <ArrowRight className="h-3 w-3" weight="bold" />
         </Link>
       )}

@@ -1,1 +1,110 @@
-{}
+{
+  "page": {
+    "title": "Komunikacija",
+    "subtitle": "Pošljite sporočila svojim strankam hitro in enostavno",
+    "emailQuotaLabel": "Email kvota",
+    "step1SectionTitle": "Izbira strank",
+    "step1ContinueDisabled": "Izberite stranke za nadaljevanje",
+    "step1Continue": "{count, plural, =1 {Naprej z 1 stranko} =2 {Naprej z 2 strankama} few {Naprej z {count} strankami} other {Naprej z {count} strankami}}",
+    "step2BackButton": "Nazaj na izbiro",
+    "step2SelectedBadge": "{count, plural, =1 {1 stranka} =2 {2 stranki} few {{count} stranke} other {{count} strank}}",
+    "step2SectionTitle": "Sestavi sporočilo"
+  },
+  "result": {
+    "title": "Sporočila poslana",
+    "requested": "Zahtevano",
+    "requestedDetail": "{clients} strank · {messages} sporočil",
+    "sent": "Poslano",
+    "skipped": "Preskočeno",
+    "skippedLabel": "Preskočeni:",
+    "newMessage": "Pošlji novo sporočilo"
+  },
+  "customerList": {
+    "searchPlaceholder": "Išči stranko po imenu, emailu ali telefonu...",
+    "selectAll": "Izberi vse",
+    "deselectAll": "Odznači vse",
+    "selectedCount": "Izbrano: {count}",
+    "resultCount": "{count, plural, =1 {1 stranka} other {{count} strank}}",
+    "empty": "Ni strank za prikaz",
+    "emptyHint": "Spremenite filtre ali iskanje"
+  },
+  "filters": {
+    "sectionLabel": "Termini",
+    "all": "Vse stranke",
+    "today": "Danes",
+    "tomorrow": "Jutri",
+    "thisWeek": "Ta teden",
+    "thisMonth": "Ta mesec",
+    "advanced": "Napredni filtri",
+    "serviceLabel": "Storitev",
+    "allServices": "Vse storitve",
+    "dateRangeLabel": "Obdobje termina"
+  },
+  "ai": {
+    "title": "Asistent+",
+    "subtitle": "Opiši, kaj želiš sporočiti strankam",
+    "toneLabel": "Ton sporočila",
+    "toneFriendly": "Prijazen",
+    "toneProfessional": "Profesionalen",
+    "promptPlaceholder": "Npr: Sporoči strankam, da imamo 20% popust na vse storitve ta vikend.",
+    "generateButton": "Generiraj sporočilo",
+    "generatingButton": "Generiram...",
+    "generateError": "Prišlo je do napake pri generiranju sporočila"
+  },
+  "composer": {
+    "subjectLabel": "Zadeva",
+    "subjectPlaceholder": "Vnesite zadevo sporočila...",
+    "messageLabel": "Sporočilo",
+    "messagePlaceholder": "Vaše sporočilo strankam...",
+    "charCount": "{count} znakov",
+    "variableHint": "Kliknite na spremenljivko da jo dodate v besedilo:",
+    "varClientFirstName": "Ime stranke",
+    "varClientLastName": "Priimek stranke",
+    "varCompanyName": "Ime podjetja",
+    "varCompanyAddress": "Naslov podjetja",
+    "varCompanyPhone": "Telefon podjetja",
+    "varCompanyEmail": "Email podjetja",
+    "varYear": "Leto",
+    "varRescheduleLink": "Povezava za prenaročanje"
+  },
+  "preview": {
+    "toggleButton": "Predogled sporočila",
+    "subjectLabel": "Zadeva:",
+    "noSubject": "Brez zadeve",
+    "empty": "Predogled bo prikazan, ko vnesete sporočilo...",
+    "note": "Spremenljivke so nadomeščene s podatki stranke"
+  },
+  "send": {
+    "recipientsLabel": "Prejemniki",
+    "recipientCount": "{count, plural, =1 {1 stranka} =2 {2 stranki} few {{count} stranke} other {{count} strank}}",
+    "remainingQuotaLabel": "Preostala kvota",
+    "remainingEmails": "{count} emailov",
+    "warnNoSubject": "Vnesite zadevo sporočila",
+    "warnNoMessage": "Vnesite vsebino sporočila",
+    "warnQuotaExceeded": "Presežena email kvota",
+    "sendButton": "Pošlji sporočilo",
+    "sendingButton": "Pošiljam...",
+    "sendNote": "Sporočilo bo poslano na email naslove izbranih strank"
+  },
+  "sms": {
+    "quotaTitle": "SMS kvota",
+    "quotaDepleted": "Dosegli ste SMS limit. Nadgradite paket za nadaljevanje pošiljanja.",
+    "quotaCritical": "Ostalo vam je samo še {remaining} SMS-ov ta mesec.",
+    "upgradeLink": "Nadgradi za več SMS-ov",
+    "blockedTitle": "SMS pošiljanje blokirano",
+    "blockedUpgrade": "Nadgradi paket",
+    "reasonQuota": "Dosegli ste mesečni SMS limit",
+    "reasonNoSubscription": "Nimate aktivne naročnine",
+    "reasonInactive": "Vaša naročnina ni aktivna",
+    "reasonDefault": "SMS pošiljanje ni na voljo"
+  },
+  "toasts": {
+    "selectAtLeastOne": "Izberite vsaj eno stranko",
+    "enterSubject": "Vnesite zadevo sporočila",
+    "enterMessage": "Vnesite vsebino sporočila",
+    "invalidId": "Stranka \"{name}\" nima veljavnega numeričnega ID-ja (Stranke.id)",
+    "someInvalidIds": "Nekatere stranke nimajo veljavnega ID-ja",
+    "sent": "Poslano {sent} / {requested} sporočil",
+    "sendError": "Prišlo je do napake pri pošiljanju sporočila"
+  }
+}

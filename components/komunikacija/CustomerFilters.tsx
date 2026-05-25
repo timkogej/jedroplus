@@ -3,22 +3,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FunnelSimple, CaretDown, CalendarBlank } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
-interface FilterOption {
-  id: string;
-  label: string;
-}
-
-const quickFilters: FilterOption[] = [
-  { id: 'all', label: 'Vse stranke' },
-  { id: 'today', label: 'Danes' },
-  { id: 'tomorrow', label: 'Jutri' },
-  { id: 'this-week', label: 'Ta teden' },
-  { id: 'this-month', label: 'Ta mesec' },
-];
-
-const serviceOptions = [
-  'Vse storitve',
+const SERVICE_OPTIONS_DATA = [
   'Striženje',
   'Barvanje',
   'Manikura',
@@ -40,12 +27,23 @@ export default function CustomerFilters({
   onServiceFilterChange,
   selectedService,
 }: CustomerFiltersProps) {
+  const t = useTranslations('communication');
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const quickFilters = [
+    { id: 'all', label: t('filters.all') },
+    { id: 'today', label: t('filters.today') },
+    { id: 'tomorrow', label: t('filters.tomorrow') },
+    { id: 'this-week', label: t('filters.thisWeek') },
+    { id: 'this-month', label: t('filters.thisMonth') },
+  ];
+
+  const serviceOptions = [t('filters.allServices'), ...SERVICE_OPTIONS_DATA];
 
   return (
     <div className="space-y-3">
       {/* Section label */}
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Termini</p>
+      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('filters.sectionLabel')}</p>
 
       {/* Quick filter pills */}
       <div className="flex flex-wrap gap-2">
@@ -77,7 +75,7 @@ export default function CustomerFilters({
         className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
       >
         <FunnelSimple className="h-4 w-4" weight="bold" />
-        <span>Napredni filtri</span>
+        <span>{t('filters.advanced')}</span>
         <CaretDown
           className={`h-3 w-3 transition-transform duration-200 ${showAdvanced ? 'rotate-180' : ''}`}
           weight="bold"
@@ -98,7 +96,7 @@ export default function CustomerFilters({
               {/* Service filter */}
               <div>
                 <label className="text-xs font-medium text-gray-500 mb-1.5 block">
-                  Storitev
+                  {t('filters.serviceLabel')}
                 </label>
                 <div className="relative">
                   <select
@@ -119,7 +117,7 @@ export default function CustomerFilters({
               {/* Date range */}
               <div>
                 <label className="text-xs font-medium text-gray-500 mb-1.5 block">
-                  Obdobje termina
+                  {t('filters.dateRangeLabel')}
                 </label>
                 <div className="relative">
                   <CalendarBlank className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" weight="regular" />

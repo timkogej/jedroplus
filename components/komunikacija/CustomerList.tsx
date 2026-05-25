@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { MagnifyingGlass, X, CheckSquare, MinusSquare } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import CustomerFilters from './CustomerFilters';
 import CustomerListItem from './CustomerListItem';
 
@@ -31,6 +32,7 @@ export default function CustomerList({
   onSelectionChange,
   loading = false,
 }: CustomerListProps) {
+  const t = useTranslations('communication');
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('today');
   const [selectedService, setSelectedService] = useState('Vse storitve');
@@ -153,7 +155,7 @@ export default function CustomerList({
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Išči stranko po imenu, emailu ali telefonu..."
+          placeholder={t('customerList.searchPlaceholder')}
           className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-[#1A1F36] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
         />
         {search && (
@@ -180,7 +182,7 @@ export default function CustomerList({
             ) : (
               <CheckSquare className="h-5 w-5" weight="regular" />
             )}
-            <span>{allSelected ? 'Odznači vse' : 'Izberi vse'}</span>
+            <span>{allSelected ? t('customerList.deselectAll') : t('customerList.selectAll')}</span>
           </button>
         </div>
         <div className="flex items-center gap-2">
@@ -190,11 +192,11 @@ export default function CustomerList({
               animate={{ opacity: 1, scale: 1 }}
               className="px-3 py-1 rounded-lg bg-violet-50 text-xs font-semibold text-violet-600 border border-violet-200"
             >
-              Izbrano: {selectedIds.size}
+              {t('customerList.selectedCount', { count: selectedIds.size })}
             </motion.span>
           )}
           <span className="text-xs text-gray-400">
-            {filteredCustomers.length} {filteredCustomers.length === 1 ? 'stranka' : 'strank'}
+            {t('customerList.resultCount', { count: filteredCustomers.length })}
           </span>
         </div>
       </div>
@@ -226,8 +228,8 @@ export default function CustomerList({
           ))
         ) : (
           <div className="py-12 text-center">
-            <p className="text-sm text-gray-400">Ni strank za prikaz</p>
-            <p className="text-xs text-gray-300 mt-1">Spremenite filtre ali iskanje</p>
+            <p className="text-sm text-gray-400">{t('customerList.empty')}</p>
+            <p className="text-xs text-gray-300 mt-1">{t('customerList.emptyHint')}</p>
           </div>
         )}
       </div>
