@@ -22,6 +22,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import { useTranslations } from 'next-intl';
 
 type ReminderRow = Record<string, unknown>;
 
@@ -38,6 +39,7 @@ const isEnabledValue = (value: unknown, fallback = false) => {
 };
 
 export default function RemindersPage() {
+  const t = useTranslations('reminders');
   const { companyId, companyUuid, companySettings } = useCompany();
   const { role, permissions } = useRolePermissions();
   const canManageSettings = role !== 'staff' || (permissions?.can_manage_opomniki ?? true);
@@ -201,24 +203,24 @@ export default function RemindersPage() {
   }, [reminderRow, companyRow]);
 
   const getToneLabel = (toneValue: string) => {
-    const toneMap: Record<string, string> = {
-      'profesionalen': 'Profesionalen',
-      'prijazen': 'Prijazen',
-      'prodajno_usmerjen': 'Prodajno usmerjen',
-      'formal': 'Formalen',
-      'sproscen': 'Sproščen',
+    const map: Record<string, string> = {
+      'profesionalen': t('tone.professional'),
+      'prijazen': t('tone.friendly'),
+      'prodajno_usmerjen': t('tone.salesOriented'),
+      'formal': t('tone.formal'),
+      'sproscen': t('tone.relaxed'),
     };
-    return toneMap[toneValue] || toneValue;
+    return map[toneValue] ?? toneValue;
   };
 
   const getLanguageLabel = (lang: string) => {
-    const langMap: Record<string, string> = {
-      'sl': 'Slovenščina',
-      'en': 'English',
-      'it': 'Italiano',
-      'de': 'Deutsch',
+    const map: Record<string, string> = {
+      'sl': t('language.sl'),
+      'en': t('language.en'),
+      'it': t('language.it'),
+      'de': t('language.de'),
     };
-    return langMap[lang] || lang;
+    return map[lang] ?? lang;
   };
 
   const getChannelLabel = (channel: string) => {
@@ -240,21 +242,20 @@ export default function RemindersPage() {
             className="mb-8 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">Opomniki</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
               <p className="mt-1 text-sm text-gray-500">
-                Pregled nastavitev avtomatskih opomnikov
+                {t('page.subtitle')}
               </p>
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Settings button */}
               {canManageSettings && (
                 <motion.button
                   onClick={() => setShowSettingsModal(true)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="relative w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
-                  title="Nastavitve"
+                  title={t('page.settingsButton')}
                 >
                   <Gear size={20} weight="bold" className="text-gray-900" />
                   {hasIncompleteSettings && (
@@ -274,15 +275,15 @@ export default function RemindersPage() {
             >
               <Warning size={18} weight="fill" className="text-orange-500 flex-shrink-0" />
               <p className="text-sm text-orange-800 flex-1">
-                <span className="font-semibold">Izpolnite nastavitve označene s !</span>{' '}
-                za brezhibno delovanje in izkoriščanje celotnega potenciala opomnikov.
+                <span className="font-semibold">{t('page.incompleteBannerTitle')}</span>{' '}
+                {t('page.incompleteBannerDesc')}
               </p>
               {canManageSettings && (
                 <button
                   onClick={() => setShowSettingsModal(true)}
                   className="text-xs font-semibold text-orange-700 hover:text-orange-900 underline underline-offset-2 flex-shrink-0"
                 >
-                  Odpri nastavitve →
+                  {t('page.openSettings')}
                 </button>
               )}
             </motion.div>
@@ -321,8 +322,8 @@ export default function RemindersPage() {
                       <Bell className="h-6 w-6 text-gray-900" weight="regular" />
                     </div>
                     <div className="mt-3 text-left">
-                      <div className="text-sm font-medium text-gray-600">Poslano Danes</div>
-                      <div className="text-xs text-gray-500 mt-1">Opomnikov pred terminom</div>
+                      <div className="text-sm font-medium text-gray-600">{t('page.stats.sentToday')}</div>
+                      <div className="text-xs text-gray-500 mt-1">{t('page.stats.sentTodayDesc')}</div>
                     </div>
                   </div>
                 </motion.div>
@@ -339,8 +340,8 @@ export default function RemindersPage() {
                       <CalendarBlank className="h-6 w-6 text-gray-900" weight="regular" />
                     </div>
                     <div className="mt-3 text-left">
-                      <div className="text-sm font-medium text-gray-600">Napovedano Jutri</div>
-                      <div className="text-xs text-gray-500 mt-1">Terminov z opomniki</div>
+                      <div className="text-sm font-medium text-gray-600">{t('page.stats.scheduledTomorrow')}</div>
+                      <div className="text-xs text-gray-500 mt-1">{t('page.stats.scheduledTomorrowDesc')}</div>
                     </div>
                   </div>
                 </motion.div>
@@ -357,8 +358,8 @@ export default function RemindersPage() {
                       <CheckCircle className="h-6 w-6 text-gray-900" weight="regular" />
                     </div>
                     <div className="mt-3 text-left">
-                      <div className="text-sm font-medium text-gray-600">Po Obiskih Danes</div>
-                      <div className="text-xs text-gray-500 mt-1">Zaključenih terminov</div>
+                      <div className="text-sm font-medium text-gray-600">{t('page.stats.afterVisits')}</div>
+                      <div className="text-xs text-gray-500 mt-1">{t('page.stats.afterVisitsDesc')}</div>
                     </div>
                   </div>
                 </motion.div>
@@ -373,19 +374,19 @@ export default function RemindersPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Splošne nastavitve */}
+              {/* General settings */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
               >
-                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Splošne nastavitve</h2>
+                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">{t('page.general.sectionTitle')}</h2>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                      <span className="text-sm text-gray-700">Jezik pošiljanja</span>
+                      <span className="text-sm text-gray-700">{t('page.general.language')}</span>
                     </div>
                     <span className="text-sm text-gray-900">{getLanguageLabel(sendingLanguage)}</span>
                   </div>
@@ -393,7 +394,7 @@ export default function RemindersPage() {
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                      <span className="text-sm text-gray-700">Ton komunikacije</span>
+                      <span className="text-sm text-gray-700">{t('page.general.tone')}</span>
                     </div>
                     <span className="text-sm text-gray-900">{getToneLabel(tone)}</span>
                   </div>
@@ -401,10 +402,10 @@ export default function RemindersPage() {
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <EnvelopeSimple className="w-4 h-4 text-gray-900" weight="regular" />
-                      <span className="text-sm text-gray-700">Reply-to Email</span>
+                      <span className="text-sm text-gray-700">{t('page.general.replyTo')}</span>
                     </div>
                     <span className="text-sm text-gray-900 truncate max-w-xs">
-                      {replyToEmail || <span className="text-gray-400">Ni nastavljeno</span>}
+                      {replyToEmail || <span className="text-gray-400">{t('page.general.notSet')}</span>}
                     </span>
                   </div>
 
@@ -412,12 +413,12 @@ export default function RemindersPage() {
                     <div className="flex items-center gap-2">
                       <EnvelopeSimple className="w-4 h-4 text-gray-900" weight="regular" />
                       <div>
-                        <span className="text-sm text-gray-700">Ime pošiljatelja</span>
-                        <p className="text-xs text-gray-400">Ime ki se prikaže pri email kot pošiljatelj</p>
+                        <span className="text-sm text-gray-700">{t('page.general.fromName')}</span>
+                        <p className="text-xs text-gray-400">{t('page.general.fromNameDesc')}</p>
                       </div>
                     </div>
                     <span className="text-sm text-gray-900">
-                      {fromName || <span className="text-gray-400">Ni nastavljeno</span>}
+                      {fromName || <span className="text-gray-400">{t('page.general.notSet')}</span>}
                     </span>
                   </div>
 
@@ -425,27 +426,31 @@ export default function RemindersPage() {
                     <div className="flex items-center gap-2">
                       <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
                       <div>
-                        <span className="text-sm text-gray-700">ID Pošiljatelja SMS</span>
-                        <p className="text-xs text-gray-400">Uporablja se pri SMS pošiljanju</p>
+                        <span className="text-sm text-gray-700">{t('page.general.senderId')}</span>
+                        <p className="text-xs text-gray-400">{t('page.general.senderIdDesc')}</p>
                       </div>
                     </div>
-                    <span className="text-sm text-gray-900">{smsSenderId || <span className="text-gray-400">Ni nastavljeno</span>}</span>
+                    <span className="text-sm text-gray-900">{smsSenderId || <span className="text-gray-400">{t('page.general.notSet')}</span>}</span>
                   </div>
 
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                      <span className="text-sm text-gray-700">Nasveti glede na storitev</span>
+                      <span className="text-sm text-gray-700">{t('page.general.tips')}</span>
                     </div>
                     <span className="text-sm text-gray-900">
-                      {nastvetiStoritev === 'yes' ? 'Da' : nastvetiStoritev === 'no' ? 'Ne' : 'AI določi'}
+                      {nastvetiStoritev === 'yes'
+                        ? t('modal.general.tipsYes')
+                        : nastvetiStoritev === 'no'
+                        ? t('modal.general.tipsNo')
+                        : t('modal.general.tipsAuto')}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between py-2.5">
                     <div className="flex items-center gap-2">
                       <Palette className="w-4 h-4 text-gray-900" weight="regular" />
-                      <span className="text-sm text-gray-700">Barve emaila</span>
+                      <span className="text-sm text-gray-700">{t('page.general.colors')}</span>
                     </div>
                     <div className="flex gap-1.5">
                       {[emailPrimary, emailSecondary].filter(Boolean).map((color, i) => (
@@ -456,30 +461,30 @@ export default function RemindersPage() {
                         />
                       ))}
                       {!emailPrimary && !emailSecondary && (
-                        <span className="text-sm text-gray-400">Ni nastavljeno</span>
+                        <span className="text-sm text-gray-400">{t('page.general.notSet')}</span>
                       )}
                     </div>
                   </div>
                 </div>
               </motion.div>
 
-              {/* Opomniki pred terminom */}
+              {/* Pre-appointment reminders */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
               >
-                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Opomniki pred terminom</h2>
+                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">{t('page.before.sectionTitle')}</h2>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <Bell className="w-4 h-4 text-gray-900" weight="regular" />
-                      <span className="text-sm text-gray-700">Status</span>
+                      <span className="text-sm text-gray-700">{t('page.before.status')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`text-sm ${enabledBefore ? 'text-green-600' : 'text-red-500'}`}>
-                        {enabledBefore ? 'Omogočeno' : 'Onemogočeno'}
+                        {enabledBefore ? t('status.enabled') : t('status.disabled')}
                       </span>
                       <div className={`w-2.5 h-2.5 rounded-full ${enabledBefore ? 'bg-green-500' : 'bg-red-400'}`} />
                     </div>
@@ -490,7 +495,7 @@ export default function RemindersPage() {
                       <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                         <div className="flex items-center gap-2">
                           <EnvelopeSimple className="w-4 h-4 text-gray-900" weight="regular" />
-                          <span className="text-sm text-gray-700">Način pošiljanja</span>
+                          <span className="text-sm text-gray-700">{t('page.before.channel')}</span>
                         </div>
                         <span className="text-sm text-gray-900">{getChannelLabel(beforeChannel)}</span>
                       </div>
@@ -500,25 +505,27 @@ export default function RemindersPage() {
                           <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                             <div className="flex items-center gap-2">
                               <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                              <span className="text-sm text-gray-700">Vrsta SMS sporočila</span>
+                              <span className="text-sm text-gray-700">{t('page.before.smsType')}</span>
                             </div>
-                            <span className="text-sm text-gray-900">{smsModePred === 'manual' ? 'Lastna predloga' : 'AI ustvari'}</span>
+                            <span className="text-sm text-gray-900">
+                              {smsModePred === 'manual' ? t('page.before.manualMode') : t('page.before.aiMode')}
+                            </span>
                           </div>
                           {smsModePred === 'ai' && (
                             <div className="py-2.5 border-b border-gray-100 space-y-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                                <span className="text-sm text-gray-700">AI upošteva</span>
+                                <span className="text-sm text-gray-700">{t('page.before.aiConsiders')}</span>
                               </div>
                               <div className="pl-6 space-y-1">
-                                {smsStoritevPred && <p className="text-xs text-gray-600">• Vključi storitev</p>}
+                                {smsStoritevPred && <p className="text-xs text-gray-600">• {t('page.before.includeService')}</p>}
                                 {smsNavodilaPred && beforeInstructions && (
                                   <>
-                                    <p className="text-xs text-gray-600">• Navodila</p>
+                                    <p className="text-xs text-gray-600">• {t('page.before.instructions')}</p>
                                     <p className="text-xs text-gray-500 pl-3 whitespace-pre-wrap text-left">{beforeInstructions}</p>
                                   </>
                                 )}
-                                {!smsStoritevPred && !smsNavodilaPred && <p className="text-xs text-gray-400">Ni posebnih navodil</p>}
+                                {!smsStoritevPred && !smsNavodilaPred && <p className="text-xs text-gray-400">{t('page.before.noSpecialInstructions')}</p>}
                               </div>
                             </div>
                           )}
@@ -526,7 +533,7 @@ export default function RemindersPage() {
                             <div className="flex items-start justify-between gap-4 py-2.5 border-b border-gray-100">
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                                <span className="text-sm text-gray-700">Lastna predloga</span>
+                                <span className="text-sm text-gray-700">{t('page.before.manualMode')}</span>
                               </div>
                               <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{smsTemplatePred}</p>
                             </div>
@@ -537,16 +544,16 @@ export default function RemindersPage() {
                       <div className={`flex items-center justify-between py-2.5 ${beforeInstructions ? 'border-b border-gray-100' : ''}`}>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-gray-900" weight="regular" />
-                          <span className="text-sm text-gray-700">Čas pošiljanja</span>
+                          <span className="text-sm text-gray-700">{t('page.before.timeLabel')}</span>
                         </div>
-                        <span className="text-sm text-gray-900">1 dan pred terminom</span>
+                        <span className="text-sm text-gray-900">{t('page.before.timeValue')}</span>
                       </div>
 
                       {beforeInstructions && (
                         <div className="flex items-start justify-between gap-4 py-2.5">
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                            <span className="text-sm text-gray-700">Navodila</span>
+                            <span className="text-sm text-gray-700">{t('page.before.instructions')}</span>
                           </div>
                           <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{beforeInstructions}</p>
                         </div>
@@ -556,23 +563,23 @@ export default function RemindersPage() {
                 </div>
               </motion.div>
 
-              {/* Opomniki po terminu */}
+              {/* Post-appointment reminders */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
                 className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
               >
-                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Opomniki po terminu</h2>
+                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">{t('page.after.sectionTitle')}</h2>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-gray-900" weight="regular" />
-                      <span className="text-sm text-gray-700">Status</span>
+                      <span className="text-sm text-gray-700">{t('page.after.status')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`text-sm ${enabledAfter ? 'text-green-600' : 'text-red-500'}`}>
-                        {enabledAfter ? 'Omogočeno' : 'Onemogočeno'}
+                        {enabledAfter ? t('status.enabled') : t('status.disabled')}
                       </span>
                       <div className={`w-2.5 h-2.5 rounded-full ${enabledAfter ? 'bg-green-500' : 'bg-red-400'}`} />
                     </div>
@@ -583,7 +590,7 @@ export default function RemindersPage() {
                       <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                         <div className="flex items-center gap-2">
                           <EnvelopeSimple className="w-4 h-4 text-gray-900" weight="regular" />
-                          <span className="text-sm text-gray-700">Način pošiljanja</span>
+                          <span className="text-sm text-gray-700">{t('page.after.channel')}</span>
                         </div>
                         <span className="text-sm text-gray-900">{getChannelLabel(afterChannel)}</span>
                       </div>
@@ -593,25 +600,27 @@ export default function RemindersPage() {
                           <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                             <div className="flex items-center gap-2">
                               <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                              <span className="text-sm text-gray-700">Vrsta SMS sporočila</span>
+                              <span className="text-sm text-gray-700">{t('page.after.smsType')}</span>
                             </div>
-                            <span className="text-sm text-gray-900">{smsModePo === 'manual' ? 'Lastna predloga' : 'AI ustvari'}</span>
+                            <span className="text-sm text-gray-900">
+                              {smsModePo === 'manual' ? t('page.after.manualMode') : t('page.after.aiMode')}
+                            </span>
                           </div>
                           {smsModePo === 'ai' && (
                             <div className="py-2.5 border-b border-gray-100 space-y-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                                <span className="text-sm text-gray-700">AI upošteva</span>
+                                <span className="text-sm text-gray-700">{t('page.after.aiConsiders')}</span>
                               </div>
                               <div className="pl-6 space-y-1">
-                                {smsStoritevPo && <p className="text-xs text-gray-600">• Vključi storitev</p>}
+                                {smsStoritevPo && <p className="text-xs text-gray-600">• {t('page.after.includeService')}</p>}
                                 {smsNavodilaPo && afterInstructions && (
                                   <>
-                                    <p className="text-xs text-gray-600">• Navodila</p>
+                                    <p className="text-xs text-gray-600">• {t('page.after.instructions')}</p>
                                     <p className="text-xs text-gray-500 pl-3 whitespace-pre-wrap text-left">{afterInstructions}</p>
                                   </>
                                 )}
-                                {!smsStoritevPo && !smsNavodilaPo && <p className="text-xs text-gray-400">Ni posebnih navodil</p>}
+                                {!smsStoritevPo && !smsNavodilaPo && <p className="text-xs text-gray-400">{t('page.after.noSpecialInstructions')}</p>}
                               </div>
                             </div>
                           )}
@@ -619,7 +628,7 @@ export default function RemindersPage() {
                             <div className="flex items-start justify-between gap-4 py-2.5 border-b border-gray-100">
                               <div className="flex items-center gap-2 flex-shrink-0">
                                 <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                                <span className="text-sm text-gray-700">Lastna predloga</span>
+                                <span className="text-sm text-gray-700">{t('page.after.manualMode')}</span>
                               </div>
                               <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{smsTemplatePo}</p>
                             </div>
@@ -630,16 +639,16 @@ export default function RemindersPage() {
                       <div className={`flex items-center justify-between py-2.5 ${(afterHasDiscount && afterDiscountText) || afterInstructions ? 'border-b border-gray-100' : ''}`}>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-gray-900" weight="regular" />
-                          <span className="text-sm text-gray-700">Čas pošiljanja</span>
+                          <span className="text-sm text-gray-700">{t('page.after.timeLabel')}</span>
                         </div>
-                        <span className="text-sm text-gray-900">Takoj po zaključku</span>
+                        <span className="text-sm text-gray-900">{t('page.after.timeValue')}</span>
                       </div>
 
                       {afterHasDiscount && afterDiscountText && (
                         <div className={`flex items-center justify-between py-2.5 ${afterInstructions ? 'border-b border-gray-100' : ''}`}>
                           <div className="flex items-center gap-2">
                             <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                            <span className="text-sm text-gray-700">Popust</span>
+                            <span className="text-sm text-gray-700">{t('page.after.discount')}</span>
                           </div>
                           <span className="text-sm text-gray-900">{afterDiscountText}</span>
                         </div>
@@ -649,7 +658,7 @@ export default function RemindersPage() {
                         <div className="flex items-start justify-between gap-4 py-2.5">
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                            <span className="text-sm text-gray-700">Navodila</span>
+                            <span className="text-sm text-gray-700">{t('page.after.instructions')}</span>
                           </div>
                           <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{afterInstructions}</p>
                         </div>
@@ -668,15 +677,9 @@ export default function RemindersPage() {
             transition={{ delay: 0.5 }}
             className="mt-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
           >
-            <h2 className="text-base font-semibold text-[#1A1F36] mb-4">O Opomnikih</h2>
-            <p className="text-sm text-gray-600">
-              Opomniki se pošiljajo avtomatsko na podlagi tukaj prikazanih nastavitev — brez ročnega dela. Vsaka stranka prejme sporočilo pred in/ali po terminu, odvisno od vaše konfiguracije.
-
-Ko je aktiviran AI, sporočila niso nikoli enaka — AI si zapomni kontekst stranke, omeni pravo storitev in prilagodi vsebino, da zveni naravno in osebno. To pomeni večjo odprtost, bolj zapomnjena sporočila in stranke, ki se počutijo cenjene.
-
-Za lažje upravljanje je na voljo tudi možnost lastne predloge sporočila, kadar želite popoln nadzor nad vsebino.
-
-V kolikor imate kakršnakoli vprašanja, nas kontaktirajte na help@jedroplus.com.
+            <h2 className="text-base font-semibold text-[#1A1F36] mb-4">{t('page.info.title')}</h2>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">
+              {t('page.info.body')}
             </p>
           </motion.div>
         </div>
