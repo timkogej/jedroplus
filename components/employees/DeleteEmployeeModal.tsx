@@ -3,6 +3,7 @@
 import { memo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Warning, Trash, Spinner } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { Employee } from '@/types/employees';
 import EmployeeAvatar from './EmployeeAvatar';
 
@@ -19,6 +20,8 @@ function DeleteEmployeeModal({
   onClose,
   onConfirm,
 }: DeleteEmployeeModalProps) {
+  const t = useTranslations('staff');
+  const tCommon = useTranslations('common');
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -59,7 +62,7 @@ function DeleteEmployeeModal({
                   <Warning className="h-5 w-5 text-red-600" weight="fill" />
                 </div>
                 <h2 className="text-lg font-semibold text-[#1A1F36]">
-                  Izbriši zaposlenega
+                  {t('deleteModal.title')}
                 </h2>
               </div>
               <button
@@ -82,11 +85,11 @@ function DeleteEmployeeModal({
                   size="xl"
                 />
                 <p className="mt-4 text-gray-600">
-                  Ali ste prepričani, da želite izbrisati zaposlenega{' '}
+                  {t('deleteModal.confirmMessage')}{' '}
                   <span className="font-semibold text-[#1A1F36]">{fullName}</span>?
                 </p>
                 <p className="mt-2 text-sm text-gray-500">
-                  Ta akcija je trajna in je ni mogoče razveljaviti.
+                  {t('deleteModal.warning')}
                 </p>
               </div>
             </div>
@@ -99,7 +102,7 @@ function DeleteEmployeeModal({
                 disabled={isDeleting}
                 className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
               >
-                Prekliči
+                {tCommon('buttons.cancel')}
               </button>
               <motion.button
                 type="button"
@@ -112,12 +115,12 @@ function DeleteEmployeeModal({
                 {isDeleting ? (
                   <>
                     <Spinner className="h-4 w-4 animate-spin" />
-                    Brisanje...
+                    {t('deleteModal.deleting')}
                   </>
                 ) : (
                   <>
                     <Trash className="h-4 w-4" weight="bold" />
-                    Izbriši
+                    {t('deleteModal.delete')}
                   </>
                 )}
               </motion.button>

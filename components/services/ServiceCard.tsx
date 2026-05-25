@@ -12,6 +12,7 @@ import {
   ToggleLeft,
   ToggleRight,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { SERVICE_CATEGORIES } from '@/types/services';
 import type { Service } from '@/types/services';
 import { isGradient, DEFAULT_SERVICE_GRADIENT, getGradientStartColor } from '@/lib/constants/serviceGradients';
@@ -35,6 +36,8 @@ function ServiceCard({
   canEdit = true,
   canDelete = true,
 }: ServiceCardProps) {
+  const t = useTranslations('services');
+
   // Handle both gradient strings and legacy hex colors
   const displayGradient = isGradient(service.barva)
     ? service.barva
@@ -64,7 +67,7 @@ function ServiceCard({
         {/* Active/Inactive badge */}
         {!service.aktivna && (
           <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium text-gray-600 shadow-sm">
-            Neaktivna
+            {t('card.inactive')}
           </div>
         )}
       </div>
@@ -131,12 +134,12 @@ function ServiceCard({
             {service.aktivna ? (
               <>
                 <ToggleRight className="h-4 w-4" weight="fill" />
-                Aktivna
+                {t('card.toggleActive')}
               </>
             ) : (
               <>
                 <ToggleLeft className="h-4 w-4" weight="regular" />
-                Neaktivna
+                {t('card.toggleInactive')}
               </>
             )}
           </motion.button>

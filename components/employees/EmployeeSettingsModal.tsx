@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import {
   X,
   Clock,
@@ -100,6 +101,19 @@ function EmployeeSettingsModal({
   onSave,
   isSaving = false,
 }: EmployeeSettingsModalProps) {
+  const t = useTranslations('staff');
+  const tCommon = useTranslations('common');
+
+  const dayLabel: Record<string, string> = {
+    Ponedeljek: t('days.Ponedeljek'),
+    Torek: t('days.Torek'),
+    Sreda: t('days.Sreda'),
+    Četrtek: t('days.Četrtek'),
+    Petek: t('days.Petek'),
+    Sobota: t('days.Sobota'),
+    Nedelja: t('days.Nedelja'),
+  };
+
   // Track if employee uses company schedule
   const [usesCompanySchedule, setUsesCompanySchedule] = useState<boolean>(() => {
     // Check employee.ali_ima_urnik_podjetja field (parsed from database)
@@ -301,7 +315,7 @@ function EmployeeSettingsModal({
                   />
                   <div>
                     <h2 className="text-xl font-semibold text-white">
-                      Nastavitve zaposlenega
+                      {t('settings.title')}
                     </h2>
                     <p className="mt-1 text-sm text-white/80">
                       {employee.ime} {employee.priimek}
@@ -332,7 +346,7 @@ function EmployeeSettingsModal({
                            }`}
               >
                 <CalendarBlank className="h-4 w-4" weight={activeTab === 'schedule' ? 'fill' : 'regular'} />
-                Urnik
+                {t('settings.tabSchedule')}
               </button>
               <button
                 type="button"
@@ -344,7 +358,7 @@ function EmployeeSettingsModal({
                            }`}
               >
                 <Briefcase className="h-4 w-4" weight={activeTab === 'services' ? 'fill' : 'regular'} />
-                Storitve ({selectedServices.length}/{allServices.length})
+                {t('settings.tabServices')} ({selectedServices.length}/{allServices.length})
               </button>
             </div>
 
@@ -355,9 +369,9 @@ function EmployeeSettingsModal({
                   {/* Use company schedule toggle - CRITICAL */}
                   <div className="flex items-center justify-between p-4 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl border border-violet-100">
                     <div>
-                      <div className="font-semibold text-[#1A1F36]">Urnik podjetja</div>
+                      <div className="font-semibold text-[#1A1F36]">{t('settings.companyScheduleTitle')}</div>
                       <div className="text-sm text-gray-500">
-                        Uporabi splošni urnik podjetja
+                        {t('settings.companyScheduleSubtitle')}
                       </div>
                     </div>
                     <button
@@ -394,10 +408,10 @@ function EmployeeSettingsModal({
                       <div className="p-4 border-2 border-orange-200 rounded-xl bg-orange-50/30">
                         <div className="flex items-center gap-2 mb-3">
                           <Clock className="h-5 w-5 text-orange-600" weight="fill" />
-                          <h3 className="text-base font-semibold text-orange-900">Prilagojen urnik</h3>
+                          <h3 className="text-base font-semibold text-orange-900">{t('settings.customScheduleTitle')}</h3>
                         </div>
                         <p className="text-sm text-orange-700 mb-4">
-                          Nastavite prilagojen delovni čas zaposlenega. Vsak dan lahko ima več intervalov (npr. 08:00-13:00, 14:00-17:00).
+                          {t('settings.customScheduleDesc')}
                         </p>
 
                         <div className="space-y-3">
@@ -422,11 +436,11 @@ function EmployeeSettingsModal({
                                       <Square className="h-5 w-5 text-gray-400" weight="regular" />
                                     )}
                                     <span className={`font-semibold ${daySchedule.enabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
-                                      {day}
+                                      {dayLabel[day]}
                                     </span>
                                   </button>
                                   {!daySchedule.enabled && (
-                                    <span className="text-xs text-gray-400 italic">Prost dan</span>
+                                    <span className="text-xs text-gray-400 italic">{t('settings.dayOff')}</span>
                                   )}
                                 </div>
 
@@ -479,7 +493,7 @@ function EmployeeSettingsModal({
                                                text-sm font-medium text-violet-600 hover:bg-violet-50 transition-colors mt-2"
                                     >
                                       <Plus className="h-4 w-4" weight="bold" />
-                                      Dodaj interval
+                                      {t('settings.addInterval')}
                                     </button>
                                   </div>
                                 )}
@@ -494,7 +508,7 @@ function EmployeeSettingsModal({
                   {usesCompanySchedule && (
                     <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
                       <p className="text-sm text-gray-500 mb-2">
-                        Zaposleni uporablja urnik podjetja. Za prilagojen urnik izklopite stikalo zgoraj.
+                        {t('settings.usingCompanySchedule')}
                       </p>
                       {DAYS.map((day) => {
                         const companyDay = companySchedule[day];
@@ -502,7 +516,7 @@ function EmployeeSettingsModal({
                         const intervals: TimeInterval[] = companyDay.intervals || [{ start: companyDay.start ?? '08:00', end: companyDay.end ?? '17:00' }];
                         return (
                           <div key={day} className={`flex items-start gap-3 text-sm ${companyDay.enabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
-                            <span className="w-24 font-medium flex-shrink-0">{day}</span>
+                            <span className="w-24 font-medium flex-shrink-0">{dayLabel[day]}</span>
                             {companyDay.enabled ? (
                               <span className="text-gray-600">
                                 {intervals.map((iv, i) => (
@@ -510,7 +524,7 @@ function EmployeeSettingsModal({
                                 ))}
                               </span>
                             ) : (
-                              <span className="italic">Prost dan</span>
+                              <span className="italic">{t('settings.dayOff')}</span>
                             )}
                           </div>
                         );
@@ -525,9 +539,9 @@ function EmployeeSettingsModal({
                   {/* Performs all services toggle */}
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                     <div>
-                      <div className="font-semibold text-[#1A1F36]">Opravlja vse storitve</div>
+                      <div className="font-semibold text-[#1A1F36]">{t('settings.allServicesTitle')}</div>
                       <div className="text-sm text-gray-500">
-                        Zaposleni lahko opravlja vse storitve podjetja
+                        {t('settings.allServicesSubtitle')}
                       </div>
                     </div>
                     <button
@@ -553,7 +567,7 @@ function EmployeeSettingsModal({
                     <>
                       <div className="flex items-center justify-between">
                         <p className="text-sm text-gray-500">
-                          Izberite storitve, ki jih ta zaposleni lahko opravlja.
+                          {t('settings.selectServicesHint')}
                         </p>
                         <div className="flex gap-2">
                           <button
@@ -561,7 +575,7 @@ function EmployeeSettingsModal({
                             onClick={selectAllServices}
                             className="text-xs font-medium text-violet-600 hover:text-violet-700"
                           >
-                            Izberi vse
+                            {t('settings.selectAll')}
                           </button>
                           <span className="text-gray-300">|</span>
                           <button
@@ -569,7 +583,7 @@ function EmployeeSettingsModal({
                             onClick={deselectAllServices}
                             className="text-xs font-medium text-gray-500 hover:text-gray-700"
                           >
-                            Počisti
+                            {t('settings.clearAll')}
                           </button>
                         </div>
                       </div>
@@ -621,7 +635,7 @@ function EmployeeSettingsModal({
                       {allServices.length === 0 && (
                         <div className="text-center py-8 text-gray-500">
                           <Briefcase className="h-12 w-12 mx-auto mb-3 text-gray-300" weight="duotone" />
-                          <p>Ni storitev za izbiranje</p>
+                          <p>{t('settings.noServices')}</p>
                         </div>
                       )}
                     </>
@@ -639,7 +653,7 @@ function EmployeeSettingsModal({
                 whileTap={{ scale: 0.98 }}
                 className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
               >
-                Prekliči
+                {tCommon('buttons.cancel')}
               </motion.button>
               <motion.button
                 type="button"
@@ -654,12 +668,12 @@ function EmployeeSettingsModal({
                 {isSaving ? (
                   <>
                     <SpinnerGap className="h-4 w-4 animate-spin" />
-                    Shranjujem...
+                    {t('settings.saving')}
                   </>
                 ) : (
                   <>
                     <FloppyDisk className="h-4 w-4" weight="bold" />
-                    Shrani nastavitve
+                    {t('settings.save')}
                   </>
                 )}
               </motion.button>

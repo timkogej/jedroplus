@@ -17,6 +17,7 @@ import {
   CaretLeft,
   CaretRight,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { Service, ServiceFormData } from '@/types/services';
 import { DURATION_OPTIONS } from '@/types/services';
 import { Select, SelectOption } from '@/components/ui/animated-select';
@@ -45,6 +46,9 @@ function ServiceModal({
   currency = 'EUR',
   existingCategories = [],
 }: ServiceModalProps) {
+  const t = useTranslations('services');
+  const tCommon = useTranslations('common');
+
   // Form state
   const [formData, setFormData] = useState<ServiceFormData>({
     naziv: '',
@@ -119,38 +123,37 @@ function ServiceModal({
   const validateField = useCallback((name: keyof ServiceFormData, value: string | number): string => {
     switch (name) {
       case 'naziv':
-        if (!String(value).trim()) return 'Naziv je obvezen';
-        if (String(value).trim().length < 2) return 'Naziv mora imeti vsaj 2 znaka';
-        if (String(value).length > 100) return 'Naziv lahko vsebuje največ 100 znakov';
+        if (!String(value).trim()) return t('modal.validationNameRequired');
+        if (String(value).trim().length < 2) return t('modal.validationNameMinLength');
+        if (String(value).length > 100) return t('modal.validationNameMaxLength');
         return '';
       case 'kategorija':
-        // Kategorija is now a text input, required
-        if (!String(value).trim()) return 'Kategorija je obvezna';
+        if (!String(value).trim()) return t('modal.validationCategoryRequired');
         return '';
-      case 'barva':
-        if (!String(value)) return 'Barva je obvezna';
-        // Accept both hex colors and gradients
+      case 'barva': {
+        if (!String(value)) return t('modal.validationColorInvalid');
         const colorVal = String(value);
         if (!isGradient(colorVal) && !/^#([A-Fa-f0-9]{6})$/.test(colorVal)) {
-          return 'Neveljavna barva';
+          return t('modal.validationColorInvalid');
         }
         return '';
+      }
       case 'trajanje':
-        if (!value || Number(value) <= 0) return 'Trajanje mora biti večje od 0';
-        if (Number(value) > 480) return 'Trajanje ne sme presegati 8 ur (480 min)';
+        if (!value || Number(value) <= 0) return t('modal.validationDurationMin');
+        if (Number(value) > 480) return t('modal.validationDurationMax');
         return '';
       case 'cena':
         if (value && (isNaN(Number(value)) || Number(value) < 0)) {
-          return 'Cena mora biti pozitivno število';
+          return t('modal.validationPriceInvalid');
         }
         return '';
       case 'opis':
-        if (String(value).length > 500) return 'Opis lahko vsebuje največ 500 znakov';
+        if (String(value).length > 500) return t('modal.validationDescriptionMaxLength');
         return '';
       default:
         return '';
     }
-  }, []);
+  }, [t]);
 
   // Handle field change
   const handleChange = useCallback((name: keyof ServiceFormData, value: string | number) => {
@@ -238,10 +241,10 @@ function ServiceModal({
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-white">
-                    {mode === 'create' ? 'Nova storitev' : 'Uredi storitev'}
+                    {mode === 'create' ? t('modal.createTitle') : t('modal.editTitle')}
                   </h2>
                   <p className="mt-1 text-sm text-white/80">
-                    {mode === 'create' ? 'Dodajte novo storitev' : 'Uredite podatke storitve'}
+                    {mode === 'create' ? t('modal.createSubtitle') : t('modal.editSubtitle')}
                   </p>
                 </div>
                 <motion.button
@@ -262,7 +265,7 @@ function ServiceModal({
                 {/* Service name */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Naziv storitve *
+                    {t('modal.nameLabel')}
                   </label>
                   <div className="relative">
                     <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -270,7 +273,7 @@ function ServiceModal({
                       type="text"
                       value={formData.naziv}
                       onChange={(e) => handleChange('naziv', e.target.value)}
-                      placeholder="npr. Striženje, Nega las, Masaža..."
+                      placeholder={t('modal.namePlaceholder')}
                       maxLength={100}
                       className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
@@ -291,7 +294,7 @@ function ServiceModal({
                 {/* Category - Select with existing categories + custom option */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Kategorija *
+                    {t('modal.categoryLabel')}
                   </label>
                   {customCategory ? (
                     <div className="space-y-2">
@@ -301,7 +304,7 @@ function ServiceModal({
                           type="text"
                           value={formData.kategorija}
                           onChange={(e) => handleChange('kategorija', e.target.value)}
-                          placeholder="Vnesite novo kategorijo..."
+                          placeholder={t('modal.categoryInputPlaceholder')}
                           autoFocus
                           className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
                                      transition-all focus:outline-none focus:ring-2
@@ -320,7 +323,7 @@ function ServiceModal({
                           }}
                           className="text-xs font-medium text-violet-600 hover:text-violet-700"
                         >
-                          Nazaj na obstoječe kategorije
+                          {t('modal.categoryBackToExisting')}
                         </button>
                       )}
                     </div>
@@ -339,7 +342,7 @@ function ServiceModal({
                             handleChange('kategorija', value);
                           }
                         }}
-                        placeholder="Izberi kategorijo"
+                        placeholder={t('modal.categorySelectPlaceholder')}
                         className="[&>button]:pl-10"
                       >
                         {existingCategories.map((cat) => (
@@ -348,7 +351,7 @@ function ServiceModal({
                           </SelectOption>
                         ))}
                         <SelectOption value="__custom__">
-                          + Nova kategorija...
+                          {t('modal.categoryNewOption')}
                         </SelectOption>
                       </Select>
                     </div>
@@ -359,7 +362,7 @@ function ServiceModal({
                         type="text"
                         value={formData.kategorija}
                         onChange={(e) => handleChange('kategorija', e.target.value)}
-                        placeholder="npr. Frizerske storitve, Kozmetika, Masaža..."
+                        placeholder={t('modal.categoryFirstPlaceholder')}
                         className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
                                    transition-all focus:outline-none focus:ring-2
                                    ${errors.kategorija
@@ -380,7 +383,7 @@ function ServiceModal({
                 {/* Gradient Color Selector with Pagination */}
                 <div>
                   <label className="mb-3 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Barva storitve *
+                    {t('modal.colorLabel')}
                   </label>
 
                   {/* Gradient options grid with pagination */}
@@ -487,10 +490,10 @@ function ServiceModal({
                       />
                       <div>
                         <div className="text-sm font-medium text-gray-700">
-                          Izbrana barva
+                          {t('modal.colorSelected')}
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                          {SERVICE_GRADIENTS.find(g => g.gradient === formData.barva)?.name || 'Po meri'}
+                          {SERVICE_GRADIENTS.find(g => g.gradient === formData.barva)?.name || t('modal.colorCustom')}
                         </div>
                       </div>
                     </div>
@@ -498,7 +501,7 @@ function ServiceModal({
 
                   <p className="mt-2 flex items-center gap-1.5 text-xs text-gray-500">
                     <Palette className="h-3.5 w-3.5" weight="regular" />
-                    Ta gradient se bo prikazal na koledarju in v seznamu storitev
+                    {t('modal.colorHint')}
                   </p>
 
                   {errors.barva && (
@@ -512,7 +515,7 @@ function ServiceModal({
                 {/* Duration */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Trajanje storitve *
+                    {t('modal.durationLabel')}
                   </label>
                   {!customDuration ? (
                     <div className="relative">
@@ -522,7 +525,7 @@ function ServiceModal({
                       <Select
                         value={formData.trajanje.toString()}
                         setValue={handleDurationSelect}
-                        placeholder="Izberi trajanje"
+                        placeholder={t('modal.durationSelectPlaceholder')}
                         className="[&>button]:pl-10"
                       >
                         {DURATION_OPTIONS.map((opt) => (
@@ -530,7 +533,7 @@ function ServiceModal({
                             {opt.label}
                           </SelectOption>
                         ))}
-                        <SelectOption value="custom">Drugo...</SelectOption>
+                        <SelectOption value="custom">{t('modal.durationCustomOption')}</SelectOption>
                       </Select>
                     </div>
                   ) : (
@@ -552,7 +555,7 @@ function ServiceModal({
                                      }`}
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
-                          minut
+                          {t('modal.durationUnit')}
                         </span>
                       </div>
                       <button
@@ -560,7 +563,7 @@ function ServiceModal({
                         onClick={() => setCustomDuration(false)}
                         className="text-xs font-medium text-violet-600 hover:text-violet-700"
                       >
-                        Nazaj na prednastavljene vrednosti
+                        {t('modal.durationBackToPreset')}
                       </button>
                     </div>
                   )}
@@ -575,7 +578,7 @@ function ServiceModal({
                 {/* Price (always fixed) */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Cena (fiksna)
+                    {t('modal.priceLabel')}
                   </label>
                   <div className="relative">
                     <CurrencyEur className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -608,14 +611,14 @@ function ServiceModal({
                 {/* Description */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Opis (opcijsko)
+                    {t('modal.descriptionLabel')}
                   </label>
                   <div className="relative">
                     <NotePencil className="absolute left-3 top-3 h-4 w-4 text-gray-400" weight="regular" />
                     <textarea
                       value={formData.opis}
                       onChange={(e) => handleChange('opis', e.target.value)}
-                      placeholder="Kratek opis storitve..."
+                      placeholder={t('modal.descriptionPlaceholder')}
                       rows={3}
                       maxLength={500}
                       className={`w-full resize-none rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
@@ -651,7 +654,7 @@ function ServiceModal({
                   whileTap={{ scale: 0.98 }}
                   className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
                 >
-                  Prekliči
+                  {tCommon('buttons.cancel')}
                 </motion.button>
                 <motion.button
                   type="submit"
@@ -665,12 +668,12 @@ function ServiceModal({
                   {isSaving ? (
                     <>
                       <SpinnerGap className="h-4 w-4 animate-spin" />
-                      Shranjujem...
+                      {t('modal.saving')}
                     </>
                   ) : (
                     <>
                       <FloppyDisk className="h-4 w-4" weight="bold" />
-                      Shrani storitev
+                      {t('modal.save')}
                     </>
                   )}
                 </motion.button>

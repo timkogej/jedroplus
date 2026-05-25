@@ -13,6 +13,7 @@ import {
   GearSix,
   LinkSimple,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { Employee } from '@/types/employees';
 import EmployeeAvatar from './EmployeeAvatar';
 
@@ -46,6 +47,7 @@ function EmployeeCard({
   canDelete = true,
   isConnected = false,
 }: EmployeeCardProps) {
+  const t = useTranslations('staff');
   const fullName = `${employee.ime} ${employee.priimek}`.trim();
   const gradient = employee.barva || 'linear-gradient(135deg, #8B5CF6, #06B6D4)';
 
@@ -90,7 +92,7 @@ function EmployeeCard({
               </div>
             ) : !employee.aktivna ? (
               <div className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-                Neaktiven
+                {t('card.inactive')}
               </div>
             ) : null}
           </div>
@@ -98,7 +100,7 @@ function EmployeeCard({
           {/* Inactive badge when pozicija is also set */}
           {employee.pozicija && !employee.aktivna && (
             <div className="mt-1 inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-              Neaktiven
+              {t('card.inactive')}
             </div>
           )}
         </div>
@@ -122,17 +124,17 @@ function EmployeeCard({
         <div className="mt-4 flex items-center justify-center gap-4 border-t border-gray-100 pt-4">
           <div className="text-center">
             <p className="text-lg font-normal text-[#1A1F36]">{employee.appointments_today || 0}</p>
-            <p className="text-xs text-gray-500">Danes</p>
+            <p className="text-xs text-gray-500">{t('card.statsToday')}</p>
           </div>
           <div className="h-8 w-px bg-gray-200" />
           <div className="text-center">
             <p className="text-lg font-normal text-[#1A1F36]">{employee.appointments_week || 0}</p>
-            <p className="text-xs text-gray-500">Teden</p>
+            <p className="text-xs text-gray-500">{t('card.statsWeek')}</p>
           </div>
           <div className="h-8 w-px bg-gray-200" />
           <div className="text-center">
             <p className="text-lg font-normal text-[#1A1F36]">{employee.appointments_month || employee.total_appointments || 0}</p>
-            <p className="text-xs text-gray-500">Mesec</p>
+            <p className="text-xs text-gray-500">{t('card.statsMonth')}</p>
           </div>
         </div>
 
@@ -145,7 +147,7 @@ function EmployeeCard({
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/10 px-3 py-2 text-xs font-medium text-violet-700 ring-1 ring-violet-200 transition-colors hover:from-violet-500/20 hover:to-cyan-500/20 hover:ring-violet-300"
             >
               <LinkSimple className="h-3.5 w-3.5" weight="bold" />
-              Poveži moj račun s to osebo
+              {t('card.connectButton')}
             </button>
           </div>
         )}
@@ -167,12 +169,12 @@ function EmployeeCard({
             {employee.aktivna ? (
               <>
                 <ToggleRight className="h-4 w-4" weight="fill" />
-                Aktiven
+                {t('card.toggleActive')}
               </>
             ) : (
               <>
                 <ToggleLeft className="h-4 w-4" weight="regular" />
-                Neaktiven
+                {t('card.toggleInactive')}
               </>
             )}
           </motion.button>
@@ -186,7 +188,7 @@ function EmployeeCard({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-violet-50 hover:text-violet-600"
-                title="Nastavitve urnika in storitev"
+                title={t('card.tooltipSettings')}
               >
                 <GearSix className="h-4 w-4" weight="regular" />
               </motion.button>
@@ -198,7 +200,7 @@ function EmployeeCard({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-pink-50 hover:text-pink-600"
-                title="Uredi podatke"
+                title={t('card.tooltipEdit')}
               >
                 <PencilSimple className="h-4 w-4" weight="regular" />
               </motion.button>
@@ -210,7 +212,7 @@ function EmployeeCard({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                title="Izbriši"
+                title={t('card.tooltipDelete')}
               >
                 <Trash className="h-4 w-4" weight="regular" />
               </motion.button>

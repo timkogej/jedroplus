@@ -1,1 +1,95 @@
-{}
+{
+  "page": {
+    "title": "Storitve",
+    "subtitle": "Upravljanje storitev",
+    "newButton": "Nova storitev",
+    "searchPlaceholder": "Išči storitve po nazivu...",
+    "showAll": "Vse storitve",
+    "showActiveOnly": "Samo aktivne",
+    "resultsCount": "Prikazujem {current} od {total} storitev",
+    "loadError": "Prišlo je do napake pri nalaganju podatkov",
+    "retry": "Poskusi znova"
+  },
+  "stats": {
+    "total": "Skupaj storitev",
+    "active": "Aktivnih storitev",
+    "avgDuration": "Povprečno trajanje",
+    "highestPrice": "Najdražja storitev"
+  },
+  "emptyState": {
+    "title": "Še nimate dodanih storitev",
+    "subtitle": "Začnite z dodajanjem vaše prve storitve za upravljanje terminov.",
+    "addFirst": "Dodaj prvo storitev"
+  },
+  "searchEmpty": {
+    "title": "Ni rezultatov za \"{term}\"",
+    "subtitle": "Poskusite z drugim iskanjem ali počistite filter",
+    "clear": "Počisti iskanje"
+  },
+  "card": {
+    "inactive": "Neaktivna",
+    "toggleActive": "Aktivna",
+    "toggleInactive": "Neaktivna"
+  },
+  "modal": {
+    "createTitle": "Nova storitev",
+    "editTitle": "Uredi storitev",
+    "createSubtitle": "Dodajte novo storitev",
+    "editSubtitle": "Uredite podatke storitve",
+    "nameLabel": "Naziv storitve *",
+    "namePlaceholder": "npr. Striženje, Nega las, Masaža...",
+    "categoryLabel": "Kategorija *",
+    "categorySelectPlaceholder": "Izberi kategorijo",
+    "categoryInputPlaceholder": "Vnesite novo kategorijo...",
+    "categoryNewOption": "+ Nova kategorija...",
+    "categoryBackToExisting": "Nazaj na obstoječe kategorije",
+    "categoryFirstPlaceholder": "npr. Frizerske storitve, Kozmetika, Masaža...",
+    "colorLabel": "Barva storitve *",
+    "colorSelected": "Izbrana barva",
+    "colorCustom": "Po meri",
+    "colorHint": "Ta gradient se bo prikazal na koledarju in v seznamu storitev",
+    "durationLabel": "Trajanje storitve *",
+    "durationSelectPlaceholder": "Izberi trajanje",
+    "durationCustomOption": "Drugo...",
+    "durationUnit": "minut",
+    "durationBackToPreset": "Nazaj na prednastavljene vrednosti",
+    "priceLabel": "Cena (fiksna)",
+    "descriptionLabel": "Opis (opcijsko)",
+    "descriptionPlaceholder": "Kratek opis storitve...",
+    "saving": "Shranjujem...",
+    "save": "Shrani storitev",
+    "validationNameRequired": "Naziv je obvezen",
+    "validationNameMinLength": "Naziv mora imeti vsaj 2 znaka",
+    "validationNameMaxLength": "Naziv lahko vsebuje največ 100 znakov",
+    "validationCategoryRequired": "Kategorija je obvezna",
+    "validationColorInvalid": "Neveljavna barva",
+    "validationDurationMin": "Trajanje mora biti večje od 0",
+    "validationDurationMax": "Trajanje ne sme presegati 8 ur (480 min)",
+    "validationPriceInvalid": "Cena mora biti pozitivno število",
+    "validationDescriptionMaxLength": "Opis lahko vsebuje največ 500 znakov"
+  },
+  "deleteModal": {
+    "titleHasAppointments": "Storitev ima termine",
+    "titleDelete": "Izbriši storitev",
+    "warningCount": "{count, plural, =1 {Ta storitev ima 1 termin} =2 {Ta storitev ima {count} termina} few {Ta storitev ima {count} termine} other {Ta storitev ima {count} terminov}}",
+    "warningDesc": "Storitve s termini ni mogoče izbrisati. Lahko jo deaktivirate, da ne bo več na voljo za nove termine.",
+    "confirmPrefix": "Ali ste prepričani, da želite izbrisati storitev",
+    "confirmSuffix": "To dejanje ni mogoče razveljaviti.",
+    "deactivating": "Deaktiviram...",
+    "deactivate": "Deaktiviraj storitev",
+    "deleting": "Brišem...",
+    "delete": "Izbriši storitev"
+  },
+  "toasts": {
+    "created": "Storitev uspešno dodana",
+    "updated": "Storitev uspešno posodobljena",
+    "deleted": "Storitev uspešno izbrisana",
+    "activated": "Storitev aktivirana",
+    "deactivated": "Storitev deaktivirana",
+    "errorCreate": "Prišlo je do napake pri ustvarjanju storitve",
+    "errorUpdate": "Prišlo je do napake pri posodabljanju storitve",
+    "errorSave": "Prišlo je do napake pri shranjevanju storitve",
+    "errorDelete": "Prišlo je do napake pri brisanju storitve",
+    "errorStatus": "Prišlo je do napake pri spremembi statusa"
+  }
+}
