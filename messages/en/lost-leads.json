@@ -1,1 +1,98 @@
-{}
+{
+  "page": {
+    "title": "Lost Clients",
+    "subtitle": "Overview of settings and inactive clients",
+    "stats": {
+      "inactiveClients": "Inactive Clients",
+      "inactiveClientsDesc": "Total marked",
+      "notifiedClients": "Notified clients",
+      "notifiedClientsDesc": "This month",
+      "inactivityDays": "Inactivity days",
+      "inactivityDaysDesc": "Inactivity threshold"
+    },
+    "table": {
+      "title": "Inactive Clients",
+      "subtitle": "{count} inactive clients (more than {days} days without interaction)",
+      "limitNote": "Showing first 50 of {total} inactive clients",
+      "columns": {
+        "client": "Client",
+        "email": "Email",
+        "phone": "Phone",
+        "daysInactive": "Days Inactive",
+        "notified": "Notified"
+      },
+      "daysValue": "{days} days",
+      "notifiedYes": "Yes",
+      "notifiedNo": "No",
+      "empty": "No inactive clients at the moment.",
+      "emptyDesc": "All clients have had an interaction in the last {days} days."
+    },
+    "settings": {
+      "title": "Settings",
+      "statusLabel": "Status",
+      "inactivityThreshold": "Inactivity threshold",
+      "tone": "Communication tone",
+      "discount": "Return discount",
+      "aiInstructions": "AI instructions",
+      "notSet": "Not set",
+      "noInstructions": "No instructions"
+    },
+    "info": {
+      "title": "About Lost Clients",
+      "body": "The system automatically detects clients who have not had an appointment within a set period, and sends them a personalized re-booking message.\n\nAI generates the message content based on your configuration — the text is tailored to each client individually, taking into account their history and services. This way your message never sounds like mass mail, but like a personal invitation to return.\n\nWith this system you win back clients who would otherwise go to a competitor — without manual work and without forgotten contacts.\n\nIf you have any questions, contact us at help@jedroplus.com."
+    }
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "tone": {
+    "professional": "Professional",
+    "friendly": "Friendly",
+    "salesOriented": "Sales-oriented",
+    "formal": "Formal",
+    "relaxed": "Relaxed"
+  },
+  "modal": {
+    "title": "Lost Leads settings",
+    "subtitle": "Tracking and re-engaging lost clients",
+    "closeButton": "Close",
+    "saveButton": "Save",
+    "savingButton": "Saving...",
+    "saveError": "Something went wrong while saving",
+    "enableTitle": "Enable Lost Leads tracking",
+    "enableDesc": "Automatic detection and outreach to inactive clients",
+    "detection": {
+      "sectionTitle": "Lost Leads detection",
+      "sectionDesc": "When the system should detect inactive clients",
+      "inactiveAfterLabel": "Inactive after",
+      "inactiveAfterDesc": "After how many days without an appointment a client is marked as inactive",
+      "daysLabel": "days",
+      "inactiveDaysHint": "Clients will be marked as inactive after {count} days without interaction"
+    },
+    "communication": {
+      "sectionTitle": "Communication instructions",
+      "sectionDesc": "Instructions for AI when communicating with inactive clients",
+      "toneLabel": "Communication tone",
+      "toneDesc": "How AI should communicate with inactive clients",
+      "tonePlaceholder": "Select tone",
+      "toneOptions": {
+        "formal": "Formal",
+        "friendly": "Friendly",
+        "relaxed": "Relaxed",
+        "professional": "Professional"
+      },
+      "instructionsLabel": "Instructions",
+      "instructionsDesc": "These instructions are used to generate personalized messages for each inactive client",
+      "instructionsPlaceholder": "E.g.: Be friendly and personal. Mention how long it has been since their last visit. Offer the option to book a new appointment. If a discount is available, mention it as a special offer for loyal clients."
+    },
+    "discount": {
+      "sectionTitle": "Return discount",
+      "sectionDesc": "Optional discount or special offer to re-engage clients",
+      "label": "Discount",
+      "fieldDesc": "Discount or special offer description (leave empty if not offering a discount)",
+      "placeholder": "E.g.: 15% discount on next visit",
+      "aiHint": "AI will include this description in messages when communicating with inactive clients"
+    }
+  }
+}

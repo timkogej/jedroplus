@@ -1,1 +1,98 @@
-{}
+{
+  "page": {
+    "title": "Izgubljene stranke",
+    "subtitle": "Pregled nastavitev in neaktivnih strank",
+    "stats": {
+      "inactiveClients": "Neaktivne Stranke",
+      "inactiveClientsDesc": "Skupaj označenih",
+      "notifiedClients": "Obveščeni stranke",
+      "notifiedClientsDesc": "Ta mesec",
+      "inactivityDays": "Dnevi neaktivnosti",
+      "inactivityDaysDesc": "Prag neaktivnosti"
+    },
+    "table": {
+      "title": "Neaktivne Stranke",
+      "subtitle": "{count} neaktivnih strank (več kot {days} dni brez interakcije)",
+      "limitNote": "Prikazanih prvih 50 od {total} neaktivnih strank",
+      "columns": {
+        "client": "Stranka",
+        "email": "Email",
+        "phone": "Telefon",
+        "daysInactive": "Dni Neaktivnosti",
+        "notified": "Obveščen"
+      },
+      "daysValue": "{days} dni",
+      "notifiedYes": "Da",
+      "notifiedNo": "Ne",
+      "empty": "Trenutno ni neaktivnih strank.",
+      "emptyDesc": "Vse stranke so imele interakcijo v zadnjih {days} dneh."
+    },
+    "settings": {
+      "title": "Nastavitve",
+      "statusLabel": "Status",
+      "inactivityThreshold": "Prag neaktivnosti",
+      "tone": "Ton komunikacije",
+      "discount": "Popust za vrnitev",
+      "aiInstructions": "Navodila AI-ju",
+      "notSet": "Ni nastavljeno",
+      "noInstructions": "Ni navodil"
+    },
+    "info": {
+      "title": "O Izgubljenih strankah",
+      "body": "Sistem avtomatsko zazna stranke, ki v določenem obdobju niso imele termina, in jim pošlje personalizirano sporočilo za povratno naročanje.\n\nAI generira vsebino sporočila glede na vašo konfiguracijo — besedilo se prilagodi vsaki stranki posebej, ob upoštevanju njene zgodovine in storitev. Tako vaše sporočilo nikoli ne zveni kot množična pošta, ampak kot osebno povabilo nazaj.\n\nZahvaljujoč temu sistemu pridobite stranke, ki bi sicer odšle h konkurenci — brez ročnega dela in brez pozabljenih kontaktov.\n\nV kolikor imate kakršnakoli vprašanja, nas kontaktirajte na help@jedroplus.com."
+    }
+  },
+  "status": {
+    "enabled": "Omogočeno",
+    "disabled": "Onemogočeno"
+  },
+  "tone": {
+    "professional": "Profesionalen",
+    "friendly": "Prijazen",
+    "salesOriented": "Prodajno usmerjen",
+    "formal": "Formalen",
+    "relaxed": "Sproščen"
+  },
+  "modal": {
+    "title": "Lost Leads nastavitve",
+    "subtitle": "Sledenje in ponovno pridobivanje izgubljenih strank",
+    "closeButton": "Zapri",
+    "saveButton": "Shrani",
+    "savingButton": "Shranjujem...",
+    "saveError": "Prišlo je do napake pri shranjevanju",
+    "enableTitle": "Omogoči sledenje Lost Leads",
+    "enableDesc": "Avtomatsko zaznavanje in kontaktiranje neaktivnih strank",
+    "detection": {
+      "sectionTitle": "Zaznavanje Lost Leads",
+      "sectionDesc": "Kdaj naj sistem zazna neaktivne stranke",
+      "inactiveAfterLabel": "Neaktivna po",
+      "inactiveAfterDesc": "Po koliko dneh brez termina je stranka označena kot neaktivna",
+      "daysLabel": "dni",
+      "inactiveDaysHint": "Stranke bodo označene kot neaktivne po {count} dneh brez interakcije"
+    },
+    "communication": {
+      "sectionTitle": "Navodila za komunikacijo",
+      "sectionDesc": "Navodila AI-ju za komunikacijo z neaktivnimi strankami",
+      "toneLabel": "Ton komunikacije",
+      "toneDesc": "Kako naj AI komunicira z neaktivnimi strankami",
+      "tonePlaceholder": "Izberi ton",
+      "toneOptions": {
+        "formal": "Formalen",
+        "friendly": "Prijazen",
+        "relaxed": "Sproščen",
+        "professional": "Profesionalen"
+      },
+      "instructionsLabel": "Navodila",
+      "instructionsDesc": "Ta navodila se uporabijo za generiranje personaliziranega sporočila za vsako neaktivno stranko",
+      "instructionsPlaceholder": "Npr: Bodi prijazen in oseben. Omeni koliko časa je minilo od zadnjega obiska. Ponudi možnost rezervacije novega termina. Če je na voljo popust, ga omeni kot posebno ponudbo za zveste stranke."
+    },
+    "discount": {
+      "sectionTitle": "Popust za vrnitev",
+      "sectionDesc": "Opcijski popust ali posebna ponudba za reaktivacijo strank",
+      "label": "Popust",
+      "fieldDesc": "Opis popusta ali posebne ponudbe (pusti prazno če ne ponujaš popusta)",
+      "placeholder": "Npr.: 15% popust na naslednji obisk",
+      "aiHint": "AI bo ta opis vključil v sporočila ko bo komuniciral z neaktivnimi strankami"
+    }
+  }
+}

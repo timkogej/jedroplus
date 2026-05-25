@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, FloppyDisk, Plus, Minus } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import {
   SettingsSection,
   SettingRow,
@@ -24,6 +25,7 @@ interface LostLeadsSettingsModalProps {
 }
 
 export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsModalProps) {
+  const t = useTranslations('lost-leads');
   const { companyId } = useCompany();
   const { user } = useAuth();
 
@@ -121,7 +123,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri shranjevanju');
+        throw new Error(t('modal.saveError'));
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -163,8 +165,8 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 gap-3">
               <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-semibold text-gray-900 truncate">Lost Leads nastavitve</h2>
-                <p className="text-sm text-gray-500 mt-0.5 truncate">Sledenje in ponovno pridobivanje izgubljenih strank</p>
+                <h2 className="text-xl font-semibold text-gray-900 truncate">{t('modal.title')}</h2>
+                <p className="text-sm text-gray-500 mt-0.5 truncate">{t('modal.subtitle')}</p>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 <SaveIndicator saving={saving} lastSaved={lastSaved} />
@@ -198,10 +200,10 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                     <div className="flex items-center justify-between gap-4">
                       <div className="min-w-0">
                         <div className="text-base font-bold text-gray-900">
-                          Omogoči sledenje Lost Leads
+                          {t('modal.enableTitle')}
                         </div>
                         <div className="text-sm text-gray-600 mt-1">
-                          Avtomatsko zaznavanje in kontaktiranje neaktivnih strank
+                          {t('modal.enableDesc')}
                         </div>
                       </div>
                       <div className="flex-shrink-0">
@@ -214,10 +216,13 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                   </div>
 
                   {/* Detection Settings */}
-                  <SettingsSection title="Zaznavanje Lost Leads" description="Kdaj naj sistem zazna neaktivne stranke">
+                  <SettingsSection
+                    title={t('modal.detection.sectionTitle')}
+                    description={t('modal.detection.sectionDesc')}
+                  >
                     <SettingRow
-                      label="Neaktivna po"
-                      description="Po koliko dneh brez termina je stranka označena kot neaktivna"
+                      label={t('modal.detection.inactiveAfterLabel')}
+                      description={t('modal.detection.inactiveAfterDesc')}
                       fullWidth
                     >
                       <div className="flex items-center gap-4">
@@ -237,7 +242,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                             <div className="text-4xl font-bold text-gray-900">
                               {inactiveDays}
                             </div>
-                            <div className="text-sm text-gray-600 mt-1">dni</div>
+                            <div className="text-sm text-gray-600 mt-1">{t('modal.detection.daysLabel')}</div>
                           </div>
                         </div>
 
@@ -252,32 +257,35 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                         </motion.button>
                       </div>
                       <p className="text-xs text-gray-500 mt-3 text-center">
-                        Stranke bodo označene kot neaktivne po {inactiveDays} dneh brez interakcije
+                        {t('modal.detection.inactiveDaysHint', { count: inactiveDays })}
                       </p>
                     </SettingRow>
                   </SettingsSection>
 
                   {/* Communication Instructions */}
-                  <SettingsSection title="Navodila za komunikacijo" description="Navodila AI-ju za komunikacijo z neaktivnimi strankami">
+                  <SettingsSection
+                    title={t('modal.communication.sectionTitle')}
+                    description={t('modal.communication.sectionDesc')}
+                  >
                     <SettingRow
-                      label="Ton komunikacije"
-                      description="Kako naj AI komunicira z neaktivnimi strankami"
+                      label={t('modal.communication.toneLabel')}
+                      description={t('modal.communication.toneDesc')}
                     >
                       <Select
                         value={tone}
                         setValue={setTone}
-                        placeholder="Izberi ton"
+                        placeholder={t('modal.communication.tonePlaceholder')}
                       >
-                        <SelectOption value="formal">Formalen</SelectOption>
-                        <SelectOption value="prijazen">Prijazen</SelectOption>
-                        <SelectOption value="sproscen">Sproščen</SelectOption>
-                        <SelectOption value="profesionalen">Profesionalen</SelectOption>
+                        <SelectOption value="formal">{t('modal.communication.toneOptions.formal')}</SelectOption>
+                        <SelectOption value="prijazen">{t('modal.communication.toneOptions.friendly')}</SelectOption>
+                        <SelectOption value="sproscen">{t('modal.communication.toneOptions.relaxed')}</SelectOption>
+                        <SelectOption value="profesionalen">{t('modal.communication.toneOptions.professional')}</SelectOption>
                       </Select>
                     </SettingRow>
 
                     <SettingRow
-                      label="Navodila"
-                      description="Ta navodila se uporabijo za generiranje personaliziranega sporočila za vsako neaktivno stranko"
+                      label={t('modal.communication.instructionsLabel')}
+                      description={t('modal.communication.instructionsDesc')}
                       fullWidth
                     >
                       <Textarea
@@ -285,7 +293,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                         onChange={(e) => setInstructions(e.target.value)}
                         rows={6}
                         maxLength={500}
-                        placeholder="Npr: Bodi prijazen in oseben. Omeni koliko časa je minilo od zadnjega obiska. Ponudi možnost rezervacije novega termina. Če je na voljo popust, ga omeni kot posebno ponudbo za zveste stranke."
+                        placeholder={t('modal.communication.instructionsPlaceholder')}
                         disabled={!enabled}
                       />
                       <p className="text-xs text-gray-400 text-right mt-1">{instructions.length}/500</p>
@@ -293,21 +301,24 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                   </SettingsSection>
 
                   {/* Discount */}
-                  <SettingsSection title="Popust za vrnitev" description="Opcijski popust ali posebna ponudba za reaktivacijo strank">
+                  <SettingsSection
+                    title={t('modal.discount.sectionTitle')}
+                    description={t('modal.discount.sectionDesc')}
+                  >
                     <SettingRow
-                      label="Popust"
-                      description="Opis popusta ali posebne ponudbe (pusti prazno če ne ponujaš popusta)"
+                      label={t('modal.discount.label')}
+                      description={t('modal.discount.fieldDesc')}
                       fullWidth
                     >
                       <Input
                         value={discount}
                         onChange={(e) => setDiscount(e.target.value)}
                         maxLength={100}
-                        placeholder="Npr.: 15% popust na naslednji obisk"
+                        placeholder={t('modal.discount.placeholder')}
                         disabled={!enabled}
                       />
                       <p className="text-xs text-gray-500 mt-2">
-                        AI bo ta opis vključil v sporočila ko bo komuniciral z neaktivnimi strankami
+                        {t('modal.discount.aiHint')}
                       </p>
                     </SettingRow>
                   </SettingsSection>
@@ -324,7 +335,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                 whileTap={{ scale: 0.98 }}
                 className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
               >
-                Zapri
+                {t('modal.closeButton')}
               </motion.button>
               <motion.button
                 type="button"
@@ -340,12 +351,12 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                 {saving ? (
                   <>
                     <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                    Shranjujem...
+                    {t('modal.savingButton')}
                   </>
                 ) : (
                   <>
                     <FloppyDisk className="h-4 w-4" weight="bold" />
-                    Shrani
+                    {t('modal.saveButton')}
                   </>
                 )}
               </motion.button>
