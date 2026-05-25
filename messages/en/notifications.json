@@ -1,1 +1,35 @@
-{}
+{
+  "page": {
+    "title": "Notifications",
+    "subtitle": "Review messages about reservations, appointments and your company's notifications.",
+    "markAllRead": "Mark all as read",
+    "loading": "Loading notifications...",
+    "loadError": "Something went wrong while loading notifications",
+    "retry": "Try again",
+    "emptyTitle": "No new notifications",
+    "emptySubtitle": "When you receive new notifications about reservations or important events, they will appear here."
+  },
+  "filters": {
+    "all": "All",
+    "unread": "Unread",
+    "reservations": "Reservations",
+    "system": "System"
+  },
+  "card": {
+    "open": "Open",
+    "markRead": "Mark read",
+    "archive": "Archive"
+  },
+  "relativeTime": {
+    "justNow": "Just now",
+    "minutesAgo": "{count, plural, =1 {1 minute ago} other {{count} minutes ago}}",
+    "hoursAgo": "{count, plural, =1 {1 hour ago} other {{count} hours ago}}",
+    "yesterday": "Yesterday",
+    "daysAgo": "{count, plural, =1 {1 day ago} other {{count} days ago}}",
+    "weeksAgo": "{count, plural, =1 {1 week ago} other {{count} weeks ago}}"
+  },
+  "dateLabel": {
+    "today": "Today",
+    "yesterday": "Yesterday"
+  }
+}

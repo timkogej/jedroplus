@@ -1,1 +1,35 @@
-{}
+{
+  "page": {
+    "title": "Obvestila",
+    "subtitle": "Preglejte sporočila o rezervacijah, terminih in obvestilih vašega podjetja.",
+    "markAllRead": "Označi vse kot prebrano",
+    "loading": "Nalaganje obvestil...",
+    "loadError": "Prišlo je do napake pri nalaganju obvestil",
+    "retry": "Poskusi znova",
+    "emptyTitle": "Ni novih obvestil",
+    "emptySubtitle": "Ko boste prejeli nova obvestila o rezervacijah ali pomembnih dogodkih, se bodo prikazala tukaj."
+  },
+  "filters": {
+    "all": "Vse",
+    "unread": "Neprebrane",
+    "reservations": "Rezervacije",
+    "system": "Sistem"
+  },
+  "card": {
+    "open": "Odpri",
+    "markRead": "Prebrano",
+    "archive": "Arhiviraj"
+  },
+  "relativeTime": {
+    "justNow": "Pravkar",
+    "minutesAgo": "{count, plural, =1 {Pred 1 minuto} =2 {Pred 2 minutama} few {Pred {count} minutami} other {Pred {count} minutami}}",
+    "hoursAgo": "{count, plural, =1 {Pred 1 uro} =2 {Pred 2 urama} few {Pred {count} urami} other {Pred {count} urami}}",
+    "yesterday": "Včeraj",
+    "daysAgo": "{count, plural, =1 {Pred 1 dnevom} =2 {Pred 2 dnevoma} few {Pred {count} dnevi} other {Pred {count} dnevi}}",
+    "weeksAgo": "{count, plural, =1 {Pred 1 tednom} =2 {Pred 2 tednoma} few {Pred {count} tedni} other {Pred {count} tedni}}"
+  },
+  "dateLabel": {
+    "today": "Danes",
+    "yesterday": "Včeraj"
+  }
+}
