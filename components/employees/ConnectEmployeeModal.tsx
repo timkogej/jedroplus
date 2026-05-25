@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, LinkSimple, CalendarBlank, UserCircle, CheckCircle } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { Employee } from '@/types/employees';
 import EmployeeAvatar from './EmployeeAvatar';
 
@@ -21,6 +22,8 @@ export default function ConnectEmployeeModal({
   onClose,
   onConfirm,
 }: ConnectEmployeeModalProps) {
+  const t = useTranslations('staff');
+  const tCommon = useTranslations('common');
   const [agreed, setAgreed] = useState(false);
 
   if (!employee) return null;
@@ -64,8 +67,8 @@ export default function ConnectEmployeeModal({
                 <div className="flex items-center gap-3">
                   <LinkSimple className="h-6 w-6 text-gray-900 flex-shrink-0" weight="bold" />
                   <div>
-                    <h2 className="text-base font-semibold text-[#1A1F36]">Poveži račun</h2>
-                    <p className="text-xs text-gray-500">z zaposlenim v podjetju</p>
+                    <h2 className="text-base font-semibold text-[#1A1F36]">{t('connect.title')}</h2>
+                    <p className="text-xs text-gray-500">{t('connect.subtitle')}</p>
                   </div>
                 </div>
                 <button
@@ -98,18 +101,18 @@ export default function ConnectEmployeeModal({
 
                 {/* What this means */}
                 <div className="space-y-3">
-                  <p className="text-sm font-medium text-[#1A1F36]">Kaj pomeni ta povezava?</p>
+                  <p className="text-sm font-medium text-[#1A1F36]">{t('connect.whatItMeans')}</p>
                   <div className="space-y-2">
                     <div className="flex items-start gap-3">
                       <CalendarBlank className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-900" weight="regular" />
                       <p className="text-sm text-gray-600">
-                        Na <span className="font-medium">Koledarju</span> in <span className="font-medium">Nadzorni plošči</span> bodo privzeto prikazani termini tega zaposlenega.
+                        {t('connect.calendarBulletBefore')} <span className="font-medium">{t('connect.calendarLabel')}</span> {t('connect.calendarBulletMid')} <span className="font-medium">{t('connect.dashboardLabel')}</span> {t('connect.calendarBulletAfter')}
                       </p>
                     </div>
                     <div className="flex items-start gap-3">
                       <UserCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-900" weight="regular" />
                       <p className="text-sm text-gray-600">
-                        Vaš račun bo povezan z osebo <span className="font-medium">{fullName}</span> v podjetju.
+                        {t('connect.accountBulletBefore')} <span className="font-medium">{fullName}</span> {t('connect.accountBulletAfter')}
                       </p>
                     </div>
                   </div>
@@ -143,7 +146,7 @@ export default function ConnectEmployeeModal({
                     </div>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Strinjam se s povezavo mojega računa z zaposlenim <span className="font-medium text-[#1A1F36]">{fullName}</span> in razumem, da bodo na koledarju in nadzorni plošči privzeto prikazani njegovi/njeni termini.
+                    {t('connect.agreementPrefix')} <span className="font-medium text-[#1A1F36]">{fullName}</span> {t('connect.agreementSuffix')}
                   </p>
                 </label>
               </div>
@@ -156,7 +159,7 @@ export default function ConnectEmployeeModal({
                   disabled={isConnecting}
                   className="rounded-xl px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-50"
                 >
-                  Prekliči
+                  {tCommon('buttons.cancel')}
                 </button>
                 <motion.button
                   type="button"
@@ -173,12 +176,12 @@ export default function ConnectEmployeeModal({
                   {isConnecting ? (
                     <>
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Povezujem...
+                      {t('connect.connecting')}
                     </>
                   ) : (
                     <>
                       <LinkSimple className="h-4 w-4 text-white" weight="bold" />
-                      Poveži račun
+                      {t('connect.connect')}
                     </>
                   )}
                 </motion.button>

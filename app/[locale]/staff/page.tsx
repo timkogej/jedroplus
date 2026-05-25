@@ -16,6 +16,7 @@ import {
   Briefcase,
   CalendarCheck,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
@@ -100,10 +101,12 @@ function SearchInput({
   value,
   onChange,
   onClear,
+  placeholder,
 }: {
   value: string;
   onChange: (value: string) => void;
   onClear: () => void;
+  placeholder: string;
 }) {
   return (
     <div className="relative">
@@ -115,7 +118,7 @@ function SearchInput({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Išči zaposlene..."
+        placeholder={placeholder}
         className="h-12 w-full rounded-xl border border-gray-200 bg-white pl-12 pr-10 text-sm
                    text-[#1A1F36] placeholder:text-gray-400
                    focus:border-purple-500 focus:outline-none focus:ring-4 focus:ring-purple-500/10"
@@ -134,41 +137,6 @@ function SearchInput({
           </motion.button>
         )}
       </AnimatePresence>
-    </div>
-  );
-}
-
-// Filter Dropdown Component
-function FilterDropdown({
-  value,
-  onChange,
-  options,
-  label,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  options: { value: string; label: string }[];
-  label: string;
-}) {
-  return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-12 appearance-none rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-sm
-                   font-medium text-[#1A1F36]
-                   focus:border-purple-500 focus:outline-none focus:ring-4 focus:ring-purple-500/10"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <CaretDown
-        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-        weight="bold"
-      />
     </div>
   );
 }
@@ -216,6 +184,7 @@ export default function OsebjePage() {
   const router = useRouter();
   const { companyId, companyUuid, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
+  const t = useTranslations('staff');
 
   // Data states
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -334,11 +303,11 @@ export default function OsebjePage() {
       }
     } catch (error) {
       console.error('Error loading employees:', error);
-      setToast({ message: 'Prišlo je do napake pri nalaganju zaposlenih', type: 'error' });
+      setToast({ message: t('toasts.errorLoad'), type: 'error' });
     } finally {
       setIsLoading(false);
     }
-  }, [companyId]);
+  }, [companyId, t]);
 
   useEffect(() => {
     loadEmployees();
@@ -393,7 +362,7 @@ export default function OsebjePage() {
         // Update existing employee
         const identifier = await getEmployeeIdentifier(selectedEmployee);
         if (!identifier) {
-          setToast({ message: 'Manjka ID zaposlenega', type: 'error' });
+          setToast({ message: t('toasts.missingId'), type: 'error' });
           return;
         }
 
@@ -420,11 +389,11 @@ export default function OsebjePage() {
         );
 
         if (!result.ok) {
-          setToast({ message: 'Prišlo je do napake pri posodabljanju zaposlenega', type: 'error' });
+          setToast({ message: t('toasts.errorUpdate'), type: 'error' });
           return;
         }
 
-        setToast({ message: 'Zaposleni uspešno posodobljen', type: 'success' });
+        setToast({ message: t('toasts.updated'), type: 'success' });
       } else {
         // Create new employee with 7-digit unique ID
         const personType = data.pozicija || 'Ekipa';
@@ -472,11 +441,11 @@ export default function OsebjePage() {
         );
 
         if (!result.ok) {
-          setToast({ message: 'Prišlo je do napake pri ustvarjanju zaposlenega', type: 'error' });
+          setToast({ message: t('toasts.errorCreate'), type: 'error' });
           return;
         }
 
-        setToast({ message: 'Zaposleni uspešno ustvarjen', type: 'success' });
+        setToast({ message: t('toasts.created'), type: 'success' });
       }
 
       // Wait 1 second for system to process
@@ -487,7 +456,7 @@ export default function OsebjePage() {
       loadEmployees();
     } catch (error) {
       console.error('Error saving employee:', error);
-      setToast({ message: 'Prišlo je do napake pri shranjevanju', type: 'error' });
+      setToast({ message: t('toasts.errorSave'), type: 'error' });
     } finally {
       setIsSaving(false);
     }
@@ -500,7 +469,7 @@ export default function OsebjePage() {
     try {
       const identifier = await getEmployeeIdentifier(selectedEmployee);
       if (!identifier) {
-        setToast({ message: 'Manjka ID zaposlenega', type: 'error' });
+        setToast({ message: t('toasts.missingId'), type: 'error' });
         return;
       }
 
@@ -518,20 +487,20 @@ export default function OsebjePage() {
       );
 
       if (!result.ok) {
-        setToast({ message: 'Prišlo je do napake pri brisanju zaposlenega', type: 'error' });
+        setToast({ message: t('toasts.errorDelete'), type: 'error' });
         return;
       }
 
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      setToast({ message: 'Zaposleni uspešno izbrisan', type: 'success' });
+      setToast({ message: t('toasts.deleted'), type: 'success' });
       setIsDeleteModalOpen(false);
       setSelectedEmployee(null);
       loadEmployees();
     } catch (error) {
       console.error('Error deleting employee:', error);
-      setToast({ message: 'Prišlo je do napake pri brisanju', type: 'error' });
+      setToast({ message: t('toasts.errorSave'), type: 'error' });
     }
   };
 
@@ -549,7 +518,7 @@ export default function OsebjePage() {
       const identifier = await getEmployeeIdentifier(employee);
       if (!identifier) {
         setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: employee.aktivna } : e));
-        setToast({ message: 'Manjka ID zaposlenega', type: 'error' });
+        setToast({ message: t('toasts.missingId'), type: 'error' });
         return;
       }
 
@@ -567,18 +536,18 @@ export default function OsebjePage() {
 
       if (!result.ok) {
         setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: employee.aktivna } : e));
-        setToast({ message: 'Prišlo je do napake pri spreminjanju statusa', type: 'error' });
+        setToast({ message: t('toasts.errorStatus'), type: 'error' });
         return;
       }
 
       setToast({
-        message: newActive ? 'Zaposleni aktiviran' : 'Zaposleni deaktiviran',
+        message: newActive ? t('toasts.activated') : t('toasts.deactivated'),
         type: 'success',
       });
     } catch (error) {
       console.error('Error toggling active:', error);
       setEmployees(prev => prev.map(e => e.id === employee.id ? { ...e, aktivna: employee.aktivna } : e));
-      setToast({ message: 'Prišlo je do napake pri spreminjanju statusa', type: 'error' });
+      setToast({ message: t('toasts.errorStatus'), type: 'error' });
     }
   };
 
@@ -624,16 +593,16 @@ export default function OsebjePage() {
       });
 
       if (!response.ok) {
-        setToast({ message: 'Prišlo je do napake pri povezovanju računa', type: 'error' });
+        setToast({ message: t('toasts.errorConnect'), type: 'error' });
         return;
       }
 
       setUserPersonId(employee.id);
       setIsConnectModalOpen(false);
       setConnectEmployee(null);
-      setToast({ message: 'Račun uspešno povezan z zaposlenim', type: 'success' });
+      setToast({ message: t('toasts.connected'), type: 'success' });
     } catch {
-      setToast({ message: 'Prišlo je do napake pri povezovanju računa', type: 'error' });
+      setToast({ message: t('toasts.errorConnect'), type: 'error' });
     } finally {
       setIsConnecting(false);
     }
@@ -647,7 +616,7 @@ export default function OsebjePage() {
     try {
       const identifier = await getEmployeeIdentifier(selectedEmployee);
       if (!identifier) {
-        setToast({ message: 'Manjka ID zaposlenega', type: 'error' });
+        setToast({ message: t('toasts.missingId'), type: 'error' });
         return;
       }
 
@@ -696,11 +665,11 @@ export default function OsebjePage() {
       );
 
       if (!result.ok) {
-        setToast({ message: 'Prišlo je do napake pri shranjevanju nastavitev', type: 'error' });
+        setToast({ message: t('toasts.errorSettings'), type: 'error' });
         return;
       }
 
-      setToast({ message: 'Nastavitve uspešno shranjene', type: 'success' });
+      setToast({ message: t('toasts.settingsSaved'), type: 'success' });
 
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -710,7 +679,7 @@ export default function OsebjePage() {
       loadEmployees();
     } catch (error) {
       console.error('Error saving settings:', error);
-      setToast({ message: 'Prišlo je do napake pri shranjevanju nastavitev', type: 'error' });
+      setToast({ message: t('toasts.errorSettings'), type: 'error' });
     } finally {
       setIsSaving(false);
     }
@@ -728,9 +697,9 @@ export default function OsebjePage() {
           {/* Header */}
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">Osebje</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
               <p className="mt-1 text-gray-500">
-                Upravljajte z vašimi zaposlenimi in njihovimi termini
+                {t('page.subtitle')}
               </p>
             </div>
             {role !== 'staff' && (
@@ -745,7 +714,7 @@ export default function OsebjePage() {
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-xl hover:shadow-cyan-500/30"
               >
                 <Plus className="h-5 w-5" weight="bold" />
-                Dodaj zaposlenega
+                {t('page.newButton')}
               </motion.button>
             )}
           </div>
@@ -754,25 +723,25 @@ export default function OsebjePage() {
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               icon={Users}
-              label="Skupaj zaposlenih"
+              label={t('stats.total')}
               value={stats?.total || 0}
               gradientIndex={0}
             />
             <StatCard
               icon={UserCirclePlus}
-              label="Aktivni"
+              label={t('stats.active')}
               value={stats?.active || 0}
               gradientIndex={1}
             />
             <StatCard
               icon={Briefcase}
-              label="Neaktivni"
+              label={t('stats.inactive')}
               value={stats?.inactive || 0}
               gradientIndex={2}
             />
             <StatCard
               icon={CalendarCheck}
-              label="Termini danes"
+              label={t('stats.today')}
               value={stats?.appointmentsToday || 0}
               trend={stats?.weeklyGrowth ? { value: stats.weeklyGrowth, positive: stats.weeklyGrowth > 0 } : undefined}
               gradientIndex={3}
@@ -786,6 +755,7 @@ export default function OsebjePage() {
                 value={searchQuery}
                 onChange={setSearchQuery}
                 onClear={() => setSearchQuery('')}
+                placeholder={t('search.placeholder')}
               />
             </div>
             {/* Status filter using animated select like Termini page */}
@@ -793,11 +763,11 @@ export default function OsebjePage() {
               <Select
                 value={statusFilter}
                 setValue={(value) => setStatusFilter(value as FilterType)}
-                placeholder="Vsi"
+                placeholder={t('search.filterAll')}
               >
-                <SelectOption value="all">Vsi</SelectOption>
-                <SelectOption value="active">Aktivni</SelectOption>
-                <SelectOption value="inactive">Neaktivni</SelectOption>
+                <SelectOption value="all">{t('search.filterAll')}</SelectOption>
+                <SelectOption value="active">{t('search.filterActive')}</SelectOption>
+                <SelectOption value="inactive">{t('search.filterInactive')}</SelectOption>
               </Select>
             </div>
           </div>
@@ -805,9 +775,9 @@ export default function OsebjePage() {
           {/* Results count */}
           <div className="mb-4">
             <p className="text-sm text-gray-500">
-              {filteredEmployees.length}{' '}
-              {filteredEmployees.length === 1 ? 'zaposleni' : 'zaposlenih'}
-              {searchQuery && ` za "${searchQuery}"`}
+              {searchQuery
+                ? t('search.resultsWithQuery', { count: filteredEmployees.length, query: searchQuery })
+                : t('search.resultsCount', { count: filteredEmployees.length })}
             </p>
           </div>
 
@@ -821,9 +791,9 @@ export default function OsebjePage() {
               <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-violet-100">
                 <Users className="h-10 w-10 text-violet-500" weight="duotone" />
               </div>
-              <h3 className="text-xl font-semibold text-[#1A1F36]">Še nimate dodanega osebja</h3>
+              <h3 className="text-xl font-semibold text-[#1A1F36]">{t('emptyState.title')}</h3>
               <p className="mt-2 text-center text-sm text-gray-500">
-                Začnite z dodajanjem vaše prve osebe za upravljanje terminov.
+                {t('emptyState.subtitle')}
               </p>
               {role !== 'staff' && (
                 <motion.button
@@ -839,7 +809,7 @@ export default function OsebjePage() {
                              hover:shadow-xl hover:shadow-cyan-500/30"
                 >
                   <Plus className="h-5 w-5" weight="bold" />
-                  Dodaj prvo osebo
+                  {t('emptyState.addFirst')}
                 </motion.button>
               )}
             </motion.div>

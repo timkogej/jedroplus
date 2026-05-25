@@ -13,6 +13,7 @@ import {
   SpinnerGap,
   Warning,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { Employee, EmployeeFormData } from '@/types/employees';
 import { checkEmployeeEmailExists } from '@/lib/supabase/employees';
 import { getDefaultGradient, isValidGradient } from '@/lib/constants/gradients';
@@ -52,6 +53,9 @@ function EmployeeModal({
   onSave,
   isSaving = false,
 }: EmployeeModalProps) {
+  const t = useTranslations('staff');
+  const tCommon = useTranslations('common');
+
   // Default gradient CSS
   const defaultGradient = getDefaultGradient();
 
@@ -107,30 +111,30 @@ function EmployeeModal({
     }
     switch (name) {
       case 'ime':
-        if (!String(value).trim()) return 'Ime je obvezno';
-        if (String(value).trim().length < 2) return 'Ime mora imeti vsaj 2 znaka';
+        if (!String(value).trim()) return t('modal.validationFirstNameRequired');
+        if (String(value).trim().length < 2) return t('modal.validationFirstNameMinLength');
         return '';
       case 'priimek':
-        if (!String(value).trim()) return 'Priimek je obvezen';
-        if (String(value).trim().length < 2) return 'Priimek mora imeti vsaj 2 znaka';
+        if (!String(value).trim()) return t('modal.validationLastNameRequired');
+        if (String(value).trim().length < 2) return t('modal.validationLastNameMinLength');
         return '';
       case 'email':
-        if (!String(value).trim()) return 'Email je obvezen';
-        if (!validateEmail(String(value))) return 'Neveljaven email naslov';
+        if (!String(value).trim()) return t('modal.validationEmailRequired');
+        if (!validateEmail(String(value))) return t('modal.validationEmailInvalid');
         return '';
       case 'telefon':
-        if (value && !validatePhone(String(value))) return 'Neveljavna telefonska številka';
+        if (value && !validatePhone(String(value))) return t('modal.validationPhoneInvalid');
         return '';
       case 'barva':
-        if (!isValidGradient(String(value))) return 'Izberite barvo avatarja';
+        if (!isValidGradient(String(value))) return t('modal.validationAvatarColorRequired');
         return '';
       case 'opombe':
-        if (String(value).length > 500) return 'Opombe lahko vsebujejo največ 500 znakov';
+        if (String(value).length > 500) return t('modal.validationNotesMaxLength');
         return '';
       default:
         return '';
     }
-  }, []);
+  }, [t]);
 
   // Handle field change
   const handleChange = useCallback((name: keyof EmployeeFormData, value: string | number) => {
@@ -159,10 +163,10 @@ function EmployeeModal({
       );
       if (result.exists) {
         setEmailExists(true);
-        setErrors((prev) => ({ ...prev, email: 'Ta email naslov je že v uporabi' }));
+        setErrors((prev) => ({ ...prev, email: t('modal.validationEmailExists') }));
       } else {
         setEmailExists(false);
-        if (errors.email === 'Ta email naslov je že v uporabi') {
+        if (errors.email === t('modal.validationEmailExists')) {
           setErrors((prev) => ({ ...prev, email: '' }));
         }
       }
@@ -171,7 +175,7 @@ function EmployeeModal({
     } finally {
       setEmailChecking(false);
     }
-  }, [formData.email, errors.email, companyId, mode, employee?.id]);
+  }, [formData.email, errors.email, companyId, mode, employee?.id, t]);
 
   // Validate all fields
   const validateForm = useCallback((): boolean => {
@@ -187,13 +191,13 @@ function EmployeeModal({
     });
 
     if (emailExists) {
-      newErrors.email = 'Ta email naslov je že v uporabi';
+      newErrors.email = t('modal.validationEmailExists');
       isValid = false;
     }
 
     setErrors(newErrors);
     return isValid;
-  }, [formData, validateField, emailExists]);
+  }, [formData, validateField, emailExists, t]);
 
   // Handle submit
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
@@ -253,10 +257,10 @@ function EmployeeModal({
                   />
                   <div>
                     <h2 className="text-xl font-semibold text-white">
-                      {mode === 'create' ? 'Novo osebje' : 'Uredi osebje'}
+                      {mode === 'create' ? t('modal.createTitle') : t('modal.editTitle')}
                     </h2>
                     <p className="mt-1 text-sm text-white/80">
-                      {mode === 'create' ? 'Dodajte novega člana ekipe' : 'Uredite podatke člana ekipe'}
+                      {mode === 'create' ? t('modal.createSubtitle') : t('modal.editSubtitle')}
                     </p>
                   </div>
                 </div>
@@ -278,7 +282,7 @@ function EmployeeModal({
                 {/* First name */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Ime *
+                    {t('modal.firstNameLabel')}
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -286,7 +290,7 @@ function EmployeeModal({
                       type="text"
                       value={formData.ime}
                       onChange={(e) => handleChange('ime', e.target.value)}
-                      placeholder="Jana"
+                      placeholder={t('modal.firstNamePlaceholder')}
                       className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.ime
@@ -306,7 +310,7 @@ function EmployeeModal({
                 {/* Last name */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Priimek *
+                    {t('modal.lastNameLabel')}
                   </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -314,7 +318,7 @@ function EmployeeModal({
                       type="text"
                       value={formData.priimek}
                       onChange={(e) => handleChange('priimek', e.target.value)}
-                      placeholder="Novak"
+                      placeholder={t('modal.lastNamePlaceholder')}
                       className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.priimek
@@ -334,7 +338,7 @@ function EmployeeModal({
                 {/* Email */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Email *
+                    {t('modal.emailLabel')}
                   </label>
                   <div className="relative">
                     <Envelope className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -343,7 +347,7 @@ function EmployeeModal({
                       value={formData.email}
                       onChange={(e) => handleChange('email', e.target.value)}
                       onBlur={handleEmailBlur}
-                      placeholder="jana.novak@email.com"
+                      placeholder={t('modal.emailPlaceholder')}
                       className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.email
@@ -366,7 +370,7 @@ function EmployeeModal({
                 {/* Phone */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Telefon
+                    {t('modal.phoneLabel')}
                   </label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -374,7 +378,7 @@ function EmployeeModal({
                       type="tel"
                       value={formData.telefon}
                       onChange={(e) => handleChange('telefon', e.target.value)}
-                      placeholder="+386 40 123 456"
+                      placeholder={t('modal.phonePlaceholder')}
                       className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.telefon
@@ -394,7 +398,7 @@ function EmployeeModal({
                 {/* Position */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Pozicija/Vloga
+                    {t('modal.positionLabel')}
                   </label>
                   <div className="relative">
                     <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -402,7 +406,7 @@ function EmployeeModal({
                       type="text"
                       value={formData.pozicija}
                       onChange={(e) => handleChange('pozicija', e.target.value)}
-                      placeholder="npr. Frizer, Kozmetičarka, Maserka..."
+                      placeholder={t('modal.positionPlaceholder')}
                       className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
                                 placeholder-gray-400 transition-all focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-100"
                     />
@@ -412,7 +416,7 @@ function EmployeeModal({
                 {/* Gradient selector */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Barva avatarja *
+                    {t('modal.avatarColorLabel')}
                   </label>
                   <GradientSelector
                     value={formData.barva}
@@ -429,14 +433,14 @@ function EmployeeModal({
                 {/* Notes */}
                 <div>
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    Opombe
+                    {t('modal.notesLabel')}
                   </label>
                   <div className="relative">
                     <NotePencil className="absolute left-3 top-3 h-4 w-4 text-gray-400" weight="regular" />
                     <textarea
                       value={formData.opombe}
                       onChange={(e) => handleChange('opombe', e.target.value)}
-                      placeholder="Dodatne informacije o zaposlenem..."
+                      placeholder={t('modal.notesPlaceholder')}
                       rows={3}
                       className={`w-full resize-none rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
                                  placeholder-gray-400 transition-all focus:outline-none focus:ring-2
@@ -471,7 +475,7 @@ function EmployeeModal({
                   whileTap={{ scale: 0.98 }}
                   className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
                 >
-                  Prekliči
+                  {tCommon('buttons.cancel')}
                 </motion.button>
                 <motion.button
                   type="submit"
@@ -485,12 +489,12 @@ function EmployeeModal({
                   {isSaving ? (
                     <>
                       <SpinnerGap className="h-4 w-4 animate-spin" />
-                      Shranjujem...
+                      {t('modal.saving')}
                     </>
                   ) : (
                     <>
                       <FloppyDisk className="h-4 w-4" weight="bold" />
-                      Shrani
+                      {t('modal.save')}
                     </>
                   )}
                 </motion.button>
