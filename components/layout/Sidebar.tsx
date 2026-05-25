@@ -90,7 +90,7 @@ function buildNavigationSectionsPaid(t: T): NavSection[] {
     {
       label: t('sidebar.sections.modules'),
       items: [
-        { name: t('sidebar.items.services'), href: '/services', icon: Briefcase },
+        { name: t('sidebar.items.services'), href: '/storitve', icon: Briefcase },
         { name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle },
       ],
     },
@@ -129,7 +129,7 @@ function buildNavigationSectionsFree(t: T): NavSection[] {
     {
       label: t('sidebar.sections.modules'),
       items: [
-        { name: t('sidebar.items.services'), href: '/services', icon: Briefcase },
+        { name: t('sidebar.items.services'), href: '/storitve', icon: Briefcase },
         { name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle },
       ],
     },

@@ -64,7 +64,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     // Moduli
     { name: t('sidebar.items.appointments'), href: '/termini', icon: ClipboardText, group: 'modules' },
     { name: t('sidebar.items.clients'), href: '/clients', icon: Users, group: 'modules' },
-    { name: t('sidebar.items.services'), href: '/services', icon: Briefcase, group: 'modules' },
+    { name: t('sidebar.items.services'), href: '/storitve', icon: Briefcase, group: 'modules' },
     { name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle, group: 'modules' },
     // Analitika
     { name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine, group: 'analytics' },
