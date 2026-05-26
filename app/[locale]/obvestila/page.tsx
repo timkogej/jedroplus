@@ -23,6 +23,7 @@ import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { supabase } from '@/lib/supabaseClient';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import { useTranslations, useLocale } from 'next-intl';
 
 // ============================================================================
 // Types
@@ -127,7 +128,9 @@ function isSystemType(type: string): boolean {
   return t === 'info' || t === 'system' || t === 'success' || t === 'warning' || t === 'error';
 }
 
-function formatRelativeTime(dateStr: string): string {
+type TFn = (key: string, values?: Record<string, string | number>) => string;
+
+function formatRelativeTime(dateStr: string, t: TFn, locale: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -135,24 +138,24 @@ function formatRelativeTime(dateStr: string): string {
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffMins < 1) return 'Pravkar';
-  if (diffMins < 60) return `Pred ${diffMins} min`;
-  if (diffHours < 24) return `Pred ${diffHours} h`;
-  if (diffDays === 1) return 'Včeraj';
-  if (diffDays < 7) return `Pred ${diffDays} dni`;
+  if (diffMins < 1) return t('relativeTime.justNow');
+  if (diffMins < 60) return t('relativeTime.minutesAgo', { count: diffMins });
+  if (diffHours < 24) return t('relativeTime.hoursAgo', { count: diffHours });
+  if (diffDays === 1) return t('relativeTime.yesterday');
+  if (diffDays < 7) return t('relativeTime.daysAgo', { count: diffDays });
 
-  return date.toLocaleDateString('sl-SI', {
+  return date.toLocaleDateString(locale, {
     day: 'numeric',
     month: 'short',
     year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
   });
 }
 
-function formatTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit' });
+function formatTime(dateStr: string, locale: string): string {
+  return new Date(dateStr).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatDateLabel(dateStr: string): string {
+function formatDateLabel(dateStr: string, t: TFn, locale: string): string {
   const date = new Date(dateStr);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -160,16 +163,16 @@ function formatDateLabel(dateStr: string): string {
   yesterday.setDate(yesterday.getDate() - 1);
   const notifDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-  if (notifDate.getTime() === today.getTime()) return 'Danes';
-  if (notifDate.getTime() === yesterday.getTime()) return 'Včeraj';
+  if (notifDate.getTime() === today.getTime()) return t('dateLabel.today');
+  if (notifDate.getTime() === yesterday.getTime()) return t('dateLabel.yesterday');
 
-  return date.toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long' });
+  return date.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
-function groupNotificationsByDate(notifications: Notification[]): Record<string, Notification[]> {
+function groupNotificationsByDate(notifications: Notification[], t: TFn, locale: string): Record<string, Notification[]> {
   const groups: Record<string, Notification[]> = {};
   for (const n of notifications) {
-    const label = formatDateLabel(n.created_at);
+    const label = formatDateLabel(n.created_at, t, locale);
     if (!groups[label]) groups[label] = [];
     groups[label].push(n);
   }
@@ -197,6 +200,8 @@ interface NotificationCardProps {
 }
 
 const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationCardProps) => {
+  const t = useTranslations('notifications');
+  const locale = useLocale();
   const [isHovered, setIsHovered] = useState(false);
   const isUnread = !notification.is_read;
 
@@ -261,7 +266,7 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
                 />
               )}
               <span className={`text-xs whitespace-nowrap ${isUnread ? 'text-gray-500' : 'text-gray-400'}`}>
-                {formatRelativeTime(notification.created_at)}
+                {formatRelativeTime(notification.created_at, t as TFn, locale)}
               </span>
             </div>
           </div>
@@ -269,7 +274,7 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
           {/* Time sub-label */}
           <div className="flex items-center gap-1 mt-0.5 mb-2">
             <ClockIcon size={11} className="text-gray-400" />
-            <span className="text-[11px] text-gray-400">{formatTime(notification.created_at)}</span>
+            <span className="text-[11px] text-gray-400">{formatTime(notification.created_at, locale)}</span>
           </div>
 
           {/* Body */}
@@ -283,7 +288,7 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
               {notification.action_url && (
                 <span className="flex items-center gap-1 text-xs font-medium text-purple-600">
                   <ArrowRightIcon size={12} />
-                  Odpri
+                  {t('card.open')}
                 </span>
               )}
             </div>
@@ -303,7 +308,7 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
                   className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-purple-600 hover:bg-purple-50 transition-colors"
                 >
                   <CheckCircleIcon size={13} weight="fill" />
-                  Prebrano
+                  {t('card.markRead')}
                 </button>
               )}
               <button
@@ -314,7 +319,7 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
                 className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
               >
                 <ArchiveIcon size={13} weight="fill" />
-                Arhiviraj
+                {t('card.archive')}
               </button>
             </motion.div>
           </div>
@@ -346,6 +351,8 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
 
 export default function ObvestilaPage() {
   const router = useRouter();
+  const t = useTranslations('notifications');
+  const locale = useLocale();
   const { companyUuid, loading: companyLoading } = useCompany();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -377,18 +384,18 @@ export default function ObvestilaPage() {
 
       if (fetchError) {
         console.error('Error fetching notifications:', fetchError);
-        setError('Prišlo je do napake pri nalaganju obvestil');
+        setError(t('page.loadError'));
         return;
       }
 
       setNotifications(data || []);
     } catch (err) {
       console.error('Error fetching notifications:', err);
-      setError('Prišlo je do napake pri nalaganju obvestil');
+      setError(t('page.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [companyUuid]);
+  }, [companyUuid, t]);
 
   useEffect(() => {
     if (companyUuid) fetchNotifications();
@@ -453,14 +460,17 @@ export default function ObvestilaPage() {
     }
   }, [notifications, activeFilter]);
 
-  const grouped = useMemo(() => groupNotificationsByDate(filteredNotifications), [filteredNotifications]);
+  const grouped = useMemo(
+    () => groupNotificationsByDate(filteredNotifications, t as TFn, locale),
+    [filteredNotifications, t, locale]
+  );
   const dateGroups = Object.entries(grouped);
 
   const filters: { id: FilterId; label: string; count: number }[] = [
-    { id: 'all', label: 'Vse', count: 0 },
-    { id: 'unread', label: 'Neprebrane', count: unreadCount },
-    { id: 'reservations', label: 'Rezervacije', count: reservationCount },
-    { id: 'system', label: 'Sistem', count: systemCount },
+    { id: 'all', label: t('filters.all'), count: 0 },
+    { id: 'unread', label: t('filters.unread'), count: unreadCount },
+    { id: 'reservations', label: t('filters.reservations'), count: reservationCount },
+    { id: 'system', label: t('filters.system'), count: systemCount },
   ];
 
   if (companyLoading || !companyUuid) {
@@ -486,9 +496,9 @@ export default function ObvestilaPage() {
           >
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Obvestila</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('page.title')}</h1>
                 <p className="text-gray-500 text-sm">
-                  Preglejte sporočila o rezervacijah, terminih in obvestilih vašega podjetja.
+                  {t('page.subtitle')}
                 </p>
               </div>
 
@@ -501,7 +511,7 @@ export default function ObvestilaPage() {
                   className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition-all disabled:opacity-60 whitespace-nowrap self-start"
                 >
                   <ChecksIcon size={18} weight="bold" />
-                  Označi vse kot prebrano
+                  {t('page.markAllRead')}
                 </motion.button>
               )}
             </div>
@@ -552,7 +562,7 @@ export default function ObvestilaPage() {
           {loading && (
             <div className="flex flex-col items-center justify-center py-24 gap-3">
               <GradientSpinner />
-              <p className="text-sm text-gray-400">Nalaganje obvestil...</p>
+              <p className="text-sm text-gray-400">{t('page.loading')}</p>
             </div>
           )}
 
@@ -571,7 +581,7 @@ export default function ObvestilaPage() {
                 onClick={fetchNotifications}
                 className="mt-4 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
               >
-                Poskusi znova
+                {t('page.retry')}
               </button>
             </motion.div>
           )}
@@ -591,9 +601,9 @@ export default function ObvestilaPage() {
               >
                 <BellSlashIcon size={36} className="text-gray-400" weight="fill" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Ni novih obvestil</h3>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">{t('page.emptyTitle')}</h3>
               <p className="text-gray-500 max-w-sm">
-                Ko boste prejeli nova obvestila o rezervacijah ali pomembnih dogodkih, se bodo prikazala tukaj.
+                {t('page.emptySubtitle')}
               </p>
             </motion.div>
           )}

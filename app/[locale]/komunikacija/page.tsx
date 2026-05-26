@@ -17,6 +17,7 @@ import AIMessageGenerator from '@/components/komunikacija/AIMessageGenerator';
 import MessageComposer from '@/components/komunikacija/MessageComposer';
 import MessagePreview from '@/components/komunikacija/MessagePreview';
 import SendSection from '@/components/komunikacija/SendSection';
+import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { fetchTableRows } from '@/lib/companyScope';
@@ -136,6 +137,7 @@ function SendResultPanel({
   result: SendResult;
   onReset: () => void;
 }) {
+  const t = useTranslations('communication');
   const skippedItems = result.skipped ?? [];
 
   return (
@@ -146,31 +148,31 @@ function SendResultPanel({
     >
       <div className="flex items-center gap-2">
         <CheckCircle className="h-5 w-5 text-emerald-500" weight="fill" />
-        <h3 className="font-semibold text-emerald-700">Sporočila poslana</h3>
+        <h3 className="font-semibold text-emerald-700">{t('result.title')}</h3>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-white rounded-xl border border-gray-100 p-3 text-center">
           <p className="text-xl font-bold text-[#1A1F36]">{result.totals.requested}</p>
-          <p className="text-xs text-gray-400 mt-0.5">Zahtevano</p>
+          <p className="text-xs text-gray-400 mt-0.5">{t('result.requested')}</p>
           <p className="text-[10px] text-gray-300 mt-0.5 leading-tight">
-            {result.totals.requested} strank · {result.totals.requested} sporočil
+            {t('result.requestedDetail', { clients: result.totals.requested, messages: result.totals.requested })}
           </p>
         </div>
         {[
-          { label: 'Poslano', value: result.totals.sent, color: 'text-emerald-600' },
-          { label: 'Preskočeno', value: result.totals.skipped, color: result.totals.skipped > 0 ? 'text-amber-600' : 'text-gray-400' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="bg-white rounded-xl border border-gray-100 p-3 text-center">
+          { labelKey: 'result.sent', value: result.totals.sent, color: 'text-emerald-600' },
+          { labelKey: 'result.skipped', value: result.totals.skipped, color: result.totals.skipped > 0 ? 'text-amber-600' : 'text-gray-400' },
+        ].map(({ labelKey, value, color }) => (
+          <div key={labelKey} className="bg-white rounded-xl border border-gray-100 p-3 text-center">
             <p className={`text-xl font-bold ${color}`}>{value}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{t(labelKey)}</p>
           </div>
         ))}
       </div>
 
       {skippedItems.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-amber-600 mb-1.5">Preskočeni:</p>
+          <p className="text-xs font-medium text-amber-600 mb-1.5">{t('result.skippedLabel')}</p>
           <ul className="space-y-1 max-h-32 overflow-y-auto">
             {skippedItems.map((item, i) => (
               <li key={i} className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-100">
@@ -190,7 +192,7 @@ function SendResultPanel({
         onClick={onReset}
         className="w-full py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
       >
-        Pošlji novo sporočilo
+        {t('result.newMessage')}
       </button>
     </motion.div>
   );
@@ -201,6 +203,7 @@ function SendResultPanel({
 // ============================================================================
 
 export default function KomunikacijaPage() {
+  const t = useTranslations('communication');
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
 
@@ -405,15 +408,15 @@ export default function KomunikacijaPage() {
 
     // Validation
     if (selectedIds.size === 0) {
-      setToast({ message: 'Izberite vsaj eno stranko', type: 'error' });
+      setToast({ message: t('toasts.selectAtLeastOne'), type: 'error' });
       return;
     }
     if (!subject.trim()) {
-      setToast({ message: 'Vnesite zadevo sporočila', type: 'error' });
+      setToast({ message: t('toasts.enterSubject'), type: 'error' });
       return;
     }
     if (!message.trim()) {
-      setToast({ message: 'Vnesite vsebino sporočila', type: 'error' });
+      setToast({ message: t('toasts.enterMessage'), type: 'error' });
       return;
     }
 
@@ -423,7 +426,7 @@ export default function KomunikacijaPage() {
       if (!selectedIds.has(c.id)) continue;
       if (c.numericId === null) {
         setToast({
-          message: `Stranka "${c.name}" nima veljavnega numeričnega ID-ja (Stranke.id)`,
+          message: t('toasts.invalidId', { name: c.name }),
           type: 'error',
         });
         return;
@@ -432,7 +435,7 @@ export default function KomunikacijaPage() {
     }
 
     if (clientIds.length !== selectedIds.size) {
-      setToast({ message: 'Nekatere stranke nimajo veljavnega ID-ja', type: 'error' });
+      setToast({ message: t('toasts.someInvalidIds'), type: 'error' });
       return;
     }
 
@@ -474,18 +477,18 @@ export default function KomunikacijaPage() {
           skipped: Array.isArray(result.skipped) ? result.skipped : [],
         });
         setToast({
-          message: `Poslano ${totals.sent} / ${totals.requested} sporočil`,
+          message: t('toasts.sent', { sent: totals.sent, requested: totals.requested }),
           type: 'success',
         });
       } else {
         setToast({
-          message: 'Prišlo je do napake pri pošiljanju sporočila',
+          message: t('toasts.sendError'),
           type: 'error',
         });
       }
     } catch (err) {
       console.error('Send error:', err);
-      setToast({ message: 'Prišlo je do napake pri pošiljanju sporočila', type: 'error' });
+      setToast({ message: t('toasts.sendError'), type: 'error' });
     } finally {
       setIsSending(false);
     }
@@ -510,15 +513,15 @@ export default function KomunikacijaPage() {
           {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">Komunikacija</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
               <p className="text-sm text-gray-500 mt-1">
-                Pošljite sporočila svojim strankam hitro in enostavno
+                {t('page.subtitle')}
               </p>
             </div>
             {/* Email quota inline */}
             {emailQuota.total > 0 && (
               <div className="text-right flex-shrink-0">
-                <p className="text-xs text-gray-400">Email kvota</p>
+                <p className="text-xs text-gray-400">{t('page.emailQuotaLabel')}</p>
                 <p className="text-sm font-medium text-gray-700 mt-0.5">
                   <span className="text-gray-900">{emailQuota.used}</span>
                   <span className="text-gray-400"> / {emailQuota.total}</span>
@@ -542,7 +545,7 @@ export default function KomunikacijaPage() {
                   <div className="flex items-center gap-2 mb-4">
                     <Users className="h-4 w-4 text-gray-400" weight="regular" />
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      Izbira strank
+                      {t('page.step1SectionTitle')}
                     </p>
                   </div>
                   <CustomerList
@@ -562,12 +565,11 @@ export default function KomunikacijaPage() {
                 >
                   {selectedIds.size > 0 ? (
                     <>
-                      Naprej z {selectedIds.size}{' '}
-                      {selectedIds.size === 1 ? 'stranko' : selectedIds.size < 5 ? 'strankami' : 'strankami'}
+                      {t('page.step1Continue', { count: selectedIds.size })}
                       <CaretRight className="h-3.5 w-3.5" weight="bold" />
                     </>
                   ) : (
-                    'Izberite stranke za nadaljevanje'
+                    t('page.step1ContinueDisabled')
                   )}
                 </button>
               </motion.div>
@@ -588,15 +590,10 @@ export default function KomunikacijaPage() {
                     className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
                   >
                     <ArrowLeft className="h-3.5 w-3.5" weight="bold" />
-                    Nazaj na izbiro
+                    {t('page.step2BackButton')}
                   </button>
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
-                    {selectedIds.size}{' '}
-                    {selectedIds.size === 1
-                      ? 'stranka'
-                      : selectedIds.size < 5
-                      ? 'stranke'
-                      : 'strank'}
+                    {t('page.step2SelectedBadge', { count: selectedIds.size })}
                   </span>
                 </div>
 
@@ -605,7 +602,7 @@ export default function KomunikacijaPage() {
                   <div className="flex items-center gap-2 mb-5">
                     <PaperPlaneTilt className="h-4 w-4 text-gray-400" weight="regular" />
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      Sestavi sporočilo
+                      {t('page.step2SectionTitle')}
                     </p>
                   </div>
 

@@ -15,6 +15,7 @@ import {
   CalendarX,
   CheckCircle,
 } from '@phosphor-icons/react';
+import { useTranslations, useLocale } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
@@ -38,6 +39,8 @@ const isEnabledValue = (value: unknown, fallback = false) => {
 };
 
 export default function LostLeadsPage() {
+  const t = useTranslations('lost-leads');
+  const locale = useLocale();
   const { companyId, companySettings } = useCompany();
   const { role, permissions } = useRolePermissions();
   const canManageSettings = role !== 'staff' || (permissions?.can_manage_lost_leads ?? true);
@@ -156,15 +159,6 @@ export default function LostLeadsPage() {
   const getClientPhone = (client: ClientRow) =>
     String(client['Telefonska številka'] ?? client['Telefon'] ?? client['phone'] ?? '-');
 
-  const getClientInitials = (client: ClientRow) => {
-    const name = getClientName(client);
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
   // Check if client has been notified via Lost Leads (from "Obveščen lost" column)
   const isClientNotified = (client: ClientRow): boolean => {
     const notifiedValue = client['Obveščen lost'] ?? client['obvescen_lost'];
@@ -177,14 +171,14 @@ export default function LostLeadsPage() {
   };
 
   const getToneLabel = (toneValue: string) => {
-    const toneMap: Record<string, string> = {
-      'profesionalen': 'Profesionalen',
-      'prijazen': 'Prijazen',
-      'prodajno_usmerjen': 'Prodajno usmerjen',
-      'formal': 'Formalen',
-      'sproscen': 'Sproščen',
+    const map: Record<string, string> = {
+      'profesionalen': t('tone.professional'),
+      'prijazen': t('tone.friendly'),
+      'prodajno_usmerjen': t('tone.salesOriented'),
+      'formal': t('tone.formal'),
+      'sproscen': t('tone.relaxed'),
     };
-    return toneMap[toneValue] || toneValue;
+    return map[toneValue] ?? toneValue;
   };
 
   const notifiedThisMonthCount = useMemo(() => {
@@ -218,9 +212,9 @@ export default function LostLeadsPage() {
             className="mb-8 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">Izgubljene stranke</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
               <p className="mt-1 text-sm text-gray-500">
-                Pregled nastavitev in neaktivnih strank
+                {t('page.subtitle')}
               </p>
             </div>
 
@@ -232,7 +226,7 @@ export default function LostLeadsPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                  title="Nastavitve"
+                  title={t('page.settings.title')}
                 >
                   <Gear size={20} weight="bold" className="text-gray-900" />
                 </motion.button>
@@ -277,8 +271,8 @@ export default function LostLeadsPage() {
                       <TrendDown className="h-6 w-6 text-gray-900" weight="regular" />
                     </div>
                     <div className="mt-3 text-left">
-                      <div className="text-sm font-medium text-gray-600">Neaktivne Stranke</div>
-                      <div className="text-xs text-gray-500 mt-1">Skupaj označenih</div>
+                      <div className="text-sm font-medium text-gray-600">{t('page.stats.inactiveClients')}</div>
+                      <div className="text-xs text-gray-500 mt-1">{t('page.stats.inactiveClientsDesc')}</div>
                     </div>
                   </div>
                 </motion.div>
@@ -297,8 +291,8 @@ export default function LostLeadsPage() {
                     <PaperPlaneRight className="h-6 w-6 text-gray-900" weight="regular" />
                   </div>
                   <div className="mt-3 text-left">
-                    <div className="text-sm font-medium text-gray-600">Obveščeni stranke</div>
-                    <div className="text-xs text-gray-500 mt-1">Ta mesec</div>
+                    <div className="text-sm font-medium text-gray-600">{t('page.stats.notifiedClients')}</div>
+                    <div className="text-xs text-gray-500 mt-1">{t('page.stats.notifiedClientsDesc')}</div>
                   </div>
                 </motion.div>
 
@@ -316,8 +310,8 @@ export default function LostLeadsPage() {
                     <CalendarX className="h-6 w-6 text-gray-900" weight="regular" />
                   </div>
                   <div className="mt-3 text-left">
-                    <div className="text-sm font-medium text-gray-600">Dnevi neaktivnosti</div>
-                    <div className="text-xs text-gray-500 mt-1">Prag neaktivnosti</div>
+                    <div className="text-sm font-medium text-gray-600">{t('page.stats.inactivityDays')}</div>
+                    <div className="text-xs text-gray-500 mt-1">{t('page.stats.inactivityDaysDesc')}</div>
                   </div>
                 </motion.div>
               </>
@@ -335,10 +329,10 @@ export default function LostLeadsPage() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-semibold text-[#1A1F36]">
-                    Neaktivne Stranke
+                    {t('page.table.title')}
                   </h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    {inactiveClients.length} neaktivnih strank (več kot {inactivityDays} dni brez interakcije)
+                    {t('page.table.subtitle', { count: inactiveClients.length, days: inactivityDays })}
                   </p>
                 </div>
               </div>
@@ -356,10 +350,10 @@ export default function LostLeadsPage() {
               <div className="p-12 text-center">
                 <UserCheck className="h-16 w-16 text-emerald-300 mx-auto mb-4" />
                 <p className="text-gray-500 text-lg font-medium">
-                  Trenutno ni neaktivnih strank.
+                  {t('page.table.empty')}
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
-                  Vse stranke so imele interakcijo v zadnjih {inactivityDays} dneh.
+                  {t('page.table.emptyDesc', { days: inactivityDays })}
                 </p>
               </div>
             ) : (
@@ -368,19 +362,19 @@ export default function LostLeadsPage() {
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Stranka
+                        {t('page.table.columns.client')}
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Email
+                        {t('page.table.columns.email')}
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Telefon
+                        {t('page.table.columns.phone')}
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Dni Neaktivnosti
+                        {t('page.table.columns.daysInactive')}
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        Obveščen
+                        {t('page.table.columns.notified')}
                       </th>
                     </tr>
                   </thead>
@@ -424,18 +418,18 @@ export default function LostLeadsPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm text-orange-600">
-                              {daysInactive} dni
+                              {t('page.table.daysValue', { days: daysInactive })}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             {notified ? (
                               <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">
                                 <CheckCircle className="h-3.5 w-3.5" weight="fill" />
-                                Da
+                                {t('page.table.notifiedYes')}
                               </span>
                             ) : (
                               <span className="text-sm text-gray-900">
-                                Ne
+                                {t('page.table.notifiedNo')}
                               </span>
                             )}
                           </td>
@@ -446,7 +440,7 @@ export default function LostLeadsPage() {
                 </table>
                 {inactiveClients.length > 50 && (
                   <div className="p-4 text-center text-sm text-gray-500 border-t border-gray-100">
-                    Prikazanih prvih 50 od {inactiveClients.length} neaktivnih strank
+                    {t('page.table.limitNote', { total: inactiveClients.length })}
                   </div>
                 )}
               </div>
@@ -460,7 +454,7 @@ export default function LostLeadsPage() {
             transition={{ delay: 0.3 }}
             className="mt-8 mb-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
           >
-            <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Nastavitve</h2>
+            <h2 className="text-base font-semibold text-[#1A1F36] mb-4">{t('page.settings.title')}</h2>
             {loading ? (
               <div className="flex items-center justify-center py-10">
                 <GradientSpinner />
@@ -470,11 +464,11 @@ export default function LostLeadsPage() {
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                   <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
                     <TrendDown className="w-4 h-4 flex-shrink-0 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">Status</span>
+                    <span className="text-sm text-gray-700">{t('page.settings.statusLabel')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`text-sm ${enabled ? 'text-green-600' : 'text-red-500'}`}>
-                      {enabled ? 'Omogočeno' : 'Onemogočeno'}
+                      {enabled ? t('status.enabled') : t('status.disabled')}
                     </span>
                     <div className={`w-2.5 h-2.5 rounded-full ${enabled ? 'bg-green-500' : 'bg-red-400'}`} />
                   </div>
@@ -483,15 +477,15 @@ export default function LostLeadsPage() {
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                   <div className="flex items-center gap-2">
                     <CalendarX className="w-4 h-4 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">Prag neaktivnosti</span>
+                    <span className="text-sm text-gray-700">{t('page.settings.inactivityThreshold')}</span>
                   </div>
-                  <span className="text-sm text-gray-900">{inactivityDays} dni</span>
+                  <span className="text-sm text-gray-900">{t('page.table.daysValue', { days: inactivityDays })}</span>
                 </div>
 
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                   <div className="flex items-center gap-2">
                     <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">Ton komunikacije</span>
+                    <span className="text-sm text-gray-700">{t('page.settings.tone')}</span>
                   </div>
                   <span className="text-sm text-gray-900">{getToneLabel(tone)}</span>
                 </div>
@@ -499,24 +493,24 @@ export default function LostLeadsPage() {
                 <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">Popust za vrnitev</span>
+                    <span className="text-sm text-gray-700">{t('page.settings.discount')}</span>
                   </div>
                   {hasDiscount && discountText ? (
                     <span className="text-sm text-gray-900">{discountText}</span>
                   ) : (
-                    <span className="text-sm text-gray-400">Ni nastavljeno</span>
+                    <span className="text-sm text-gray-400">{t('page.settings.notSet')}</span>
                   )}
                 </div>
 
                 <div className="flex items-start justify-between gap-4 py-2.5">
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <EnvelopeSimple className="w-4 h-4 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">Navodila AI-ju</span>
+                    <span className="text-sm text-gray-700">{t('page.settings.aiInstructions')}</span>
                   </div>
                   {instructions ? (
                     <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{instructions}</p>
                   ) : (
-                    <span className="text-sm text-gray-400">Ni navodil</span>
+                    <span className="text-sm text-gray-400">{t('page.settings.noInstructions')}</span>
                   )}
                 </div>
               </div>
@@ -535,15 +529,9 @@ export default function LostLeadsPage() {
                 <Info className="h-4 w-4" weight="bold" />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-gray-900 mb-1">O Izgubljenih strankah</h4>
-                <p className="text-sm text-gray-700">
-                  Sistem avtomatsko zazna stranke, ki v določenem obdobju niso imele termina, in jim pošlje personalizirano sporočilo za povratno naročanje.
-
-AI generira vsebino sporočila glede na vašo konfiguracijo — besedilo se prilagodi vsaki stranki posebej, ob upoštevanju njene zgodovine in storitev. Tako vaše sporočilo nikoli ne zveni kot množična pošta, ampak kot osebno povabilo nazaj.
-
-Zahvaljujoč temu sistemu pridobite stranke, ki bi sicer odšle h konkurenci — brez ročnega dela in brez pozabljenih kontaktov.
-
-V kolikor imate kakršnakoli vprašanja, nas kontaktirajte na help@jedroplus.com.
+                <h4 className="font-semibold text-gray-900 mb-1">{t('page.info.title')}</h4>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                  {t('page.info.body')}
                 </p>
               </div>
             </div>

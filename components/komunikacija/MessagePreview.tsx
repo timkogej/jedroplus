@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Eye, CaretDown } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 interface MessagePreviewProps {
   subject: string;
@@ -11,6 +12,7 @@ interface MessagePreviewProps {
 }
 
 export default function MessagePreview({ subject, message, senderName }: MessagePreviewProps) {
+  const t = useTranslations('communication');
   const [isOpen, setIsOpen] = useState(false);
 
   // Replace variables with mock data for preview
@@ -38,7 +40,7 @@ export default function MessagePreview({ subject, message, senderName }: Message
       >
         <div className="flex items-center gap-3">
           <Eye className="w-5 h-5 text-[#1A1F36]" weight="regular" />
-          <span className="text-sm font-medium text-[#1A1F36]">Predogled sporočila</span>
+          <span className="text-sm font-medium text-[#1A1F36]">{t('preview.toggleButton')}</span>
         </div>
         <CaretDown
           className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -76,9 +78,9 @@ export default function MessagePreview({ subject, message, senderName }: Message
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">Zadeva:</span>
+                    <span className="text-xs text-gray-400">{t('preview.subjectLabel')}</span>
                     <span className="text-sm font-medium text-[#1A1F36]">
-                      {previewSubject || 'Brez zadeve'}
+                      {previewSubject || t('preview.noSubject')}
                     </span>
                   </div>
                 </div>
@@ -91,14 +93,14 @@ export default function MessagePreview({ subject, message, senderName }: Message
                     </p>
                   ) : (
                     <p className="text-sm text-gray-400 italic">
-                      Predogled bo prikazan, ko vnesete sporočilo...
+                      {t('preview.empty')}
                     </p>
                   )}
                 </div>
               </div>
 
               <p className="mt-2 text-center text-xs text-gray-400">
-                Spremenljivke so nadomeščene s podatki stranke
+                {t('preview.note')}
               </p>
             </div>
           </motion.div>

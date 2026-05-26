@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { PaperPlaneTilt, Warning, CircleNotch } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 interface SendSectionProps {
   selectedCount: number;
@@ -20,6 +21,7 @@ export default function SendSection({
   onSend,
   sending = false,
 }: SendSectionProps) {
+  const t = useTranslations('communication');
   const canSend = !sending && selectedCount > 0 && hasMessage && hasSubject && remainingQuota >= selectedCount;
   const exceedsQuota = selectedCount > remainingQuota;
 
@@ -28,13 +30,13 @@ export default function SendSection({
       {/* Summary */}
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">Prejemniki</span>
+          <span className="text-sm text-gray-500">{t('send.recipientsLabel')}</span>
           <span className={`text-sm font-semibold ${selectedCount > 0 ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
-            {selectedCount} {selectedCount === 1 ? 'stranka' : selectedCount < 5 ? 'stranke' : 'strank'}
+            {t('send.recipientCount', { count: selectedCount })}
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">Preostala kvota</span>
+          <span className="text-sm text-gray-500">{t('send.remainingQuotaLabel')}</span>
           <span
             className="text-sm font-semibold"
             style={{
@@ -43,25 +45,25 @@ export default function SendSection({
               WebkitTextFillColor: 'transparent',
             }}
           >
-            {remainingQuota} emailov
+            {t('send.remainingEmails', { count: remainingQuota })}
           </span>
         </div>
         {!hasSubject && selectedCount > 0 && (
           <div className="flex items-center gap-2 text-xs text-amber-500">
             <Warning className="h-3.5 w-3.5" weight="fill" />
-            <span>Vnesite zadevo sporočila</span>
+            <span>{t('send.warnNoSubject')}</span>
           </div>
         )}
         {!hasMessage && selectedCount > 0 && (
           <div className="flex items-center gap-2 text-xs text-amber-500">
             <Warning className="h-3.5 w-3.5" weight="fill" />
-            <span>Vnesite vsebino sporočila</span>
+            <span>{t('send.warnNoMessage')}</span>
           </div>
         )}
         {exceedsQuota && (
           <div className="flex items-center gap-2 text-xs text-red-500">
             <Warning className="h-3.5 w-3.5" weight="fill" />
-            <span>Presežena email kvota</span>
+            <span>{t('send.warnQuotaExceeded')}</span>
           </div>
         )}
       </div>
@@ -95,12 +97,12 @@ export default function SendSection({
           ) : (
             <PaperPlaneTilt className="h-5 w-5" weight="fill" style={canSend ? { fill: 'url(#btn-icon-grad)' } : undefined} />
           )}
-          {sending ? 'Pošiljam...' : 'Pošlji sporočilo'}
+          {sending ? t('send.sendingButton') : t('send.sendButton')}
         </span>
       </motion.button>
 
       <p className="text-center text-xs text-gray-400">
-        Sporočilo bo poslano na email naslove izbranih strank
+        {t('send.sendNote')}
       </p>
     </div>
   );
