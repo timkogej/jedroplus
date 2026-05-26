@@ -1,1 +1,258 @@
-{}
+{
+  "page": {
+    "pageTitle": "{role, select, staff {Paketi} other {Paketi in kvote}}"
+  },
+  "currentPlan": {
+    "label": "Trenutni paket",
+    "subscriptionDetails": "Podrobnosti naročnine",
+    "statusLabel": "Status",
+    "statusActive": "Aktivna",
+    "renewalLabel": "Naslednja obnova",
+    "freeLabel": "Brezplačni",
+    "smsQuota": "SMS kvota",
+    "emailQuota": "Email kvota",
+    "quotaUsed": "Porabljeno",
+    "quotaAvailable": "Na voljo"
+  },
+  "portal": {
+    "button": "Odpri Billing Portal",
+    "opening": "Odpiranje portala...",
+    "note": "Upravljajte naročnino, plačilno metodo in račune prek Stripe portala."
+  },
+  "toggle": {
+    "monthly": "Mesečno",
+    "yearly": "Letno"
+  },
+  "plans": {
+    "mostPopular": "Najbolj priljubljen",
+    "customPricing": "po dogovoru",
+    "perMonth": "/ mesec",
+    "contactUs": "Kontaktiraj nas",
+    "ctaLoading": "Nalagam...",
+    "ctaCurrentPlan": "Trenutni paket",
+    "ctaSendInquiry": "Pošlji Povpraševanje",
+    "ctaTryFree": "Preizkusi Brezplačno",
+    "ctaSelectPlan": "Izberi paket",
+    "jedroPlus": {
+      "description": "Za podjetja, ki želijo urejen sistem in jasen pregled",
+      "tagline": "Koledar, baze in opomniki, ki brez zapletov uredijo vsakdan.",
+      "features": [
+        "Baza strank in terminov",
+        "Baza storitev in osebja",
+        "Personalizirani opomniki pred in po terminu",
+        "Email pošiljanje",
+        "Celotna analitika",
+        "Spletno Naročanje",
+        "Različni dizajni spletnega naročanja",
+        "Asistent+"
+      ]
+    },
+    "jedroPro": {
+      "description": "Za podjetja, ki želijo več zasedenosti in manj praznih terminov",
+      "tagline": "Vključuje AI pomočnike, Lost Leads in SMS opomnike.",
+      "features": [
+        "Vse iz Jedro Plus",
+        "Chatbot+",
+        "Lost Leads sistem",
+        "SMS pošiljanje",
+        "Email pošiljanje",
+        "Dodatni dizajni spletnega naročanja"
+      ]
+    },
+    "jedroPremium": {
+      "description": "Za podjetja, ki želijo maksimalno avtomatizacijo",
+      "tagline": "Celoten nabor AI funkcij za rast in komunikacijo.",
+      "features": [
+        "Vse iz Jedro Pro",
+        "Receptionist+",
+        "SMS pošiljanje (višja kvota)",
+        "Email pošiljanje (višja kvota)",
+        "Premium dizajn spletnega naročanja",
+        "Premium chatbot dizajn"
+      ]
+    },
+    "enterprise": {
+      "description": "Za podjetja s posebnimi zahtevami in prilagoditvami",
+      "tagline": "Prilagoditve funkcij, AI in booking okolja po meri.",
+      "features": [
+        "Custom AI funkcije prilagojene podjetju",
+        "Premium booking page",
+        "Različni booking linki",
+        "Dodatne zahteve po meri"
+      ]
+    }
+  },
+  "footer": {
+    "questions": "Imate vprašanja? Kontaktirajte nas na",
+    "quotaQuestion": "Želite večjo kvoto ali več zaposlenih? Pišite nam na"
+  },
+  "enterpriseModal": {
+    "title": "Enterprise povpraševanje",
+    "subtitle": "Pošljite nam vaše zahteve in se vam oglasimo",
+    "successTitle": "Povpraševanje poslano!",
+    "successMessage": "Kontaktirali vas bomo v najkrajšem možnem času.",
+    "closeButton": "Zapri",
+    "cancelButton": "Prekliči",
+    "submitButton": "Pošlji povpraševanje",
+    "submittingButton": "Pošiljam...",
+    "fields": {
+      "fullName": "Ime in priimek",
+      "email": "Email",
+      "phone": "Telefon",
+      "companyName": "Ime podjetja",
+      "employeeCount": "Število zaposlenih",
+      "requirements": "Vaše zahteve in potrebe"
+    },
+    "placeholders": {
+      "fullName": "Jan Novak",
+      "email": "jan@podjetje.si",
+      "phone": "+386 40 123 456",
+      "companyName": "Podjetje d.o.o.",
+      "employeeCount": "npr. 10–50",
+      "requirements": "Opišite vaše specifične potrebe, integracije, prilagoditve..."
+    }
+  },
+  "errors": {
+    "companyNotSet": "Podjetje ni nastavljeno. Prosimo, prijavite se ponovno.",
+    "portalError": "Prišlo je do napake pri pridobivanju portala za plačila",
+    "serverError": "Prišlo je do napake pri povezavi s strežnikom",
+    "invalidCheckoutUrl": "Neveljaven URL za plačilo. Prosimo, poskusite znova.",
+    "checkoutError": "Prišlo je do napake pri ustvarjanju plačilne seje",
+    "companyDataError": "Prišlo je do napake pri pridobivanju podatkov podjetja",
+    "errorLabel": "Napaka"
+  },
+  "success": {
+    "missingSession": {
+      "title": "Manjka ID seje",
+      "message": "Prišlo je do napake pri potrditvi plačila. Prosimo, preverite vaš email za potrditev.",
+      "backButton": "Nazaj na pakete"
+    },
+    "verifying": {
+      "title": "Potrjujem plačilo...",
+      "message": "Aktiviramo vaš paket. Prosimo, počakajte trenutek.",
+      "progressLabel": "Preverjanje...",
+      "timeRemaining": "{seconds}s preostalo"
+    },
+    "complete": {
+      "title": "Plačilo uspešno!",
+      "subtitle": "Hvala za vašo naročnino.",
+      "yourPlan": "Vaš paket:",
+      "whatsNext": "Kaj sledi?",
+      "emailConfirmation": "Prejeli boste potrdilo na email {email}",
+      "smsReset": "SMS kvota je bila ponastavljena",
+      "backToBilling": "Paketi",
+      "dashboard": "Dashboard"
+    },
+    "timeout": {
+      "title": "Obdelava plačila",
+      "message": "Vaše plačilo se še obdeluje. To lahko traja nekaj trenutkov. Preverite vaš email za potrditev ali poskusite znova.",
+      "retryButton": "Poskusi znova",
+      "backButton": "Nazaj"
+    },
+    "error": {
+      "title": "Napaka",
+      "message": "Prišlo je do napake pri potrjevanju plačila. Prosimo, kontaktirajte podporo.",
+      "backButton": "Nazaj na pakete"
+    },
+    "loading": "Nalaganje..."
+  },
+  "cancel": {
+    "title": "Nakup preklican",
+    "message": "Vaš nakup je bil preklican. Nobena sprememba ni bila izvedena na vašem računu.",
+    "backButton": "Nazaj na obračunavanje",
+    "dashboardButton": "Nadaljuj na nadzorno ploščo"
+  },
+  "featureGate": {
+    "upgradeRequired": "Nadgradite za dostop",
+    "requiresPlan": "Ta funkcija zahteva paket {plan} ali višje.",
+    "viewPlans": "Oglej si pakete",
+    "planNames": {
+      "free": "Brezplačno",
+      "basic": "Basic",
+      "pro": "Pro",
+      "premium": "Premium"
+    }
+  },
+  "paketi": {
+    "title": "Paketi in kvote",
+    "subtitle": "Pregled vašega paketa in porabe",
+    "currentBadge": "Trenutni",
+    "recommendedBadge": "Priporočeno",
+    "renewalLabel": "Naslednja obnova",
+    "upgradeButton": "Nadgradi",
+    "maxUsersLabel": "Največje število uporabnikov aplikacije",
+    "currentTeamLabel": "Trenutno v ekipi",
+    "usageTitle": "Poraba tega meseca",
+    "availablePlans": "Razpoložljivi paketi",
+    "customPricing": "Po dogovoru",
+    "billingPeriod": {
+      "monthly": "Mesečno",
+      "yearly": "Letno",
+      "billedYearly": "Obračunano letno"
+    },
+    "quotaLabels": {
+      "sms": "SMS sporočila",
+      "email": "Email sporočila",
+      "teamMembers": "Aktivni člani ekipe",
+      "clients": "Stranke",
+      "appointments": "Termini ta mesec"
+    },
+    "planDescriptions": {
+      "jedroPlus": "Vključuje opomnike, email pošiljanje in analitiko.",
+      "jedroPro": "Vključuje SMS, izgubljene stranke in napredne funkcije.",
+      "enterprise": "Prilagojen paket za posebne poslovne potrebe.",
+      "free": "Brezplačen preizkusni dostop."
+    },
+    "planButtons": {
+      "active": "Aktiven",
+      "sendInquiry": "Pošlji povpraševanje",
+      "upgrade": "Nadgradi"
+    },
+    "enterpriseModal": {
+      "title": "Povpraševanje za Enterprise",
+      "subtitle": "Opišite vaše potrebe in odgovorili vam bomo v najkrajšem možnem času.",
+      "submitButton": "Pošlji povpraševanje",
+      "submittingButton": "Pošiljanje...",
+      "cancelButton": "Prekliči",
+      "fields": {
+        "fullName": "Ime in priimek",
+        "email": "E-pošta",
+        "phone": "Telefon",
+        "message": "Sporočilo"
+      }
+    },
+    "inquiryToast": "Povpraševanje poslano. Kmalu vas kontaktiramo.",
+    "plans": {
+      "jedroPlus": {
+        "features": [
+          "Baza strank in terminov",
+          "Baza storitev in osebja",
+          "Personalizirani opomniki pred in po terminu",
+          "Email pošiljanje (500 email/mesec)",
+          "Komunikacija",
+          "Celotna analitika",
+          "Spletno naročanje",
+          "Različni dizajni spletnega naročanja"
+        ]
+      },
+      "jedroPro": {
+        "features": [
+          "Vse iz Jedro Plus",
+          "Obveščanje izgubljenih strank",
+          "SMS pošiljanje (200 sms/mesec)",
+          "Email pošiljanje (2000 email/mesec)",
+          "Dodatni dizajni spletnega naročanja"
+        ]
+      },
+      "enterprise": {
+        "features": [
+          "Custom AI funkcije (chatbot, asistent, receptionist in več)",
+          "Custom booking dizajni z obdelavo slik in naprednimi elementi",
+          "Avtomatizacije poslovnih procesov po meri",
+          "Neomejena email in SMS kvota",
+          "Dedicirani manager in prioritetna podpora"
+        ]
+      }
+    }
+  }
+}

@@ -3,8 +3,10 @@
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { XCircle, ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 export default function BillingCancelPage() {
+  const t = useTranslations('billing');
   const router = useRouter();
 
   return (
@@ -31,7 +33,7 @@ export default function BillingCancelPage() {
           transition={{ delay: 0.2 }}
           className="text-2xl font-bold text-gray-900 mb-2"
         >
-          Nakup preklican
+          {t('cancel.title')}
         </motion.h1>
 
         <motion.p
@@ -40,7 +42,7 @@ export default function BillingCancelPage() {
           transition={{ delay: 0.3 }}
           className="text-gray-600 mb-8"
         >
-          Vaš nakup je bil preklican. Nobena sprememba ni bila izvedena na vašem računu.
+          {t('cancel.message')}
         </motion.p>
 
         <motion.div
@@ -54,14 +56,14 @@ export default function BillingCancelPage() {
             className="w-full py-3 px-4 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" weight="bold" />
-            Nazaj na obračunavanje
+            {t('cancel.backButton')}
           </button>
 
           <button
             onClick={() => router.push('/dashboard')}
             className="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
           >
-            Nadaljuj na nadzorno ploščo
+            {t('cancel.dashboardButton')}
             <ArrowRight className="h-4 w-4" weight="bold" />
           </button>
         </motion.div>
