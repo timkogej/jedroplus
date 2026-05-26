@@ -1,1 +1,168 @@
-{}
+{
+  "page": {
+    "title": "Rezervacije",
+    "subtitle": "Upravljanje spletnega sistema za rezervacije"
+  },
+  "incompleteBanner": {
+    "message": "Izpolnite nastavitve označene s ! za brezhibno delovanje in izkoriščanje celotnega potenciala rezervacij.",
+    "openButton": "Odpri nastavitve →"
+  },
+  "newDesignsBanner": "Vsak mesec novi dizajni za booking strani",
+  "multiChannelBanner": {
+    "bold": "Vsak booking link lahko uporabite na drugem kanalu.",
+    "body": "Na Instagram profilu en dizajn, na spletni strani drug, v email podpisu tretji – vsak kanal ima lahko svojega. Stranke vsakič pristanejo na isti vaši strani, samo z drugačnim videzom."
+  },
+  "standardSection": {
+    "title": "Standardne strani za rezervacijo",
+    "subtitle": "Klasičen, Moderen in Eleganten dizajn"
+  },
+  "premiumSection": {
+    "title": "Premium strani za rezervacijo",
+    "subtitle": "Sezonsko in Magazine dizajn"
+  },
+  "designs": {
+    "bookingLinkLabel": "Booking link",
+    "notAvailable": "Ni na voljo",
+    "comingSoon": "Kmalu na voljo",
+    "copy": "Kopiraj",
+    "copied": "Kopirano",
+    "classic": {
+      "name": "Klasičen",
+      "subtitle": "Preprost in pregleden",
+      "description": "Klasičen dizajn z elegantnimi gradient ozadji. Idealno za prikaz barv vašega podjetja in ustvarjanje prepoznavne blagovne znamke."
+    },
+    "modern": {
+      "name": "Moderen",
+      "subtitle": "Sodoben in dinamičen",
+      "description": "Sodoben dizajn s temnim ozadjem in živahnimi poudarki. Priporočamo temnejšo primarno barvo za najboljši vizualni učinek in premium občutek."
+    },
+    "elegant": {
+      "name": "Eleganten",
+      "subtitle": "Čist in enostaven",
+      "description": "Luksuzni minimalistični dizajn z nežnimi zemeljskimi toni. Popoln za elegantne salone, spa centre in ekskluzivne storitve."
+    },
+    "seasonal": {
+      "name": "Sezonsko",
+      "subtitle": "Prilagodljiv in živahen",
+      "description": "Dinamičen dizajn, ki se samodejno prilagaja letnemu času in praznikom. Pomlad, poletje, jesen, zima, božič, valentinovo, noč čarovnic in več – vaša stran je vedno sveža in aktualna."
+    },
+    "magazine": {
+      "name": "Magazine",
+      "subtitle": "Eleganten in urejevalen",
+      "description": "Premium Magazine dizajn z uredniško estetiko in visokokakovostnim vizualnim slogom. Idealno za ekskluzivne salone, kozmetične studio in premium storitve."
+    },
+    "casino": {
+      "name": "Casino",
+      "subtitle": "Glamurozen in razburljiv",
+      "description": "Ekskluziven kazino dizajn z glamurozno atmosfero, bleščečimi akcenti in dinamičnimi vizualnimi elementi. Popoln za tiste, ki želijo rezervacijo terminov spremeniti v nepozabno izkušnjo."
+    }
+  },
+  "customCta": {
+    "text": "Želite prilagojen booking sistem prav za vaše podjetje?",
+    "linkText": "Pišite nam na info@jedroplus.com"
+  },
+  "mainLink": {
+    "title": "Glavni booking link",
+    "subtitle": "Uporablja se pri pošiljanju strankam, kadar je potrebno deliti link za rezervacijo.",
+    "copy": "Kopiraj",
+    "copied": "Kopirano"
+  },
+  "mgmtLink": {
+    "title": "Link za prenaročanje in odpoved terminov",
+    "subtitle": "Univerzalen link za upravljanje terminov — stranke ga lahko uporabijo za prenaročanje ali odpoved."
+  },
+  "settingsOverview": {
+    "title": "Nastavitve",
+    "bookingEnabled": "Spletne rezervacije",
+    "enabled": "Omogočeno",
+    "disabled": "Onemogočeno",
+    "timeSlots": "Časovni intervali",
+    "timeSlotValue": "{minutes} min",
+    "clientConfirm": "Potrdilo stranki",
+    "onlineConfirm": "Potrdilo po spletni rezervaciji",
+    "mainLinkLabel": "Glavni booking link",
+    "linkSet": "Nastavljen",
+    "colors": "Barve",
+    "mgmtLinkLabel": "Link za prenaročanje in odpoved",
+    "yes": "Da",
+    "no": "Ne"
+  },
+  "modal": {
+    "title": "Nastavitve rezervacij",
+    "subtitle": "Kako delujejo spletne rezervacije",
+    "general": {
+      "sectionTitle": "Splošne nastavitve",
+      "sectionDesc": "Osnovne nastavitve rezervacij",
+      "enableLabel": "Omogoči spletne rezervacije",
+      "enableDesc": "Ali so spletne rezervacije aktivne",
+      "intervalLabel": "Dolžina časovnega intervala",
+      "intervalDesc": "Intervali za rezervacije (15, 30 ali 60 minut)",
+      "intervalPlaceholder": "Izberi interval",
+      "interval15": "15 minut",
+      "interval30": "30 minut",
+      "interval60": "60 minut (1 ura)"
+    },
+    "mainLink": {
+      "sectionTitle": "Glavni booking link",
+      "sectionDesc": "Link, ki se uporablja pri pošiljanju strankam",
+      "selectLabel": "Izberi glavni booking link",
+      "selectDesc": "Ta link se bo uporabljal pri pošiljanju rezervacij strankam",
+      "selectPlaceholder": "Izberi link...",
+      "classic": "Klasičen",
+      "modern": "Moderen",
+      "minimal": "Minimalen",
+      "seasonal": "Sezonsko",
+      "magazine": "Magazine"
+    },
+    "confirmations": {
+      "sectionTitle": "Potrdila",
+      "sectionDesc": "Pošiljanje potrdil strankam",
+      "manualLabel": "Pošlji potrdilo ob rezervaciji termina",
+      "manualDesc": "Avtomatsko pošlji potrdilo ob kreaciji termina",
+      "onlineLabel": "Pošlji potrdilo po online rezervaciji",
+      "onlineDesc": "Potrdilo ob rezervaciji preko spletnega sistema",
+      "channelLabel": "Pošlji potrdilo preko:",
+      "smsUnavailable": "– ni dostopno",
+      "smsUpgradeNote": "SMS je na voljo v višjih paketih.",
+      "smsUpgradeLink": "Nadgradi paket",
+      "smsPlanNotePrefix": "Za pošiljanje SMS potrdil",
+      "smsPlanNoteLink": "nadgradite paket"
+    },
+    "policy": {
+      "sectionTitle": "Politika odpovedi in prestavitev",
+      "sectionDesc": "Koliko dni pred terminom lahko stranke odpovejo ali prestavijo",
+      "cancelLabel": "Odpoved termina",
+      "cancelDesc": "Koliko dni pred terminom lahko stranka odpove",
+      "rescheduleLabel": "Prestavitev termina",
+      "rescheduleDesc": "Koliko dni pred terminom lahko stranka prestavi",
+      "selectPlaceholder": "Izberi",
+      "sameDay": "Isti dan",
+      "day1": "1 dan prej",
+      "day2": "2 dni prej",
+      "day3": "3 dni prej",
+      "day5": "5 dni prej",
+      "day7": "7 dni prej",
+      "day14": "14 dni prej"
+    },
+    "colors": {
+      "sectionTitle": "Barve rezervacijske strani",
+      "sectionDesc": "Prilagodite videz vaše rezervacijske strani",
+      "primaryLabel": "Primarna barva",
+      "primaryDesc": "Glavna barva za gumbe in akcente",
+      "secondaryLabel": "Sekundarna barva",
+      "secondaryDesc": "Barva za dodatne elemente",
+      "bgFromLabel": "Ozadje gradient (začetek)",
+      "bgFromDesc": "Začetna barva gradient ozadja",
+      "bgToLabel": "Ozadje gradient (konec)",
+      "bgToDesc": "Končna barva gradient ozadja",
+      "previewLabel": "Predogled ozadja:",
+      "previewButton": "Predogled gumba"
+    },
+    "footer": {
+      "close": "Zapri",
+      "save": "Shrani",
+      "saving": "Shranjujem...",
+      "saveError": "Prišlo je do napake pri shranjevanju"
+    }
+  }
+}

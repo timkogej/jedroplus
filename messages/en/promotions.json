@@ -1,1 +1,162 @@
-{}
+{
+  "layout": {
+    "title": "Promotions",
+    "subtitle": "Manage discounts, happy hours, and add-ons",
+    "tabs": {
+      "discounts": "Discounts",
+      "happyHours": "Happy Hours",
+      "addOns": "Add-ons"
+    }
+  },
+  "shared": {
+    "discountType": {
+      "percentage": "Percentage (%)",
+      "fixed": "Fixed amount (€)"
+    },
+    "serviceSearch": "Search services...",
+    "noServices": "No services",
+    "activeLabel": "Active",
+    "saveButton": "Save",
+    "createButton": "Create",
+    "cancelButton": "Cancel",
+    "deleteButton": "Delete",
+    "cannotUndo": "This action can't be undone.",
+    "valueUnit": {
+      "percentage": "(%)",
+      "fixed": "(€)"
+    }
+  },
+  "discounts": {
+    "search": "Search discounts...",
+    "newButton": "New discount",
+    "table": {
+      "name": "Name",
+      "services": "Services",
+      "discount": "Discount",
+      "dateFrom": "From",
+      "dateTo": "To",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": "No discounts. Create your first one!",
+    "serviceCount": "{count, plural, =1 {1 service} other {{count} services}}",
+    "modal": {
+      "createTitle": "New discount",
+      "editTitle": "Edit discount",
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "E.g. Summer discount",
+        "type": "Discount type",
+        "value": "Value {unit}",
+        "dateFrom": "Start date",
+        "dateTo": "End date",
+        "services": "Services ({count} selected)"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Delete discount?"
+    },
+    "toasts": {
+      "created": "Discount created",
+      "updated": "Discount updated",
+      "deleted": "Discount deleted",
+      "loadError": "Failed to load discounts",
+      "saveError": "Failed to save",
+      "deleteError": "Failed to delete",
+      "updateError": "Failed to update",
+      "nameRequired": "Name is required",
+      "valueRequired": "Value must be greater than 0",
+      "percentMax": "Percentage cannot exceed 100",
+      "dateOrder": "End date must be after start date",
+      "serviceRequired": "Select at least one service"
+    }
+  },
+  "addOns": {
+    "count": "{count, plural, =1 {1 Add-on} other {{count} Add-ons}}",
+    "newButton": "New Add-on",
+    "table": {
+      "service": "Service",
+      "originalPrice": "Original price",
+      "discount": "Discount",
+      "finalPrice": "Price with discount",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": "No Add-ons. Create your first one!",
+    "modal": {
+      "createTitle": "New Add-on",
+      "editTitle": "Edit Add-on",
+      "fields": {
+        "service": "Service",
+        "type": "Discount type",
+        "value": "Value",
+        "active": "Active",
+        "previewTitle": "Preview"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Delete Add-on?"
+    },
+    "toasts": {
+      "created": "Add-on created",
+      "updated": "Add-on updated",
+      "deleted": "Add-on deleted",
+      "loadError": "Failed to load",
+      "saveError": "Failed to save",
+      "deleteError": "Failed to delete",
+      "genericError": "Error",
+      "valueRequired": "Value must be greater than 0",
+      "percentMax": "Percentage cannot exceed 100",
+      "serviceRequired": "Select a service"
+    }
+  },
+  "happyHours": {
+    "count": "{count} happy hours",
+    "newButton": "New Happy Hour",
+    "table": {
+      "name": "Name",
+      "days": "Days",
+      "time": "Time",
+      "discount": "Discount",
+      "services": "Services",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "servicesAll": "All",
+    "empty": "No Happy Hours. Create your first one!",
+    "modal": {
+      "createTitle": "New Happy Hour",
+      "editTitle": "Edit Happy Hour",
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "E.g. Afternoon Happy Hour",
+        "days": "Days of the week",
+        "timeFrom": "From",
+        "timeTo": "To",
+        "type": "Discount type",
+        "value": "Value",
+        "services": "Services",
+        "allServices": "All services"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Delete Happy Hour?"
+    },
+    "toasts": {
+      "created": "Happy Hour created",
+      "updated": "Happy Hour updated",
+      "deleted": "Happy Hour deleted",
+      "loadError": "Failed to load",
+      "saveError": "Failed to save",
+      "deleteError": "Failed to delete",
+      "genericError": "Error",
+      "nameRequired": "Name is required",
+      "dayRequired": "Select at least one day",
+      "timeRequired": "Time is required",
+      "timeOrder": "End time must be after start time",
+      "valueRequired": "Value must be greater than 0",
+      "percentMax": "Percentage cannot exceed 100",
+      "serviceRequired": "Select at least one service"
+    }
+  }
+}

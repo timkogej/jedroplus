@@ -2,19 +2,21 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 
-const TABS = [
-  { label: 'Popusti', href: '/promotions/discounts' },
-  { label: 'Happy Hours', href: '/promotions/happy-hours' },
-  { label: 'Dodajanje storitev', href: '/promotions/add-ons' },
-];
-
 export default function PromotionsLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('promotions');
   const pathname = usePathname();
   const router = useRouter();
 
-  const activeTab = TABS.find((t) => pathname.startsWith(t.href))?.href ?? TABS[0].href;
+  const TABS = [
+    { labelKey: 'layout.tabs.discounts', href: '/promotions/discounts' },
+    { labelKey: 'layout.tabs.happyHours', href: '/promotions/happy-hours' },
+    { labelKey: 'layout.tabs.addOns', href: '/promotions/add-ons' },
+  ];
+
+  const activeTab = TABS.find((tab) => pathname.startsWith(tab.href))?.href ?? TABS[0].href;
 
   return (
     <ProtectedLayout>
@@ -27,8 +29,8 @@ export default function PromotionsLayout({ children }: { children: React.ReactNo
           className="mb-8 flex items-center gap-3"
         >
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Promocije</h1>
-            <p className="text-sm text-gray-500">Upravljajte popuste, happy hours in dodajanje storitev</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('layout.title')}</h1>
+            <p className="text-sm text-gray-500">{t('layout.subtitle')}</p>
           </div>
         </motion.div>
 
@@ -45,7 +47,7 @@ export default function PromotionsLayout({ children }: { children: React.ReactNo
                     isActive ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  {tab.label}
+                  {t(tab.labelKey as Parameters<typeof t>[0])}
                   {isActive && (
                     <motion.div
                       layoutId="promo-tab-indicator"

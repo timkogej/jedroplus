@@ -1,1 +1,162 @@
-{}
+{
+  "layout": {
+    "title": "Promocije",
+    "subtitle": "Upravljajte popuste, happy hours in dodajanje storitev",
+    "tabs": {
+      "discounts": "Popusti",
+      "happyHours": "Happy Hours",
+      "addOns": "Dodajanje storitev"
+    }
+  },
+  "shared": {
+    "discountType": {
+      "percentage": "Odstotek (%)",
+      "fixed": "Fiksni znesek (€)"
+    },
+    "serviceSearch": "Iskanje storitev...",
+    "noServices": "Ni storitev",
+    "activeLabel": "Aktiven",
+    "saveButton": "Shrani",
+    "createButton": "Ustvari",
+    "cancelButton": "Prekliči",
+    "deleteButton": "Izbriši",
+    "cannotUndo": "Tega dejanja ni mogoče razveljaviti.",
+    "valueUnit": {
+      "percentage": "(%)",
+      "fixed": "(€)"
+    }
+  },
+  "discounts": {
+    "search": "Iskanje popustov...",
+    "newButton": "Nov popust",
+    "table": {
+      "name": "Naziv",
+      "services": "Storitve",
+      "discount": "Popust",
+      "dateFrom": "Datum od",
+      "dateTo": "Datum do",
+      "status": "Status",
+      "actions": "Akcije"
+    },
+    "empty": "Ni popustov. Ustvarite prvega!",
+    "serviceCount": "{count, plural, =1 {1 storitev} =2 {2 storitvi} few {{count} storitve} other {{count} storitev}}",
+    "modal": {
+      "createTitle": "Nov popust",
+      "editTitle": "Uredi popust",
+      "fields": {
+        "name": "Naziv",
+        "namePlaceholder": "Npr. Poletni popust",
+        "type": "Tip popusta",
+        "value": "Vrednost {unit}",
+        "dateFrom": "Datum začetka",
+        "dateTo": "Datum konca",
+        "services": "Storitve ({count} izbranih)"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Izbriši popust?"
+    },
+    "toasts": {
+      "created": "Popust ustvarjen",
+      "updated": "Popust posodobljen",
+      "deleted": "Popust izbrisan",
+      "loadError": "Napaka pri nalaganju popustov",
+      "saveError": "Napaka pri shranjevanju",
+      "deleteError": "Napaka pri brisanju",
+      "updateError": "Napaka pri posodabljanju",
+      "nameRequired": "Naziv je obvezen",
+      "valueRequired": "Vrednost mora biti večja od 0",
+      "percentMax": "Odstotek ne sme biti večji od 100",
+      "dateOrder": "Datum konca mora biti po datumu začetka",
+      "serviceRequired": "Izberite vsaj eno storitev"
+    }
+  },
+  "addOns": {
+    "count": "{count, plural, =1 {1 Add-on} =2 {2 Add-ona} few {{count} Add-oni} other {{count} Add-onov}}",
+    "newButton": "Nov add-on",
+    "table": {
+      "service": "Storitev",
+      "originalPrice": "Originalna cena",
+      "discount": "Popust",
+      "finalPrice": "Cena z popustom",
+      "status": "Status",
+      "actions": "Akcije"
+    },
+    "empty": "Ni add-onov. Ustvarite prvega!",
+    "modal": {
+      "createTitle": "Nov add-on",
+      "editTitle": "Uredi add-on",
+      "fields": {
+        "service": "Storitev",
+        "type": "Tip popusta",
+        "value": "Vrednost",
+        "active": "Aktiven",
+        "previewTitle": "Predogled"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Izbriši add-on?"
+    },
+    "toasts": {
+      "created": "Add-on ustvarjen",
+      "updated": "Add-on posodobljen",
+      "deleted": "Add-on izbrisan",
+      "loadError": "Napaka pri nalaganju",
+      "saveError": "Napaka pri shranjevanju",
+      "deleteError": "Napaka pri brisanju",
+      "genericError": "Napaka",
+      "valueRequired": "Vrednost mora biti večja od 0",
+      "percentMax": "Odstotek ne sme biti večji od 100",
+      "serviceRequired": "Izberite storitev"
+    }
+  },
+  "happyHours": {
+    "count": "{count} happy hours",
+    "newButton": "Nov Happy Hour",
+    "table": {
+      "name": "Naziv",
+      "days": "Dnevi",
+      "time": "Čas",
+      "discount": "Popust",
+      "services": "Storitve",
+      "status": "Status",
+      "actions": "Akcije"
+    },
+    "servicesAll": "Vse",
+    "empty": "Ni happy hours. Ustvarite prvega!",
+    "modal": {
+      "createTitle": "Nov Happy Hour",
+      "editTitle": "Uredi Happy Hour",
+      "fields": {
+        "name": "Naziv",
+        "namePlaceholder": "Npr. Popoldanski Happy Hour",
+        "days": "Dnevi v tednu",
+        "timeFrom": "Čas od",
+        "timeTo": "Čas do",
+        "type": "Tip popusta",
+        "value": "Vrednost",
+        "services": "Storitve",
+        "allServices": "Vse storitve"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Izbriši Happy Hour?"
+    },
+    "toasts": {
+      "created": "Happy Hour ustvarjen",
+      "updated": "Happy Hour posodobljen",
+      "deleted": "Happy Hour izbrisan",
+      "loadError": "Napaka pri nalaganju",
+      "saveError": "Napaka pri shranjevanju",
+      "deleteError": "Napaka pri brisanju",
+      "genericError": "Napaka",
+      "nameRequired": "Naziv je obvezen",
+      "dayRequired": "Izberite vsaj en dan",
+      "timeRequired": "Čas je obvezen",
+      "timeOrder": "Čas konca mora biti po času začetka",
+      "valueRequired": "Vrednost mora biti večja od 0",
+      "percentMax": "Odstotek ne sme biti večji od 100",
+      "serviceRequired": "Izberite vsaj eno storitev"
+    }
+  }
+}

@@ -1,1 +1,168 @@
-{}
+{
+  "page": {
+    "title": "Reservations",
+    "subtitle": "Manage your online booking page"
+  },
+  "incompleteBanner": {
+    "message": "Complete the settings marked with ! for a fully functional booking experience.",
+    "openButton": "Open settings →"
+  },
+  "newDesignsBanner": "New booking page designs every month",
+  "multiChannelBanner": {
+    "bold": "Use each booking link on a different channel.",
+    "body": "One design on your Instagram profile, another on your website, a third in your email signature – every channel can have its own. Clients always land on your page, just with a different look."
+  },
+  "standardSection": {
+    "title": "Standard booking pages",
+    "subtitle": "Classic, Modern, and Elegant designs"
+  },
+  "premiumSection": {
+    "title": "Premium booking pages",
+    "subtitle": "Seasonal and Magazine designs"
+  },
+  "designs": {
+    "bookingLinkLabel": "Booking link",
+    "notAvailable": "Not available",
+    "comingSoon": "Coming soon",
+    "copy": "Copy",
+    "copied": "Copied",
+    "classic": {
+      "name": "Classic",
+      "subtitle": "Simple and clean",
+      "description": "Classic design with elegant gradient backgrounds. Ideal for showcasing your brand colors and building a recognizable identity."
+    },
+    "modern": {
+      "name": "Modern",
+      "subtitle": "Contemporary and dynamic",
+      "description": "Contemporary design with a dark background and vibrant accents. We recommend a darker primary color for the best visual effect and a premium feel."
+    },
+    "elegant": {
+      "name": "Elegant",
+      "subtitle": "Clean and minimal",
+      "description": "Luxurious minimalist design with soft earthy tones. Perfect for upscale salons, spas, and exclusive services."
+    },
+    "seasonal": {
+      "name": "Seasonal",
+      "subtitle": "Adaptive and vibrant",
+      "description": "Dynamic design that automatically adapts to the season and holidays. Spring, summer, autumn, winter, Christmas, Valentine's Day, Halloween and more – your page is always fresh and relevant."
+    },
+    "magazine": {
+      "name": "Magazine",
+      "subtitle": "Elegant and editorial",
+      "description": "Premium Magazine design with editorial aesthetics and high-quality visual style. Ideal for exclusive salons, beauty studios, and premium services."
+    },
+    "casino": {
+      "name": "Casino",
+      "subtitle": "Glamorous and exciting",
+      "description": "Exclusive casino design with a glamorous atmosphere, sparkling accents, and dynamic visual elements. Perfect for those who want to turn appointment booking into an unforgettable experience."
+    }
+  },
+  "customCta": {
+    "text": "Want a custom booking system tailored to your business?",
+    "linkText": "Write to us at info@jedroplus.com"
+  },
+  "mainLink": {
+    "title": "Main booking link",
+    "subtitle": "Used when sending clients a link to book an appointment.",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "mgmtLink": {
+    "title": "Rescheduling & cancellation link",
+    "subtitle": "Universal appointment management link — clients can use it to reschedule or cancel."
+  },
+  "settingsOverview": {
+    "title": "Settings",
+    "bookingEnabled": "Online bookings",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "timeSlots": "Time slots",
+    "timeSlotValue": "{minutes} min",
+    "clientConfirm": "Client confirmation",
+    "onlineConfirm": "Online booking confirmation",
+    "mainLinkLabel": "Main booking link",
+    "linkSet": "Configured",
+    "colors": "Colors",
+    "mgmtLinkLabel": "Rescheduling & cancellation link",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "modal": {
+    "title": "Booking settings",
+    "subtitle": "How online bookings work",
+    "general": {
+      "sectionTitle": "General settings",
+      "sectionDesc": "Basic booking configuration",
+      "enableLabel": "Enable online bookings",
+      "enableDesc": "Whether online bookings are active",
+      "intervalLabel": "Time slot length",
+      "intervalDesc": "Booking slot intervals (15, 30, or 60 minutes)",
+      "intervalPlaceholder": "Select interval",
+      "interval15": "15 minutes",
+      "interval30": "30 minutes",
+      "interval60": "60 minutes (1 hour)"
+    },
+    "mainLink": {
+      "sectionTitle": "Main booking link",
+      "sectionDesc": "The link used when sending clients bookings",
+      "selectLabel": "Select main booking link",
+      "selectDesc": "This link will be used when sending booking confirmations to clients",
+      "selectPlaceholder": "Select link...",
+      "classic": "Classic",
+      "modern": "Modern",
+      "minimal": "Minimal",
+      "seasonal": "Seasonal",
+      "magazine": "Magazine"
+    },
+    "confirmations": {
+      "sectionTitle": "Confirmations",
+      "sectionDesc": "Sending confirmations to clients",
+      "manualLabel": "Send confirmation on appointment creation",
+      "manualDesc": "Automatically send a confirmation when an appointment is created",
+      "onlineLabel": "Send confirmation after online booking",
+      "onlineDesc": "Confirmation when booking through the online system",
+      "channelLabel": "Send confirmation via:",
+      "smsUnavailable": "– not available",
+      "smsUpgradeNote": "SMS is available on higher plans.",
+      "smsUpgradeLink": "Upgrade plan",
+      "smsPlanNotePrefix": "To send SMS confirmations",
+      "smsPlanNoteLink": "upgrade your plan"
+    },
+    "policy": {
+      "sectionTitle": "Cancellation & rescheduling policy",
+      "sectionDesc": "How many days before the appointment clients can cancel or reschedule",
+      "cancelLabel": "Cancel appointment",
+      "cancelDesc": "How many days before the appointment a client can cancel",
+      "rescheduleLabel": "Reschedule appointment",
+      "rescheduleDesc": "How many days before the appointment a client can reschedule",
+      "selectPlaceholder": "Select",
+      "sameDay": "Same day",
+      "day1": "1 day before",
+      "day2": "2 days before",
+      "day3": "3 days before",
+      "day5": "5 days before",
+      "day7": "7 days before",
+      "day14": "14 days before"
+    },
+    "colors": {
+      "sectionTitle": "Booking page colors",
+      "sectionDesc": "Customize the look of your booking page",
+      "primaryLabel": "Primary color",
+      "primaryDesc": "Main color for buttons and accents",
+      "secondaryLabel": "Secondary color",
+      "secondaryDesc": "Color for additional elements",
+      "bgFromLabel": "Background gradient (start)",
+      "bgFromDesc": "Starting color of the background gradient",
+      "bgToLabel": "Background gradient (end)",
+      "bgToDesc": "Ending color of the background gradient",
+      "previewLabel": "Background preview:",
+      "previewButton": "Button preview"
+    },
+    "footer": {
+      "close": "Close",
+      "save": "Save",
+      "saving": "Saving...",
+      "saveError": "An error occurred while saving"
+    }
+  }
+}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, FloppyDisk, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   SettingsSection,
   SettingRow,
@@ -29,11 +30,13 @@ function ChannelPicker({
   onChange,
   smsLocked = false,
   onUpgradeClick,
+  t,
 }: {
   value: 'sms' | 'email';
   onChange: (v: 'sms' | 'email') => void;
   smsLocked?: boolean;
   onUpgradeClick?: () => void;
+  t: ReturnType<typeof useTranslations<'reservations'>>;
 }) {
   return (
     <div className="flex flex-col gap-2 mt-3">
@@ -54,7 +57,7 @@ function ChannelPicker({
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed text-sm font-medium">
             <DeviceMobile className="h-4 w-4" weight="regular" />
             SMS
-            <span className="text-xs text-gray-400">– ni dostopno</span>
+            <span className="text-xs text-gray-400">{t('modal.confirmations.smsUnavailable')}</span>
           </div>
         ) : (
           <button
@@ -73,13 +76,13 @@ function ChannelPicker({
       </div>
       {smsLocked && (
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-500">SMS je na voljo v višjih paketih.</span>
+          <span className="text-xs text-gray-500">{t('modal.confirmations.smsUpgradeNote')}</span>
           <button
             type="button"
             onClick={onUpgradeClick}
             className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
           >
-            Nadgradi paket <ArrowRight className="h-3 w-3" weight="bold" />
+            {t('modal.confirmations.smsUpgradeLink')} <ArrowRight className="h-3 w-3" weight="bold" />
           </button>
         </div>
       )}
@@ -88,6 +91,7 @@ function ChannelPicker({
 }
 
 export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalProps) {
+  const t = useTranslations('reservations');
   const { companyId, planCode } = useCompany();
   const { user } = useAuth();
   const router = useRouter();
@@ -226,7 +230,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri shranjevanju');
+        throw new Error(t('modal.footer.saveError'));
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -264,8 +268,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Nastavitve rezervacij</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Kako delujejo spletne rezervacije</p>
+                <h2 className="text-xl font-semibold text-gray-900">{t('modal.title')}</h2>
+                <p className="text-sm text-gray-500 mt-0.5">{t('modal.subtitle')}</p>
               </div>
               <div className="flex items-center gap-3">
                 <SaveIndicator saving={saving} lastSaved={lastSaved} />
@@ -295,10 +299,10 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   {/* General Booking Settings */}
-                  <SettingsSection title="Splošne nastavitve" description="Osnovne nastavitve rezervacij">
+                  <SettingsSection title={t('modal.general.sectionTitle')} description={t('modal.general.sectionDesc')}>
                     <SettingRow
-                      label="Omogoči spletne rezervacije"
-                      description="Ali so spletne rezervacije aktivne"
+                      label={t('modal.general.enableLabel')}
+                      description={t('modal.general.enableDesc')}
                     >
                       <Switch
                         checked={bookingOmogocen}
@@ -307,37 +311,37 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                     </SettingRow>
 
                     <SettingRow
-                      label="Dolžina časovnega intervala"
-                      description="Intervali za rezervacije (15, 30 ali 60 minut)"
+                      label={t('modal.general.intervalLabel')}
+                      description={t('modal.general.intervalDesc')}
                     >
                       <Select
                         value={koledarUre}
                         setValue={(value) => setKoledarUre(value as '15' | '30' | '60')}
-                        placeholder="Izberi interval"
+                        placeholder={t('modal.general.intervalPlaceholder')}
                       >
-                        <SelectOption value="15">15 minut</SelectOption>
-                        <SelectOption value="30">30 minut</SelectOption>
-                        <SelectOption value="60">60 minut (1 ura)</SelectOption>
+                        <SelectOption value="15">{t('modal.general.interval15')}</SelectOption>
+                        <SelectOption value="30">{t('modal.general.interval30')}</SelectOption>
+                        <SelectOption value="60">{t('modal.general.interval60')}</SelectOption>
                       </Select>
                     </SettingRow>
                   </SettingsSection>
 
                   {/* Main Booking Link */}
-                  <SettingsSection title="Glavni booking link" description="Link, ki se uporablja pri pošiljanju strankam">
+                  <SettingsSection title={t('modal.mainLink.sectionTitle')} description={t('modal.mainLink.sectionDesc')}>
                     <SettingRow
-                      label="Izberi glavni booking link"
-                      description="Ta link se bo uporabljal pri pošiljanju rezervacij strankam"
+                      label={t('modal.mainLink.selectLabel')}
+                      description={t('modal.mainLink.selectDesc')}
                     >
                       <Select
                         value={mainBookingLink}
                         setValue={setMainBookingLink}
-                        placeholder="Izberi link..."
+                        placeholder={t('modal.mainLink.selectPlaceholder')}
                       >
-                        {bookingLink1 && <SelectOption value={bookingLink1}>Klasičen</SelectOption>}
-                        {bookingLink2 && <SelectOption value={bookingLink2}>Moderen</SelectOption>}
-                        {bookingLink3 && <SelectOption value={bookingLink3}>Minimalen</SelectOption>}
-                        {bookingLink4 && <SelectOption value={bookingLink4}>Sezonsko</SelectOption>}
-                        {bookingLink5 && <SelectOption value={bookingLink5}>Magazine</SelectOption>}
+                        {bookingLink1 && <SelectOption value={bookingLink1}>{t('modal.mainLink.classic')}</SelectOption>}
+                        {bookingLink2 && <SelectOption value={bookingLink2}>{t('modal.mainLink.modern')}</SelectOption>}
+                        {bookingLink3 && <SelectOption value={bookingLink3}>{t('modal.mainLink.minimal')}</SelectOption>}
+                        {bookingLink4 && <SelectOption value={bookingLink4}>{t('modal.mainLink.seasonal')}</SelectOption>}
+                        {bookingLink5 && <SelectOption value={bookingLink5}>{t('modal.mainLink.magazine')}</SelectOption>}
                       </Select>
                     </SettingRow>
                     {mainBookingLink && (
@@ -348,12 +352,12 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                   </SettingsSection>
 
                   {/* Confirmation Settings */}
-                  <SettingsSection title="Potrdila" description="Pošiljanje potrdil strankam">
+                  <SettingsSection title={t('modal.confirmations.sectionTitle')} description={t('modal.confirmations.sectionDesc')}>
                     {/* Confirmation on manual booking */}
                     <div className="space-y-1">
                       <SettingRow
-                        label="Pošlji potrdilo ob rezervaciji termina"
-                        description="Avtomatsko pošlji potrdilo ob kreaciji termina"
+                        label={t('modal.confirmations.manualLabel')}
+                        description={t('modal.confirmations.manualDesc')}
                       >
                         <Switch
                           checked={potrdiloReservation}
@@ -367,16 +371,16 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           exit={{ opacity: 0, height: 0 }}
                           className="px-4 pb-3"
                         >
-                          <p className="text-xs font-medium text-gray-500 mb-2">Pošlji potrdilo preko:</p>
+                          <p className="text-xs font-medium text-gray-500 mb-2">{t('modal.confirmations.channelLabel')}</p>
                           {smsLockedForPlan && (
                             <p className="text-xs text-gray-500 mb-1">
-                              Za pošiljanje SMS potrdil{' '}
+                              {t('modal.confirmations.smsPlanNotePrefix')}{' '}
                               <button
                                 type="button"
                                 onClick={() => { onClose(); router.push('/billing'); }}
                                 className="font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
                               >
-                                nadgradite paket
+                                {t('modal.confirmations.smsPlanNoteLink')}
                               </button>
                               .
                             </p>
@@ -386,6 +390,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             onChange={setPotrdiloChannel}
                             smsLocked={smsLockedForPlan}
                             onUpgradeClick={() => { onClose(); router.push('/billing'); }}
+                            t={t}
                           />
                         </motion.div>
                       )}
@@ -394,8 +399,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                     {/* Confirmation on online booking */}
                     <div className="space-y-1">
                       <SettingRow
-                        label="Pošlji potrdilo po online rezervaciji"
-                        description="Potrdilo ob rezervaciji preko spletnega sistema"
+                        label={t('modal.confirmations.onlineLabel')}
+                        description={t('modal.confirmations.onlineDesc')}
                       >
                         <Switch
                           checked={potrdiloOnline}
@@ -409,16 +414,16 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           exit={{ opacity: 0, height: 0 }}
                           className="px-4 pb-3"
                         >
-                          <p className="text-xs font-medium text-gray-500 mb-2">Pošlji potrdilo preko:</p>
+                          <p className="text-xs font-medium text-gray-500 mb-2">{t('modal.confirmations.channelLabel')}</p>
                           {smsLockedForPlan && (
                             <p className="text-xs text-gray-500 mb-1">
-                              Za pošiljanje SMS potrdil{' '}
+                              {t('modal.confirmations.smsPlanNotePrefix')}{' '}
                               <button
                                 type="button"
                                 onClick={() => { onClose(); router.push('/billing'); }}
                                 className="font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
                               >
-                                nadgradite paket
+                                {t('modal.confirmations.smsPlanNoteLink')}
                               </button>
                               .
                             </p>
@@ -428,6 +433,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             onChange={setPotrdiloOnlineChannel}
                             smsLocked={smsLockedForPlan}
                             onUpgradeClick={() => { onClose(); router.push('/billing'); }}
+                            t={t}
                           />
                         </motion.div>
                       )}
@@ -435,51 +441,51 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                   </SettingsSection>
 
                   {/* Cancellation & Rescheduling Policy */}
-                  <SettingsSection title="Politika odpovedi in prestavitev" description="Koliko dni pred terminom lahko stranke odpovejo ali prestavijo">
+                  <SettingsSection title={t('modal.policy.sectionTitle')} description={t('modal.policy.sectionDesc')}>
                     <SettingRow
-                      label="Odpoved termina"
-                      description="Koliko dni pred terminom lahko stranka odpove"
+                      label={t('modal.policy.cancelLabel')}
+                      description={t('modal.policy.cancelDesc')}
                     >
                       <Select
                         value={cancelApptDays}
                         setValue={setCancelApptDays}
-                        placeholder="Izberi"
+                        placeholder={t('modal.policy.selectPlaceholder')}
                       >
-                        <SelectOption value="0">Isti dan</SelectOption>
-                        <SelectOption value="1">1 dan prej</SelectOption>
-                        <SelectOption value="2">2 dni prej</SelectOption>
-                        <SelectOption value="3">3 dni prej</SelectOption>
-                        <SelectOption value="5">5 dni prej</SelectOption>
-                        <SelectOption value="7">7 dni prej</SelectOption>
-                        <SelectOption value="14">14 dni prej</SelectOption>
+                        <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
+                        <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
+                        <SelectOption value="2">{t('modal.policy.day2')}</SelectOption>
+                        <SelectOption value="3">{t('modal.policy.day3')}</SelectOption>
+                        <SelectOption value="5">{t('modal.policy.day5')}</SelectOption>
+                        <SelectOption value="7">{t('modal.policy.day7')}</SelectOption>
+                        <SelectOption value="14">{t('modal.policy.day14')}</SelectOption>
                       </Select>
                     </SettingRow>
 
                     <SettingRow
-                      label="Prestavitev termina"
-                      description="Koliko dni pred terminom lahko stranka prestavi"
+                      label={t('modal.policy.rescheduleLabel')}
+                      description={t('modal.policy.rescheduleDesc')}
                     >
                       <Select
                         value={rescheduleApptDays}
                         setValue={setRescheduleApptDays}
-                        placeholder="Izberi"
+                        placeholder={t('modal.policy.selectPlaceholder')}
                       >
-                        <SelectOption value="0">Isti dan</SelectOption>
-                        <SelectOption value="1">1 dan prej</SelectOption>
-                        <SelectOption value="2">2 dni prej</SelectOption>
-                        <SelectOption value="3">3 dni prej</SelectOption>
-                        <SelectOption value="5">5 dni prej</SelectOption>
-                        <SelectOption value="7">7 dni prej</SelectOption>
-                        <SelectOption value="14">14 dni prej</SelectOption>
+                        <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
+                        <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
+                        <SelectOption value="2">{t('modal.policy.day2')}</SelectOption>
+                        <SelectOption value="3">{t('modal.policy.day3')}</SelectOption>
+                        <SelectOption value="5">{t('modal.policy.day5')}</SelectOption>
+                        <SelectOption value="7">{t('modal.policy.day7')}</SelectOption>
+                        <SelectOption value="14">{t('modal.policy.day14')}</SelectOption>
                       </Select>
                     </SettingRow>
                   </SettingsSection>
 
                   {/* Booking Page Colors */}
-                  <SettingsSection title="Barve rezervacijske strani" description="Prilagodite videz vaše rezervacijske strani">
+                  <SettingsSection title={t('modal.colors.sectionTitle')} description={t('modal.colors.sectionDesc')}>
                     <SettingRow
-                      label="Primarna barva"
-                      description="Glavna barva za gumbe in akcente"
+                      label={t('modal.colors.primaryLabel')}
+                      description={t('modal.colors.primaryDesc')}
                     >
                       <div className="flex gap-3 items-center">
                         <input
@@ -498,8 +504,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                     </SettingRow>
 
                     <SettingRow
-                      label="Sekundarna barva"
-                      description="Barva za dodatne elemente"
+                      label={t('modal.colors.secondaryLabel')}
+                      description={t('modal.colors.secondaryDesc')}
                     >
                       <div className="flex gap-3 items-center">
                         <input
@@ -518,8 +524,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                     </SettingRow>
 
                     <SettingRow
-                      label="Ozadje gradient (začetek)"
-                      description="Začetna barva gradient ozadja (stolpec Booking_bg_from)"
+                      label={t('modal.colors.bgFromLabel')}
+                      description={t('modal.colors.bgFromDesc')}
                     >
                       <div className="flex gap-3 items-center">
                         <input
@@ -538,8 +544,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                     </SettingRow>
 
                     <SettingRow
-                      label="Ozadje gradient (konec)"
-                      description="Končna barva gradient ozadja (stolpec Booking_bg_to)"
+                      label={t('modal.colors.bgToLabel')}
+                      description={t('modal.colors.bgToDesc')}
                     >
                       <div className="flex gap-3 items-center">
                         <input
@@ -559,7 +565,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
 
                     {/* Gradient Preview */}
                     <div className="mt-6">
-                      <p className="text-sm font-medium text-gray-700 mb-3">Predogled ozadja:</p>
+                      <p className="text-sm font-medium text-gray-700 mb-3">{t('modal.colors.previewLabel')}</p>
                       <div
                         className="w-full p-8 rounded-xl border-2 border-gray-200"
                         style={{
@@ -573,7 +579,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                               background: `linear-gradient(135deg, ${bookingPrimary} 0%, ${bookingSecondary} 100%)`,
                             }}
                           >
-                            Predogled gumba
+                            {t('modal.colors.previewButton')}
                           </div>
                         </div>
                       </div>
@@ -592,7 +598,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                 whileTap={{ scale: 0.98 }}
                 className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
               >
-                Zapri
+                {t('modal.footer.close')}
               </motion.button>
               <motion.button
                 type="button"
@@ -608,12 +614,12 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                 {saving ? (
                   <>
                     <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                    Shranjujem...
+                    {t('modal.footer.saving')}
                   </>
                 ) : (
                   <>
                     <FloppyDisk className="h-4 w-4" weight="bold" />
-                    Shrani
+                    {t('modal.footer.save')}
                   </>
                 )}
               </motion.button>

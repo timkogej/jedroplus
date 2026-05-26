@@ -15,6 +15,7 @@ import {
   Link,
   Warning,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
@@ -45,9 +46,7 @@ interface ReservationSettings {
 
 interface BookingDesign {
   id: number;
-  name: string;
-  subtitle: string;
-  description: string;
+  designKey: string;
   linkKey: keyof ReservationSettings;
   image: string;
 }
@@ -55,25 +54,19 @@ interface BookingDesign {
 const STANDARD_DESIGNS: BookingDesign[] = [
   {
     id: 1,
-    name: 'Klasičen',
-    subtitle: 'Preprost in pregleden',
-    description: 'Klasičen dizajn z elegantnimi gradient ozadji. Idealno za prikaz barv vašega podjetja in ustvarjanje prepoznavne blagovne znamke.',
+    designKey: 'classic',
     linkKey: 'bookingLink1',
     image: '/booking-designs/booking-classic.jpg',
   },
   {
     id: 2,
-    name: 'Moderen',
-    subtitle: 'Sodoben in dinamičen',
-    description: 'Sodoben dizajn s temnim ozadjem in živahnimi poudarki. Priporočamo temnejšo primarno barvo za najboljši vizualni učinek in premium občutek.',
+    designKey: 'modern',
     linkKey: 'bookingLink2',
     image: '/booking-designs/booking-modern.jpg',
   },
   {
     id: 3,
-    name: 'Eleganten',
-    subtitle: 'Čist in enostaven',
-    description: 'Luksuzni minimalistični dizajn z nežnimi zemeljskimi toni. Popoln za elegantne salone, spa centre in ekskluzivne storitve.',
+    designKey: 'elegant',
     linkKey: 'bookingLink3',
     image: '/booking-designs/booking-elegant.jpg',
   },
@@ -82,25 +75,19 @@ const STANDARD_DESIGNS: BookingDesign[] = [
 const PREMIUM_DESIGNS: BookingDesign[] = [
   {
     id: 4,
-    name: 'Sezonsko',
-    subtitle: 'Prilagodljiv in živahen',
-    description: 'Dinamičen dizajn, ki se samodejno prilagaja letnemu času in praznikom. Pomlad, poletje, jesen, zima, božič, valentinovo, noč čarovnic in več – vaša stran je vedno sveža in aktualna.',
+    designKey: 'seasonal',
     linkKey: 'bookingLink4',
     image: '/booking-designs/booking-seasonal.jpg',
   },
   {
     id: 5,
-    name: 'Magazine',
-    subtitle: 'Eleganten in urejevalen',
-    description: 'Premium Magazine dizajn z uredniško estetiko in visokokakovostnim vizualnim slogom. Idealno za ekskluzivne salone, kozmetične studio in premium storitve.',
+    designKey: 'magazine',
     linkKey: 'bookingLink5',
     image: '/booking-designs/booking-magazine.jpg',
   },
   {
     id: 6,
-    name: 'Casino',
-    subtitle: 'Glamurozen in razburljiv',
-    description: 'Ekskluziven kazino dizajn z glamurozno atmosfero, bleščečimi akcenti in dinamičnimi vizualnimi elementi. Popoln za tiste, ki želijo rezervacijo terminov spremeniti v nepozabno izkušnjo.',
+    designKey: 'casino',
     linkKey: 'bookingLink6',
     image: '/booking-designs/booking-casino.jpg',
   },
@@ -111,6 +98,7 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 }
 
 export default function RezervacijePage() {
+  const t = useTranslations('reservations');
   const router = useRouter();
   const { companyId, loading: companyLoading } = useCompany();
   const { role, permissions } = useRolePermissions();
@@ -243,9 +231,9 @@ export default function RezervacijePage() {
             className="mb-8 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1F36]">Rezervacije</h1>
+              <h1 className="text-2xl font-bold text-[#1A1F36]">{t('page.title')}</h1>
               <p className="mt-1 text-sm text-gray-500">
-                Upravljanje spletnega sistema za rezervacije
+                {t('page.subtitle')}
               </p>
             </div>
 
@@ -256,7 +244,7 @@ export default function RezervacijePage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="relative w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                title="Nastavitve"
+                title={t('modal.title')}
               >
                 <Gear size={20} weight="bold" className="text-gray-900" />
                 {hasIncompleteSettings && (
@@ -275,15 +263,14 @@ export default function RezervacijePage() {
             >
               <Warning size={18} weight="fill" className="text-orange-500 flex-shrink-0" />
               <p className="text-sm text-orange-800 flex-1">
-                <span className="font-semibold">Izpolnite nastavitve označene s !</span>{' '}
-                za brezhibno delovanje in izkoriščanje celotnega potenciala rezervacij.
+                {t('incompleteBanner.message')}
               </p>
               {canManageSettings && (
                 <button
                   onClick={() => setShowSettingsModal(true)}
                   className="text-xs font-semibold text-orange-700 hover:text-orange-900 underline underline-offset-2 flex-shrink-0"
                 >
-                  Odpri nastavitve →
+                  {t('incompleteBanner.openButton')}
                 </button>
               )}
             </motion.div>
@@ -306,7 +293,7 @@ export default function RezervacijePage() {
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>
-              Vsak mesec novi dizajni za booking strani
+              {t('newDesignsBanner')}
             </p>
           </motion.div>
 
@@ -319,8 +306,8 @@ export default function RezervacijePage() {
           >
             <span className="text-amber-500 mt-0.5 flex-shrink-0" style={{ fontSize: 16 }}>💡</span>
             <p className="text-sm text-amber-800">
-              <span className="font-semibold">Vsak booking link lahko uporabite na drugem kanalu.</span>{' '}
-              Na Instagram profilu en dizajn, na spletni strani drug, v email podpisu tretji – vsak kanal ima lahko svojega. Stranke vsakič pristanejo na isti vaši strani, samo z drugačnim videzom.
+              <span className="font-semibold">{t('multiChannelBanner.bold')}</span>{' '}
+              {t('multiChannelBanner.body')}
             </p>
           </motion.div>
 
@@ -339,8 +326,8 @@ export default function RezervacijePage() {
                 className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6"
               >
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-[#1A1F36] mb-1">Standardne strani za rezervacijo</h2>
-                  <p className="text-sm text-gray-500">Klasičen, Moderen in Eleganten dizajn</p>
+                  <h2 className="text-lg font-semibold text-[#1A1F36] mb-1">{t('standardSection.title')}</h2>
+                  <p className="text-sm text-gray-500">{t('standardSection.subtitle')}</p>
                 </div>
                 <div className="overflow-x-auto pb-4 -mx-2 px-2">
                   <div className="flex gap-5" style={{ minWidth: 'max-content' }}>
@@ -355,19 +342,19 @@ export default function RezervacijePage() {
                           <div className="mb-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
                             <Image
                               src={design.image}
-                              alt={`${design.name} booking dizajn`}
+                              alt={`${t(`designs.${design.designKey}.name`)} booking dizajn`}
                               width={320}
                               height={200}
                               sizes="(max-width: 640px) 256px, 320px"
                               className="w-full h-auto block"
                             />
                           </div>
-                          <h3 className="font-semibold text-left text-gray-900 text-sm">{design.name}</h3>
-                          <p className="text-xs text-left text-gray-500 mt-0.5">{design.subtitle}</p>
-                          <p className="text-[10px] text-left text-gray-400 mt-1 mb-3 leading-relaxed">{design.description}</p>
+                          <h3 className="font-semibold text-left text-gray-900 text-sm">{t(`designs.${design.designKey}.name`)}</h3>
+                          <p className="text-xs text-left text-gray-500 mt-0.5">{t(`designs.${design.designKey}.subtitle`)}</p>
+                          <p className="text-[10px] text-left text-gray-400 mt-1 mb-3 leading-relaxed">{t(`designs.${design.designKey}.description`)}</p>
                           <div className="space-y-2">
                             <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
-                              <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">Booking link</p>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">{t('designs.bookingLinkLabel')}</p>
                               {designUrl ? (
                                 <p
                                   className="text-xs truncate"
@@ -381,7 +368,7 @@ export default function RezervacijePage() {
                                   {designUrl}
                                 </p>
                               ) : (
-                                <p className="text-xs text-gray-400">Ni na voljo</p>
+                                <p className="text-xs text-gray-400">{t('designs.notAvailable')}</p>
                               )}
                             </div>
                             <div className="flex gap-2">
@@ -393,9 +380,9 @@ export default function RezervacijePage() {
                                 className="flex-1 h-8 flex items-center justify-center gap-1 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 text-xs"
                               >
                                 {isCopied ? (
-                                  <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">Kopirano</span></>
+                                  <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">{t('designs.copied')}</span></>
                                 ) : (
-                                  <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">Kopiraj</span></>
+                                  <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('designs.copy')}</span></>
                                 )}
                               </motion.button>
                               <motion.button
@@ -426,7 +413,7 @@ export default function RezervacijePage() {
                 <div className="mb-4 flex items-center gap-3">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <h2 className="text-lg font-semibold text-[#1A1F36]">Premium strani za rezervacijo</h2>
+                      <h2 className="text-lg font-semibold text-[#1A1F36]">{t('premiumSection.title')}</h2>
                       <span
                         className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
                         style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)' }}
@@ -434,7 +421,7 @@ export default function RezervacijePage() {
                         Premium
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500">Sezonsko in Magazine dizajn</p>
+                    <p className="text-sm text-gray-500">{t('premiumSection.subtitle')}</p>
                   </div>
                 </div>
                 <div className="overflow-x-auto pb-4 -mx-2 px-2">
@@ -451,19 +438,19 @@ export default function RezervacijePage() {
                           <div className="mb-3 overflow-hidden rounded-lg border border-violet-200 bg-violet-50/30">
                             <Image
                               src={design.image}
-                              alt={`${design.name} booking dizajn`}
+                              alt={`${t(`designs.${design.designKey}.name`)} booking dizajn`}
                               width={320}
                               height={200}
                               sizes="(max-width: 640px) 256px, 320px"
                               className="w-full h-auto block"
                             />
                           </div>
-                          <h3 className="font-semibold text-left text-gray-900 text-sm">{design.name}</h3>
-                          <p className="text-xs text-left text-gray-500 mt-0.5">{design.subtitle}</p>
-                          <p className="text-[10px] text-left text-gray-400 mt-1 mb-3 leading-relaxed">{design.description}</p>
+                          <h3 className="font-semibold text-left text-gray-900 text-sm">{t(`designs.${design.designKey}.name`)}</h3>
+                          <p className="text-xs text-left text-gray-500 mt-0.5">{t(`designs.${design.designKey}.subtitle`)}</p>
+                          <p className="text-[10px] text-left text-gray-400 mt-1 mb-3 leading-relaxed">{t(`designs.${design.designKey}.description`)}</p>
                           <div className="space-y-2">
                             <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
-                              <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">Booking link</p>
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">{t('designs.bookingLinkLabel')}</p>
                               {designUrl ? (
                                 <p
                                   className="text-xs truncate"
@@ -477,7 +464,7 @@ export default function RezervacijePage() {
                                   {designUrl}
                                 </p>
                               ) : (
-                                <p className="text-xs text-gray-400">Kmalu na voljo</p>
+                                <p className="text-xs text-gray-400">{t('designs.comingSoon')}</p>
                               )}
                             </div>
                             <div className="flex gap-2">
@@ -489,9 +476,9 @@ export default function RezervacijePage() {
                                 className="flex-1 h-8 flex items-center justify-center gap-1 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 text-xs"
                               >
                                 {isCopied ? (
-                                  <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">Kopirano</span></>
+                                  <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">{t('designs.copied')}</span></>
                                 ) : (
-                                  <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">Kopiraj</span></>
+                                  <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('designs.copy')}</span></>
                                 )}
                               </motion.button>
                               <motion.button
@@ -521,7 +508,7 @@ export default function RezervacijePage() {
               >
                 <span className="text-lg flex-shrink-0">✉️</span>
                 <p className="text-sm text-gray-600">
-                  Želite prilagojen booking sistem prav za vaše podjetje?{' '}
+                  {t('customCta.text')}{' '}
                   <a
                     href="mailto:info@jedroplus.com"
                     className="font-semibold"
@@ -532,7 +519,7 @@ export default function RezervacijePage() {
                       backgroundClip: 'text',
                     }}
                   >
-                    Pišite nam na info@jedroplus.com
+                    {t('customCta.linkText')}
                   </a>
                 </p>
               </motion.div>
@@ -547,10 +534,10 @@ export default function RezervacijePage() {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Link className="w-5 h-5 text-violet-400" weight="regular" />
-                    <h2 className="text-base font-semibold text-[#1A1F36]">Glavni booking link</h2>
+                    <h2 className="text-base font-semibold text-[#1A1F36]">{t('mainLink.title')}</h2>
                   </div>
                   <p className="text-xs text-gray-500 mb-3">
-                    Uporablja se pri pošiljanju strankam, kadar je potrebno deliti link za rezervacijo.
+                    {t('mainLink.subtitle')}
                   </p>
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
                     <div className="flex-1 min-w-0">
@@ -581,9 +568,9 @@ export default function RezervacijePage() {
                         className="h-8 px-3 flex items-center gap-1.5 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors text-xs"
                       >
                         {copiedDesignId === -1 ? (
-                          <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">Kopirano</span></>
+                          <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">{t('mainLink.copied')}</span></>
                         ) : (
-                          <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">Kopiraj</span></>
+                          <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('mainLink.copy')}</span></>
                         )}
                       </motion.button>
                       <motion.button
@@ -609,10 +596,10 @@ export default function RezervacijePage() {
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Link className="w-5 h-5 text-gray-400" weight="regular" />
-                    <h2 className="text-base font-semibold text-[#1A1F36]">Link za prenaročanje in odpoved terminov</h2>
+                    <h2 className="text-base font-semibold text-[#1A1F36]">{t('mgmtLink.title')}</h2>
                   </div>
                   <p className="text-xs text-gray-500 mb-3">
-                    Univerzalen link za upravljanje terminov — stranke ga lahko uporabijo za prenaročanje ali odpoved.
+                    {t('mgmtLink.subtitle')}
                   </p>
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
                     <div className="flex-1 min-w-0">
@@ -643,9 +630,9 @@ export default function RezervacijePage() {
                         className="h-8 px-3 flex items-center gap-1.5 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors text-xs"
                       >
                         {copiedMgmt ? (
-                          <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">Kopirano</span></>
+                          <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">{t('mainLink.copied')}</span></>
                         ) : (
-                          <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">Kopiraj</span></>
+                          <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('mainLink.copy')}</span></>
                         )}
                       </motion.button>
                       <motion.button
@@ -668,17 +655,17 @@ export default function RezervacijePage() {
                 transition={{ delay: 0.3 }}
                 className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
               >
-                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Nastavitve</h2>
+                <h2 className="text-base font-semibold text-[#1A1F36] mb-4">{t('settingsOverview.title')}</h2>
                 <div className="space-y-3">
                   {/* Booking Enabled - single row */}
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-gray-400" weight="regular" />
-                      <span className="text-sm font-medium text-gray-700">Spletne rezervacije</span>
+                      <span className="text-sm font-medium text-gray-700">{t('settingsOverview.bookingEnabled')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={cn("text-sm font-semibold", settings.bookingOmogocen ? "text-green-600" : "text-red-500")}>
-                        {settings.bookingOmogocen ? 'Omogočeno' : 'Onemogočeno'}
+                        {settings.bookingOmogocen ? t('settingsOverview.enabled') : t('settingsOverview.disabled')}
                       </span>
                       <div className={cn("w-2.5 h-2.5 rounded-full", settings.bookingOmogocen ? "bg-green-500" : "bg-red-400")} />
                     </div>
@@ -688,16 +675,16 @@ export default function RezervacijePage() {
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-gray-400" weight="regular" />
-                      <span className="text-sm font-medium text-gray-700">Časovni intervali</span>
+                      <span className="text-sm font-medium text-gray-700">{t('settingsOverview.timeSlots')}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">{settings.timeSlotLength} min</span>
+                    <span className="text-sm font-semibold text-gray-900">{t('settingsOverview.timeSlotValue', { minutes: settings.timeSlotLength })}</span>
                   </div>
 
                   {/* Confirmations */}
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-gray-400" weight="regular" />
-                      <span className="text-sm font-medium text-gray-700">Potrdilo stranki</span>
+                      <span className="text-sm font-medium text-gray-700">{t('settingsOverview.clientConfirm')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       {settings.sendClientConfirmation && (
@@ -706,7 +693,7 @@ export default function RezervacijePage() {
                         </span>
                       )}
                       <span className={cn("text-sm font-semibold", settings.sendClientConfirmation ? "text-green-600" : "text-gray-400")}>
-                        {settings.sendClientConfirmation ? 'Da' : 'Ne'}
+                        {settings.sendClientConfirmation ? t('settingsOverview.yes') : t('settingsOverview.no')}
                       </span>
                       <div className={cn("w-2.5 h-2.5 rounded-full", settings.sendClientConfirmation ? "bg-green-500" : "bg-gray-300")} />
                     </div>
@@ -716,7 +703,7 @@ export default function RezervacijePage() {
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 text-gray-400" weight="regular" />
-                      <span className="text-sm font-medium text-gray-700">Potrdilo po spletni rezervaciji</span>
+                      <span className="text-sm font-medium text-gray-700">{t('settingsOverview.onlineConfirm')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       {settings.sendOnlineConfirmation && (
@@ -725,7 +712,7 @@ export default function RezervacijePage() {
                         </span>
                       )}
                       <span className={cn("text-sm font-semibold", settings.sendOnlineConfirmation ? "text-green-600" : "text-gray-400")}>
-                        {settings.sendOnlineConfirmation ? 'Da' : 'Ne'}
+                        {settings.sendOnlineConfirmation ? t('settingsOverview.yes') : t('settingsOverview.no')}
                       </span>
                       <div className={cn("w-2.5 h-2.5 rounded-full", settings.sendOnlineConfirmation ? "bg-green-500" : "bg-gray-300")} />
                     </div>
@@ -736,11 +723,11 @@ export default function RezervacijePage() {
                     <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                       <div className="flex items-center gap-2">
                         <Link className="w-4 h-4 text-gray-400" weight="regular" />
-                        <span className="text-sm font-medium text-gray-700">Glavni booking link</span>
+                        <span className="text-sm font-medium text-gray-700">{t('settingsOverview.mainLinkLabel')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full bg-violet-400" />
-                        <span className="text-sm font-semibold text-violet-600">Nastavljen</span>
+                        <span className="text-sm font-semibold text-violet-600">{t('settingsOverview.linkSet')}</span>
                       </div>
                     </div>
                   )}
@@ -749,7 +736,7 @@ export default function RezervacijePage() {
                   <div className={`flex items-center justify-between py-2.5 ${(settings.apptManagementLink || settings.mainBookingLink) ? 'border-b border-gray-100' : ''}`}>
                     <div className="flex items-center gap-2">
                       <Palette className="w-4 h-4 text-gray-400" weight="regular" />
-                      <span className="text-sm font-medium text-gray-700">Barve</span>
+                      <span className="text-sm font-medium text-gray-700">{t('settingsOverview.colors')}</span>
                     </div>
                     <div className="flex gap-1.5">
                       {[settings.primaryColor, settings.secondaryColor, settings.bgFromColor, settings.bgToColor].map((color, i) => (
@@ -763,7 +750,7 @@ export default function RezervacijePage() {
                     <div className="flex items-start justify-between gap-4 py-2.5">
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <Link className="w-4 h-4 text-gray-400" weight="regular" />
-                        <span className="text-sm font-medium text-gray-700">Link za prenaročanje in odpoved</span>
+                        <span className="text-sm font-medium text-gray-700">{t('settingsOverview.mgmtLinkLabel')}</span>
                       </div>
                       <a
                         href={settings.apptManagementLink}

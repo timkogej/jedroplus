@@ -4,10 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, PencilSimple, Trash, X, MagnifyingGlass, Clock } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { fetchStoritve } from '@/lib/companyScope';
 import type { Storitev } from '@/types/appointments';
-import { DAYS_SL } from '@/lib/promotions';
 
 interface HappyHour {
   id: string;
@@ -48,6 +48,8 @@ const DEFAULT_FORM: HHFormData = {
 };
 
 export default function HappyHoursPage() {
+  const t = useTranslations('promotions');
+  const tc = useTranslations('common');
   const { companyId } = useCompany();
   const [happyHours, setHappyHours] = useState<HappyHour[]>([]);
   const [services, setServices] = useState<Storitev[]>([]);
@@ -59,6 +61,17 @@ export default function HappyHoursPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [serviceSearch, setServiceSearch] = useState('');
 
+  // Sunday-first day labels mapped from common.daysShort (Sun=0 … Sat=6)
+  const DAYS = [
+    tc('daysShort.sun'),
+    tc('daysShort.mon'),
+    tc('daysShort.tue'),
+    tc('daysShort.wed'),
+    tc('daysShort.thu'),
+    tc('daysShort.fri'),
+    tc('daysShort.sat'),
+  ];
+
   const load = useCallback(async () => {
     if (!companyId) return;
     try {
@@ -66,11 +79,11 @@ export default function HappyHoursPage() {
       const data = await res.json();
       if (data.ok) setHappyHours(data.data || []);
     } catch {
-      toast.error('Napaka pri nalaganju');
+      toast.error(t('happyHours.toasts.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [companyId]);
+  }, [companyId, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -89,14 +102,14 @@ export default function HappyHoursPage() {
 
   const handleSave = async () => {
     if (!companyId) return;
-    if (!form.naziv.trim()) { toast.error('Naziv je obvezen'); return; }
-    if (form.dnevi_v_tednu.length === 0) { toast.error('Izberite vsaj en dan'); return; }
-    if (!form.cas_zacetek || !form.cas_konec) { toast.error('Čas je obvezen'); return; }
-    if (form.cas_konec <= form.cas_zacetek) { toast.error('Čas konca mora biti po času začetka'); return; }
+    if (!form.naziv.trim()) { toast.error(t('happyHours.toasts.nameRequired')); return; }
+    if (form.dnevi_v_tednu.length === 0) { toast.error(t('happyHours.toasts.dayRequired')); return; }
+    if (!form.cas_zacetek || !form.cas_konec) { toast.error(t('happyHours.toasts.timeRequired')); return; }
+    if (form.cas_konec <= form.cas_zacetek) { toast.error(t('happyHours.toasts.timeOrder')); return; }
     const vrednost = parseFloat(form.vrednost);
-    if (!vrednost || vrednost <= 0) { toast.error('Vrednost mora biti večja od 0'); return; }
-    if (form.tip_popusta === 'percentage' && vrednost > 100) { toast.error('Odstotek ne sme biti večji od 100'); return; }
-    if (!form.vse_storitve && form.storitev_ids.length === 0) { toast.error('Izberite vsaj eno storitev'); return; }
+    if (!vrednost || vrednost <= 0) { toast.error(t('happyHours.toasts.valueRequired')); return; }
+    if (form.tip_popusta === 'percentage' && vrednost > 100) { toast.error(t('happyHours.toasts.percentMax')); return; }
+    if (!form.vse_storitve && form.storitev_ids.length === 0) { toast.error(t('happyHours.toasts.serviceRequired')); return; }
 
     setSaving(true);
     try {
@@ -105,10 +118,10 @@ export default function HappyHoursPage() {
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, vrednost, company_id: companyId }) });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      toast.success(editingId ? 'Happy Hour posodobljen' : 'Happy Hour ustvarjen');
+      toast.success(editingId ? t('happyHours.toasts.updated') : t('happyHours.toasts.created'));
       setModalOpen(false);
       load();
-    } catch { toast.error('Napaka pri shranjevanju'); } finally { setSaving(false); }
+    } catch { toast.error(t('happyHours.toasts.saveError')); } finally { setSaving(false); }
   };
 
   const handleDelete = async (id: string) => {
@@ -116,17 +129,17 @@ export default function HappyHoursPage() {
       const res = await fetch(`/api/promotions/happy-hours/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      toast.success('Happy Hour izbrisan');
+      toast.success(t('happyHours.toasts.deleted'));
       setDeleteId(null);
       load();
-    } catch { toast.error('Napaka pri brisanju'); }
+    } catch { toast.error(t('happyHours.toasts.deleteError')); }
   };
 
   const handleToggleActive = async (hh: HappyHour) => {
     try {
       await fetch(`/api/promotions/happy-hours/${hh.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...hh, vrednost: hh.vrednost, aktiven: !hh.aktiven }) });
       load();
-    } catch { toast.error('Napaka'); }
+    } catch { toast.error(t('happyHours.toasts.genericError')); }
   };
 
   const toggleDay = (day: number) => {
@@ -154,25 +167,33 @@ export default function HappyHoursPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-sm font-medium text-gray-600">{happyHours.length} happy hours</h3>
+        <h3 className="text-sm font-medium text-gray-600">{t('happyHours.count', { count: happyHours.length })}</h3>
         <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={openCreate} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white" style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 100%)' }}>
           <Plus className="w-4 h-4" weight="bold" />
-          Nov Happy Hour
+          {t('happyHours.newButton')}
         </motion.button>
       </div>
 
       {happyHours.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <Clock className="w-10 h-10 mx-auto mb-3 opacity-40" weight="thin" />
-          <p className="text-sm">Ni happy hours. Ustvarite prvega!</p>
+          <p className="text-sm">{t('happyHours.empty')}</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                {['Naziv', 'Dnevi', 'Čas', 'Popust', 'Storitve', 'Status', 'Akcije'].map((h) => (
-                  <th key={h} className={`py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider ${h === 'Akcije' ? 'text-right' : 'text-left'}`}>{h}</th>
+                {[
+                  t('happyHours.table.name'),
+                  t('happyHours.table.days'),
+                  t('happyHours.table.time'),
+                  t('happyHours.table.discount'),
+                  t('happyHours.table.services'),
+                  t('happyHours.table.status'),
+                  t('happyHours.table.actions'),
+                ].map((h) => (
+                  <th key={h} className={`py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider ${h === t('happyHours.table.actions') ? 'text-right' : 'text-left'}`}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -184,7 +205,7 @@ export default function HappyHoursPage() {
                     <td className="py-3.5 px-4">
                       <div className="flex flex-wrap gap-1">
                         {(hh.dnevi_v_tednu || []).sort().map((d) => (
-                          <span key={d} className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">{DAYS_SL[d]}</span>
+                          <span key={d} className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">{DAYS[d]}</span>
                         ))}
                       </div>
                     </td>
@@ -192,12 +213,14 @@ export default function HappyHoursPage() {
                     <td className="py-3.5 px-4 font-semibold text-gray-900">{hh.tip_popusta === 'percentage' ? `${hh.vrednost}%` : `${hh.vrednost} €`}</td>
                     <td className="py-3.5 px-4">
                       {hh.vse_storitve
-                        ? <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">Vse</span>
+                        ? <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">{t('happyHours.servicesAll')}</span>
                         : <span className="px-2 py-0.5 bg-violet-100 text-violet-700 rounded-full text-xs">{(hh.storitev_ids || []).length}</span>
                       }
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${hh.aktiven ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{hh.aktiven ? 'Aktiven' : 'Neaktiven'}</span>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${hh.aktiven ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+                        {hh.aktiven ? tc('status.active') : tc('status.inactive')}
+                      </span>
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center justify-end gap-2">
@@ -223,21 +246,23 @@ export default function HappyHoursPage() {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
               <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">{editingId ? 'Uredi Happy Hour' : 'Nov Happy Hour'}</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {editingId ? t('happyHours.modal.editTitle') : t('happyHours.modal.createTitle')}
+                </h2>
                 <button onClick={() => setModalOpen(false)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"><X className="w-5 h-5" weight="bold" /></button>
               </div>
 
               <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Naziv</label>
-                  <input value={form.naziv} onChange={(e) => setForm((p) => ({ ...p, naziv: e.target.value }))} placeholder="Npr. Popoldanski Happy Hour" className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('happyHours.modal.fields.name')}</label>
+                  <input value={form.naziv} onChange={(e) => setForm((p) => ({ ...p, naziv: e.target.value }))} placeholder={t('happyHours.modal.fields.namePlaceholder')} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
                 </div>
 
                 {/* Days */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Dnevi v tednu</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">{t('happyHours.modal.fields.days')}</label>
                   <div className="flex gap-1.5">
-                    {DAYS_SL.map((label, idx) => (
+                    {DAYS.map((label, idx) => (
                       <button
                         key={idx}
                         onClick={() => toggleDay(idx)}
@@ -256,23 +281,23 @@ export default function HappyHoursPage() {
                 {/* Time */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Čas od</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('happyHours.modal.fields.timeFrom')}</label>
                     <input type="time" value={form.cas_zacetek} onChange={(e) => setForm((p) => ({ ...p, cas_zacetek: e.target.value }))} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Čas do</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('happyHours.modal.fields.timeTo')}</label>
                     <input type="time" value={form.cas_konec} onChange={(e) => setForm((p) => ({ ...p, cas_konec: e.target.value }))} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
                   </div>
                 </div>
 
                 {/* Tip + vrednost */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Tip popusta</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">{t('happyHours.modal.fields.type')}</label>
                   <div className="flex gap-3 mb-3">
-                    {([['percentage', 'Odstotek (%)'], ['fixed', 'Fiksni znesek (€)']] as const).map(([val, label]) => (
+                    {(['percentage', 'fixed'] as const).map((val) => (
                       <label key={val} className="flex items-center gap-2 cursor-pointer">
                         <input type="radio" checked={form.tip_popusta === val} onChange={() => setForm((p) => ({ ...p, tip_popusta: val }))} className="accent-violet-600" />
-                        <span className="text-sm text-gray-700">{label}</span>
+                        <span className="text-sm text-gray-700">{t(`shared.discountType.${val}`)}</span>
                       </label>
                     ))}
                   </div>
@@ -282,17 +307,17 @@ export default function HappyHoursPage() {
                 {/* Storitve */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">Storitve</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('happyHours.modal.fields.services')}</label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={form.vse_storitve} onChange={() => setForm((p) => ({ ...p, vse_storitve: !p.vse_storitve }))} className="accent-violet-600" />
-                      <span className="text-xs text-gray-600">Vse storitve</span>
+                      <span className="text-xs text-gray-600">{t('happyHours.modal.fields.allServices')}</span>
                     </label>
                   </div>
                   {!form.vse_storitve && (
                     <>
                       <div className="relative mb-2">
                         <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" weight="regular" />
-                        <input value={serviceSearch} onChange={(e) => setServiceSearch(e.target.value)} placeholder="Iskanje..." className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                        <input value={serviceSearch} onChange={(e) => setServiceSearch(e.target.value)} placeholder={t('shared.serviceSearch')} className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
                       </div>
                       {form.storitev_ids.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mb-2">
@@ -321,7 +346,7 @@ export default function HappyHoursPage() {
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <span className="text-sm font-medium text-gray-700">Aktiven</span>
+                  <span className="text-sm font-medium text-gray-700">{t('shared.activeLabel')}</span>
                   <button onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.aktiven ? 'translate-x-6' : 'translate-x-1'}`} />
                   </button>
@@ -329,10 +354,10 @@ export default function HappyHoursPage() {
               </div>
 
               <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
-                <button onClick={() => setModalOpen(false)} className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">Prekliči</button>
+                <button onClick={() => setModalOpen(false)} className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">{t('shared.cancelButton')}</button>
                 <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white rounded-xl disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 100%)' }}>
                   {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                  {editingId ? 'Shrani' : 'Ustvari'}
+                  {editingId ? t('shared.saveButton') : t('shared.createButton')}
                 </motion.button>
               </div>
             </motion.div>
@@ -346,11 +371,11 @@ export default function HappyHoursPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteId(null)} />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
-              <p className="text-base font-semibold text-gray-900 mb-2">Izbriši Happy Hour?</p>
-              <p className="text-sm text-gray-500 mb-5">Tega dejanja ni mogoče razveljaviti.</p>
+              <p className="text-base font-semibold text-gray-900 mb-2">{t('happyHours.deleteConfirm.title')}</p>
+              <p className="text-sm text-gray-500 mb-5">{t('shared.cannotUndo')}</p>
               <div className="flex gap-3">
-                <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">Prekliči</button>
-                <button onClick={() => deleteId && handleDelete(deleteId)} className="flex-1 py-2.5 rounded-xl bg-red-500 text-sm font-medium text-white hover:bg-red-600 transition-colors">Izbriši</button>
+                <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">{t('shared.cancelButton')}</button>
+                <button onClick={() => deleteId && handleDelete(deleteId)} className="flex-1 py-2.5 rounded-xl bg-red-500 text-sm font-medium text-white hover:bg-red-600 transition-colors">{t('shared.deleteButton')}</button>
               </div>
             </motion.div>
           </div>

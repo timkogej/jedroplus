@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, PencilSimple, Trash, X, MagnifyingGlass, Tag } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { fetchStoritve } from '@/lib/companyScope';
 import type { Storitev } from '@/types/appointments';
@@ -46,14 +47,9 @@ function formatDate(dateStr: string): string {
   return d.toLocaleDateString('sl-SI');
 }
 
-function getStatus(popust: Popust): { label: string; color: string } {
-  const today = new Date().toISOString().split('T')[0];
-  if (!popust.aktiven) return { label: 'Neaktiven', color: 'bg-gray-100 text-gray-600' };
-  if (popust.datum_konec && popust.datum_konec < today) return { label: 'Potekel', color: 'bg-orange-100 text-orange-700' };
-  return { label: 'Aktiven', color: 'bg-emerald-100 text-emerald-700' };
-}
-
 export default function DiscountsPage() {
+  const t = useTranslations('promotions');
+  const tc = useTranslations('common');
   const { companyId } = useCompany();
   const [discounts, setDiscounts] = useState<Popust[]>([]);
   const [services, setServices] = useState<Storitev[]>([]);
@@ -66,6 +62,13 @@ export default function DiscountsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [serviceSearch, setServiceSearch] = useState('');
 
+  const getStatus = (popust: Popust): { label: string; color: string } => {
+    const today = new Date().toISOString().split('T')[0];
+    if (!popust.aktiven) return { label: tc('status.inactive'), color: 'bg-gray-100 text-gray-600' };
+    if (popust.datum_konec && popust.datum_konec < today) return { label: tc('status.expired'), color: 'bg-orange-100 text-orange-700' };
+    return { label: tc('status.active'), color: 'bg-emerald-100 text-emerald-700' };
+  };
+
   const loadDiscounts = useCallback(async () => {
     if (!companyId) return;
     try {
@@ -73,11 +76,11 @@ export default function DiscountsPage() {
       const data = await res.json();
       if (data.ok) setDiscounts(data.data || []);
     } catch {
-      toast.error('Napaka pri nalaganju popustov');
+      toast.error(t('discounts.toasts.loadError'));
     } finally {
       setLoading(false);
     }
-  }, [companyId]);
+  }, [companyId, t]);
 
   useEffect(() => {
     loadDiscounts();
@@ -112,12 +115,12 @@ export default function DiscountsPage() {
 
   const handleSave = async () => {
     if (!companyId) return;
-    if (!form.naziv.trim()) { toast.error('Naziv je obvezen'); return; }
+    if (!form.naziv.trim()) { toast.error(t('discounts.toasts.nameRequired')); return; }
     const vrednost = parseFloat(form.vrednost);
-    if (!vrednost || vrednost <= 0) { toast.error('Vrednost mora biti večja od 0'); return; }
-    if (form.tip_popusta === 'percentage' && vrednost > 100) { toast.error('Odstotek ne sme biti večji od 100'); return; }
-    if (form.datum_konec && form.datum_zacetek && form.datum_konec < form.datum_zacetek) { toast.error('Datum konca mora biti po datumu začetka'); return; }
-    if (form.storitev_ids.length === 0) { toast.error('Izberite vsaj eno storitev'); return; }
+    if (!vrednost || vrednost <= 0) { toast.error(t('discounts.toasts.valueRequired')); return; }
+    if (form.tip_popusta === 'percentage' && vrednost > 100) { toast.error(t('discounts.toasts.percentMax')); return; }
+    if (form.datum_konec && form.datum_zacetek && form.datum_konec < form.datum_zacetek) { toast.error(t('discounts.toasts.dateOrder')); return; }
+    if (form.storitev_ids.length === 0) { toast.error(t('discounts.toasts.serviceRequired')); return; }
 
     setSaving(true);
     try {
@@ -130,11 +133,11 @@ export default function DiscountsPage() {
       });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      toast.success(editingId ? 'Popust posodobljen' : 'Popust ustvarjen');
+      toast.success(editingId ? t('discounts.toasts.updated') : t('discounts.toasts.created'));
       setModalOpen(false);
       loadDiscounts();
     } catch (err) {
-      toast.error('Napaka pri shranjevanju');
+      toast.error(t('discounts.toasts.saveError'));
     } finally {
       setSaving(false);
     }
@@ -145,11 +148,11 @@ export default function DiscountsPage() {
       const res = await fetch(`/api/promotions/discounts/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      toast.success('Popust izbrisan');
+      toast.success(t('discounts.toasts.deleted'));
       setDeleteId(null);
       loadDiscounts();
     } catch {
-      toast.error('Napaka pri brisanju');
+      toast.error(t('discounts.toasts.deleteError'));
     }
   };
 
@@ -164,7 +167,7 @@ export default function DiscountsPage() {
       if (!data.ok) throw new Error(data.error);
       loadDiscounts();
     } catch {
-      toast.error('Napaka pri posodabljanju');
+      toast.error(t('discounts.toasts.updateError'));
     }
   };
 
@@ -210,7 +213,7 @@ export default function DiscountsPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Iskanje popustov..."
+            placeholder={t('discounts.search')}
             className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
           />
         </div>
@@ -222,7 +225,7 @@ export default function DiscountsPage() {
           style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 100%)' }}
         >
           <Plus className="w-4 h-4" weight="bold" />
-          Nov popust
+          {t('discounts.newButton')}
         </motion.button>
       </div>
 
@@ -230,20 +233,20 @@ export default function DiscountsPage() {
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <Tag className="w-10 h-10 mx-auto mb-3 opacity-40" weight="thin" />
-          <p className="text-sm">Ni popustov. Ustvarite prvega!</p>
+          <p className="text-sm">{t('discounts.empty')}</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Naziv</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Storitve</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Popust</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Datum od</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Datum do</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Akcije</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.name')}</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.services')}</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.discount')}</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.dateFrom')}</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.dateTo')}</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.status')}</th>
+                <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -264,7 +267,7 @@ export default function DiscountsPage() {
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 cursor-pointer"
                           title={(popust.storitev_ids || []).map(getServiceName).join(', ')}
                         >
-                          {(popust.storitev_ids || []).length} {(popust.storitev_ids || []).length === 1 ? 'storitev' : 'storitve'}
+                          {t('discounts.serviceCount', { count: (popust.storitev_ids || []).length })}
                         </span>
                       </td>
                       <td className="py-3.5 px-4 font-semibold text-gray-900">
@@ -323,7 +326,9 @@ export default function DiscountsPage() {
               className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
             >
               <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">{editingId ? 'Uredi popust' : 'Nov popust'}</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {editingId ? t('discounts.modal.editTitle') : t('discounts.modal.createTitle')}
+                </h2>
                 <button onClick={() => setModalOpen(false)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors">
                   <X className="w-5 h-5" weight="bold" />
                 </button>
@@ -332,20 +337,20 @@ export default function DiscountsPage() {
               <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
                 {/* Naziv */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Naziv</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('discounts.modal.fields.name')}</label>
                   <input
                     value={form.naziv}
                     onChange={(e) => setForm((p) => ({ ...p, naziv: e.target.value }))}
-                    placeholder="Npr. Poletni popust"
+                    placeholder={t('discounts.modal.fields.namePlaceholder')}
                     className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
                   />
                 </div>
 
                 {/* Tip popusta */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">Tip popusta</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">{t('discounts.modal.fields.type')}</label>
                   <div className="flex gap-3">
-                    {([['percentage', 'Odstotek (%)'], ['fixed', 'Fiksni znesek (€)']] as const).map(([val, label]) => (
+                    {(['percentage', 'fixed'] as const).map((val) => (
                       <label key={val} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="radio"
@@ -353,7 +358,7 @@ export default function DiscountsPage() {
                           onChange={() => setForm((p) => ({ ...p, tip_popusta: val }))}
                           className="accent-violet-600"
                         />
-                        <span className="text-sm text-gray-700">{label}</span>
+                        <span className="text-sm text-gray-700">{t(`shared.discountType.${val}`)}</span>
                       </label>
                     ))}
                   </div>
@@ -362,7 +367,7 @@ export default function DiscountsPage() {
                 {/* Vrednost */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Vrednost {form.tip_popusta === 'percentage' ? '(%)' : '(€)'}
+                    {t('discounts.modal.fields.value', { unit: t(`shared.valueUnit.${form.tip_popusta}`) })}
                   </label>
                   <input
                     type="number"
@@ -379,7 +384,7 @@ export default function DiscountsPage() {
                 {/* Datumi */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Datum začetka</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('discounts.modal.fields.dateFrom')}</label>
                     <input
                       type="date"
                       value={form.datum_zacetek}
@@ -388,7 +393,7 @@ export default function DiscountsPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Datum konca</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('discounts.modal.fields.dateTo')}</label>
                     <input
                       type="date"
                       value={form.datum_konec}
@@ -401,14 +406,14 @@ export default function DiscountsPage() {
                 {/* Storitve */}
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-                    Storitve ({form.storitev_ids.length} izbranih)
+                    {t('discounts.modal.fields.services', { count: form.storitev_ids.length })}
                   </label>
                   <div className="relative mb-2">
                     <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" weight="regular" />
                     <input
                       value={serviceSearch}
                       onChange={(e) => setServiceSearch(e.target.value)}
-                      placeholder="Iskanje storitev..."
+                      placeholder={t('shared.serviceSearch')}
                       className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
                     />
                   </div>
@@ -443,14 +448,14 @@ export default function DiscountsPage() {
                       );
                     })}
                     {filteredServices.length === 0 && (
-                      <p className="text-center py-4 text-sm text-gray-400">Ni storitev</p>
+                      <p className="text-center py-4 text-sm text-gray-400">{t('shared.noServices')}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Aktiven */}
                 <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <span className="text-sm font-medium text-gray-700">Aktiven</span>
+                  <span className="text-sm font-medium text-gray-700">{t('shared.activeLabel')}</span>
                   <button
                     onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}
@@ -462,7 +467,7 @@ export default function DiscountsPage() {
 
               <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
                 <button onClick={() => setModalOpen(false)} className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
-                  Prekliči
+                  {t('shared.cancelButton')}
                 </button>
                 <motion.button
                   whileTap={{ scale: 0.98 }}
@@ -472,7 +477,7 @@ export default function DiscountsPage() {
                   style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 100%)' }}
                 >
                   {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
-                  {editingId ? 'Shrani' : 'Ustvari'}
+                  {editingId ? t('shared.saveButton') : t('shared.createButton')}
                 </motion.button>
               </div>
             </motion.div>
@@ -486,11 +491,11 @@ export default function DiscountsPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteId(null)} />
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
-              <p className="text-base font-semibold text-gray-900 mb-2">Izbriši popust?</p>
-              <p className="text-sm text-gray-500 mb-5">Tega dejanja ni mogoče razveljaviti.</p>
+              <p className="text-base font-semibold text-gray-900 mb-2">{t('discounts.deleteConfirm.title')}</p>
+              <p className="text-sm text-gray-500 mb-5">{t('shared.cannotUndo')}</p>
               <div className="flex gap-3">
-                <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">Prekliči</button>
-                <button onClick={() => deleteId && handleDelete(deleteId)} className="flex-1 py-2.5 rounded-xl bg-red-500 text-sm font-medium text-white hover:bg-red-600 transition-colors">Izbriši</button>
+                <button onClick={() => setDeleteId(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">{t('shared.cancelButton')}</button>
+                <button onClick={() => deleteId && handleDelete(deleteId)} className="flex-1 py-2.5 rounded-xl bg-red-500 text-sm font-medium text-white hover:bg-red-600 transition-colors">{t('shared.deleteButton')}</button>
               </div>
             </motion.div>
           </div>
