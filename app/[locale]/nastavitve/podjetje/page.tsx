@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { CaretLeft, SpinnerGap, Plus, X } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import {
   SettingsSection,
   SettingRow,
@@ -29,7 +30,20 @@ const DAYS_OF_WEEK = [
   'Nedelja',
 ];
 
+// SL day names are DB schema keys — must not be translated
+const DAY_KEYS: Record<string, 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'> = {
+  'Ponedeljek': 'mon',
+  'Torek': 'tue',
+  'Sreda': 'wed',
+  'Četrtek': 'thu',
+  'Petek': 'fri',
+  'Sobota': 'sat',
+  'Nedelja': 'sun',
+};
+
 export default function CompanySettingsPage() {
+  const t = useTranslations('settings');
+  const tc = useTranslations('common');
   const { companyId } = useCompany();
   const { user } = useAuth();
 
@@ -168,7 +182,7 @@ export default function CompanySettingsPage() {
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri shranjevanju');
+        throw new Error('Failed to save company data');
       }
 
       // Wait 1 second for system to process
@@ -255,13 +269,13 @@ export default function CompanySettingsPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-4"
       >
         <CaretLeft className="w-3.5 h-3.5" weight="regular" />
-        Nastavitve
+        {t('back')}
       </Link>
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Podjetje</h1>
-          <p className="text-sm text-gray-500 mt-1">Osnovni podatki in nastavitve vašega podjetja</p>
+          <h1 className="text-xl font-semibold text-gray-900">{t('company.title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('company.subtitle')}</p>
         </div>
         <SaveIndicator saving={saving} lastSaved={lastSaved} />
       </div>
@@ -271,32 +285,32 @@ export default function CompanySettingsPage() {
         animate={{ opacity: 1 }}
       >
         {/* Basic Info */}
-        <SettingsSection title="Osnovni podatki" description="Pravni in identifikacijski podatki">
+        <SettingsSection title={t('company.basicInfo.title')} description={t('company.basicInfo.subtitle')}>
           <SettingRow
-            label="Ime podjetja"
-            description="Polno ime vašega podjetja"
+            label={t('company.basicInfo.nameLabel')}
+            description={t('company.basicInfo.nameNote')}
           >
             <Input
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="Vnesi ime podjetja"
+              placeholder={t('company.basicInfo.namePlaceholder')}
             />
           </SettingRow>
 
           <SettingRow
-            label="Panoga"
-            description="Dejavnost vašega podjetja"
+            label={t('company.basicInfo.industryLabel')}
+            description={t('company.basicInfo.industryNote')}
           >
             <Input
               value={industry}
               onChange={(e) => setIndustry(e.target.value)}
-              placeholder="npr. Frizerstvo, Kozmetika, Fitness..."
+              placeholder={t('company.basicInfo.industryPlaceholder')}
             />
           </SettingRow>
 
           <SettingRow
-            label="Davčna številka"
-            description="Davčna številka podjetja"
+            label={t('company.basicInfo.taxLabel')}
+            description={t('company.basicInfo.taxNote')}
           >
             <Input
               value={taxNumber}
@@ -307,10 +321,10 @@ export default function CompanySettingsPage() {
         </SettingsSection>
 
         {/* Contact Info */}
-        <SettingsSection title="Kontaktni podatki" description="Naslov in kontaktne informacije">
+        <SettingsSection title={t('company.contact.title')} description={t('company.contact.subtitle')}>
           <SettingRow
-            label="Naslov"
-            description="Ulica in hišna številka"
+            label={t('company.contact.addressLabel')}
+            description={t('company.contact.addressNote')}
           >
             <Input
               value={address}
@@ -320,8 +334,8 @@ export default function CompanySettingsPage() {
           </SettingRow>
 
           <SettingRow
-            label="Telefon"
-            description="Glavna kontaktna številka"
+            label={t('company.contact.phoneLabel')}
+            description={t('company.contact.phoneNote')}
           >
             <Input
               type="tel"
@@ -332,8 +346,8 @@ export default function CompanySettingsPage() {
           </SettingRow>
 
           <SettingRow
-            label="Email"
-            description="Kontaktni email"
+            label={t('company.contact.emailLabel')}
+            description={t('company.contact.emailNote')}
           >
             <Input
               type="email"
@@ -344,8 +358,8 @@ export default function CompanySettingsPage() {
           </SettingRow>
 
           <SettingRow
-            label="Spletna stran"
-            description="URL vaše spletne strani"
+            label={t('company.contact.websiteLabel')}
+            description={t('company.contact.websiteNote')}
           >
             <Input
               value={website}
@@ -356,16 +370,17 @@ export default function CompanySettingsPage() {
         </SettingsSection>
 
         {/* Working Hours - Interval Based */}
-        <SettingsSection title="Delovni čas" description="Kdaj je vaše podjetje odprto (podpora za več intervalov na dan)">
+        <SettingsSection title={t('company.workingHours.title')} description={t('company.workingHours.subtitle')}>
           <div className="space-y-4">
             {DAYS_OF_WEEK.map((day) => {
               const dayHours = workingHours[day] || { enabled: false, intervals: [{ start: '08:00', end: '17:00' }] };
+              const dayKey = DAY_KEYS[day];
 
               return (
                 <div key={day} className="border border-gray-100 rounded-2xl p-5 space-y-3">
                   {/* Day header with enable toggle */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900">{day}</span>
+                    <span className="text-sm font-semibold text-gray-900">{tc(`daysLong.${dayKey}`)}</span>
                     <Switch
                       checked={dayHours.enabled}
                       onChange={(enabled) => updateWorkingHours(day, { enabled })}
@@ -409,13 +424,13 @@ export default function CompanySettingsPage() {
                         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
                       >
                         <Plus className="w-4 h-4" />
-                        Interval
+                        {t('company.workingHours.addInterval')}
                       </button>
                     </div>
                   )}
 
                   {!dayHours.enabled && (
-                    <span className="text-sm text-gray-400">Zaprto</span>
+                    <span className="text-sm text-gray-400">{t('company.workingHours.closed')}</span>
                   )}
                 </div>
               );
@@ -435,19 +450,19 @@ export default function CompanySettingsPage() {
             {saving ? (
               <>
                 <SpinnerGap className="h-4 w-4 animate-spin" />
-                Shranjujem...
+                {t('company.actions.saving')}
               </>
             ) : saveSuccess ? (
-              'Shranjeno ✓'
+              t('company.actions.saved')
             ) : (
-              'Shrani spremembe'
+              t('company.actions.save')
             )}
           </motion.button>
           <Link
             href="/nastavitve"
             className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
           >
-            Prekliči
+            {t('company.actions.cancel')}
           </Link>
         </div>
       </motion.div>

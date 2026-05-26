@@ -218,7 +218,8 @@
         "fullName": "Full name",
         "email": "Email",
         "phone": "Phone",
-        "message": "Message"
+        "message": "Message",
+        "messagePlaceholder": "Describe what you need..."
       }
     },
     "inquiryToast": "Inquiry sent. We'll contact you shortly.",

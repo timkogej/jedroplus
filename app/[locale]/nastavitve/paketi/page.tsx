@@ -360,7 +360,7 @@ function EnterpriseModal({
               rows={4}
               value={form.message}
               onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-              placeholder="Opišite, kaj potrebujete..."
+              placeholder={t('paketi.enterpriseModal.fields.messagePlaceholder')}
               required
               className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-[#6D5EF7]/30 focus:border-[#6D5EF7]/40 placeholder:text-gray-400"
             />

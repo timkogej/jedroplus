@@ -218,7 +218,8 @@
         "fullName": "Ime in priimek",
         "email": "E-pošta",
         "phone": "Telefon",
-        "message": "Sporočilo"
+        "message": "Sporočilo",
+        "messagePlaceholder": "Opišite, kaj potrebujete..."
       }
     },
     "inquiryToast": "Povpraševanje poslano. Kmalu vas kontaktiramo.",
