@@ -1,1 +1,224 @@
-{}
+{
+  "hub": {
+    "title": "Settings",
+    "subtitle": "All settings, organized by section.",
+    "menu": {
+      "company": {
+        "label": "Company",
+        "description": "Name, address, working hours, and contact details"
+      },
+      "general": {
+        "label": "General",
+        "description": "Account, language, notifications, and company codes"
+      },
+      "members": {
+        "label": "Members",
+        "description": "Team, roles, and permissions for staff"
+      },
+      "plans": {
+        "label": "Plans and quotas",
+        "description": "Overview of your plan and monthly usage"
+      },
+      "messages": {
+        "label": "Messages",
+        "description": "History of sent messages and reminders"
+      }
+    }
+  },
+  "back": "Settings",
+  "general": {
+    "title": "General",
+    "subtitle": "Basic app settings and your account",
+    "account": {
+      "title": "Account & Profile",
+      "subtitle": "Your personal details",
+      "nameLabel": "Username",
+      "nameNote": "Name cannot be changed",
+      "emailLabel": "Email",
+      "emailNote": "Email cannot be changed"
+    },
+    "langRegion": {
+      "title": "Language & Region",
+      "subtitle": "Local settings (locked)",
+      "languageLabel": "App language",
+      "languageNote": "Currently Slovenian only",
+      "languageValue": "Slovenian",
+      "regionLabel": "Region",
+      "regionNote": "Your geographical location",
+      "timezoneLabel": "Time zone",
+      "timezoneNote": "Your local time zone",
+      "dateFormatLabel": "Date format",
+      "dateFormatNote": "How dates are displayed"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Notification settings",
+      "emailLabel": "Email notifications",
+      "emailNote": "Receive notifications by email"
+    },
+    "companyData": {
+      "title": "Company data",
+      "subtitle": "Company ID and codes for adding users",
+      "companyIdLabel": "Company ID",
+      "adminCodeLabel": "Admin code",
+      "adminCodeNote": "For adding administrators to your company. Administrators have full access: they can view and edit all appointments, clients, services, staff, analytics, settings, and plans.",
+      "employeeCodeLabel": "Employee code",
+      "employeeCodeNote": "For adding staff to your company. Staff can only view their own schedule and assigned appointments. They have no access to settings, analytics, or other staff data.",
+      "slugLabel": "Company slug",
+      "slugNote": "The suffix used in booking links and the chatbot on your website",
+      "disclaimer": "Share codes only with trusted people. Administrators have full system access; staff only have access to their own appointments."
+    },
+    "qr": {
+      "title": "QR code for client registration",
+      "subtitle": "Clients scan the code and register in your system",
+      "noSlug": "Company slug not set.",
+      "caption": "Clients scan the code and register in your system."
+    }
+  },
+  "company": {
+    "title": "Company",
+    "subtitle": "Basic information and settings for your company",
+    "basicInfo": {
+      "title": "Basic information",
+      "subtitle": "Legal and identification data",
+      "nameLabel": "Company name",
+      "nameNote": "Full legal name of your company",
+      "namePlaceholder": "Enter company name",
+      "industryLabel": "Industry",
+      "industryNote": "Your company's line of business",
+      "industryPlaceholder": "e.g. Hairdressing, Cosmetics, Fitness...",
+      "taxLabel": "VAT number",
+      "taxNote": "Company VAT number"
+    },
+    "contact": {
+      "title": "Contact details",
+      "subtitle": "Address and contact information",
+      "addressLabel": "Address",
+      "addressNote": "Street and building number",
+      "phoneLabel": "Phone",
+      "phoneNote": "Main contact number",
+      "emailLabel": "Email",
+      "emailNote": "Contact email",
+      "websiteLabel": "Website",
+      "websiteNote": "URL of your website"
+    },
+    "workingHours": {
+      "title": "Working hours",
+      "subtitle": "When your company is open (supports multiple intervals per day)",
+      "closed": "Closed",
+      "addInterval": "Interval"
+    },
+    "actions": {
+      "save": "Save changes",
+      "saving": "Saving...",
+      "saved": "Saved ✓",
+      "cancel": "Cancel",
+      "saveError": "An error occurred while saving"
+    }
+  },
+  "members": {
+    "title": "Members",
+    "subtitle": "Team, roles, and permissions for staff",
+    "noAccess": {
+      "title": "Access restricted",
+      "message": "This page is only visible to company owners."
+    },
+    "loadError": "An error occurred while loading data.",
+    "maxUsersLabel": "Maximum number of app users",
+    "currentTeamLabel": "Currently in team",
+    "list": {
+      "title": "Members",
+      "subtitle": "All users that are part of this company",
+      "empty": "No members found."
+    },
+    "permissions": {
+      "title": "Staff permissions",
+      "subtitle": "Set what staff can view and edit",
+      "notConfigured": "Permissions for this company have not been configured yet.",
+      "saved": "Settings have been saved.",
+      "saveError": "An error occurred while saving.",
+      "saveButton": "Save",
+      "saving": "Saving…",
+      "sections": {
+        "termini": "Appointments",
+        "stranke": "Clients",
+        "storitve": "Services",
+        "osebje": "Staff",
+        "analitika": "Analytics",
+        "moduli": "Modules"
+      },
+      "labels": {
+        "can_view_all_appointments": "View all company appointments",
+        "can_view_only_own_appointments": "View only own appointments",
+        "can_edit_all_appointments": "Edit all company appointments",
+        "can_edit_only_own_appointments": "Edit only own appointments",
+        "can_create_appointments": "Create new appointments",
+        "can_delete_appointments": "Delete appointments",
+        "can_view_clients": "View clients",
+        "can_edit_clients": "Edit clients",
+        "can_create_clients": "Create new clients",
+        "can_delete_clients": "Delete clients",
+        "can_view_services": "View services",
+        "can_edit_services": "Edit services",
+        "can_create_services": "Add services",
+        "can_delete_services": "Delete services",
+        "can_view_staff": "View staff list",
+        "can_edit_staff": "Edit staff",
+        "can_view_analytics": "View analytics",
+        "can_access_asistent_plus": "Access to Assistant+",
+        "can_access_komunikacija": "Access to Communication",
+        "can_access_chatbot_plus": "Access to Chatbot+",
+        "can_manage_chatbot_plus_settings": "Edit Chatbot+ settings",
+        "can_access_opomniki": "Access to Reminders",
+        "can_manage_opomniki": "Manage Reminders",
+        "can_access_rezervacije": "Access to Reservations",
+        "can_manage_rezervacije": "Manage Reservations",
+        "can_access_lost_leads": "Access to Lost Leads",
+        "can_manage_lost_leads": "Manage Lost Leads"
+      }
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Only the last 14 days of history are shown",
+    "messageCount": "{count, plural, =1 {1 message} other {{count} messages}}",
+    "filters": {
+      "all": "All messages",
+      "appointment_reminder": "Pre-appointment reminders",
+      "appointment_post": "Post-appointment reminders",
+      "appointment_confirmation": "Appointment confirmations",
+      "lost_leads": "Lost leads",
+      "communication_message": "Communication"
+    },
+    "entityLabels": {
+      "appointment_reminder": "Pre-appointment reminder",
+      "appointment_post": "Post-appointment reminder",
+      "appointment_confirmation": "Appointment confirmation",
+      "lost_leads": "Lost leads",
+      "communication_message": "Communication"
+    },
+    "status": {
+      "sent": "Sent",
+      "queued": "Queued",
+      "failed": "Error"
+    },
+    "expand": "Show",
+    "collapse": "Close",
+    "subjectLabel": "Subject",
+    "bodyLabel": "Message content",
+    "noBody": "No content",
+    "empty": {
+      "title": "No messages sent",
+      "all": "No messages were sent in the last 14 days.",
+      "filtered": "No messages for the selected filter in the last 14 days."
+    }
+  },
+  "saveIndicator": {
+    "saving": "Saving...",
+    "saved": "Saved {relative}",
+    "justNow": "just now",
+    "secondsAgo": "{seconds}s ago",
+    "minutesAgo": "{minutes}min ago",
+    "hoursAgo": "{hours}h ago"
+  }
+}

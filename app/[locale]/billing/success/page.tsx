@@ -3,42 +3,20 @@
 import { Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'motion/react';
-import { CheckCircle, SpinnerGap, ArrowRight, Warning } from '@phosphor-icons/react';
+import { SpinnerGap, ArrowRight, Warning } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { getBillingStatus } from '@/lib/api/billingClient';
 
-const MAX_POLL_TIME_MS = 60000; // 60 seconds max polling
-const POLL_INTERVAL_MS = 3000; // Poll every 3 seconds
+const MAX_POLL_TIME_MS = 60000;
+const POLL_INTERVAL_MS = 3000;
 
-// Plan features mapping
-const PLAN_FEATURES: Record<string, string[]> = {
-  JEDRO_PLUS: [
-    'Baza strank in terminov',
-    'Baza storitev in osebja',
-    'Personalizirani opomniki pred in po terminu',
-    'Email pošiljanje',
-    'Celotna analitika',
-    'Spletno Naročanje',
-    'Različni dizajni spletnega naročanja',
-    'Asistent+',
-  ],
-  JEDRO_PRO: [
-    'Vse iz Jedro Plus',
-    'Chatbot+',
-    'Lost Leads sistem',
-    'SMS pošiljanje',
-    'Email pošiljanje',
-    'Dodatni dizajni spletnega naročanja',
-  ],
-  JEDRO_PREMIUM: [
-    'Vse iz Jedro Pro',
-    'Receptionist+',
-    'SMS pošiljanje (višja kvota)',
-    'Email pošiljanje (višja kvota)',
-    'Premium dizajn spletnega naročanja',
-    'Premium chatbot dizajn',
-  ],
+// Plan features mapping — keys map to billing.json plans.{key}.features
+const PLAN_FEATURE_KEYS: Record<string, string> = {
+  JEDRO_PLUS:    'jedroPlus',
+  JEDRO_PRO:     'jedroPro',
+  JEDRO_PREMIUM: 'jedroPremium',
 };
 
 // Confetti implementation
@@ -139,6 +117,7 @@ function GradientCheck({ size = 16 }: { size?: number }) {
 }
 
 function BillingSuccessContent() {
+  const t = useTranslations('billing');
   const router = useRouter();
   const searchParams = useSearchParams();
   const { refreshSubscription } = useCompany();
@@ -155,10 +134,8 @@ function BillingSuccessContent() {
   const sessionId = searchParams.get('session_id');
 
   const pollSubscription = useCallback(async () => {
-    // Prevent multiple success triggers
     if (hasSucceeded.current) return;
 
-    // Check if we've exceeded max poll time
     const elapsedTime = Date.now() - pollStartTime.current;
     if (elapsedTime >= MAX_POLL_TIME_MS) {
       setStatus('timeout');
@@ -169,7 +146,6 @@ function BillingSuccessContent() {
       console.log('Polling subscription status...');
       setPollCount(prev => prev + 1);
 
-      // Use the billing status endpoint
       const result = await getBillingStatus(false);
 
       console.log('Billing status result:', result);
@@ -188,29 +164,24 @@ function BillingSuccessContent() {
           setStatus('success');
           setShowConfetti(true);
 
-          // Refresh the app-wide subscription state
           await refreshSubscription();
           return;
         }
       }
 
-      // Schedule next poll
       pollTimeoutRef.current = setTimeout(pollSubscription, POLL_INTERVAL_MS);
     } catch (error) {
       console.error('Error polling subscription:', error);
-      // Continue polling on error
       pollTimeoutRef.current = setTimeout(pollSubscription, POLL_INTERVAL_MS);
     }
   }, [refreshSubscription]);
 
-  // Initial verification effect
   useEffect(() => {
     if (!sessionId) {
       setStatus('error');
       return;
     }
 
-    // Start polling after initial delay (give webhook time to process)
     const initialDelay = setTimeout(() => {
       pollStartTime.current = Date.now();
       pollSubscription();
@@ -240,8 +211,12 @@ function BillingSuccessContent() {
     pollSubscription();
   };
 
-  // Get features for the active plan
-  const planFeatures = activePlanCode ? (PLAN_FEATURES[activePlanCode] || PLAN_FEATURES['JEDRO_PLUS']) : [];
+  const planFeatureKey = activePlanCode
+    ? (PLAN_FEATURE_KEYS[activePlanCode] || PLAN_FEATURE_KEYS['JEDRO_PLUS'])
+    : null;
+  const planFeatures = planFeatureKey
+    ? (t.raw(`plans.${planFeatureKey}.features`) as string[])
+    : [];
 
   // No session ID
   if (!sessionId) {
@@ -250,16 +225,16 @@ function BillingSuccessContent() {
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 max-w-md w-full text-center">
           <Warning className="h-16 w-16 text-amber-500 mx-auto mb-4" weight="fill" />
           <h1 className="text-xl font-semibold text-gray-900 mb-4">
-            Manjka ID seje
+            {t('success.missingSession.title')}
           </h1>
           <p className="text-gray-600 mb-6">
-            Prišlo je do napake pri potrditvi plačila. Prosimo, preverite vaš email za potrditev.
+            {t('success.missingSession.message')}
           </p>
           <button
             onClick={() => router.push('/billing')}
             className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
           >
-            Nazaj na pakete
+            {t('success.missingSession.backButton')}
           </button>
         </div>
       </div>
@@ -289,10 +264,10 @@ function BillingSuccessContent() {
               </svg>
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Potrjujem plačilo...
+              {t('success.verifying.title')}
             </h2>
             <p className="text-gray-600 mb-4">
-              Aktiviramo vaš paket. Prosimo, počakajte trenutek.
+              {t('success.verifying.message')}
             </p>
             <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
               <motion.div
@@ -304,14 +279,14 @@ function BillingSuccessContent() {
               />
             </div>
             <p className="text-xs text-gray-400">
-              Preverjanje... ({Math.max(0, Math.ceil((MAX_POLL_TIME_MS - (Date.now() - pollStartTime.current)) / 1000))}s preostalo)
+              {t('success.verifying.progressLabel')} ({t('success.verifying.timeRemaining', { seconds: Math.max(0, Math.ceil((MAX_POLL_TIME_MS - (Date.now() - pollStartTime.current)) / 1000)) })})
             </p>
           </div>
         )}
 
         {status === 'success' && (
           <div className="text-center">
-            {/* Success Animation - green gradient circle */}
+            {/* Success Animation */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -336,7 +311,7 @@ function BillingSuccessContent() {
               transition={{ delay: 0.2 }}
               className="text-2xl font-bold text-gray-900 mt-6 mb-2"
             >
-              Plačilo uspešno!
+              {t('success.complete.title')}
             </motion.h1>
 
             <motion.p
@@ -345,10 +320,10 @@ function BillingSuccessContent() {
               transition={{ delay: 0.3 }}
               className="text-gray-600 mb-2"
             >
-              Hvala za vašo naročnino.
+              {t('success.complete.subtitle')}
             </motion.p>
 
-            {/* Plan badge with gradient text */}
+            {/* Plan badge */}
             {(activePlanCode || activePlanName) && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -356,7 +331,7 @@ function BillingSuccessContent() {
                 transition={{ delay: 0.4 }}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-100 rounded-full text-sm font-medium mb-6"
               >
-                <span className="text-gray-600">Vaš paket:</span>
+                <span className="text-gray-600">{t('success.complete.yourPlan')}</span>
                 <span
                   className="font-bold"
                   style={{
@@ -365,7 +340,7 @@ function BillingSuccessContent() {
                     WebkitTextFillColor: 'transparent',
                   }}
                 >
-                  {activePlanName || getPlanDisplayName(activePlanCode!)}
+                  {activePlanName || activePlanCode}
                 </span>
               </motion.div>
             )}
@@ -377,7 +352,7 @@ function BillingSuccessContent() {
               className="space-y-4"
             >
               <div className="p-4 bg-gray-50 rounded-xl text-left">
-                <h3 className="font-semibold text-gray-900 mb-3">Kaj sledi?</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">{t('success.complete.whatsNext')}</h3>
                 <ul className="space-y-2.5 text-sm text-gray-600">
                   {planFeatures.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2.5">
@@ -391,13 +366,13 @@ function BillingSuccessContent() {
                     <span className="mt-0.5 flex-shrink-0">
                       <GradientCheck size={18} />
                     </span>
-                    <span>Prejeli boste potrdilo na email {user?.email}</span>
+                    <span>{t('success.complete.emailConfirmation', { email: user?.email ?? '' })}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="mt-0.5 flex-shrink-0">
                       <GradientCheck size={18} />
                     </span>
-                    <span>SMS kvota je bila ponastavljena</span>
+                    <span>{t('success.complete.smsReset')}</span>
                   </li>
                 </ul>
               </div>
@@ -409,7 +384,7 @@ function BillingSuccessContent() {
                   onClick={handleContinue}
                   className="flex-1 py-3 px-4 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                 >
-                  Paketi
+                  {t('success.complete.backToBilling')}
                   <ArrowRight className="h-4 w-4" weight="bold" />
                 </motion.button>
                 <motion.button
@@ -425,7 +400,7 @@ function BillingSuccessContent() {
                       WebkitTextFillColor: 'transparent',
                     }}
                   >
-                    Dashboard
+                    {t('success.complete.dashboard')}
                   </span>
                 </motion.button>
               </div>
@@ -439,23 +414,23 @@ function BillingSuccessContent() {
               <SpinnerGap className="h-8 w-8 text-amber-600" weight="bold" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Obdelava plačila
+              {t('success.timeout.title')}
             </h2>
             <p className="text-gray-600 mb-6">
-              Vaše plačilo se še obdeluje. To lahko traja nekaj trenutkov. Preverite vaš email za potrditev ali poskusite znova.
+              {t('success.timeout.message')}
             </p>
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleRetry}
                 className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
               >
-                Poskusi znova
+                {t('success.timeout.retryButton')}
               </button>
               <button
                 onClick={() => router.push('/billing')}
                 className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
               >
-                Nazaj
+                {t('success.timeout.backButton')}
               </button>
             </div>
           </div>
@@ -465,16 +440,16 @@ function BillingSuccessContent() {
           <div className="text-center py-8">
             <Warning className="h-16 w-16 text-red-500 mx-auto mb-4" weight="fill" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Napaka
+              {t('success.error.title')}
             </h2>
             <p className="text-gray-600 mb-6">
-              Prišlo je do napake pri potrjevanju plačila. Prosimo, kontaktirajte podporo.
+              {t('success.error.message')}
             </p>
             <button
               onClick={() => router.push('/billing')}
               className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
             >
-              Nazaj na pakete
+              {t('success.error.backButton')}
             </button>
           </div>
         )}
@@ -483,20 +458,8 @@ function BillingSuccessContent() {
   );
 }
 
-function getPlanDisplayName(code: string): string {
-  const names: Record<string, string> = {
-    FREE: 'Brezplačno',
-    JEDRO_PLUS: 'Jedro Plus',
-    JEDRO_PRO: 'Jedro Pro',
-    JEDRO_PREMIUM: 'Jedro Premium',
-    BASIC: 'Basic',
-    PRO: 'Pro',
-    PREMIUM: 'Premium',
-  };
-  return names[code] || code;
-}
-
 function LoadingFallback() {
+  const t = useTranslations('billing');
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="text-center">
@@ -512,7 +475,7 @@ function LoadingFallback() {
             <circle cx="25" cy="25" r="20" fill="none" stroke="url(#loading-spinner)" strokeWidth="3" strokeLinecap="round" strokeDasharray="80 50" />
           </svg>
         </div>
-        <p className="text-gray-500 text-sm">Nalaganje...</p>
+        <p className="text-gray-500 text-sm">{t('success.loading')}</p>
       </div>
     </div>
   );

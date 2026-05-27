@@ -3,54 +3,31 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Buildings, Gear, UsersThree, ChatTeardrop, Package, CaretRight } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 
-const menuItems = [
-  {
-    id: 'podjetje',
-    label: 'Podjetje',
-    description: 'Naziv, naslov, delovni čas in kontaktni podatki',
-    icon: Buildings,
-    path: '/nastavitve/podjetje',
-    ownerOnly: false,
-  },
-  {
-    id: 'splosno',
-    label: 'Splošno',
-    description: 'Račun, jezik, obvestila in kode podjetja',
-    icon: Gear,
-    path: '/nastavitve/splosno',
-    ownerOnly: false,
-  },
-  {
-    id: 'clani',
-    label: 'Člani',
-    description: 'Ekipa, vloge in dovoljenja za zaposlene',
-    icon: UsersThree,
-    path: '/nastavitve/clani',
-    ownerOnly: true,
-  },
-  {
-    id: 'paketi',
-    label: 'Paketi in kvote',
-    description: 'Pregled vašega paketa in mesečne porabe',
-    icon: Package,
-    path: '/nastavitve/paketi',
-    ownerOnly: true,
-  },
-  {
-    id: 'sporocila',
-    label: 'Sporočila',
-    description: 'Zgodovina poslanih sporočil in opomnikov',
-    icon: ChatTeardrop,
-    path: '/nastavitve/sporocila',
-    ownerOnly: false,
-  },
+type MenuId = 'podjetje' | 'splosno' | 'clani' | 'paketi' | 'sporocila';
+
+const menuItems: { id: MenuId; icon: typeof Buildings; path: string; ownerOnly: boolean }[] = [
+  { id: 'podjetje', icon: Buildings,    path: '/nastavitve/podjetje', ownerOnly: false },
+  { id: 'splosno',  icon: Gear,         path: '/nastavitve/splosno',  ownerOnly: false },
+  { id: 'clani',    icon: UsersThree,   path: '/nastavitve/clani',    ownerOnly: true  },
+  { id: 'paketi',   icon: Package,      path: '/nastavitve/paketi',   ownerOnly: true  },
+  { id: 'sporocila',icon: ChatTeardrop, path: '/nastavitve/sporocila',ownerOnly: false },
 ];
 
+const menuKeyMap: Record<MenuId, string> = {
+  podjetje:  'company',
+  splosno:   'general',
+  clani:     'members',
+  paketi:    'plans',
+  sporocila: 'messages',
+};
+
 export default function SettingsPage() {
+  const t = useTranslations('settings');
   const { companyUuid } = useCompany();
   const { user } = useAuth();
 
@@ -80,13 +57,14 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Nastavitve</h1>
-        <p className="text-sm text-gray-500 mt-1">Vse nastavitve, organizirane po sklopih.</p>
+        <h1 className="text-xl font-semibold text-gray-900">{t('hub.title')}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t('hub.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 px-5">
         {visibleItems.map((item, index) => {
           const Icon = item.icon;
+          const menuKey = menuKeyMap[item.id];
           const isLast = index === visibleItems.length - 1;
           return (
             <Link
@@ -96,8 +74,8 @@ export default function SettingsPage() {
             >
               <Icon className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors duration-150 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">{item.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
+                <p className="text-sm font-medium text-gray-900">{t(`hub.menu.${menuKey}.label`)}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t(`hub.menu.${menuKey}.description`)}</p>
               </div>
               <CaretRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors duration-150 flex-shrink-0" />
             </Link>

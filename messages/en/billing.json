@@ -1,1 +1,259 @@
-{}
+{
+  "page": {
+    "pageTitle": "{role, select, staff {Plans} other {Plans and quotas}}"
+  },
+  "currentPlan": {
+    "label": "Current plan",
+    "subscriptionDetails": "Subscription details",
+    "statusLabel": "Status",
+    "statusActive": "Active",
+    "renewalLabel": "Next renewal",
+    "freeLabel": "Free",
+    "smsQuota": "SMS quota",
+    "emailQuota": "Email quota",
+    "quotaUsed": "Used",
+    "quotaAvailable": "Available"
+  },
+  "portal": {
+    "button": "Open Billing Portal",
+    "opening": "Opening portal...",
+    "note": "Manage your subscription, payment method, and invoices via the Stripe portal."
+  },
+  "toggle": {
+    "monthly": "Monthly",
+    "yearly": "Yearly"
+  },
+  "plans": {
+    "mostPopular": "Most popular",
+    "customPricing": "custom pricing",
+    "perMonth": "/ month",
+    "contactUs": "Contact us",
+    "ctaLoading": "Loading...",
+    "ctaCurrentPlan": "Current plan",
+    "ctaSendInquiry": "Send Inquiry",
+    "ctaTryFree": "Try for Free",
+    "ctaSelectPlan": "Select plan",
+    "jedroPlus": {
+      "description": "For businesses that want an organized system and a clear overview",
+      "tagline": "Calendar, databases and reminders that simplify your day.",
+      "features": [
+        "Client and appointment database",
+        "Service and staff database",
+        "Personalized reminders before and after appointments",
+        "Email sending",
+        "Full analytics",
+        "Online booking",
+        "Multiple online booking designs",
+        "Assistant+"
+      ]
+    },
+    "jedroPro": {
+      "description": "For businesses that want more bookings and fewer empty slots",
+      "tagline": "Includes AI assistants, Lost Leads, and SMS reminders.",
+      "features": [
+        "Everything in Jedro Plus",
+        "Chatbot+",
+        "Lost Leads system",
+        "SMS sending",
+        "Email sending",
+        "Additional online booking designs"
+      ]
+    },
+    "jedroPremium": {
+      "description": "For businesses that want maximum automation",
+      "tagline": "Full suite of AI features for growth and communication.",
+      "features": [
+        "Everything in Jedro Pro",
+        "Receptionist+",
+        "SMS sending (higher quota)",
+        "Email sending (higher quota)",
+        "Premium online booking design",
+        "Premium chatbot design"
+      ]
+    },
+    "enterprise": {
+      "description": "For businesses with special requirements and customizations",
+      "tagline": "Custom features, AI, and booking environment tailored to you.",
+      "features": [
+        "Custom AI features tailored to your business",
+        "Premium booking page",
+        "Multiple booking links",
+        "Additional custom requirements"
+      ]
+    }
+  },
+  "footer": {
+    "questions": "Have questions? Contact us at",
+    "quotaQuestion": "Need a higher quota or more staff? Write to us at"
+  },
+  "enterpriseModal": {
+    "title": "Enterprise inquiry",
+    "subtitle": "Send us your requirements and we'll get back to you",
+    "successTitle": "Inquiry sent!",
+    "successMessage": "We'll contact you as soon as possible.",
+    "closeButton": "Close",
+    "cancelButton": "Cancel",
+    "submitButton": "Send inquiry",
+    "submittingButton": "Sending...",
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "companyName": "Company name",
+      "employeeCount": "Number of employees",
+      "requirements": "Your requirements and needs"
+    },
+    "placeholders": {
+      "fullName": "John Smith",
+      "email": "john@company.com",
+      "phone": "+1 555 123 4567",
+      "companyName": "Company Inc.",
+      "employeeCount": "e.g. 10–50",
+      "requirements": "Describe your specific needs, integrations, customizations..."
+    }
+  },
+  "errors": {
+    "companyNotSet": "Company not configured. Please log in again.",
+    "portalError": "An error occurred while retrieving the billing portal",
+    "serverError": "An error occurred while connecting to the server",
+    "invalidCheckoutUrl": "Invalid checkout URL. Please try again.",
+    "checkoutError": "An error occurred while creating the checkout session",
+    "companyDataError": "An error occurred while retrieving company data",
+    "errorLabel": "Error"
+  },
+  "success": {
+    "missingSession": {
+      "title": "Missing session ID",
+      "message": "An error occurred while confirming your payment. Please check your email for confirmation.",
+      "backButton": "Back to plans"
+    },
+    "verifying": {
+      "title": "Confirming payment...",
+      "message": "Activating your plan. Please wait a moment.",
+      "progressLabel": "Verifying...",
+      "timeRemaining": "{seconds}s remaining"
+    },
+    "complete": {
+      "title": "Payment successful!",
+      "subtitle": "Thank you for your subscription.",
+      "yourPlan": "Your plan:",
+      "whatsNext": "What's next?",
+      "emailConfirmation": "You will receive a confirmation email at {email}",
+      "smsReset": "SMS quota has been reset",
+      "backToBilling": "Plans",
+      "dashboard": "Dashboard"
+    },
+    "timeout": {
+      "title": "Payment processing",
+      "message": "Your payment is still processing. This can take a moment. Check your email for confirmation or try again.",
+      "retryButton": "Try again",
+      "backButton": "Back"
+    },
+    "error": {
+      "title": "Error",
+      "message": "An error occurred while confirming your payment. Please contact support.",
+      "backButton": "Back to plans"
+    },
+    "loading": "Loading..."
+  },
+  "cancel": {
+    "title": "Purchase canceled",
+    "message": "Your purchase has been canceled. No changes were made to your account.",
+    "backButton": "Back to billing",
+    "dashboardButton": "Continue to dashboard"
+  },
+  "featureGate": {
+    "upgradeRequired": "Upgrade for access",
+    "requiresPlan": "This feature requires the {plan} plan or higher.",
+    "viewPlans": "View plans",
+    "planNames": {
+      "free": "Free",
+      "basic": "Basic",
+      "pro": "Pro",
+      "premium": "Premium"
+    }
+  },
+  "paketi": {
+    "title": "Plans and quotas",
+    "subtitle": "Overview of your plan and usage",
+    "currentBadge": "Current",
+    "recommendedBadge": "Recommended",
+    "renewalLabel": "Next renewal",
+    "upgradeButton": "Upgrade",
+    "maxUsersLabel": "Maximum number of app users",
+    "currentTeamLabel": "Currently in team",
+    "usageTitle": "This month's usage",
+    "availablePlans": "Available plans",
+    "customPricing": "Custom pricing",
+    "billingPeriod": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "billedYearly": "Billed yearly"
+    },
+    "quotaLabels": {
+      "sms": "SMS messages",
+      "email": "Email messages",
+      "teamMembers": "Active team members",
+      "clients": "Clients",
+      "appointments": "Appointments this month"
+    },
+    "planDescriptions": {
+      "jedroPlus": "Includes reminders, email sending, and analytics.",
+      "jedroPro": "Includes SMS, lost leads, and advanced features.",
+      "enterprise": "Customized plan for specific business needs.",
+      "free": "Free trial access."
+    },
+    "planButtons": {
+      "active": "Active",
+      "sendInquiry": "Send inquiry",
+      "upgrade": "Upgrade"
+    },
+    "enterpriseModal": {
+      "title": "Enterprise inquiry",
+      "subtitle": "Describe your needs and we'll get back to you as soon as possible.",
+      "submitButton": "Send inquiry",
+      "submittingButton": "Sending...",
+      "cancelButton": "Cancel",
+      "fields": {
+        "fullName": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "message": "Message",
+        "messagePlaceholder": "Describe what you need..."
+      }
+    },
+    "inquiryToast": "Inquiry sent. We'll contact you shortly.",
+    "plans": {
+      "jedroPlus": {
+        "features": [
+          "Client and appointment database",
+          "Service and staff database",
+          "Personalized reminders before and after appointments",
+          "Email sending (500 emails/month)",
+          "Communication",
+          "Full analytics",
+          "Online booking",
+          "Multiple online booking designs"
+        ]
+      },
+      "jedroPro": {
+        "features": [
+          "Everything in Jedro Plus",
+          "Lost client notifications",
+          "SMS sending (200 sms/month)",
+          "Email sending (2000 emails/month)",
+          "Additional online booking designs"
+        ]
+      },
+      "enterprise": {
+        "features": [
+          "Custom AI features (chatbot, assistant, receptionist and more)",
+          "Custom booking designs with image processing and advanced elements",
+          "Business process automations tailored to you",
+          "Unlimited email and SMS quota",
+          "Dedicated manager and priority support"
+        ]
+      }
+    }
+  }
+}

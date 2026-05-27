@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { CaretLeft, Copy, Check, Lock } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { QRCodeCard } from '@/components/qr/QRCodeCard';
 import {
   SettingsSection,
@@ -19,23 +20,20 @@ import { sendWebhook, WEBHOOK_EVENTS } from '@/components/utils/webhookUtils';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 
 export default function GeneralSettingsPage() {
+  const t = useTranslations('settings');
   const { companyId } = useCompany();
   const { user } = useAuth();
 
-  // User data from auth
   const [userName, setUserName] = useState('');
   const userEmail = user?.email || '';
 
-  // Company data for ID and Join Codes
   const [companyIdDisplay, setCompanyIdDisplay] = useState('');
   const [adminCode, setAdminCode] = useState('');
   const [staffCode, setStaffCode] = useState('');
   const [companySlug, setCompanySlug] = useState('');
 
-  // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
 
-  // Copy states
   const [copiedId, setCopiedId] = useState(false);
   const [copiedAdminCode, setCopiedAdminCode] = useState(false);
   const [copiedStaffCode, setCopiedStaffCode] = useState(false);
@@ -45,26 +43,22 @@ export default function GeneralSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load settings
   useEffect(() => {
     async function loadSettings() {
       if (!companyId) return;
       setIsLoading(true);
 
       try {
-        // Get user name from auth metadata
         const displayName = user?.user_metadata?.display_name ||
                            user?.user_metadata?.full_name ||
                            user?.email?.split('@')[0] || '';
         setUserName(displayName);
 
-        // Load company data
         const { data } = await loadCompanyRow(companyId);
         if (data) {
           setCompanyIdDisplay(String(data['ID Podjetja'] ?? data['id_podjetja'] ?? companyId));
         }
 
-        // Load join codes and slug from companies table
         const { data: companyRow } = await supabaseReadOnly
           .from('companies')
           .select('slug, join_code_admin, join_code_staff')
@@ -85,7 +79,6 @@ export default function GeneralSettingsPage() {
     loadSettings();
   }, [companyId, user]);
 
-  // Auto-save with debounce
   const saveSettings = useCallback(async () => {
     if (!companyId) return;
     setSaving(true);
@@ -99,10 +92,7 @@ export default function GeneralSettingsPage() {
         timestamp: new Date().toISOString(),
         data: {
           section: 'general',
-          new_values: {
-            userName,
-            emailNotifications,
-          },
+          new_values: { userName, emailNotifications },
         },
       });
 
@@ -114,7 +104,6 @@ export default function GeneralSettingsPage() {
     }
   }, [companyId, userEmail, userName, emailNotifications]);
 
-  // Debounced save trigger
   const triggerSave = useCallback(() => {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -122,7 +111,6 @@ export default function GeneralSettingsPage() {
     saveTimeoutRef.current = setTimeout(() => saveSettings(), 1000);
   }, [saveSettings]);
 
-  // Copy to clipboard
   const copyToClipboard = async (text: string, type: 'id' | 'adminCode' | 'staffCode') => {
     try {
       await navigator.clipboard.writeText(text);
@@ -156,36 +144,30 @@ export default function GeneralSettingsPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-4"
       >
         <CaretLeft className="w-3.5 h-3.5" weight="regular" />
-        Nastavitve
+        {t('back')}
       </Link>
 
-      {/* Header with save indicator */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Splošno</h1>
-          <p className="text-sm text-gray-500 mt-1">Osnovne nastavitve aplikacije in vašega računa</p>
+          <h1 className="text-xl font-semibold text-gray-900">{t('general.title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('general.subtitle')}</p>
         </div>
         <SaveIndicator saving={saving} lastSaved={lastSaved} />
       </div>
 
-      {/* Settings sections */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ staggerChildren: 0.1 }}
       >
         {/* Account & Profile */}
-        <SettingsSection title="Račun & Profil" description="Vaši osebni podatki">
+        <SettingsSection title={t('general.account.title')} description={t('general.account.subtitle')}>
           <SettingRow
-            label="Ime uporabnika"
-            description="Ime se ne more spreminjati"
+            label={t('general.account.nameLabel')}
+            description={t('general.account.nameNote')}
           >
             <div className="flex items-center gap-3">
-              <Input
-                value={userName}
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
+              <Input value={userName} disabled className="bg-gray-50 cursor-not-allowed" />
               <div className="flex items-center gap-1 text-gray-400">
                 <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
@@ -193,16 +175,11 @@ export default function GeneralSettingsPage() {
           </SettingRow>
 
           <SettingRow
-            label="Email"
-            description="Email se ne more spreminjati"
+            label={t('general.account.emailLabel')}
+            description={t('general.account.emailNote')}
           >
             <div className="flex items-center gap-3">
-              <Input
-                type="email"
-                value={userEmail}
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
+              <Input type="email" value={userEmail} disabled className="bg-gray-50 cursor-not-allowed" />
               <div className="flex items-center gap-1 text-gray-400">
                 <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
@@ -210,66 +187,38 @@ export default function GeneralSettingsPage() {
           </SettingRow>
         </SettingsSection>
 
-        {/* Language & Region - Fixed/Locked */}
-        <SettingsSection title="Jezik & Regija" description="Lokalne nastavitve (zaklenjene)">
-          <SettingRow
-            label="Jezik aplikacije"
-            description="Trenutno samo slovenščina"
-          >
+        {/* Language & Region */}
+        <SettingsSection title={t('general.langRegion.title')} description={t('general.langRegion.subtitle')}>
+          <SettingRow label={t('general.langRegion.languageLabel')} description={t('general.langRegion.languageNote')}>
             <div className="flex items-center gap-3">
-              <Input
-                value="Slovenščina"
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
+              <Input value={t('general.langRegion.languageValue')} disabled className="bg-gray-50 cursor-not-allowed" />
               <div className="flex items-center gap-1 text-gray-400">
                 <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
 
-          <SettingRow
-            label="Regija"
-            description="Vaša geografska lokacija"
-          >
+          <SettingRow label={t('general.langRegion.regionLabel')} description={t('general.langRegion.regionNote')}>
             <div className="flex items-center gap-3">
-              <Input
-                value="Ljubljana, SI"
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
+              <Input value="Ljubljana, SI" disabled className="bg-gray-50 cursor-not-allowed" />
               <div className="flex items-center gap-1 text-gray-400">
                 <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
 
-          <SettingRow
-            label="Časovni pas"
-            description="Vaš lokalni časovni pas"
-          >
+          <SettingRow label={t('general.langRegion.timezoneLabel')} description={t('general.langRegion.timezoneNote')}>
             <div className="flex items-center gap-3">
-              <Input
-                value="MT+1"
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
+              <Input value="MT+1" disabled className="bg-gray-50 cursor-not-allowed" />
               <div className="flex items-center gap-1 text-gray-400">
                 <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
             </div>
           </SettingRow>
 
-          <SettingRow
-            label="Format datuma"
-            description="Kako se prikazujejo datumi"
-          >
+          <SettingRow label={t('general.langRegion.dateFormatLabel')} description={t('general.langRegion.dateFormatNote')}>
             <div className="flex items-center gap-3">
-              <Input
-                value="dd.mm.yyyy"
-                disabled
-                className="bg-gray-50 cursor-not-allowed"
-              />
+              <Input value="dd.mm.yyyy" disabled className="bg-gray-50 cursor-not-allowed" />
               <div className="flex items-center gap-1 text-gray-400">
                 <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>
@@ -278,10 +227,10 @@ export default function GeneralSettingsPage() {
         </SettingsSection>
 
         {/* Notifications */}
-        <SettingsSection title="Obvestila" description="Nastavitve obvestil">
+        <SettingsSection title={t('general.notifications.title')} description={t('general.notifications.subtitle')}>
           <SettingRow
-            label="Email obvestila"
-            description="Prejemaj obvestila na email"
+            label={t('general.notifications.emailLabel')}
+            description={t('general.notifications.emailNote')}
           >
             <Switch
               checked={emailNotifications}
@@ -291,128 +240,122 @@ export default function GeneralSettingsPage() {
               }}
             />
           </SettingRow>
-
         </SettingsSection>
 
-        {/* Company ID & Codes - New Section with Gradient */}
-        <SettingsSection title="Podatki podjetja" description="ID podjetja in kode za dodajanje uporabnikov">
+        {/* Company ID & Codes */}
+        <SettingsSection title={t('general.companyData.title')} description={t('general.companyData.subtitle')}>
           <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
-              {/* Company ID */}
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-gray-500 mb-1">ID podjetja</p>
-                  <div className="text-2xl font-bold gradient-text tracking-tight">
-                    {companyIdDisplay || companyId}
-                  </div>
+            {/* Company ID */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs font-medium text-gray-500 mb-1">{t('general.companyData.companyIdLabel')}</p>
+                <div className="text-2xl font-bold gradient-text tracking-tight">
+                  {companyIdDisplay || companyId}
                 </div>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => copyToClipboard(companyIdDisplay || companyId || '', 'id')}
+                className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                {copiedId ? (
+                  <Check className="w-4 h-4 text-gray-900" weight="bold" />
+                ) : (
+                  <Copy className="w-4 h-4 text-gray-500" />
+                )}
+              </motion.button>
+            </div>
+
+            <div className="border-t border-gray-100" />
+
+            {/* Admin Code */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900 mb-0.5">{t('general.companyData.adminCodeLabel')}</p>
+                <p className="text-xs text-gray-500 mb-2">{t('general.companyData.adminCodeNote')}</p>
+                <div className="text-2xl font-bold gradient-text tracking-tight">
+                  {adminCode || '—'}
+                </div>
+              </div>
+              {adminCode && (
                 <motion.button
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => copyToClipboard(companyIdDisplay || companyId || '', 'id')}
+                  onClick={() => copyToClipboard(adminCode, 'adminCode')}
                   className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
                 >
-                  {copiedId ? (
+                  {copiedAdminCode ? (
                     <Check className="w-4 h-4 text-gray-900" weight="bold" />
                   ) : (
                     <Copy className="w-4 h-4 text-gray-500" />
                   )}
                 </motion.button>
-              </div>
+              )}
+            </div>
 
-              {/* Divider */}
-              <div className="border-t border-gray-100" />
+            <div className="border-t border-gray-100" />
 
-              {/* Admin Code */}
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Admin code</p>
-                  <p className="text-xs text-gray-500 mb-2">Za dodajanje administratorjev v vaše podjetje. Administrator ima popoln dostop: vidi in ureja vse termine, stranke, storitve, osebje, analitiko, nastavitve in pakete.</p>
-                  <div className="text-2xl font-bold gradient-text tracking-tight">
-                    {adminCode || '—'}
-                  </div>
+            {/* Employee Code */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900 mb-0.5">{t('general.companyData.employeeCodeLabel')}</p>
+                <p className="text-xs text-gray-500 mb-2">{t('general.companyData.employeeCodeNote')}</p>
+                <div className="text-2xl font-bold gradient-text tracking-tight">
+                  {staffCode || '—'}
                 </div>
-                {adminCode && (
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => copyToClipboard(adminCode, 'adminCode')}
-                    className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
-                  >
-                    {copiedAdminCode ? (
-                      <Check className="w-4 h-4 text-gray-900" weight="bold" />
-                    ) : (
-                      <Copy className="w-4 h-4 text-gray-500" />
-                    )}
-                  </motion.button>
-                )}
               </div>
-
-              {/* Divider */}
-              <div className="border-t border-gray-100" />
-
-              {/* Employee Code */}
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-900 mb-0.5">Employee code</p>
-                  <p className="text-xs text-gray-500 mb-2">Za dodajanje zaposlenih v vaše podjetje. Zaposleni vidi le svoj urnik in termine, ki so mu dodeljeni. Nima dostopa do nastavitev, analitike ali podatkov o drugih zaposlenih.</p>
-                  <div className="text-2xl font-bold gradient-text tracking-tight">
-                    {staffCode || '—'}
-                  </div>
-                </div>
-                {staffCode && (
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => copyToClipboard(staffCode, 'staffCode')}
-                    className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
-                  >
-                    {copiedStaffCode ? (
-                      <Check className="w-4 h-4 text-gray-900" weight="bold" />
-                    ) : (
-                      <Copy className="w-4 h-4 text-gray-500" />
-                    )}
-                  </motion.button>
-                )}
-              </div>
-
-              {/* Divider */}
-              <div className="border-t border-gray-100" />
-
-              {/* Company Slug */}
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-xs font-medium text-gray-500 mb-1">Slug podjetja</p>
-                  <p className="text-xs text-gray-400 mb-2">Končnica, ki se uporablja pri booking linkih in pri chatbotu na spletni strani</p>
-                  {companySlug ? (
-                    <div className="text-2xl font-bold gradient-text tracking-tight">
-                      {companySlug}
-                    </div>
+              {staffCode && (
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => copyToClipboard(staffCode, 'staffCode')}
+                  className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  {copiedStaffCode ? (
+                    <Check className="w-4 h-4 text-gray-900" weight="bold" />
                   ) : (
-                    <div className="text-2xl font-bold text-gray-300">—</div>
+                    <Copy className="w-4 h-4 text-gray-500" />
                   )}
-                </div>
-              </div>
+                </motion.button>
+              )}
+            </div>
 
-              {/* Divider */}
-              <div className="border-t border-gray-100" />
+            <div className="border-t border-gray-100" />
 
-              {/* Explanation */}
-              <div className="text-xs text-gray-400">
-                Kode delite le z zaupanja vrednimi osebami. Administrator ima polni dostop do sistema, zaposleni pa le do svojih terminov.
+            {/* Company Slug */}
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <p className="text-xs font-medium text-gray-500 mb-1">{t('general.companyData.slugLabel')}</p>
+                <p className="text-xs text-gray-400 mb-2">{t('general.companyData.slugNote')}</p>
+                {companySlug ? (
+                  <div className="text-2xl font-bold gradient-text tracking-tight">
+                    {companySlug}
+                  </div>
+                ) : (
+                  <div className="text-2xl font-bold text-gray-300">—</div>
+                )}
               </div>
+            </div>
+
+            <div className="border-t border-gray-100" />
+
+            <div className="text-xs text-gray-400">
+              {t('general.companyData.disclaimer')}
+            </div>
           </div>
         </SettingsSection>
-        {/* QR koda */}
-        <SettingsSection title="QR koda za registracijo strank" description="Stranke skenirajo kodo in se registrirajo v vaš sistem">
+
+        {/* QR code */}
+        <SettingsSection title={t('general.qr.title')} description={t('general.qr.subtitle')}>
           <div className="flex flex-col items-center gap-3 py-4">
             {companySlug ? (
               <QRCodeCard slug={companySlug} size={160} compact />
             ) : (
-              <p className="text-xs text-gray-400">Slug podjetja ni nastavljen.</p>
+              <p className="text-xs text-gray-400">{t('general.qr.noSlug')}</p>
             )}
             <p className="text-xs text-gray-400 text-center">
-              Stranke skenirajo kodo in se registrirajo v vaš sistem.
+              {t('general.qr.caption')}
             </p>
           </div>
         </SettingsSection>
-
       </motion.div>
     </div>
   );

@@ -15,6 +15,7 @@ import {
   CreditCard,
   SpinnerGap,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
@@ -36,53 +37,14 @@ interface PlanDef {
   name: string;
   price: PlanPrice | null;
   recommended?: boolean;
-  features: string[];
 }
 
 const PLANS: PlanDef[] = [
-  {
-    id: 'JEDRO_PLUS',
-    name: 'Jedro Plus',
-    price: { monthly: 19, annual: 15 },
-    features: [
-      'Baza strank in terminov',
-      'Baza storitev in osebja',
-      'Personalizirani opomniki pred in po terminu',
-      'Email pošiljanje (500 email/mesec)',
-      'Komunikacija',
-      'Celotna analitika',
-      'Spletno naročanje',
-      'Različni dizajni spletnega naročanja',
-    ],
-  },
-  {
-    id: 'JEDRO_PRO',
-    name: 'Jedro Pro',
-    price: { monthly: 35, annual: 28 },
-    recommended: true,
-    features: [
-      'Vse iz Jedro Plus',
-      'Obveščanje izgubljenih strank',
-      'SMS pošiljanje (200 sms/mesec)',
-      'Email pošiljanje (2000 email/mesec)',
-      'Dodatni dizajni spletnega naročanja',
-    ],
-  },
-  {
-    id: 'ENTERPRISE',
-    name: 'Enterprise',
-    price: null,
-    features: [
-      'Custom AI funkcije (chatbot, asistent, receptionist in več)',
-      'Custom booking dizajni z obdelavo slik in naprednimi elementi',
-      'Avtomatizacije poslovnih procesov po meri',
-      'Neomejena email in SMS kvota',
-      'Dedicirani manager in prioritetna podpora',
-    ],
-  },
+  { id: 'JEDRO_PLUS',  name: 'Jedro Plus',  price: { monthly: 19, annual: 15 } },
+  { id: 'JEDRO_PRO',   name: 'Jedro Pro',   price: { monthly: 35, annual: 28 }, recommended: true },
+  { id: 'ENTERPRISE',  name: 'Enterprise',  price: null },
 ];
 
-// Map planCode variants to our PLANS IDs
 function normalizePlanId(code: string): string {
   const c = code.toUpperCase().replace(/[\s-]+/g, '_');
   if (c.includes('ENTERPRISE')) return 'ENTERPRISE';
@@ -91,13 +53,22 @@ function normalizePlanId(code: string): string {
   return c;
 }
 
+function planKey(id: string): 'jedroPlus' | 'jedroPro' | 'enterprise' {
+  const map: Record<string, 'jedroPlus' | 'jedroPro' | 'enterprise'> = {
+    JEDRO_PLUS:  'jedroPlus',
+    JEDRO_PRO:   'jedroPro',
+    ENTERPRISE:  'enterprise',
+  };
+  return map[id] || 'jedroPlus';
+}
+
 // ─── Quota item ─────────────────────────────────────────────────────────────
 
 interface QuotaItem {
   icon: React.ReactNode;
   label: string;
   used: number;
-  total: number | null; // null = unlimited
+  total: number | null;
 }
 
 function QuotaRow({ item, loading }: { item: QuotaItem; loading: boolean }) {
@@ -153,12 +124,14 @@ function PlanCard({
   loading,
   billingPeriod,
   onCta,
+  t,
 }: {
   plan: PlanDef;
   isCurrent: boolean;
   loading: boolean;
   billingPeriod: BillingPeriod;
   onCta: (plan: PlanDef) => void;
+  t: ReturnType<typeof useTranslations<'billing'>>;
 }) {
   if (loading) {
     return (
@@ -175,6 +148,8 @@ function PlanCard({
     );
   }
 
+  const features = t.raw(`paketi.plans.${planKey(plan.id)}.features`) as string[];
+
   return (
     <div
       className={`bg-white border rounded-2xl p-5 flex flex-col ${
@@ -188,11 +163,11 @@ function PlanCard({
         <h3 className="text-base font-semibold text-gray-900">{plan.name}</h3>
         {isCurrent ? (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
-            Trenutni
+            {t('paketi.currentBadge')}
           </span>
         ) : plan.recommended ? (
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-50 text-amber-700">
-            Priporočeno
+            {t('paketi.recommendedBadge')}
           </span>
         ) : null}
       </div>
@@ -216,19 +191,19 @@ function PlanCard({
             <span className="text-sm text-gray-500 ml-1">/mesec</span>
           </div>
           <p className="text-xs text-gray-400 mt-1 h-4">
-            {billingPeriod === 'annual' ? 'Obračunano letno' : ' '}
+            {billingPeriod === 'annual' ? t('paketi.billingPeriod.billedYearly') : ' '}
           </p>
         </div>
       ) : (
         <div className="mb-5">
-          <span className="text-lg font-semibold text-gray-500">Po dogovoru</span>
+          <span className="text-lg font-semibold text-gray-500">{t('paketi.customPricing')}</span>
           <p className="text-xs text-gray-400 mt-1 h-4">&nbsp;</p>
         </div>
       )}
 
       {/* Features */}
       <ul className="space-y-2 flex-1">
-        {plan.features.map((f, i) => (
+        {features.map((f, i) => (
           <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
             <Check weight="bold" className="w-4 h-4 text-[#6D5EF7] flex-shrink-0 mt-0.5" />
             <span>{f}</span>
@@ -250,10 +225,10 @@ function PlanCard({
         }`}
       >
         {isCurrent
-          ? 'Aktiven'
+          ? t('paketi.planButtons.active')
           : plan.id === 'ENTERPRISE'
-          ? 'Pošlji povpraševanje'
-          : 'Nadgradi'}
+          ? t('paketi.planButtons.sendInquiry')
+          : t('paketi.planButtons.upgrade')}
       </button>
     </div>
   );
@@ -273,11 +248,13 @@ function EnterpriseModal({
   onClose,
   defaultEmail,
   onSuccess,
+  t,
 }: {
   open: boolean;
   onClose: () => void;
   defaultEmail: string;
   onSuccess: () => void;
+  t: ReturnType<typeof useTranslations<'billing'>>;
 }) {
   const [form, setForm] = useState<InquiryForm>({
     name: '',
@@ -326,9 +303,9 @@ function EnterpriseModal({
       >
         <div className="flex items-start justify-between p-6 pb-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Povpraševanje za Enterprise</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('paketi.enterpriseModal.title')}</h2>
             <p className="text-sm text-gray-500 mt-0.5">
-              Opišite vaše potrebe in odgovorili vam bomo v najkrajšem možnem času.
+              {t('paketi.enterpriseModal.subtitle')}
             </p>
           </div>
           <button
@@ -343,7 +320,7 @@ function EnterpriseModal({
         <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Ime in priimek <span className="text-red-500">*</span>
+              {t('paketi.enterpriseModal.fields.fullName')} <span className="text-red-500">*</span>
             </label>
             <Input
               value={form.name}
@@ -354,7 +331,7 @@ function EnterpriseModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              E-pošta <span className="text-red-500">*</span>
+              {t('paketi.enterpriseModal.fields.email')} <span className="text-red-500">*</span>
             </label>
             <Input
               type="email"
@@ -366,7 +343,7 @@ function EnterpriseModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Telefon
+              {t('paketi.enterpriseModal.fields.phone')}
             </label>
             <Input
               type="tel"
@@ -377,13 +354,13 @@ function EnterpriseModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Sporočilo <span className="text-red-500">*</span>
+              {t('paketi.enterpriseModal.fields.message')} <span className="text-red-500">*</span>
             </label>
             <textarea
               rows={4}
               value={form.message}
               onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-              placeholder="Opišite, kaj potrebujete..."
+              placeholder={t('paketi.enterpriseModal.fields.messagePlaceholder')}
               required
               className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-[#6D5EF7]/30 focus:border-[#6D5EF7]/40 placeholder:text-gray-400"
             />
@@ -394,14 +371,14 @@ function EnterpriseModal({
               disabled={submitting}
               className="px-5 py-2.5 rounded-lg text-sm font-medium bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] disabled:opacity-60 transition-colors"
             >
-              {submitting ? 'Pošiljanje...' : 'Pošlji povpraševanje'}
+              {submitting ? t('paketi.enterpriseModal.submittingButton') : t('paketi.enterpriseModal.submitButton')}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
             >
-              Prekliči
+              {t('paketi.enterpriseModal.cancelButton')}
             </button>
           </div>
         </form>
@@ -414,8 +391,8 @@ function EnterpriseModal({
 
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onClose, 4000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(onClose, 4000);
+    return () => clearTimeout(timer);
   }, [onClose]);
 
   return (
@@ -434,6 +411,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function PaketiPage() {
+  const t = useTranslations('billing');
   const { companyId, companyUuid, planCode, subscription, smsQuota } = useCompany();
   const { user } = useAuth();
 
@@ -458,7 +436,6 @@ export default function PaketiPage() {
 
   const currentPlanId = normalizePlanId(planCode || 'FREE');
 
-  // Map plan labels
   const currentPlan = PLANS.find((p) => p.id === currentPlanId);
   const planLabel = currentPlan
     ? currentPlanId === 'ENTERPRISE'
@@ -467,14 +444,16 @@ export default function PaketiPage() {
       ? 'Pro'
       : 'Plus'
     : 'Free';
-  const planFullName = currentPlan?.name ?? 'Brezplačni paket';
-  const planDescription = currentPlan
-    ? currentPlanId === 'JEDRO_PLUS'
-      ? 'Vključuje opomnike, email pošiljanje in analitiko.'
-      : currentPlanId === 'JEDRO_PRO'
-      ? 'Vključuje SMS, izgubljene stranke in napredne funkcije.'
-      : 'Prilagojen paket za posebne poslovne potrebe.'
-    : 'Brezplačen preizkusni dostop.';
+  const planFullName = currentPlan?.name ?? t('currentPlan.freeLabel');
+
+  const planDescriptionKey = currentPlanId === 'JEDRO_PLUS'
+    ? 'jedroPlus'
+    : currentPlanId === 'JEDRO_PRO'
+    ? 'jedroPro'
+    : currentPlanId === 'ENTERPRISE'
+    ? 'enterprise'
+    : 'free';
+  const planDescription = t(`paketi.planDescriptions.${planDescriptionKey}`);
 
   const canUpgrade = currentPlanId !== 'ENTERPRISE';
 
@@ -506,11 +485,9 @@ export default function PaketiPage() {
           .eq('company_id', companyUuid),
       ]);
 
-      // Email quota
       const emailSent = emailRes.data?.sent_count ?? 0;
       setEmailUsed(emailSent);
 
-      // Get email plan quota
       const { data: subData } = await supabaseReadOnly
         .from('company_subscriptions')
         .select('plan_id')
@@ -526,10 +503,8 @@ export default function PaketiPage() {
         setSmsTotal(planData?.sms_quota_monthly ?? 0);
       }
 
-      // Members
       setMemberCount(membersRes.count ?? 0);
 
-      // Clients count (approximate — fetch limited rows)
       try {
         const { count: cCount } = await supabaseReadOnly
           .from('Stranke')
@@ -537,7 +512,6 @@ export default function PaketiPage() {
         setClientCount(cCount ?? 0);
       } catch { /* table may not exist */ }
 
-      // Appointments this month
       try {
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
@@ -562,7 +536,7 @@ export default function PaketiPage() {
   const quotas: QuotaItem[] = [
     {
       icon: <ChatCircleText className="w-4 h-4" weight="regular" />,
-      label: 'SMS sporočila',
+      label: t('paketi.quotaLabels.sms'),
       used: smsQuota?.used_current_month ?? 0,
       total: (smsTotal || smsQuota?.quota_effective || 0) > 0
         ? (smsTotal || smsQuota?.quota_effective!)
@@ -570,25 +544,25 @@ export default function PaketiPage() {
     },
     {
       icon: <EnvelopeSimple className="w-4 h-4" weight="regular" />,
-      label: 'Email sporočila',
+      label: t('paketi.quotaLabels.email'),
       used: emailUsed,
       total: emailTotal || null,
     },
     {
       icon: <UsersThree className="w-4 h-4" weight="regular" />,
-      label: 'Aktivni člani ekipe',
+      label: t('paketi.quotaLabels.teamMembers'),
       used: memberCount,
       total: currentPlanId === 'JEDRO_PLUS' ? 10 : currentPlanId === 'JEDRO_PRO' ? 25 : null,
     },
     {
       icon: <AddressBook className="w-4 h-4" weight="regular" />,
-      label: 'Stranke',
+      label: t('paketi.quotaLabels.clients'),
       used: clientCount,
       total: null,
     },
     {
       icon: <CalendarBlank className="w-4 h-4" weight="regular" />,
-      label: 'Termini ta mesec',
+      label: t('paketi.quotaLabels.appointments'),
       used: terminiCount,
       total: null,
     },
@@ -596,7 +570,7 @@ export default function PaketiPage() {
 
   const handleManageSubscription = async () => {
     if (!companyUuid) {
-      setPortalError('Podjetje ni nastavljeno. Prosimo, prijavite se ponovno.');
+      setPortalError(t('errors.companyNotSet'));
       return;
     }
     const { data: { session } } = await supabase.auth.getSession();
@@ -612,10 +586,10 @@ export default function PaketiPage() {
       if (result.ok && portalUrl && portalUrl.startsWith('http')) {
         window.location.assign(portalUrl);
       } else {
-        setPortalError('Prišlo je do napake pri pridobivanju portala za plačila');
+        setPortalError(t('errors.portalError'));
       }
     } catch {
-      setPortalError('Prišlo je do napake pri povezavi s strežnikom');
+      setPortalError(t('errors.serverError'));
     } finally {
       setIsLoadingPortal(false);
     }
@@ -625,7 +599,6 @@ export default function PaketiPage() {
     if (plan.id === 'ENTERPRISE') {
       setEnterpriseOpen(true);
     } else {
-      // TODO: backend checkout currently expects only plan id — wire billingPeriod through
       window.location.href = `/billing?period=${billingPeriod}`;
     }
   };
@@ -641,11 +614,11 @@ export default function PaketiPage() {
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Paketi in kvote</h1>
-        <p className="text-sm text-gray-500 mt-1">Pregled vašega paketa in porabe</p>
+        <h1 className="text-xl font-semibold text-gray-900">{t('paketi.title')}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t('paketi.subtitle')}</p>
       </div>
 
-      {/* Section 1 — Trenutni paket */}
+      {/* Section 1 — Current plan */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
@@ -662,12 +635,12 @@ export default function PaketiPage() {
               href="/billing"
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors flex-shrink-0"
             >
-              Nadgradi
+              {t('paketi.upgradeButton')}
             </Link>
           )}
         </div>
         <div className="border-t border-gray-100 mt-5 pt-4 flex items-center justify-between">
-          <span className="text-xs text-gray-500">Naslednja obnova</span>
+          <span className="text-xs text-gray-500">{t('paketi.renewalLabel')}</span>
           <span className="text-xs font-medium text-gray-700">{renewalDate}</span>
         </div>
 
@@ -682,27 +655,30 @@ export default function PaketiPage() {
               {isLoadingPortal ? (
                 <>
                   <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                  Odpiranje portala...
+                  {t('portal.opening')}
                 </>
               ) : (
                 <>
                   <CreditCard className="h-4 w-4" weight="bold" />
-                  Odpri Billing Portal
+                  {t('portal.button')}
                 </>
               )}
             </button>
             {portalError && (
               <p className="mt-2 text-xs text-red-500">{portalError}</p>
             )}
-            <p className="mt-2 text-xs text-gray-400">Upravljajte naročnino, plačilno metodo in račune prek Stripe portala.</p>
+            <p className="mt-2 text-xs text-gray-400">{t('portal.note')}</p>
           </div>
         )}
       </div>
 
-      {/* Section 2 — Poraba tega meseca */}
+      {/* Section 2 — User limit banner */}
+      {/* (maxUsers banner rendered by parent if needed) */}
+
+      {/* Section 3 — Usage this month */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-5">
         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
-          Poraba tega meseca
+          {t('paketi.usageTitle')}
         </p>
         <div className="space-y-5">
           {quotas.map((q, i) => (
@@ -711,11 +687,11 @@ export default function PaketiPage() {
         </div>
       </div>
 
-      {/* Section 3 — Razpoložljivi paketi */}
+      {/* Section 4 — Available plans */}
       <div className="mb-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-            Razpoložljivi paketi
+            {t('paketi.availablePlans')}
           </p>
           <div className="inline-flex border border-gray-200 rounded-lg overflow-hidden bg-white self-start sm:self-auto">
             <button
@@ -727,7 +703,7 @@ export default function PaketiPage() {
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              Mesečno
+              {t('paketi.billingPeriod.monthly')}
             </button>
             <button
               type="button"
@@ -738,7 +714,7 @@ export default function PaketiPage() {
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              Letno
+              {t('paketi.billingPeriod.yearly')}
               <span
                 className={`px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none ${
                   billingPeriod === 'annual'
@@ -760,6 +736,7 @@ export default function PaketiPage() {
               loading={loadingPlans}
               billingPeriod={billingPeriod}
               onCta={handleCta}
+              t={t}
             />
           ))}
         </div>
@@ -772,7 +749,8 @@ export default function PaketiPage() {
             open={enterpriseOpen}
             onClose={() => setEnterpriseOpen(false)}
             defaultEmail={user?.email ?? ''}
-            onSuccess={() => setToast('Povpraševanje poslano. Kmalu vas kontaktiramo.')}
+            onSuccess={() => setToast(t('paketi.inquiryToast'))}
+            t={t}
           />
         )}
       </AnimatePresence>

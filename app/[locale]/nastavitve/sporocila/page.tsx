@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Hourglass,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 
@@ -29,29 +30,31 @@ interface MessageOutboxRow {
   sent_at: string;
 }
 
-const ENTITY_TYPE_LABELS: Record<string, string> = {
-  appointment_reminder: 'Opomnik pred terminom',
-  appointment_post: 'Opomnik po terminu',
-  appointment_confirmation: 'Potrdilo termina',
-  lost_leads: 'Izgubljene stranke',
-  communication_message: 'Komunikacija',
-};
+const FILTER_VALUES = [
+  'all',
+  'appointment_reminder',
+  'appointment_post',
+  'appointment_confirmation',
+  'lost_leads',
+  'communication_message',
+] as const;
 
-const FILTER_OPTIONS = [
-  { value: 'all', label: 'Vsa sporočila' },
-  { value: 'appointment_reminder', label: 'Opomniki pred' },
-  { value: 'appointment_post', label: 'Opomniki po' },
-  { value: 'appointment_confirmation', label: 'Potrdila terminov' },
-  { value: 'lost_leads', label: 'Izgubljene stranke' },
-  { value: 'communication_message', label: 'Komunikacija' },
-];
+const KNOWN_ENTITY_TYPES = new Set([
+  'appointment_reminder',
+  'appointment_post',
+  'appointment_confirmation',
+  'lost_leads',
+  'communication_message',
+]);
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useTranslations('settings');
+
   if (status === 'sent') {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
         <CheckCircle className="w-3.5 h-3.5" weight="fill" />
-        Poslano
+        {t('messages.status.sent')}
       </span>
     );
   }
@@ -59,7 +62,7 @@ function StatusBadge({ status }: { status: string }) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
         <Hourglass className="w-3.5 h-3.5" weight="fill" />
-        V vrsti
+        {t('messages.status.queued')}
       </span>
     );
   }
@@ -67,7 +70,7 @@ function StatusBadge({ status }: { status: string }) {
     return (
       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
         <Warning className="w-3.5 h-3.5" weight="fill" />
-        Napaka
+        {t('messages.status.failed')}
       </span>
     );
   }
@@ -103,6 +106,7 @@ function ChannelBadge({ channel }: { channel: string }) {
 }
 
 function MessageRow({ msg }: { msg: MessageOutboxRow }) {
+  const t = useTranslations('settings');
   const [expanded, setExpanded] = useState(false);
 
   const formattedDate = new Date(msg.sent_at).toLocaleString('sl-SI', {
@@ -113,7 +117,9 @@ function MessageRow({ msg }: { msg: MessageOutboxRow }) {
     minute: '2-digit',
   });
 
-  const typeLabel = ENTITY_TYPE_LABELS[msg.entity_type] ?? msg.entity_type;
+  const typeLabel = KNOWN_ENTITY_TYPES.has(msg.entity_type)
+    ? t(`messages.entityLabels.${msg.entity_type}`)
+    : msg.entity_type;
 
   return (
     <div className="border border-gray-100 rounded-2xl overflow-hidden bg-white transition-colors hover:border-gray-200">
@@ -144,12 +150,12 @@ function MessageRow({ msg }: { msg: MessageOutboxRow }) {
           {expanded ? (
             <>
               <CaretUp className="w-3.5 h-3.5" />
-              Zapri
+              {t('messages.collapse')}
             </>
           ) : (
             <>
               <CaretDown className="w-3.5 h-3.5" />
-              Prikaži
+              {t('messages.expand')}
             </>
           )}
         </button>
@@ -167,19 +173,19 @@ function MessageRow({ msg }: { msg: MessageOutboxRow }) {
             <div className="px-4 pb-4 border-t border-gray-100 pt-3 space-y-3">
               {msg.channel === 'email' && msg.subject && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 tracking-wide mb-1">Zadeva</p>
+                  <p className="text-xs font-semibold text-gray-500 tracking-wide mb-1">{t('messages.subjectLabel')}</p>
                   <p className="text-sm text-gray-800 bg-gray-50 rounded-lg px-3 py-2">
                     {msg.subject}
                   </p>
                 </div>
               )}
               <div>
-                <p className="text-xs font-semibold text-gray-500 tracking-wide mb-1">Vsebina sporočila</p>
+                <p className="text-xs font-semibold text-gray-500 tracking-wide mb-1">{t('messages.bodyLabel')}</p>
                 <div
                   className="text-sm text-gray-800 bg-gray-50 rounded-lg px-3 py-2 overflow-y-auto"
                   style={{ maxHeight: '200px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                 >
-                  {msg.body || <span className="text-gray-400 italic">Ni vsebine</span>}
+                  {msg.body || <span className="text-gray-400 italic">{t('messages.noBody')}</span>}
                 </div>
               </div>
             </div>
@@ -191,6 +197,7 @@ function MessageRow({ msg }: { msg: MessageOutboxRow }) {
 }
 
 export default function SporocilaPage() {
+  const t = useTranslations('settings');
   const { companyUuid } = useCompany();
   const [messages, setMessages] = useState<MessageOutboxRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -239,15 +246,15 @@ export default function SporocilaPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-4"
       >
         <CaretLeft className="w-3.5 h-3.5" weight="regular" />
-        Nastavitve
+        {t('back')}
       </Link>
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Sporočila</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{t('messages.title')}</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Prikazana je samo zgodovina zadnjih 14 dni
+            {t('messages.subtitle')}
           </p>
         </div>
       </div>
@@ -256,18 +263,18 @@ export default function SporocilaPage() {
       <div className="mb-5">
         <div className="flex items-center gap-1.5 flex-wrap">
           <Funnel className="w-4 h-4 text-gray-400 flex-shrink-0" />
-          {FILTER_OPTIONS.map((opt) => (
+          {FILTER_VALUES.map((value) => (
             <button
-              key={opt.value}
+              key={value}
               type="button"
-              onClick={() => setActiveFilter(opt.value)}
+              onClick={() => setActiveFilter(value)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
-                activeFilter === opt.value
+                activeFilter === value
                   ? 'border-transparent bg-[#0a0a0a] text-white'
                   : 'border-gray-200 text-gray-600 bg-white hover:border-gray-300 hover:text-gray-900'
               }`}
             >
-              {opt.label}
+              {t(`messages.filters.${value}`)}
             </button>
           ))}
         </div>
@@ -291,11 +298,11 @@ export default function SporocilaPage() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <EnvelopeSimple className="w-10 h-10 text-gray-300 mb-3" />
-          <p className="text-sm font-medium text-gray-600">Ni poslanih sporočil</p>
+          <p className="text-sm font-medium text-gray-600">{t('messages.empty.title')}</p>
           <p className="text-xs text-gray-400 mt-1">
             {activeFilter === 'all'
-              ? 'V zadnjih 14 dneh ni bilo poslanih sporočil.'
-              : 'Za izbrani filter ni sporočil v zadnjih 14 dneh.'}
+              ? t('messages.empty.all')
+              : t('messages.empty.filtered')}
           </p>
         </div>
       ) : (
@@ -305,7 +312,7 @@ export default function SporocilaPage() {
           className="space-y-2"
         >
           <p className="text-xs text-gray-400 mb-3">
-            {filtered.length} {filtered.length === 1 ? 'sporočilo' : filtered.length < 5 ? 'sporočila' : 'sporočil'}
+            {t('messages.messageCount', { count: filtered.length })}
           </p>
           {filtered.map((msg) => (
             <MessageRow key={msg.id} msg={msg} />

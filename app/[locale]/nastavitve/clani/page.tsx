@@ -5,13 +5,11 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import {
   CaretLeft,
-  Crown,
-  ShieldStar,
-  UserCircle,
   Warning,
   CircleNotch,
   CheckCircle,
 } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
@@ -71,64 +69,64 @@ interface StaffPermissions {
 // ─── Permission config ────────────────────────────────────────────────────────
 
 const permissionSections: {
-  label: string;
-  keys: { key: keyof StaffPermissions; label: string }[];
+  sectionKey: string;
+  keys: { key: keyof StaffPermissions }[];
 }[] = [
   {
-    label: 'Termini',
+    sectionKey: 'termini',
     keys: [
-      { key: 'can_view_all_appointments', label: 'Vidi vse termine podjetja' },
-      { key: 'can_view_only_own_appointments', label: 'Vidi samo svoje termine' },
-      { key: 'can_edit_all_appointments', label: 'Ureja vse termine podjetja' },
-      { key: 'can_edit_only_own_appointments', label: 'Ureja samo svoje termine' },
-      { key: 'can_create_appointments', label: 'Ustvarja nove termine' },
-      { key: 'can_delete_appointments', label: 'Briše termine' },
+      { key: 'can_view_all_appointments' },
+      { key: 'can_view_only_own_appointments' },
+      { key: 'can_edit_all_appointments' },
+      { key: 'can_edit_only_own_appointments' },
+      { key: 'can_create_appointments' },
+      { key: 'can_delete_appointments' },
     ],
   },
   {
-    label: 'Stranke',
+    sectionKey: 'stranke',
     keys: [
-      { key: 'can_view_clients', label: 'Vidi stranke' },
-      { key: 'can_edit_clients', label: 'Ureja stranke' },
-      { key: 'can_create_clients', label: 'Ustvarja nove stranke' },
-      { key: 'can_delete_clients', label: 'Briše stranke' },
+      { key: 'can_view_clients' },
+      { key: 'can_edit_clients' },
+      { key: 'can_create_clients' },
+      { key: 'can_delete_clients' },
     ],
   },
   {
-    label: 'Storitve',
+    sectionKey: 'storitve',
     keys: [
-      { key: 'can_view_services', label: 'Vidi storitve' },
-      { key: 'can_edit_services', label: 'Ureja storitve' },
-      { key: 'can_create_services', label: 'Dodaja storitve' },
-      { key: 'can_delete_services', label: 'Briše storitve' },
+      { key: 'can_view_services' },
+      { key: 'can_edit_services' },
+      { key: 'can_create_services' },
+      { key: 'can_delete_services' },
     ],
   },
   {
-    label: 'Osebje',
+    sectionKey: 'osebje',
     keys: [
-      { key: 'can_view_staff', label: 'Vidi seznam zaposlenih' },
-      { key: 'can_edit_staff', label: 'Ureja zaposlene' },
+      { key: 'can_view_staff' },
+      { key: 'can_edit_staff' },
     ],
   },
   {
-    label: 'Analitika',
+    sectionKey: 'analitika',
     keys: [
-      { key: 'can_view_analytics', label: 'Vidi analitiko' },
+      { key: 'can_view_analytics' },
     ],
   },
   {
-    label: 'Moduli',
+    sectionKey: 'moduli',
     keys: [
-      { key: 'can_access_asistent_plus', label: 'Dostop do Asistent+' },
-      { key: 'can_access_komunikacija', label: 'Dostop do Komunikacija' },
-      { key: 'can_access_chatbot_plus', label: 'Dostop do Chatbot+' },
-      { key: 'can_manage_chatbot_plus_settings', label: 'Urejanje nastavitev Chatbot+' },
-      { key: 'can_access_opomniki', label: 'Dostop do Opomniki' },
-      { key: 'can_manage_opomniki', label: 'Upravljanje Opomnikov' },
-      { key: 'can_access_rezervacije', label: 'Dostop do Rezervacije' },
-      { key: 'can_manage_rezervacije', label: 'Upravljanje Rezervacij' },
-      { key: 'can_access_lost_leads', label: 'Dostop do Lost Leads' },
-      { key: 'can_manage_lost_leads', label: 'Upravljanje Lost Leads' },
+      { key: 'can_access_asistent_plus' },
+      { key: 'can_access_komunikacija' },
+      { key: 'can_access_chatbot_plus' },
+      { key: 'can_manage_chatbot_plus_settings' },
+      { key: 'can_access_opomniki' },
+      { key: 'can_manage_opomniki' },
+      { key: 'can_access_rezervacije' },
+      { key: 'can_manage_rezervacije' },
+      { key: 'can_access_lost_leads' },
+      { key: 'can_manage_lost_leads' },
     ],
   },
 ];
@@ -136,23 +134,25 @@ const permissionSections: {
 // ─── Role badge ───────────────────────────────────────────────────────────────
 
 function RoleBadge({ role }: { role: MemberRole }) {
+  const tc = useTranslations('common');
+
   if (role === 'owner') {
     return (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
-        Lastnik
+        {tc('roles.owner')}
       </span>
     );
   }
   if (role === 'admin') {
     return (
       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-        Admin
+        {tc('roles.admin')}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-      Zaposleni
+      {tc('roles.staff')}
     </span>
   );
 }
@@ -189,6 +189,7 @@ function PermissionToggle({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ClaniPage() {
+  const t = useTranslations('settings');
   const { companyUuid, companyId } = useCompany();
   const { user } = useAuth();
 
@@ -199,15 +200,15 @@ export default function ClaniPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState(false);
+  const [error, setError] = useState(false);
 
   // ── Fetch members + current user role ──
 
   const fetchData = useCallback(async () => {
     if (!companyUuid || !user?.id) return;
     setLoading(true);
-    setError(null);
+    setError(false);
 
     try {
       // 1. Fetch all members + auth info via admin API (bypasses RLS)
@@ -261,7 +262,7 @@ export default function ClaniPage() {
       setMaxUsers(limitsData?.max_users ?? null);
     } catch (err) {
       console.error('[ClaniPage] fetchData error:', err);
-      setError('Prišlo je do napake pri nalaganju podatkov.');
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -291,7 +292,7 @@ export default function ClaniPage() {
       return next;
     });
     setSaveSuccess(false);
-    setSaveError(null);
+    setSaveError(false);
   };
 
   // ── Save all permissions via n8n ──
@@ -301,7 +302,7 @@ export default function ClaniPage() {
 
     setSaving(true);
     setSaveSuccess(false);
-    setSaveError(null);
+    setSaveError(false);
 
     // Build the full permissions payload (exclude id & company_id from permission keys)
     const permissionData: Record<string, boolean> = {};
@@ -328,7 +329,7 @@ export default function ClaniPage() {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } else {
-      setSaveError('Prišlo je do napake pri shranjevanju.');
+      setSaveError(true);
     }
 
     setSaving(false);
@@ -354,7 +355,7 @@ export default function ClaniPage() {
           className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors"
         >
           <CaretLeft className="w-3.5 h-3.5" weight="regular" />
-          Nastavitve
+          {t('back')}
         </Link>
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -362,9 +363,9 @@ export default function ClaniPage() {
           className="rounded-2xl bg-amber-50 border border-amber-100 p-8 text-center"
         >
           <Warning className="w-8 h-8 text-amber-500 mx-auto mb-3" weight="fill" />
-          <h2 className="text-base font-semibold text-amber-900 mb-1">Dostop omejen</h2>
+          <h2 className="text-base font-semibold text-amber-900 mb-1">{t('members.noAccess.title')}</h2>
           <p className="text-sm text-amber-700">
-            To stran lahko vidijo samo lastniki podjetja.
+            {t('members.noAccess.message')}
           </p>
         </motion.div>
       </div>
@@ -381,11 +382,11 @@ export default function ClaniPage() {
           className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors"
         >
           <CaretLeft className="w-3.5 h-3.5" weight="regular" />
-          Nastavitve
+          {t('back')}
         </Link>
         <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
           <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
-          <p className="text-sm text-red-700">{error}</p>
+          <p className="text-sm text-red-700">{t('members.loadError')}</p>
         </div>
       </div>
     );
@@ -400,13 +401,14 @@ export default function ClaniPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors"
       >
         <CaretLeft className="w-3.5 h-3.5" weight="regular" />
-        Nastavitve
+        {t('back')}
       </Link>
 
       <div>
-        <h1 className="text-xl font-semibold text-gray-900">Člani</h1>
-        <p className="text-sm text-gray-500 mt-1">Ekipa, vloge in dovoljenja za zaposlene</p>
+        <h1 className="text-xl font-semibold text-gray-900">{t('members.title')}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t('members.subtitle')}</p>
       </div>
+
       {/* User limit banner */}
       {maxUsers !== null && (
         <motion.div
@@ -415,11 +417,11 @@ export default function ClaniPage() {
           className="bg-white rounded-2xl border border-gray-100 px-6 py-4 flex items-center justify-between gap-4"
         >
           <div>
-            <p className="text-xs font-medium text-gray-500 tracking-wide">Največje število uporabnikov aplikacije</p>
+            <p className="text-xs font-medium text-gray-500 tracking-wide">{t('members.maxUsersLabel')}</p>
             <p className="text-xl font-semibold text-gray-900 mt-1">{maxUsers}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs font-medium text-gray-500 tracking-wide">Trenutno v ekipi</p>
+            <p className="text-xs font-medium text-gray-500 tracking-wide">{t('members.currentTeamLabel')}</p>
             <p className="text-xl font-semibold text-gray-900 mt-1">{members.length}</p>
           </div>
         </motion.div>
@@ -432,15 +434,15 @@ export default function ClaniPage() {
         className="bg-white rounded-2xl border border-gray-100 overflow-hidden"
       >
         <div className="px-6 py-5 border-b border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-900">Člani</h2>
+          <h2 className="text-sm font-semibold text-gray-900">{t('members.list.title')}</h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Vsi uporabniki, ki so del tega podjetja
+            {t('members.list.subtitle')}
           </p>
         </div>
 
         {members.length === 0 ? (
           <div className="px-6 py-12 text-center text-sm text-gray-400">
-            Ni najdenih članov.
+            {t('members.list.empty')}
           </div>
         ) : (
           <ul className="divide-y divide-gray-100">
@@ -470,31 +472,31 @@ export default function ClaniPage() {
       >
         <div className="px-6 py-5 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-900">
-            Dovoljenja za zaposlene (Staff)
+            {t('members.permissions.title')}
           </h2>
           <p className="text-xs text-gray-500 mt-0.5">
-            Nastavite, kaj lahko vidijo in urejajo zaposleni
+            {t('members.permissions.subtitle')}
           </p>
         </div>
 
         {!permissions ? (
           <div className="px-6 py-8 text-center text-sm text-gray-400">
-            Nastavitve dovoljenj za to podjetje še niso bile nastavljene.
+            {t('members.permissions.notConfigured')}
           </div>
         ) : (
           <>
             <div className="divide-y divide-gray-100">
               {permissionSections.map((section) => (
-                <div key={section.label} className="px-6 py-5">
+                <div key={section.sectionKey} className="px-6 py-5">
                   <h3 className="text-xs font-semibold text-gray-500 tracking-wide mb-4">
-                    {section.label}
+                    {t(`members.permissions.sections.${section.sectionKey}`)}
                   </h3>
                   <div className="space-y-3">
-                    {section.keys.map(({ key, label }) => {
+                    {section.keys.map(({ key }) => {
                       const value = permissions[key] as boolean;
                       return (
                         <div key={key} className="flex items-center justify-between gap-4">
-                          <span className="text-sm text-gray-700">{label}</span>
+                          <span className="text-sm text-gray-700">{t(`members.permissions.labels.${key}`)}</span>
                           <PermissionToggle
                             value={value ?? false}
                             onChange={(v) => handleToggle(key, v)}
@@ -514,13 +516,13 @@ export default function ClaniPage() {
                 {saveSuccess && (
                   <span className="flex items-center gap-1.5 text-gray-500">
                     <CheckCircle className="w-3.5 h-3.5 text-gray-400" weight="fill" />
-                    Nastavitve so bile shranjene.
+                    {t('members.permissions.saved')}
                   </span>
                 )}
                 {saveError && (
                   <span className="flex items-center gap-1.5 text-red-600">
                     <Warning className="w-3.5 h-3.5" weight="fill" />
-                    {saveError}
+                    {t('members.permissions.saveError')}
                   </span>
                 )}
               </div>
@@ -533,10 +535,10 @@ export default function ClaniPage() {
                 {saving ? (
                   <>
                     <CircleNotch className="w-4 h-4 animate-spin" />
-                    Shranjujem…
+                    {t('members.permissions.saving')}
                   </>
                 ) : (
-                  'Shrani'
+                  t('members.permissions.saveButton')
                 )}
               </button>
             </div>

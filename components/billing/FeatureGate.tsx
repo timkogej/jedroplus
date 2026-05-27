@@ -2,8 +2,9 @@
 
 import { ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { Lock, Crown, ArrowRight } from '@phosphor-icons/react';
+import { Crown, ArrowRight } from '@phosphor-icons/react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 
 // Feature requirements by plan level
@@ -93,14 +94,16 @@ interface UpgradePromptProps {
 }
 
 function UpgradePrompt({ requiredPlan, feature }: UpgradePromptProps) {
-  const getPlanDisplayName = (code: string) => {
+  const t = useTranslations('billing');
+
+  const getPlanDisplayName = (code: string): string => {
     const names: Record<string, string> = {
-      free: 'Brezplačno',
-      basic: 'Basic',
-      pro: 'Pro',
-      premium: 'Premium',
+      free:    t('featureGate.planNames.free'),
+      basic:   t('featureGate.planNames.basic'),
+      pro:     t('featureGate.planNames.pro'),
+      premium: t('featureGate.planNames.premium'),
     };
-    return names[code] || code;
+    return names[code] ?? code;
   };
 
   return (
@@ -114,22 +117,18 @@ function UpgradePrompt({ requiredPlan, feature }: UpgradePromptProps) {
       </div>
 
       <h3 className="text-lg font-semibold text-gray-900 mb-2">
-        Nadgradite za dostop
+        {t('featureGate.upgradeRequired')}
       </h3>
 
       <p className="text-sm text-gray-600 mb-4">
-        Ta funkcija zahteva paket{' '}
-        <span className="font-semibold text-violet-600">
-          {getPlanDisplayName(requiredPlan)}
-        </span>{' '}
-        ali višje.
+        {t('featureGate.requiresPlan', { plan: getPlanDisplayName(requiredPlan) })}
       </p>
 
       <Link
         href="/nastavitve/paketi"
         className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-shadow"
       >
-        Oglej si pakete
+        {t('featureGate.viewPlans')}
         <ArrowRight className="h-4 w-4" weight="bold" />
       </Link>
     </motion.div>
