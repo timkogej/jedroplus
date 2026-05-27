@@ -2,6 +2,7 @@
 
 import { memo, useState, useEffect, useId } from 'react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchEmployeeChartData, type EmployeeChartData } from '@/lib/analytics/calculations';
 import {
@@ -22,6 +23,7 @@ function AppointmentsByEmployeeChart({
   timePeriod,
   customRange,
 }: AppointmentsByEmployeeChartProps) {
+  const t = useTranslations('analytics');
   const [chartData, setChartData] = useState<EmployeeChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const gradientIdPrefix = useId().replace(/:/g, '');
@@ -77,6 +79,8 @@ function AppointmentsByEmployeeChart({
     };
   });
 
+  const tooltipLabel = t('employeeChart.tooltipAppointments');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -84,13 +88,13 @@ function AppointmentsByEmployeeChart({
       className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Termini po Osebju</h3>
-        <p className="mt-1 text-sm text-gray-500">Zaključeni termini po zaposlenih</p>
+        <h3 className="text-lg font-semibold text-gray-900">{t('employeeChart.title')}</h3>
+        <p className="mt-1 text-sm text-gray-500">{t('employeeChart.subtitle')}</p>
       </div>
 
       {chartData.length === 0 ? (
         <div className="flex h-[300px] items-center justify-center text-gray-500">
-          Ni podatkov za izbrano obdobje
+          {t('employeeChart.noData')}
         </div>
       ) : (
         <>
@@ -144,7 +148,7 @@ function AppointmentsByEmployeeChart({
                   const entry = pieData.find((d) => d.name === name);
                   return [
                     <div key="tooltip" className="space-y-1">
-                      <div className="font-semibold">{value} terminov</div>
+                      <div className="font-semibold">{value} {tooltipLabel}</div>
                       <div className="text-gray-500">€{entry?.prihodki.toFixed(2) || 0}</div>
                       <div className="text-gray-500">{entry?.percentage}%</div>
                     </div>,
@@ -183,7 +187,7 @@ function AppointmentsByEmployeeChart({
             ))}
             {chartData.length > 5 && (
               <div className="text-center text-xs text-gray-500">
-                +{chartData.length - 5} drugih zaposlenih
+                {t('employeeChart.moreEmployees', { count: chartData.length - 5 })}
               </div>
             )}
           </div>

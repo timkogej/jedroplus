@@ -1,1 +1,112 @@
-{}
+{
+  "page": {
+    "title": "Analitika",
+    "subtitle": "Pregled poslovanja in ključnih metrik"
+  },
+  "periods": {
+    "danes": "Danes",
+    "ta_teden": "Ta Teden",
+    "ta_mesec": "Ta Mesec",
+    "zadnjih_30": "Zadnjih 30 Dni",
+    "ta_leto": "Letos",
+    "custom": "Obdobje po Meri"
+  },
+  "customRange": {
+    "fromLabel": "Od:",
+    "toLabel": "Do:",
+    "applyButton": "Uporabi"
+  },
+  "metrics": {
+    "totalRevenue": "Skupaj Prihodki",
+    "averageValue": "Povprečna Vrednost",
+    "perAppointment": "Na termin",
+    "occupancyRate": "Stopnja Zasedenosti",
+    "workingTime": "Delovnega časa",
+    "completionRate": "Stopnja Zaključenih",
+    "appointments": "Terminov",
+    "vsPrevious": "vs. prejšnje obdobje"
+  },
+  "revenueChart": {
+    "title": "Prihodki & Termini Skozi Čas",
+    "subtitle": "Dnevni pregled zaključenih terminov in prihodkov",
+    "noData": "Ni podatkov za izbrano obdobje",
+    "revenueLegend": "Prihodki (€)",
+    "appointmentsLegend": "Zaključeni Termini"
+  },
+  "serviceChart": {
+    "title": "Termini po Storitvah",
+    "subtitle": "Porazdelitev terminov po storitvah",
+    "noData": "Ni podatkov za izbrano obdobje",
+    "tooltipAppointments": "terminov",
+    "moreServices": "+{count} drugih storitev"
+  },
+  "employeeChart": {
+    "title": "Termini po Osebju",
+    "subtitle": "Zaključeni termini po zaposlenih",
+    "noData": "Ni podatkov za izbrano obdobje",
+    "tooltipAppointments": "terminov",
+    "moreEmployees": "+{count} drugih zaposlenih"
+  },
+  "heatmap": {
+    "title": "Zasedenost po urah",
+    "subtitle": "Delež skupnega časa terminov po dnevih in urah",
+    "lessOccupied": "Manj zasedeno",
+    "moreOccupied": "Bolj zasedeno",
+    "note": "% prikazuje delež skupnega časa terminov v posamezni urni reži",
+    "cellTooltip": "{day} {hour}:00–{hourEnd}:00 · {pct}% zasedenosti"
+  },
+  "clientGrowth": {
+    "title": "Rast Strank",
+    "subtitle": "Nove stranke skozi čas",
+    "newClientsCount": "novih strank",
+    "noData": "Ni podatkov za izbrano obdobje",
+    "totalLabel": "Skupaj Strank",
+    "newLabel": "Nove Stranke"
+  },
+  "topPerformers": {
+    "title": "Top Performerji",
+    "services": "Storitve",
+    "staff": "Osebje",
+    "noData": "Ni podatkov za izbrano obdobje",
+    "appointmentCount": "{count} terminov"
+  },
+  "retention": {
+    "distributionTitle": "Porazdelitev Strank po Terminih",
+    "oneAppointment": "Stranke z 1 terminom",
+    "threeAppointments": "Stranke s 3 termini",
+    "fivePlusAppointments": "Stranke s 5+ termini",
+    "statusTitle": "Analiza Statusov",
+    "noData": "Ni podatkov za izbrano obdobje",
+    "statusNames": {
+      "zakljuceni": "Zaključeni",
+      "nacrtovani": "Načrtovani",
+      "odpovedani": "Odpovedani",
+      "niPrisel": "Ni prišel"
+    }
+  },
+  "promotions": {
+    "title": "Promocije",
+    "subtitle": "Analitika popustov, happy hourov in add-onov",
+    "types": {
+      "popust": "Popusti",
+      "happy_hour": "Happy Hours",
+      "add_on": "Add-oni"
+    },
+    "appointmentCount": "terminov",
+    "totalSavings": "Skupni prihranek",
+    "topPromos": "Najpogosteje uporabljeni popusti",
+    "monthlyTrend": "Uporaba promocij po mesecih",
+    "totalSavingsLabel": "Skupni prihranek strank s promocijami",
+    "totalCountLabel": "Število terminov s promocijo",
+    "avgSavingLabel": "Povprečni popust na termin",
+    "legend": {
+      "discount": "Popust",
+      "happyHour": "Happy Hour",
+      "addOn": "Add-on"
+    },
+    "empty": {
+      "title": "Še ni terminov s promocijami",
+      "description": "Ustvarite popust ali happy hour in začnite slediti prihrankom strank."
+    }
+  }
+}

@@ -1,1 +1,112 @@
-{}
+{
+  "page": {
+    "title": "Analytics",
+    "subtitle": "Business overview and key metrics"
+  },
+  "periods": {
+    "danes": "Today",
+    "ta_teden": "This Week",
+    "ta_mesec": "This Month",
+    "zadnjih_30": "Last 30 Days",
+    "ta_leto": "This Year",
+    "custom": "Custom Range"
+  },
+  "customRange": {
+    "fromLabel": "From:",
+    "toLabel": "To:",
+    "applyButton": "Apply"
+  },
+  "metrics": {
+    "totalRevenue": "Total Revenue",
+    "averageValue": "Average Value",
+    "perAppointment": "Per appointment",
+    "occupancyRate": "Occupancy Rate",
+    "workingTime": "Of working time",
+    "completionRate": "Completion Rate",
+    "appointments": "Appointments",
+    "vsPrevious": "vs. previous period"
+  },
+  "revenueChart": {
+    "title": "Revenue & Appointments Over Time",
+    "subtitle": "Daily overview of completed appointments and revenue",
+    "noData": "No data for the selected period",
+    "revenueLegend": "Revenue (€)",
+    "appointmentsLegend": "Completed Appointments"
+  },
+  "serviceChart": {
+    "title": "Appointments by Service",
+    "subtitle": "Distribution of appointments by service",
+    "noData": "No data for the selected period",
+    "tooltipAppointments": "appointments",
+    "moreServices": "+{count} more services"
+  },
+  "employeeChart": {
+    "title": "Appointments by Staff",
+    "subtitle": "Completed appointments per employee",
+    "noData": "No data for the selected period",
+    "tooltipAppointments": "appointments",
+    "moreEmployees": "+{count} more employees"
+  },
+  "heatmap": {
+    "title": "Occupancy by hour",
+    "subtitle": "Share of total appointment time by day and hour",
+    "lessOccupied": "Less busy",
+    "moreOccupied": "More busy",
+    "note": "% shows share of total appointment time in each hourly slot",
+    "cellTooltip": "{day} {hour}:00–{hourEnd}:00 · {pct}% occupancy"
+  },
+  "clientGrowth": {
+    "title": "Client Growth",
+    "subtitle": "New clients over time",
+    "newClientsCount": "new clients",
+    "noData": "No data for the selected period",
+    "totalLabel": "Total Clients",
+    "newLabel": "New Clients"
+  },
+  "topPerformers": {
+    "title": "Top Performers",
+    "services": "Services",
+    "staff": "Staff",
+    "noData": "No data for the selected period",
+    "appointmentCount": "{count} appointments"
+  },
+  "retention": {
+    "distributionTitle": "Client Appointment Distribution",
+    "oneAppointment": "Clients with 1 appointment",
+    "threeAppointments": "Clients with 3 appointments",
+    "fivePlusAppointments": "Clients with 5+ appointments",
+    "statusTitle": "Status Analysis",
+    "noData": "No data for the selected period",
+    "statusNames": {
+      "zakljuceni": "Completed",
+      "nacrtovani": "Planned",
+      "odpovedani": "Cancelled",
+      "niPrisel": "No-show"
+    }
+  },
+  "promotions": {
+    "title": "Promotions",
+    "subtitle": "Analytics for discounts, happy hours, and add-ons",
+    "types": {
+      "popust": "Discounts",
+      "happy_hour": "Happy Hours",
+      "add_on": "Add-ons"
+    },
+    "appointmentCount": "appointments",
+    "totalSavings": "Total savings",
+    "topPromos": "Most-used promotions",
+    "monthlyTrend": "Promotion usage by month",
+    "totalSavingsLabel": "Total client savings from promotions",
+    "totalCountLabel": "Appointments with a promotion",
+    "avgSavingLabel": "Average discount per appointment",
+    "legend": {
+      "discount": "Discount",
+      "happyHour": "Happy Hour",
+      "addOn": "Add-on"
+    },
+    "empty": {
+      "title": "No promotional appointments yet",
+      "description": "Create a discount or happy hour and start tracking client savings."
+    }
+  }
+}

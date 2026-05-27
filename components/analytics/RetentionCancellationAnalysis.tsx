@@ -4,6 +4,7 @@ import { memo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { CalendarCheck, Star, Trophy } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import {
   fetchRetentionData,
   fetchClientAppointmentDistribution,
@@ -22,11 +23,20 @@ interface RetentionCancellationAnalysisProps {
   customRange?: CustomRange;
 }
 
+// Maps the SL status name strings returned by calculations.ts to translation keys
+const STATUS_KEYS: Record<string, string> = {
+  'Zaključeni': 'zakljuceni',
+  'Načrtovani': 'nacrtovani',
+  'Odpovedani': 'odpovedani',
+  'Ni prišel': 'niPrisel',
+};
+
 function RetentionCancellationAnalysis({
   companyId,
   timePeriod,
   customRange,
 }: RetentionCancellationAnalysisProps) {
+  const t = useTranslations('analytics');
   const [distributionData, setDistributionData] = useState<ClientAppointmentDistribution>({
     totalClients: 0,
     clientsWithOneAppointment: 0,
@@ -81,6 +91,12 @@ function RetentionCancellationAnalysis({
 
   const totalStatuses = statusData.reduce((sum, d) => sum + d.value, 0);
 
+  const getStatusDisplayName = (name: string) => {
+    const key = STATUS_KEYS[name];
+    if (key) return t(`retention.statusNames.${key}` as Parameters<typeof t>[0]);
+    return name;
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Client Appointment Distribution */}
@@ -89,13 +105,15 @@ function RetentionCancellationAnalysis({
         animate={{ opacity: 1, y: 0 }}
         className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
       >
-        <h3 className="mb-6 text-lg font-semibold text-gray-900">Porazdelitev Strank po Terminih</h3>
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">
+          {t('retention.distributionTitle')}
+        </h3>
 
         <div className="space-y-3">
           {/* Clients with 1 appointment */}
           <div className="flex items-center justify-between rounded-lg bg-amber-50 p-4">
             <div>
-              <div className="text-sm text-gray-600">Stranke z 1 terminom</div>
+              <div className="text-sm text-gray-600">{t('retention.oneAppointment')}</div>
               <div className="text-2xl font-bold text-gray-900">
                 {distributionData.clientsWithOneAppointment}
               </div>
@@ -106,7 +124,7 @@ function RetentionCancellationAnalysis({
           {/* Clients with 3 appointments */}
           <div className="flex items-center justify-between rounded-lg bg-emerald-50 p-4">
             <div>
-              <div className="text-sm text-gray-600">Stranke s 3 termini</div>
+              <div className="text-sm text-gray-600">{t('retention.threeAppointments')}</div>
               <div className="text-2xl font-bold text-gray-900">
                 {distributionData.clientsWithThreeAppointments}
               </div>
@@ -117,7 +135,7 @@ function RetentionCancellationAnalysis({
           {/* Clients with 5+ appointments */}
           <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-violet-500 to-cyan-500 p-4">
             <div>
-              <div className="text-sm text-white/90">Stranke s 5+ termini</div>
+              <div className="text-sm text-white/90">{t('retention.fivePlusAppointments')}</div>
               <div className="text-2xl font-bold text-white">
                 {distributionData.clientsWithFivePlusAppointments}
               </div>
@@ -134,11 +152,11 @@ function RetentionCancellationAnalysis({
         transition={{ delay: 0.1 }}
         className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
       >
-        <h3 className="mb-6 text-lg font-semibold text-gray-900">Analiza Statusov</h3>
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">{t('retention.statusTitle')}</h3>
 
         {totalStatuses === 0 ? (
           <div className="flex h-[200px] items-center justify-center text-gray-500">
-            Ni podatkov za izbrano obdobje
+            {t('retention.noData')}
           </div>
         ) : (
           <>
@@ -168,7 +186,7 @@ function RetentionCancellationAnalysis({
                       className="h-3 w-3 rounded-full"
                       style={{ backgroundColor: item.color }}
                     />
-                    <span className="text-sm text-gray-700">{item.name}</span>
+                    <span className="text-sm text-gray-700">{getStatusDisplayName(item.name)}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-gray-900">{item.value}</span>

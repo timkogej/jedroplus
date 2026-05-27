@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { createCompany, type UrnikDay } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
@@ -10,46 +11,79 @@ import { toast } from 'sonner';
 const STORAGE_KEY = "jedroplus_company_id";
 const STORAGE_KEY_UUID = "jedroplus_company_uuid";
 
-const COUNTRIES = [
-  'Slovenia', 'Croatia', 'Serbia', 'Bosnia and Herzegovina', 'Montenegro',
-  'North Macedonia', 'Austria', 'Germany', 'Italy', 'Hungary',
-  'Czech Republic', 'Slovakia', 'Poland', 'Romania', 'Bulgaria',
-  'France', 'Spain', 'Portugal', 'Netherlands', 'Belgium',
-  'Switzerland', 'United Kingdom', 'United States', 'Canada', 'Australia',
-  'Other',
+// Stored values are English country names (DB schema — do not change)
+const COUNTRIES_DATA = [
+  { value: 'Slovenia', key: 'si' },
+  { value: 'Croatia', key: 'hr' },
+  { value: 'Serbia', key: 'rs' },
+  { value: 'Bosnia and Herzegovina', key: 'ba' },
+  { value: 'Montenegro', key: 'me' },
+  { value: 'North Macedonia', key: 'mk' },
+  { value: 'Austria', key: 'at' },
+  { value: 'Germany', key: 'de' },
+  { value: 'Italy', key: 'it' },
+  { value: 'Hungary', key: 'hu' },
+  { value: 'Czech Republic', key: 'cz' },
+  { value: 'Slovakia', key: 'sk' },
+  { value: 'Poland', key: 'pl' },
+  { value: 'Romania', key: 'ro' },
+  { value: 'Bulgaria', key: 'bg' },
+  { value: 'France', key: 'fr' },
+  { value: 'Spain', key: 'es' },
+  { value: 'Portugal', key: 'pt' },
+  { value: 'Netherlands', key: 'nl' },
+  { value: 'Belgium', key: 'be' },
+  { value: 'Switzerland', key: 'ch' },
+  { value: 'United Kingdom', key: 'gb' },
+  { value: 'United States', key: 'us' },
+  { value: 'Canada', key: 'ca' },
+  { value: 'Australia', key: 'au' },
+  { value: 'Other', key: 'other' },
+];
+
+// Stored values are SL strings (DB schema — do not change)
+const PANOGE_DATA = [
+  { value: 'Frizerstvo', key: 'hairSalons' },
+  { value: 'Kozmetika in nega', key: 'cosmeticsAndSkincare' },
+  { value: 'Masaže in wellness', key: 'massageAndWellness' },
+  { value: 'Zobozdravstvo', key: 'dentistry' },
+  { value: 'Medicina in zdravstvo', key: 'medicineAndHealth' },
+  { value: 'Fizioterapija', key: 'physiotherapy' },
+  { value: 'Psihologija in coaching', key: 'psychologyAndCoaching' },
+  { value: 'Veterina', key: 'veterinary' },
+  { value: 'Osebno treniranje / fitnes', key: 'personalTrainingFitness' },
+  { value: 'Yoga in pilates', key: 'yogaAndPilates' },
+  { value: 'Lepotni salon', key: 'beautySalon' },
+  { value: 'Manikura in pedikura', key: 'manicureAndPedicure' },
+  { value: 'Tetovaže in piercings', key: 'tattoosAndPiercings' },
+  { value: 'Arhitektura in oblikovanje', key: 'architectureAndDesign' },
+  { value: 'Fotografija', key: 'photography' },
+  { value: 'Pravo in svetovanje', key: 'lawAndConsulting' },
+  { value: 'Računovodstvo', key: 'accounting' },
+  { value: 'IT storitve', key: 'itServices' },
+  { value: 'Izobraževanje in poučevanje', key: 'educationAndTutoring' },
+  { value: 'Avtoservis', key: 'carService' },
+  { value: 'Čiščenje in vzdrževanje', key: 'cleaningAndMaintenance' },
+  { value: 'Drugo', key: 'other' },
 ];
 
 const LANGUAGES = [
-  { label: 'Slovenščina', value: 'slo' },
-  { label: 'English', value: 'eng' },
+  { value: 'slo' },
+  { value: 'eng' },
 ];
 
+// SL day names are DB keys for urnik — do not change
 const DAYS = ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja'];
 
-const PANOGE = [
-  'Frizerstvo',
-  'Kozmetika in nega',
-  'Masaže in wellness',
-  'Zobozdravstvo',
-  'Medicina in zdravstvo',
-  'Fizioterapija',
-  'Psihologija in coaching',
-  'Veterina',
-  'Osebno treniranje / fitnes',
-  'Yoga in pilates',
-  'Lepotni salon',
-  'Manikura in pedikura',
-  'Tetovaže in piercings',
-  'Arhitektura in oblikovanje',
-  'Fotografija',
-  'Pravo in svetovanje',
-  'Računovodstvo',
-  'IT storitve',
-  'Izobraževanje in poučevanje',
-  'Avtoservis',
-  'Čiščenje in vzdrževanje',
-  'Drugo',
-];
+const DAY_TO_COMMON_KEY: Record<string, string> = {
+  'Ponedeljek': 'mon',
+  'Torek': 'tue',
+  'Sreda': 'wed',
+  'Četrtek': 'thu',
+  'Petek': 'fri',
+  'Sobota': 'sat',
+  'Nedelja': 'sun',
+};
 
 const DEFAULT_URNIK: Record<string, UrnikDay> = {
   Ponedeljek: { enabled: true,  intervals: [{ start: '08:00', end: '16:00' }] },
@@ -157,6 +191,8 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
 
 export default function CreateCompanyPage() {
   const router = useRouter();
+  const t = useTranslations('onboarding');
+  const tCommon = useTranslations('common');
   const [step, setStep] = useState(0);
 
   // Step 0: locale
@@ -274,21 +310,21 @@ export default function CreateCompanyPage() {
 
           setCreatedCompanyPublicId(publicId);
           setShowConfetti(true);
-          toast.success('Podjetje uspešno ustvarjeno!');
+          toast.success(t('create.toasts.success'));
           setTimeout(() => {
             window.location.href = '/dashboard';
           }, 1500);
         } else {
-          toast.error('Prišlo je do napake pri nalaganju podjetja. Prosimo, poskusite znova.');
+          toast.error(t('create.toasts.errorLoad'));
           setLoading(false);
         }
       } else {
-        toast.error('Prišlo je do napake pri ustvarjanju podjetja');
+        toast.error(t('create.toasts.errorCreate'));
         setLoading(false);
       }
     } catch (error) {
       console.error('Create company error:', error);
-      toast.error('Prišlo je do napake pri ustvarjanju podjetja');
+      toast.error(t('create.toasts.errorCreate'));
       setLoading(false);
     }
   };
@@ -308,14 +344,14 @@ export default function CreateCompanyPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Podjetje je ustvarjeno</h2>
-            <p className="text-gray-500 mb-10">Vaše podjetje je pripravljeno za uporabo</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">{t('create.success.title')}</h2>
+            <p className="text-gray-500 mb-10">{t('create.success.subtitle')}</p>
             <button
               onClick={() => (window.location.href = '/dashboard')}
               className="w-full h-12 text-white font-semibold rounded-xl transition-all duration-300 hover:opacity-90 hover:shadow-lg"
               style={{ background: 'linear-gradient(to right, #8B5CF6, #06B6D4)' }}
             >
-              Pojdi na Dashboard
+              {t('create.success.goToDashboard')}
             </button>
           </div>
         </div>
@@ -324,16 +360,16 @@ export default function CreateCompanyPage() {
   }
 
   const stepTitles = [
-    'Lokalizacija',
-    'Ime podjetja',
-    'Panoga',
-    'Delovni urnik',
+    t('create.steps.localization'),
+    t('create.steps.companyName'),
+    t('create.steps.industry'),
+    t('create.steps.schedule'),
   ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">Ustvari podjetje</h1>
+        <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">{t('create.title')}</h1>
         <p className="text-center text-gray-500 mb-8 text-sm">{stepTitles[step]}</p>
 
         <div className="flex justify-center">
@@ -346,15 +382,19 @@ export default function CreateCompanyPage() {
           {step === 0 && (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Država</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  {t('create.localization.countryLabel')}
+                </label>
                 <div className="relative">
                   <select
                     value={country}
                     onChange={e => setCountry(e.target.value)}
                     className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 pr-8 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400 appearance-none"
                   >
-                    {COUNTRIES.map(c => (
-                      <option key={c} value={c}>{c}</option>
+                    {COUNTRIES_DATA.map(c => (
+                      <option key={c.value} value={c.value}>
+                        {t(`create.countries.${c.key}`)}
+                      </option>
                     ))}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
@@ -366,7 +406,9 @@ export default function CreateCompanyPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Jezik</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  {t('create.localization.languageLabel')}
+                </label>
                 <div className="flex gap-3">
                   {LANGUAGES.map(lang => (
                     <button
@@ -380,7 +422,7 @@ export default function CreateCompanyPage() {
                           : { borderColor: '#E5E7EB', background: '#fff', color: '#6B7280' }
                       }
                     >
-                      {lang.label}
+                      {t(`create.languages.${lang.value}`)}
                     </button>
                   ))}
                 </div>
@@ -391,11 +433,13 @@ export default function CreateCompanyPage() {
           {/* STEP 1 — Company Name */}
           {step === 1 && (
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Ime podjetja</label>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">
+                {t('create.companyName.label')}
+              </label>
               <Input
                 value={companyName}
                 onChange={e => setCompanyName(e.target.value)}
-                placeholder="Jedro Plus d.o.o."
+                placeholder={t('create.companyName.placeholder')}
                 autoFocus
                 onKeyDown={e => e.key === 'Enter' && canAdvance() && handleNext()}
               />
@@ -405,31 +449,35 @@ export default function CreateCompanyPage() {
           {/* STEP 2 — Industry */}
           {step === 2 && (
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-gray-900">Panoga / dejavnost</label>
+              <label className="block text-sm font-semibold text-gray-900">
+                {t('create.industry.label')}
+              </label>
               <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
-                {PANOGE.map(p => (
+                {PANOGE_DATA.map(p => (
                   <button
-                    key={p}
+                    key={p.value}
                     type="button"
-                    onClick={() => { setSelectedPanoga(p); if (p !== 'Drugo') setCustomPanoga(''); }}
+                    onClick={() => { setSelectedPanoga(p.value); if (p.value !== 'Drugo') setCustomPanoga(''); }}
                     className="text-left px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-150"
                     style={
-                      selectedPanoga === p
+                      selectedPanoga === p.value
                         ? { borderColor: '#8B5CF6', background: 'rgba(139,92,246,0.06)', color: '#7C3AED' }
                         : { borderColor: '#E5E7EB', background: '#FAFAFA', color: '#374151' }
                     }
                   >
-                    {p}
+                    {t(`create.industries.${p.key}`)}
                   </button>
                 ))}
               </div>
               {selectedPanoga === 'Drugo' && (
                 <div className="mt-1">
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Opišite svojo dejavnost</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    {t('create.industry.customLabel')}
+                  </label>
                   <Input
                     value={customPanoga}
                     onChange={e => setCustomPanoga(e.target.value)}
-                    placeholder="npr. Moja specifična dejavnost…"
+                    placeholder={t('create.industry.customPlaceholder')}
                     autoFocus
                     onKeyDown={e => e.key === 'Enter' && canAdvance() && handleNext()}
                   />
@@ -442,10 +490,11 @@ export default function CreateCompanyPage() {
           {step === 3 && (
             <div className="space-y-3">
               <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
-                Delovni urnik lahko kadarkoli spremenite v nastavitvah podjetja.
+                {t('create.schedule.hint')}
               </p>
               {DAYS.map(day => {
                 const d = urnik[day];
+                const displayDay = tCommon(`daysLong.${DAY_TO_COMMON_KEY[day]}`);
                 return (
                   <div
                     key={day}
@@ -466,7 +515,7 @@ export default function CreateCompanyPage() {
                     </button>
 
                     {/* Day name */}
-                    <span className="w-24 text-sm font-semibold text-gray-800 flex-shrink-0">{day}</span>
+                    <span className="w-24 text-sm font-semibold text-gray-800 flex-shrink-0">{displayDay}</span>
 
                     {/* Time inputs */}
                     {d.enabled ? (
@@ -486,7 +535,9 @@ export default function CreateCompanyPage() {
                         />
                       </div>
                     ) : (
-                      <span className="ml-auto text-xs text-gray-400 font-medium">Zaprto</span>
+                      <span className="ml-auto text-xs text-gray-400 font-medium">
+                        {t('create.schedule.closed')}
+                      </span>
                     )}
                   </div>
                 );
@@ -501,7 +552,7 @@ export default function CreateCompanyPage() {
               disabled={loading}
               className="flex-1 h-12 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Nazaj
+              {t('create.nav.back')}
             </button>
             <button
               onClick={handleNext}
@@ -510,10 +561,10 @@ export default function CreateCompanyPage() {
               style={{ background: 'linear-gradient(to right, #8B5CF6, #06B6D4)' }}
             >
               {loading
-                ? 'Ustvarjam...'
+                ? t('create.nav.creating')
                 : step === TOTAL_STEPS - 1
-                ? 'Ustvari'
-                : 'Naprej'}
+                ? t('create.nav.finish')
+                : t('create.nav.next')}
             </button>
           </div>
         </div>

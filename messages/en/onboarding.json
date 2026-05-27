@@ -1,1 +1,158 @@
-{}
+{
+  "entry": {
+    "loading": "Checking...",
+    "title": "Welcome to",
+    "subtitle": "Get started by creating or joining a company",
+    "create": {
+      "title": "Create a new company",
+      "description": "Start fresh with a new company and invite your team",
+      "cta": "Get started"
+    },
+    "join": {
+      "title": "Join a company",
+      "description": "Have a company ID and code? Join an existing company",
+      "cta": "Join"
+    }
+  },
+  "create": {
+    "title": "Create company",
+    "steps": {
+      "localization": "Localization",
+      "companyName": "Company name",
+      "industry": "Industry",
+      "schedule": "Working hours"
+    },
+    "localization": {
+      "countryLabel": "Country",
+      "languageLabel": "Language"
+    },
+    "companyName": {
+      "label": "Company name",
+      "placeholder": "My Business LLC"
+    },
+    "industry": {
+      "label": "Industry / activity",
+      "customLabel": "Describe your activity",
+      "customPlaceholder": "e.g. My specific activity…"
+    },
+    "schedule": {
+      "hint": "You can change the working hours any time in company settings.",
+      "closed": "Closed"
+    },
+    "nav": {
+      "back": "Back",
+      "next": "Next",
+      "finish": "Create",
+      "creating": "Creating..."
+    },
+    "success": {
+      "title": "Company created",
+      "subtitle": "Your company is ready to use",
+      "goToDashboard": "Go to Dashboard"
+    },
+    "toasts": {
+      "success": "Company created successfully!",
+      "errorCreate": "Failed to create company",
+      "errorLoad": "Failed to load company. Please try again."
+    },
+    "countries": {
+      "si": "Slovenia",
+      "hr": "Croatia",
+      "rs": "Serbia",
+      "ba": "Bosnia and Herzegovina",
+      "me": "Montenegro",
+      "mk": "North Macedonia",
+      "at": "Austria",
+      "de": "Germany",
+      "it": "Italy",
+      "hu": "Hungary",
+      "cz": "Czech Republic",
+      "sk": "Slovakia",
+      "pl": "Poland",
+      "ro": "Romania",
+      "bg": "Bulgaria",
+      "fr": "France",
+      "es": "Spain",
+      "pt": "Portugal",
+      "nl": "Netherlands",
+      "be": "Belgium",
+      "ch": "Switzerland",
+      "gb": "United Kingdom",
+      "us": "United States",
+      "ca": "Canada",
+      "au": "Australia",
+      "other": "Other"
+    },
+    "languages": {
+      "slo": "Slovenian",
+      "eng": "English"
+    },
+    "industries": {
+      "hairSalons": "Hair salons",
+      "cosmeticsAndSkincare": "Beauty & skincare",
+      "massageAndWellness": "Massage & wellness",
+      "dentistry": "Dentistry",
+      "medicineAndHealth": "Medicine & healthcare",
+      "physiotherapy": "Physiotherapy",
+      "psychologyAndCoaching": "Psychology & coaching",
+      "veterinary": "Veterinary",
+      "personalTrainingFitness": "Personal training / fitness",
+      "yogaAndPilates": "Yoga & Pilates",
+      "beautySalon": "Beauty salon",
+      "manicureAndPedicure": "Manicure & pedicure",
+      "tattoosAndPiercings": "Tattoos & piercings",
+      "architectureAndDesign": "Architecture & design",
+      "photography": "Photography",
+      "lawAndConsulting": "Law & consulting",
+      "accounting": "Accounting",
+      "itServices": "IT services",
+      "educationAndTutoring": "Education & tutoring",
+      "carService": "Car service",
+      "cleaningAndMaintenance": "Cleaning & maintenance",
+      "other": "Other"
+    }
+  },
+  "join": {
+    "title": "Join a company",
+    "subtitle": "Choose how you'd like to join",
+    "admin": {
+      "title": "Join as Admin",
+      "description": "You'll have the same privileges as the owner. Full access to company data, settings, staff, and analytics.",
+      "note": "You need an admin code from the company owner.",
+      "cta": "Continue"
+    },
+    "employee": {
+      "title": "Join as Staff",
+      "description": "You'll see only your own data, appointments, and clients. Access is limited and can be further configured by an admin.",
+      "note": "You need a staff code from an admin.",
+      "cta": "Continue"
+    },
+    "back": "Back",
+    "form": {
+      "adminTitle": "Join as Admin",
+      "employeeTitle": "Join as Staff",
+      "adminSubtitle": "Enter the admin code you received from the owner",
+      "employeeSubtitle": "Enter the staff code you received from an admin",
+      "adminCodeLabel": "Admin code",
+      "employeeCodeLabel": "Staff code",
+      "adminCodeHint": "8-character admin code",
+      "employeeCodeHint": "8-character staff code",
+      "submit": "Join",
+      "submitting": "Joining..."
+    },
+    "toasts": {
+      "noCode": "Enter the admin code",
+      "noCodeEmployee": "Enter the staff code",
+      "noFreeSlot": "This company has no available user slots.",
+      "notLoggedIn": "You are not logged in",
+      "profileNotLinked": "Company not yet linked to your profile. Please try again in a few seconds.",
+      "errorJoin": "Failed to join company",
+      "errorProfile": "Failed to save profile",
+      "errorLoad": "Failed to load company",
+      "successWithName": "You joined {name}!",
+      "success": "You joined the company!",
+      "invalidCode": "Invalid company code",
+      "companyNotFound": "No company found with this ID"
+    }
+  }
+}

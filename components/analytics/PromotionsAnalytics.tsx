@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Tag, Clock, Plus } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabaseClient';
 
 interface PromoRow {
@@ -17,33 +18,6 @@ interface PromoRow {
 interface PromotionsAnalyticsProps {
   companyId: string;
 }
-
-const TYPE_CONFIG = {
-  popust: {
-    label: 'Popusti',
-    Icon: Tag,
-    color: '#6D5EF7',
-    bgClass: 'bg-purple-100',
-    iconClass: 'text-purple-600',
-    barBg: 'linear-gradient(90deg, #6D5EF7, #2F80ED)',
-  },
-  happy_hour: {
-    label: 'Happy Hours',
-    Icon: Clock,
-    color: '#F59E0B',
-    bgClass: 'bg-amber-100',
-    iconClass: 'text-amber-600',
-    barBg: '#F59E0B',
-  },
-  add_on: {
-    label: 'Add-oni',
-    Icon: Plus,
-    color: '#3B82F6',
-    bgClass: 'bg-blue-100',
-    iconClass: 'text-blue-600',
-    barBg: '#3B82F6',
-  },
-} as const;
 
 const TYPES = ['popust', 'happy_hour', 'add_on'] as const;
 
@@ -63,8 +37,36 @@ function computeSaving(row: PromoRow): number {
 }
 
 export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsProps) {
+  const t = useTranslations('analytics');
   const [rows, setRows] = useState<PromoRow[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const TYPE_CONFIG = {
+    popust: {
+      label: t('promotions.types.popust'),
+      Icon: Tag,
+      color: '#6D5EF7',
+      bgClass: 'bg-purple-100',
+      iconClass: 'text-purple-600',
+      barBg: 'linear-gradient(90deg, #6D5EF7, #2F80ED)',
+    },
+    happy_hour: {
+      label: t('promotions.types.happy_hour'),
+      Icon: Clock,
+      color: '#F59E0B',
+      bgClass: 'bg-amber-100',
+      iconClass: 'text-amber-600',
+      barBg: '#F59E0B',
+    },
+    add_on: {
+      label: t('promotions.types.add_on'),
+      Icon: Plus,
+      color: '#3B82F6',
+      bgClass: 'bg-blue-100',
+      iconClass: 'text-blue-600',
+      barBg: '#3B82F6',
+    },
+  } as const;
 
   useEffect(() => {
     if (!companyId) return;
@@ -87,7 +89,7 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
   }, [companyId]);
 
   if (isLoading) return <SkeletonLoader />;
-  if (!rows || rows.length === 0) return <EmptyState />;
+  if (!rows || rows.length === 0) return <EmptyState t={t} />;
 
   // Summary per type
   const summary = TYPES.map((type) => {
@@ -152,10 +154,8 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
     <div className="mb-8 space-y-6">
       {/* Section header */}
       <div>
-        <h2 className="text-xl font-bold text-[#1A1F36]">Promocije</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Analitika popustov, happy hourov in add-onov
-        </p>
+        <h2 className="text-xl font-bold text-[#1A1F36]">{t('promotions.title')}</h2>
+        <p className="mt-1 text-sm text-gray-500">{t('promotions.subtitle')}</p>
       </div>
 
       {/* A) Summary cards */}
@@ -180,9 +180,9 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
                 <span className="font-semibold text-gray-800">{cfg.label}</span>
               </div>
               <p className="text-3xl font-bold text-gray-900 mb-0.5">{count}</p>
-              <p className="text-sm text-gray-500 mb-4">terminov</p>
+              <p className="text-sm text-gray-500 mb-4">{t('promotions.appointmentCount')}</p>
               <div className="pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-400 mb-0.5">Skupni prihranek</p>
+                <p className="text-xs text-gray-400 mb-0.5">{t('promotions.totalSavings')}</p>
                 <p className="text-lg font-bold text-green-600">€{fmt(savings)}</p>
               </div>
             </motion.div>
@@ -193,7 +193,7 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
       {/* B) Horizontal bar chart — most used promotions */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-base font-bold text-[#1A1F36] mb-5">
-          Najpogosteje uporabljeni popusti
+          {t('promotions.topPromos')}
         </h3>
         <div className="space-y-3">
           {topPromos.map(({ naziv, count, type }, idx) => {
@@ -243,7 +243,7 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
       {/* C) Monthly trend — last 6 months, stacked bars */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-base font-bold text-[#1A1F36] mb-5">
-          Uporaba promocij po mesecih
+          {t('promotions.monthlyTrend')}
         </h3>
         <div className="flex items-end gap-2" style={{ height: '160px' }}>
           {monthlyData.map(({ label, popust, happy_hour, add_on }) => {
@@ -284,15 +284,15 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
               className="h-3 w-3 rounded-sm"
               style={{ background: 'linear-gradient(135deg, #6D5EF7, #2F80ED)' }}
             />
-            <span className="text-xs text-gray-600">Popust</span>
+            <span className="text-xs text-gray-600">{t('promotions.legend.discount')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="h-3 w-3 rounded-sm bg-amber-400" />
-            <span className="text-xs text-gray-600">Happy Hour</span>
+            <span className="text-xs text-gray-600">{t('promotions.legend.happyHour')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="h-3 w-3 rounded-sm bg-blue-400" />
-            <span className="text-xs text-gray-600">Add-on</span>
+            <span className="text-xs text-gray-600">{t('promotions.legend.addOn')}</span>
           </div>
         </div>
       </div>
@@ -306,17 +306,15 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
       >
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div>
-            <p className="text-white/70 text-sm mb-1">
-              Skupni prihranek strank s promocijami
-            </p>
+            <p className="text-white/70 text-sm mb-1">{t('promotions.totalSavingsLabel')}</p>
             <p className="text-2xl font-bold">€{fmt(totalSavings)}</p>
           </div>
           <div>
-            <p className="text-white/70 text-sm mb-1">Število terminov s promocijo</p>
+            <p className="text-white/70 text-sm mb-1">{t('promotions.totalCountLabel')}</p>
             <p className="text-2xl font-bold">{totalCount}</p>
           </div>
           <div>
-            <p className="text-white/70 text-sm mb-1">Povprečni popust na termin</p>
+            <p className="text-white/70 text-sm mb-1">{t('promotions.avgSavingLabel')}</p>
             <p className="text-2xl font-bold">€{fmt(avgSaving)}</p>
           </div>
         </div>
@@ -367,17 +365,15 @@ function SkeletonLoader() {
   );
 }
 
-function EmptyState() {
+function EmptyState({ t }: { t: ReturnType<typeof useTranslations<'analytics'>> }) {
   return (
     <div className="mb-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
       <div className="text-4xl mb-4">🏷️</div>
       <h3 className="text-base font-semibold text-[#1A1F36] mb-2">
-        Še ni terminov s promocijami
+        {t('promotions.empty.title')}
       </h3>
       <p className="text-sm text-gray-500 leading-relaxed">
-        Ustvarite popust ali happy hour in
-        <br />
-        začnite slediti prihrankom strank.
+        {t('promotions.empty.description')}
       </p>
     </div>
   );

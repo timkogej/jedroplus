@@ -2,6 +2,7 @@
 
 import { memo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { fetchClientGrowthData, type ClientGrowthData } from '@/lib/analytics/calculations';
 import {
@@ -17,6 +18,7 @@ interface ClientGrowthChartProps {
 }
 
 function ClientGrowthChart({ companyId, timePeriod, customRange }: ClientGrowthChartProps) {
+  const t = useTranslations('analytics');
   const [chartData, setChartData] = useState<ClientGrowthData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -52,7 +54,8 @@ function ClientGrowthChart({ companyId, timePeriod, customRange }: ClientGrowthC
   }
 
   const totalNewClients = chartData.reduce((sum, d) => sum + d.nove, 0);
-  const latestTotal = chartData.length > 0 ? chartData[chartData.length - 1].skupaj : 0;
+  const totalLabel = t('clientGrowth.totalLabel');
+  const newLabel = t('clientGrowth.newLabel');
 
   return (
     <motion.div
@@ -62,18 +65,18 @@ function ClientGrowthChart({ companyId, timePeriod, customRange }: ClientGrowthC
     >
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Rast Strank</h3>
-          <p className="mt-1 text-sm text-gray-500">Nove stranke skozi čas</p>
+          <h3 className="text-lg font-semibold text-gray-900">{t('clientGrowth.title')}</h3>
+          <p className="mt-1 text-sm text-gray-500">{t('clientGrowth.subtitle')}</p>
         </div>
         <div className="text-right">
           <div className="text-2xl font-bold text-gray-900">+{totalNewClients}</div>
-          <div className="text-xs text-gray-500">novih strank</div>
+          <div className="text-xs text-gray-500">{t('clientGrowth.newClientsCount')}</div>
         </div>
       </div>
 
       {chartData.length === 0 ? (
         <div className="flex h-[250px] items-center justify-center text-gray-500">
-          Ni podatkov za izbrano obdobje
+          {t('clientGrowth.noData')}
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={250}>
@@ -94,8 +97,8 @@ function ClientGrowthChart({ companyId, timePeriod, customRange }: ClientGrowthC
                 borderRadius: '8px',
               }}
               formatter={(value, name) => {
-                if (name === 'Skupaj Strank') return [value, String(name)];
-                return [value, 'Nove Stranke'];
+                if (name === totalLabel) return [value, String(name)];
+                return [value, newLabel];
               }}
             />
             <Area
@@ -105,7 +108,7 @@ function ClientGrowthChart({ companyId, timePeriod, customRange }: ClientGrowthC
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#clientGradient)"
-              name="Skupaj Strank"
+              name={totalLabel}
             />
           </AreaChart>
         </ResponsiveContainer>
