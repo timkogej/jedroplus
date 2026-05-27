@@ -2,6 +2,7 @@
 
 import { memo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { fetchHeatmapData, type HeatmapData } from '@/lib/analytics/calculations';
 import {
   type TimePeriod,
@@ -38,9 +39,16 @@ function HourlyOccupancyHeatmap({
   timePeriod,
   customRange,
 }: HourlyOccupancyHeatmapProps) {
+  const t = useTranslations('analytics');
+  const tCommon = useTranslations('common');
   const [heatmapData, setHeatmapData] = useState<HeatmapData>({});
   const [isLoading, setIsLoading] = useState(true);
   const maxPct = Math.max(...Object.values(heatmapData).filter(v => v > 0), 1);
+
+  // Translated short day names matching DAYS_OF_WEEK order (Mon–Sun)
+  const translatedDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(
+    k => tCommon(`daysShort.${k}`)
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,8 +88,8 @@ function HourlyOccupancyHeatmap({
       className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Zasedenost po urah</h3>
-        <p className="mt-1 text-sm text-gray-500">Delež skupnega časa terminov po dnevih in urah</p>
+        <h3 className="text-lg font-semibold text-gray-900">{t('heatmap.title')}</h3>
+        <p className="mt-1 text-sm text-gray-500">{t('heatmap.subtitle')}</p>
       </div>
 
       {/* Heatmap Grid */}
@@ -100,7 +108,9 @@ function HourlyOccupancyHeatmap({
           {/* Day rows */}
           {DAYS_OF_WEEK.map((day, dayIndex) => (
             <div key={day} className="mb-1 flex">
-              <div className="flex w-12 items-center text-sm font-medium text-gray-700">{day}</div>
+              <div className="flex w-12 items-center text-sm font-medium text-gray-700">
+                {translatedDays[dayIndex]}
+              </div>
               {WORKING_HOURS.map((hour) => {
                 const key = `${dayIndex}-${hour}`;
                 const pct = heatmapData[key] || 0;
@@ -109,9 +119,13 @@ function HourlyOccupancyHeatmap({
                     key={key}
                     whileHover={{ scale: 1.1 }}
                     className={`mx-0.5 flex h-8 w-10 cursor-pointer items-center justify-center rounded transition-all ${getIntensityColor(pct, maxPct)}`}
-                    title={`${day} ${hour}:00–${hour + 1}:00 · ${pct.toFixed(1)}% zasedenosti`}
+                    title={t('heatmap.cellTooltip', {
+                      day: translatedDays[dayIndex],
+                      hour,
+                      hourEnd: hour + 1,
+                      pct: pct.toFixed(1),
+                    })}
                   />
-
                 );
               })}
             </div>
@@ -121,7 +135,7 @@ function HourlyOccupancyHeatmap({
 
       {/* Legend */}
       <div className="mt-6 flex items-center gap-4">
-        <span className="text-sm text-gray-600">Manj zasedeno</span>
+        <span className="text-sm text-gray-600">{t('heatmap.lessOccupied')}</span>
         <div className="flex gap-1">
           <div className="h-6 w-6 rounded bg-gray-100" />
           <div className="h-6 w-6 rounded bg-violet-200" />
@@ -129,10 +143,10 @@ function HourlyOccupancyHeatmap({
           <div className="h-6 w-6 rounded bg-violet-600" />
           <div className="h-6 w-6 rounded bg-violet-800" />
         </div>
-        <span className="text-sm text-gray-600">Bolj zasedeno</span>
+        <span className="text-sm text-gray-600">{t('heatmap.moreOccupied')}</span>
       </div>
       <p className="mt-2 text-xs text-gray-400">
-        % prikazuje delež skupnega časa terminov v posamezni urni reži
+        {t('heatmap.note')}
       </p>
     </motion.div>
   );

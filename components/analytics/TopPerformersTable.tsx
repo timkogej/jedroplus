@@ -3,6 +3,7 @@
 import { memo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Trophy, Medal, Star } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import { fetchTopPerformers, type TopPerformer } from '@/lib/analytics/calculations';
 import {
   type TimePeriod,
@@ -30,6 +31,7 @@ function getRankBadge(index: number): React.ReactNode {
 }
 
 function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformersTableProps) {
+  const t = useTranslations('analytics');
   const [topServices, setTopServices] = useState<TopPerformer[]>([]);
   const [topEmployees, setTopEmployees] = useState<TopPerformer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,15 +83,15 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
       animate={{ opacity: 1, y: 0 }}
       className="mb-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
     >
-      <h3 className="mb-6 text-lg font-semibold text-gray-900">Top Performerji</h3>
+      <h3 className="mb-6 text-lg font-semibold text-gray-900">{t('topPerformers.title')}</h3>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Top Services - with service colors */}
         <div>
-          <h4 className="mb-4 text-sm font-semibold text-gray-700">Storitve</h4>
+          <h4 className="mb-4 text-sm font-semibold text-gray-700">{t('topPerformers.services')}</h4>
           {topServices.length === 0 ? (
             <div className="rounded-lg bg-gray-50 p-4 text-center text-gray-500">
-              Ni podatkov za izbrano obdobje
+              {t('topPerformers.noData')}
             </div>
           ) : (
             <div className="space-y-3">
@@ -111,7 +113,7 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-gray-900 truncate">{service.name}</div>
                     <div className="text-xs text-gray-600">
-                      {service.count} terminov
+                      {t('topPerformers.appointmentCount', { count: service.count })}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
@@ -125,10 +127,10 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
 
         {/* Top Employees - with employee colors and initials */}
         <div>
-          <h4 className="mb-4 text-sm font-semibold text-gray-700">Osebje</h4>
+          <h4 className="mb-4 text-sm font-semibold text-gray-700">{t('topPerformers.staff')}</h4>
           {topEmployees.length === 0 ? (
             <div className="rounded-lg bg-gray-50 p-4 text-center text-gray-500">
-              Ni podatkov za izbrano obdobje
+              {t('topPerformers.noData')}
             </div>
           ) : (
             <div className="space-y-3">
@@ -152,7 +154,7 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-semibold text-gray-900 truncate">{employee.name}</div>
                     <div className="text-xs text-gray-600">
-                      {employee.count} terminov
+                      {t('topPerformers.appointmentCount', { count: employee.count })}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">

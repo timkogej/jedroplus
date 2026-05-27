@@ -2,6 +2,7 @@
 
 import { memo, useState, useEffect, useId } from 'react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { fetchServiceChartData, type ServiceChartData } from '@/lib/analytics/calculations';
 import {
@@ -22,6 +23,7 @@ function AppointmentsByServiceChart({
   timePeriod,
   customRange,
 }: AppointmentsByServiceChartProps) {
+  const t = useTranslations('analytics');
   const [chartData, setChartData] = useState<ServiceChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const gradientIdPrefix = useId().replace(/:/g, '');
@@ -70,6 +72,8 @@ function AppointmentsByServiceChart({
     };
   });
 
+  const tooltipLabel = t('serviceChart.tooltipAppointments');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -77,13 +81,13 @@ function AppointmentsByServiceChart({
       className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Termini po Storitvah</h3>
-        <p className="mt-1 text-sm text-gray-500">Porazdelitev terminov po storitvah</p>
+        <h3 className="text-lg font-semibold text-gray-900">{t('serviceChart.title')}</h3>
+        <p className="mt-1 text-sm text-gray-500">{t('serviceChart.subtitle')}</p>
       </div>
 
       {chartData.length === 0 ? (
         <div className="flex h-[300px] items-center justify-center text-gray-500">
-          Ni podatkov za izbrano obdobje
+          {t('serviceChart.noData')}
         </div>
       ) : (
         <>
@@ -137,7 +141,7 @@ function AppointmentsByServiceChart({
                   const entry = chartData.find((d) => d.name === name);
                   return [
                     <div key="tooltip" className="space-y-1">
-                      <div className="font-semibold">{value} terminov</div>
+                      <div className="font-semibold">{value} {tooltipLabel}</div>
                       <div className="text-gray-500">€{entry?.revenue.toFixed(2) || 0}</div>
                       <div className="text-gray-500">{entry?.percentage}%</div>
                     </div>,
@@ -169,7 +173,7 @@ function AppointmentsByServiceChart({
             ))}
             {chartData.length > 5 && (
               <div className="text-center text-xs text-gray-500">
-                +{chartData.length - 5} drugih storitev
+                {t('serviceChart.moreServices', { count: chartData.length - 5 })}
               </div>
             )}
           </div>

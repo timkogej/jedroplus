@@ -2,6 +2,7 @@
 
 import { memo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import {
   LineChart,
   Line,
@@ -26,6 +27,7 @@ interface RevenueBookingsChartProps {
 }
 
 function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBookingsChartProps) {
+  const t = useTranslations('analytics');
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -60,6 +62,9 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
     );
   }
 
+  const revenueLegend = t('revenueChart.revenueLegend');
+  const appointmentsLegend = t('revenueChart.appointmentsLegend');
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -67,15 +72,13 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
       className="mb-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
     >
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Prihodki & Termini Skozi Čas</h3>
-        <p className="mt-1 text-sm text-gray-500">
-          Dnevni pregled zaključenih terminov in prihodkov
-        </p>
+        <h3 className="text-lg font-semibold text-gray-900">{t('revenueChart.title')}</h3>
+        <p className="mt-1 text-sm text-gray-500">{t('revenueChart.subtitle')}</p>
       </div>
 
       {chartData.length === 0 ? (
         <div className="flex h-[350px] items-center justify-center text-gray-500">
-          Ni podatkov za izbrano obdobje
+          {t('revenueChart.noData')}
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={350}>
@@ -104,7 +107,7 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
               }}
               formatter={(value, name) => {
                 const numValue = Number(value) || 0;
-                if (name === 'Prihodki (€)') return [`€${numValue.toFixed(2)}`, name];
+                if (name === revenueLegend) return [`€${numValue.toFixed(2)}`, name];
                 return [numValue, name];
               }}
             />
@@ -117,7 +120,7 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
               strokeWidth={3}
               dot={{ fill: '#8B5CF6', r: 4 }}
               activeDot={{ r: 6 }}
-              name="Prihodki (€)"
+              name={revenueLegend}
             />
             <Line
               yAxisId="right"
@@ -127,7 +130,7 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
               strokeWidth={3}
               dot={{ fill: '#10B981', r: 4 }}
               activeDot={{ r: 6 }}
-              name="Zaključeni Termini"
+              name={appointmentsLegend}
             />
           </LineChart>
         </ResponsiveContainer>

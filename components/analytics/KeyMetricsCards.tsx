@@ -2,6 +2,7 @@
 
 import { memo, useState, useEffect } from 'react';
 import { TrendUp, CurrencyEur, Clock, CheckCircle } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import MetricCard from './MetricCard';
 import {
   fetchAnalyticsMetrics,
@@ -21,6 +22,7 @@ interface KeyMetricsCardsProps {
 }
 
 function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCardsProps) {
+  const t = useTranslations('analytics');
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,32 +50,32 @@ function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCards
     <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
       {/* Revenue */}
       <MetricCard
-        title="Skupaj Prihodki"
+        title={t('metrics.totalRevenue')}
         value={`€${(metrics?.totalRevenue ?? 0).toFixed(2)}`}
         icon={<TrendUp className="h-6 w-6" weight="bold" />}
         iconColor="black"
         change={metrics?.revenueGrowth}
-        changeLabel="vs. prejšnje obdobje"
+        changeLabel={t('metrics.vsPrevious')}
         isLoading={isLoading}
       />
 
       {/* Average Booking Value */}
       <MetricCard
-        title="Povprečna Vrednost"
+        title={t('metrics.averageValue')}
         value={`€${(metrics?.averageBookingValue ?? 0).toFixed(2)}`}
-        subtitle="Na termin"
+        subtitle={t('metrics.perAppointment')}
         icon={<CurrencyEur className="h-6 w-6" weight="bold" />}
         iconColor="darkGray"
         change={metrics?.bookingGrowth}
-        changeLabel="vs. prejšnje obdobje"
+        changeLabel={t('metrics.vsPrevious')}
         isLoading={isLoading}
       />
 
       {/* Occupancy Rate */}
       <MetricCard
-        title="Stopnja Zasedenosti"
+        title={t('metrics.occupancyRate')}
         value={`${(metrics?.occupancyRate ?? 0).toFixed(1)}%`}
-        subtitle="Delovnega časa"
+        subtitle={t('metrics.workingTime')}
         icon={<Clock className="h-6 w-6" weight="bold" />}
         iconColor="mediumGray"
         progressBar={metrics?.occupancyRate ?? 0}
@@ -82,9 +84,9 @@ function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCards
 
       {/* Completion Rate */}
       <MetricCard
-        title="Stopnja Zaključenih"
+        title={t('metrics.completionRate')}
         value={`${(metrics?.completionRate ?? 0).toFixed(1)}%`}
-        subtitle="Terminov"
+        subtitle={t('metrics.appointments')}
         icon={<CheckCircle className="h-6 w-6" weight="bold" />}
         iconColor="slate"
         progressBar={metrics?.completionRate ?? 0}

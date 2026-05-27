@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CalendarBlank } from '@phosphor-icons/react';
 import { format } from 'date-fns';
+import { useTranslations } from 'next-intl';
 import { type TimePeriod, type CustomRange } from '@/lib/analytics/dateUtils';
 
 interface AnalyticsHeaderProps {
@@ -14,15 +15,6 @@ interface AnalyticsHeaderProps {
   onExportCSV?: () => void;
 }
 
-const TIME_PERIODS: { value: TimePeriod; label: string }[] = [
-  { value: 'danes', label: 'Danes' },
-  { value: 'ta_teden', label: 'Ta Teden' },
-  { value: 'ta_mesec', label: 'Ta Mesec' },
-  { value: 'zadnjih_30', label: 'Zadnjih 30 Dni' },
-  { value: 'ta_leto', label: 'Letos' },
-  { value: 'custom', label: 'Obdobje po Meri' },
-];
-
 function AnalyticsHeader({
   timePeriod,
   setTimePeriod,
@@ -30,8 +22,18 @@ function AnalyticsHeader({
   setCustomRange,
   onExportCSV,
 }: AnalyticsHeaderProps) {
+  const t = useTranslations('analytics');
+
+  const TIME_PERIODS: { value: TimePeriod; label: string }[] = [
+    { value: 'danes', label: t('periods.danes') },
+    { value: 'ta_teden', label: t('periods.ta_teden') },
+    { value: 'ta_mesec', label: t('periods.ta_mesec') },
+    { value: 'zadnjih_30', label: t('periods.zadnjih_30') },
+    { value: 'ta_leto', label: t('periods.ta_leto') },
+    { value: 'custom', label: t('periods.custom') },
+  ];
+
   const handleApplyCustomRange = () => {
-    // Custom range is already set, just close the picker by changing to custom
     setTimePeriod('custom');
   };
 
@@ -40,8 +42,8 @@ function AnalyticsHeader({
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* Title */}
         <div>
-          <h1 className="text-2xl font-normal text-[#1A1F36]">Analitika</h1>
-          <p className="mt-1 text-gray-600">Pregled poslovanja in ključnih metrik</p>
+          <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
+          <p className="mt-1 text-gray-600">{t('page.subtitle')}</p>
         </div>
 
       </div>
@@ -76,7 +78,9 @@ function AnalyticsHeader({
           >
             <div className="flex flex-wrap items-end gap-4 rounded-xl bg-gray-50 p-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Od:</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  {t('customRange.fromLabel')}
+                </label>
                 <div className="relative">
                   <CalendarBlank className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <input
@@ -93,7 +97,9 @@ function AnalyticsHeader({
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">Do:</label>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  {t('customRange.toLabel')}
+                </label>
                 <div className="relative">
                   <CalendarBlank className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                   <input
@@ -116,7 +122,7 @@ function AnalyticsHeader({
                 disabled={!customRange.start || !customRange.end}
                 className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-700 disabled:opacity-50"
               >
-                Uporabi
+                {t('customRange.applyButton')}
               </motion.button>
             </div>
           </motion.div>
