@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
 import { joinCompany, type JoinCompanyResult } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
@@ -67,13 +68,14 @@ type JoinRole = null | 'admin' | 'employee';
 
 export default function JoinCompanyPage() {
   const router = useRouter();
+  const t = useTranslations('onboarding');
   const [selectedRole, setSelectedRole] = useState<JoinRole>(null);
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleJoin = async () => {
     if (!joinCode.trim()) {
-      toast.error(selectedRole === 'admin' ? 'Vnesite kodo za admine' : 'Vnesite kodo za zaposlene');
+      toast.error(selectedRole === 'admin' ? t('join.toasts.noCode') : t('join.toasts.noCodeEmployee'));
       return;
     }
 
@@ -86,7 +88,7 @@ export default function JoinCompanyPage() {
 
       if (result.code === 'NO_FREE_USER_SLOT') {
         const redirectUrl = result.redirect_url || 'https://app.jedroplus.com/billing';
-        toast.error(result.message || 'Podjetje nima več prostih uporabniških mest.');
+        toast.error(result.message || t('join.toasts.noFreeSlot'));
         setTimeout(() => {
           window.location.href = redirectUrl;
         }, 1500);
@@ -96,7 +98,7 @@ export default function JoinCompanyPage() {
       if (result.ok) {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-          toast.error('Niste prijavljeni');
+          toast.error(t('join.toasts.notLoggedIn'));
           setLoading(false);
           return;
         }
@@ -127,7 +129,7 @@ export default function JoinCompanyPage() {
             if (profileLookup.uuid) {
               companyUUID = profileLookup.uuid;
             } else {
-              toast.error('Podjetje še ni povezano s profilom. Poskusite znova čez nekaj sekund.');
+              toast.error(t('join.toasts.profileNotLinked'));
               setLoading(false);
               return;
             }
@@ -140,7 +142,7 @@ export default function JoinCompanyPage() {
 
         if (!companyUUID) {
           console.error('Join company: missing company UUID in response', result);
-          toast.error('Prišlo je do napake pri pridruževanju');
+          toast.error(t('join.toasts.errorJoin'));
           setLoading(false);
           return;
         }
@@ -153,7 +155,7 @@ export default function JoinCompanyPage() {
 
           if (profileError) {
             console.error('Join company: failed to update profile', profileError);
-            toast.error('Prišlo je do napake pri shranjevanju profila');
+            toast.error(t('join.toasts.errorProfile'));
             setLoading(false);
             return;
           }
@@ -178,7 +180,7 @@ export default function JoinCompanyPage() {
         }
 
         if (!companyPublicId) {
-          toast.error('Prišlo je do napake pri nalaganju podjetja');
+          toast.error(t('join.toasts.errorLoad'));
           setLoading(false);
           return;
         }
@@ -189,26 +191,26 @@ export default function JoinCompanyPage() {
         document.cookie = `company_id=${companyPublicId}; path=/; max-age=31536000`;
 
         if (companyName) {
-          toast.success(`Pridružili ste se podjetju ${companyName}!`);
+          toast.success(t('join.toasts.successWithName', { name: companyName }));
         } else {
-          toast.success('Pridružili ste se podjetju!');
+          toast.success(t('join.toasts.success'));
         }
         setTimeout(() => {
           window.location.href = '/dashboard';
         }, 500);
       } else {
         if (result.reason === 'invalid_join_code') {
-          toast.error('Koda podjetja ni pravilna');
+          toast.error(t('join.toasts.invalidCode'));
         } else if (result.reason === 'company_not_found') {
-          toast.error('Podjetje s tem ID-jem ne obstaja');
+          toast.error(t('join.toasts.companyNotFound'));
         } else {
-          toast.error(result.reason || 'Prišlo je do napake pri pridruževanju');
+          toast.error(result.reason || t('join.toasts.errorJoin'));
         }
         setLoading(false);
       }
     } catch (error) {
       console.error('Join company error:', error);
-      toast.error('Prišlo je do napake pri pridruževanju');
+      toast.error(t('join.toasts.errorJoin'));
       setLoading(false);
     }
   };
@@ -221,10 +223,10 @@ export default function JoinCompanyPage() {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-3">
-              Pridruži se podjetju
+              {t('join.title')}
             </h1>
             <p className="text-lg text-gray-600">
-              Izberite način pridružitve
+              {t('join.subtitle')}
             </p>
           </div>
 
@@ -242,16 +244,16 @@ export default function JoinCompanyPage() {
 
               <div className="mt-16">
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  Pridruži se kot Admin
+                  {t('join.admin.title')}
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Imate enake privilegije kot lastnik. Dostop do vseh podatkov podjetja, nastavitev, zaposlenih in analitike.
+                  {t('join.admin.description')}
                 </p>
                 <p className="text-xs text-gray-400 mb-6">
-                  Potrebujete kodo za admine od lastnika podjetja.
+                  {t('join.admin.note')}
                 </p>
                 <div className="text-violet-600 font-semibold group-hover:translate-x-2 transition-transform duration-300 inline-flex items-center gap-2">
-                  Nadaljuj
+                  {t('join.admin.cta')}
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -272,16 +274,16 @@ export default function JoinCompanyPage() {
 
               <div className="mt-16">
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  Pridruži se kot Zaposleni
+                  {t('join.employee.title')}
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  Vidite le svoje podatke, termine in stranke. Dostop je omejen in ga lahko administrator dodatno konfigurira.
+                  {t('join.employee.description')}
                 </p>
                 <p className="text-xs text-gray-400 mb-6">
-                  Potrebujete kodo za zaposlene od administratorja.
+                  {t('join.employee.note')}
                 </p>
                 <div className="text-cyan-600 font-semibold group-hover:translate-x-2 transition-transform duration-300 inline-flex items-center gap-2">
-                  Nadaljuj
+                  {t('join.employee.cta')}
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -296,7 +298,7 @@ export default function JoinCompanyPage() {
               onClick={() => router.push('/onboarding')}
               className="text-gray-500 hover:text-gray-700 font-medium transition-colors"
             >
-              Nazaj
+              {t('join.back')}
             </button>
           </div>
         </div>
@@ -311,19 +313,16 @@ export default function JoinCompanyPage() {
     <div className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">
-          {isAdmin ? 'Pridruži se kot Admin' : 'Pridruži se kot Zaposleni'}
+          {isAdmin ? t('join.form.adminTitle') : t('join.form.employeeTitle')}
         </h1>
         <p className="text-center text-gray-500 mb-8 text-sm">
-          {isAdmin
-            ? 'Vnesite kodo za admine, ki ste jo prejeli od lastnika'
-            : 'Vnesite kodo za zaposlene, ki ste jo prejeli od administratorja'
-          }
+          {isAdmin ? t('join.form.adminSubtitle') : t('join.form.employeeSubtitle')}
         </p>
 
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 space-y-6">
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              {isAdmin ? 'Koda za admine' : 'Koda za zaposlene'}
+              {isAdmin ? t('join.form.adminCodeLabel') : t('join.form.employeeCodeLabel')}
             </label>
             <Input
               value={joinCode}
@@ -336,7 +335,7 @@ export default function JoinCompanyPage() {
               onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
             />
             <p className="text-xs text-gray-500 mt-2 text-center">
-              {isAdmin ? '8-mestna koda za admine' : '8-mestna koda za zaposlene'}
+              {isAdmin ? t('join.form.adminCodeHint') : t('join.form.employeeCodeHint')}
             </p>
           </div>
 
@@ -350,7 +349,7 @@ export default function JoinCompanyPage() {
                 : 'linear-gradient(to right, #06B6D4, #8B5CF6)',
             }}
           >
-            {loading ? 'Pridružujem...' : 'Pridruži se'}
+            {loading ? t('join.form.submitting') : t('join.form.submit')}
           </button>
 
           <button
@@ -358,7 +357,7 @@ export default function JoinCompanyPage() {
             disabled={loading}
             className="w-full h-12 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Nazaj
+            {t('join.back')}
           </button>
         </div>
       </div>

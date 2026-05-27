@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabaseClient';
 
 const STORAGE_KEY = "jedroplus_company_id";
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const t = useTranslations('onboarding');
   const [checking, setChecking] = useState(true);
 
   // Check if user already has a company
@@ -67,7 +69,6 @@ export default function OnboardingPage() {
     checkUserCompany();
   }, [router]);
 
-  // Show loading while checking - minimalist white bg + gradient spinner
   if (checking) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -84,7 +85,7 @@ export default function OnboardingPage() {
               <circle cx="25" cy="25" r="20" fill="none" stroke="url(#spinner-gradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray="80 50" />
             </svg>
           </div>
-          <p className="text-gray-500 text-sm">Preverjam...</p>
+          <p className="text-gray-500 text-sm">{t('entry.loading')}</p>
         </div>
       </div>
     );
@@ -96,7 +97,7 @@ export default function OnboardingPage() {
         {/* Header - no J+ symbol, just text */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-3">
-            Dobrodošli v{' '}
+            {t('entry.title')}{' '}
             <span
               style={{
                 background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
@@ -108,7 +109,7 @@ export default function OnboardingPage() {
             </span>
           </h1>
           <p className="text-lg text-gray-600">
-            Začnite z ustvarjanjem ali pridružitvijo podjetju
+            {t('entry.subtitle')}
           </p>
         </div>
 
@@ -126,13 +127,13 @@ export default function OnboardingPage() {
 
             <div className="mt-16">
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                Ustvari novo podjetje
+                {t('entry.create.title')}
               </h3>
               <p className="text-gray-600 mb-6">
-                Začnite z novim podjetjem in povabite svoje zaposlene
+                {t('entry.create.description')}
               </p>
               <div className="text-violet-600 font-semibold group-hover:translate-x-2 transition-transform duration-300 inline-flex items-center gap-2">
-                Začni
+                {t('entry.create.cta')}
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
@@ -153,13 +154,13 @@ export default function OnboardingPage() {
 
             <div className="mt-16">
               <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                Pridruži se podjetju
+                {t('entry.join.title')}
               </h3>
               <p className="text-gray-600 mb-6">
-                Imate ID in kodo podjetja? Pridružite se obstoječemu podjetju
+                {t('entry.join.description')}
               </p>
               <div className="text-cyan-600 font-semibold group-hover:translate-x-2 transition-transform duration-300 inline-flex items-center gap-2">
-                Pridruži se
+                {t('entry.join.cta')}
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

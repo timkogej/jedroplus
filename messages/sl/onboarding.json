@@ -1,1 +1,158 @@
-{}
+{
+  "entry": {
+    "loading": "Preverjam...",
+    "title": "Dobrodošli v",
+    "subtitle": "Začnite z ustvarjanjem ali pridružitvijo podjetju",
+    "create": {
+      "title": "Ustvari novo podjetje",
+      "description": "Začnite z novim podjetjem in povabite svoje zaposlene",
+      "cta": "Začni"
+    },
+    "join": {
+      "title": "Pridruži se podjetju",
+      "description": "Imate ID in kodo podjetja? Pridružite se obstoječemu podjetju",
+      "cta": "Pridruži se"
+    }
+  },
+  "create": {
+    "title": "Ustvari podjetje",
+    "steps": {
+      "localization": "Lokalizacija",
+      "companyName": "Ime podjetja",
+      "industry": "Panoga",
+      "schedule": "Delovni urnik"
+    },
+    "localization": {
+      "countryLabel": "Država",
+      "languageLabel": "Jezik"
+    },
+    "companyName": {
+      "label": "Ime podjetja",
+      "placeholder": "Jedro Plus d.o.o."
+    },
+    "industry": {
+      "label": "Panoga / dejavnost",
+      "customLabel": "Opišite svojo dejavnost",
+      "customPlaceholder": "npr. Moja specifična dejavnost…"
+    },
+    "schedule": {
+      "hint": "Delovni urnik lahko kadarkoli spremenite v nastavitvah podjetja.",
+      "closed": "Zaprto"
+    },
+    "nav": {
+      "back": "Nazaj",
+      "next": "Naprej",
+      "finish": "Ustvari",
+      "creating": "Ustvarjam..."
+    },
+    "success": {
+      "title": "Podjetje je ustvarjeno",
+      "subtitle": "Vaše podjetje je pripravljeno za uporabo",
+      "goToDashboard": "Pojdi na Dashboard"
+    },
+    "toasts": {
+      "success": "Podjetje uspešno ustvarjeno!",
+      "errorCreate": "Prišlo je do napake pri ustvarjanju podjetja",
+      "errorLoad": "Prišlo je do napake pri nalaganju podjetja. Prosimo, poskusite znova."
+    },
+    "countries": {
+      "si": "Slovenija",
+      "hr": "Hrvaška",
+      "rs": "Srbija",
+      "ba": "Bosna in Hercegovina",
+      "me": "Črna Gora",
+      "mk": "Severna Makedonija",
+      "at": "Avstrija",
+      "de": "Nemčija",
+      "it": "Italija",
+      "hu": "Madžarska",
+      "cz": "Češka",
+      "sk": "Slovaška",
+      "pl": "Poljska",
+      "ro": "Romunija",
+      "bg": "Bolgarija",
+      "fr": "Francija",
+      "es": "Španija",
+      "pt": "Portugalska",
+      "nl": "Nizozemska",
+      "be": "Belgija",
+      "ch": "Švica",
+      "gb": "Združeno kraljestvo",
+      "us": "Združene države Amerike",
+      "ca": "Kanada",
+      "au": "Avstralija",
+      "other": "Drugo"
+    },
+    "languages": {
+      "slo": "Slovenščina",
+      "eng": "English"
+    },
+    "industries": {
+      "hairSalons": "Frizerstvo",
+      "cosmeticsAndSkincare": "Kozmetika in nega",
+      "massageAndWellness": "Masaže in wellness",
+      "dentistry": "Zobozdravstvo",
+      "medicineAndHealth": "Medicina in zdravstvo",
+      "physiotherapy": "Fizioterapija",
+      "psychologyAndCoaching": "Psihologija in coaching",
+      "veterinary": "Veterina",
+      "personalTrainingFitness": "Osebno treniranje / fitnes",
+      "yogaAndPilates": "Yoga in pilates",
+      "beautySalon": "Lepotni salon",
+      "manicureAndPedicure": "Manikura in pedikura",
+      "tattoosAndPiercings": "Tetovaže in piercings",
+      "architectureAndDesign": "Arhitektura in oblikovanje",
+      "photography": "Fotografija",
+      "lawAndConsulting": "Pravo in svetovanje",
+      "accounting": "Računovodstvo",
+      "itServices": "IT storitve",
+      "educationAndTutoring": "Izobraževanje in poučevanje",
+      "carService": "Avtoservis",
+      "cleaningAndMaintenance": "Čiščenje in vzdrževanje",
+      "other": "Drugo"
+    }
+  },
+  "join": {
+    "title": "Pridruži se podjetju",
+    "subtitle": "Izberite način pridružitve",
+    "admin": {
+      "title": "Pridruži se kot Admin",
+      "description": "Imate enake privilegije kot lastnik. Dostop do vseh podatkov podjetja, nastavitev, zaposlenih in analitike.",
+      "note": "Potrebujete kodo za admine od lastnika podjetja.",
+      "cta": "Nadaljuj"
+    },
+    "employee": {
+      "title": "Pridruži se kot Zaposleni",
+      "description": "Vidite le svoje podatke, termine in stranke. Dostop je omejen in ga lahko administrator dodatno konfigurira.",
+      "note": "Potrebujete kodo za zaposlene od administratorja.",
+      "cta": "Nadaljuj"
+    },
+    "back": "Nazaj",
+    "form": {
+      "adminTitle": "Pridruži se kot Admin",
+      "employeeTitle": "Pridruži se kot Zaposleni",
+      "adminSubtitle": "Vnesite kodo za admine, ki ste jo prejeli od lastnika",
+      "employeeSubtitle": "Vnesite kodo za zaposlene, ki ste jo prejeli od administratorja",
+      "adminCodeLabel": "Koda za admine",
+      "employeeCodeLabel": "Koda za zaposlene",
+      "adminCodeHint": "8-mestna koda za admine",
+      "employeeCodeHint": "8-mestna koda za zaposlene",
+      "submit": "Pridruži se",
+      "submitting": "Pridružujem..."
+    },
+    "toasts": {
+      "noCode": "Vnesite kodo za admine",
+      "noCodeEmployee": "Vnesite kodo za zaposlene",
+      "noFreeSlot": "Podjetje nima več prostih uporabniških mest.",
+      "notLoggedIn": "Niste prijavljeni",
+      "profileNotLinked": "Podjetje še ni povezano s profilom. Poskusite znova čez nekaj sekund.",
+      "errorJoin": "Prišlo je do napake pri pridruževanju",
+      "errorProfile": "Prišlo je do napake pri shranjevanju profila",
+      "errorLoad": "Prišlo je do napake pri nalaganju podjetja",
+      "successWithName": "Pridružili ste se podjetju {name}!",
+      "success": "Pridružili ste se podjetju!",
+      "invalidCode": "Koda podjetja ni pravilna",
+      "companyNotFound": "Podjetje s tem ID-jem ne obstaja"
+    }
+  }
+}
