@@ -18,6 +18,7 @@ import ClientSearch from '@/components/appointments/ClientSearch';
 import type { Client } from '@/lib/supabase/clients';
 import type { Storitev, Zaposleni, AppointmentWithDetails } from '@/types/appointments';
 import { minutesToTime, parseTimeToMinutes } from '@/lib/utils/calendar';
+import { useTranslations } from 'next-intl';
 
 export type ModalMode = 'view' | 'edit' | 'create';
 
@@ -48,14 +49,6 @@ interface CalendarAppointmentModalProps {
   onCreateClient?: () => void;
 }
 
-const STATUS_OPTIONS = [
-  { value: 'scheduled', label: 'Načrtovan', color: '#8B5CF6' },
-  { value: 'confirmed', label: 'Potrjen', color: '#10B981' },
-  { value: 'pending', label: 'Čakajoč', color: '#F59E0B' },
-  { value: 'completed', label: 'Zaključen', color: '#3B82F6' },
-  { value: 'cancelled', label: 'Odpovedan', color: '#EF4444' },
-  { value: 'no_show', label: 'Ni prišel', color: '#6B7280' },
-];
 
 // Generate time options from 5:30 to 23:00 in 15-minute intervals
 function generateTimeOptions(): { value: string; label: string }[] {
@@ -258,19 +251,19 @@ function CalendarAppointmentModal({
     const newErrors: Record<string, string> = {};
 
     if (!formData.datum) {
-      newErrors.datum = 'Datum je obvezen';
+      newErrors.datum = t('modal.validation.dateRequired');
     }
     if (!formData.cas_zacetek) {
-      newErrors.cas_zacetek = 'Čas začetka je obvezen';
+      newErrors.cas_zacetek = t('modal.validation.startTimeRequired');
     }
     if (!formData.stranka_id && !formData.stranka_ime) {
-      newErrors.stranka = 'Stranka je obvezna';
+      newErrors.stranka = t('modal.validation.clientRequired');
     }
     if (!formData.storitev_id) {
-      newErrors.storitev_id = 'Storitev je obvezna';
+      newErrors.storitev_id = t('modal.validation.serviceRequired');
     }
     if (!formData.zaposleni_id) {
-      newErrors.zaposleni_id = 'Zaposleni je obvezen';
+      newErrors.zaposleni_id = t('modal.validation.employeeRequired');
     }
 
     setErrors(newErrors);
@@ -300,6 +293,17 @@ function CalendarAppointmentModal({
     exit: { opacity: 0, scale: 0.95, y: 20 },
   };
 
+  const t = useTranslations('appointments');
+
+  const STATUS_OPTIONS = [
+    { value: 'scheduled', label: t('status.scheduled'), color: '#8B5CF6' },
+    { value: 'confirmed', label: t('status.confirmed'), color: '#10B981' },
+    { value: 'pending', label: t('status.pending'), color: '#F59E0B' },
+    { value: 'completed', label: t('status.completed'), color: '#3B82F6' },
+    { value: 'cancelled', label: t('status.cancelled'), color: '#EF4444' },
+    { value: 'no_show', label: t('status.noShow'), color: '#6B7280' },
+  ];
+
   const isViewMode = mode === 'view';
 
   return (
@@ -325,10 +329,10 @@ function CalendarAppointmentModal({
             <div className="bg-gradient-to-r from-violet-500 to-cyan-500 p-6">
               <div>
                 <h2 className="text-xl font-semibold text-white">
-                  {mode === 'create' ? 'Nov termin' : mode === 'edit' ? 'Uredi termin' : 'Podrobnosti termina'}
+                  {mode === 'create' ? t('modal.title.create') : mode === 'edit' ? t('modal.title.edit') : t('modal.title.view')}
                 </h2>
                 <p className="mt-1 text-sm text-white/80">
-                  {mode === 'create' ? 'Ustvarite nov termin' : 'Pregled in urejanje termina'}
+                  {mode === 'create' ? t('calendarView.appointmentModal.subtitles.create') : t('calendarView.appointmentModal.subtitles.viewEdit')}
                 </p>
               </div>
             </div>
@@ -340,14 +344,14 @@ function CalendarAppointmentModal({
                 <div>
                   <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#1A1F36]">
                     <CalendarBlank className="h-4 w-4" weight="regular" />
-                    Podatki o terminu
+                    {t('calendarView.appointmentModal.sections.appointmentData')}
                   </h3>
 
                   <div className="space-y-4">
                     {/* Date */}
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                        Datum
+                        {t('modal.fields.date')}
                       </label>
                       <input
                         type="date"
@@ -368,7 +372,7 @@ function CalendarAppointmentModal({
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                          Čas začetka
+                          {t('modal.fields.startTime')}
                         </label>
                         <Select
                           value={formData.cas_zacetek}
@@ -381,7 +385,7 @@ function CalendarAppointmentModal({
                               cas_konec: calculateEndTime(value, duration),
                             }));
                           }}
-                          placeholder="Izberi čas"
+                          placeholder={t('calendarView.appointmentModal.fields.timePlaceholder')}
                           disabled={isViewMode}
                         >
                           {TIME_OPTIONS.map(option => (
@@ -396,7 +400,7 @@ function CalendarAppointmentModal({
                       </div>
                       <div>
                         <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                          Čas konca
+                          {t('modal.fields.endTime')}
                         </label>
                         <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-600">
                           <Clock className="h-4 w-4" weight="regular" />
@@ -408,12 +412,12 @@ function CalendarAppointmentModal({
                     {/* Service - uses filtered list */}
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                        Storitev
+                        {t('modal.fields.service')}
                       </label>
                       <Select
                         value={formData.storitev_id || ''}
                         setValue={handleServiceChange}
-                        placeholder="Izberi storitev"
+                        placeholder={t('modal.placeholders.service')}
                         disabled={isViewMode}
                       >
                         {filteredServices.map((service, idx) => (
@@ -435,12 +439,12 @@ function CalendarAppointmentModal({
                     {/* Employee - uses filtered list and proper handler */}
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                        Zaposleni
+                        {t('modal.fields.employee')}
                       </label>
                       <Select
                         value={formData.zaposleni_id || ''}
                         setValue={(value) => handleEmployeeChange(value || null)}
-                        placeholder="Izberi zaposlenega"
+                        placeholder={t('modal.placeholders.employee')}
                         disabled={isViewMode}
                       >
                         {filteredEmployees.map((employee, idx) => (
@@ -457,12 +461,12 @@ function CalendarAppointmentModal({
                     {/* Status */}
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                        Status
+                        {t('modal.fields.status')}
                       </label>
                       <Select
                         value={formData.status}
                         setValue={(value) => setFormData(prev => ({ ...prev, status: value }))}
-                        placeholder="Izberi status"
+                        placeholder={t('modal.placeholders.status')}
                         disabled={isViewMode}
                       >
                         {STATUS_OPTIONS.map(option => (
@@ -480,14 +484,14 @@ function CalendarAppointmentModal({
                     {/* Notes */}
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-gray-500">
-                        Opombe
+                        {t('modal.fields.notes')}
                       </label>
                       <textarea
                         value={formData.opombe}
                         onChange={(e) => setFormData(prev => ({ ...prev, opombe: e.target.value }))}
                         disabled={isViewMode}
                         rows={3}
-                        placeholder="Dodatne opombe..."
+                        placeholder={t('modal.notesPlaceholder')}
                         className={`w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm
                                    text-[#1A1F36] placeholder-gray-400 transition-all resize-none
                                    focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20
@@ -504,19 +508,19 @@ function CalendarAppointmentModal({
                 <div>
                   <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#1A1F36]">
                     <User className="h-4 w-4" weight="regular" />
-                    Podatki o stranki
+                    {t('calendarView.appointmentModal.sections.clientData')}
                   </h3>
 
                   {isViewMode ? (
                     <div className="rounded-xl bg-gray-50 p-4">
-                      <p className="font-medium text-[#1A1F36]">{formData.stranka_ime || 'Ni podatka'}</p>
+                      <p className="font-medium text-[#1A1F36]">{formData.stranka_ime || t('calendarView.appointmentModal.fields.noData')}</p>
                     </div>
                   ) : (
                     <div>
                       <ClientSearch
                         selectedClient={selectedClient}
                         onSelect={handleClientSelect}
-                        placeholder="Išči stranko po imenu, emailu ali telefonu..."
+                        placeholder={t('calendarView.appointmentModal.fields.clientSearch')}
                         onCreateNew={onCreateClient}
                       />
                       {errors.stranka && (
@@ -538,7 +542,7 @@ function CalendarAppointmentModal({
                 className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium
                            text-gray-700 transition-colors hover:bg-gray-50"
               >
-                {isViewMode ? 'Zapri' : 'Prekliči'}
+                {isViewMode ? t('calendarView.appointmentModal.actions.close') : t('calendarView.appointmentModal.actions.cancel')}
               </motion.button>
 
               {!isViewMode && (
@@ -556,12 +560,12 @@ function CalendarAppointmentModal({
                   {isSaving ? (
                     <>
                       <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                      Shranjujem...
+                      {t('calendarView.appointmentModal.actions.saving')}
                     </>
                   ) : (
                     <>
                       <FloppyDisk className="h-4 w-4" weight="bold" />
-                      Shrani termin
+                      {t('calendarView.appointmentModal.actions.saveAppointment')}
                     </>
                   )}
                 </motion.button>

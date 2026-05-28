@@ -24,6 +24,7 @@ import {
   JS_DAY_TO_SLOVENIAN,
   getOffHourRanges,
 } from '@/lib/utils/calendar';
+import { useTranslations } from 'next-intl';
 
 interface DayViewProps {
   currentDate: Date;
@@ -121,6 +122,8 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
 }
 
 function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true, isMobile = false, onAppointmentReschedule }: DayViewProps) {
+  const t = useTranslations('appointments');
+
   // Drag state
   const [dragging, setDragging] = useState<DragInfo | null>(null);
   const [ghostPos, setGhostPos] = useState<{ x: number; y: number } | null>(null);
@@ -290,7 +293,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
   if (skipDay) {
     return (
       <div className="flex h-full flex-col items-center justify-center text-center">
-        <p className="text-sm font-medium text-gray-400">{DAYS_FULL[currentDate.getDay()]} ni delovni dan</p>
+        <p className="text-sm font-medium text-gray-400">{t('calendarView.dayView.notWorkingDay', { day: DAYS_FULL[currentDate.getDay()] })}</p>
         <p className="text-xs text-gray-300 mt-1">{formatDate(currentDate, 'dayMonth')} {currentDate.getFullYear()}</p>
       </div>
     );
@@ -362,7 +365,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                   style={{ background: '#FFFBEB', borderRadius: '5px', padding: '3px 8px' }}
                 >
                   <span className="text-xs font-semibold truncate leading-tight" style={titleStyle}>
-                    {absence.employee_name || 'Vsi zaposleni'}
+                    {absence.employee_name || t('calendarView.allEmployees')}
                   </span>
                   {!isMobile && absence.reason && (
                     <span className="text-[10px] text-amber-600 truncate max-w-[80px]">{absence.reason}</span>
@@ -377,7 +380,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                 {dayAppointments.length}
               </span>
               <span className="text-xs text-gray-400">
-                {dayAppointments.length === 1 ? 'termin' : dayAppointments.length >= 2 && dayAppointments.length <= 4 ? 'termini' : 'terminov'}
+                {t('calendarView.dayView.appointmentNoun', { count: dayAppointments.length })}
               </span>
             </div>
           </div>
@@ -521,7 +524,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                             fontSize: '12px',
                             fontWeight: 600,
                           } : { fontSize: '12px', fontWeight: 600 }}>
-                            {employeeAbsence.employee_name || 'Vsi zaposleni'}
+                            {employeeAbsence.employee_name || t('calendarView.allEmployees')}
                           </p>
                           <div className="flex items-center gap-0.5 mt-0.5 overflow-hidden whitespace-nowrap" style={{ fontSize: '10px', fontWeight: 500, opacity: 0.88 }}>
                             <span>{fmt(visibleStart)}</span>
@@ -657,7 +660,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                     top: `${top}px`,
                     height: `${Math.max(height, 44)}px`,
                   }}
-                  title={`${absence.employee_name || 'Vsi zaposleni'}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${absence.reason ? ` · ${absence.reason}` : ''}`}
+                  title={`${absence.employee_name || t('calendarView.allEmployees')}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${absence.reason ? ` · ${absence.reason}` : ''}`}
                 >
                   <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#1A1F36' }}>
                     <p className="truncate leading-tight" style={absence.employee_color ? {
@@ -668,7 +671,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                       fontSize: '12px',
                       fontWeight: 600,
                     } : { fontSize: '12px', fontWeight: 600 }}>
-                      {absence.employee_name || 'Vsi zaposleni'}
+                      {absence.employee_name || t('calendarView.allEmployees')}
                     </p>
                     <div className="flex items-center gap-0.5 mt-0.5 overflow-hidden whitespace-nowrap" style={{ fontSize: '10px', fontWeight: 500, opacity: 0.88 }}>
                       <span>{fmt(visibleStart)}</span>
@@ -704,7 +707,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                       />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-gray-500">Ni terminov za ta dan</p>
+                  <p className="text-sm font-medium text-gray-500">{t('calendarView.dayView.noAppointmentsToday')}</p>
                 </div>
               </div>
             )}

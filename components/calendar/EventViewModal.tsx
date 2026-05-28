@@ -16,6 +16,7 @@ import {
 } from '@phosphor-icons/react';
 import type { CalendarEvent } from '@/types/events';
 import { extractFirstColorStop } from '@/lib/utils/eventColors';
+import { useTranslations } from 'next-intl';
 
 interface EventViewModalProps {
   isOpen: boolean;
@@ -49,6 +50,7 @@ function EventViewModal({
   onDelete,
   isDeleting = false,
 }: EventViewModalProps) {
+  const t = useTranslations('appointments');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleDeleteConfirm = useCallback(async () => {
@@ -139,7 +141,7 @@ function EventViewModal({
                     {formatDateRange(event.event_date, event.end_date)}
                   </p>
                   {event.all_day ? (
-                    <p className="text-xs text-gray-400 mt-0.5">Celodnevni dogodek</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{t('calendarView.eventModal.fields.allDay')}</p>
                   ) : event.start_time ? (
                     <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
                       <Clock style={{ width: 12, height: 12 }} weight="regular" />
@@ -199,11 +201,11 @@ function EventViewModal({
                              transition-all hover:bg-red-50 disabled:opacity-50"
                 >
                   <Trash style={{ width: 16, height: 16 }} weight="bold" />
-                  Izbriši
+                  {t('calendarView.eventModal.actions.delete')}
                 </button>
               ) : (
                 <div className="flex items-center gap-2 flex-1">
-                  <span className="text-sm text-red-500 font-medium">Potrdi izbris?</span>
+                  <span className="text-sm text-red-500 font-medium">{t('calendarView.eventModal.actions.confirmDelete')}</span>
                   <button
                     type="button"
                     onClick={handleDeleteConfirm}
@@ -216,14 +218,14 @@ function EventViewModal({
                     ) : (
                       <Trash style={{ width: 14, height: 14 }} weight="bold" />
                     )}
-                    Da, izbriši
+                    {t('calendarView.eventModal.actions.confirmYes')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(false)}
                     className="rounded-xl px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
                   >
-                    Ne
+                    {t('calendarView.absenceDetailModal.actions.confirmNo')}
                   </button>
                 </div>
               )}
@@ -242,7 +244,7 @@ function EventViewModal({
                     }}
                   >
                     <PencilSimple style={{ width: 16, height: 16 }} weight="bold" />
-                    Uredi
+                    {t('calendarView.eventModal.actions.edit')}
                   </button>
                 </>
               )}

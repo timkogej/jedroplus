@@ -16,6 +16,7 @@ import {
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { Absence } from '@/lib/supabase/appointments';
 import type { Zaposleni } from '@/types/appointments';
+import { useTranslations } from 'next-intl';
 
 interface AbsenceDetailModalProps {
   isOpen: boolean;
@@ -80,6 +81,8 @@ function AbsenceDetailModal({
   isDeleting = false,
   isSaving = false,
 }: AbsenceDetailModalProps) {
+  const t = useTranslations('appointments');
+
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -124,9 +127,9 @@ function AbsenceDetailModal({
   const handleSaveEdit = useCallback(async () => {
     if (!absence) return;
     const errs: string[] = [];
-    if (!editDateFrom) errs.push('Izberite datum začetka');
-    if (!editSingleDay && editDateTo < editDateFrom) errs.push('Datum konca mora biti po datumu začetka');
-    if (editSingleDay && editTimeFrom >= editTimeTo) errs.push('Čas konca mora biti po času začetka');
+    if (!editDateFrom) errs.push(t('calendarView.absenceModal.validation.startDateRequired'));
+    if (!editSingleDay && editDateTo < editDateFrom) errs.push(t('calendarView.absenceModal.validation.endDateAfterStart'));
+    if (editSingleDay && editTimeFrom >= editTimeTo) errs.push(t('calendarView.absenceModal.validation.endTimeAfterStart'));
     if (errs.length > 0) { setEditErrors(errs); return; }
 
     await onEdit(absence, {
@@ -187,9 +190,9 @@ function AbsenceDetailModal({
                     backgroundClip: 'text',
                   }}
                 >
-                  {absence.employee_name || 'Vsi zaposleni'}
+                  {absence.employee_name || t('calendarView.allEmployees')}
                 </h2>
-                <p className="text-xs text-amber-700 mt-0.5">Odsotnost</p>
+                <p className="text-xs text-amber-700 mt-0.5">{t('calendarView.absenceDetailModal.subtitle')}</p>
               </div>
               <button
                 type="button"
@@ -253,21 +256,21 @@ function AbsenceDetailModal({
                       onClick={() => setEditSingleDay(true)}
                       className={`flex-1 py-2 rounded-xl border text-xs font-medium transition-all ${editSingleDay ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-amber-700 border-amber-200'}`}
                     >
-                      Samo ure
+                      {t('calendarView.absenceModal.fields.hoursOnly')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setEditSingleDay(false)}
                       className={`flex-1 py-2 rounded-xl border text-xs font-medium transition-all ${!editSingleDay ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-amber-700 border-amber-200'}`}
                     >
-                      Več dni
+                      {t('calendarView.absenceModal.fields.multipleDays')}
                     </button>
                   </div>
 
                   {/* Date */}
                   <div className={editSingleDay ? '' : 'grid grid-cols-2 gap-2'}>
                     <div>
-                      <label className="text-xs font-medium text-amber-800 mb-1 block">{editSingleDay ? 'Datum' : 'Od datuma'}</label>
+                      <label className="text-xs font-medium text-amber-800 mb-1 block">{editSingleDay ? t('calendarView.absenceModal.fields.date') : t('calendarView.absenceModal.fields.dateFrom')}</label>
                       <input
                         type="date"
                         value={editDateFrom}
@@ -277,7 +280,7 @@ function AbsenceDetailModal({
                     </div>
                     {!editSingleDay && (
                       <div>
-                        <label className="text-xs font-medium text-amber-800 mb-1 block">Do datuma</label>
+                        <label className="text-xs font-medium text-amber-800 mb-1 block">{t('calendarView.absenceModal.fields.dateTo')}</label>
                         <input
                           type="date"
                           value={editDateTo}
@@ -293,15 +296,15 @@ function AbsenceDetailModal({
                   {editSingleDay && (
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-xs font-medium text-amber-800 mb-1 block">Od ure</label>
-                        <Select value={editTimeFrom} setValue={setEditTimeFrom} placeholder="Izberi uro">
-                          {TIME_OPTIONS.map((t) => <SelectOption key={t} value={t}>{t}</SelectOption>)}
+                        <label className="text-xs font-medium text-amber-800 mb-1 block">{t('calendarView.absenceModal.fields.timeFrom')}</label>
+                        <Select value={editTimeFrom} setValue={setEditTimeFrom} placeholder={t('calendarView.absenceModal.fields.timePlaceholder')}>
+                          {TIME_OPTIONS.map((time) => <SelectOption key={time} value={time}>{time}</SelectOption>)}
                         </Select>
                       </div>
                       <div>
-                        <label className="text-xs font-medium text-amber-800 mb-1 block">Do ure</label>
-                        <Select value={editTimeTo} setValue={setEditTimeTo} placeholder="Izberi uro">
-                          {TIME_OPTIONS.map((t) => <SelectOption key={t} value={t}>{t}</SelectOption>)}
+                        <label className="text-xs font-medium text-amber-800 mb-1 block">{t('calendarView.absenceModal.fields.timeTo')}</label>
+                        <Select value={editTimeTo} setValue={setEditTimeTo} placeholder={t('calendarView.absenceModal.fields.timePlaceholder')}>
+                          {TIME_OPTIONS.map((time) => <SelectOption key={time} value={time}>{time}</SelectOption>)}
                         </Select>
                       </div>
                     </div>
@@ -309,7 +312,7 @@ function AbsenceDetailModal({
 
                   {/* Reason */}
                   <div>
-                    <label className="text-xs font-medium text-amber-800 mb-1 block">Razlog</label>
+                    <label className="text-xs font-medium text-amber-800 mb-1 block">{t('calendarView.absenceModal.fields.reason')}</label>
                     <textarea
                       value={editReason}
                       onChange={(e) => setEditReason(e.target.value)}
@@ -338,11 +341,11 @@ function AbsenceDetailModal({
                       className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 transition-all disabled:opacity-50"
                     >
                       <Trash className="h-4 w-4" weight="bold" />
-                      Izbriši odsotnost
+                      {t('calendarView.absenceDetailModal.actions.deleteAbsence')}
                     </button>
                   ) : (
                     <div className="flex items-center gap-2 flex-1">
-                      <span className="text-sm text-red-500 font-medium">Potrdi izbris?</span>
+                      <span className="text-sm text-red-500 font-medium">{t('calendarView.eventModal.actions.confirmDelete')}</span>
                       <button
                         type="button"
                         onClick={handleDelete}
@@ -350,14 +353,14 @@ function AbsenceDetailModal({
                         className="flex items-center gap-1.5 rounded-xl bg-red-50 border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
                       >
                         {isDeleting ? <SpinnerGap className="h-3.5 w-3.5 animate-spin" /> : <Trash className="h-3.5 w-3.5" weight="bold" />}
-                        Da
+                        {t('calendarView.absenceDetailModal.actions.confirmYes')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setShowDeleteConfirm(false)}
                         className="rounded-xl px-3 py-1.5 text-sm font-medium text-amber-700 hover:bg-amber-100"
                       >
-                        Ne
+                        {t('calendarView.absenceDetailModal.actions.confirmNo')}
                       </button>
                     </div>
                   )}
@@ -369,7 +372,7 @@ function AbsenceDetailModal({
                       className="flex items-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow hover:bg-amber-600 transition-all"
                     >
                       <PencilSimple className="h-4 w-4" weight="bold" />
-                      Uredi odsotnost
+                      {t('calendarView.absenceDetailModal.actions.editAbsence')}
                     </button>
                   )}
                 </>
@@ -381,7 +384,7 @@ function AbsenceDetailModal({
                     disabled={isSaving}
                     className="rounded-xl px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-50"
                   >
-                    Prekliči
+                    {t('calendarView.absenceModal.actions.cancel')}
                   </button>
                   <div className="flex-1" />
                   <button
@@ -395,7 +398,7 @@ function AbsenceDetailModal({
                     ) : (
                       <FloppyDisk className="h-4 w-4" weight="bold" />
                     )}
-                    Shrani spremembe
+                    {t('calendarView.absenceDetailModal.actions.saveChanges')}
                   </button>
                 </>
               )}

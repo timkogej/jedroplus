@@ -12,6 +12,7 @@ import {
 } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { Zaposleni } from '@/types/appointments';
+import { useTranslations } from 'next-intl';
 
 interface AbsenceModalProps {
   isOpen: boolean;
@@ -63,6 +64,8 @@ function AbsenceModal({
   onSave,
   isSaving = false,
 }: AbsenceModalProps) {
+  const t = useTranslations('appointments');
+
   // Form state
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
   const [singleDay, setSingleDay] = useState(true);
@@ -95,23 +98,23 @@ function AbsenceModal({
     const newErrors: string[] = [];
 
     if (!selectedEmployeeId) {
-      newErrors.push('Izberite zaposlenega');
+      newErrors.push(t('calendarView.absenceModal.validation.employeeRequired'));
     }
 
     if (!dateFrom) {
-      newErrors.push('Izberite datum začetka');
+      newErrors.push(t('calendarView.absenceModal.validation.startDateRequired'));
     }
 
     if (!singleDay && !dateTo) {
-      newErrors.push('Izberite datum konca');
+      newErrors.push(t('calendarView.absenceModal.validation.endDateRequired'));
     }
 
     if (!singleDay && dateFrom && dateTo && dateFrom > dateTo) {
-      newErrors.push('Datum konca mora biti po datumu začetka');
+      newErrors.push(t('calendarView.absenceModal.validation.endDateAfterStart'));
     }
 
     if (singleDay && timeFrom && timeTo && timeFrom >= timeTo) {
-      newErrors.push('Čas konca mora biti po času začetka');
+      newErrors.push(t('calendarView.absenceModal.validation.endTimeAfterStart'));
     }
 
     setErrors(newErrors);
@@ -189,10 +192,10 @@ function AbsenceModal({
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-white">
-                    Dodaj odsotnost
+                    {t('calendarView.absenceModal.title')}
                   </h2>
                   <p className="mt-1 text-sm text-white/80">
-                    Označite dneve ali ure odsotnosti zaposlenega
+                    {t('calendarView.absenceModal.subtitle')}
                   </p>
                 </div>
                 <button
@@ -224,7 +227,7 @@ function AbsenceModal({
               {/* Employee Selection */}
               <div className="space-y-3">
                 <label className="text-sm font-medium text-[#1A1F36]">
-                  Zaposleni
+                  {t('calendarView.absenceModal.fields.employee')}
                 </label>
                 <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto overflow-x-hidden p-1">
                   {employees.map((employee, idx) => {
@@ -268,7 +271,7 @@ function AbsenceModal({
                              }`}
                 >
                   <Clock className="h-4 w-4" weight={singleDay ? 'fill' : 'regular'} />
-                  <span className="text-sm font-medium">Samo ure</span>
+                  <span className="text-sm font-medium">{t('calendarView.absenceModal.fields.hoursOnly')}</span>
                 </button>
                 <button
                   type="button"
@@ -280,7 +283,7 @@ function AbsenceModal({
                              }`}
                 >
                   <CalendarBlank className="h-4 w-4" weight={!singleDay ? 'fill' : 'regular'} />
-                  <span className="text-sm font-medium">Več dni</span>
+                  <span className="text-sm font-medium">{t('calendarView.absenceModal.fields.multipleDays')}</span>
                 </button>
               </div>
 
@@ -289,7 +292,7 @@ function AbsenceModal({
                 <div className={singleDay ? '' : 'grid grid-cols-1 gap-3 sm:grid-cols-2'}>
                   <div>
                     <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
-                      {singleDay ? 'Datum' : 'Od datuma'}
+                      {singleDay ? t('calendarView.absenceModal.fields.date') : t('calendarView.absenceModal.fields.dateFrom')}
                     </label>
                     <input
                       type="date"
@@ -302,7 +305,7 @@ function AbsenceModal({
                   {!singleDay && (
                     <div>
                       <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
-                        Do datuma
+                        {t('calendarView.absenceModal.fields.dateTo')}
                       </label>
                       <input
                         type="date"
@@ -321,7 +324,7 @@ function AbsenceModal({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="min-w-0">
                       <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
-                        Od ure
+                        {t('calendarView.absenceModal.fields.timeFrom')}
                       </label>
                       {isMobile ? (
                         <input
@@ -332,7 +335,7 @@ function AbsenceModal({
                                    focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                         />
                       ) : (
-                        <Select value={timeFrom} setValue={setTimeFrom} placeholder="Izberi uro">
+                        <Select value={timeFrom} setValue={setTimeFrom} placeholder={t('calendarView.absenceModal.fields.timePlaceholder')}>
                           {TIME_OPTIONS.map((time) => (
                             <SelectOption key={time} value={time}>{time}</SelectOption>
                           ))}
@@ -341,7 +344,7 @@ function AbsenceModal({
                     </div>
                     <div className="min-w-0">
                       <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
-                        Do ure
+                        {t('calendarView.absenceModal.fields.timeTo')}
                       </label>
                       {isMobile ? (
                         <input
@@ -352,7 +355,7 @@ function AbsenceModal({
                                    focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
                         />
                       ) : (
-                        <Select value={timeTo} setValue={setTimeTo} placeholder="Izberi uro">
+                        <Select value={timeTo} setValue={setTimeTo} placeholder={t('calendarView.absenceModal.fields.timePlaceholder')}>
                           {TIME_OPTIONS.map((time) => (
                             <SelectOption key={time} value={time}>{time}</SelectOption>
                           ))}
@@ -366,12 +369,12 @@ function AbsenceModal({
               {/* Reason */}
               <div>
                 <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
-                  Razlog (neobvezno)
+                  {t('calendarView.absenceModal.fields.reason')}
                 </label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="npr. Bolniška, dopust, izlet..."
+                  placeholder={t('calendarView.absenceModal.fields.reasonPlaceholder')}
                   rows={2}
                   className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[#1A1F36]
                            placeholder-gray-400 resize-none
@@ -387,7 +390,7 @@ function AbsenceModal({
                 onClick={onClose}
                 className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
               >
-                Prekliči
+                {t('calendarView.absenceModal.actions.cancel')}
               </button>
               <button
                 type="button"
@@ -400,12 +403,12 @@ function AbsenceModal({
                 {isSaving ? (
                   <>
                     <SpinnerGap className="h-4 w-4 animate-spin" />
-                    Shranjujem...
+                    {t('calendarView.absenceModal.actions.saving')}
                   </>
                 ) : (
                   <>
                     <FloppyDisk className="h-4 w-4" weight="bold" />
-                    Shrani odsotnost
+                    {t('calendarView.absenceModal.actions.save')}
                   </>
                 )}
               </button>
