@@ -7,12 +7,12 @@ import type { CalendarEvent } from '@/types/events';
 import TimeGrid from './TimeGrid';
 import AppointmentCard from './AppointmentCard';
 import EventCard from './EventCard';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   getWeekDays,
   isSameDay,
   isToday,
-  DAYS_SHORT,
+  getDaysShort,
   HOUR_HEIGHT,
   getTimePosition,
   getDurationHeight,
@@ -127,6 +127,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
 
 function WeekView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, showAllDays = true, onGridSlotClick, companySchedule, onAppointmentReschedule }: WeekViewProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   const [isMobile, setIsMobile] = useState(false);
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const gridScrollRef = useRef<HTMLDivElement>(null);
@@ -392,7 +393,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                       WebkitTextFillColor: 'transparent',
                     } : { color: '#9CA3AF' }}
                   >
-                    {DAYS_SHORT[day.getDay()]}
+                    {getDaysShort(locale)[day.getDay()]}
                   </span>
                   <button
                     type="button"

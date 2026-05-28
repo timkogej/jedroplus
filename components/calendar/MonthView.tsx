@@ -12,9 +12,9 @@ import {
   isToday,
   startOfMonth,
   getLocalDateKey,
-  DAYS_ABBR,
+  getDaysAbbr,
 } from '@/lib/utils/calendar';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface MonthViewProps {
   currentDate: Date;
@@ -31,6 +31,7 @@ interface MonthViewProps {
 
 function MonthView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, isMobile = false }: MonthViewProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const monthDays = useMemo(() => getMonthGrid(currentDate), [currentDate]);
   const todayRef = useRef<HTMLDivElement>(null);
@@ -85,7 +86,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
   }, [events]);
 
   // Days header (Monday first)
-  const daysHeader = [1, 2, 3, 4, 5, 6, 0].map((i) => DAYS_ABBR[i]);
+  const daysHeader = [1, 2, 3, 4, 5, 6, 0].map((i) => getDaysAbbr(locale)[i]);
 
   return (
     <div className="flex h-full flex-col bg-white overflow-auto">

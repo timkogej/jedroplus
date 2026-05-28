@@ -32,6 +32,28 @@ export const MONTHS_SHORT = [
   'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'
 ];
 
+// Day names in English
+const DAYS_FULL_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAYS_SHORT_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS_ABBR_EN = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+// Month names in English
+const MONTHS_FULL_EN = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+const MONTHS_SHORT_EN = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+];
+
+// Locale-aware getters (locale: 'sl' | 'en')
+export function getDaysFull(locale: string) { return locale === 'en' ? DAYS_FULL_EN : DAYS_FULL; }
+export function getDaysShort(locale: string) { return locale === 'en' ? DAYS_SHORT_EN : DAYS_SHORT; }
+export function getDaysAbbr(locale: string) { return locale === 'en' ? DAYS_ABBR_EN : DAYS_ABBR; }
+export function getMonthsFull(locale: string) { return locale === 'en' ? MONTHS_FULL_EN : MONTHS_FULL; }
+export function getMonthsShort(locale: string) { return locale === 'en' ? MONTHS_SHORT_EN : MONTHS_SHORT; }
+
 // Get start of day (midnight)
 export function startOfDay(date: Date): Date {
   const result = new Date(date);

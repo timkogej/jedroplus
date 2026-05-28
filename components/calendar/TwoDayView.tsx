@@ -9,7 +9,7 @@ import AppointmentCard from './AppointmentCard';
 import EventCard from './EventCard';
 import {
   isToday,
-  DAYS_SHORT,
+  getDaysShort,
   HOUR_HEIGHT,
   getTimePosition,
   getDurationHeight,
@@ -22,7 +22,7 @@ import {
   JS_DAY_TO_SLOVENIAN,
   getOffHourRanges,
 } from '@/lib/utils/calendar';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface TwoDayViewProps {
   currentDate: Date;
@@ -104,6 +104,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
 
 function TwoDayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, onGridSlotClick, companySchedule, showAllDays = true }: TwoDayViewProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   // When showAllDays=false, compute next 3 weekdays skipping Sat/Sun
   const days = useMemo(() => {
     if (showAllDays) return [currentDate, addDays(currentDate, 1), addDays(currentDate, 2)];
@@ -212,7 +213,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
                       backgroundClip: 'text',
                     } : { color: '#9CA3AF' }}
                   >
-                    {DAYS_SHORT[day.getDay()]}
+                    {getDaysShort(locale)[day.getDay()]}
                   </span>
                   <div className="w-[30px] h-[30px] flex items-center justify-center">
                     <span
