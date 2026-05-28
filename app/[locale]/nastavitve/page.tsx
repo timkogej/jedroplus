@@ -39,6 +39,10 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (!companyUuid || !user?.id || !cacheKey) return;
+    // Apply cached value immediately so the correct item count shows on first render
+    const cached = localStorage.getItem(cacheKey);
+    if (cached !== null) setIsOwner(cached === '1');
+    // Then verify with DB and update if needed
     supabaseReadOnly
       .from('company_members')
       .select('role')

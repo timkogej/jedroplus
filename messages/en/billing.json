@@ -173,6 +173,18 @@
       "premium": "Premium"
     }
   },
+  "upgradePlanGate": {
+    "heading": "This feature requires the {plan} plan",
+    "subtitle": "Upgrade your plan to unlock this feature and get the full potential of Jedro+.",
+    "upgradeButton": "Upgrade plan",
+    "hint": "Browse all available plans and choose the one that fits you best."
+  },
+  "roleAccessGate": {
+    "title": "Access restricted",
+    "defaultMessage": "You do not have access to this page. Contact the business owner.",
+    "billingOwnerOnly": "The 'Plans and quotas' page is only accessible to the business owner.",
+    "staffRestricted": "This feature is disabled for your account. Contact the business owner for access."
+  },
   "paketi": {
     "title": "Plans and quotas",
     "subtitle": "Overview of your plan and usage",
