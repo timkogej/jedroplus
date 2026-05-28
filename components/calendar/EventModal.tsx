@@ -20,6 +20,7 @@ import {
   EVENT_COLOR_PRESETS,
   extractFirstColorStop,
 } from '@/lib/utils/eventColors';
+import { useTranslations } from 'next-intl';
 
 export interface EventFormData {
   title: string;
@@ -70,6 +71,7 @@ function EventModal({
   isSaving = false,
   isDeleting = false,
 }: EventModalProps) {
+  const t = useTranslations('appointments');
   const today = new Date().toISOString().split('T')[0];
 
   // ── Form state ──────────────────────────────────────────────────────────────
@@ -130,13 +132,13 @@ function EventModal({
   // ── Validation ───────────────────────────────────────────────────────────────
   const validate = useCallback((): boolean => {
     const errs: string[] = [];
-    if (!title.trim()) errs.push('Naslov dogodka je obvezen');
-    if (!eventDate) errs.push('Datum začetka je obvezen');
-    if (endDate && endDate < eventDate) errs.push('Datum konca ne sme biti pred datumom začetka');
+    if (!title.trim()) errs.push(t('calendarView.eventModal.validation.titleRequired'));
+    if (!eventDate) errs.push(t('calendarView.eventModal.validation.startDateRequired'));
+    if (endDate && endDate < eventDate) errs.push(t('calendarView.eventModal.validation.endDateBeforeStart'));
     if (!allDay && startTime && endTime && startTime >= endTime) {
-      errs.push('Končna ura mora biti po začetni uri');
+      errs.push(t('calendarView.eventModal.validation.endTimeAfterStart'));
     }
-    if (!color) errs.push('Izberite barvo dogodka');
+    if (!color) errs.push(t('calendarView.eventModal.validation.colorRequired'));
     setErrors(errs);
     return errs.length === 0;
   }, [title, eventDate, endDate, allDay, startTime, endTime, color]);
@@ -216,10 +218,10 @@ function EventModal({
                   />
                   <div>
                     <h2 className="text-lg font-semibold" style={{ color: '#1A1F36' }}>
-                      {mode === 'edit' ? 'Uredi dogodek' : 'Nov dogodek'}
+                      {mode === 'edit' ? t('calendarView.eventModal.titles.edit') : t('calendarView.eventModal.titles.create')}
                     </h2>
                     <p className="text-sm" style={{ color: '#6B7280' }}>
-                      {mode === 'edit' ? 'Posodobi podatke o dogodku' : 'Dodaj nov dogodek v koledar'}
+                      {mode === 'edit' ? t('calendarView.eventModal.subtitles.edit') : t('calendarView.eventModal.subtitles.create')}
                     </p>
                   </div>
                 </div>
@@ -258,12 +260,12 @@ function EventModal({
 
               {/* Title */}
               <div>
-                <label className={labelClass}>Naslov dogodka *</label>
+                <label className={labelClass}>{t('calendarView.eventModal.fields.title')}</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="npr. Sestanek s stranko..."
+                  placeholder={t('calendarView.eventModal.fields.titlePlaceholder')}
                   className={inputClass}
                 />
               </div>
@@ -273,7 +275,7 @@ function EventModal({
                 <div>
                   <label className={labelClass}>
                     <CalendarBlank className="inline h-3 w-3 mr-1" weight="bold" />
-                    Datum začetka *
+                    {t('calendarView.eventModal.fields.startDate')}
                   </label>
                   <input
                     type="date"
@@ -285,7 +287,7 @@ function EventModal({
                 <div>
                   <label className={labelClass}>
                     <CalendarBlank className="inline h-3 w-3 mr-1" weight="bold" />
-                    Datum konca
+                    {t('calendarView.eventModal.fields.endDate')}
                   </label>
                   <input
                     type="date"
@@ -317,7 +319,7 @@ function EventModal({
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-600 group-hover:text-[#1A1F36] transition-colors">
-                    Celodnevni dogodek
+                    {t('calendarView.eventModal.fields.allDay')}
                   </span>
                 </button>
               </div>
@@ -328,22 +330,22 @@ function EventModal({
                   <div>
                     <label className={labelClass}>
                       <Clock className="inline h-3 w-3 mr-1" weight="bold" />
-                      Začetna ura
+                      {t('calendarView.eventModal.fields.startTime')}
                     </label>
-                    <Select value={startTime} setValue={setStartTime} placeholder="Izberi uro">
-                      {TIME_OPTIONS.map((t) => (
-                        <SelectOption key={t} value={t}>{t}</SelectOption>
+                    <Select value={startTime} setValue={setStartTime} placeholder={t('calendarView.eventModal.fields.timePlaceholder')}>
+                      {TIME_OPTIONS.map((opt) => (
+                        <SelectOption key={opt} value={opt}>{opt}</SelectOption>
                       ))}
                     </Select>
                   </div>
                   <div>
                     <label className={labelClass}>
                       <Clock className="inline h-3 w-3 mr-1" weight="bold" />
-                      Končna ura
+                      {t('calendarView.eventModal.fields.endTime')}
                     </label>
-                    <Select value={endTime} setValue={setEndTime} placeholder="Izberi uro">
-                      {TIME_OPTIONS.map((t) => (
-                        <SelectOption key={t} value={t}>{t}</SelectOption>
+                    <Select value={endTime} setValue={setEndTime} placeholder={t('calendarView.eventModal.fields.timePlaceholder')}>
+                      {TIME_OPTIONS.map((opt) => (
+                        <SelectOption key={opt} value={opt}>{opt}</SelectOption>
                       ))}
                     </Select>
                   </div>
@@ -352,7 +354,7 @@ function EventModal({
 
               {/* Color picker */}
               <div>
-                <label className={labelClass}>Barva dogodka</label>
+                <label className={labelClass}>{t('calendarView.eventModal.fields.color')}</label>
                 <div className="grid grid-cols-4 gap-2">
                   {EVENT_COLOR_PRESETS.map((preset) => {
                     const isSelected = color === preset.value;
@@ -387,12 +389,12 @@ function EventModal({
               <div>
                 <label className={labelClass}>
                   <TextAlignLeft className="inline h-3 w-3 mr-1" weight="bold" />
-                  Opis
+                  {t('calendarView.eventModal.fields.description')}
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Splošen opis dogodka..."
+                  placeholder={t('calendarView.eventModal.fields.descriptionPlaceholder')}
                   rows={2}
                   className={`${inputClass} resize-none`}
                 />
@@ -400,11 +402,11 @@ function EventModal({
 
               {/* Notes */}
               <div>
-                <label className={labelClass}>Opombe</label>
+                <label className={labelClass}>{t('calendarView.eventModal.fields.notes')}</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Interne opombe..."
+                  placeholder={t('calendarView.eventModal.fields.notesPlaceholder')}
                   rows={2}
                   className={`${inputClass} resize-none`}
                 />
@@ -414,13 +416,13 @@ function EventModal({
               <div>
                 <label className={labelClass}>
                   <MapPin className="inline h-3 w-3 mr-1" weight="bold" />
-                  Lokacija
+                  {t('calendarView.eventModal.fields.location')}
                 </label>
                 <input
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder="npr. Salon, Zoom, Ljubljana..."
+                  placeholder={t('calendarView.eventModal.fields.locationPlaceholder')}
                   className={inputClass}
                 />
               </div>
@@ -445,7 +447,7 @@ function EventModal({
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-600 group-hover:text-[#1A1F36] transition-colors">
-                    Vidno v koledarju
+                    {t('calendarView.eventModal.fields.visibleInCalendar')}
                   </span>
                 </button>
               </div>
@@ -470,7 +472,7 @@ function EventModal({
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-600 group-hover:text-[#1A1F36] transition-colors">
-                    Omogoči rezervacijo termina
+                    {t('calendarView.eventModal.fields.allowBooking')}
                   </span>
                 </button>
               </div>
@@ -491,14 +493,14 @@ function EventModal({
                              transition-all hover:bg-red-50 disabled:opacity-50"
                 >
                   <Trash style={{ width: 16, height: 16 }} weight="bold" />
-                  Izbriši
+                  {t('calendarView.eventModal.actions.delete')}
                 </button>
               )}
 
               {/* Delete confirmation inline */}
               {showDeleteConfirm && (
                 <div className="flex items-center gap-2 flex-1">
-                  <span className="text-sm text-red-500 font-medium">Potrdi izbris?</span>
+                  <span className="text-sm text-red-500 font-medium">{t('calendarView.eventModal.actions.confirmDelete')}</span>
                   <button
                     type="button"
                     onClick={handleDeleteConfirm}
@@ -511,14 +513,14 @@ function EventModal({
                     ) : (
                       <Trash style={{ width: 14, height: 14 }} weight="bold" />
                     )}
-                    Da, izbriši
+                    {t('calendarView.eventModal.actions.confirmYes')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(false)}
                     className="rounded-xl px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
                   >
-                    Ne
+                    {t('calendarView.absenceDetailModal.actions.confirmNo')}
                   </button>
                 </div>
               )}
@@ -533,7 +535,7 @@ function EventModal({
                   disabled={isSaving}
                   className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#1A1F36] disabled:opacity-50"
                 >
-                  Prekliči
+                  {t('calendarView.eventModal.actions.cancel')}
                 </button>
               )}
 
@@ -553,12 +555,12 @@ function EventModal({
                   {isSaving ? (
                     <>
                       <SpinnerGap style={{ width: 16, height: 16 }} className="animate-spin" />
-                      Shranjujem...
+                      {t('calendarView.eventModal.actions.saving')}
                     </>
                   ) : (
                     <>
                       <FloppyDisk style={{ width: 16, height: 16 }} weight="bold" />
-                      {mode === 'edit' ? 'Posodobi' : 'Shrani'}
+                      {mode === 'edit' ? t('calendarView.eventModal.actions.update') : t('calendarView.eventModal.actions.save')}
                     </>
                   )}
                 </button>

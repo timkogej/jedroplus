@@ -22,6 +22,7 @@ import {
   JS_DAY_TO_SLOVENIAN,
   getOffHourRanges,
 } from '@/lib/utils/calendar';
+import { useTranslations } from 'next-intl';
 
 interface TwoDayViewProps {
   currentDate: Date;
@@ -102,6 +103,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
 }
 
 function TwoDayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, onGridSlotClick, companySchedule, showAllDays = true }: TwoDayViewProps) {
+  const t = useTranslations('appointments');
   // When showAllDays=false, compute next 3 weekdays skipping Sat/Sun
   const days = useMemo(() => {
     if (showAllDays) return [currentDate, addDays(currentDate, 1), addDays(currentDate, 2)];
@@ -247,7 +249,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
                           style={{ background: '#FFFBEB', borderRadius: '5px', padding: '1.5px 5px' }}
                         >
                           <span className="text-[9px] font-semibold truncate flex-1 leading-tight" style={titleStyle}>
-                            {absence.employee_name || 'Vsi'}
+                            {absence.employee_name || t('calendarView.allEmployees')}
                           </span>
                         </div>
                       );
@@ -358,7 +360,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
                       key={absence.id}
                       className="absolute left-0 right-0 bg-amber-50 mx-1 rounded-lg overflow-hidden shadow-sm"
                       style={{ top: `${top}px`, height: `${Math.max(height, 36)}px` }}
-                      title={`${absence.employee_name || 'Vsi zaposleni'}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${absence.reason ? ` · ${absence.reason}` : ''}`}
+                      title={`${absence.employee_name || t('calendarView.allEmployees')}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${absence.reason ? ` · ${absence.reason}` : ''}`}
                     >
                       <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#1A1F36' }}>
                         <p className="truncate leading-tight" style={absence.employee_color ? {
@@ -369,7 +371,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
                           fontSize: '12px',
                           fontWeight: 600,
                         } : { fontSize: '12px', fontWeight: 600 }}>
-                          {absence.employee_name || 'Vsi zaposleni'}
+                          {absence.employee_name || t('calendarView.allEmployees')}
                         </p>
                         <div className="flex items-center gap-0.5 mt-0.5 overflow-hidden whitespace-nowrap" style={{ fontSize: '10px', fontWeight: 500, opacity: 0.88 }}>
                           <span>{fmt(visibleStart)}</span>

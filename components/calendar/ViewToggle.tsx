@@ -4,6 +4,7 @@ import { memo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CaretDown, CaretUp } from '@phosphor-icons/react';
 import type { ViewMode } from '@/lib/utils/calendar';
+import { useTranslations } from 'next-intl';
 
 interface ViewToggleProps {
   currentView: ViewMode;
@@ -11,19 +12,21 @@ interface ViewToggleProps {
   isMobile?: boolean;
 }
 
-const desktopViews: { mode: ViewMode; label: string }[] = [
-  { mode: 'day', label: 'Dan' },
-  { mode: 'week', label: 'Teden' },
-  { mode: 'month', label: 'Mesec' },
-];
-
-const mobileViews: { mode: ViewMode; label: string }[] = [
-  { mode: 'day', label: 'Dan' },
-  { mode: '2day', label: '3 dni' },
-  { mode: 'month', label: 'Mesec' },
-];
-
 function ViewToggle({ currentView, onViewChange, isMobile = false }: ViewToggleProps) {
+  const t = useTranslations('appointments');
+
+  const desktopViews: { mode: ViewMode; label: string }[] = [
+    { mode: 'day', label: t('calendarView.viewModes.day') },
+    { mode: 'week', label: t('calendarView.viewModes.week') },
+    { mode: 'month', label: t('calendarView.viewModes.month') },
+  ];
+
+  const mobileViews: { mode: ViewMode; label: string }[] = [
+    { mode: 'day', label: t('calendarView.viewModes.day') },
+    { mode: '2day', label: t('calendarView.viewModes.threeDays') },
+    { mode: 'month', label: t('calendarView.viewModes.month') },
+  ];
+
   const views = isMobile ? mobileViews : desktopViews;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);

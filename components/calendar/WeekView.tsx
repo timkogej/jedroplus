@@ -7,6 +7,7 @@ import type { CalendarEvent } from '@/types/events';
 import TimeGrid from './TimeGrid';
 import AppointmentCard from './AppointmentCard';
 import EventCard from './EventCard';
+import { useTranslations } from 'next-intl';
 import {
   getWeekDays,
   isSameDay,
@@ -125,6 +126,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
 }
 
 function WeekView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, showAllDays = true, onGridSlotClick, companySchedule, onAppointmentReschedule }: WeekViewProps) {
+  const t = useTranslations('appointments');
   const [isMobile, setIsMobile] = useState(false);
   const headerScrollRef = useRef<HTMLDivElement>(null);
   const gridScrollRef = useRef<HTMLDivElement>(null);
@@ -422,19 +424,19 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                             tabIndex={0}
                             onClick={() => onAbsenceClick?.(absence)}
                             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onAbsenceClick?.(absence); }}
-                            title={`${absence.employee_name || 'Vsi'}${absence.reason ? ` - ${absence.reason}` : ''}`}
+                            title={`${absence.employee_name || t('calendarView.allEmployees')}${absence.reason ? ` - ${absence.reason}` : ''}`}
                             className="cursor-pointer w-full flex items-center gap-1 min-w-0 overflow-hidden"
                             style={{ background: '#FFFBEB', borderRadius: '5px', padding: '1.5px 5px' }}
                           >
                             <span className="text-[9px] font-semibold truncate flex-1 leading-tight" style={titleStyle}>
-                              {absence.employee_name || 'Vsi'}
+                              {absence.employee_name || t('calendarView.allEmployees')}
                             </span>
                           </div>
                         );
                       })}
                       {dayAbsences.length > 2 && (
                         <span className="text-[9px] text-amber-600 text-right">
-                          +{dayAbsences.length - 2} več
+                          {t('calendarView.weekView.moreAbsences', { count: dayAbsences.length - 2 })}
                         </span>
                       )}
                     </div>
@@ -451,7 +453,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                       ))}
                       {dayEventsForCell.length > 2 && (
                         <span className="text-[9px] text-gray-500 text-center">
-                          +{dayEventsForCell.length - 2} več
+                          {t('calendarView.weekView.moreEvents', { count: dayEventsForCell.length - 2 })}
                         </span>
                       )}
                     </div>
@@ -563,7 +565,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                         top: `${top}px`,
                         height: `${Math.max(height, 36)}px`,
                       }}
-                      title={`${absence.employee_name || 'Vsi zaposleni'}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${absence.reason ? ` · ${absence.reason}` : ''}`}
+                      title={`${absence.employee_name || t('calendarView.allEmployees')}: ${fmt(visibleStart)} – ${fmt(visibleEnd)}${absence.reason ? ` · ${absence.reason}` : ''}`}
                     >
                       <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#1A1F36' }}>
                         <p className="truncate leading-tight" style={absence.employee_color ? {
@@ -574,7 +576,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                           fontSize: '12px',
                           fontWeight: 600,
                         } : { fontSize: '12px', fontWeight: 600 }}>
-                          {absence.employee_name || 'Vsi zaposleni'}
+                          {absence.employee_name || t('calendarView.allEmployees')}
                         </p>
                         <div className="flex items-center gap-0.5 mt-0.5 overflow-hidden whitespace-nowrap" style={{ fontSize: '10px', fontWeight: 500, opacity: 0.88 }}>
                           <span>{fmt(visibleStart)}</span>

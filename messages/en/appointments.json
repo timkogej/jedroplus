@@ -183,5 +183,210 @@
     "activeService": "Service: {name}",
     "activeFrom": "From: {date}",
     "activeTo": "To: {date}"
+  },
+  "calendarView": {
+    "viewModes": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "threeDays": "3 days"
+    },
+    "sidebar": {
+      "newEvent": "Event",
+      "newAbsence": "Absence",
+      "searchPlaceholder": "Search appointments...",
+      "filters": "Filters",
+      "displayDays": "Display days",
+      "showAllDays": "Show all days",
+      "weekdaysOnly": "Weekdays only",
+      "employeesSection": "Employees",
+      "servicesSection": "Services",
+      "legend": "Service legend",
+      "noServices": "No services to display",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month"
+    },
+    "eventModal": {
+      "titles": {
+        "create": "New event",
+        "edit": "Edit event"
+      },
+      "subtitles": {
+        "create": "Add a new event to the calendar",
+        "edit": "Update event details"
+      },
+      "fields": {
+        "title": "Event title *",
+        "titlePlaceholder": "e.g. Meeting with client...",
+        "startDate": "Start date *",
+        "endDate": "End date",
+        "allDay": "All-day event",
+        "startTime": "Start time",
+        "endTime": "End time",
+        "timePlaceholder": "Select time",
+        "color": "Event color",
+        "description": "Description",
+        "descriptionPlaceholder": "General event description...",
+        "notes": "Notes",
+        "notesPlaceholder": "Internal notes...",
+        "location": "Location",
+        "locationPlaceholder": "e.g. Salon, Zoom, Ljubljana...",
+        "visibleInCalendar": "Visible in calendar",
+        "allowBooking": "Allow appointment booking"
+      },
+      "validation": {
+        "titleRequired": "Event title is required",
+        "startDateRequired": "Start date is required",
+        "endDateBeforeStart": "End date cannot be before start date",
+        "endTimeAfterStart": "End time must be after start time",
+        "colorRequired": "Select an event color"
+      },
+      "actions": {
+        "delete": "Delete",
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "save": "Save",
+        "confirmDelete": "Confirm delete?",
+        "confirmYes": "Yes, delete",
+        "saving": "Saving...",
+        "update": "Update"
+      }
+    },
+    "absenceModal": {
+      "title": "Add absence",
+      "subtitle": "Mark days or hours of employee absence",
+      "absenceLabel": "Absence",
+      "fields": {
+        "employee": "Employee",
+        "hoursOnly": "Hours only",
+        "multipleDays": "Multiple days",
+        "date": "Date",
+        "dateFrom": "From date",
+        "dateTo": "To date",
+        "timeFrom": "From time",
+        "timeTo": "To time",
+        "timePlaceholder": "Select time",
+        "reason": "Reason (optional)",
+        "reasonPlaceholder": "Reason for absence..."
+      },
+      "validation": {
+        "employeeRequired": "Select an employee",
+        "startDateRequired": "Select a start date",
+        "endDateRequired": "Select an end date",
+        "endDateAfterStart": "End date must be after start date",
+        "endTimeAfterStart": "End time must be after start time"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "save": "Save absence"
+      }
+    },
+    "absenceDetailModal": {
+      "subtitle": "Absence",
+      "actions": {
+        "deleteAbsence": "Delete absence",
+        "editAbsence": "Edit absence",
+        "saveChanges": "Save changes",
+        "confirmYes": "Yes",
+        "confirmNo": "No"
+      }
+    },
+    "appointmentModal": {
+      "subtitles": {
+        "create": "Create a new appointment",
+        "viewEdit": "View and edit appointment"
+      },
+      "sections": {
+        "appointmentData": "Appointment details",
+        "clientData": "Client details"
+      },
+      "fields": {
+        "timePlaceholder": "Select time",
+        "noData": "No data",
+        "clientSearch": "Search client by name, email or phone..."
+      },
+      "actions": {
+        "close": "Close",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "saveAppointment": "Save appointment"
+      }
+    },
+    "detailModal": {
+      "fields": {
+        "duration": "Duration",
+        "copyTitle": "Copy {label}",
+        "unknownClient": "Unknown client",
+        "time": "Time",
+        "originalPrice": "Original price",
+        "discount": "Discount",
+        "priceWithDiscount": "Price with discount",
+        "additionalService": "Additional service",
+        "deleteTitle": "Delete appointment",
+        "deleteMessage": "Are you sure you want to delete this appointment?"
+      },
+      "actions": {
+        "noShow": "No show",
+        "cancel": "Cancel",
+        "complete": "Complete",
+        "moreOptions": "More options"
+      }
+    },
+    "dayView": {
+      "notWorkingDay": "{day} is not a working day",
+      "appointmentNoun": "{count, plural, =1 {appointment} other {appointments}}",
+      "noAppointmentsToday": "No appointments for today",
+      "allEmployees": "All employees"
+    },
+    "monthView": {
+      "moreEvents": "+{count} events",
+      "moreAbsences": "+{count} absences",
+      "more": "+{count} more"
+    },
+    "weekView": {
+      "moreAbsences": "+{count} more",
+      "moreEvents": "+{count} more"
+    },
+    "rescheduleDialog": {
+      "title": "Reschedule appointment?",
+      "service": "Service",
+      "employee": "Employee",
+      "newTime": "New time",
+      "saving": "Rescheduling...",
+      "confirm": "Reschedule"
+    },
+    "completeDialog": {
+      "title": "Complete appointment",
+      "subtitle": "Confirm appointment completion",
+      "notesLabel": "Message to client or post-appointment instructions",
+      "notesPlaceholder": "Enter a message or instructions after the appointment (optional)...",
+      "completing": "Completing...",
+      "complete": "Complete",
+      "cancel": "Cancel"
+    },
+    "navigation": {
+      "prev": "Back",
+      "next": "Next",
+      "filters": "Filters"
+    },
+    "toast": {
+      "eventCreated": "Event created",
+      "eventUpdated": "Event updated",
+      "eventDeleted": "Event deleted",
+      "appointmentRescheduled": "Appointment successfully rescheduled"
+    },
+    "errors": {
+      "loadAppointments": "An error occurred while loading appointments.",
+      "eventSave": "An error occurred while saving the event.",
+      "eventDelete": "An error occurred while deleting the event.",
+      "absenceSave": "An error occurred while saving the absence.",
+      "absenceDelete": "An error occurred while deleting the absence.",
+      "absenceEdit": "An error occurred while editing the absence.",
+      "reschedule": "An error occurred while rescheduling the appointment.",
+      "companyNotSelected": "Company not selected. Please refresh the page."
+    },
+    "saving": "Saving...",
+    "allEmployees": "All employees"
   }
 }

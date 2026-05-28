@@ -135,5 +135,8 @@
     "errorSettings": "Failed to save settings",
     "errorStatus": "Failed to change status",
     "errorConnect": "Failed to connect account"
+  },
+  "gradientSelector": {
+    "description": "This color will be used for initials in the calendar and profiles"
   }
 }

@@ -135,5 +135,8 @@
     "errorSettings": "Prišlo je do napake pri shranjevanju nastavitev",
     "errorStatus": "Prišlo je do napake pri spreminjanju statusa",
     "errorConnect": "Prišlo je do napake pri povezovanju računa"
+  },
+  "gradientSelector": {
+    "description": "Ta barva bo uporabljena za začetnice na koledarju in profilih"
   }
 }

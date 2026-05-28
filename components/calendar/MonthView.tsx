@@ -14,6 +14,7 @@ import {
   getLocalDateKey,
   DAYS_ABBR,
 } from '@/lib/utils/calendar';
+import { useTranslations } from 'next-intl';
 
 interface MonthViewProps {
   currentDate: Date;
@@ -29,6 +30,7 @@ interface MonthViewProps {
 }
 
 function MonthView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, isMobile = false }: MonthViewProps) {
+  const t = useTranslations('appointments');
   const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const monthDays = useMemo(() => getMonthGrid(currentDate), [currentDate]);
   const todayRef = useRef<HTMLDivElement>(null);
@@ -172,7 +174,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                   ))}
                   {dayEvents.length > 2 && (
                     <div className="text-[8px] text-[#1A1F36] opacity-60 px-1">
-                      +{dayEvents.length - 2} dogodki
+                      {t('calendarView.monthView.moreEvents', { count: dayEvents.length - 2 })}
                     </div>
                   )}
                 </div>
@@ -187,7 +189,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                       type="button"
                       onClick={(e) => { e.stopPropagation(); onAbsenceClick?.(absence); }}
                       className="flex items-center gap-1 rounded-md bg-amber-50 border border-amber-200 px-1.5 py-0.5 truncate w-full text-left hover:bg-amber-100 transition-colors"
-                      title={`${absence.employee_name || 'Vsi zaposleni'}${absence.reason ? ` - ${absence.reason}` : ''}`}
+                      title={`${absence.employee_name || t('calendarView.allEmployees')}${absence.reason ? ` - ${absence.reason}` : ''}`}
                     >
                       <span
                         className="text-[9px] font-semibold truncate"
@@ -198,7 +200,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                           backgroundClip: 'text',
                         } : { color: '#92400E' }}
                       >
-                        {absence.employee_name || 'Vsi'}
+                        {absence.employee_name || t('calendarView.allEmployees')}
                       </span>
                       {absence.reason && (
                         <span className="text-[8px] text-amber-700 truncate">{absence.reason}</span>
@@ -207,7 +209,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                   ))}
                   {dayAbsences.length > 2 && (
                     <div className="text-[8px] text-amber-600 opacity-80 px-1">
-                      +{dayAbsences.length - 2} odsotnosti
+                      {t('calendarView.monthView.moreAbsences', { count: dayAbsences.length - 2 })}
                     </div>
                   )}
                 </div>
@@ -232,7 +234,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                     className="w-full rounded px-1.5 py-0.5 text-left text-[10px] font-medium
                                text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
                   >
-                    +{dayAppointments.length - 3} več
+                    {t('calendarView.monthView.more', { count: dayAppointments.length - 3 })}
                   </button>
                 )}
               </div>

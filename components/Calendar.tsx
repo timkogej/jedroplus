@@ -81,6 +81,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
+import { useTranslations } from 'next-intl';
 
 interface CalendarProps {
   companyId: string;
@@ -104,7 +105,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className="rounded-lg p-2 border border-gray-200 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-      title={`Kopiraj ${label}`}
+      title={label}
     >
       {copied ? (
         <Check className="h-4 w-4 text-emerald-500" weight="bold" />
@@ -136,6 +137,7 @@ function AppointmentDetailModal({
   onCancel?: (appointment: AppointmentWithDetails) => void;
   onDelete?: (appointment: AppointmentWithDetails) => void;
 }) {
+  const t = useTranslations('appointments');
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
   // Get gradient background - matches AppointmentCard color logic (supports multiple services)
@@ -199,12 +201,12 @@ function AppointmentDetailModal({
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'scheduled': return 'Načrtovano';
-      case 'confirmed': return 'Potrjeno';
-      case 'completed': return 'Zaključeno';
-      case 'cancelled': return 'Preklicano';
-      case 'pending': return 'Čakajoč';
-      case 'no_show': return 'Ni prišel/a';
+      case 'scheduled': return t('status.scheduled');
+      case 'confirmed': return t('status.confirmed');
+      case 'completed': return t('status.completed');
+      case 'cancelled': return t('status.cancelled');
+      case 'pending': return t('status.pending');
+      case 'no_show': return t('status.noShow');
       default: return status;
     }
   };
@@ -252,7 +254,7 @@ function AppointmentDetailModal({
           style={{ background: getGradientBackground() }}
         >
           <h3 className="text-base font-semibold text-white truncate pr-3">
-            {appointment.stranka_ime || 'Neznana stranka'}
+            {appointment.stranka_ime || t('calendarView.detailModal.fields.unknownClient')}
           </h3>
           <motion.button
             type="button"
@@ -260,7 +262,7 @@ function AppointmentDetailModal({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             className="rounded-full bg-white/20 p-2 text-white transition-colors hover:bg-white/30 flex-shrink-0"
-            aria-label="Zapri"
+            aria-label={t('calendarView.appointmentModal.actions.close')}
           >
             <X className="h-5 w-5" weight="bold" />
           </motion.button>
@@ -270,7 +272,7 @@ function AppointmentDetailModal({
         <div className="flex-1 overflow-y-auto min-h-0 p-5 space-y-4">
           {/* Status */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Status</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.status')}</label>
             <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(appointment.status || 'scheduled')}`}>
               {getStatusLabel(appointment.status || 'scheduled')}
             </span>
@@ -278,7 +280,7 @@ function AppointmentDetailModal({
 
           {/* Client */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Stranka</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.client')}</label>
             <div className="space-y-2">
               <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
                 <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
@@ -307,7 +309,7 @@ function AppointmentDetailModal({
                     >
                       <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                       <div className="min-w-0">
-                        <div className="text-[10px] text-gray-500">Telefon</div>
+                        <div className="text-[10px] text-gray-500">{t('modal.fields.phone')}</div>
                         <div className="text-xs font-medium text-[#1A1F36] truncate">{appointment.stranka_telefon}</div>
                       </div>
                     </a>
@@ -323,7 +325,7 @@ function AppointmentDetailModal({
             const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
             return (
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Storitev</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.service')}</label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
@@ -354,7 +356,7 @@ function AppointmentDetailModal({
           {/* Employee */}
           {appointment.zaposleni && (
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Oseba</label>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('calendarView.rescheduleDialog.employee')}</label>
               <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
                 <span
                   className="text-lg font-bold flex-shrink-0"
@@ -376,13 +378,13 @@ function AppointmentDetailModal({
 
           {/* Date */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Datum</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.date')}</label>
             <p className="text-sm font-medium text-[#1A1F36]">{formatModalDate(appointment.datum)}</p>
           </div>
 
           {/* Time */}
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Čas</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('calendarView.detailModal.fields.time')}</label>
             <p className="text-sm font-medium text-[#1A1F36]">
               {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
             </p>
@@ -391,7 +393,7 @@ function AppointmentDetailModal({
           {/* Duration */}
           {appointment.cas_zacetek && appointment.cas_konec && (
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
-              <span className="text-sm font-medium text-gray-700">Trajanje</span>
+              <span className="text-sm font-medium text-gray-700">{t('calendarView.detailModal.fields.duration')}</span>
               <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
                 {(() => {
                   try {
@@ -441,17 +443,17 @@ function AppointmentDetailModal({
                     )}
                     <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-2.5">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Originalna cena</span>
+                        <span className="text-gray-500">{t('calendarView.detailModal.fields.originalPrice')}</span>
                         <span className="text-gray-400 line-through">{fmt(originalCena)} EUR</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-500">Popust</span>
+                        <span className="text-gray-500">{t('calendarView.detailModal.fields.discount')}</span>
                         <span className="font-medium text-red-500">
                           − {popustTip === 'percent' ? `${popustVrednost}%` : `${fmt(popustVrednost)} EUR`}
                         </span>
                       </div>
                       <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
-                        <span className="font-semibold text-gray-900">Cena z popustom</span>
+                        <span className="font-semibold text-gray-900">{t('calendarView.detailModal.fields.priceWithDiscount')}</span>
                         <span className="text-xl font-bold text-green-600">{fmt(finalCena)} EUR</span>
                       </div>
                     </div>
@@ -470,13 +472,13 @@ function AppointmentDetailModal({
                   >
                     <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm mb-2">
                       <Plus size={14} />
-                      <span>Dodatna storitev</span>
+                      <span>{t('calendarView.detailModal.fields.additionalService')}</span>
                     </div>
                     <p className="text-sm font-medium text-gray-800">{apt.storitev_2.naziv}</p>
                     {apt.add_on_final_cena && (
                       <>
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Popust</span>
+                          <span className="text-gray-500">{t('calendarView.detailModal.fields.discount')}</span>
                           <span className="text-red-500">
                             − {apt.add_on_popust_tip === '%'
                               ? `${apt.add_on_popust}%`
@@ -484,7 +486,7 @@ function AppointmentDetailModal({
                           </span>
                         </div>
                         <div className="flex justify-between font-semibold">
-                          <span className="text-gray-700">Cena z popustom</span>
+                          <span className="text-gray-700">{t('calendarView.detailModal.fields.priceWithDiscount')}</span>
                           <span className="text-green-600">{fmt(parseFloat(apt.add_on_final_cena))} EUR</span>
                         </div>
                       </>
@@ -498,7 +500,7 @@ function AppointmentDetailModal({
           {/* Notes */}
           {appointment.opombe && (
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Opombe</label>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.notes')}</label>
               <div className="p-4 bg-gray-50 rounded-xl">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.opombe}</p>
               </div>
@@ -513,7 +515,7 @@ function AppointmentDetailModal({
             if (!notes) return null;
             return (
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Interne opombe</label>
+                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.internalNotes')}</label>
                 <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
                 </div>
@@ -533,7 +535,7 @@ function AppointmentDetailModal({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
-                title="Zaključi"
+                title={t('calendarView.detailModal.actions.complete')}
               >
                 <CheckCircle className="h-4.5 w-4.5" weight="regular" />
               </motion.button>
@@ -547,7 +549,7 @@ function AppointmentDetailModal({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                title="Uredi"
+                title={t('calendarView.eventModal.actions.edit')}
               >
                 <NotePencil className="h-4.5 w-4.5" weight="regular" />
               </motion.button>
@@ -561,7 +563,7 @@ function AppointmentDetailModal({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                title="Več možnosti"
+                title={t('calendarView.detailModal.actions.moreOptions')}
               >
                 <DotsThreeVertical className="h-4.5 w-4.5" weight="bold" />
               </motion.button>
@@ -582,7 +584,7 @@ function AppointmentDetailModal({
                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-amber-50 hover:text-amber-700"
                       >
                         <WarningCircle className="h-4 w-4" weight="regular" />
-                        Ni prišel
+                        {t('calendarView.detailModal.actions.noShow')}
                       </button>
                     )}
                     {onCancel && (
@@ -592,7 +594,7 @@ function AppointmentDetailModal({
                         className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
                       >
                         <XCircle className="h-4 w-4" weight="regular" />
-                        Odpoved
+                        {t('calendarView.detailModal.actions.cancel')}
                       </button>
                     )}
                     <button
@@ -601,7 +603,7 @@ function AppointmentDetailModal({
                       className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
                     >
                       <Trash className="h-4 w-4" weight="regular" />
-                      Izbriši
+                      {t('calendarView.eventModal.actions.delete')}
                     </button>
                   </motion.div>
                 )}
@@ -615,6 +617,7 @@ function AppointmentDetailModal({
 }
 
 function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
+  const t = useTranslations('appointments');
   const { companySettings } = useCompany();
   const { user } = useAuth();
   const { role, personId: rolePersonId, permissions } = useRolePermissions();
@@ -909,7 +912,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     const result = await fetchAppointmentsForMonth(companyId, year, month);
 
     if (result.error) {
-      setError('Prišlo je do napake pri nalaganju terminov.');
+      setError(t('calendarView.errors.loadAppointments'));
     } else {
       setAppointments(result.data || []);
     }
@@ -1005,18 +1008,18 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         updated_by: actor,
       };
       const result = await sendEventWebhook(payload);
-      if (!result.ok) throw new Error('Prišlo je do napake pri brisanju dogodka.');
+      if (!result.ok) throw new Error(t('calendarView.errors.eventDelete'));
       await new Promise((r) => setTimeout(r, 800));
       await loadEvents();
       handleCloseEventViewModal();
-      setSuccessMessage('Dogodek izbrisan');
+      setSuccessMessage(t('calendarView.toast.eventDeleted'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setActionError('Prišlo je do napake pri brisanju dogodka.');
+      setActionError(t('calendarView.errors.eventDelete'));
     } finally {
       setIsEventDeleting(false);
     }
-  }, [viewingEvent, companyId, actor, loadEvents, handleCloseEventViewModal]);
+  }, [viewingEvent, companyId, actor, loadEvents, handleCloseEventViewModal, t]);
 
   const handleSaveEvent = useCallback(async (data: EventFormData) => {
     setIsSaving(true);
@@ -1044,20 +1047,20 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       };
 
       const result = await sendEventWebhook(payload);
-      if (!result.ok) throw new Error('Prišlo je do napake pri shranjevanju dogodka.');
+      if (!result.ok) throw new Error(t('calendarView.errors.eventSave'));
 
       // Give n8n a moment to write to Supabase before re-fetching
       await new Promise((r) => setTimeout(r, 800));
       await loadEvents();
       handleCloseEventModal();
-      setSuccessMessage(isEdit ? 'Dogodek posodobljen' : 'Dogodek ustvarjen');
+      setSuccessMessage(isEdit ? t('calendarView.toast.eventUpdated') : t('calendarView.toast.eventCreated'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setActionError('Prišlo je do napake pri shranjevanju dogodka.');
+      setActionError(t('calendarView.errors.eventSave'));
     } finally {
       setIsSaving(false);
     }
-  }, [eventModalMode, editingEvent, companyId, actor, loadEvents, handleCloseEventModal]);
+  }, [eventModalMode, editingEvent, companyId, actor, loadEvents, handleCloseEventModal, t]);
 
   const handleDeleteEvent = useCallback(async () => {
     if (!editingEvent) return;
@@ -1073,19 +1076,19 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       };
 
       const result = await sendEventWebhook(payload);
-      if (!result.ok) throw new Error('Prišlo je do napake pri brisanju dogodka.');
+      if (!result.ok) throw new Error(t('calendarView.errors.eventDelete'));
 
       await new Promise((r) => setTimeout(r, 800));
       await loadEvents();
       handleCloseEventModal();
-      setSuccessMessage('Dogodek izbrisan');
+      setSuccessMessage(t('calendarView.toast.eventDeleted'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
-      setActionError('Prišlo je do napake pri brisanju dogodka.');
+      setActionError(t('calendarView.errors.eventDelete'));
     } finally {
       setIsEventDeleting(false);
     }
-  }, [editingEvent, companyId, actor, loadEvents, handleCloseEventModal]);
+  }, [editingEvent, companyId, actor, loadEvents, handleCloseEventModal, t]);
 
   // Filter appointments
   const filteredAppointments = useMemo(() => {
@@ -1312,10 +1315,10 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri zaključevanju termina.');
+        throw new Error(t('errors.completeError'));
       }
 
-      setSuccessMessage('Termin uspešno zaključen');
+      setSuccessMessage(t('toast.completed'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       // Wait 1.5 seconds for system to process completion
@@ -1325,11 +1328,11 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       setCompleteTarget(null);
       setCompletionNotes('');
     } catch (err) {
-      setActionError('Prišlo je do napake pri zaključevanju termina.');
+      setActionError(t('errors.completeError'));
     } finally {
       setIsCompleting(false);
     }
-  }, [completeTarget, completionNotes, companyId, actor, companyPayload, buildPayload, loadAppointments]);
+  }, [completeTarget, completionNotes, companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
 
   const handleNoShowAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
     setSelectedAppointment(null); // Close detail modal first (like Termini)
@@ -1358,20 +1361,20 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri označevanju kot No Show.');
+        throw new Error(t('errors.noShowError'));
       }
 
-      setSuccessMessage('Termin označen kot No Show');
+      setSuccessMessage(t('toast.noShow'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       await new Promise((resolve) => setTimeout(resolve, 700));
       await loadAppointments();
     } catch (err) {
-      setActionError('Prišlo je do napake pri označevanju kot No Show.');
+      setActionError(t('errors.noShowError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
 
   const handleCancelAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
     setSelectedAppointment(null); // Close detail modal first (like Termini)
@@ -1400,20 +1403,20 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri odpovedi termina.');
+        throw new Error(t('errors.cancelError'));
       }
 
-      setSuccessMessage('Termin uspešno odpovedan');
+      setSuccessMessage(t('toast.cancelled'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       await new Promise((resolve) => setTimeout(resolve, 700));
       await loadAppointments();
     } catch (err) {
-      setActionError('Prišlo je do napake pri odpovedi termina.');
+      setActionError(t('errors.cancelError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
 
   // Delete handler - opens DeleteConfirmation dialog (identical to Termini)
   const handleDeleteAppointment = useCallback((appointment: AppointmentWithDetails) => {
@@ -1442,7 +1445,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri brisanju termina.');
+        throw new Error(t('errors.deleteError'));
       }
 
       // Wait 1 second for system to process
@@ -1451,11 +1454,11 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       await loadAppointments();
       setDeleteTarget(null);
     } catch (err) {
-      setActionError('Prišlo je do napake pri brisanju termina.');
+      setActionError(t('errors.deleteError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [deleteTarget, companyId, actor, companyPayload, buildPayload, loadAppointments]);
+  }, [deleteTarget, companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
 
   // Modal handlers
   const handleNewAppointment = useCallback(() => {
@@ -1481,7 +1484,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
   const handleSaveAppointment = useCallback(async (data: AppointmentFormData) => {
     if (!companyId) {
-      setActionError('Podjetje ni izbrano. Prosimo, osvežite stran.');
+      setActionError(t('calendarView.errors.companyNotSelected'));
       return;
     }
     setIsSaving(true);
@@ -1638,7 +1641,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri shranjevanju termina.');
+        throw new Error(t('errors.saveError'));
       }
 
       // Wait 1 second for system to process
@@ -1647,11 +1650,11 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       await loadAppointments();
       handleCloseModal();
     } catch (err) {
-      setActionError('Prišlo je do napake pri shranjevanju termina.');
+      setActionError(t('errors.saveError'));
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal]);
+  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal, t]);
 
   // Drag-and-drop reschedule: callback from WeekView/DayView
   const handleAppointmentDropped = useCallback((
@@ -1671,7 +1674,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     newEndTime: string
   ) => {
     if (!companyId) {
-      setActionError('Prišlo je do napake pri prestavljanju termina.');
+      setActionError(t('calendarView.errors.reschedule'));
       return;
     }
     setIsSaving(true);
@@ -1749,20 +1752,20 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       );
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri prestavljanju termina.');
+        throw new Error(t('calendarView.errors.reschedule'));
       }
 
-      setSuccessMessage('Termin uspešno prestavljen');
+      setSuccessMessage(t('calendarView.toast.appointmentRescheduled'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await loadAppointments();
     } catch (err) {
-      setActionError('Prišlo je do napake pri prestavljanju termina.');
+      setActionError(t('calendarView.errors.reschedule'));
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
 
   const handleConfirmReschedule = useCallback(async () => {
     if (!rescheduleConfirm) return;
@@ -1818,7 +1821,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       });
 
       if (!result.ok) {
-        throw new Error('Prišlo je do napake pri shranjevanju odsotnosti.');
+        throw new Error(t('calendarView.errors.absenceSave'));
       }
 
       handleCloseAbsenceModal();
@@ -1863,7 +1866,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         timestamp: new Date().toISOString(),
         meta: { app: 'Integrate' as const, version: '1.0' as const },
       });
-      if (!result.ok) throw new Error('Prišlo je do napake pri brisanju odsotnosti.');
+      if (!result.ok) throw new Error(t('calendarView.errors.absenceDelete'));
       handleAbsenceDetailClose();
       await new Promise((r) => setTimeout(r, 700));
       await refreshAbsences();
@@ -1897,7 +1900,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         timestamp: new Date().toISOString(),
         meta: { app: 'Integrate' as const, version: '1.0' as const },
       });
-      if (!result.ok) throw new Error('Prišlo je do napake pri urejanju odsotnosti.');
+      if (!result.ok) throw new Error(t('calendarView.errors.absenceEdit'));
       handleAbsenceDetailClose();
       await new Promise((r) => setTimeout(r, 700));
       await refreshAbsences();
@@ -1968,7 +1971,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 whileTap={{ scale: 0.92 }}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-[#1A1F36]
                            transition-colors hover:bg-gray-100 active:bg-gray-200"
-                aria-label="Nazaj"
+                aria-label={t('calendarView.navigation.prev')}
               >
                 <CaretLeft className="h-[14px] w-[14px] md:h-4 md:w-4" weight="bold" />
               </motion.button>
@@ -1985,7 +1988,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 whileTap={{ scale: 0.92 }}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-[#1A1F36]
                            transition-colors hover:bg-gray-100 active:bg-gray-200"
-                aria-label="Naprej"
+                aria-label={t('calendarView.navigation.next')}
               >
                 <CaretRight className="h-[14px] w-[14px] md:h-4 md:w-4" weight="bold" />
               </motion.button>
@@ -2002,7 +2005,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 whileTap={{ scale: 0.92 }}
                 className="flex h-8 w-8 items-center justify-center rounded-full text-[#6B7280]
                            transition-colors hover:bg-gray-100 hover:text-[#1A1F36] active:bg-gray-200"
-                aria-label="Filtri"
+                aria-label={t('calendarView.navigation.filters')}
               >
                 <Faders className="h-[17px] w-[17px] md:h-[18px] md:w-[18px]" weight="bold" />
               </motion.button>
@@ -2283,8 +2286,8 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Izbriši termin"
-        message="Ali ste prepričani, da želite izbrisati ta termin?"
+        title={t('calendarView.detailModal.fields.deleteTitle')}
+        message={t('calendarView.detailModal.fields.deleteMessage')}
         appointment={deleteTarget}
         isDeleting={isDeleting}
       />
@@ -2330,8 +2333,8 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 </motion.button>
                 <CheckCircle className="h-10 w-10 text-emerald-500" weight="fill" />
                 <div className="text-center">
-                  <h2 className="text-lg font-semibold text-[#1A1F36]">Zaključi termin</h2>
-                  <p className="text-sm text-gray-500">Potrdite zaključitev termina</p>
+                  <h2 className="text-lg font-semibold text-[#1A1F36]">{t('calendarView.completeDialog.title')}</h2>
+                  <p className="text-sm text-gray-500">{t('calendarView.completeDialog.subtitle')}</p>
                 </div>
               </div>
 
@@ -2343,7 +2346,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                     {(() => { const p = (completeTarget.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
                   </span>
                   <div>
-                    <p className="text-xs text-gray-500">Stranka</p>
+                    <p className="text-xs text-gray-500">{t('modal.fields.client')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.stranka_ime}</p>
                   </div>
                 </div>
@@ -2356,7 +2359,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                       style={{ background: completeTarget.storitev.barva || '#6366F1' }}
                     />
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500">Storitev</p>
+                      <p className="text-xs text-gray-500">{t('modal.fields.service')}</p>
                       <div className="space-y-1 mt-0.5">
                         <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev.naziv}</p>
                         {completeTarget.storitev_2 && (
@@ -2380,7 +2383,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 <div className="flex items-center gap-3">
                   <CalendarBlank className="h-[18px] w-[18px] text-emerald-500 flex-shrink-0" weight="regular" />
                   <div>
-                    <p className="text-xs text-gray-500">Datum</p>
+                    <p className="text-xs text-gray-500">{t('modal.fields.date')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
                       {new Date(completeTarget.datum).toLocaleDateString('sl-SI', {
                         weekday: 'long',
@@ -2396,7 +2399,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 <div className="flex items-center gap-3">
                   <Clock className="h-[18px] w-[18px] text-emerald-500 flex-shrink-0" weight="regular" />
                   <div>
-                    <p className="text-xs text-gray-500">Čas</p>
+                    <p className="text-xs text-gray-500">{t('calendarView.detailModal.fields.time')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
                       {completeTarget.cas_zacetek?.substring(0, 5)} - {completeTarget.cas_konec?.substring(0, 5)}
                     </p>
@@ -2406,13 +2409,13 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 {/* Notes field (optional) */}
                 <div>
                   <label htmlFor="calendar-completion-notes" className="block text-sm font-semibold text-gray-700 mb-2">
-                    Sporočilo stranki oz. navodila po terminu
+                    {t('calendarView.completeDialog.notesLabel')}
                   </label>
                   <textarea
                     id="calendar-completion-notes"
                     value={completionNotes}
                     onChange={(e) => setCompletionNotes(e.target.value)}
-                    placeholder="Vnesite sporočilo ali navodila po zaključenem terminu (opcijsko)..."
+                    placeholder={t('calendarView.completeDialog.notesPlaceholder')}
                     rows={4}
                     className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 resize-none"
                   />
@@ -2430,7 +2433,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                   disabled={isCompleting}
                   className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Prekliči
+                  {t('calendarView.completeDialog.cancel')}
                 </button>
                 <motion.button
                   type="button"
@@ -2447,12 +2450,12 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                         transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                         className="h-4 w-4 rounded-full border-2 border-white border-t-transparent"
                       />
-                      Zaključujem...
+                      {t('calendarView.completeDialog.completing')}
                     </>
                   ) : (
                     <>
                       <CheckCircle className="h-4 w-4" weight="bold" />
-                      Zaključi
+                      {t('calendarView.completeDialog.complete')}
                     </>
                   )}
                 </motion.button>
@@ -2503,7 +2506,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="px-6 py-5 border-b border-gray-100">
-                <h3 className="text-base font-semibold text-[#1A1F36]">Prestavi termin?</h3>
+                <h3 className="text-base font-semibold text-[#1A1F36]">{t('calendarView.rescheduleDialog.title')}</h3>
                 <p className="text-sm font-medium text-[#1A1F36] mt-1">
                   {rescheduleConfirm.appointment.stranka_ime} {rescheduleConfirm.appointment.stranka_priimek || ''}
                 </p>
@@ -2512,7 +2515,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 {/* Service */}
                 {rescheduleConfirm.appointment.storitev && (
                   <div>
-                    <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Storitev</div>
+                    <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">{t('calendarView.rescheduleDialog.service')}</div>
                     <div className="space-y-1.5">
                       {[
                         rescheduleConfirm.appointment.storitev,
@@ -2530,7 +2533,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 {/* Employee */}
                 {rescheduleConfirm.appointment.zaposleni && (
                   <div>
-                    <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Oseba</div>
+                    <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">{t('calendarView.rescheduleDialog.employee')}</div>
                     <div className="flex items-center gap-2.5 rounded-xl bg-[#F7F8FA] px-3 py-2">
                       <span
                         className="text-base font-bold flex-shrink-0"
@@ -2551,7 +2554,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 )}
                 {/* New time */}
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Nov čas</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">{t('calendarView.rescheduleDialog.newTime')}</div>
                   <div className="rounded-xl bg-[#F7F8FA] px-4 py-3 text-sm font-semibold text-[#1A1F36]">
                     {rescheduleConfirm.newDate.split('-').reverse().join('.')} · {rescheduleConfirm.newStartTime} – {rescheduleConfirm.newEndTime}
                   </div>
@@ -2564,7 +2567,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                   disabled={isSaving}
                   className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Prekliči
+                  {t('calendarView.completeDialog.cancel')}
                 </button>
                 <button
                   type="button"
@@ -2573,7 +2576,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                   className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-opacity disabled:opacity-60"
                   style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
                 >
-                  {isSaving ? 'Prestavljam...' : 'Prestavi'}
+                  {isSaving ? t('calendarView.rescheduleDialog.saving') : t('calendarView.rescheduleDialog.confirm')}
                 </button>
               </div>
             </motion.div>

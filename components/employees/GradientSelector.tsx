@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { motion } from 'motion/react';
 import { Check } from '@phosphor-icons/react';
 import { EMPLOYEE_GRADIENTS } from '@/lib/constants/gradients';
+import { useTranslations } from 'next-intl';
 
 interface GradientSelectorProps {
   value: string; // Full CSS gradient string
@@ -12,6 +13,7 @@ interface GradientSelectorProps {
 }
 
 function GradientSelector({ value, onChange, disabled = false }: GradientSelectorProps) {
+  const t = useTranslations('staff');
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-3">
@@ -49,7 +51,7 @@ function GradientSelector({ value, onChange, disabled = false }: GradientSelecto
         ))}
       </div>
       <p className="text-xs text-gray-500">
-        Ta barva bo uporabljena za začetnice na koledarju in profilih
+        {t('gradientSelector.description')}
       </p>
     </div>
   );

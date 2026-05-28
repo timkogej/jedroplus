@@ -14,6 +14,7 @@ import {
 } from '@phosphor-icons/react';
 import type { Storitev, Zaposleni } from '@/types/appointments';
 import type { ViewMode } from '@/lib/utils/calendar';
+import { useTranslations } from 'next-intl';
 import {
   getMonthGrid,
   isToday,
@@ -74,6 +75,8 @@ function CalendarSidebar({
   appointmentDates,
   restrictedToEmployeeId,
 }: CalendarSidebarProps) {
+  const t = useTranslations('appointments');
+
   // Mini calendar state - always shows current selected month
   const miniCalendarDate = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const miniCalendarDays = useMemo(() => getMonthGrid(miniCalendarDate), [miniCalendarDate]);
@@ -122,7 +125,7 @@ function CalendarSidebar({
                              transition-shadow hover:shadow-xl hover:shadow-cyan-500/30"
                 >
                   <Plus className="h-4 w-4" weight="bold" />
-                  Nov termin
+                  {t('page.newAppointment')}
                 </motion.button>
 
                 {/* Dogodek button */}
@@ -135,7 +138,7 @@ function CalendarSidebar({
                              text-sm font-medium text-white shadow-md transition-all hover:bg-[#2D3350]"
                 >
                   <Star className="h-4 w-4" weight="regular" />
-                  Dogodek
+                  {t('calendarView.sidebar.newEvent')}
                 </motion.button>
 
                 {/* Absence button */}
@@ -150,7 +153,7 @@ function CalendarSidebar({
                                hover:shadow-lg hover:shadow-orange-500/30"
                   >
                     <ProhibitInset className="h-4 w-4" weight="bold" />
-                    Odsotnost
+                    {t('calendarView.sidebar.newAbsence')}
                   </motion.button>
                 )}
               </div>
@@ -165,7 +168,7 @@ function CalendarSidebar({
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     className="rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-200"
-                    aria-label="Prejšnji mesec"
+                    aria-label={t('calendarView.sidebar.prevMonth')}
                   >
                     <CaretLeft className="h-4 w-4" weight="bold" />
                   </motion.button>
@@ -178,7 +181,7 @@ function CalendarSidebar({
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     className="rounded-lg p-1.5 text-gray-600 transition-colors hover:bg-gray-200"
-                    aria-label="Naslednji mesec"
+                    aria-label={t('calendarView.sidebar.nextMonth')}
                   >
                     <CaretRight className="h-4 w-4" weight="bold" />
                   </motion.button>
@@ -247,7 +250,7 @@ function CalendarSidebar({
                 />
                 <input
                   type="text"
-                  placeholder="Išči termine..."
+                  placeholder={t('calendarView.sidebar.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
                   className="w-full rounded-xl border-2 border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
@@ -258,13 +261,13 @@ function CalendarSidebar({
               {/* Filters section */}
               <div>
                 <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3">
-                  Filtri
+                  {t('calendarView.sidebar.filters')}
                 </h3>
 
                 {/* Days filter */}
                 <div className="mb-4">
                   <div className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                    Prikaz dni
+                    {t('calendarView.sidebar.displayDays')}
                   </div>
                   <motion.button
                     type="button"
@@ -285,7 +288,7 @@ function CalendarSidebar({
                       WebkitTextFillColor: 'transparent',
                     }} />
                     <span className="flex-1 text-sm font-medium text-gray-900">
-                      {showAllDays ? 'Prikaži vse dneve' : 'Samo tedenske dneve'}
+                      {showAllDays ? t('calendarView.sidebar.showAllDays') : t('calendarView.sidebar.weekdaysOnly')}
                     </span>
                     <Check className={`w-4 h-4 flex-shrink-0 ${showAllDays ? 'text-violet-600' : 'text-blue-600'}`} weight="bold" />
                   </motion.button>
@@ -294,7 +297,7 @@ function CalendarSidebar({
                 {/* Employees filter */}
                 <div className="mb-4">
                   <div className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                    Zaposleni
+                    {t('calendarView.sidebar.employeesSection')}
                   </div>
                   <div className="space-y-1.5 max-h-40 overflow-y-auto">
                     {restrictedToEmployeeId ? (
@@ -336,7 +339,7 @@ function CalendarSidebar({
                                      }`}
                         >
                           <span className={`flex-1 text-sm font-medium ${!selectedEmployeeId ? 'text-gray-900' : 'text-gray-700'}`}>
-                            Vsi zaposleni
+                            {t('filters.allEmployees')}
                           </span>
                           {!selectedEmployeeId && (
                             <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
@@ -382,7 +385,7 @@ function CalendarSidebar({
                 {/* Services filter */}
                 <div>
                   <div className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                    Storitve
+                    {t('calendarView.sidebar.servicesSection')}
                   </div>
                   <div className="space-y-1.5 max-h-40 overflow-y-auto">
                     {/* All services option */}
@@ -396,7 +399,7 @@ function CalendarSidebar({
                                  }`}
                     >
                       <span className={`flex-1 text-sm font-medium ${!selectedServiceId ? 'text-gray-900' : 'text-gray-700'}`}>
-                        Vse storitve
+                        {t('filters.allServices')}
                       </span>
                       {!selectedServiceId && (
                         <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
@@ -440,7 +443,7 @@ function CalendarSidebar({
               {/* Service legend */}
               <div>
                 <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3">
-                  Legenda storitev
+                  {t('calendarView.sidebar.legend')}
                 </h3>
                 <div className="space-y-2">
                   {services.map((service, idx) => {
@@ -473,7 +476,7 @@ function CalendarSidebar({
                     );
                   })}
                   {services.length === 0 && (
-                    <p className="text-sm text-gray-400 text-center py-4">Ni storitev za prikaz</p>
+                    <p className="text-sm text-gray-400 text-center py-4">{t('calendarView.sidebar.noServices')}</p>
                   )}
                 </div>
               </div>

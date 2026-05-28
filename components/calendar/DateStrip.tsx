@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { motion } from 'motion/react';
 import type { ViewMode } from '@/lib/utils/calendar';
 import { DAYS_ABBR, addDays, startOfWeek, isSameDay, isToday } from '@/lib/utils/calendar';
+import { useTranslations } from 'next-intl';
 
 interface DateStripProps {
   currentDate: Date;
@@ -11,10 +12,18 @@ interface DateStripProps {
   onDateSelect: (date: Date) => void;
 }
 
-// Abbreviations: just first letter (uppercase) for mobile iOS look
-const DAY_LETTER = ['N', 'P', 'T', 'S', 'Č', 'P', 'S'];
-
 function DateStrip({ currentDate, currentView, onDateSelect }: DateStripProps) {
+  const t = useTranslations('common');
+  // Sun=0 … Sat=6, matching JS getDay()
+  const DAY_LETTER = [
+    t('dayLetters.sun'),
+    t('dayLetters.mon'),
+    t('dayLetters.tue'),
+    t('dayLetters.wed'),
+    t('dayLetters.thu'),
+    t('dayLetters.fri'),
+    t('dayLetters.sat'),
+  ];
   // Show 7 days of the week containing currentDate (Mon–Sun)
   const weekStart = startOfWeek(currentDate);
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));

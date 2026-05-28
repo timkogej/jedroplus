@@ -183,5 +183,210 @@
     "activeService": "Storitev: {name}",
     "activeFrom": "Od: {date}",
     "activeTo": "Do: {date}"
+  },
+  "calendarView": {
+    "viewModes": {
+      "day": "Dan",
+      "week": "Teden",
+      "month": "Mesec",
+      "threeDays": "3 dni"
+    },
+    "sidebar": {
+      "newEvent": "Dogodek",
+      "newAbsence": "Odsotnost",
+      "searchPlaceholder": "Išči termine...",
+      "filters": "Filtri",
+      "displayDays": "Prikaz dni",
+      "showAllDays": "Prikaži vse dneve",
+      "weekdaysOnly": "Samo tedenske dneve",
+      "employeesSection": "Zaposleni",
+      "servicesSection": "Storitve",
+      "legend": "Legenda storitev",
+      "noServices": "Ni storitev za prikaz",
+      "prevMonth": "Prejšnji mesec",
+      "nextMonth": "Naslednji mesec"
+    },
+    "eventModal": {
+      "titles": {
+        "create": "Nov dogodek",
+        "edit": "Uredi dogodek"
+      },
+      "subtitles": {
+        "create": "Dodaj nov dogodek v koledar",
+        "edit": "Posodobi podatke o dogodku"
+      },
+      "fields": {
+        "title": "Naslov dogodka *",
+        "titlePlaceholder": "npr. Sestanek s stranko...",
+        "startDate": "Datum začetka *",
+        "endDate": "Datum konca",
+        "allDay": "Celodnevni dogodek",
+        "startTime": "Začetna ura",
+        "endTime": "Končna ura",
+        "timePlaceholder": "Izberi uro",
+        "color": "Barva dogodka",
+        "description": "Opis",
+        "descriptionPlaceholder": "Splošen opis dogodka...",
+        "notes": "Opombe",
+        "notesPlaceholder": "Interne opombe...",
+        "location": "Lokacija",
+        "locationPlaceholder": "npr. Salon, Zoom, Ljubljana...",
+        "visibleInCalendar": "Vidno v koledarju",
+        "allowBooking": "Omogoči rezervacijo termina"
+      },
+      "validation": {
+        "titleRequired": "Naslov dogodka je obvezen",
+        "startDateRequired": "Datum začetka je obvezen",
+        "endDateBeforeStart": "Datum konca ne sme biti pred datumom začetka",
+        "endTimeAfterStart": "Končna ura mora biti po začetni uri",
+        "colorRequired": "Izberite barvo dogodka"
+      },
+      "actions": {
+        "delete": "Izbriši",
+        "edit": "Uredi",
+        "cancel": "Prekliči",
+        "save": "Shrani",
+        "confirmDelete": "Potrdi izbris?",
+        "confirmYes": "Da, izbriši",
+        "saving": "Shranjujem...",
+        "update": "Posodobi"
+      }
+    },
+    "absenceModal": {
+      "title": "Dodaj odsotnost",
+      "subtitle": "Označite dneve ali ure odsotnosti zaposlenega",
+      "absenceLabel": "Odsotnost",
+      "fields": {
+        "employee": "Zaposleni",
+        "hoursOnly": "Samo ure",
+        "multipleDays": "Več dni",
+        "date": "Datum",
+        "dateFrom": "Od datuma",
+        "dateTo": "Do datuma",
+        "timeFrom": "Od ure",
+        "timeTo": "Do ure",
+        "timePlaceholder": "Izberi uro",
+        "reason": "Razlog (neobvezno)",
+        "reasonPlaceholder": "Razlog za odsotnost..."
+      },
+      "validation": {
+        "employeeRequired": "Izberite zaposlenega",
+        "startDateRequired": "Izberite datum začetka",
+        "endDateRequired": "Izberite datum konca",
+        "endDateAfterStart": "Datum konca mora biti po datumu začetka",
+        "endTimeAfterStart": "Čas konca mora biti po času začetka"
+      },
+      "actions": {
+        "cancel": "Prekliči",
+        "saving": "Shranjujem...",
+        "save": "Shrani odsotnost"
+      }
+    },
+    "absenceDetailModal": {
+      "subtitle": "Odsotnost",
+      "actions": {
+        "deleteAbsence": "Izbriši odsotnost",
+        "editAbsence": "Uredi odsotnost",
+        "saveChanges": "Shrani spremembe",
+        "confirmYes": "Da",
+        "confirmNo": "Ne"
+      }
+    },
+    "appointmentModal": {
+      "subtitles": {
+        "create": "Ustvarite nov termin",
+        "viewEdit": "Pregled in urejanje termina"
+      },
+      "sections": {
+        "appointmentData": "Podatki o terminu",
+        "clientData": "Podatki o stranki"
+      },
+      "fields": {
+        "timePlaceholder": "Izberi čas",
+        "noData": "Ni podatka",
+        "clientSearch": "Išči stranko po imenu, emailu ali telefonu..."
+      },
+      "actions": {
+        "close": "Zapri",
+        "cancel": "Prekliči",
+        "saving": "Shranjujem...",
+        "saveAppointment": "Shrani termin"
+      }
+    },
+    "detailModal": {
+      "fields": {
+        "duration": "Trajanje",
+        "copyTitle": "Kopiraj {label}",
+        "unknownClient": "Neznana stranka",
+        "time": "Čas",
+        "originalPrice": "Originalna cena",
+        "discount": "Popust",
+        "priceWithDiscount": "Cena z popustom",
+        "additionalService": "Dodatna storitev",
+        "deleteTitle": "Izbriši termin",
+        "deleteMessage": "Ali ste prepričani, da želite izbrisati ta termin?"
+      },
+      "actions": {
+        "noShow": "Ni prišel",
+        "cancel": "Odpoved",
+        "complete": "Zaključi",
+        "moreOptions": "Več možnosti"
+      }
+    },
+    "dayView": {
+      "notWorkingDay": "{day} ni delovni dan",
+      "appointmentNoun": "{count, plural, =1 {termin} =2 {termini} few {termini} other {terminov}}",
+      "noAppointmentsToday": "Ni terminov za ta dan",
+      "allEmployees": "Vsi zaposleni"
+    },
+    "monthView": {
+      "moreEvents": "+{count} dogodki",
+      "moreAbsences": "+{count} odsotnosti",
+      "more": "+{count} več"
+    },
+    "weekView": {
+      "moreAbsences": "+{count} več",
+      "moreEvents": "+{count} več"
+    },
+    "rescheduleDialog": {
+      "title": "Prestavi termin?",
+      "service": "Storitev",
+      "employee": "Oseba",
+      "newTime": "Nov čas",
+      "saving": "Prestavljam...",
+      "confirm": "Prestavi"
+    },
+    "completeDialog": {
+      "title": "Zaključi termin",
+      "subtitle": "Potrdite zaključitev termina",
+      "notesLabel": "Sporočilo stranki oz. navodila po terminu",
+      "notesPlaceholder": "Vnesite sporočilo ali navodila po zaključenem terminu (opcijsko)...",
+      "completing": "Zaključujem...",
+      "complete": "Zaključi",
+      "cancel": "Prekliči"
+    },
+    "navigation": {
+      "prev": "Nazaj",
+      "next": "Naprej",
+      "filters": "Filtri"
+    },
+    "toast": {
+      "eventCreated": "Dogodek ustvarjen",
+      "eventUpdated": "Dogodek posodobljen",
+      "eventDeleted": "Dogodek izbrisan",
+      "appointmentRescheduled": "Termin uspešno prestavljen"
+    },
+    "errors": {
+      "loadAppointments": "Prišlo je do napake pri nalaganju terminov.",
+      "eventSave": "Prišlo je do napake pri shranjevanju dogodka.",
+      "eventDelete": "Prišlo je do napake pri brisanju dogodka.",
+      "absenceSave": "Prišlo je do napake pri shranjevanju odsotnosti.",
+      "absenceDelete": "Prišlo je do napake pri brisanju odsotnosti.",
+      "absenceEdit": "Prišlo je do napake pri urejanju odsotnosti.",
+      "reschedule": "Prišlo je do napake pri prestavljanju termina.",
+      "companyNotSelected": "Podjetje ni izbrano. Prosimo, osvežite stran."
+    },
+    "saving": "Shranjujem...",
+    "allEmployees": "Vsi zaposleni"
   }
 }

@@ -87,5 +87,14 @@
   "pagination": {
     "previous": "Prejšnja",
     "next": "Naslednja"
+  },
+  "dayLetters": {
+    "sun": "N",
+    "mon": "P",
+    "tue": "T",
+    "wed": "S",
+    "thu": "Č",
+    "fri": "P",
+    "sat": "S"
   }
 }
