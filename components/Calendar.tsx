@@ -460,7 +460,12 @@ function AppointmentDetailModal({
                     </div>
                   </motion.div>
                 ) : (
-                  <p className="text-2xl font-bold text-gray-900">{fmt(originalCena)} EUR</p>
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+                    <span className="text-sm font-medium text-gray-700">{t('calendarView.detailModal.fields.price')}</span>
+                    <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      {fmt(originalCena)} EUR
+                    </span>
+                  </div>
                 )}
 
                 {/* ADD-ON section — only when there is actual add-on pricing or an explicit add_on promo */}
