@@ -316,6 +316,7 @@
     "detailModal": {
       "fields": {
         "duration": "Trajanje",
+        "price": "Cena",
         "copyTitle": "Kopiraj {label}",
         "unknownClient": "Neznana stranka",
         "time": "Čas",

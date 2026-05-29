@@ -11,8 +11,8 @@ import EventCard from './EventCard';
 import {
   isSameDay,
   isToday,
-  formatDate,
-  DAYS_FULL,
+  getDaysFull,
+  getMonthsFull,
   HOUR_HEIGHT,
   getTimePosition,
   getDurationHeight,
@@ -24,7 +24,7 @@ import {
   JS_DAY_TO_SLOVENIAN,
   getOffHourRanges,
 } from '@/lib/utils/calendar';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface DayViewProps {
   currentDate: Date;
@@ -123,6 +123,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
 
 function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true, isMobile = false, onAppointmentReschedule }: DayViewProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
 
   // Drag state
   const [dragging, setDragging] = useState<DragInfo | null>(null);
@@ -293,8 +294,8 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
   if (skipDay) {
     return (
       <div className="flex h-full flex-col items-center justify-center text-center">
-        <p className="text-sm font-medium text-gray-400">{t('calendarView.dayView.notWorkingDay', { day: DAYS_FULL[currentDate.getDay()] })}</p>
-        <p className="text-xs text-gray-300 mt-1">{formatDate(currentDate, 'dayMonth')} {currentDate.getFullYear()}</p>
+        <p className="text-sm font-medium text-gray-400">{t('calendarView.dayView.notWorkingDay', { day: getDaysFull(locale)[currentDate.getDay()] })}</p>
+        <p className="text-xs text-gray-300 mt-1">{currentDate.getDate()}. {getMonthsFull(locale)[currentDate.getMonth()]} {currentDate.getFullYear()}</p>
       </div>
     );
   }
@@ -323,10 +324,10 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
           </div>
           <div className="flex-shrink-0">
             <p className="text-base font-normal text-[#1A1F36]">
-              {DAYS_FULL[currentDate.getDay()]}
+              {getDaysFull(locale)[currentDate.getDay()]}
             </p>
             <p className="text-xs text-gray-400">
-              {formatDate(currentDate, 'dayMonth')} {currentDate.getFullYear()}
+              {currentDate.getDate()}. {getMonthsFull(locale)[currentDate.getMonth()]} {currentDate.getFullYear()}
             </p>
           </div>
 

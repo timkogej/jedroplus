@@ -316,6 +316,7 @@
     "detailModal": {
       "fields": {
         "duration": "Duration",
+        "price": "Price",
         "copyTitle": "Copy {label}",
         "unknownClient": "Unknown client",
         "time": "Time",

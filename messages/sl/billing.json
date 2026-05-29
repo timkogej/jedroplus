@@ -173,6 +173,18 @@
       "premium": "Premium"
     }
   },
+  "upgradePlanGate": {
+    "heading": "Ta funkcija zahteva paket {plan}",
+    "subtitle": "Nadgradite svoj paket, da odklenete to funkcijo in izkoristite celoten potencial platforme Jedro+.",
+    "upgradeButton": "Nadgradi paket",
+    "hint": "Oglejte si vse razpoložljive pakete in izberite tistega, ki vam ustreza."
+  },
+  "roleAccessGate": {
+    "title": "Dostop omejen",
+    "defaultMessage": "Nimate dostopa do te strani. Obrnite se na lastnika podjetja.",
+    "billingOwnerOnly": "Stran 'Paketi in kvote' je dostopna samo lastniku podjetja.",
+    "staffRestricted": "Ta funkcija je za vaš račun onemogočena. Za dostop kontaktirajte lastnika podjetja."
+  },
   "paketi": {
     "title": "Paketi in kvote",
     "subtitle": "Pregled vašega paketa in porabe",

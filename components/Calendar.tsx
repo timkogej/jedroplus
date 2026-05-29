@@ -49,7 +49,7 @@ import {
 import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
 import type { CalendarEvent } from '@/types/events';
 import {
-  MONTHS_FULL,
+  getMonthsFull,
   formatWeekRange,
   formatDate,
   formatDateResponsive,
@@ -81,7 +81,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface CalendarProps {
   companyId: string;
@@ -138,6 +138,7 @@ function AppointmentDetailModal({
   onDelete?: (appointment: AppointmentWithDetails) => void;
 }) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
   // Get gradient background - matches AppointmentCard color logic (supports multiple services)
@@ -186,7 +187,7 @@ function AppointmentDetailModal({
 
   const formatModalDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('sl-SI', {
+    return date.toLocaleDateString(locale === 'sl' ? 'sl-SI' : 'en-US', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -424,7 +425,7 @@ function AppointmentDetailModal({
             const badge = getBadge();
 
             const fmt = (val: number) =>
-              new Intl.NumberFormat('sl-SI', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+              new Intl.NumberFormat(locale === 'sl' ? 'sl-SI' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
             if (originalCena === 0 && !imaPopust) return null;
 
@@ -459,11 +460,16 @@ function AppointmentDetailModal({
                     </div>
                   </motion.div>
                 ) : (
-                  <p className="text-2xl font-bold text-gray-900">{fmt(originalCena)} EUR</p>
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+                    <span className="text-sm font-medium text-gray-700">{t('calendarView.detailModal.fields.price')}</span>
+                    <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      {fmt(originalCena)} EUR
+                    </span>
+                  </div>
                 )}
 
-                {/* ADD-ON section */}
-                {apt.storitev_2 && (
+                {/* ADD-ON section — only when there is actual add-on pricing or an explicit add_on promo */}
+                {apt.storitev_2 && (apt.add_on_final_cena || apt.promocija_tip === 'add_on') && (
                   <motion.div
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -618,6 +624,7 @@ function AppointmentDetailModal({
 
 function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   const { companySettings } = useCompany();
   const { user } = useAuth();
   const { role, personId: rolePersonId, permissions } = useRolePermissions();
@@ -1913,8 +1920,8 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
   // Header title: always "Month Year" (Apple Calendar style – date strip shows specific day)
   const headerTitle = useMemo(() => {
-    return `${MONTHS_FULL[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
-  }, [currentDate]);
+    return `${getMonthsFull(locale)[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+  }, [currentDate, locale]);
 
   // Calculate visible appointments count based on current view
   const visibleAppointmentsCount = useMemo(() => {
@@ -2385,7 +2392,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                   <div>
                     <p className="text-xs text-gray-500">{t('modal.fields.date')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
-                      {new Date(completeTarget.datum).toLocaleDateString('sl-SI', {
+                      {new Date(completeTarget.datum).toLocaleDateString(locale === 'sl' ? 'sl-SI' : 'en-US', {
                         weekday: 'long',
                         day: 'numeric',
                         month: 'long',

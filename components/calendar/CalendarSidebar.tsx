@@ -14,14 +14,14 @@ import {
 } from '@phosphor-icons/react';
 import type { Storitev, Zaposleni } from '@/types/appointments';
 import type { ViewMode } from '@/lib/utils/calendar';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   getMonthGrid,
   isToday,
   isSameDay,
   startOfMonth,
-  MONTHS_FULL,
-  DAYS_ABBR,
+  getMonthsFull,
+  getDaysAbbr,
   addMonths,
   getLocalDateKey,
 } from '@/lib/utils/calendar';
@@ -76,13 +76,14 @@ function CalendarSidebar({
   restrictedToEmployeeId,
 }: CalendarSidebarProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
 
   // Mini calendar state - always shows current selected month
   const miniCalendarDate = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const miniCalendarDays = useMemo(() => getMonthGrid(miniCalendarDate), [miniCalendarDate]);
 
   // Days header (Monday first)
-  const daysHeader = [1, 2, 3, 4, 5, 6, 0].map((i) => DAYS_ABBR[i]);
+  const daysHeader = [1, 2, 3, 4, 5, 6, 0].map((i) => getDaysAbbr(locale)[i]);
 
   // Check if any filters are active
   const hasActiveFilters = selectedEmployeeId || selectedServiceId || searchQuery.trim();
@@ -173,7 +174,7 @@ function CalendarSidebar({
                     <CaretLeft className="h-4 w-4" weight="bold" />
                   </motion.button>
                   <span className="text-sm font-semibold text-gray-900">
-                    {MONTHS_FULL[miniCalendarDate.getMonth()]} {miniCalendarDate.getFullYear()}
+                    {getMonthsFull(locale)[miniCalendarDate.getMonth()]} {miniCalendarDate.getFullYear()}
                   </span>
                   <motion.button
                     type="button"

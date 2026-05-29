@@ -14,6 +14,7 @@ import { useRolePermissions } from "@/app/role-permission-context";
 import { supabase } from "@/lib/supabaseClient";
 import type { StaffPermissions } from "@/types/roles";
 import FreeTrialModal, { wasShownToday } from "@/components/FreeTrialModal";
+import { useTranslations } from "next-intl";
 
 // ============================================================================
 // Inner layout that uses sidebar context
@@ -118,6 +119,7 @@ export default function ProtectedLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations('billing');
   const { companyId, loading: companyLoading } = useCompany();
   const { user, loading: authLoading } = useAuth();
   const { planCode, loading: planLoading } = useCompanyPlan();
@@ -162,9 +164,12 @@ export default function ProtectedLayout({
     );
   }
 
+  // Strip locale prefix so route checks work with or without /sl/, /en/ prefix
+  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(\/|$)/, '/').replace(/\/$/, '') || '/';
+
   // ── Plan-based access gate ──────────────────────────────────────────────
-  const accessAllowed = hasAccessToRoute(pathname, planCode);
-  const requiredPlan = getRequiredPlan(pathname);
+  const accessAllowed = hasAccessToRoute(pathnameWithoutLocale, planCode);
+  const requiredPlan = getRequiredPlan(pathnameWithoutLocale);
 
   // ── Role-based access gate ──────────────────────────────────────────────
   // Admin cannot access /billing at all.
@@ -174,8 +179,8 @@ export default function ProtectedLayout({
     if (role === 'owner' || role === null) return null;
 
     if (role === 'admin') {
-      if (pathname === '/billing' || pathname.startsWith('/billing/')) {
-        return <RoleAccessGate message="Stran 'Paketi in kvote' je dostopna samo lastniku podjetja." />;
+      if (pathnameWithoutLocale === '/billing' || pathnameWithoutLocale.startsWith('/billing/')) {
+        return <RoleAccessGate message={t('roleAccessGate.billingOwnerOnly')} />;
       }
       return null;
     }
@@ -184,7 +189,7 @@ export default function ProtectedLayout({
       const p = permissions;
 
       // /billing is always accessible for staff (page itself handles the restricted view)
-      if (pathname === '/billing' || pathname.startsWith('/billing/')) return null;
+      if (pathnameWithoutLocale === '/billing' || pathnameWithoutLocale.startsWith('/billing/')) return null;
 
       const routePermMap: { prefix: string; key: keyof StaffPermissions }[] = [
         { prefix: '/analytics', key: 'can_view_analytics' },
@@ -197,10 +202,10 @@ export default function ProtectedLayout({
       ];
 
       for (const { prefix, key } of routePermMap) {
-        if (pathname === prefix || pathname.startsWith(prefix + '/')) {
+        if (pathnameWithoutLocale === prefix || pathnameWithoutLocale.startsWith(prefix + '/')) {
           if (p && p[key] === false) {
             return (
-              <RoleAccessGate message="Ta funkcija je za vaš račun onemogočena. Za dostop kontaktirajte lastnika podjetja." />
+              <RoleAccessGate message={t('roleAccessGate.staffRestricted')} />
             );
           }
         }
