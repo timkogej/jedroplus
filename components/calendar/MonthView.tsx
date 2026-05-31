@@ -27,9 +27,10 @@ interface MonthViewProps {
   onAbsenceClick?: (absence: Absence) => void;
   onDateClick: (date: Date) => void;
   isMobile?: boolean;
+  appointmentsWithResursi?: Set<number>;
 }
 
-function MonthView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, isMobile = false }: MonthViewProps) {
+function MonthView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, isMobile = false, appointmentsWithResursi }: MonthViewProps) {
   const t = useTranslations('appointments');
   const locale = useLocale();
   const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
@@ -226,6 +227,7 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
                     variant="mini"
                     services={services}
                     timeOnly={isMobile}
+                    hasResursi={appointmentsWithResursi?.has(Number(apt.id))}
                   />
                 ))}
                 {dayAppointments.length > 3 && (

@@ -28,6 +28,8 @@ import {
   getServiceStats,
   checkServiceHasAppointments,
 } from '@/lib/supabase/services';
+import { fetchActiveResursi, fetchStoritveResursi, syncStoritevResursi } from '@/lib/supabase/resursi';
+import type { Resurs, StoritevResurs } from '@/types/resursi';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import {
   buildServiceCreateData,
@@ -236,6 +238,11 @@ export default function StoritvePage() {
   // Toast state
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
+  // Resursi state for ServiceModal
+  const [availableResursi, setAvailableResursi] = useState<Resurs[]>([]);
+  const [storitveResursiLinks, setStoritveResursiLinks] = useState<StoritevResurs[]>([]);
+  const [pendingResursiIds, setPendingResursiIds] = useState<string[]>([]);
+
   const actor = user?.email ?? 'unknown';
   const companyPayload = useMemo(
     () => getPodatkiPodjetja(companySettings ?? undefined),
@@ -279,9 +286,11 @@ export default function StoritvePage() {
     setError(null);
 
     try {
-      const [servicesRes, statsRes] = await Promise.all([
+      const [servicesRes, statsRes, resursiRes, linksRes] = await Promise.all([
         fetchServicesWithCount(companyId),
         getServiceStats(companyId),
+        fetchActiveResursi(companyId),
+        fetchStoritveResursi(companyId),
       ]);
 
       if (servicesRes.error) {
@@ -290,6 +299,8 @@ export default function StoritvePage() {
 
       setServices(servicesRes.data ?? []);
       setStats(statsRes.data);
+      if (resursiRes.data) setAvailableResursi(resursiRes.data);
+      if (linksRes.data) setStoritveResursiLinks(linksRes.data);
     } catch (err) {
       setError(t('page.loadError'));
     } finally {
@@ -338,6 +349,7 @@ export default function StoritvePage() {
   const openCreateModal = useCallback(() => {
     setSelectedService(null);
     setModalMode('create');
+    setPendingResursiIds([]);
     setModalOpen(true);
   }, []);
 
@@ -345,8 +357,12 @@ export default function StoritvePage() {
   const openEditModal = useCallback((service: Service) => {
     setSelectedService(service);
     setModalMode('edit');
+    const current = storitveResursiLinks
+      .filter((l) => l.id_storitve === service.id)
+      .map((l) => l.id_resursa);
+    setPendingResursiIds(current);
     setModalOpen(true);
-  }, []);
+  }, [storitveResursiLinks]);
 
   // Open delete modal
   const openDeleteModal = useCallback(async (service: Service) => {
@@ -410,6 +426,7 @@ export default function StoritvePage() {
           throw new Error(t('toasts.errorUpdate'));
         }
 
+        await syncStoritevResursi(companyId, selectedService.id, pendingResursiIds);
         showToast(t('toasts.updated'), 'success');
       } else {
         // Create new service
@@ -460,6 +477,9 @@ export default function StoritvePage() {
           throw new Error(t('toasts.errorCreate'));
         }
 
+        if (pendingResursiIds.length > 0) {
+          await syncStoritevResursi(companyId, serviceId, pendingResursiIds);
+        }
         showToast(t('toasts.created'), 'success');
       }
 
@@ -482,6 +502,7 @@ export default function StoritvePage() {
     loadData,
     t,
     services,
+    pendingResursiIds,
   ]);
 
   // Toggle service active status
@@ -756,6 +777,9 @@ export default function StoritvePage() {
         onSave={handleSaveService}
         isSaving={isSaving}
         existingCategories={[...new Set(services.map(s => s.kategorija).filter((c): c is string => Boolean(c)))]}
+        availableResursi={availableResursi}
+        linkedResursiIds={pendingResursiIds}
+        onLinkedResursiChange={setPendingResursiIds}
       />
 
       {/* Delete Modal */}

@@ -1,0 +1,104 @@
+{
+  "page": {
+    "title": "Resources",
+    "subtitle": "Manage the physical resources your services require",
+    "newButton": "Add resource",
+    "searchPlaceholder": "Search resources...",
+    "showAll": "Show all",
+    "showActiveOnly": "Active only",
+    "resultsCount": "{current} of {total} resources",
+    "loadError": "Error loading resources.",
+    "retry": "Try again"
+  },
+  "stats": {
+    "total": "Total resources",
+    "active": "Active",
+    "totalCapacity": "Total capacity",
+    "linkedServices": "Linked services"
+  },
+  "card": {
+    "inactive": "Inactive",
+    "units": "{count} units",
+    "unit": "{count} unit",
+    "perUnit": "{count} p./unit",
+    "totalCapacity": "Total: {count} slots",
+    "alwaysAvailable": "Always available",
+    "scheduleSet": "Schedule set",
+    "noServices": "No linked services",
+    "toggleActive": "Active",
+    "toggleInactive": "Inactive"
+  },
+  "modal": {
+    "createTitle": "Add resource",
+    "createSubtitle": "Create a new physical resource for your business",
+    "editTitle": "Edit resource",
+    "editSubtitle": "Update resource details",
+    "nameLabel": "Resource name",
+    "namePlaceholder": "e.g. Massage table, Cabin 1...",
+    "bookingNameLabel": "Booking name",
+    "bookingNamePlaceholder": "Default: {naziv}",
+    "bookingNameHint": "The name clients see when booking online",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Short description (optional)...",
+    "colorLabel": "Color",
+    "colorSelected": "Selected color",
+    "colorCustom": "Custom",
+    "colorHint": "Color helps identify the resource in the view",
+    "quantityLabel": "Number of units",
+    "quantityHelp": "How many physical units of this resource do you have? (e.g. 3 massage tables)",
+    "capacityLabel": "Capacity per unit",
+    "capacityHelp": "How many clients can use one unit at a time?",
+    "totalCapacityLabel": "Total capacity",
+    "totalCapacityValue": "{value} total slots",
+    "showInBookingLabel": "Show to clients in online booking",
+    "scheduleLabel": "Availability",
+    "alwaysAvailable": "Always available",
+    "customSchedule": "Set schedule",
+    "scheduleHint": "Configure the working hours for this resource",
+    "addInterval": "Add interval",
+    "servicesLabel": "Services that require this resource",
+    "servicesHelp": "Bookings for these services will occupy this resource",
+    "noServicesAvailable": "No active services",
+    "save": "Save",
+    "saving": "Saving...",
+    "validationNameRequired": "Name is required.",
+    "validationNameMinLength": "Name must be at least 2 characters.",
+    "validationNameMaxLength": "Name cannot exceed 100 characters.",
+    "validationColorInvalid": "Please select a valid color."
+  },
+  "deleteModal": {
+    "title": "Delete resource",
+    "confirmPrefix": "Are you sure you want to delete the resource",
+    "confirmSuffix": "This action cannot be undone.",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "cancel": "Cancel"
+  },
+  "emptyState": {
+    "title": "No resources",
+    "subtitle": "Add resources your services need — massage tables, cabins, equipment...",
+    "addFirst": "Add first resource"
+  },
+  "searchEmpty": {
+    "title": "No results for \"{term}\"",
+    "subtitle": "Try different keywords.",
+    "clear": "Clear search"
+  },
+  "toasts": {
+    "created": "Resource added successfully.",
+    "updated": "Resource updated successfully.",
+    "deleted": "Resource deleted successfully.",
+    "errorSave": "Error saving resource.",
+    "errorDelete": "Error deleting resource.",
+    "errorStatus": "Error changing resource status."
+  },
+  "days": {
+    "Ponedeljek": "Mon",
+    "Torek": "Tue",
+    "Sreda": "Wed",
+    "Četrtek": "Thu",
+    "Petek": "Fri",
+    "Sobota": "Sat",
+    "Nedelja": "Sun"
+  }
+}

@@ -41,6 +41,7 @@ interface DayViewProps {
   showAllDays?: boolean;
   isMobile?: boolean;
   onAppointmentReschedule?: (appointment: AppointmentWithDetails, newDate: string, newStartTime: string, newEndTime: string) => void;
+  appointmentsWithResursi?: Set<number>;
 }
 
 interface DragInfo {
@@ -121,7 +122,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true, isMobile = false, onAppointmentReschedule }: DayViewProps) {
+function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true, isMobile = false, onAppointmentReschedule, appointmentsWithResursi }: DayViewProps) {
   const t = useTranslations('appointments');
   const locale = useLocale();
 
@@ -583,6 +584,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                         services={services}
                         onLongPress={onAppointmentReschedule ? handleAppointmentLongPress : undefined}
                         isDragging={dragging?.apt.id === apt.id}
+                        hasResursi={appointmentsWithResursi?.has(Number(apt.id))}
                         style={{
                           top: `${top}px`,
                           height: `${Math.max(height, 50)}px`,

@@ -11,8 +11,10 @@ import {
   Check,
   Calendar,
   Star,
+  Cube,
 } from '@phosphor-icons/react';
 import type { Storitev, Zaposleni } from '@/types/appointments';
+import type { Resurs } from '@/types/resursi';
 import type { ViewMode } from '@/lib/utils/calendar';
 import { useTranslations, useLocale } from 'next-intl';
 import {
@@ -40,6 +42,9 @@ interface CalendarSidebarProps {
   onEmployeeFilterChange: (employeeId: string | null) => void;
   selectedServiceId: string | null;
   onServiceFilterChange: (serviceId: string | null) => void;
+  availableResursi?: Resurs[];
+  selectedResursId?: number | null;
+  onResursFilterChange?: (resursId: number | null) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   currentView: ViewMode;
@@ -66,6 +71,9 @@ function CalendarSidebar({
   onEmployeeFilterChange,
   selectedServiceId,
   onServiceFilterChange,
+  availableResursi = [],
+  selectedResursId = null,
+  onResursFilterChange,
   searchQuery,
   onSearchChange,
   isOpen,
@@ -86,7 +94,7 @@ function CalendarSidebar({
   const daysHeader = [1, 2, 3, 4, 5, 6, 0].map((i) => getDaysAbbr(locale)[i]);
 
   // Check if any filters are active
-  const hasActiveFilters = selectedEmployeeId || selectedServiceId || searchQuery.trim();
+  const hasActiveFilters = selectedEmployeeId || selectedServiceId || selectedResursId || searchQuery.trim();
 
   return (
     <>
@@ -439,6 +447,65 @@ function CalendarSidebar({
                     })}
                   </div>
                 </div>
+
+                {/* Resources filter */}
+                {availableResursi.length > 0 && onResursFilterChange && (
+                  <div>
+                    <div className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                      Resursi
+                    </div>
+                    <div className="space-y-1.5 max-h-32 overflow-y-auto">
+                      <button
+                        type="button"
+                        onClick={() => onResursFilterChange(null)}
+                        className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all text-left
+                                   ${!selectedResursId
+                                     ? 'border-violet-500 bg-violet-50'
+                                     : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                   }`}
+                      >
+                        <span className={`flex-1 text-sm font-medium ${!selectedResursId ? 'text-gray-900' : 'text-gray-700'}`}>
+                          Vsi resursi
+                        </span>
+                        {!selectedResursId && (
+                          <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
+                        )}
+                      </button>
+                      {availableResursi.map((resurs, idx) => {
+                        const isSelected = selectedResursId === resurs.row_id;
+                        const colorStyle = resurs.barva?.includes('gradient')
+                          ? { background: resurs.barva }
+                          : { background: resurs.barva || '#6366F1' };
+
+                        return (
+                          <button
+                            key={`res-${idx}-${resurs.id}`}
+                            type="button"
+                            onClick={() => onResursFilterChange(resurs.row_id)}
+                            className={`w-full flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all text-left
+                                       ${isSelected
+                                         ? 'border-violet-500 bg-violet-50'
+                                         : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                       }`}
+                          >
+                            <div
+                              className="w-4 h-4 rounded-full flex-shrink-0 shadow-sm flex items-center justify-center"
+                              style={colorStyle}
+                            >
+                              <Cube className="w-2.5 h-2.5 text-white/80" weight="fill" />
+                            </div>
+                            <span className={`flex-1 text-sm font-medium truncate ${isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
+                              {resurs.naziv}
+                            </span>
+                            {isSelected && (
+                              <Check className="w-4 h-4 text-violet-600 flex-shrink-0" weight="bold" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Service legend */}

@@ -24,6 +24,7 @@ import {
   Lock,
   Tag,
   CaretLeft,
+  Cube,
 } from '@phosphor-icons/react';
 import { useSidebar } from './sidebar-context';
 import { JedroLogo } from '@/components/ui/JedroLogo';
@@ -91,6 +92,7 @@ function buildNavigationSectionsPaid(t: T): NavSection[] {
       label: t('sidebar.sections.modules'),
       items: [
         { name: t('sidebar.items.services'), href: '/storitve', icon: Briefcase },
+        { name: t('sidebar.items.resources'), href: '/resursi', icon: Cube },
         { name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle },
       ],
     },
@@ -130,6 +132,7 @@ function buildNavigationSectionsFree(t: T): NavSection[] {
       label: t('sidebar.sections.modules'),
       items: [
         { name: t('sidebar.items.services'), href: '/storitve', icon: Briefcase },
+        { name: t('sidebar.items.resources'), href: '/resursi', icon: Cube },
         { name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle },
       ],
     },

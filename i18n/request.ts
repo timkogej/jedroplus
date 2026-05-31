@@ -11,7 +11,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     common, auth, onboarding, dashboard, appointments,
     clients, services, staff, analytics, communication,
     notifications, reminders, lostLeads, reservations,
-    promotions, billing, settings, layout,
+    promotions, billing, settings, layout, resursi,
   ] = await Promise.all([
     import(`../messages/${locale}/common.json`).then(m => m.default),
     import(`../messages/${locale}/auth.json`).then(m => m.default),
@@ -31,6 +31,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/billing.json`).then(m => m.default),
     import(`../messages/${locale}/settings.json`).then(m => m.default),
     import(`../messages/${locale}/layout.json`).then(m => m.default),
+    import(`../messages/${locale}/resursi.json`).then(m => m.default),
   ]);
 
   return {
@@ -39,7 +40,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       common, auth, onboarding, dashboard, appointments,
       clients, services, staff, analytics, communication,
       notifications, reminders, 'lost-leads': lostLeads, reservations,
-      promotions, billing, settings, layout,
+      promotions, billing, settings, layout, resursi,
     },
   };
 });

@@ -47,6 +47,8 @@ import {
   type Absence,
 } from '@/lib/supabase/appointments';
 import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
+import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, fetchResursiForStoritve, syncTerminResursi, deleteTerminResursi } from '@/lib/supabase/resursi';
+import type { Resurs } from '@/types/resursi';
 import type { CalendarEvent } from '@/types/events';
 import {
   getMonthsFull,
@@ -659,6 +661,10 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   const [employees, setEmployees] = useState<(Zaposleni & { initials: string })[]>([]);
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [terminIdsWithResursi, setTerminIdsWithResursi] = useState<Set<number>>(new Set());
+  const [terminResursiMap, setTerminResursiMap] = useState<Map<number, Set<number>>>(new Map());
+  const [activeResursi, setActiveResursi] = useState<Resurs[]>([]);
+  const [selectedResursId, setSelectedResursId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -825,13 +831,16 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     saveViewPreference(view);
   }, []);
 
-  // Load services, employees, and absences
+  // Load services, employees, absences, and resource-linked appointment IDs
   useEffect(() => {
     const loadStaticData = async () => {
-      const [servicesResult, employeesResult, absencesResult] = await Promise.all([
+      const [servicesResult, employeesResult, absencesResult, resursiIdsResult, resursiMapResult, activeResursiResult] = await Promise.all([
         fetchServices(companyId),
         fetchEmployees(companyId),
         fetchAbsences(companyId),
+        fetchTerminIdsWithResursi(companyId),
+        fetchTerminResursiMap(companyId),
+        fetchActiveResursi(companyId),
       ]);
 
       if (servicesResult.data) {
@@ -843,6 +852,15 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       if (absencesResult.data) {
         console.log('[Calendar] Loaded absences:', absencesResult.data.length, absencesResult.data);
         setAbsences(absencesResult.data);
+      }
+      if (resursiIdsResult.data) {
+        setTerminIdsWithResursi(resursiIdsResult.data);
+      }
+      if (resursiMapResult.data) {
+        setTerminResursiMap(resursiMapResult.data);
+      }
+      if (activeResursiResult.data) {
+        setActiveResursi(activeResursiResult.data);
       }
     };
 
@@ -1115,6 +1133,11 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       filtered = filtered.filter((a) => a.storitev?.id === selectedServiceId);
     }
 
+    if (selectedResursId) {
+      const resursTerminIds = terminResursiMap.get(selectedResursId);
+      filtered = filtered.filter((a) => resursTerminIds?.has(Number(a.id)));
+    }
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       filtered = filtered.filter(
@@ -1127,7 +1150,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     }
 
     return filtered;
-  }, [appointments, selectedEmployeeId, selectedServiceId, searchQuery, staffViewOwnOnly, rolePersonId]);
+  }, [appointments, selectedEmployeeId, selectedServiceId, selectedResursId, terminResursiMap, searchQuery, staffViewOwnOnly, rolePersonId]);
 
   // Filter absences by selected employee (same logic as appointments)
   const filteredAbsences = useMemo(() => {
@@ -1455,6 +1478,8 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         throw new Error(t('errors.deleteError'));
       }
 
+      await deleteTerminResursi(companyId, Number(deleteTarget.id));
+
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -1653,6 +1678,49 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const textTerminId = isNewAppointment ? unique8DigitId : data.id;
+
+      if (textTerminId) {
+        // Fetch Termini bigint id — use maybeSingle to avoid 400 errors
+        const { data: terminRow } = await supabase
+          .from('Termini')
+          .select('id')
+          .eq('ID termina', textTerminId)
+          .eq('ID podjetja', companyId)
+          .maybeSingle();
+
+        const terminRowId = terminRow ? Number(terminRow.id) : null;
+
+        if (terminRowId) {
+          const serviceIds = [
+            data.storitev_id,
+            data.storitev_id_2,
+            data.storitev_id_3,
+          ].filter(Boolean) as string[];
+
+          if (serviceIds.length > 0) {
+            const { data: resursiData } = await fetchResursiForStoritve(
+              companyId,
+              serviceIds,
+            );
+            const resursiPairs = (resursiData ?? []).map((r) => ({
+              rowId: r.resursRowId,
+              textId: r.resursTextId,
+            }));
+            await syncTerminResursi(companyId, terminRowId, resursiPairs);
+          } else {
+            await deleteTerminResursi(companyId, terminRowId);
+          }
+        }
+
+        const [idsResult, mapResult] = await Promise.all([
+          fetchTerminIdsWithResursi(companyId),
+          fetchTerminResursiMap(companyId),
+        ]);
+        if (idsResult.data) setTerminIdsWithResursi(idsResult.data);
+        if (mapResult.data) setTerminResursiMap(mapResult.data);
+      }
 
       await loadAppointments();
       handleCloseModal();
@@ -2076,6 +2144,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                   onGridSlotClick={handleGridSlotClick}
                   companySchedule={companySchedule}
                   onAppointmentReschedule={handleAppointmentDropped}
+                  appointmentsWithResursi={terminIdsWithResursi}
                 />
               )}
               {currentView === 'day' && (
@@ -2115,6 +2184,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                       showAllDays={showAllDays}
                       isMobile={isMobile}
                       onAppointmentReschedule={handleAppointmentDropped}
+                      appointmentsWithResursi={terminIdsWithResursi}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -2131,6 +2201,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                   onAbsenceClick={handleAbsenceClick}
                   onDateClick={handleDateClick}
                   isMobile={isMobile}
+                  appointmentsWithResursi={terminIdsWithResursi}
                 />
               )}
               {currentView === '2day' && (
@@ -2173,6 +2244,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                         onGridSlotClick={handleGridSlotClick}
                         companySchedule={companySchedule}
                         showAllDays={showAllDays}
+                        appointmentsWithResursi={terminIdsWithResursi}
                       />
                     </motion.div>
                   </AnimatePresence>
@@ -2199,6 +2271,9 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         restrictedToEmployeeId={staffViewOwnOnly && rolePersonId ? rolePersonId : undefined}
         selectedServiceId={selectedServiceId}
         onServiceFilterChange={setSelectedServiceId}
+        availableResursi={activeResursi}
+        selectedResursId={selectedResursId}
+        onResursFilterChange={setSelectedResursId}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         currentView={currentView}

@@ -18,15 +18,12 @@ export async function generateUnique8DigitId(
     const randomId = Math.floor(Math.random() * (max - min + 1)) + min;
     const idString = randomId.toString();
 
-    // Check if ID exists in database using maybeSingle() to avoid 406 errors
-    const { data } = await supabase
+    const { count } = await supabase
       .from(tableName)
-      .select(columnName)
-      .eq(columnName, idString)
-      .maybeSingle();
+      .select('*', { count: 'exact', head: true })
+      .eq(columnName, idString);
 
-    // If no data found, ID is unique
-    if (!data) {
+    if (!count || count === 0) {
       return idString;
     }
 

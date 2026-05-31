@@ -22,6 +22,10 @@
       "messages": {
         "label": "Sporočila",
         "description": "Zgodovina poslanih sporočil in opomnikov"
+      },
+      "addons": {
+        "label": "Dodatki in kvote",
+        "description": "Nakup SMS, e-pošta in zaposleni addonov"
       }
     }
   },

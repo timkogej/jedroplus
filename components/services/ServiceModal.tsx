@@ -22,6 +22,8 @@ import type { Service, ServiceFormData } from '@/types/services';
 import { DURATION_OPTIONS } from '@/types/services';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/constants/serviceGradients';
+import type { Resurs } from '@/types/resursi';
+import { Cube } from '@phosphor-icons/react';
 
 type ModalMode = 'create' | 'edit';
 
@@ -34,6 +36,10 @@ interface ServiceModalProps {
   isSaving?: boolean;
   currency?: string; // from company settings
   existingCategories?: string[]; // existing categories from database for suggestions
+  // Resursi (Feature 3)
+  availableResursi?: Resurs[];
+  linkedResursiIds?: string[];
+  onLinkedResursiChange?: (ids: string[]) => void;
 }
 
 function ServiceModal({
@@ -45,9 +51,13 @@ function ServiceModal({
   isSaving = false,
   currency = 'EUR',
   existingCategories = [],
+  availableResursi = [],
+  linkedResursiIds = [],
+  onLinkedResursiChange,
 }: ServiceModalProps) {
   const t = useTranslations('services');
   const tCommon = useTranslations('common');
+  const [selectedResursiIds, setSelectedResursiIds] = useState<string[]>([]);
 
   // Form state
   const [formData, setFormData] = useState<ServiceFormData>({
@@ -116,8 +126,10 @@ function ServiceModal({
       } else {
         setCustomCategory(false);
       }
+      // Init linked resursi
+      setSelectedResursiIds(linkedResursiIds);
     }
-  }, [isOpen, mode, service, existingCategories]);
+  }, [isOpen, mode, service, existingCategories, linkedResursiIds]);
 
   // Validate individual field
   const validateField = useCallback((name: keyof ServiceFormData, value: string | number): string => {
@@ -643,6 +655,65 @@ function ServiceModal({
                     </span>
                   </div>
                 </div>
+
+                {/* Resursi section (Feature 3) */}
+                {availableResursi.length > 0 && (
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      Potrebni resursi
+                    </label>
+                    <p className="mb-2 text-xs text-gray-400">
+                      Rezervacije te storitve bodo zasedle izbrane resurse
+                    </p>
+                    <div className="max-h-40 overflow-y-auto rounded-xl border border-gray-200">
+                      {availableResursi.map((r) => {
+                        const isLinked = selectedResursiIds.includes(r.id);
+                        return (
+                          <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => {
+                              const next = isLinked
+                                ? selectedResursiIds.filter((id) => id !== r.id)
+                                : [...selectedResursiIds, r.id];
+                              setSelectedResursiIds(next);
+                              onLinkedResursiChange?.(next);
+                            }}
+                            className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors border-b border-gray-100 last:border-0
+                                       ${isLinked ? 'bg-violet-50' : 'hover:bg-gray-50'}`}
+                          >
+                            <div className="h-3.5 w-3.5 flex-shrink-0 rounded-full shadow-sm" style={{ background: r.barva }} />
+                            <div className="flex-1 min-w-0">
+                              <span className={`text-sm font-medium ${isLinked ? 'text-violet-700' : 'text-[#1A1F36]'}`}>
+                                {r.naziv}
+                              </span>
+                              <span className="ml-2 text-xs text-gray-400">
+                                {r.kolicina} × {r.kapaciteta} mest
+                              </span>
+                            </div>
+                            <div className={`h-5 w-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors
+                                           ${isLinked ? 'border-violet-500 bg-violet-500' : 'border-gray-300'}`}>
+                              {isLinked && <Check className="h-3 w-3 text-white" weight="bold" />}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {selectedResursiIds.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {selectedResursiIds.map((id) => {
+                          const r = availableResursi.find((x) => x.id === id);
+                          return r ? (
+                            <span key={id} className="flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700">
+                              <Cube className="h-3 w-3" weight="fill" />
+                              {r.naziv}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Footer */}

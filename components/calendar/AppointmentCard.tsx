@@ -2,7 +2,7 @@
 
 import { memo, useMemo, useRef, useLayoutEffect, useState, useCallback, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Tag, Clock, Plus } from '@phosphor-icons/react';
+import { X, Tag, Clock, Plus, Cube } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import { formatTime, getGradientCSS } from '@/lib/utils/calendar';
 
@@ -167,6 +167,7 @@ interface AppointmentCardProps {
   timeOnly?: boolean;
   onLongPress?: (appointment: AppointmentWithDetails, info: { clientX: number; clientY: number; cardRect: DOMRect }) => void;
   isDragging?: boolean;
+  hasResursi?: boolean; // Feature 6: show resource icon if appointment uses resources
 }
 
 function AppointmentCard({
@@ -180,6 +181,7 @@ function AppointmentCard({
   timeOnly = false,
   onLongPress,
   isDragging = false,
+  hasResursi = false,
 }: AppointmentCardProps) {
   const isCompleted = ['completed', 'Zaključen', 'zaključen', 'no_show', 'Ni prišel'].includes(appointment.status || '');
   const isNoShow = appointment.status === 'no_show' || appointment.status === 'Ni prišel';
@@ -555,6 +557,11 @@ function AppointmentCard({
         }}
       >
         <PromoIcon />
+        {hasResursi && (
+          <div className="absolute bottom-1 right-1 pointer-events-none z-10">
+            <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />
+          </div>
+        )}
         <div className="px-2.5 py-1.5 h-full flex items-center gap-1.5" style={{ color: '#FFFFFF' }}>
           <SmartClientName
             fullName={appointment.stranka_ime}
@@ -606,6 +613,11 @@ function AppointmentCard({
         }}
       >
         <PromoIcon />
+        {hasResursi && (
+          <div className="absolute bottom-1 right-1 pointer-events-none z-10">
+            <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />
+          </div>
+        )}
         <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
           {/* Row 1: client name + initials */}
           <div className="flex items-center gap-1.5 min-w-0">
@@ -661,6 +673,11 @@ function AppointmentCard({
       }}
     >
       <PromoIcon />
+      {hasResursi && (
+        <div className="absolute bottom-1 right-1 pointer-events-none z-10">
+          <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />
+        </div>
+      )}
       <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
         {/* Row 1: client name + initials */}
         <div className="flex items-center gap-1.5 min-w-0">

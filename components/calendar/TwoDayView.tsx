@@ -37,6 +37,7 @@ interface TwoDayViewProps {
   onGridSlotClick?: (date: Date, time: string) => void;
   companySchedule?: CompanySchedule | null;
   showAllDays?: boolean;
+  appointmentsWithResursi?: Set<number>;
 }
 
 function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map<string, { column: number; totalColumns: number }> {
@@ -102,7 +103,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function TwoDayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, onGridSlotClick, companySchedule, showAllDays = true }: TwoDayViewProps) {
+function TwoDayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, onGridSlotClick, companySchedule, showAllDays = true, appointmentsWithResursi }: TwoDayViewProps) {
   const t = useTranslations('appointments');
   const locale = useLocale();
   // When showAllDays=false, compute next 3 weekdays skipping Sat/Sun
@@ -405,6 +406,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
                       onClick={onAppointmentClick}
                       variant="grid"
                       services={services}
+                      hasResursi={appointmentsWithResursi?.has(Number(apt.id))}
                       style={{ top: `${top}px`, height: `${height}px`, left, width, right: 'auto' }}
                     />
                   );

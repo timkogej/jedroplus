@@ -39,6 +39,7 @@ interface WeekViewProps {
   onGridSlotClick?: (date: Date, time: string) => void;
   companySchedule?: CompanySchedule | null;
   onAppointmentReschedule?: (appointment: AppointmentWithDetails, newDate: string, newStartTime: string, newEndTime: string) => void;
+  appointmentsWithResursi?: Set<number>;
 }
 
 interface DragInfo {
@@ -125,7 +126,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function WeekView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, showAllDays = true, onGridSlotClick, companySchedule, onAppointmentReschedule }: WeekViewProps) {
+function WeekView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, showAllDays = true, onGridSlotClick, companySchedule, onAppointmentReschedule, appointmentsWithResursi }: WeekViewProps) {
   const t = useTranslations('appointments');
   const locale = useLocale();
   const [isMobile, setIsMobile] = useState(false);
@@ -632,6 +633,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                       services={services}
                       onLongPress={onAppointmentReschedule ? handleAppointmentLongPress : undefined}
                       isDragging={dragging?.apt.id === apt.id}
+                      hasResursi={appointmentsWithResursi?.has(Number(apt.id))}
                       style={{
                         top: `${top}px`,
                         height: `${height}px`,

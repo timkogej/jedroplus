@@ -22,6 +22,10 @@
       "messages": {
         "label": "Messages",
         "description": "History of sent messages and reminders"
+      },
+      "addons": {
+        "label": "Addons & Quotas",
+        "description": "Purchase SMS, email, and employee addons"
       }
     }
   },
