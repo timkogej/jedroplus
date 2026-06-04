@@ -2,7 +2,7 @@
 
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, CalendarBlank, LockSimple, Plus, Minus, Envelope, Phone, Tag } from '@phosphor-icons/react';
+import { X, Clock, CalendarBlank, LockSimple, Plus, Minus, Envelope, Phone, Tag, Warning } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { ScrollTimePicker } from '@/components/ui/ScrollTimePicker';
 import ClientSearch from './ClientSearch';
@@ -24,6 +24,7 @@ import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { addMinutesToTime } from '@/lib/promotions';
 import { useTranslations } from 'next-intl';
+import { checkResourceConflicts, type ResourceConflict } from '@/lib/supabase/resursi';
 
 type ModalMode = 'view' | 'edit' | 'create';
 
@@ -251,6 +252,7 @@ function AppointmentModal({
 
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof AppointmentFormData, string>>>({});
+  const [resourceConflicts, setResourceConflicts] = useState<ResourceConflict[]>([]);
 
   // Initialize form data when appointment changes
   useEffect(() => {
@@ -334,7 +336,15 @@ function AppointmentModal({
       setFormData({
         datum: initialDate || now.toISOString().split('T')[0],
         cas_zacetek: initialStartTime || '09:00',
-        cas_konec: '10:00',
+        cas_konec: (() => {
+          if (!initialStartTime) return '10:00';
+          // Default to start + 60 min as placeholder until service is selected
+          const [h, m] = initialStartTime.split(':').map(Number);
+          const endMin = h * 60 + m + 60;
+          const eh = Math.floor(endMin / 60);
+          const em = endMin % 60;
+          return `${eh.toString().padStart(2, '0')}:${em.toString().padStart(2, '0')}`;
+        })(),
         stranka_ime: '',
         stranka_email: '',
         stranka_telefon: '',
@@ -366,7 +376,7 @@ function AppointmentModal({
       // In create mode, hide internal notes by default
       setShowInternalNotes(false);
     }
-  }, [appointment, mode, services, employees, initialDate, initialStartTime, initialEmployeeId, personId]);
+  }, [appointment, mode, employees, initialDate, initialStartTime, initialEmployeeId, personId]);
 
   // Track if end time was manually set by user
   const [endTimeManuallySet, setEndTimeManuallySet] = useState(false);
@@ -565,6 +575,48 @@ function AppointmentModal({
     }
   }, [formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3, services, serviceCount, calculateTotalServicePrice]);
 
+  // Resource conflict check — debounced, non-blocking
+  useEffect(() => {
+    const serviceIds = [
+      formData.storitev_id,
+      formData.storitev_id_2,
+      formData.storitev_id_3,
+    ].filter(Boolean) as string[];
+
+    if (!companyId || !serviceIds.length || !formData.datum || !formData.cas_zacetek || !formData.cas_konec) {
+      setResourceConflicts([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      const excludeId = mode === 'edit' && appointment?.id
+        ? Number(appointment.id)
+        : undefined;
+
+      const { conflicts } = await checkResourceConflicts(
+        companyId,
+        serviceIds,
+        formData.datum,
+        formData.cas_zacetek,
+        formData.cas_konec,
+        excludeId,
+      );
+      setResourceConflicts(conflicts);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [
+    formData.storitev_id,
+    formData.storitev_id_2,
+    formData.storitev_id_3,
+    formData.datum,
+    formData.cas_zacetek,
+    formData.cas_konec,
+    companyId,
+    mode,
+    appointment,
+  ]);
+
   // Calculate final price when price or discount changes
   const calculateFinalPrice = useCallback(() => {
     const basePrice = formData.cena ?? 0;
@@ -743,7 +795,6 @@ function AppointmentModal({
         promocija_naziv: prev.promocija_tip ? prev.promocija_naziv : 'Add-on',
       };
     });
-    setEndTimeManuallySet(true);
   }, [selectedAddOnId]);
 
   // Handle employee change - check if current service can still be done by the new employee
@@ -1595,38 +1646,28 @@ function AppointmentModal({
               </label>
               {isViewMode ? (
                 (() => {
-                  const originalCena = formData.cena ?? 0;
-                  const popustVrednost = formData.popust ?? 0;
-                  const finalCena =
-                    formData.koncna_cena ??
-                    (popustVrednost > 0
-                      ? formData.popust_tip === '%'
-                        ? originalCena * (1 - popustVrednost / 100)
-                        : originalCena - popustVrednost
-                      : originalCena);
-                  const imaPopust = popustVrednost > 0;
-                  const promocijaTip = appointment?.promocija_tip ?? null;
-                  const promocijaNaziv = appointment?.promocija_naziv ?? null;
+                  const originalCena = appointment?.cena;
+                  const popustVrednost = appointment?.popust;
+                  const finalCena = appointment?.koncna_cena;
+                  const popustTip = appointment?.popust_tip;
+                  const promocijaTip = appointment?.promocija_tip;
+                  const promocijaNaziv = appointment?.promocija_naziv;
+                  const storitevDva = appointment?.storitev_2;
 
-                  const badgeBg =
-                    promocijaTip === 'happy_hour'
-                      ? '#F59E0B'
-                      : promocijaTip === 'add_on'
-                        ? '#3B82F6'
-                        : '#6D5EF7';
-                  const badgeLabel =
-                    promocijaTip === 'happy_hour'
-                      ? 'Happy Hour'
-                      : promocijaTip === 'add_on'
-                        ? 'Add-on'
-                        : (promocijaNaziv || 'Popust');
-                  const BadgeIcon =
-                    promocijaTip === 'happy_hour' ? Clock
-                      : promocijaTip === 'add_on' ? Plus : Tag;
-                  const badgeWeight: 'bold' | 'fill' =
-                    promocijaTip === 'add_on' ? 'bold' : 'fill';
+                  const orig = parseFloat(String(originalCena)) || 0;
+                  const popust = parseFloat(String(popustVrednost)) || 0;
+                  const final = parseFloat(String(finalCena)) || orig;
+                  const imaPopust = popust > 0;
 
-                  const fmtPrice = (val: number) =>
+                  const getBadge = () => {
+                    if (promocijaTip === 'happy_hour') return { label: 'Happy Hour', bg: '#F59E0B', Icon: Clock };
+                    if (promocijaTip === 'add_on') return { label: 'Add-on', bg: '#3B82F6', Icon: Plus };
+                    if (imaPopust) return { label: promocijaNaziv ?? 'Popust', bg: '#6D5EF7', Icon: Tag };
+                    return null;
+                  };
+                  const badge = getBadge();
+
+                  const fmt = (val: number) =>
                     new Intl.NumberFormat('sl-SI', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -1640,47 +1681,45 @@ function AppointmentModal({
                           animate={{ opacity: 1, y: 0 }}
                           className="space-y-3"
                         >
-                          {/* Promotion badge */}
-                          <div
-                            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-xs font-semibold"
-                            style={{ backgroundColor: badgeBg }}
-                          >
-                            <BadgeIcon size={11} weight={badgeWeight} />
-                            <span>{badgeLabel}</span>
-                          </div>
-
-                          {/* Price breakdown */}
+                          {badge && (
+                            <div
+                              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-xs font-semibold"
+                              style={{ backgroundColor: badge.bg }}
+                            >
+                              <badge.Icon size={11} />
+                              <span>{badge.label}</span>
+                            </div>
+                          )}
                           <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-2.5">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">{t('modal.price.original')}</span>
+                              <span className="text-gray-500">Originalna cena</span>
                               <span className="text-gray-400 line-through">
-                                {fmtPrice(originalCena)} €
+                                {fmt(orig)} EUR
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">{t('modal.price.discount')}</span>
+                              <span className="text-gray-500">Popust</span>
                               <span className="font-medium text-red-500">
-                                − {formData.popust_tip === '%'
-                                  ? `${popustVrednost}%`
-                                  : `${fmtPrice(popustVrednost)} €`}
+                                − {popustTip === 'percent'
+                                  ? `${popust}%`
+                                  : `${fmt(popust)} EUR`}
                               </span>
                             </div>
                             <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
-                              <span className="font-semibold text-gray-900">{t('modal.price.withDiscount')}</span>
+                              <span className="font-semibold text-gray-900">Cena z popustom</span>
                               <span className="text-xl font-bold text-green-600">
-                                {fmtPrice(finalCena)} €
+                                {fmt(final)} EUR
                               </span>
                             </div>
                           </div>
                         </motion.div>
                       ) : (
-                        <p className="text-sm font-medium text-[#1A1F36]">
-                          {originalCena > 0 ? `${fmtPrice(originalCena)} €` : '-'}
+                        <p className="text-2xl font-bold text-gray-900">
+                          {orig > 0 ? `${fmt(orig)} EUR` : '-'}
                         </p>
                       )}
 
-                      {/* Add-on section */}
-                      {appointment?.storitev_2 && (
+                      {storitevDva && (
                         <motion.div
                           initial={{ opacity: 0, y: 6 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -1689,32 +1728,11 @@ function AppointmentModal({
                         >
                           <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm">
                             <Plus size={14} weight="bold" />
-                            <span>{t('modal.price.addOnLabel')}</span>
+                            <span>Dodatna storitev</span>
                           </div>
                           <p className="text-sm font-medium text-gray-800">
-                            {appointment.storitev_2?.naziv ?? t('modal.price.addOnFallback')}
+                            {storitevDva?.naziv ?? 'Add-on storitev'}
                           </p>
-                          {appointment?.add_on_final_cena && (
-                            <>
-                              {appointment?.add_on_popust &&
-                                parseFloat(appointment.add_on_popust) > 0 && (
-                                  <div className="flex justify-between text-sm">
-                                    <span className="text-gray-500">{t('modal.price.discount')}</span>
-                                    <span className="text-red-500">
-                                      − {appointment.add_on_popust_tip === '%'
-                                        ? `${appointment.add_on_popust}%`
-                                        : `${fmtPrice(parseFloat(appointment.add_on_popust ?? '0'))} €`}
-                                    </span>
-                                  </div>
-                                )}
-                              <div className="flex justify-between font-semibold pt-1 border-t border-blue-200">
-                                <span className="text-gray-700">{t('modal.price.withDiscount')}</span>
-                                <span className="text-green-600">
-                                  {fmtPrice(parseFloat(appointment.add_on_final_cena))} €
-                                </span>
-                              </div>
-                            </>
-                          )}
                         </motion.div>
                       )}
                     </div>
@@ -1962,6 +1980,28 @@ function AppointmentModal({
                   <span className="text-sm font-medium">{t('modal.addInternalNotes')}</span>
                 </motion.button>
               )
+            )}
+
+            {/* Resource conflict warning */}
+            {!isViewMode && resourceConflicts.length > 0 && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                <div className="flex items-start gap-2.5">
+                  <Warning weight="fill" className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-amber-800">
+                      Resurs zaseden
+                    </p>
+                    {resourceConflicts.map((c) => (
+                      <p key={c.resursId} className="mt-0.5 text-xs text-amber-700">
+                        {c.naziv}: {c.trenutnoZasedeno}/{c.maxKapaciteta} mest zasedenih
+                      </p>
+                    ))}
+                    <p className="mt-1 text-xs text-amber-600">
+                      Termin lahko vseeno shranite.
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Actions */}

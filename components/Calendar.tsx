@@ -123,6 +123,8 @@ function CopyButton({ text, label }: { text: string; label: string }) {
 function AppointmentDetailModal({
   appointment,
   services,
+  terminResursiMap,
+  activeResursi,
   onClose,
   onEdit,
   onComplete,
@@ -132,6 +134,8 @@ function AppointmentDetailModal({
 }: {
   appointment: AppointmentWithDetails;
   services: Storitev[];
+  terminResursiMap: Map<number, Set<number>>;
+  activeResursi: Resurs[];
   onClose: () => void;
   onEdit?: (appointment: AppointmentWithDetails) => void;
   onComplete?: (appointment: AppointmentWithDetails) => void;
@@ -142,6 +146,13 @@ function AppointmentDetailModal({
   const t = useTranslations('appointments');
   const locale = useLocale();
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
+
+  const aptResursi = useMemo(() => {
+    const aptId = Number(appointment.id);
+    return activeResursi.filter((r) =>
+      terminResursiMap.get(r.row_id)?.has(aptId)
+    );
+  }, [appointment.id, activeResursi, terminResursiMap]);
 
   // Get gradient background - matches AppointmentCard color logic (supports multiple services)
   const getGradientBackground = () => {
@@ -504,6 +515,27 @@ function AppointmentDetailModal({
               </div>
             );
           })()}
+
+          {/* Resources */}
+          {aptResursi.length > 0 && (
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Resursi v uporabi</label>
+              <div className="flex flex-wrap gap-1.5">
+                {aptResursi.map((r) => (
+                  <span
+                    key={r.id}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full flex-shrink-0"
+                      style={{ background: r.barva }}
+                    />
+                    {r.naziv}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Notes */}
           {appointment.opombe && (
@@ -1480,6 +1512,13 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
       await deleteTerminResursi(companyId, Number(deleteTarget.id));
 
+      const [idsResult, mapResult] = await Promise.all([
+        fetchTerminIdsWithResursi(companyId),
+        fetchTerminResursiMap(companyId),
+      ]);
+      if (idsResult.data) setTerminIdsWithResursi(idsResult.data);
+      if (mapResult.data) setTerminResursiMap(mapResult.data);
+
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -2293,6 +2332,8 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
             <AppointmentDetailModal
               appointment={selectedAppointment}
               services={services}
+              terminResursiMap={terminResursiMap}
+              activeResursi={activeResursi}
               onClose={handleCloseDetailModal}
               onEdit={aptEditable ? handleEditFromDetail : undefined}
               onComplete={aptEditable ? handleCompleteAppointment : undefined}

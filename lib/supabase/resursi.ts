@@ -418,3 +418,97 @@ export async function fetchTerminResursiMap(
   }
   return { data: map, error: null };
 }
+
+// ─── Real-time resource conflict detection ────────────────────────────────────
+
+export interface ResourceConflict {
+  resursId: number;
+  resursTextId: string;
+  naziv: string;
+  trenutnoZasedeno: number;
+  maxKapaciteta: number;
+}
+
+export async function checkResourceConflicts(
+  companyId: string,
+  serviceIds: string[],
+  datum: string,
+  casZacetek: string,
+  casKonec: string,
+  excludeTerminId?: number,
+): Promise<{ conflicts: ResourceConflict[]; error: string | null }> {
+  if (!companyId || serviceIds.length === 0 || !datum || !casZacetek || !casKonec) {
+    return { conflicts: [], error: null };
+  }
+
+  const { data: resursiData, error: resursiErr } = await fetchResursiForStoritve(
+    companyId,
+    serviceIds,
+  );
+  if (resursiErr || !resursiData?.length) return { conflicts: [], error: resursiErr };
+
+  // Fetch all termini for this date without time filter
+  const { data: terminiOnDate } = await supabase
+    .from('Termini')
+    .select('id, "Čas", "Konec", "Status"')
+    .eq('ID podjetja', companyId)
+    .eq('Datum', datum);
+
+  // Filter time overlap in JavaScript (avoids special character issues with PostgREST)
+  const overlappingIds = (terminiOnDate ?? [])
+    .filter((t) => {
+      const row = t as Record<string, unknown>;
+      const status = String(row['Status'] ?? '');
+      if (status === 'cancelled' || status === 'Odpovedan') return false;
+      if (excludeTerminId && Number(row['id']) === excludeTerminId) return false;
+      const tStart = String(row['Čas'] ?? '');
+      const tEnd = String(row['Konec'] ?? '');
+      // Overlap: existing starts before our end AND existing ends after our start
+      return tStart < casKonec && tEnd > casZacetek;
+    })
+    .map((t) => Number((t as Record<string, unknown>)['id']));
+
+  if (!overlappingIds.length) return { conflicts: [], error: null };
+  const resursRowIds = resursiData.map((r) => r.resursRowId);
+
+  const { data: usedResursi } = await supabase
+    .from(TABLE_TERMINI_RESURSI)
+    .select('resurs_id')
+    .eq('ID podjetja', companyId)
+    .in('termin_id', overlappingIds)
+    .in('resurs_id', resursRowIds);
+
+  if (!usedResursi?.length) return { conflicts: [], error: null };
+
+  const usageMap = new Map<number, number>();
+  for (const row of usedResursi as Record<string, unknown>[]) {
+    const rid = Number(row['resurs_id']);
+    usageMap.set(rid, (usageMap.get(rid) ?? 0) + 1);
+  }
+
+  const { data: resursiRows } = await supabase
+    .from(TABLE_RESURSI)
+    .select('id, "Naziv", "Kolicina", "Kapaciteta"')
+    .eq('ID podjetja', companyId)
+    .in('id', resursRowIds);
+
+  const conflicts: ResourceConflict[] = [];
+  for (const r of (resursiRows ?? []) as Record<string, unknown>[]) {
+    const rid = Number(r['id']);
+    const kolicina = Number(r['Kolicina'] ?? 1);
+    const kapaciteta = Number(r['Kapaciteta'] ?? 1);
+    const max = kolicina * kapaciteta;
+    const used = usageMap.get(rid) ?? 0;
+    if (used >= max) {
+      conflicts.push({
+        resursId: rid,
+        resursTextId: resursiData.find((x) => x.resursRowId === rid)?.resursTextId ?? '',
+        naziv: String(r['Naziv'] ?? ''),
+        trenutnoZasedeno: used,
+        maxKapaciteta: max,
+      });
+    }
+  }
+
+  return { conflicts, error: null };
+}
