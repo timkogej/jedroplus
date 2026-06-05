@@ -64,6 +64,10 @@ interface StaffPermissions {
   can_manage_rezervacije: boolean;
   can_access_lost_leads: boolean;
   can_manage_lost_leads: boolean;
+  // Zgodovina
+  can_view_zgodovina: boolean;
+  // Ghost termini
+  can_create_ghost_termin: boolean;
 }
 
 // ─── Permission config ────────────────────────────────────────────────────────
@@ -81,6 +85,7 @@ const permissionSections: {
       { key: 'can_edit_only_own_appointments' },
       { key: 'can_create_appointments' },
       { key: 'can_delete_appointments' },
+      { key: 'can_create_ghost_termin' },
     ],
   },
   {
@@ -112,6 +117,7 @@ const permissionSections: {
     sectionKey: 'analitika',
     keys: [
       { key: 'can_view_analytics' },
+      { key: 'can_view_zgodovina' },
     ],
   },
   {

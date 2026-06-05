@@ -26,6 +26,10 @@
       "addons": {
         "label": "Addons & Quotas",
         "description": "Purchase SMS, email, and employee addons"
+      },
+      "history": {
+        "label": "History",
+        "description": "Audit trail of all changes and actions in the system"
       }
     }
   },
@@ -169,6 +173,7 @@
         "can_view_staff": "View staff list",
         "can_edit_staff": "Edit staff",
         "can_view_analytics": "View analytics",
+        "can_view_zgodovina": "View history (audit trail)",
         "can_access_asistent_plus": "Access to Assistant+",
         "can_access_komunikacija": "Access to Communication",
         "can_access_chatbot_plus": "Access to Chatbot+",
@@ -178,7 +183,8 @@
         "can_access_rezervacije": "Access to Reservations",
         "can_manage_rezervacije": "Manage Reservations",
         "can_access_lost_leads": "Access to Lost Leads",
-        "can_manage_lost_leads": "Manage Lost Leads"
+        "can_manage_lost_leads": "Manage Lost Leads",
+        "can_create_ghost_termin": "Can create ghost appointments"
       }
     }
   },
@@ -215,6 +221,75 @@
       "title": "No messages sent",
       "all": "No messages were sent in the last 14 days.",
       "filtered": "No messages for the selected filter in the last 14 days."
+    }
+  },
+  "zgodovina": {
+    "title": "History",
+    "subtitle": "Audit trail of all changes and actions in the system",
+    "noAccess": {
+      "title": "Access restricted",
+      "message": "You do not have permission to view the action history."
+    },
+    "loadError": "An error occurred while loading history.",
+    "empty": {
+      "title": "No records",
+      "description": "No history records found for the selected filters."
+    },
+    "filters": {
+      "tip": "Type",
+      "vsi": "All",
+      "termini": "Appointments",
+      "stranke": "Clients",
+      "akcija": "Action",
+      "vseAkcije": "All actions",
+      "datumOd": "From",
+      "datumDo": "To",
+      "search": "Search by client / appointment ID",
+      "resetFilters": "Reset"
+    },
+    "columns": {
+      "datum": "Date & time",
+      "akcija": "Action",
+      "entiteta": "Entity",
+      "kdo": "By",
+      "podrobnosti": "Details"
+    },
+    "akcije": {
+      "ustvarjen": "Created",
+      "spremenjen": "Modified",
+      "prestavljen": "Rescheduled",
+      "zakljucen": "Completed",
+      "izbrisan": "Deleted",
+      "odpovedan": "Cancelled",
+      "online_rezervacija": "Online booking",
+      "stranka_dodana": "Client added",
+      "stranka_posodobljena": "Client updated"
+    },
+    "tipEntitete": {
+      "termin": "Appointment",
+      "stranka": "Client"
+    },
+    "izvedel_tip": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "staff": "Staff",
+      "stranka": "Client",
+      "sistem": "System"
+    },
+    "expand": "Details",
+    "collapse": "Close",
+    "idTermina": "Appointment ID",
+    "idStranke": "Client ID",
+    "spremembe": {
+      "title": "Changes",
+      "prej": "Before",
+      "potem": "After",
+      "noChanges": "No changes recorded."
+    },
+    "pagination": {
+      "previous": "Back",
+      "next": "Next",
+      "of": "of"
     }
   },
   "saveIndicator": {

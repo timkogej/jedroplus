@@ -56,6 +56,8 @@
     "priceLabel": "Price (fixed)",
     "descriptionLabel": "Description (optional)",
     "descriptionPlaceholder": "Brief service description...",
+    "resourcesTitle": "Required resources",
+    "resourcesDescription": "Bookings for this service will reserve the selected resources",
     "saving": "Saving...",
     "save": "Save service",
     "validationNameRequired": "Service name is required",

@@ -396,6 +396,15 @@ export async function fetchAppointmentsForMonth(
       const pricing = extractPricingFields(row);
       const promo = extractPromotionFields(row);
 
+      // Extract ghost termin fields
+      const beleziTermin = row['belezi_termin'];
+      const belezi_termin = beleziTermin === false || beleziTermin === 0 ? false : true;
+      const deletedAt = row['deleted_at'];
+      const deleted_at = deletedAt && String(deletedAt) !== 'null' ? String(deletedAt) : null;
+
+      // Ghost termini with deleted_at set are soft-deleted — exclude from all views
+      if (deleted_at !== null) continue;
+
       appointments.push({
         id,
         datum: bookingDate.toISOString(),
@@ -421,6 +430,8 @@ export async function fetchAppointmentsForMonth(
         promocija_naziv: promo.promocija_naziv,
         popust_id: promo.popust_id,
         happy_hour_id: promo.happy_hour_id,
+        belezi_termin,
+        deleted_at,
         storitev: serviceData,
         storitev_2: storitev2,
         storitev_3: storitev3,
@@ -818,6 +829,15 @@ export async function fetchAllAppointments(
       const pricing = extractPricingFields(row);
       const promo = extractPromotionFields(row);
 
+      // Extract ghost termin fields
+      const beleziTermin = row['belezi_termin'];
+      const belezi_termin = beleziTermin === false || beleziTermin === 0 ? false : true;
+      const deletedAt = row['deleted_at'];
+      const deleted_at = deletedAt && String(deletedAt) !== 'null' ? String(deletedAt) : null;
+
+      // Ghost termini with deleted_at set are soft-deleted — exclude from all views
+      if (deleted_at !== null) continue;
+
       appointments.push({
         id,
         datum: bookingDate.toISOString(),
@@ -843,6 +863,8 @@ export async function fetchAllAppointments(
         promocija_naziv: promo.promocija_naziv,
         popust_id: promo.popust_id,
         happy_hour_id: promo.happy_hour_id,
+        belezi_termin,
+        deleted_at,
         storitev: serviceData,
         storitev_2: storitev2,
         storitev_3: storitev3,

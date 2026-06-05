@@ -711,7 +711,7 @@ export default function OsebjePage() {
                 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all hover:shadow-xl hover:shadow-cyan-500/30"
+                className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
               >
                 <Plus className="h-5 w-5" weight="bold" />
                 {t('page.newButton')}
@@ -804,9 +804,9 @@ export default function OsebjePage() {
                   }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="mt-6 flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-6 py-3
-                             text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
-                             hover:shadow-xl hover:shadow-cyan-500/30"
+                  className="mt-6 flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-6 py-3
+                             text-sm font-medium text-white shadow-sm transition-colors
+                             hover:bg-[#1f1f1f]"
                 >
                   <Plus className="h-5 w-5" weight="bold" />
                   {t('emptyState.addFirst')}

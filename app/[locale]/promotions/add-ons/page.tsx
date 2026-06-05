@@ -140,25 +140,25 @@ export default function AddOnsPage() {
     return naziv.toLowerCase().includes(serviceSearch.toLowerCase());
   });
 
-  if (loading) return <div className="flex items-center justify-center py-16"><div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center py-16"><div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent" /></div>;
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
         <h3 className="text-sm font-medium text-gray-600">{t('addOns.count', { count: addOns.length })}</h3>
-        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={openCreate} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white" style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 100%)' }}>
+        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={openCreate} className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]">
           <Plus className="w-4 h-4" weight="bold" />
           {t('addOns.newButton')}
         </motion.button>
       </div>
 
       {addOns.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-400 shadow-sm">
           <Plus className="w-10 h-10 mx-auto mb-3 opacity-40" weight="thin" />
           <p className="text-sm">{t('addOns.empty')}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
@@ -181,7 +181,7 @@ export default function AddOnsPage() {
                     <td className="py-3.5 px-4 font-medium text-gray-900">{ao.naziv || getServiceName(ao.storitev_id)}</td>
                     <td className="py-3.5 px-4 text-gray-600">{ao.original_cena?.toFixed(2) ?? '-'} €</td>
                     <td className="py-3.5 px-4 font-semibold text-gray-900">{ao.tip_popusta === 'percentage' ? `${ao.vrednost_popusta}%` : `${ao.vrednost_popusta} €`}</td>
-                    <td className="py-3.5 px-4 font-semibold" style={{ background: 'linear-gradient(90deg, #6D5EF7, #2AD4C5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                    <td className="py-3.5 px-4 font-semibold text-gray-900">
                       {ao.final_cena?.toFixed(2) ?? '-'} €
                     </td>
                     <td className="py-3.5 px-4">
@@ -194,7 +194,7 @@ export default function AddOnsPage() {
                         <button onClick={() => handleToggleActive(ao)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${ao.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
                           <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${ao.aktiven ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                         </button>
-                        <button onClick={() => openEdit(ao)} className="p-1.5 text-gray-400 hover:text-violet-600 transition-colors rounded-lg hover:bg-violet-50"><PencilSimple className="w-4 h-4" weight="regular" /></button>
+                        <button onClick={() => openEdit(ao)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"><PencilSimple className="w-4 h-4" weight="regular" /></button>
                         <button onClick={() => setDeleteId(ao.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"><Trash className="w-4 h-4" weight="regular" /></button>
                       </div>
                     </td>
@@ -211,35 +211,35 @@ export default function AddOnsPage() {
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
-              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl">
+              <div className="flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
                 <h2 className="text-lg font-semibold text-gray-900">
                   {editingId ? t('addOns.modal.editTitle') : t('addOns.modal.createTitle')}
                 </h2>
                 <button onClick={() => setModalOpen(false)} className="p-2 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"><X className="w-5 h-5" weight="bold" /></button>
               </div>
 
-              <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
                 {/* Storitev picker */}
                 {!editingId && (
-                  <div>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
                     <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('addOns.modal.fields.service')}</label>
                     <div className="relative mb-2">
                       <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" weight="regular" />
-                      <input value={serviceSearch} onChange={(e) => setServiceSearch(e.target.value)} placeholder={t('shared.serviceSearch')} className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                      <input value={serviceSearch} onChange={(e) => setServiceSearch(e.target.value)} placeholder={t('shared.serviceSearch')} className="w-full rounded-lg border border-gray-200 py-2 pl-8 pr-3 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10" />
                     </div>
                     {form.storitev_id && (
-                      <div className="mb-2 px-3 py-2 bg-violet-50 text-violet-700 rounded-xl text-sm font-medium flex items-center justify-between">
+                      <div className="mb-2 flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-100">
                         <span>{getServiceName(form.storitev_id)}</span>
                         <button onClick={() => setForm((p) => ({ ...p, storitev_id: '' }))}><X className="w-3.5 h-3.5" weight="bold" /></button>
                       </div>
                     )}
-                    <div className="max-h-36 overflow-y-auto space-y-1 border border-gray-100 rounded-xl p-2">
+                    <div className="max-h-36 overflow-y-auto space-y-1 rounded-lg border border-gray-100 p-2">
                       {filteredServices.map((svc) => {
                         const naziv = (() => { const r = svc as unknown as Record<string, unknown>; return String(r['Naziv'] ?? r['naziv'] ?? svc.naziv ?? svc.id); })();
                         const selected = form.storitev_id === svc.id;
                         return (
-                          <button key={svc.id} onClick={() => { setForm((p) => ({ ...p, storitev_id: svc.id })); setServiceSearch(''); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${selected ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50 text-gray-700'}`}>
+                          <button key={svc.id} onClick={() => { setForm((p) => ({ ...p, storitev_id: svc.id })); setServiceSearch(''); }} className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${selected ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-50'}`}>
                             <span>{naziv}</span>
                             <span className="text-xs text-gray-400">{svc.cena?.toFixed(2)} €</span>
                           </button>
@@ -250,41 +250,41 @@ export default function AddOnsPage() {
                 )}
 
                 {editingId && (
-                  <div className="p-3 bg-gray-50 rounded-xl">
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
                     <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">{t('addOns.modal.fields.service')}</p>
                     <p className="text-sm font-medium text-gray-900">{getServiceName(form.storitev_id)}</p>
                   </div>
                 )}
 
                 {/* Tip + vrednost */}
-                <div>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">{t('addOns.modal.fields.type')}</label>
                   <div className="flex gap-3 mb-3">
                     {(['percentage', 'fixed'] as const).map((val) => (
                       <label key={val} className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" checked={form.tip_popusta === val} onChange={() => setForm((p) => ({ ...p, tip_popusta: val }))} className="accent-violet-600" />
+                        <input type="radio" checked={form.tip_popusta === val} onChange={() => setForm((p) => ({ ...p, tip_popusta: val }))} className="accent-gray-900" />
                         <span className="text-sm text-gray-700">{t(`shared.discountType.${val}`)}</span>
                       </label>
                     ))}
                   </div>
-                  <input type="number" min="0" max={form.tip_popusta === 'percentage' ? 100 : undefined} step="0.01" value={form.vrednost_popusta} onChange={(e) => setForm((p) => ({ ...p, vrednost_popusta: e.target.value }))} placeholder={form.tip_popusta === 'percentage' ? '20' : '5.00'} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200" />
+                  <input type="number" min="0" max={form.tip_popusta === 'percentage' ? 100 : undefined} step="0.01" value={form.vrednost_popusta} onChange={(e) => setForm((p) => ({ ...p, vrednost_popusta: e.target.value }))} placeholder={form.tip_popusta === 'percentage' ? '20' : '5.00'} className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10" />
                 </div>
 
                 {/* Live preview */}
                 {form.storitev_id && vrednost > 0 && selectedServicePrice > 0 && (
-                  <div className="p-4 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
                     <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">{t('addOns.modal.fields.previewTitle')}</p>
                     <div className="flex items-center gap-2 text-sm">
                       <span className="text-gray-500 line-through">{selectedServicePrice.toFixed(2)} €</span>
                       <span className="text-gray-400">→</span>
-                      <span className="font-bold text-lg" style={{ background: 'linear-gradient(90deg, #6D5EF7, #2AD4C5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                      <span className="text-lg font-bold text-gray-900">
                         {previewFinal.toFixed(2)} €
                       </span>
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5">
                   <span className="text-sm font-medium text-gray-700">{t('addOns.modal.fields.active')}</span>
                   <button onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.aktiven ? 'translate-x-6' : 'translate-x-1'}`} />
@@ -292,9 +292,9 @@ export default function AddOnsPage() {
                 </div>
               </div>
 
-              <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
-                <button onClick={() => setModalOpen(false)} className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">{t('shared.cancelButton')}</button>
-                <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white rounded-xl disabled:opacity-50" style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 100%)' }}>
+              <div className="flex justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
+                <button onClick={() => setModalOpen(false)} className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900">{t('shared.cancelButton')}</button>
+                <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f] disabled:opacity-50">
                   {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                   {editingId ? t('shared.saveButton') : t('shared.createButton')}
                 </motion.button>

@@ -185,6 +185,7 @@ function AppointmentCard({
 }: AppointmentCardProps) {
   const isCompleted = ['completed', 'Zaključen', 'zaključen', 'no_show', 'Ni prišel'].includes(appointment.status || '');
   const isNoShow = appointment.status === 'no_show' || appointment.status === 'Ni prišel';
+  const isGhost = appointment.belezi_termin === false && !appointment.deleted_at;
 
   const appointmentDuration = useMemo(() => {
     if (duration !== undefined) return duration;
@@ -322,6 +323,20 @@ function AppointmentCard({
     );
   };
 
+  const GhostIcon = () => {
+    if (!isGhost) return null;
+    return (
+      <div
+        className="absolute top-1 left-1 text-white/90 pointer-events-none z-10 leading-none"
+        style={{ fontSize: 12 }}
+        aria-hidden
+        title="Ghost termin — ni zabeležen"
+      >
+        👻
+      </div>
+    );
+  };
+
   const StatusIndicator = () => {
     if (isCompleted) return null;
     if (appointment.status === 'cancelled' || appointment.status === 'Odpovedan') {
@@ -351,8 +366,15 @@ function AppointmentCard({
         onKeyDown={handleKeyDown}
         className="group mb-0.5 cursor-pointer rounded px-1.5 py-0.5 text-[10px] font-medium
                    transition-all hover:shadow-sm relative overflow-hidden flex items-center"
-        style={{ background: serviceGradient, color: '#FFFFFF', ...style }}
+        style={{
+          background: serviceGradient,
+          color: '#FFFFFF',
+          opacity: isGhost ? 0.6 : undefined,
+          border: isGhost ? '1.5px dashed rgba(255,255,255,0.7)' : undefined,
+          ...style,
+        }}
       >
+        {isGhost && <span className="mr-0.5 text-[9px]">👻</span>}
         <SmartClientName
           fullName={appointment.stranka_ime}
           priimek={appointment.stranka_priimek}
@@ -381,7 +403,13 @@ function AppointmentCard({
         onKeyDown={handleKeyDown}
         className="group cursor-pointer rounded-xl p-3 transition-all duration-200
                    hover:-translate-y-0.5 hover:shadow-lg overflow-hidden relative"
-        style={{ background: serviceGradient, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', ...style }}
+        style={{
+          background: serviceGradient,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          opacity: isGhost ? 0.6 : undefined,
+          border: isGhost ? '2px dashed rgba(255,255,255,0.7)' : undefined,
+          ...style,
+        }}
       >
         <div className="flex items-center gap-2 mb-2">
           <div className="flex items-center gap-1 text-xs font-semibold bg-white/20 px-2 py-1 rounded backdrop-blur-sm text-white">
@@ -425,6 +453,7 @@ function AppointmentCard({
             }}
           />
         )}
+        <GhostIcon />
       </div>
     );
   }
@@ -472,7 +501,8 @@ function AppointmentCard({
         style={{
           background: serviceGradient,
           boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-          opacity: isDragging ? 0.3 : undefined,
+          opacity: isDragging ? 0.3 : isGhost ? 0.6 : undefined,
+          border: isGhost ? '2px dashed rgba(255,255,255,0.7)' : undefined,
           ...style,
           ...longPressTouchStyle,
         }}
@@ -504,7 +534,8 @@ function AppointmentCard({
         style={{
           background: serviceGradient,
           boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
-          opacity: isDragging ? 0.3 : undefined,
+          opacity: isDragging ? 0.3 : isGhost ? 0.6 : undefined,
+          border: isGhost ? '2px dashed rgba(255,255,255,0.7)' : undefined,
           ...style,
           ...longPressTouchStyle,
         }}
@@ -551,12 +582,14 @@ function AppointmentCard({
           background: serviceGradient,
           boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
           minHeight: '24px',
-          opacity: isDragging ? 0.3 : undefined,
+          opacity: isDragging ? 0.3 : isGhost ? 0.6 : undefined,
+          border: isGhost ? '2px dashed rgba(255,255,255,0.7)' : undefined,
           ...style,
           ...longPressTouchStyle,
         }}
       >
         <PromoIcon />
+        <GhostIcon />
         {hasResursi && (
           <div className="absolute bottom-1 right-1 pointer-events-none z-10">
             <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />
@@ -607,12 +640,14 @@ function AppointmentCard({
           background: serviceGradient,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           minHeight: '40px',
-          opacity: isDragging ? 0.3 : undefined,
+          opacity: isDragging ? 0.3 : isGhost ? 0.6 : undefined,
+          border: isGhost ? '2px dashed rgba(255,255,255,0.7)' : undefined,
           ...style,
           ...longPressTouchStyle,
         }}
       >
         <PromoIcon />
+        <GhostIcon />
         {hasResursi && (
           <div className="absolute bottom-1 right-1 pointer-events-none z-10">
             <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />
@@ -667,12 +702,14 @@ function AppointmentCard({
         background: serviceGradient,
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         minHeight: '60px',
-        opacity: isDragging ? 0.3 : undefined,
+        opacity: isDragging ? 0.3 : isGhost ? 0.6 : undefined,
+        border: isGhost ? '2px dashed rgba(255,255,255,0.7)' : undefined,
         ...style,
         ...longPressTouchStyle,
       }}
     >
       <PromoIcon />
+      <GhostIcon />
       {hasResursi && (
         <div className="absolute bottom-1 right-1 pointer-events-none z-10">
           <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />

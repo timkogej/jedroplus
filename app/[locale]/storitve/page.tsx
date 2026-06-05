@@ -120,9 +120,9 @@ function EmptyState({ onCreateService }: { onCreateService: () => void }) {
         onClick={onCreateService}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="mt-6 flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-violet-600 px-6 py-3
-                   text-sm font-medium text-white shadow-lg shadow-violet-500/25 transition-all
-                   hover:shadow-xl hover:shadow-violet-500/30"
+        className="mt-6 flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-6 py-3
+                   text-sm font-medium text-white shadow-sm transition-colors
+                   hover:bg-[#1f1f1f]"
       >
         <Plus className="h-5 w-5" weight="bold" />
         {t('emptyState.addFirst')}
@@ -621,9 +621,9 @@ export default function StoritvePage() {
               animate={{ opacity: 1, scale: 1 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-violet-600 px-5 py-3
-                         text-sm font-medium text-white shadow-lg shadow-violet-500/25 transition-all
-                         hover:shadow-xl hover:shadow-violet-500/30"
+              className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-3
+                         text-sm font-medium text-white shadow-sm transition-colors
+                         hover:bg-[#1f1f1f]"
             >
               <Plus className="h-5 w-5" weight="bold" />
               {t('page.newButton')}

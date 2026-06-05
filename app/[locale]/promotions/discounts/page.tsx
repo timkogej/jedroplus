@@ -199,7 +199,7 @@ export default function DiscountsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <div className="w-6 h-6 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent" />
       </div>
     );
   }
@@ -207,22 +207,21 @@ export default function DiscountsPage() {
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
         <div className="relative flex-1 max-w-sm">
           <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" weight="regular" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('discounts.search')}
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
+            className="w-full rounded-lg border border-gray-200 bg-[#F7F8FA] py-2.5 pl-9 pr-4 text-sm focus:border-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10"
           />
         </div>
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white"
-          style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 100%)' }}
+          className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
         >
           <Plus className="w-4 h-4" weight="bold" />
           {t('discounts.newButton')}
@@ -231,12 +230,12 @@ export default function DiscountsPage() {
 
       {/* Table */}
       {filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-400 shadow-sm">
           <Tag className="w-10 h-10 mx-auto mb-3 opacity-40" weight="thin" />
           <p className="text-sm">{t('discounts.empty')}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
@@ -264,7 +263,7 @@ export default function DiscountsPage() {
                     >
                       <td className="py-3.5 px-4 font-medium text-gray-900">{popust.naziv}</td>
                       <td className="py-3.5 px-4">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 cursor-pointer"
+                        <span className="inline-flex cursor-pointer items-center rounded-lg bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-100"
                           title={(popust.storitev_ids || []).map(getServiceName).join(', ')}
                         >
                           {t('discounts.serviceCount', { count: (popust.storitev_ids || []).length })}
@@ -291,7 +290,7 @@ export default function DiscountsPage() {
                           >
                             <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${popust.aktiven ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                           </button>
-                          <button onClick={() => openEdit(popust)} className="p-1.5 text-gray-400 hover:text-violet-600 transition-colors rounded-lg hover:bg-violet-50">
+                          <button onClick={() => openEdit(popust)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900">
                             <PencilSimple className="w-4 h-4" weight="regular" />
                           </button>
                           <button onClick={() => setDeleteId(popust.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50">
@@ -323,9 +322,9 @@ export default function DiscountsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden"
+              className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
             >
-              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
                 <h2 className="text-lg font-semibold text-gray-900">
                   {editingId ? t('discounts.modal.editTitle') : t('discounts.modal.createTitle')}
                 </h2>
@@ -334,20 +333,20 @@ export default function DiscountsPage() {
                 </button>
               </div>
 
-              <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
+              <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
                 {/* Naziv */}
-                <div>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('discounts.modal.fields.name')}</label>
                   <input
                     value={form.naziv}
                     onChange={(e) => setForm((p) => ({ ...p, naziv: e.target.value }))}
                     placeholder={t('discounts.modal.fields.namePlaceholder')}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                   />
                 </div>
 
                 {/* Tip popusta */}
-                <div>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">{t('discounts.modal.fields.type')}</label>
                   <div className="flex gap-3">
                     {(['percentage', 'fixed'] as const).map((val) => (
@@ -356,7 +355,7 @@ export default function DiscountsPage() {
                           type="radio"
                           checked={form.tip_popusta === val}
                           onChange={() => setForm((p) => ({ ...p, tip_popusta: val }))}
-                          className="accent-violet-600"
+                          className="accent-gray-900"
                         />
                         <span className="text-sm text-gray-700">{t(`shared.discountType.${val}`)}</span>
                       </label>
@@ -365,7 +364,7 @@ export default function DiscountsPage() {
                 </div>
 
                 {/* Vrednost */}
-                <div>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                     {t('discounts.modal.fields.value', { unit: t(`shared.valueUnit.${form.tip_popusta}`) })}
                   </label>
@@ -377,19 +376,19 @@ export default function DiscountsPage() {
                     value={form.vrednost}
                     onChange={(e) => setForm((p) => ({ ...p, vrednost: e.target.value }))}
                     placeholder={form.tip_popusta === 'percentage' ? '20' : '5.00'}
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
+                    className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                   />
                 </div>
 
                 {/* Datumi */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 rounded-2xl border border-gray-100 bg-white p-5 sm:grid-cols-2">
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{t('discounts.modal.fields.dateFrom')}</label>
                     <input
                       type="date"
                       value={form.datum_zacetek}
                       onChange={(e) => setForm((p) => ({ ...p, datum_zacetek: e.target.value }))}
-                      className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                     />
                   </div>
                   <div>
@@ -398,13 +397,13 @@ export default function DiscountsPage() {
                       type="date"
                       value={form.datum_konec}
                       onChange={(e) => setForm((p) => ({ ...p, datum_konec: e.target.value }))}
-                      className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
+                      className="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                     />
                   </div>
                 </div>
 
                 {/* Storitve */}
-                <div>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
                     {t('discounts.modal.fields.services', { count: form.storitev_ids.length })}
                   </label>
@@ -414,23 +413,23 @@ export default function DiscountsPage() {
                       value={serviceSearch}
                       onChange={(e) => setServiceSearch(e.target.value)}
                       placeholder={t('shared.serviceSearch')}
-                      className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-violet-200"
+                      className="w-full rounded-lg border border-gray-200 py-2 pl-8 pr-3 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                     />
                   </div>
                   {/* Selected chips */}
                   {form.storitev_ids.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-2">
                       {form.storitev_ids.map((id) => (
-                        <span key={id} className="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-100 text-violet-700 rounded-full text-xs font-medium">
+                        <span key={id} className="inline-flex items-center gap-1 rounded-lg bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-100">
                           {getServiceName(id)}
-                          <button onClick={() => toggleService(id)} className="hover:text-violet-900">
+                          <button onClick={() => toggleService(id)} className="hover:text-gray-900">
                             <X className="w-3 h-3" weight="bold" />
                           </button>
                         </span>
                       ))}
                     </div>
                   )}
-                  <div className="max-h-36 overflow-y-auto space-y-1 border border-gray-100 rounded-xl p-2">
+                  <div className="max-h-36 overflow-y-auto space-y-1 rounded-lg border border-gray-100 p-2">
                     {filteredServices.map((svc) => {
                       const naziv = (() => { const r = svc as unknown as Record<string, unknown>; return String(r['Naziv'] ?? r['naziv'] ?? svc.naziv ?? svc.id); })();
                       const selected = form.storitev_ids.includes(svc.id);
@@ -439,11 +438,11 @@ export default function DiscountsPage() {
                           key={svc.id}
                           onClick={() => toggleService(svc.id)}
                           className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
-                            selected ? 'bg-violet-50 text-violet-700' : 'hover:bg-gray-50 text-gray-700'
+                            selected ? 'bg-gray-100 text-gray-900' : 'hover:bg-gray-50 text-gray-700'
                           }`}
                         >
                           <span>{naziv}</span>
-                          {selected && <span className="text-violet-500 text-xs font-medium">✓</span>}
+                          {selected && <span className="text-xs font-medium text-gray-900">✓</span>}
                         </button>
                       );
                     })}
@@ -454,7 +453,7 @@ export default function DiscountsPage() {
                 </div>
 
                 {/* Aktiven */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5">
                   <span className="text-sm font-medium text-gray-700">{t('shared.activeLabel')}</span>
                   <button
                     onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))}
@@ -465,16 +464,15 @@ export default function DiscountsPage() {
                 </div>
               </div>
 
-              <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
-                <button onClick={() => setModalOpen(false)} className="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+              <div className="flex justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
+                <button onClick={() => setModalOpen(false)} className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900">
                   {t('shared.cancelButton')}
                 </button>
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white rounded-xl disabled:opacity-50"
-                  style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 100%)' }}
+                  className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f] disabled:opacity-50"
                 >
                   {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                   {editingId ? t('shared.saveButton') : t('shared.createButton')}

@@ -26,6 +26,10 @@
       "addons": {
         "label": "Dodatki in kvote",
         "description": "Nakup SMS, e-pošta in zaposleni addonov"
+      },
+      "history": {
+        "label": "Zgodovina",
+        "description": "Revizijska sled vseh sprememb in dejanj v sistemu"
       }
     }
   },
@@ -169,6 +173,7 @@
         "can_view_staff": "Vidi seznam zaposlenih",
         "can_edit_staff": "Ureja zaposlene",
         "can_view_analytics": "Vidi analitiko",
+        "can_view_zgodovina": "Vidi zgodovino (revizijsko sled)",
         "can_access_asistent_plus": "Dostop do Asistent+",
         "can_access_komunikacija": "Dostop do Komunikacija",
         "can_access_chatbot_plus": "Dostop do Chatbot+",
@@ -178,7 +183,8 @@
         "can_access_rezervacije": "Dostop do Rezervacije",
         "can_manage_rezervacije": "Upravljanje Rezervacij",
         "can_access_lost_leads": "Dostop do Lost Leads",
-        "can_manage_lost_leads": "Upravljanje Lost Leads"
+        "can_manage_lost_leads": "Upravljanje Lost Leads",
+        "can_create_ghost_termin": "Lahko ustvari ghost termine"
       }
     }
   },
@@ -215,6 +221,75 @@
       "title": "Ni poslanih sporočil",
       "all": "V zadnjih 14 dneh ni bilo poslanih sporočil.",
       "filtered": "Za izbrani filter ni sporočil v zadnjih 14 dneh."
+    }
+  },
+  "zgodovina": {
+    "title": "Zgodovina",
+    "subtitle": "Revizijska sled vseh sprememb in dejanj v sistemu",
+    "noAccess": {
+      "title": "Dostop omejen",
+      "message": "Nimate dovoljenja za ogled zgodovine dejanj."
+    },
+    "loadError": "Prišlo je do napake pri nalaganju zgodovine.",
+    "empty": {
+      "title": "Ni zapisov",
+      "description": "Za izbrane filtre ni najdenih zapisov v zgodovini."
+    },
+    "filters": {
+      "tip": "Tip",
+      "vsi": "Vsi",
+      "termini": "Termini",
+      "stranke": "Stranke",
+      "akcija": "Akcija",
+      "vseAkcije": "Vse akcije",
+      "datumOd": "Od",
+      "datumDo": "Do",
+      "search": "Išči po ID stranke / termina",
+      "resetFilters": "Ponastavi"
+    },
+    "columns": {
+      "datum": "Datum in čas",
+      "akcija": "Akcija",
+      "entiteta": "Entiteta",
+      "kdo": "Kdo",
+      "podrobnosti": "Podrobnosti"
+    },
+    "akcije": {
+      "ustvarjen": "Ustvarjen",
+      "spremenjen": "Spremenjen",
+      "prestavljen": "Prestavljen",
+      "zakljucen": "Zaključen",
+      "izbrisan": "Izbrisan",
+      "odpovedan": "Odpovedan",
+      "online_rezervacija": "Online rezervacija",
+      "stranka_dodana": "Stranka dodana",
+      "stranka_posodobljena": "Stranka posodobljena"
+    },
+    "tipEntitete": {
+      "termin": "Termin",
+      "stranka": "Stranka"
+    },
+    "izvedel_tip": {
+      "owner": "Lastnik",
+      "admin": "Admin",
+      "staff": "Zaposleni",
+      "stranka": "Stranka",
+      "sistem": "Sistem"
+    },
+    "expand": "Podrobnosti",
+    "collapse": "Zapri",
+    "idTermina": "ID termina",
+    "idStranke": "ID stranke",
+    "spremembe": {
+      "title": "Spremembe",
+      "prej": "Prej",
+      "potem": "Potem",
+      "noChanges": "Ni zabeleženih sprememb."
+    },
+    "pagination": {
+      "previous": "Nazaj",
+      "next": "Naprej",
+      "of": "od"
     }
   },
   "saveIndicator": {

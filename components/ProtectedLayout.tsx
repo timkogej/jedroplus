@@ -199,6 +199,7 @@ export default function ProtectedLayout({
         { prefix: '/reminders', key: 'can_access_opomniki' },
         { prefix: '/rezervacije', key: 'can_access_rezervacije' },
         { prefix: '/lost-leads', key: 'can_access_lost_leads' },
+        { prefix: '/nastavitve/zgodovina', key: 'can_view_zgodovina' },
       ];
 
       for (const { prefix, key } of routePermMap) {

@@ -12,7 +12,6 @@ import {
   FloppyDisk,
   SpinnerGap,
   Warning,
-  Palette,
   Check,
   CaretLeft,
   CaretRight,
@@ -245,17 +244,17 @@ function ServiceModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Gradient header */}
-            <div className="bg-gradient-to-r from-violet-500 to-cyan-500 p-6">
+            {/* Header */}
+            <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-white">
+                  <h2 className="text-xl font-semibold text-gray-900">
                     {mode === 'create' ? t('modal.createTitle') : t('modal.editTitle')}
                   </h2>
-                  <p className="mt-1 text-sm text-white/80">
+                  <p className="mt-1 text-sm text-gray-500">
                     {mode === 'create' ? t('modal.createSubtitle') : t('modal.editSubtitle')}
                   </p>
                 </div>
@@ -264,7 +263,7 @@ function ServiceModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                  className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
                 >
                   <X className="h-5 w-5" weight="bold" />
                 </motion.button>
@@ -272,131 +271,138 @@ function ServiceModal({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="max-h-[calc(90vh-180px)] overflow-y-auto p-6">
-              <div className="space-y-4">
-                {/* Service name */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.nameLabel')}
-                  </label>
-                  <div className="relative">
-                    <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                    <input
-                      type="text"
-                      value={formData.naziv}
-                      onChange={(e) => handleChange('naziv', e.target.value)}
-                      placeholder={t('modal.namePlaceholder')}
-                      maxLength={100}
-                      className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
-                                 transition-all focus:outline-none focus:ring-2
-                                 ${errors.naziv
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-violet-400 focus:ring-violet-100'
-                                 }`}
-                    />
+            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+              <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+                <div className="space-y-5">
+                {/* Basic info */}
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                  {/* Service name */}
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                      {t('modal.nameLabel')}
+                    </label>
+                    <div className="relative">
+                      <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                      <input
+                        type="text"
+                        value={formData.naziv}
+                        onChange={(e) => handleChange('naziv', e.target.value)}
+                        placeholder={t('modal.namePlaceholder')}
+                        maxLength={100}
+                        className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                                   transition-colors focus:outline-none focus:ring-2
+                                   ${errors.naziv
+                                     ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                     : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                   }`}
+                      />
+                    </div>
+                    {errors.naziv && (
+                      <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                        <Warning className="h-3 w-3" weight="fill" />
+                        {errors.naziv}
+                      </p>
+                    )}
                   </div>
-                  {errors.naziv && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.naziv}
-                    </p>
-                  )}
-                </div>
 
-                {/* Category - Select with existing categories + custom option */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.categoryLabel')}
-                  </label>
-                  {customCategory ? (
-                    <div className="space-y-2">
+                  {/* Category - Select with existing categories + custom option */}
+                  <div className="mt-4">
+                    <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                      {t('modal.categoryLabel')}
+                    </label>
+                    {customCategory ? (
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <Folder className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                          <input
+                            type="text"
+                            value={formData.kategorija}
+                            onChange={(e) => handleChange('kategorija', e.target.value)}
+                            placeholder={t('modal.categoryInputPlaceholder')}
+                            autoFocus
+                            className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                                       transition-colors focus:outline-none focus:ring-2
+                                       ${errors.kategorija
+                                         ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                         : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                       }`}
+                          />
+                        </div>
+                        {existingCategories.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomCategory(false);
+                              handleChange('kategorija', '');
+                            }}
+                            className="text-xs font-medium text-gray-500 hover:text-gray-900"
+                          >
+                            {t('modal.categoryBackToExisting')}
+                          </button>
+                        )}
+                      </div>
+                    ) : existingCategories.length > 0 ? (
+                      <div className="relative">
+                        <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <Folder className="h-4 w-4" weight="regular" />
+                        </div>
+                        <Select
+                          value={formData.kategorija}
+                          setValue={(value) => {
+                            if (value === '__custom__') {
+                              setCustomCategory(true);
+                              handleChange('kategorija', '');
+                            } else {
+                              handleChange('kategorija', value);
+                            }
+                          }}
+                          placeholder={t('modal.categorySelectPlaceholder')}
+                          className="[&>button]:rounded-lg [&>button]:pl-10 [&>button]:focus:ring-gray-900/10"
+                        >
+                          {existingCategories.map((cat) => (
+                            <SelectOption key={cat} value={cat}>
+                              {cat}
+                            </SelectOption>
+                          ))}
+                          <SelectOption value="__custom__">
+                            {t('modal.categoryNewOption')}
+                          </SelectOption>
+                        </Select>
+                      </div>
+                    ) : (
                       <div className="relative">
                         <Folder className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
                         <input
                           type="text"
                           value={formData.kategorija}
                           onChange={(e) => handleChange('kategorija', e.target.value)}
-                          placeholder={t('modal.categoryInputPlaceholder')}
-                          autoFocus
-                          className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
-                                     transition-all focus:outline-none focus:ring-2
+                          placeholder={t('modal.categoryFirstPlaceholder')}
+                          className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                                     transition-colors focus:outline-none focus:ring-2
                                      ${errors.kategorija
-                                       ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                       : 'border-gray-200 focus:border-violet-400 focus:ring-violet-100'
+                                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                       : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
                                      }`}
                         />
                       </div>
-                      {existingCategories.length > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setCustomCategory(false);
-                            handleChange('kategorija', '');
-                          }}
-                          className="text-xs font-medium text-violet-600 hover:text-violet-700"
-                        >
-                          {t('modal.categoryBackToExisting')}
-                        </button>
-                      )}
-                    </div>
-                  ) : existingCategories.length > 0 ? (
-                    <div className="relative">
-                      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <Folder className="h-4 w-4" weight="regular" />
-                      </div>
-                      <Select
-                        value={formData.kategorija}
-                        setValue={(value) => {
-                          if (value === '__custom__') {
-                            setCustomCategory(true);
-                            handleChange('kategorija', '');
-                          } else {
-                            handleChange('kategorija', value);
-                          }
-                        }}
-                        placeholder={t('modal.categorySelectPlaceholder')}
-                        className="[&>button]:pl-10"
-                      >
-                        {existingCategories.map((cat) => (
-                          <SelectOption key={cat} value={cat}>
-                            {cat}
-                          </SelectOption>
-                        ))}
-                        <SelectOption value="__custom__">
-                          {t('modal.categoryNewOption')}
-                        </SelectOption>
-                      </Select>
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <Folder className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                      <input
-                        type="text"
-                        value={formData.kategorija}
-                        onChange={(e) => handleChange('kategorija', e.target.value)}
-                        placeholder={t('modal.categoryFirstPlaceholder')}
-                        className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
-                                   transition-all focus:outline-none focus:ring-2
-                                   ${errors.kategorija
-                                     ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                     : 'border-gray-200 focus:border-violet-400 focus:ring-violet-100'
-                                   }`}
-                      />
-                    </div>
-                  )}
-                  {errors.kategorija && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.kategorija}
-                    </p>
-                  )}
+                    )}
+                    {errors.kategorija && (
+                      <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                        <Warning className="h-3 w-3" weight="fill" />
+                        {errors.kategorija}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Gradient Color Selector with Pagination */}
-                <div>
-                  <label className="mb-3 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     {t('modal.colorLabel')}
-                  </label>
+                  </p>
+                  <p className="mb-4 text-xs text-gray-500">
+                    {t('modal.colorHint')}
+                  </p>
 
                   {/* Gradient options grid with pagination */}
                   <div className="flex items-center gap-2">
@@ -405,34 +411,34 @@ function ServiceModal({
                       type="button"
                       onClick={() => setColorPage((p) => Math.max(0, p - 1))}
                       disabled={colorPage === 0}
-                      whileHover={{ scale: colorPage === 0 ? 1 : 1.1 }}
-                      whileTap={{ scale: colorPage === 0 ? 1 : 0.95 }}
-                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all
+                      whileHover={{ scale: colorPage === 0 ? 1 : 1.04 }}
+                      whileTap={{ scale: colorPage === 0 ? 1 : 0.97 }}
+                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-colors
                                  ${colorPage === 0
-                                   ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                   ? 'cursor-not-allowed bg-gray-50 text-gray-300'
+                                   : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                  }`}
                     >
-                      <CaretLeft className="w-5 h-5" weight="bold" />
+                      <CaretLeft className="h-4 w-4" weight="bold" />
                     </motion.button>
 
                     {/* Gradient options - 4 at a time */}
-                    <div className="flex-1 grid grid-cols-4 gap-3">
+                    <div className="grid flex-1 grid-cols-4 gap-2.5">
                       <AnimatePresence mode="wait">
                         {visibleGradients.map((g) => (
                           <motion.button
                             key={g.id}
                             type="button"
                             onClick={() => handleChange('barva', g.gradient)}
-                            initial={{ opacity: 0, scale: 0.8 }}
+                            initial={{ opacity: 0, scale: 0.96 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className={`relative h-20 rounded-xl transition-all cursor-pointer shadow-sm
+                            exit={{ opacity: 0, scale: 0.96 }}
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.97 }}
+                            className={`relative h-16 rounded-lg shadow-sm transition-all
                                        ${formData.barva === g.gradient
-                                         ? 'ring-4 ring-violet-500 ring-offset-2 scale-105'
-                                         : 'hover:shadow-lg'
+                                         ? 'ring-2 ring-gray-900 ring-offset-2'
+                                         : 'hover:shadow-md'
                                        }`}
                             style={{ background: g.gradient }}
                           >
@@ -443,15 +449,15 @@ function ServiceModal({
                                 animate={{ scale: 1 }}
                                 className="absolute inset-0 flex items-center justify-center"
                               >
-                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
-                                  <Check className="w-5 h-5 text-violet-600" weight="bold" />
+                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-lg">
+                                  <Check className="h-4 w-4 text-gray-900" weight="bold" />
                                 </div>
                               </motion.div>
                             )}
 
                             {/* Gradient name */}
-                            <div className="absolute bottom-2 left-0 right-0 text-center">
-                              <span className="text-xs font-semibold text-white drop-shadow-lg">
+                            <div className="absolute inset-x-1 bottom-1.5 text-center">
+                              <span className="block truncate text-[10px] font-semibold text-white drop-shadow-lg">
                                 {g.name}
                               </span>
                             </div>
@@ -465,207 +471,206 @@ function ServiceModal({
                       type="button"
                       onClick={() => setColorPage((p) => Math.min(totalColorPages - 1, p + 1))}
                       disabled={colorPage >= totalColorPages - 1}
-                      whileHover={{ scale: colorPage >= totalColorPages - 1 ? 1 : 1.1 }}
-                      whileTap={{ scale: colorPage >= totalColorPages - 1 ? 1 : 0.95 }}
-                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all
+                      whileHover={{ scale: colorPage >= totalColorPages - 1 ? 1 : 1.04 }}
+                      whileTap={{ scale: colorPage >= totalColorPages - 1 ? 1 : 0.97 }}
+                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg transition-colors
                                  ${colorPage >= totalColorPages - 1
-                                   ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                   ? 'cursor-not-allowed bg-gray-50 text-gray-300'
+                                   : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                                  }`}
                     >
-                      <CaretRight className="w-5 h-5" weight="bold" />
+                      <CaretRight className="h-4 w-4" weight="bold" />
                     </motion.button>
                   </div>
 
                   {/* Page indicator dots */}
-                  <div className="flex items-center justify-center gap-1.5 mt-3">
+                  <div className="mt-3 flex items-center justify-center gap-1.5">
                     {Array.from({ length: totalColorPages }).map((_, i) => (
                       <button
                         key={i}
                         type="button"
                         onClick={() => setColorPage(i)}
-                        className={`w-2 h-2 rounded-full transition-all ${
+                        className={`h-1.5 rounded-full transition-all ${
                           colorPage === i
-                            ? 'bg-violet-500 w-4'
-                            : 'bg-gray-300 hover:bg-gray-400'
+                            ? 'w-4 bg-gray-900'
+                            : 'w-1.5 bg-gray-300 hover:bg-gray-400'
                         }`}
                       />
                     ))}
                   </div>
 
                   {/* Selected gradient preview */}
-                  <div className="mt-4 p-4 rounded-xl border-2 border-gray-200">
-                    <div className="flex items-center gap-4">
+                  <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50/70 p-3">
+                    <div className="flex items-center gap-3">
                       <div
-                        className="w-16 h-16 rounded-xl shadow-lg flex-shrink-0"
+                        className="h-10 w-10 flex-shrink-0 rounded-lg shadow-sm"
                         style={{ background: formData.barva }}
                       />
                       <div>
-                        <div className="text-sm font-medium text-gray-700">
+                        <div className="text-sm font-medium text-gray-900">
                           {t('modal.colorSelected')}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="mt-0.5 text-xs text-gray-500">
                           {SERVICE_GRADIENTS.find(g => g.gradient === formData.barva)?.name || t('modal.colorCustom')}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <p className="mt-2 flex items-center gap-1.5 text-xs text-gray-500">
-                    <Palette className="h-3.5 w-3.5" weight="regular" />
-                    {t('modal.colorHint')}
-                  </p>
-
                   {errors.barva && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
+                    <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
                       <Warning className="h-3 w-3" weight="fill" />
                       {errors.barva}
                     </p>
                   )}
                 </div>
 
-                {/* Duration */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.durationLabel')}
-                  </label>
-                  {!customDuration ? (
-                    <div className="relative">
-                      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <Clock className="h-4 w-4" weight="regular" />
-                      </div>
-                      <Select
-                        value={formData.trajanje.toString()}
-                        setValue={handleDurationSelect}
-                        placeholder={t('modal.durationSelectPlaceholder')}
-                        className="[&>button]:pl-10"
-                      >
-                        {DURATION_OPTIONS.map((opt) => (
-                          <SelectOption key={opt.value} value={opt.value.toString()}>
-                            {opt.label}
-                          </SelectOption>
-                        ))}
-                        <SelectOption value="custom">{t('modal.durationCustomOption')}</SelectOption>
-                      </Select>
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {/* Duration */}
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                        {t('modal.durationLabel')}
+                      </label>
+                      {!customDuration ? (
+                        <div className="relative">
+                          <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                            <Clock className="h-4 w-4" weight="regular" />
+                          </div>
+                          <Select
+                            value={formData.trajanje.toString()}
+                            setValue={handleDurationSelect}
+                            placeholder={t('modal.durationSelectPlaceholder')}
+                            className="[&>button]:rounded-lg [&>button]:pl-10 [&>button]:focus:ring-gray-900/10"
+                          >
+                            {DURATION_OPTIONS.map((opt) => (
+                              <SelectOption key={opt.value} value={opt.value.toString()}>
+                                {opt.label}
+                              </SelectOption>
+                            ))}
+                            <SelectOption value="custom">{t('modal.durationCustomOption')}</SelectOption>
+                          </Select>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                            <input
+                              type="number"
+                              value={formData.trajanje}
+                              onChange={(e) => handleChange('trajanje', parseInt(e.target.value, 10) || 0)}
+                              placeholder="45"
+                              min={1}
+                              max={480}
+                              className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-16 text-sm text-gray-900 placeholder-gray-400
+                                         transition-colors focus:outline-none focus:ring-2
+                                         ${errors.trajanje
+                                           ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                           : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                         }`}
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                              {t('modal.durationUnit')}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setCustomDuration(false)}
+                            className="text-xs font-medium text-gray-500 hover:text-gray-900"
+                          >
+                            {t('modal.durationBackToPreset')}
+                          </button>
+                        </div>
+                      )}
+                      {errors.trajanje && (
+                        <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                          <Warning className="h-3 w-3" weight="fill" />
+                          {errors.trajanje}
+                        </p>
+                      )}
                     </div>
-                  ) : (
-                    <div className="space-y-2">
+
+                    {/* Price (always fixed) */}
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                        {t('modal.priceLabel')}
+                      </label>
                       <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                        <CurrencyEur className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
                         <input
                           type="number"
-                          value={formData.trajanje}
-                          onChange={(e) => handleChange('trajanje', parseInt(e.target.value, 10) || 0)}
-                          placeholder="45"
-                          min={1}
-                          max={480}
-                          className={`w-full rounded-xl border py-2.5 pl-10 pr-16 text-sm text-[#1A1F36] placeholder-gray-400
-                                     transition-all focus:outline-none focus:ring-2
-                                     ${errors.trajanje
-                                       ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                       : 'border-gray-200 focus:border-violet-400 focus:ring-violet-100'
+                          value={formData.cena}
+                          onChange={(e) => handleChange('cena', e.target.value)}
+                          placeholder="35.00"
+                          step="0.01"
+                          min={0}
+                          className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-16 text-sm text-gray-900 placeholder-gray-400
+                                     transition-colors focus:outline-none focus:ring-2
+                                     ${errors.cena
+                                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                       : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
                                      }`}
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
-                          {t('modal.durationUnit')}
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
+                          {currency}
                         </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setCustomDuration(false)}
-                        className="text-xs font-medium text-violet-600 hover:text-violet-700"
-                      >
-                        {t('modal.durationBackToPreset')}
-                      </button>
+                      {errors.cena && (
+                        <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                          <Warning className="h-3 w-3" weight="fill" />
+                          {errors.cena}
+                        </p>
+                      )}
                     </div>
-                  )}
-                  {errors.trajanje && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.trajanje}
-                    </p>
-                  )}
-                </div>
-
-                {/* Price (always fixed) */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.priceLabel')}
-                  </label>
-                  <div className="relative">
-                    <CurrencyEur className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                    <input
-                      type="number"
-                      value={formData.cena}
-                      onChange={(e) => handleChange('cena', e.target.value)}
-                      placeholder="35.00"
-                      step="0.01"
-                      min={0}
-                      className={`w-full rounded-xl border py-2.5 pl-10 pr-16 text-sm text-[#1A1F36] placeholder-gray-400
-                                 transition-all focus:outline-none focus:ring-2
-                                 ${errors.cena
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-violet-400 focus:ring-violet-100'
-                                 }`}
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
-                      {currency}
-                    </span>
                   </div>
-                  {errors.cena && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.cena}
-                    </p>
-                  )}
-                </div>
 
-                {/* Description */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.descriptionLabel')}
-                  </label>
-                  <div className="relative">
-                    <NotePencil className="absolute left-3 top-3 h-4 w-4 text-gray-400" weight="regular" />
-                    <textarea
-                      value={formData.opis}
-                      onChange={(e) => handleChange('opis', e.target.value)}
-                      placeholder={t('modal.descriptionPlaceholder')}
-                      rows={3}
-                      maxLength={500}
-                      className={`w-full resize-none rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                 placeholder-gray-400 transition-all focus:outline-none focus:ring-2
-                                 ${errors.opis
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-violet-400 focus:ring-violet-100'
-                                 }`}
-                    />
-                  </div>
-                  <div className="mt-1 flex items-center justify-between">
-                    {errors.opis ? (
-                      <p className="flex items-center gap-1 text-xs text-red-500">
-                        <Warning className="h-3 w-3" weight="fill" />
-                        {errors.opis}
-                      </p>
-                    ) : (
-                      <span />
-                    )}
-                    <span className="text-xs text-gray-400">
-                      {formData.opis.length}/500
-                    </span>
+                  {/* Description */}
+                  <div className="mt-4">
+                    <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                      {t('modal.descriptionLabel')}
+                    </label>
+                    <div className="relative">
+                      <NotePencil className="absolute left-3 top-3 h-4 w-4 text-gray-400" weight="regular" />
+                      <textarea
+                        value={formData.opis}
+                        onChange={(e) => handleChange('opis', e.target.value)}
+                        placeholder={t('modal.descriptionPlaceholder')}
+                        rows={3}
+                        maxLength={500}
+                        className={`w-full resize-none rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                                   placeholder-gray-400 transition-colors focus:outline-none focus:ring-2
+                                   ${errors.opis
+                                     ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                     : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                   }`}
+                      />
+                    </div>
+                    <div className="mt-1 flex items-center justify-between">
+                      {errors.opis ? (
+                        <p className="flex items-center gap-1 text-xs text-red-600">
+                          <Warning className="h-3 w-3" weight="fill" />
+                          {errors.opis}
+                        </p>
+                      ) : (
+                        <span />
+                      )}
+                      <span className="text-xs text-gray-400">
+                        {formData.opis.length}/500
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* Resursi section (Feature 3) */}
                 {availableResursi.length > 0 && (
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Potrebni resursi
-                    </label>
-                    <p className="mb-2 text-xs text-gray-400">
-                      Rezervacije te storitve bodo zasedle izbrane resurse
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      {t('modal.resourcesTitle')}
                     </p>
-                    <div className="max-h-40 overflow-y-auto rounded-xl border border-gray-200">
+                    <p className="mb-3 text-xs text-gray-500">
+                      {t('modal.resourcesDescription')}
+                    </p>
+                    <div className="max-h-40 overflow-y-auto rounded-xl border border-gray-100">
                       {availableResursi.map((r) => {
                         const isLinked = selectedResursiIds.includes(r.id);
                         return (
@@ -679,12 +684,12 @@ function ServiceModal({
                               setSelectedResursiIds(next);
                               onLinkedResursiChange?.(next);
                             }}
-                            className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors border-b border-gray-100 last:border-0
-                                       ${isLinked ? 'bg-violet-50' : 'hover:bg-gray-50'}`}
+                            className={`flex w-full items-center gap-3 border-b border-gray-100 px-4 py-2.5 text-left transition-colors last:border-0
+                                       ${isLinked ? 'bg-gray-50' : 'hover:bg-gray-50'}`}
                           >
                             <div className="h-3.5 w-3.5 flex-shrink-0 rounded-full shadow-sm" style={{ background: r.barva }} />
                             <div className="flex-1 min-w-0">
-                              <span className={`text-sm font-medium ${isLinked ? 'text-violet-700' : 'text-[#1A1F36]'}`}>
+                              <span className="text-sm font-medium text-gray-900">
                                 {r.naziv}
                               </span>
                               <span className="ml-2 text-xs text-gray-400">
@@ -692,7 +697,7 @@ function ServiceModal({
                               </span>
                             </div>
                             <div className={`h-5 w-5 flex-shrink-0 rounded-full border-2 flex items-center justify-center transition-colors
-                                           ${isLinked ? 'border-violet-500 bg-violet-500' : 'border-gray-300'}`}>
+                                           ${isLinked ? 'border-gray-900 bg-gray-900' : 'border-gray-300'}`}>
                               {isLinked && <Check className="h-3 w-3 text-white" weight="bold" />}
                             </div>
                           </button>
@@ -704,7 +709,7 @@ function ServiceModal({
                         {selectedResursiIds.map((id) => {
                           const r = availableResursi.find((x) => x.id === id);
                           return r ? (
-                            <span key={id} className="flex items-center gap-1 rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700">
+                            <span key={id} className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
                               <Cube className="h-3 w-3" weight="fill" />
                               {r.naziv}
                             </span>
@@ -714,16 +719,17 @@ function ServiceModal({
                     )}
                   </div>
                 )}
+                </div>
               </div>
 
               {/* Footer */}
-              <div className="mt-6 flex items-center justify-end gap-3">
+              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
+                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
                 >
                   {tCommon('buttons.cancel')}
                 </motion.button>
@@ -732,9 +738,9 @@ function ServiceModal({
                   disabled={isSaving}
                   whileHover={{ scale: isSaving ? 1 : 1.02 }}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5
-                             text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
-                             hover:shadow-xl hover:shadow-cyan-500/30 disabled:opacity-70"
+                  className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5
+                             text-sm font-medium text-white shadow-sm transition-colors
+                             hover:bg-[#1f1f1f] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isSaving ? (
                     <>

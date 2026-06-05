@@ -241,25 +241,25 @@ function EmployeeModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-lg max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Gradient header */}
-            <div className="bg-gradient-to-r from-violet-500 to-cyan-500 p-6">
+            {/* Header */}
+            <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   {/* Avatar preview */}
                   <EmployeeAvatar
                     firstName={formData.ime || '?'}
                     lastName={formData.priimek || '?'}
                     gradient={formData.barva}
-                    size="lg"
+                    size="md"
                   />
                   <div>
-                    <h2 className="text-xl font-semibold text-white">
+                    <h2 className="text-xl font-semibold text-gray-900">
                       {mode === 'create' ? t('modal.createTitle') : t('modal.editTitle')}
                     </h2>
-                    <p className="mt-1 text-sm text-white/80">
+                    <p className="mt-1 text-sm text-gray-500">
                       {mode === 'create' ? t('modal.createSubtitle') : t('modal.editSubtitle')}
                     </p>
                   </div>
@@ -269,7 +269,7 @@ function EmployeeModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                  className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
                 >
                   <X className="h-5 w-5" weight="bold" />
                 </motion.button>
@@ -277,203 +277,222 @@ function EmployeeModal({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="max-h-[calc(90vh-180px)] overflow-y-auto p-6">
-              <div className="space-y-4">
-                {/* First name */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.firstNameLabel')}
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                    <input
-                      type="text"
-                      value={formData.ime}
-                      onChange={(e) => handleChange('ime', e.target.value)}
-                      placeholder={t('modal.firstNamePlaceholder')}
-                      className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
-                                 transition-all focus:outline-none focus:ring-2
-                                 ${errors.ime
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-pink-400 focus:ring-pink-100'
-                                 }`}
-                    />
-                  </div>
-                  {errors.ime && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.ime}
-                    </p>
-                  )}
-                </div>
+            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+              <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+                <div className="space-y-5">
+                  {/* Personal info */}
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {/* First name */}
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                          {t('modal.firstNameLabel')}
+                        </label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                          <input
+                            type="text"
+                            value={formData.ime}
+                            onChange={(e) => handleChange('ime', e.target.value)}
+                            placeholder={t('modal.firstNamePlaceholder')}
+                            className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                                       transition-colors focus:outline-none focus:ring-2
+                                       ${errors.ime
+                                         ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                         : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                       }`}
+                          />
+                        </div>
+                        {errors.ime && (
+                          <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                            <Warning className="h-3 w-3" weight="fill" />
+                            {errors.ime}
+                          </p>
+                        )}
+                      </div>
 
-                {/* Last name */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.lastNameLabel')}
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                    <input
-                      type="text"
-                      value={formData.priimek}
-                      onChange={(e) => handleChange('priimek', e.target.value)}
-                      placeholder={t('modal.lastNamePlaceholder')}
-                      className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
-                                 transition-all focus:outline-none focus:ring-2
-                                 ${errors.priimek
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-pink-400 focus:ring-pink-100'
-                                 }`}
-                    />
-                  </div>
-                  {errors.priimek && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.priimek}
-                    </p>
-                  )}
-                </div>
+                      {/* Last name */}
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                          {t('modal.lastNameLabel')}
+                        </label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                          <input
+                            type="text"
+                            value={formData.priimek}
+                            onChange={(e) => handleChange('priimek', e.target.value)}
+                            placeholder={t('modal.lastNamePlaceholder')}
+                            className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                                       transition-colors focus:outline-none focus:ring-2
+                                       ${errors.priimek
+                                         ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                         : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                       }`}
+                          />
+                        </div>
+                        {errors.priimek && (
+                          <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                            <Warning className="h-3 w-3" weight="fill" />
+                            {errors.priimek}
+                          </p>
+                        )}
+                      </div>
+                    </div>
 
-                {/* Email */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.emailLabel')}
-                  </label>
-                  <div className="relative">
-                    <Envelope className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      onBlur={handleEmailBlur}
-                      placeholder={t('modal.emailPlaceholder')}
-                      className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
-                                 transition-all focus:outline-none focus:ring-2
-                                 ${errors.email
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-pink-400 focus:ring-pink-100'
-                                 }`}
-                    />
-                    {emailChecking && (
-                      <SpinnerGap className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" />
-                    )}
-                  </div>
-                  {errors.email && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
+                    {/* Email */}
+                    <div className="mt-4">
+                      <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                        {t('modal.emailLabel')}
+                      </label>
+                      <div className="relative">
+                        <Envelope className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                        <input
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => handleChange('email', e.target.value)}
+                          onBlur={handleEmailBlur}
+                          placeholder={t('modal.emailPlaceholder')}
+                          className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder-gray-400
+                                     transition-colors focus:outline-none focus:ring-2
+                                     ${errors.email
+                                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                       : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                     }`}
+                        />
+                        {emailChecking && (
+                          <SpinnerGap className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-400" />
+                        )}
+                      </div>
+                      {errors.email && (
+                        <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                          <Warning className="h-3 w-3" weight="fill" />
+                          {errors.email}
+                        </p>
+                      )}
+                    </div>
 
-                {/* Phone */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.phoneLabel')}
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                    <input
-                      type="tel"
-                      value={formData.telefon}
-                      onChange={(e) => handleChange('telefon', e.target.value)}
-                      placeholder={t('modal.phonePlaceholder')}
-                      className={`w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
-                                 transition-all focus:outline-none focus:ring-2
-                                 ${errors.telefon
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-pink-400 focus:ring-pink-100'
-                                 }`}
-                    />
-                  </div>
-                  {errors.telefon && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.telefon}
-                    </p>
-                  )}
-                </div>
+                    <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                      {/* Phone */}
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                          {t('modal.phoneLabel')}
+                        </label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                          <input
+                            type="tel"
+                            value={formData.telefon}
+                            onChange={(e) => handleChange('telefon', e.target.value)}
+                            placeholder={t('modal.phonePlaceholder')}
+                            className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                                       transition-colors focus:outline-none focus:ring-2
+                                       ${errors.telefon
+                                         ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                         : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                       }`}
+                          />
+                        </div>
+                        {errors.telefon && (
+                          <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+                            <Warning className="h-3 w-3" weight="fill" />
+                            {errors.telefon}
+                          </p>
+                        )}
+                      </div>
 
-                {/* Position */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.positionLabel')}
-                  </label>
-                  <div className="relative">
-                    <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                    <input
-                      type="text"
-                      value={formData.pozicija}
-                      onChange={(e) => handleChange('pozicija', e.target.value)}
-                      placeholder={t('modal.positionPlaceholder')}
-                      className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                placeholder-gray-400 transition-all focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-100"
-                    />
+                      {/* Position */}
+                      <div>
+                        <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                          {t('modal.positionLabel')}
+                        </label>
+                        <div className="relative">
+                          <Briefcase className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                          <input
+                            type="text"
+                            value={formData.pozicija}
+                            onChange={(e) => handleChange('pozicija', e.target.value)}
+                            placeholder={t('modal.positionPlaceholder')}
+                            className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                                      placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Gradient selector */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.avatarColorLabel')}
-                  </label>
-                  <GradientSelector
-                    value={formData.barva}
-                    onChange={(gradient) => handleChange('barva', gradient)}
-                  />
-                  {errors.barva && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
-                      {errors.barva}
-                    </p>
-                  )}
-                </div>
-
-                {/* Notes */}
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                    {t('modal.notesLabel')}
-                  </label>
-                  <div className="relative">
-                    <NotePencil className="absolute left-3 top-3 h-4 w-4 text-gray-400" weight="regular" />
-                    <textarea
-                      value={formData.opombe}
-                      onChange={(e) => handleChange('opombe', e.target.value)}
-                      placeholder={t('modal.notesPlaceholder')}
-                      rows={3}
-                      className={`w-full resize-none rounded-xl border py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                 placeholder-gray-400 transition-all focus:outline-none focus:ring-2
-                                 ${errors.opombe
-                                   ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-pink-400 focus:ring-pink-100'
-                                 }`}
+                  {/* Gradient selector */}
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                    <div className="mb-4 flex items-center gap-3">
+                      <EmployeeAvatar
+                        firstName={formData.ime || '?'}
+                        lastName={formData.priimek || '?'}
+                        gradient={formData.barva}
+                        size="md"
+                      />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                          {t('modal.avatarColorLabel')}
+                        </p>
+                      </div>
+                    </div>
+                    <GradientSelector
+                      value={formData.barva}
+                      onChange={(gradient) => handleChange('barva', gradient)}
                     />
-                  </div>
-                  <div className="mt-1 flex items-center justify-between">
-                    {errors.opombe ? (
-                      <p className="flex items-center gap-1 text-xs text-red-500">
+                    {errors.barva && (
+                      <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
                         <Warning className="h-3 w-3" weight="fill" />
-                        {errors.opombe}
+                        {errors.barva}
                       </p>
-                    ) : (
-                      <span />
                     )}
-                    <span className="text-xs text-gray-400">
-                      {formData.opombe.length}/500
-                    </span>
+                  </div>
+
+                  {/* Notes */}
+                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                    <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                      {t('modal.notesLabel')}
+                    </label>
+                    <div className="relative">
+                      <NotePencil className="absolute left-3 top-3 h-4 w-4 text-gray-400" weight="regular" />
+                      <textarea
+                        value={formData.opombe}
+                        onChange={(e) => handleChange('opombe', e.target.value)}
+                        placeholder={t('modal.notesPlaceholder')}
+                        rows={3}
+                        className={`w-full resize-none rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                                   placeholder-gray-400 transition-colors focus:outline-none focus:ring-2
+                                   ${errors.opombe
+                                     ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                     : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                   }`}
+                      />
+                    </div>
+                    <div className="mt-1 flex items-center justify-between">
+                      {errors.opombe ? (
+                        <p className="flex items-center gap-1 text-xs text-red-600">
+                          <Warning className="h-3 w-3" weight="fill" />
+                          {errors.opombe}
+                        </p>
+                      ) : (
+                        <span />
+                      )}
+                      <span className="text-xs text-gray-400">
+                        {formData.opombe.length}/500
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="mt-6 flex items-center justify-end gap-3">
+              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
+                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
                 >
                   {tCommon('buttons.cancel')}
                 </motion.button>
@@ -482,9 +501,9 @@ function EmployeeModal({
                   disabled={isSaving}
                   whileHover={{ scale: isSaving ? 1 : 1.02 }}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5
-                             text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
-                             hover:shadow-xl hover:shadow-cyan-500/30 disabled:opacity-70"
+                  className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5
+                             text-sm font-medium text-white shadow-sm transition-colors
+                             hover:bg-[#1f1f1f] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isSaving ? (
                     <>

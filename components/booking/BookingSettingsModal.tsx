@@ -39,22 +39,22 @@ function ChannelPicker({
   t: ReturnType<typeof useTranslations<'reservations'>>;
 }) {
   return (
-    <div className="flex flex-col gap-2 mt-3">
-      <div className="flex gap-2">
+    <div className="mt-3 flex flex-col gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => onChange('email')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all
+          className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors
                      ${value === 'email'
-                       ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200'
-                       : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                       ? 'border-gray-900 bg-gray-900 text-white'
+                       : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-900'
                      }`}
         >
           <EnvelopeSimple className="h-4 w-4" weight={value === 'email' ? 'fill' : 'regular'} />
           Email
         </button>
         {smsLocked ? (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed text-sm font-medium">
+          <div className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm font-medium text-gray-400">
             <DeviceMobile className="h-4 w-4" weight="regular" />
             SMS
             <span className="text-xs text-gray-400">{t('modal.confirmations.smsUnavailable')}</span>
@@ -63,10 +63,10 @@ function ChannelPicker({
           <button
             type="button"
             onClick={() => onChange('sms')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all
+            className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors
                        ${value === 'sms'
-                         ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200'
-                         : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
+                         ? 'border-gray-900 bg-gray-900 text-white'
+                         : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-900'
                        }`}
           >
             <DeviceMobile className="h-4 w-4" weight={value === 'sms' ? 'fill' : 'regular'} />
@@ -80,7 +80,7 @@ function ChannelPicker({
           <button
             type="button"
             onClick={onUpgradeClick}
-            className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+            className="flex items-center gap-1 text-xs font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
           >
             {t('modal.confirmations.smsUpgradeLink')} <ArrowRight className="h-3 w-3" weight="bold" />
           </button>
@@ -262,11 +262,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            className="relative flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">{t('modal.title')}</h2>
                 <p className="text-sm text-gray-500 mt-0.5">{t('modal.subtitle')}</p>
@@ -275,7 +275,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                 <SaveIndicator saving={saving} lastSaved={lastSaved} />
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="rounded-lg p-2 transition-colors hover:bg-gray-100"
                 >
                   <X className="w-5 h-5 text-gray-500" weight="bold" />
                 </button>
@@ -283,12 +283,12 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
               {isLoading ? (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="bg-gray-50 rounded-xl p-6 animate-pulse">
-                      <div className="h-6 bg-gray-200 rounded w-1/4 mb-4" />
+                    <div key={i} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-5">
+                      <div className="mb-4 h-4 w-1/4 rounded bg-gray-100" />
                       <div className="space-y-3">
                         <div className="h-10 bg-gray-100 rounded" />
                         <div className="h-10 bg-gray-100 rounded" />
@@ -318,6 +318,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         value={koledarUre}
                         setValue={(value) => setKoledarUre(value as '15' | '30' | '60')}
                         placeholder={t('modal.general.intervalPlaceholder')}
+                        className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
                       >
                         <SelectOption value="15">{t('modal.general.interval15')}</SelectOption>
                         <SelectOption value="30">{t('modal.general.interval30')}</SelectOption>
@@ -336,6 +337,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         value={mainBookingLink}
                         setValue={setMainBookingLink}
                         placeholder={t('modal.mainLink.selectPlaceholder')}
+                        className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
                       >
                         {bookingLink1 && <SelectOption value={bookingLink1}>{t('modal.mainLink.classic')}</SelectOption>}
                         {bookingLink2 && <SelectOption value={bookingLink2}>{t('modal.mainLink.modern')}</SelectOption>}
@@ -345,8 +347,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                       </Select>
                     </SettingRow>
                     {mainBookingLink && (
-                      <div className="px-4 pb-3">
-                        <p className="text-xs text-gray-500 mt-1 break-all">{mainBookingLink}</p>
+                      <div className="rounded-lg border border-gray-100 bg-gray-50/70 px-3 py-2">
+                        <p className="break-all text-xs text-gray-500">{mainBookingLink}</p>
                       </div>
                     )}
                   </SettingsSection>
@@ -378,7 +380,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                               <button
                                 type="button"
                                 onClick={() => { onClose(); router.push('/billing'); }}
-                                className="font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+                                className="font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
                               >
                                 {t('modal.confirmations.smsPlanNoteLink')}
                               </button>
@@ -421,7 +423,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                               <button
                                 type="button"
                                 onClick={() => { onClose(); router.push('/billing'); }}
-                                className="font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+                                className="font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
                               >
                                 {t('modal.confirmations.smsPlanNoteLink')}
                               </button>
@@ -450,6 +452,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         value={cancelApptDays}
                         setValue={setCancelApptDays}
                         placeholder={t('modal.policy.selectPlaceholder')}
+                        className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
                       >
                         <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
                         <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
@@ -469,6 +472,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         value={rescheduleApptDays}
                         setValue={setRescheduleApptDays}
                         placeholder={t('modal.policy.selectPlaceholder')}
+                        className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
                       >
                         <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
                         <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
@@ -492,13 +496,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           type="color"
                           value={bookingPrimary}
                           onChange={(e) => setBookingPrimary(e.target.value)}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                          className="h-10 w-10 cursor-pointer rounded-lg border border-gray-200 bg-white p-0.5"
                         />
                         <Input
                           value={bookingPrimary}
                           onChange={(e) => setBookingPrimary(e.target.value)}
                           placeholder="#7C75FC"
-                          className="w-32"
+                          className="w-28"
                         />
                       </div>
                     </SettingRow>
@@ -512,13 +516,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           type="color"
                           value={bookingSecondary}
                           onChange={(e) => setBookingSecondary(e.target.value)}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                          className="h-10 w-10 cursor-pointer rounded-lg border border-gray-200 bg-white p-0.5"
                         />
                         <Input
                           value={bookingSecondary}
                           onChange={(e) => setBookingSecondary(e.target.value)}
                           placeholder="#44D0C6"
-                          className="w-32"
+                          className="w-28"
                         />
                       </div>
                     </SettingRow>
@@ -532,13 +536,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           type="color"
                           value={bookingBgFrom}
                           onChange={(e) => setBookingBgFrom(e.target.value)}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                          className="h-10 w-10 cursor-pointer rounded-lg border border-gray-200 bg-white p-0.5"
                         />
                         <Input
                           value={bookingBgFrom}
                           onChange={(e) => setBookingBgFrom(e.target.value)}
                           placeholder="#7C75FC"
-                          className="w-32"
+                          className="w-28"
                         />
                       </div>
                     </SettingRow>
@@ -552,29 +556,29 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           type="color"
                           value={bookingBgTo}
                           onChange={(e) => setBookingBgTo(e.target.value)}
-                          className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                          className="h-10 w-10 cursor-pointer rounded-lg border border-gray-200 bg-white p-0.5"
                         />
                         <Input
                           value={bookingBgTo}
                           onChange={(e) => setBookingBgTo(e.target.value)}
                           placeholder="#44D0C6"
-                          className="w-32"
+                          className="w-28"
                         />
                       </div>
                     </SettingRow>
 
                     {/* Gradient Preview */}
-                    <div className="mt-6">
-                      <p className="text-sm font-medium text-gray-700 mb-3">{t('modal.colors.previewLabel')}</p>
+                    <div className="mt-5">
+                      <p className="mb-3 text-sm font-medium text-gray-900">{t('modal.colors.previewLabel')}</p>
                       <div
-                        className="w-full p-8 rounded-xl border-2 border-gray-200"
+                        className="w-full rounded-lg border border-gray-100 p-5"
                         style={{
                           background: `linear-gradient(135deg, ${bookingBgFrom} 0%, ${bookingBgTo} 100%)`,
                         }}
                       >
                         <div className="text-center">
                           <div
-                            className="inline-block px-6 py-3 rounded-xl font-semibold text-white shadow-lg"
+                            className="inline-block rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm"
                             style={{
                               background: `linear-gradient(135deg, ${bookingPrimary} 0%, ${bookingSecondary} 100%)`,
                             }}
@@ -590,13 +594,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <div className="flex flex-shrink-0 justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
               <motion.button
                 type="button"
                 onClick={onClose}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
               >
                 {t('modal.footer.close')}
               </motion.button>
@@ -606,10 +610,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                 disabled={saving || isLoading}
                 whileHover={{ scale: saving ? 1 : 1.02 }}
                 whileTap={{ scale: saving ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
-                           px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/25
-                           transition-shadow hover:shadow-xl hover:shadow-violet-500/30
-                           disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5
+                           text-sm font-medium text-white shadow-sm transition-colors
+                           hover:bg-[#1f1f1f] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving ? (
                   <>

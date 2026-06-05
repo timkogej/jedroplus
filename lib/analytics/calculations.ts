@@ -207,11 +207,16 @@ export async function fetchAnalyticsMetrics(
     }
   }
 
+  // Exclude ghost termini (belezi_termin === false) from all analytics
+  const validAppointmentRows = (appointmentsResult.data ?? []).filter(
+    (a) => a['belezi_termin'] !== false
+  );
+
   // Parse and filter appointments by date range
   const appointments: ParsedAppointment[] = [];
   const previousAppointments: ParsedAppointment[] = [];
 
-  for (const row of appointmentsResult.data ?? []) {
+  for (const row of validAppointmentRows) {
     const apt = parseAppointment(row);
     if (!apt || !apt.datum) continue;
 

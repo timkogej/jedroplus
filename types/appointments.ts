@@ -75,6 +75,9 @@ export interface AppointmentWithDetails {
   add_on_popust_tip?: string | null;
   add_on_final_cena?: string | null;
   valuta?: string | null;
+  // Ghost termin fields
+  belezi_termin?: boolean; // false = ghost termin (excluded from analytics/history)
+  deleted_at?: string | null; // set when ghost termin is soft-deleted after completion
   // Service details
   storitev: {
     id: string;

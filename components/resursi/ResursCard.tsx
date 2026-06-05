@@ -39,13 +39,13 @@ function ResursCard({ resurs, onEdit, onDelete, onToggleActive, index = 0 }: Res
         opacity: { duration: 0.15 },
         y: { delay: index * 0.05, duration: 0.3 },
       }}
-      whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }}
-      className="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100"
+      whileHover={{ y: -2, boxShadow: '0 10px 30px rgba(15,23,42,0.08)' }}
+      className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
     >
       {/* Color gradient header */}
-      <div className="relative h-16 w-full" style={{ background: displayGradient }}>
+      <div className="relative h-14 w-full" style={{ background: displayGradient }}>
         {!isActive && (
-          <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-xs font-medium text-gray-600 shadow-sm">
+          <div className="absolute right-3 top-3 rounded-lg bg-white/90 px-2 py-0.5 text-xs font-medium text-gray-600 shadow-sm">
             {t('card.inactive')}
           </div>
         )}
@@ -76,7 +76,8 @@ function ResursCard({ resurs, onEdit, onDelete, onToggleActive, index = 0 }: Res
         </div>
 
         {/* Total capacity badge */}
-        <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-medium text-violet-700">
+        <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-[#F7F8FA] px-2.5 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-100">
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: displayGradient }} />
           {t('card.totalCapacity', { count: skupnaKapaciteta })}
         </div>
 
@@ -89,16 +90,22 @@ function ResursCard({ resurs, onEdit, onDelete, onToggleActive, index = 0 }: Res
         {/* Connected services */}
         {resurs.storitve && resurs.storitve.length > 0 ? (
           <div className="mt-2 flex flex-wrap gap-1">
-            {resurs.storitve.slice(0, 3).map((s) => (
-              <span
-                key={s.id_storitve}
-                className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600"
-              >
-                {s.naziv_storitve ?? s.id_storitve}
-              </span>
-            ))}
+            {resurs.storitve.slice(0, 3).map((s) => {
+              const serviceColor = isGradient(s.barva_storitve ?? '') ? s.barva_storitve : undefined;
+              return (
+                <span
+                  key={s.id_storitve}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-gray-50 px-2 py-1 text-xs text-gray-600 ring-1 ring-gray-100"
+                >
+                  {serviceColor && (
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: serviceColor }} />
+                  )}
+                  {s.naziv_storitve ?? s.id_storitve}
+                </span>
+              );
+            })}
             {resurs.storitve.length > 3 && (
-              <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+              <span className="rounded-lg bg-gray-50 px-2 py-1 text-xs text-gray-500 ring-1 ring-gray-100">
                 +{resurs.storitve.length - 3}
               </span>
             )}
@@ -139,7 +146,7 @@ function ResursCard({ resurs, onEdit, onDelete, onToggleActive, index = 0 }: Res
               onClick={() => onEdit(resurs)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-violet-50 hover:text-violet-600"
+              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
             >
               <PencilSimple className="h-4 w-4" weight="regular" />
             </motion.button>
@@ -168,7 +175,7 @@ export function ResursCardSkeleton({ index = 0 }: { index?: number }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: index * 0.05 }}
-      className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100"
+      className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
     >
       <div className="h-16 w-full animate-pulse bg-gray-200" />
       <div className="p-4">

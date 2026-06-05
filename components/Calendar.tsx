@@ -79,6 +79,7 @@ import {
 import { generateUnique8DigitId } from '@/lib/utils/uniqueIdGenerator';
 import { pickFirst } from '@/lib/dashboardHelpers';
 import { supabase } from '@/lib/supabaseClient';
+import { logZgodovina } from '@/lib/supabase/zgodovina';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
@@ -1149,9 +1150,9 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
   // Filter appointments
   const filteredAppointments = useMemo(() => {
-    // Always exclude cancelled appointments from calendar view
+    // Always exclude cancelled appointments and soft-deleted ghost termini
     let filtered = appointments.filter(
-      (a) => a.status !== 'cancelled' && a.status !== 'Odpovedan'
+      (a) => a.status !== 'cancelled' && a.status !== 'Odpovedan' && !a.deleted_at
     );
 
     // RBAC: staff with view-own-only restriction sees only their appointments
@@ -1341,6 +1342,13 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   const handleConfirmComplete = useCallback(async () => {
     if (!completeTarget) return;
 
+    console.log('[handleConfirmComplete] appointment:', {
+      id: completeTarget.id,
+      belezi_termin: completeTarget.belezi_termin,
+      deleted_at: completeTarget.deleted_at,
+      stranka_ime: completeTarget.stranka_ime,
+    });
+
     setIsCompleting(true);
     setActionError(null);
 
@@ -1380,6 +1388,49 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         throw new Error(t('errors.completeError'));
       }
 
+      // Log zakljucen for all completions
+      if (companyId && completeTarget.id) {
+        logZgodovina({
+          idPodjetja: companyId,
+          tipEntitete: 'termin',
+          idEntitete: completeTarget.id,
+          akcija: 'zakljucen',
+          izvedel: actor,
+          izvedel_tip: (role as 'owner' | 'admin' | 'staff') ?? 'staff',
+          idTermina: completeTarget.id,
+          idStranke: completeTarget.stranka_id,
+        }).catch(() => {/* ignore logging errors */});
+      }
+
+      // Ghost termin: soft-delete after successful completion
+      if (completeTarget.belezi_termin === false && companyId) {
+        console.log('[handleConfirmComplete] ghost termin detected — writing deleted_at for id:', completeTarget.id);
+        try {
+          const { error: deleteError } = await supabase
+            .from('Termini')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('ID termina', completeTarget.id)
+            .eq('ID podjetja', companyId);
+
+          if (deleteError) {
+            console.error('[handleConfirmComplete] deleted_at write failed:', deleteError.message);
+          }
+
+          logZgodovina({
+            idPodjetja: companyId,
+            tipEntitete: 'termin',
+            idEntitete: completeTarget.id,
+            akcija: 'izbrisan',
+            izvedel: actor,
+            izvedel_tip: (role as 'owner' | 'admin' | 'staff') ?? 'staff',
+            idTermina: completeTarget.id,
+            idStranke: completeTarget.stranka_id,
+          }).catch(() => {/* ignore logging errors */});
+        } catch (ghostErr) {
+          console.error('[handleConfirmComplete] ghost deletion threw:', ghostErr);
+        }
+      }
+
       setSuccessMessage(t('toast.completed'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
@@ -1394,7 +1445,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     } finally {
       setIsCompleting(false);
     }
-  }, [completeTarget, completionNotes, companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
+  }, [completeTarget, completionNotes, companyId, actor, role, companyPayload, buildPayload, loadAppointments, t]);
 
   const handleNoShowAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
     setSelectedAppointment(null); // Close detail modal first (like Termini)

@@ -31,6 +31,8 @@ import ResursGrid from '@/components/resursi/ResursGrid';
 import ResursModal from '@/components/resursi/ResursModal';
 import DeleteResursModal from '@/components/resursi/DeleteResursModal';
 
+const RESOURCE_ACCENT = 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
+
 // ─── Toast ───────────────────────────────────────────────────────────────────
 
 function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
@@ -70,10 +72,13 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+      className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-12 shadow-sm"
     >
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-violet-100">
-        <Cube className="h-10 w-10 text-violet-500" weight="duotone" />
+      <div
+        className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl text-white shadow-sm"
+        style={{ background: RESOURCE_ACCENT }}
+      >
+        <Cube className="h-10 w-10" weight="duotone" />
       </div>
       <h3 className="text-xl font-semibold text-[#1A1F36]">{t('emptyState.title')}</h3>
       <p className="mt-2 text-center text-sm text-gray-500">{t('emptyState.subtitle')}</p>
@@ -82,8 +87,8 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
         onClick={onCreate}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="mt-6 flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-violet-600 px-6 py-3
-                   text-sm font-medium text-white shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30"
+        className="mt-6 flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-6 py-3
+                   text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
       >
         <Plus className="h-5 w-5" weight="bold" />
         {t('emptyState.addFirst')}
@@ -100,7 +105,7 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+      className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-12 shadow-sm"
     >
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-slate-100">
         <MagnifyingGlass className="h-8 w-8 text-gray-400" weight="duotone" />
@@ -112,7 +117,7 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
         onClick={onClear}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-violet-600 hover:text-violet-700"
+        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900"
       >
         {t('searchEmpty.clear')}
         <ArrowRight className="h-4 w-4" weight="bold" />
@@ -335,7 +340,7 @@ export default function ResursiPage() {
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-[#F7F8FA]">
+      <main className="min-h-screen bg-[linear-gradient(180deg,#FAFBFF_0%,#F7F8FA_36%,#F7F8FA_100%)]">
         <div className="mx-auto max-w-7xl px-6 py-8">
 
           {/* Header */}
@@ -364,9 +369,9 @@ export default function ResursiPage() {
               animate={{ opacity: 1, scale: 1 }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-violet-600 px-5 py-3
-                         text-sm font-medium text-white shadow-lg shadow-violet-500/25
-                         hover:shadow-xl hover:shadow-violet-500/30"
+              className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-3
+                         text-sm font-medium text-white shadow-sm transition-colors
+                         hover:bg-[#1f1f1f]"
             >
               <Plus className="h-5 w-5" weight="bold" />
               {t('page.newButton')}
@@ -386,10 +391,11 @@ export default function ResursiPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1, duration: 0.3 }}
-                  className="group rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 hover:shadow-md hover:ring-gray-200 transition-all"
+                  className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:border-gray-200 hover:shadow-md"
                 >
+                  <div className="absolute inset-x-0 top-0 h-0.5 opacity-80" style={{ background: RESOURCE_ACCENT }} />
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl text-gray-700">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7F8FA] text-gray-700 ring-1 ring-gray-100">
                       {stat.icon}
                     </div>
                     <div>
@@ -407,7 +413,7 @@ export default function ResursiPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-6 flex flex-wrap items-center gap-4"
+            className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
           >
             <div className="relative flex-1 min-w-[280px] max-w-md">
               <MagnifyingGlass className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" weight="regular" />
@@ -416,9 +422,9 @@ export default function ResursiPage() {
                 placeholder={t('page.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border-0 bg-white py-3 pl-12 pr-12 text-sm text-[#1A1F36]
-                           placeholder-gray-400 shadow-sm ring-1 ring-gray-200 transition-all
-                           focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                className="w-full rounded-lg border border-gray-200 bg-[#F7F8FA] py-3 pl-12 pr-12 text-sm text-[#1A1F36]
+                           placeholder-gray-400 transition-colors
+                           focus:border-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10"
               />
               {search && (
                 <button
@@ -437,10 +443,10 @@ export default function ResursiPage() {
               onClick={() => setShowInactive(!showInactive)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all
+              className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors
                          ${showInactive
-                           ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
-                           : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'
+                           ? 'bg-[#F7F8FA] text-gray-600 ring-1 ring-gray-200 hover:bg-white hover:text-gray-900'
+                           : 'bg-gray-900 text-white'
                          }`}
             >
               {showInactive ? t('page.showAll') : t('page.showActiveOnly')}
@@ -460,7 +466,7 @@ export default function ResursiPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3"
+              className="mb-6 flex items-center gap-3 rounded-lg border border-red-100 bg-red-50 px-4 py-3"
             >
               <Warning className="h-5 w-5 flex-shrink-0 text-red-500" weight="fill" />
               <p className="text-sm text-red-700">{error}</p>

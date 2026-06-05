@@ -73,6 +73,8 @@ export interface AppointmentFormData {
   add_on_popust?: string | null;
   add_on_popust_tip?: string | null;
   add_on_final_cena?: string | null;
+  // Ghost termin
+  belezi_termin?: boolean;
 }
 
 // Get status dot color for select options
@@ -164,7 +166,7 @@ function AppointmentModal({
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
-  const { personId } = useRolePermissions();
+  const { personId, role, permissions } = useRolePermissions();
   const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
     { value: 'scheduled', label: t('status.scheduled') },
     { value: 'confirmed', label: t('status.confirmed') },
@@ -249,6 +251,9 @@ function AppointmentModal({
 
   // Internal notes toggle state (for create mode only)
   const [showInternalNotes, setShowInternalNotes] = useState(false);
+
+  // Ghost termin toggle state
+  const [isGhostTermin, setIsGhostTermin] = useState(false);
 
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof AppointmentFormData, string>>>({});
@@ -375,6 +380,12 @@ function AppointmentModal({
       setHasDiscount(false);
       // In create mode, hide internal notes by default
       setShowInternalNotes(false);
+    }
+    // Initialize ghost termin flag
+    if (appointment && (mode === 'edit' || mode === 'view')) {
+      setIsGhostTermin(appointment.belezi_termin === false);
+    } else {
+      setIsGhostTermin(false);
     }
   }, [appointment, mode, employees, initialDate, initialStartTime, initialEmployeeId, personId]);
 
@@ -979,7 +990,7 @@ function AppointmentModal({
 
     if (!validate()) return;
 
-    await onSave(formData);
+    await onSave({ ...formData, belezi_termin: !isGhostTermin });
   };
 
   // Animation variants
@@ -1982,6 +1993,39 @@ function AppointmentModal({
               )
             )}
 
+            {/* Ghost termin toggle — owner/admin always see it, staff only if permission granted */}
+            {!isViewMode && (role === 'owner' || role === 'admin' || (role === 'staff' && (permissions?.can_create_ghost_termin ?? false))) && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  <div>
+                    <div className="font-semibold text-gray-900">Ne beleži termina</div>
+                    <div className="text-sm text-gray-600">Ghost termin — termin se ne beleži v analitiko</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsGhostTermin(!isGhostTermin)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      isGhostTermin ? 'bg-gray-900' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isGhostTermin ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {isGhostTermin && (
+                  <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+                    <Warning className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" weight="fill" />
+                    <p className="text-xs text-amber-700">
+                      Ta termin ne bo zabeležen v analitiki, zgodovini ali blagajni. Po zaključku bo avtomatsko izbrisan.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Resource conflict warning */}
             {!isViewMode && resourceConflicts.length > 0 && (
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
@@ -1993,7 +2037,10 @@ function AppointmentModal({
                     </p>
                     {resourceConflicts.map((c) => (
                       <p key={c.resursId} className="mt-0.5 text-xs text-amber-700">
-                        {c.naziv}: {c.trenutnoZasedeno}/{c.maxKapaciteta} mest zasedenih
+                        {c.tip === 'urnik'
+                          ? `${c.naziv}: ni na voljo ob tem času`
+                          : `${c.naziv}: ${c.trenutnoZasedeno}/${c.maxKapaciteta} mest zasedenih`
+                        }
                       </p>
                     ))}
                     <p className="mt-1 text-xs text-amber-600">

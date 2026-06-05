@@ -2,13 +2,13 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Buildings, Gear, UsersThree, ChatTeardrop, Package, Stack, CaretRight } from '@phosphor-icons/react';
+import { Buildings, Gear, UsersThree, ChatTeardrop, Package, Stack, CaretRight, ClockCounterClockwise } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 
-type MenuId = 'podjetje' | 'splosno' | 'clani' | 'paketi' | 'sporocila' | 'addoni';
+type MenuId = 'podjetje' | 'splosno' | 'clani' | 'paketi' | 'sporocila' | 'addoni' | 'zgodovina';
 
 const menuItems: { id: MenuId; icon: typeof Buildings; path: string; ownerOnly: boolean }[] = [
   { id: 'podjetje', icon: Buildings,    path: '/nastavitve/podjetje', ownerOnly: false },
@@ -16,7 +16,8 @@ const menuItems: { id: MenuId; icon: typeof Buildings; path: string; ownerOnly: 
   { id: 'clani',    icon: UsersThree,   path: '/nastavitve/clani',    ownerOnly: true  },
   { id: 'paketi',   icon: Package,      path: '/nastavitve/paketi',   ownerOnly: true  },
   { id: 'sporocila',icon: ChatTeardrop, path: '/nastavitve/sporocila',ownerOnly: false },
-  { id: 'addoni',   icon: Stack,        path: '/nastavitve/addoni',   ownerOnly: true  },
+  { id: 'addoni',   icon: Stack,                  path: '/nastavitve/addoni',    ownerOnly: true  },
+  { id: 'zgodovina', icon: ClockCounterClockwise, path: '/nastavitve/zgodovina', ownerOnly: false },
 ];
 
 const menuKeyMap: Record<MenuId, string> = {
@@ -26,6 +27,7 @@ const menuKeyMap: Record<MenuId, string> = {
   paketi:    'plans',
   sporocila: 'messages',
   addoni:    'addons',
+  zgodovina: 'history',
 };
 
 export default function SettingsPage() {

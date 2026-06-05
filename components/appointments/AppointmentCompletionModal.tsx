@@ -17,7 +17,10 @@ import { useAuth } from '@/app/auth-context';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { getPodatkiPodjetja } from '@/lib/webhookPayloadBuilders';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
+import { supabase } from '@/lib/supabaseClient';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
+import { useRolePermissions } from '@/app/role-permission-context';
+import { logZgodovina } from '@/lib/supabase/zgodovina';
 
 interface AppointmentCompletionModalProps {
   appointment: AppointmentWithDetails | null;
@@ -59,6 +62,7 @@ export default function AppointmentCompletionModal({
 }: AppointmentCompletionModalProps) {
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
+  const { role } = useRolePermissions();
   const [completionNotes, setCompletionNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -123,13 +127,41 @@ export default function AppointmentCompletionModal({
         throw new Error('Prišlo je do napake pri zaključevanju termina.');
       }
 
-      // Also update client's last interaction if client ID exists
-      if (appointment.stranka_id) {
+      // Log zakljucen action for all completions
+      if (companyId && appointment.id) {
+        logZgodovina({
+          idPodjetja: companyId,
+          tipEntitete: 'termin',
+          idEntitete: appointment.id,
+          akcija: 'zakljucen',
+          izvedel: actor,
+          izvedel_tip: (role as 'owner' | 'admin' | 'staff') ?? 'staff',
+          idTermina: appointment.id,
+          idStranke: appointment.stranka_id,
+        }).catch(() => {/* ignore logging errors */});
+      }
+
+      // Ghost termin: soft-delete after completion
+      if (appointment.belezi_termin === false && companyId) {
         try {
-          const clientColumn = await getCompanyColumnForTable('Stranke', companyId);
-          // Note: This is a read-only client, actual update happens via webhook
+          await supabase
+            .from('Termini')
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('ID termina', appointment.id)
+            .eq('ID podjetja', companyId);
+
+          logZgodovina({
+            idPodjetja: companyId,
+            tipEntitete: 'termin',
+            idEntitete: appointment.id,
+            akcija: 'izbrisan',
+            izvedel: actor,
+            izvedel_tip: (role as 'owner' | 'admin' | 'staff') ?? 'staff',
+            idTermina: appointment.id,
+            idStranke: appointment.stranka_id,
+          }).catch(() => {/* ignore logging errors */});
         } catch {
-          // Ignore errors updating client - webhook handles this
+          // Non-fatal: ghost deletion error should not block the completion flow
         }
       }
 
@@ -145,7 +177,7 @@ export default function AppointmentCompletionModal({
     } finally {
       setSaving(false);
     }
-  }, [appointment, companyId, actor, companyPayload, completionNotes, onComplete, onClose]);
+  }, [appointment, companyId, actor, companyPayload, completionNotes, role, onComplete, onClose]);
 
   const handleClose = useCallback(() => {
     if (!saving) {

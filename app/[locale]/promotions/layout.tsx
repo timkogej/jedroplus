@@ -16,26 +16,29 @@ export default function PromotionsLayout({ children }: { children: React.ReactNo
     { labelKey: 'layout.tabs.addOns', href: '/promotions/add-ons' },
   ];
 
-  const activeTab = TABS.find((tab) => pathname.startsWith(tab.href))?.href ?? TABS[0].href;
+  const pathnameWithoutLocale = pathname.replace(/^\/[^/]+(?=\/promotions(?:\/|$))/, '');
+  const activeTab = TABS.find((tab) =>
+    pathnameWithoutLocale === tab.href || pathnameWithoutLocale.startsWith(`${tab.href}/`)
+  )?.href ?? TABS[0].href;
 
   return (
     <ProtectedLayout>
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#FAFBFF_0%,#F7F8FA_36%,#F7F8FA_100%)]">
+      <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8 flex items-center gap-3"
+          className="mb-8"
         >
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('layout.title')}</h1>
-            <p className="text-sm text-gray-500">{t('layout.subtitle')}</p>
+            <h1 className="text-2xl font-normal text-[#1A1F36]">{t('layout.title')}</h1>
+            <p className="mt-1 text-gray-500">{t('layout.subtitle')}</p>
           </div>
         </motion.div>
 
         {/* Tab navigation */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
           <div className="flex border-b border-gray-100">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.href;
@@ -44,7 +47,7 @@ export default function PromotionsLayout({ children }: { children: React.ReactNo
                   key={tab.href}
                   onClick={() => router.push(tab.href)}
                   className={`relative flex-1 px-4 py-3.5 text-sm font-medium transition-colors ${
-                    isActive ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'
+                    isActive ? 'text-gray-900' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
                   {t(tab.labelKey as Parameters<typeof t>[0])}
@@ -52,7 +55,7 @@ export default function PromotionsLayout({ children }: { children: React.ReactNo
                     <motion.div
                       layoutId="promo-tab-indicator"
                       className="absolute bottom-0 left-0 right-0 h-0.5"
-                      style={{ background: 'linear-gradient(90deg, #6D5EF7 0%, #2F80ED 50%, #2AD4C5 100%)' }}
+                      style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
                     />
                   )}
                 </button>

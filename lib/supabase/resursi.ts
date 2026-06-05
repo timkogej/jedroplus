@@ -427,6 +427,7 @@ export interface ResourceConflict {
   naziv: string;
   trenutnoZasedeno: number;
   maxKapaciteta: number;
+  tip: 'zaseden' | 'urnik';
 }
 
 export async function checkResourceConflicts(
@@ -446,6 +447,15 @@ export async function checkResourceConflicts(
     serviceIds,
   );
   if (resursiErr || !resursiData?.length) return { conflicts: [], error: resursiErr };
+
+  const resursRowIds = resursiData.map((r) => r.resursRowId);
+
+  // Fetch resursiRows with Urnik for schedule validation
+  const { data: resursiRows } = await supabase
+    .from(TABLE_RESURSI)
+    .select('id, "Naziv", "Kolicina", "Kapaciteta", "Urnik"')
+    .eq('ID podjetja', companyId)
+    .in('id', resursRowIds);
 
   // Fetch all termini for this date without time filter
   const { data: terminiOnDate } = await supabase
@@ -468,45 +478,76 @@ export async function checkResourceConflicts(
     })
     .map((t) => Number((t as Record<string, unknown>)['id']));
 
-  if (!overlappingIds.length) return { conflicts: [], error: null };
-  const resursRowIds = resursiData.map((r) => r.resursRowId);
-
-  const { data: usedResursi } = await supabase
-    .from(TABLE_TERMINI_RESURSI)
-    .select('resurs_id')
-    .eq('ID podjetja', companyId)
-    .in('termin_id', overlappingIds)
-    .in('resurs_id', resursRowIds);
-
-  if (!usedResursi?.length) return { conflicts: [], error: null };
-
-  const usageMap = new Map<number, number>();
-  for (const row of usedResursi as Record<string, unknown>[]) {
-    const rid = Number(row['resurs_id']);
-    usageMap.set(rid, (usageMap.get(rid) ?? 0) + 1);
-  }
-
-  const { data: resursiRows } = await supabase
-    .from(TABLE_RESURSI)
-    .select('id, "Naziv", "Kolicina", "Kapaciteta"')
-    .eq('ID podjetja', companyId)
-    .in('id', resursRowIds);
+  const dayMap: Record<number, string> = {
+    0: 'Nedelja', 1: 'Ponedeljek', 2: 'Torek', 3: 'Sreda',
+    4: 'Četrtek', 5: 'Petek', 6: 'Sobota',
+  };
 
   const conflicts: ResourceConflict[] = [];
+  const schedulePassedIds: number[] = [];
+
   for (const r of (resursiRows ?? []) as Record<string, unknown>[]) {
     const rid = Number(r['id']);
-    const kolicina = Number(r['Kolicina'] ?? 1);
-    const kapaciteta = Number(r['Kapaciteta'] ?? 1);
-    const max = kolicina * kapaciteta;
-    const used = usageMap.get(rid) ?? 0;
-    if (used >= max) {
-      conflicts.push({
-        resursId: rid,
-        resursTextId: resursiData.find((x) => x.resursRowId === rid)?.resursTextId ?? '',
-        naziv: String(r['Naziv'] ?? ''),
-        trenutnoZasedeno: used,
-        maxKapaciteta: max,
-      });
+    const naziv = String(r['Naziv'] ?? '');
+    const textId = resursiData.find((x) => x.resursRowId === rid)?.resursTextId ?? '';
+
+    // Schedule check
+    const urnikRaw = r['Urnik'];
+    let urnik: Record<string, { enabled: boolean; intervals: { start: string; end: string }[] }> | null = null;
+    if (urnikRaw && typeof urnikRaw === 'string') {
+      try { urnik = JSON.parse(urnikRaw); } catch { urnik = null; }
+    } else if (urnikRaw && typeof urnikRaw === 'object') {
+      urnik = urnikRaw as typeof urnik;
+    }
+
+    if (urnik !== null) {
+      const dayName = dayMap[new Date(datum).getDay()];
+      const daySchedule = urnik[dayName];
+      const available = daySchedule?.enabled === true &&
+        daySchedule.intervals.some(
+          (interval) => interval.start <= casZacetek && interval.end >= casKonec
+        );
+      if (!available) {
+        conflicts.push({ resursId: rid, resursTextId: textId, naziv, trenutnoZasedeno: 0, maxKapaciteta: 0, tip: 'urnik' });
+        continue;
+      }
+    }
+
+    schedulePassedIds.push(rid);
+  }
+
+  // Occupancy check only for resources that passed schedule validation
+  if (schedulePassedIds.length > 0 && overlappingIds.length > 0) {
+    const { data: usedResursi } = await supabase
+      .from(TABLE_TERMINI_RESURSI)
+      .select('resurs_id')
+      .eq('ID podjetja', companyId)
+      .in('termin_id', overlappingIds)
+      .in('resurs_id', schedulePassedIds);
+
+    const usageMap = new Map<number, number>();
+    for (const row of (usedResursi ?? []) as Record<string, unknown>[]) {
+      const rid = Number(row['resurs_id']);
+      usageMap.set(rid, (usageMap.get(rid) ?? 0) + 1);
+    }
+
+    for (const rid of schedulePassedIds) {
+      const r = ((resursiRows ?? []) as Record<string, unknown>[]).find((row) => Number(row['id']) === rid);
+      if (!r) continue;
+      const kolicina = Number(r['Kolicina'] ?? 1);
+      const kapaciteta = Number(r['Kapaciteta'] ?? 1);
+      const max = kolicina * kapaciteta;
+      const used = usageMap.get(rid) ?? 0;
+      if (used >= max) {
+        conflicts.push({
+          resursId: rid,
+          resursTextId: resursiData.find((x) => x.resursRowId === rid)?.resursTextId ?? '',
+          naziv: String(r['Naziv'] ?? ''),
+          trenutnoZasedeno: used,
+          maxKapaciteta: max,
+          tip: 'zaseden',
+        });
+      }
     }
   }
 

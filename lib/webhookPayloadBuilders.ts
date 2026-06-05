@@ -672,6 +672,7 @@ export function buildEnhancedAppointmentData({
     popust?: number; // Discount value
     popust_tip?: '€' | '%'; // Discount type
     valuta?: string; // Currency
+    belezi_termin?: boolean; // false = ghost termin
   };
   serviceDetails: {
     id: string;
@@ -817,6 +818,8 @@ export function buildEnhancedAppointmentData({
       notes_internal: appointmentData.internal_opombe ?? null,
       internal_opombe: appointmentData.internal_opombe ?? null,
       custom: null,
+      // Ghost termin flag
+      belezi_termin: appointmentData.belezi_termin !== false,
     },
     // Client data - now includes gender (Spol) and id_vrstice
     podatkiStranke: {
