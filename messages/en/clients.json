@@ -52,6 +52,7 @@
       "firstNameRequired": "First name *",
       "lastNameRequired": "Last name *",
       "genderRequired": "Gender *",
+      "clientType": "Client type",
       "emailHint": "(at least email or phone)",
       "phone": "Phone",
       "notes": "Notes",
@@ -65,6 +66,12 @@
       "male": "Male",
       "female": "Female",
       "other": "Other"
+    },
+    "clientType": {
+      "placeholder": "Select client type",
+      "nova": "New",
+      "redna": "Regular",
+      "vip": "VIP"
     },
     "addInternalNotes": "+ Internal notes",
     "warning": {
@@ -99,6 +106,7 @@
     "delete": "Delete",
     "contactInfo": "Contact details",
     "gender": "Gender",
+    "clientType": "Client type",
     "genderMale": "Male",
     "genderFemale": "Female",
     "genderOther": "Other",

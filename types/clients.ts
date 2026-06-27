@@ -2,11 +2,14 @@
 
 export type Gender = 'moški' | 'ženska' | 'drugo';
 
+export type ClientType = 'nova' | 'redna' | 'vip';
+
 export interface Client {
   id: string;
   ime: string;
   priimek: string;
   spol?: Gender | null;
+  tip_stranke?: ClientType | null; // "Tip stranke" column
   email: string;
   telefon?: string | null;
   opombe?: string | null;
@@ -23,6 +26,7 @@ export interface ClientFormData {
   ime: string;
   priimek: string;
   spol: Gender | '';
+  tip_stranke: ClientType;
   email: string;
   telefon: string;
   opombe: string;

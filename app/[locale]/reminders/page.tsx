@@ -6,7 +6,6 @@ import {
   Bell,
   Gear,
   CheckCircle,
-  CalendarBlank,
   Clock,
   Info,
   EnvelopeSimple,
@@ -17,7 +16,6 @@ import {
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
-import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
@@ -55,6 +53,10 @@ export default function RemindersPage() {
   const [replyToEmail, setReplyToEmail] = useState('');
   const [fromName, setFromName] = useState('');
   const [tone, setTone] = useState('prijazen');
+  const [nagovor, setNagovor] = useState<'vikanje' | 'tikanje'>('vikanje');
+  const [samodejniOpomnik, setSamodejniOpomnik] = useState(false);
+  const [smsOsebaPred, setSmsOsebaPred] = useState(false);
+  const [dniPrej, setDniPrej] = useState(1);
   const [enabledBefore, setEnabledBefore] = useState(true);
   const [beforeChannel, setBeforeChannel] = useState('email');
   const [beforeInstructions, setBeforeInstructions] = useState('');
@@ -75,13 +77,6 @@ export default function RemindersPage() {
   const [smsNavodilaPred, setSmsNavodilaPred] = useState(false);
   const [smsStoritevPo, setSmsStoritevPo] = useState(false);
   const [smsNavodilaPo, setSmsNavodilaPo] = useState(false);
-
-  // Stats
-  const [stats, setStats] = useState({
-    sentToday: 0,
-    scheduledTomorrow: 0,
-    afterVisitsToday: 0,
-  });
 
   const loadData = useCallback(async () => {
     if (!companyId) return;
@@ -104,35 +99,6 @@ export default function RemindersPage() {
         }
       }
 
-      // Fetch stats from appointments
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      const companyColumn = await getCompanyColumnForTable('Termini', companyId);
-
-      const { count: tomorrowCount } = await supabaseReadOnly
-        .from('Termini')
-        .select('*', { count: 'exact', head: true })
-        .eq(companyColumn, companyId)
-        .gte('Datum', tomorrow.toISOString().split('T')[0])
-        .lt('Datum', new Date(tomorrow.getTime() + 86400000).toISOString().split('T')[0]);
-
-      const { count: completedCount } = await supabaseReadOnly
-        .from('Termini')
-        .select('*', { count: 'exact', head: true })
-        .eq(companyColumn, companyId)
-        .gte('Datum', today.toISOString().split('T')[0])
-        .lt('Datum', tomorrow.toISOString().split('T')[0])
-        .or('Status.ilike.%zakljuc%,Status.ilike.%complet%,Status.eq.Zaključen');
-
-      setStats({
-        sentToday: tomorrowCount ?? 0,
-        scheduledTomorrow: tomorrowCount ?? 0,
-        afterVisitsToday: completedCount ?? 0,
-      });
-
     } catch (err) {
       console.error('Error loading data:', err);
     } finally {
@@ -152,6 +118,13 @@ export default function RemindersPage() {
     setReplyToEmail(String(source.reply_to ?? source.reply_to_email ?? ''));
     setFromName(String(source.from_name ?? source.From_name ?? ''));
     setTone(String(source.reminder_tone ?? source['Ton komunikacije opomikov'] ?? 'prijazen'));
+
+    const nagovorVal = String(source['nagovor'] ?? 'vikanje').toLowerCase().trim();
+    setNagovor(nagovorVal === 'tikanje' ? 'tikanje' : 'vikanje');
+    setSamodejniOpomnik(isEnabledValue(source['samodejni_opomnik'], false));
+    setSmsOsebaPred(isEnabledValue(source['sms_oseba_pred'], false));
+    const dniPrejNum = Number(source['dni_prej'] ?? 1);
+    setDniPrej(dniPrejNum >= 1 && dniPrejNum <= 7 ? dniPrejNum : 1);
 
     setEnabledBefore(isEnabledValue(
       source['Pošiljanje PRED'] ?? source.enabled_before_booking ?? source.posiljanje_pred,
@@ -289,84 +262,6 @@ export default function RemindersPage() {
             </motion.div>
           )}
 
-          {/* Statistics Cards */}
-          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {loading ? (
-              <>
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="relative rounded-2xl p-[1px] overflow-hidden bg-gradient-to-r from-violet-200 via-blue-200 to-cyan-200">
-                    <div className="bg-white rounded-[15px] p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="h-8 w-16 rounded-lg bg-gray-200 animate-pulse" />
-                        <div className="h-6 w-6 rounded bg-gray-200 animate-pulse" />
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        <div className="h-4 w-24 rounded bg-gray-200 animate-pulse" />
-                        <div className="h-3 w-20 rounded bg-gray-200 animate-pulse" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0 }}
-                  className="relative rounded-2xl p-[1px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500"
-                >
-                  <div className="bg-white rounded-[15px] p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="text-3xl text-gray-900 leading-none">{enabledBefore ? stats.sentToday : 0}</div>
-                      <Bell className="h-6 w-6 text-gray-900" weight="regular" />
-                    </div>
-                    <div className="mt-3 text-left">
-                      <div className="text-sm font-medium text-gray-600">{t('page.stats.sentToday')}</div>
-                      <div className="text-xs text-gray-500 mt-1">{t('page.stats.sentTodayDesc')}</div>
-                    </div>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="relative rounded-2xl p-[1px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500"
-                >
-                  <div className="bg-white rounded-[15px] p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="text-3xl text-gray-900 leading-none">{stats.scheduledTomorrow}</div>
-                      <CalendarBlank className="h-6 w-6 text-gray-900" weight="regular" />
-                    </div>
-                    <div className="mt-3 text-left">
-                      <div className="text-sm font-medium text-gray-600">{t('page.stats.scheduledTomorrow')}</div>
-                      <div className="text-xs text-gray-500 mt-1">{t('page.stats.scheduledTomorrowDesc')}</div>
-                    </div>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="relative rounded-2xl p-[1px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500"
-                >
-                  <div className="bg-white rounded-[15px] p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="text-3xl text-gray-900 leading-none">{enabledAfter ? stats.afterVisitsToday : 0}</div>
-                      <CheckCircle className="h-6 w-6 text-gray-900" weight="regular" />
-                    </div>
-                    <div className="mt-3 text-left">
-                      <div className="text-sm font-medium text-gray-600">{t('page.stats.afterVisits')}</div>
-                      <div className="text-xs text-gray-500 mt-1">{t('page.stats.afterVisitsDesc')}</div>
-                    </div>
-                  </div>
-                </motion.div>
-              </>
-            )}
-          </div>
-
           {/* Settings Sections */}
           {loading ? (
             <div className="flex items-center justify-center py-20">
@@ -397,6 +292,30 @@ export default function RemindersPage() {
                       <span className="text-sm text-gray-700">{t('page.general.tone')}</span>
                     </div>
                     <span className="text-sm text-gray-900">{getToneLabel(tone)}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
+                      <span className="text-sm text-gray-700">Nagovor strank</span>
+                    </div>
+                    <span className="text-sm text-gray-900">{nagovor === 'tikanje' ? 'Tikanje' : 'Vikanje'}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
+                      <span className="text-sm text-gray-700">Oznaka samodejni opomnik</span>
+                    </div>
+                    <span className="text-sm text-gray-900">{samodejniOpomnik ? t('status.enabled') : t('status.disabled')}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
+                      <span className="text-sm text-gray-700">Izvajalec v opomniku</span>
+                    </div>
+                    <span className="text-sm text-gray-900">{smsOsebaPred ? t('status.enabled') : t('status.disabled')}</span>
                   </div>
 
                   <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
@@ -546,7 +465,7 @@ export default function RemindersPage() {
                           <Clock className="w-4 h-4 text-gray-900" weight="regular" />
                           <span className="text-sm text-gray-700">{t('page.before.timeLabel')}</span>
                         </div>
-                        <span className="text-sm text-gray-900">{t('page.before.timeValue')}</span>
+                        <span className="text-sm text-gray-900">{dniPrej === 1 ? '1 dan pred terminom' : `${dniPrej} dni pred terminom`}</span>
                       </div>
 
                       {beforeInstructions && (

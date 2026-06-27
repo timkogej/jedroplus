@@ -43,7 +43,9 @@ import ClientTable from '@/components/clients/ClientTable';
 import ClientModal from '@/components/clients/ClientModal';
 import ClientDetailsPanel from '@/components/clients/ClientDetailsPanel';
 import DeleteClientModal from '@/components/clients/DeleteClientModal';
+import CrmImportModal from '@/components/clients/CrmImportModal';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import * as XLSX from 'xlsx';
 
 // Stats card component - Gradient border with black icon (no circle)
 interface StatCardProps {
@@ -236,6 +238,8 @@ export default function ClientsPage() {
   // CRM dropdown states
   const [importDropdownOpen, setImportDropdownOpen] = useState(false);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const actor = user?.email ?? 'unknown';
   const companyPayload = useMemo(
@@ -406,6 +410,7 @@ export default function ClientsPage() {
           Ime: data.ime,
           Priimek: data.priimek,
           Spol: data.spol,
+          'Tip stranke': data.tip_stranke,
           Email: data.email.trim() || null,
           Telefon: data.telefon.trim() || null,
           Opombe: data.opombe,
@@ -439,6 +444,7 @@ export default function ClientsPage() {
           Ime: data.ime,
           Priimek: data.priimek,
           Spol: data.spol,
+          'Tip stranke': data.tip_stranke,
           Email: data.email.trim() || null,
           Telefon: data.telefon.trim() || null,
           Opombe: data.opombe,
@@ -535,6 +541,43 @@ export default function ClientsPage() {
     }
   }, [companyId, deleteClient, actor, companyPayload, buildPayload, showToast, closeDeleteModal, loadData]);
 
+  // Export clients to Excel (XLSX)
+  const handleExportXlsx = useCallback(async () => {
+    if (!companyId || isExporting) return;
+    setIsExporting(true);
+    try {
+      const res = await fetchClientsWithCount(companyId);
+      if (res.error) throw res.error;
+      const rows = (res.data ?? []).map((c) => ({
+        'Ime': c.ime ?? '',
+        'Priimek': c.priimek ?? '',
+        'Email': c.email ?? '',
+        'Telefon': c.telefon ?? '',
+        'Spol': c.spol ?? '',
+        'Opombe': c.opombe ?? '',
+        'Datum vpisa': c.created_at
+          ? new Date(c.created_at).toLocaleDateString('sl-SI')
+          : '',
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Stranke');
+
+      const colWidths = Object.keys(rows[0] ?? {}).map((key) => ({
+        wch: Math.max(key.length, ...rows.map((r) => String(r[key as keyof typeof r] ?? '').length)),
+      }));
+      ws['!cols'] = colWidths;
+
+      XLSX.writeFile(wb, `stranke_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showToast('Izvoz uspešen', 'success');
+    } catch {
+      showToast('Napaka pri izvozu', 'error');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [companyId, isExporting, showToast]);
+
   // Loading state - white background with simple black spinner
   if (companyLoading || !companyId) {
     return (
@@ -602,7 +645,7 @@ export default function ClientsPage() {
                         type="button"
                         onClick={() => {
                           setImportDropdownOpen(false);
-                          // TODO: Implement import from CSV
+                          setImportModalOpen(true);
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
@@ -612,22 +655,24 @@ export default function ClientsPage() {
                         type="button"
                         onClick={() => {
                           setImportDropdownOpen(false);
-                          // TODO: Implement import from Excel
+                          setImportModalOpen(true);
                         }}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         {t('crm.importExcel')}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setImportDropdownOpen(false);
-                          // TODO: Implement import from other CRM
-                        }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        {t('crm.importOther')}
-                      </button>
+                      <div className="relative group">
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-400 cursor-not-allowed"
+                        >
+                          {t('crm.importOther')}
+                        </button>
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
+                          Kmalu na voljo
+                        </span>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -666,32 +711,37 @@ export default function ClientsPage() {
                         type="button"
                         onClick={() => {
                           setExportDropdownOpen(false);
-                          // TODO: Implement export to CSV
+                          handleExportXlsx();
                         }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        disabled={isExporting}
+                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-60"
                       >
-                        {t('crm.exportCsv')}
+                        {isExporting ? 'Izvažam...' : t('crm.exportExcel')}
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setExportDropdownOpen(false);
-                          // TODO: Implement export to Excel
-                        }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        {t('crm.exportExcel')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setExportDropdownOpen(false);
-                          // TODO: Implement export to PDF
-                        }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        {t('crm.exportPdf')}
-                      </button>
+                      <div className="relative group">
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-400 cursor-not-allowed"
+                        >
+                          {t('crm.exportCsv')}
+                        </button>
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
+                          Kmalu na voljo
+                        </span>
+                      </div>
+                      <div className="relative group">
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-400 cursor-not-allowed"
+                        >
+                          {t('crm.exportPdf')}
+                        </button>
+                        <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
+                          Kmalu na voljo
+                        </span>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -855,6 +905,17 @@ export default function ClientsPage() {
         client={deleteClient}
         onConfirm={handleDeleteClient}
         isDeleting={isDeleting}
+      />
+
+      {/* CRM Import Modal */}
+      <CrmImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        companyId={companyId}
+        actor={actor}
+        existingClients={clients}
+        onImportComplete={loadData}
+        onSendToN8n={(payload) => callN8nAction(payload)}
       />
 
       {/* Toast notifications */}

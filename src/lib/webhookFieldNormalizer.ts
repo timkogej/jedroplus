@@ -73,6 +73,9 @@ export function normalizeClient(raw: AnyRow | null | undefined) {
     // Gender (Spol)
     spol: toValue(data.spol ?? data.Spol ?? data.gender),
     gender: toValue(data.gender ?? data.Spol ?? data.spol),
+    // Client type (Tip stranke): 'nova' | 'redna' | 'vip'
+    tip_stranke: toValue(data["Tip stranke"] ?? data.tip_stranke),
+    "Tip stranke": toValue(data["Tip stranke"] ?? data.tip_stranke),
     // Color
     barva: toValue(data.barva ?? data.Barva ?? data.color),
   };
@@ -174,6 +177,8 @@ export function normalizeService(raw: AnyRow | null | undefined) {
     service_color_to: toValue(data.service_color_to),
     active: toValue(data.active ?? data.Aktivna ?? data.Aktivno ?? data.Active),
     category: toValue(data.category ?? data.Kategorija ?? data.kategorija),
+    online_booking: toValue(data.online_booking ?? data.Spletne_rezervacije ?? data.spletne_rezervacije ?? data.online_rezervacije),
+    spletne_rezervacije: toValue(data.Spletne_rezervacije ?? data.spletne_rezervacije ?? data.online_booking ?? data.online_rezervacije),
   };
   return { ...data, ...normalized };
 }

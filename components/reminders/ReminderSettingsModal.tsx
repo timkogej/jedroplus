@@ -8,6 +8,7 @@ import {
   SettingsSection,
   SettingRow,
   Switch,
+  SegmentedControl,
   Input,
   Textarea,
   SaveIndicator,
@@ -43,6 +44,10 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
   // Settings from "Podatki podjetij" table
   const [sendingLanguage, setSendingLanguage] = useState('sl');
   const [tonKomunikacije, setTonKomunikacije] = useState('prijazen');
+  const [nagovor, setNagovor] = useState<'vikanje' | 'tikanje'>('vikanje');
+  const [samodejniOpomnik, setSamodejniOpomnik] = useState(false);
+  const [smsOsebaPred, setSmsOsebaPred] = useState(false);
+  const [dniPrej, setDniPrej] = useState('1');
   const [replyTo, setReplyTo] = useState('');
   const [fromName, setFromName] = useState('');
   const fromEmail = 'booking@jedroplus.com'; // FIXED
@@ -93,6 +98,11 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
   // Nasveti glede na storitev: 'yes' | 'no' | 'auto'
   const [nastvetiStoritev, setNastvetiStoritev] = useState<'yes' | 'no' | 'auto'>('auto');
 
+  // Reschedule notification
+  const [obvestiloPrestavitevOmogoceno, setObvestiloPrestavitevOmogoceno] = useState(false);
+  const [obvestiloPrestavitevTemplateSms, setObvestiloPrestavitevTemplateSms] = useState('');
+  const [obvestiloPrestavitevTemplateEmail, setObvestiloPrestavitevTemplateEmail] = useState('');
+
   // Brand colors for email templates
   const [brandPrimaryColor, setBrandPrimaryColor] = useState('#7C75FC');
   const [brandSecondaryColor, setBrandSecondaryColor] = useState('#50C3D2');
@@ -130,6 +140,20 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
         if (data) {
           setSendingLanguage(String(data['jezik posiljanja'] ?? data['jezik_posiljanja'] ?? 'sl'));
           setTonKomunikacije(String(data['Ton komunikacije opomikov'] ?? data['ton_komunikacije_opomikov'] ?? 'prijazen'));
+
+          const nagovorVal = String(data['nagovor'] ?? 'vikanje').toLowerCase().trim();
+          setNagovor(nagovorVal === 'tikanje' ? 'tikanje' : 'vikanje');
+
+          const parseBoolLoad = (v: unknown) => {
+            if (typeof v === 'boolean') return v;
+            if (typeof v === 'string') return v.toLowerCase() === 'true' || v.toLowerCase() === 'yes';
+            return false;
+          };
+          setSamodejniOpomnik(parseBoolLoad(data['samodejni_opomnik']));
+          setSmsOsebaPred(parseBoolLoad(data['sms_oseba_pred']));
+
+          const dniPrejNum = Number(data['dni_prej'] ?? 1);
+          setDniPrej(String(dniPrejNum >= 1 && dniPrejNum <= 7 ? dniPrejNum : 1));
           setReplyTo(String(data['reply_to'] ?? data['Reply_to'] ?? ''));
           setFromName(String(data['from_name'] ?? data['From_name'] ?? ''));
           setChanelPred(String(data['chanel_pred'] ?? data['Chanel_pred'] ?? 'email'));
@@ -202,6 +226,10 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           setSmsStoritevPo(parseBool(data['sms_storitev_po']));
           setSmsOpombePo(parseBool(data['sms_opombe_po']));
           setSmsNavodilaPo(parseBool(data['sms_navodila_po']));
+
+          setObvestiloPrestavitevOmogoceno(parseBool(data['obvestilo_prestavitev_omogoceno']));
+          setObvestiloPrestavitevTemplateSms(String(data['obvestilo_prestavitev_template_sms'] ?? ''));
+          setObvestiloPrestavitevTemplateEmail(String(data['obvestilo_prestavitev_template_email'] ?? ''));
         }
       } catch (error) {
         console.error('Error loading reminder settings:', error);
@@ -227,6 +255,10 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
         data: {
           'jezik posiljanja': sendingLanguage,
           'Ton komunikacije opomikov': tonKomunikacije,
+          'nagovor': nagovor,
+          'samodejni_opomnik': samodejniOpomnik,
+          'sms_oseba_pred': smsOsebaPred,
+          'dni_prej': Number(dniPrej),
           'reply_to': replyTo,
           'from_name': fromName,
           'chanel_pred': chanelPred,
@@ -303,6 +335,9 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
             template: smsTemplatePo,
             lastna_predloga: smsModePo === 'manual' ? smsTemplatePo : lastnaPredlogaPo,
           },
+          obvestilo_prestavitev_omogoceno: obvestiloPrestavitevOmogoceno,
+          obvestilo_prestavitev_template_sms: obvestiloPrestavitevTemplateSms,
+          obvestilo_prestavitev_template_email: obvestiloPrestavitevTemplateEmail,
         },
       };
 
@@ -327,6 +362,66 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
     }
   };
 
+  const lockedFieldClass = 'flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-sm text-gray-700';
+  const innerPanelClass = 'space-y-4 rounded-2xl border border-gray-100 bg-gray-50 p-4';
+  const infoPanelClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
+  const textareaClass = 'w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10';
+
+  const renderChannelSelector = (
+    value: string,
+    onChange: (next: string) => void,
+    context: 'before' | 'after'
+  ) => {
+    const smsUnavailable = t(`modal.${context}.smsNotAvailable`);
+
+    return (
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1">
+          <button
+            type="button"
+            onClick={() => onChange('email')}
+            className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+              value === 'email'
+                ? 'bg-white text-gray-900 shadow-sm'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            <EnvelopeSimple className="h-4 w-4" weight={value === 'email' ? 'fill' : 'regular'} />
+            Email
+          </button>
+          <button
+            type="button"
+            disabled={smsLockedForPlan}
+            onClick={() => !smsLockedForPlan && onChange('sms')}
+            className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+              value === 'sms' && !smsLockedForPlan
+                ? 'bg-white text-gray-900 shadow-sm'
+                : smsLockedForPlan
+                  ? 'cursor-not-allowed text-gray-400'
+                  : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            <DeviceMobile className="h-4 w-4" weight={value === 'sms' && !smsLockedForPlan ? 'fill' : 'regular'} />
+            SMS
+          </button>
+        </div>
+        {smsLockedForPlan && (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+            <span>{smsUnavailable}</span>
+            <span>{t(`modal.${context}.smsUpgradeHint`)}</span>
+            <button
+              type="button"
+              onClick={() => { onClose(); router.push('/billing'); }}
+              className="inline-flex items-center gap-1 font-semibold text-gray-900 underline underline-offset-2"
+            >
+              {t(`modal.${context}.upgradeButton`)} <ArrowRight className="h-3 w-3" weight="bold" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -341,28 +436,30 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 gap-3">
+            <div className="flex items-center justify-between gap-3 border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
               <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-semibold text-gray-900 truncate">{t('modal.title')}</h2>
-                <p className="text-sm text-gray-500 mt-0.5 truncate">{t('modal.subtitle')}</p>
+                <h2 className="truncate text-xl font-semibold text-gray-900">
+                  {t('modal.title')}
+                </h2>
+                <p className="mt-0.5 truncate text-sm text-gray-500">{t('modal.subtitle')}</p>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 <SaveIndicator saving={saving} lastSaved={lastSaved} />
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="w-5 h-5 text-gray-500" weight="bold" />
+                  <X className="h-5 w-5" weight="bold" />
                 </button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
               {isLoading ? (
                 <div className="space-y-6">
                   {[1, 2, 3, 4].map((i) => (
@@ -413,6 +510,59 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                       </Select>
                     </SettingRow>
 
+                    {/* Nagovor strank */}
+                    <SettingRow
+                      label="Nagovor strank"
+                      description="Ali naj se stranke v opomnikih vika ali tika."
+                    >
+                      <SegmentedControl
+                        value={nagovor}
+                        onChange={(v) => setNagovor(v === 'tikanje' ? 'tikanje' : 'vikanje')}
+                        options={[
+                          { value: 'vikanje', label: 'Vikanje' },
+                          { value: 'tikanje', label: 'Tikanje' },
+                        ]}
+                      />
+                    </SettingRow>
+
+                    {/* Samodejni opomnik oznaka */}
+                    <SettingRow
+                      label="Označi sporočila kot samodejni opomnik"
+                      description="Na začetku sporočila se doda oznaka, da gre za samodejni opomnik."
+                    >
+                      <Switch
+                        checked={samodejniOpomnik}
+                        onChange={setSamodejniOpomnik}
+                      />
+                    </SettingRow>
+
+                    {/* Vključi izvajalca */}
+                    <SettingRow
+                      label="Vključi izvajalca v opomnik"
+                      description="Če je vklopljeno, lahko opomnik omeni zaposlenega, ki bo izvedel storitev."
+                    >
+                      <Switch
+                        checked={smsOsebaPred}
+                        onChange={setSmsOsebaPred}
+                      />
+                    </SettingRow>
+
+                    {/* Dni pred terminom */}
+                    <SettingRow
+                      label="Pošlji opomnik (dni pred terminom)"
+                      description="Koliko dni pred terminom naj se pošlje opomnik."
+                    >
+                      <Select
+                        value={dniPrej}
+                        setValue={setDniPrej}
+                        placeholder="Izberi"
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7].map((d) => (
+                          <SelectOption key={d} value={String(d)}>{d}</SelectOption>
+                        ))}
+                      </Select>
+                    </SettingRow>
+
                     <SettingRow
                       label={t('modal.general.replyToLabel')}
                       description={t('modal.general.replyToDesc')}
@@ -442,7 +592,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                       description={t('modal.general.fromEmailDesc')}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 font-mono text-sm text-gray-700 p-3 bg-gray-100 rounded-xl border-2 border-gray-200">
+                        <div className={lockedFieldClass}>
                           {fromEmail}
                         </div>
                         <div className="flex items-center gap-1 text-gray-400">
@@ -458,7 +608,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                       description={t('modal.general.senderIdDesc')}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex-1 font-mono text-sm text-gray-700 p-3 bg-gray-100 rounded-xl border-2 border-gray-200">
+                        <div className={lockedFieldClass}>
                           {smsSenderId || <span className="text-gray-400 font-sans">{t('modal.general.notSet')}</span>}
                         </div>
                         <div className="flex items-center gap-1 text-gray-400">
@@ -473,7 +623,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                       label={t('modal.general.tipsLabel')}
                       description={t('modal.general.tipsDesc')}
                     >
-                      <div className="flex gap-2">
+                      <div className="grid grid-cols-3 gap-1 rounded-xl bg-gray-100 p-1">
                         {([
                           { value: 'yes' as const, labelKey: 'modal.general.tipsYes' },
                           { value: 'no' as const, labelKey: 'modal.general.tipsNo' },
@@ -483,14 +633,11 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                             key={opt.value}
                             type="button"
                             onClick={() => setNastvetiStoritev(opt.value)}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
                               nastvetiStoritev === opt.value
-                                ? 'border-transparent text-white'
-                                : 'border-gray-200 text-gray-700 bg-white hover:border-gray-300'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-900'
                             }`}
-                            style={nastvetiStoritev === opt.value ? {
-                              background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                            } : undefined}
                           >
                             {t(opt.labelKey)}
                           </button>
@@ -509,7 +656,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                               type="color"
                               value={brandPrimaryColor}
                               onChange={(e) => setBrandPrimaryColor(e.target.value)}
-                              className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                              className="h-12 w-12 cursor-pointer rounded-lg border border-gray-200"
                             />
                             <Input
                               value={brandPrimaryColor}
@@ -525,7 +672,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                               type="color"
                               value={brandSecondaryColor}
                               onChange={(e) => setBrandSecondaryColor(e.target.value)}
-                              className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-200"
+                              className="h-12 w-12 cursor-pointer rounded-lg border border-gray-200"
                             />
                             <Input
                               value={brandSecondaryColor}
@@ -559,52 +706,15 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           label={t('modal.before.channelLabel')}
                           description={t('modal.before.channelDesc')}
                         >
-                          {smsLockedForPlan ? (
-                            <div className="flex flex-col gap-2">
-                              <div className="flex gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => setChanelPred('email')}
-                                  className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${chanelPred === 'email' ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'}`}
-                                >
-                                  <EnvelopeSimple className="h-4 w-4" weight={chanelPred === 'email' ? 'fill' : 'regular'} />
-                                  Email
-                                </button>
-                                <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed text-sm font-medium">
-                                  <DeviceMobile className="h-4 w-4" weight="regular" />
-                                  SMS
-                                  <span className="text-xs text-gray-400">{t('modal.before.smsNotAvailable')}</span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500">{t('modal.before.smsUpgradeHint')}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => { onClose(); router.push('/billing'); }}
-                                  className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
-                                >
-                                  {t('modal.before.upgradeButton')} <ArrowRight className="h-3 w-3" weight="bold" />
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <Select
-                              value={chanelPred}
-                              setValue={setChanelPred}
-                              placeholder={t('modal.before.channelPlaceholder')}
-                            >
-                              <SelectOption value="email">Email</SelectOption>
-                              <SelectOption value="sms">SMS</SelectOption>
-                            </Select>
-                          )}
+                          {renderChannelSelector(chanelPred, setChanelPred, 'before')}
                         </SettingRow>
 
                         {chanelPred === 'sms' && (
-                          <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl space-y-4">
+                          <div className={innerPanelClass}>
                             <div className="font-semibold text-gray-900 text-sm">{t('modal.before.smsSettings')}</div>
 
                             {/* Mode selector */}
-                            <div className="flex gap-2">
+                            <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
                               {([
                                 { value: 'ai' as const, labelKey: 'modal.before.modeAI' },
                                 { value: 'manual' as const, labelKey: 'modal.before.modeManual' },
@@ -613,12 +723,11 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   key={opt.value}
                                   type="button"
                                   onClick={() => setSmsModePred(opt.value)}
-                                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                                     smsModePred === opt.value
-                                      ? 'border-transparent text-white'
-                                      : 'border-gray-200 text-gray-700 bg-white hover:border-gray-300'
+                                      ? 'bg-white text-gray-900 shadow-sm'
+                                      : 'text-gray-500 hover:text-gray-900'
                                   }`}
-                                  style={smsModePred === opt.value ? { background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)' } : undefined}
                                 >
                                   {t(opt.labelKey)}
                                 </button>
@@ -637,7 +746,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   <button
                                     type="button"
                                     onClick={() => setSmsStoritevPred(!smsStoritevPred)}
-                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsStoritevPred ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsStoritevPred ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsStoritevPred ? 'translate-x-6' : 'translate-x-1'}`} />
                                   </button>
@@ -651,7 +760,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   <button
                                     type="button"
                                     onClick={() => setSmsOpombePred(!smsOpombePred)}
-                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsOpombePred ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsOpombePred ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsOpombePred ? 'translate-x-6' : 'translate-x-1'}`} />
                                   </button>
@@ -665,7 +774,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   <button
                                     type="button"
                                     onClick={() => setSmsNavodilaPred(!smsNavodilaPred)}
-                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsNavodilaPred ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsNavodilaPred ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsNavodilaPred ? 'translate-x-6' : 'translate-x-1'}`} />
                                   </button>
@@ -679,7 +788,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                       rows={5}
                                       maxLength={500}
                                       placeholder={t('modal.before.instructionsPlaceholder')}
-                                      className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-violet-300 focus:outline-none resize-none"
+                                      className={textareaClass}
                                     />
                                     <div className="flex justify-between items-center">
                                       <p className="text-xs text-gray-400">{t('modal.before.instructionsHint')}</p>
@@ -708,7 +817,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                         )}
 
                         {chanelPred === 'email' && (
-                          <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl space-y-3">
+                          <div className={innerPanelClass}>
                             <div className="font-semibold text-gray-900 text-sm">{t('modal.before.emailInstructionsTitle')}</div>
                             <p className="text-xs text-gray-500">{t('modal.before.emailInstructionsDesc')}</p>
                             <Textarea
@@ -722,7 +831,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           </div>
                         )}
 
-                        <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                        <div className={infoPanelClass}>
                           <div className="font-semibold text-gray-900 mb-1">{t('modal.before.timingTitle')}</div>
                           <div className="text-sm text-gray-700">
                             {t('modal.before.timingValue')}
@@ -753,52 +862,15 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           label={t('modal.after.channelLabel')}
                           description={t('modal.after.channelDesc')}
                         >
-                          {smsLockedForPlan ? (
-                            <div className="flex flex-col gap-2">
-                              <div className="flex gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => setChanelPo('email')}
-                                  className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${chanelPo === 'email' ? 'bg-violet-50 border-violet-300 text-violet-700 ring-1 ring-violet-200' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'}`}
-                                >
-                                  <EnvelopeSimple className="h-4 w-4" weight={chanelPo === 'email' ? 'fill' : 'regular'} />
-                                  Email
-                                </button>
-                                <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed text-sm font-medium">
-                                  <DeviceMobile className="h-4 w-4" weight="regular" />
-                                  SMS
-                                  <span className="text-xs text-gray-400">{t('modal.after.smsNotAvailable')}</span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs text-gray-500">{t('modal.after.smsUpgradeHint')}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => { onClose(); router.push('/billing'); }}
-                                  className="flex items-center gap-1 text-xs font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
-                                >
-                                  {t('modal.after.upgradeButton')} <ArrowRight className="h-3 w-3" weight="bold" />
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <Select
-                              value={chanelPo}
-                              setValue={setChanelPo}
-                              placeholder={t('modal.after.channelPlaceholder')}
-                            >
-                              <SelectOption value="email">Email</SelectOption>
-                              <SelectOption value="sms">SMS</SelectOption>
-                            </Select>
-                          )}
+                          {renderChannelSelector(chanelPo, setChanelPo, 'after')}
                         </SettingRow>
 
                         {chanelPo === 'sms' && (
-                          <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl space-y-4">
+                          <div className={innerPanelClass}>
                             <div className="font-semibold text-gray-900 text-sm">{t('modal.after.smsSettings')}</div>
 
                             {/* Mode selector */}
-                            <div className="flex gap-2">
+                            <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
                               {([
                                 { value: 'ai' as const, labelKey: 'modal.after.modeAI' },
                                 { value: 'manual' as const, labelKey: 'modal.after.modeManual' },
@@ -807,12 +879,11 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   key={opt.value}
                                   type="button"
                                   onClick={() => setSmsModePo(opt.value)}
-                                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
+                                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                                     smsModePo === opt.value
-                                      ? 'border-transparent text-white'
-                                      : 'border-gray-200 text-gray-700 bg-white hover:border-gray-300'
+                                      ? 'bg-white text-gray-900 shadow-sm'
+                                      : 'text-gray-500 hover:text-gray-900'
                                   }`}
-                                  style={smsModePo === opt.value ? { background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)' } : undefined}
                                 >
                                   {t(opt.labelKey)}
                                 </button>
@@ -831,7 +902,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   <button
                                     type="button"
                                     onClick={() => setSmsStoritevPo(!smsStoritevPo)}
-                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsStoritevPo ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsStoritevPo ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsStoritevPo ? 'translate-x-6' : 'translate-x-1'}`} />
                                   </button>
@@ -845,7 +916,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   <button
                                     type="button"
                                     onClick={() => setSmsOpombePo(!smsOpombePo)}
-                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsOpombePo ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsOpombePo ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsOpombePo ? 'translate-x-6' : 'translate-x-1'}`} />
                                   </button>
@@ -859,7 +930,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   <button
                                     type="button"
                                     onClick={() => setSmsNavodilaPo(!smsNavodilaPo)}
-                                    className={`flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${smsNavodilaPo ? 'bg-violet-500' : 'bg-gray-200'}`}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsNavodilaPo ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsNavodilaPo ? 'translate-x-6' : 'translate-x-1'}`} />
                                   </button>
@@ -873,7 +944,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                       rows={5}
                                       maxLength={500}
                                       placeholder={t('modal.after.instructionsPlaceholder')}
-                                      className="w-full rounded-xl border-2 border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-violet-300 focus:outline-none resize-none"
+                                      className={textareaClass}
                                     />
                                     <div className="flex justify-between items-center">
                                       <p className="text-xs text-gray-400">{t('modal.after.instructionsHint')}</p>
@@ -902,7 +973,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                         )}
 
                         {chanelPo === 'email' && (
-                          <div className="p-4 bg-gray-50 border-2 border-gray-200 rounded-xl space-y-3">
+                          <div className={innerPanelClass}>
                             <div className="font-semibold text-gray-900 text-sm">{t('modal.after.emailInstructionsTitle')}</div>
                             <p className="text-xs text-gray-500">{t('modal.after.emailInstructionsDesc')}</p>
                             <Textarea
@@ -919,7 +990,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                         {/* Discount option — hidden when SMS LP (custom template handles its own content) */}
                         {!(chanelPo === 'sms' && smsModePo === 'manual') && (
                           <>
-                            <div className="flex items-center justify-between p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
+                            <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
                               <div>
                                 <div className="font-semibold text-gray-900">
                                   {t('modal.after.discountTitle')}
@@ -950,11 +1021,57 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           </>
                         )}
 
-                        <div className="p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
+                        <div className={infoPanelClass}>
                           <div className="font-semibold text-gray-900 mb-1">{t('modal.after.timingTitle')}</div>
                           <div className="text-sm text-gray-700">
                             {t('modal.after.timingValue')}
                           </div>
+                        </div>
+                      </>
+                    )}
+                  </SettingsSection>
+
+                  {/* Reschedule notification section */}
+                  <SettingsSection
+                    title="Obvestilo ob prestavitvi termina"
+                    description="Stranka prejme obvestilo, ko ji prestavite termin."
+                  >
+                    <SettingRow
+                      label="Omogoči obvestilo ob prestavitvi"
+                      description="Ko prestavite termin, vam sistem predlaga pošiljanje obvestila stranki."
+                    >
+                      <Switch
+                        checked={obvestiloPrestavitevOmogoceno}
+                        onChange={setObvestiloPrestavitevOmogoceno}
+                      />
+                    </SettingRow>
+
+                    {obvestiloPrestavitevOmogoceno && (
+                      <>
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">SMS predloga</label>
+                          <Textarea
+                            value={obvestiloPrestavitevTemplateSms}
+                            onChange={(e) => setObvestiloPrestavitevTemplateSms(e.target.value)}
+                            rows={4}
+                            placeholder="Spoštovani {{ime_stranke}}, vaš termin je bil prestavljen na {{datum}} ob {{ura}}. Lep pozdrav, {{naziv_podjetja}}"
+                          />
+                          <p className="text-xs text-gray-400">
+                            Spremenljivke: {'{{ime_stranke}}'}, {'{{datum}}'}, {'{{ura}}'}, {'{{naziv_podjetja}}'}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium text-gray-700">Email predloga</label>
+                          <Textarea
+                            value={obvestiloPrestavitevTemplateEmail}
+                            onChange={(e) => setObvestiloPrestavitevTemplateEmail(e.target.value)}
+                            rows={4}
+                            placeholder="Spoštovani {{ime_stranke}}, vaš termin je bil prestavljen na {{datum}} ob {{ura}}. Lep pozdrav, {{naziv_podjetja}}"
+                          />
+                          <p className="text-xs text-gray-400">
+                            Spremenljivke: {'{{ime_stranke}}'}, {'{{datum}}'}, {'{{ura}}'}, {'{{naziv_podjetja}}'}
+                          </p>
                         </div>
                       </>
                     )}
@@ -964,13 +1081,13 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <div className="flex justify-end gap-3 border-t border-gray-100 bg-white px-5 py-4 sm:px-6">
               <motion.button
                 type="button"
                 onClick={onClose}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
               >
                 {t('modal.closeButton')}
               </motion.button>
@@ -980,10 +1097,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                 disabled={saving || isLoading}
                 whileHover={{ scale: saving ? 1 : 1.02 }}
                 whileTap={{ scale: saving ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
-                           px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/25
-                           transition-shadow hover:shadow-xl hover:shadow-violet-500/30
-                           disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving ? (
                   <>

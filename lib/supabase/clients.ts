@@ -1,7 +1,7 @@
 import { fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst, safeDate } from '@/lib/dashboardHelpers';
-import type { Client, ClientWithAppointments, ClientAppointment, ClientStats, Gender } from '@/types/clients';
+import type { Client, ClientWithAppointments, ClientAppointment, ClientStats, Gender, ClientType } from '@/types/clients';
 
 // Re-export Client type for backward compatibility
 export type { Client } from '@/types/clients';
@@ -17,6 +17,7 @@ function detectClientSchema(row: Record<string, unknown>) {
     firstNameField: pickField(['Ime', 'ime', 'first_name', 'firstName', 'name']),
     lastNameField: pickField(['Priimek', 'priimek', 'last_name', 'lastName', 'surname']),
     genderField: pickField(['Spol', 'spol', 'gender', 'Gender']),
+    clientTypeField: pickField(['Tip stranke', 'tip_stranke', 'client_type', 'Tip Stranke']),
     emailField: pickField(['Email', 'email', 'e-mail', 'E-mail', 'Email stranke']),
     phoneField: pickField(['Telefonska številka', 'Telefon', 'telefon', 'phone', 'Phone', 'tel']),
     notesField: pickField(['Opombe stranke', 'Opombe', 'opombe', 'notes', 'Notes', 'Opombe strank']),
@@ -51,6 +52,18 @@ function parseClient(row: Record<string, unknown>): Client | null {
     }
   }
 
+  // Parse client type (Tip stranke) — read stored value, no override fallback
+  let tipStranke: ClientType | null = null;
+  if (schema.clientTypeField) {
+    const typeValue = row[schema.clientTypeField];
+    if (typeof typeValue === 'string') {
+      const v = typeValue.toLowerCase().trim();
+      if (v === 'redna') tipStranke = 'redna';
+      else if (v === 'vip') tipStranke = 'vip';
+      else if (v === 'nova') tipStranke = 'nova';
+    }
+  }
+
   // Parse last interaction date - return null if empty or invalid
   let zadnjaInterakcija: string | null = null;
   if (schema.lastInteractionField) {
@@ -65,6 +78,7 @@ function parseClient(row: Record<string, unknown>): Client | null {
     ime: schema.firstNameField ? String(row[schema.firstNameField] ?? '') : '',
     priimek: schema.lastNameField ? String(row[schema.lastNameField] ?? '') : '',
     spol, // Read from "Spol" column
+    tip_stranke: tipStranke, // Read from "Tip stranke" column
     email: schema.emailField ? String(row[schema.emailField] ?? '') : '',
     telefon: schema.phoneField ? String(row[schema.phoneField] ?? '') || null : null,
     opombe: schema.notesField ? String(row[schema.notesField] ?? '') || null : null, // Always include opombe

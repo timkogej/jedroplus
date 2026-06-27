@@ -23,6 +23,7 @@ import {
   NotePencil,
   LockSimple,
   LockKey,
+  Tag,
 } from '@phosphor-icons/react';
 import type { Client, ClientWithAppointments, ClientAppointment } from '@/types/clients';
 import { getClientWithAppointments } from '@/lib/supabase/clients';
@@ -349,6 +350,22 @@ function ClientDetailsPanel({
                         {client.spol === 'ženska' ? t('details.genderFemale') :
                          client.spol === 'drugo' ? t('details.genderOther') :
                          client.spol ? t('details.genderMale') : t('details.genderUnknown')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Client type */}
+                <div className="rounded-xl border border-gray-200 bg-white p-4">
+                  <div className="flex items-center gap-3">
+                    <Tag className="h-5 w-5 text-[#1A1F36]" weight="regular" />
+                    <div>
+                      <div className="text-xs text-gray-500">{t('details.clientType')}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {client.tip_stranke === 'vip' ? t('modal.clientType.vip') :
+                         client.tip_stranke === 'redna' ? t('modal.clientType.redna') :
+                         client.tip_stranke === 'nova' ? t('modal.clientType.nova') :
+                         t('details.genderUnknown')}
                       </div>
                     </div>
                   </div>
