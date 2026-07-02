@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireRowCompanyAccess } from '@/lib/auth/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -15,6 +16,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params;
     const body = await request.json();
     const { tip_popusta, vrednost_popusta, aktiven } = body;
+
+    const auth = await requireRowCompanyAccess(request, 'add_on_storitve', id);
+    if ('response' in auth) return auth.response;
 
     const supabase = getClient();
 
@@ -33,9 +37,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+
+    const auth = await requireRowCompanyAccess(request, 'add_on_storitve', id);
+    if ('response' in auth) return auth.response;
+
     const supabase = getClient();
 
     const { error } = await supabase.from('add_on_storitve').delete().eq('id', id);

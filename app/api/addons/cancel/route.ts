@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireCompanyAccess } from '@/lib/auth/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -31,6 +32,9 @@ export async function POST(request: NextRequest) {
   if (!['sms', 'email', 'employees'].includes(addon_type)) {
     return NextResponse.json({ success: false, message: 'Invalid addon_type' }, { status: 400 });
   }
+
+  const authResult = await requireCompanyAccess(request, company_id);
+  if ('response' in authResult) return authResult.response;
 
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },

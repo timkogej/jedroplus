@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { addMinutesToTime } from '@/lib/promotions';
+import { requireCompanyAccess } from '@/lib/auth/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -64,6 +65,9 @@ export async function POST(request: NextRequest) {
     if (!company_id || !main_storitev_id || !zaposleni_id || !datum || !cas_konec) {
       return NextResponse.json({ ok: false, data: [], error: 'Missing required fields' }, { status: 400 });
     }
+
+    const auth = await requireCompanyAccess(request, company_id);
+    if ('response' in auth) return auth.response;
 
     const supabase = getClient();
 

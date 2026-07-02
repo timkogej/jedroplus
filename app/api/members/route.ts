@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireCompanyAccess } from '@/lib/auth/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -37,6 +38,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json() as { company_id?: string; user_ids?: string[] };
+
+    // Auth + company ownership. company_id (the company UUID) is required so we
+    // can verify the caller belongs to the company they're querying — this also
+    // closes the user_ids-only path, which could otherwise enumerate arbitrary
+    // users' emails.
+    const auth = await requireCompanyAccess(request, body.company_id);
+    if ('response' in auth) return auth.response;
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
