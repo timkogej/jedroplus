@@ -64,7 +64,7 @@ function detectStaffSchema(row: Record<string, unknown>) {
 }
 
 // Parse service from raw row
-function parseService(row: Record<string, unknown>): Storitev | null {
+export function parseService(row: Record<string, unknown>): Storitev | null {
   const schema = detectServiceSchema(row);
   const id = schema.idField ? String(row[schema.idField] ?? '') : '';
   if (!id) return null;
@@ -88,7 +88,7 @@ function parseService(row: Record<string, unknown>): Storitev | null {
 }
 
 // Parse staff from raw row
-function parseStaff(row: Record<string, unknown>): (Zaposleni & { initials: string; barva?: string }) | null {
+export function parseStaff(row: Record<string, unknown>): (Zaposleni & { initials: string; barva?: string }) | null {
   const schema = detectStaffSchema(row);
   const id = schema.idField ? String(row[schema.idField] ?? '') : '';
   if (!id) return null;
@@ -128,7 +128,7 @@ function parseStaff(row: Record<string, unknown>): (Zaposleni & { initials: stri
 }
 
 // Extract promotion fields from raw booking row
-function extractPromotionFields(row: Record<string, unknown>): {
+export function extractPromotionFields(row: Record<string, unknown>): {
   promocija_tip: 'popust' | 'happy_hour' | 'add_on' | null;
   promocija_naziv: string | null;
   popust_id: string | null;
@@ -154,7 +154,7 @@ function extractPromotionFields(row: Record<string, unknown>): {
 }
 
 // Extract pricing fields from raw booking row
-function extractPricingFields(row: Record<string, unknown>): {
+export function extractPricingFields(row: Record<string, unknown>): {
   koncna_cena: number | null;
   cena: number | null;
   popust: number | null;
@@ -177,7 +177,7 @@ function extractPricingFields(row: Record<string, unknown>): {
 }
 
 // Extract additional service IDs (2 and 3) from raw booking row
-function extractAdditionalServiceIds(row: Record<string, unknown>): { serviceId2: string; serviceId3: string } {
+export function extractAdditionalServiceIds(row: Record<string, unknown>): { serviceId2: string; serviceId3: string } {
   const SERVICE_ID_2_FIELDS = ['ID storitev 2', 'ID storitve 2', 'storitev_id_2', 'service_id_2'];
   const SERVICE_ID_3_FIELDS = ['ID storitev 3', 'ID storitve 3', 'storitev_id_3', 'service_id_3'];
 
@@ -204,7 +204,7 @@ function extractAdditionalServiceIds(row: Record<string, unknown>): { serviceId2
 }
 
 // Parse date from booking row - handles various date formats
-function parseBookingDate(row: Record<string, unknown>, schema: ReturnType<typeof detectBookingSchema>): Date | null {
+export function parseBookingDate(row: Record<string, unknown>, schema: ReturnType<typeof detectBookingSchema>): Date | null {
   // Try start_at first (ISO timestamp)
   if (schema.startAtField) {
     const startAt = row[schema.startAtField];
