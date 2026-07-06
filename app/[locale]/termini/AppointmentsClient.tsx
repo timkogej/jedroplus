@@ -30,6 +30,7 @@ import {
 } from '@/lib/supabase/appointments';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import type { AppointmentsInitialData } from '@/lib/appointments/fetchAppointmentsData.server';
+import { loadAppointmentsFrom } from './actions';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import {
   buildBookingDeleteData,
@@ -116,6 +117,13 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
   const skipAutoFetch = useRef(!!initialData);
   const [error, setError] = useState<string | null>(null);
 
+  // Date-range scoping. In server mode we load [windowFrom, ∞) up front; a date
+  // filter earlier than windowFrom expands the loaded range via a server action.
+  // In the client fallback (no initialData) the old path loads everything, so no
+  // windowing applies.
+  const serverMode = !!initialData;
+  const [loadedFrom, setLoadedFrom] = useState<string>(initialData?.windowFrom ?? '');
+
   // Filter state — initialize from URL params if present
   const [filters, setFilters] = useState<FilterState>(() => {
     const dateFrom = searchParams.get('dateFrom') ?? '';
@@ -179,6 +187,20 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
     setError(null);
 
     try {
+      // Server mode: refresh only the currently-loaded window via the server
+      // action (session-aware, own-only-filtered) so mutations don't re-pull the
+      // whole table. Fallback mode: the original full client fetch.
+      if (serverMode) {
+        const result = await loadAppointmentsFrom(loadedFrom);
+        if (result) {
+          setAppointments(result.appointments);
+          setServices(result.services);
+          setEmployees(result.employees);
+          return;
+        }
+        // result null (e.g. cookie/session gone) — fall through to client fetch.
+      }
+
       const [appointmentsRes, servicesRes, employeesRes] = await Promise.all([
         fetchAllAppointments(companyId),
         fetchServices(companyId),
@@ -197,12 +219,42 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
     } finally {
       setIsLoading(false);
     }
-  }, [companyId]);
+  }, [companyId, serverMode, loadedFrom, t]);
 
   useEffect(() => {
     if (skipAutoFetch.current) return; // server already provided initialData
     loadData();
   }, [loadData]);
+
+  // Range expansion: when the date filter reaches earlier than the loaded window,
+  // load that older range from the server and replace the working set. Dates at
+  // or after loadedFrom are already loaded and handled client-side (instant).
+  useEffect(() => {
+    if (!serverMode) return; // fallback mode already has everything
+    const from = filters.dateFrom;
+    if (!from || from >= loadedFrom) return;
+
+    let cancelled = false;
+    setIsLoading(true);
+    loadAppointmentsFrom(from)
+      .then((result) => {
+        if (cancelled || !result) return;
+        setAppointments(result.appointments);
+        setServices(result.services);
+        setEmployees(result.employees);
+        setLoadedFrom(result.windowFrom);
+      })
+      .catch(() => {
+        if (!cancelled) setError(t('errors.loadError'));
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filters.dateFrom, loadedFrom, serverMode, t]);
 
   // Auto-set employee filter when user is connected to a person
   useEffect(() => {
@@ -961,6 +1013,19 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                               style={{ background: completeTarget.storitev_3.barva || '#6366F1' }}
                             />
                             <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev_3.naziv}</p>
+                          </div>
+                        )}
+                        {completeTarget.add_on_naziv && (
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                              style={{ background: completeTarget.add_on_storitev?.barva || '#6366F1' }}
+                            />
+                            <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.add_on_naziv}</p>
+                            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                              <Plus className="h-2.5 w-2.5" weight="bold" />
+                              Dodatna storitev
+                            </span>
                           </div>
                         )}
                       </div>

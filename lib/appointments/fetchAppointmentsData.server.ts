@@ -19,6 +19,7 @@
 // functions in lib/supabase/appointments.ts are left untouched.
 
 import "server-only";
+import { startOfMonth, subMonths, format } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
 import { TABLES } from "@/lib/data";
@@ -42,6 +43,19 @@ export interface AppointmentsInitialData {
   /** True when the caller is staff restricted to their own appointments (already
    *  applied server-side). Informational; the client also derives this itself. */
   ownOnly: boolean;
+  /** The earliest date (yyyy-MM-dd) included in this fetch. The client uses it as
+   *  the "loaded window start": date filters at or after it are handled purely
+   *  client-side; a date filter earlier than it triggers a range expansion. */
+  windowFrom: string;
+}
+
+/** The bookings date column (confirmed a proper Postgres `date`). */
+const DATE_COLUMN = "Datum";
+
+/** Default window start: the first day of the previous month. Everything from
+ *  here into the future is loaded up front; older history loads on demand. */
+export function defaultWindowFrom(now: Date = new Date()): string {
+  return format(startOfMonth(subMonths(now, 1)), "yyyy-MM-dd");
 }
 
 const COMPANY_COLUMN_CANDIDATES = [
@@ -75,6 +89,40 @@ async function fetchTableOnce(
       console.warn(`[Appointments.server] ${tableName} fetch error:`, error.message);
       return [];
     }
+  }
+  return [];
+}
+
+// Bookings scoped to [fromDate, ∞) via a DB-level date filter on "Datum" — this
+// is what actually reduces the payload (old history is not fetched). If the date
+// column is somehow absent, degrade to a full fetch rather than losing all rows.
+async function fetchBookingsFrom(
+  supabase: ServerClient,
+  companyId: string,
+  fromDate: string
+): Promise<Row[]> {
+  for (const col of COMPANY_COLUMN_CANDIDATES) {
+    const { data, error } = await supabase
+      .from(TABLES.bookings)
+      .select("*")
+      .eq(col, companyId)
+      .gte(DATE_COLUMN, fromDate)
+      .limit(5000);
+    if (!error) return (data as Row[] | null) ?? [];
+    if (isMissingColumnError(error)) {
+      // The missing column could be the company col OR "Datum". Retry this company
+      // column without the date filter; if that works, the date column was the
+      // problem and we fall back to the full set.
+      const { data: d2, error: e2 } = await supabase
+        .from(TABLES.bookings)
+        .select("*")
+        .eq(col, companyId)
+        .limit(5000);
+      if (!e2) return (d2 as Row[] | null) ?? [];
+      continue; // company column invalid — try the next candidate
+    }
+    console.warn(`[Appointments.server] Termini fetch error:`, error.message);
+    return [];
   }
   return [];
 }
@@ -300,7 +348,8 @@ function buildEmployees(staff: Row[]): (Zaposleni & { initials: string })[] {
  * Returns null when there is no authenticated session (page should fall back).
  */
 export async function fetchAppointmentsDataServer(
-  companyId: string
+  companyId: string,
+  fromDate?: string
 ): Promise<AppointmentsInitialData | null> {
   if (!companyId || companyId.trim() === "") return null;
 
@@ -312,8 +361,12 @@ export async function fetchAppointmentsDataServer(
 
   const { ownOnly, personId } = await resolveViewScope(supabase, user.id);
 
+  // Default window: previous month → all future. An explicit earlier fromDate
+  // (from the range-expansion server action) widens it into older history.
+  const windowFrom = fromDate && fromDate.trim() !== "" ? fromDate : defaultWindowFrom();
+
   const [bookings, services, staff, clients] = await Promise.all([
-    fetchTableOnce(supabase, TABLES.bookings, companyId, 5000),
+    fetchBookingsFrom(supabase, companyId, windowFrom),
     fetchTableOnce(supabase, TABLES.services, companyId, 500),
     fetchTableOnce(supabase, TABLES.staff, companyId, 200),
     fetchTableOnce(supabase, TABLES.clients, companyId, 2000),
@@ -327,5 +380,6 @@ export async function fetchAppointmentsDataServer(
     services: buildServices(services),
     employees: buildEmployees(staff),
     ownOnly: !!ownOnlyPersonId,
+    windowFrom,
   };
 }
