@@ -34,8 +34,8 @@ interface ClientDetailsPanelProps {
   onClose: () => void;
   client: Client | null;
   companyId: string;
-  onEdit: (client: Client) => void;
-  onDelete: (client: Client) => void;
+  onEdit?: (client: Client) => void;
+  onDelete?: (client: Client) => void;
   onNewAppointment?: (client: Client) => void;
 }
 
@@ -255,30 +255,36 @@ function ClientDetailsPanel({
               </div>
 
               {/* Quick actions */}
-              <div className="mt-4 flex items-center gap-2">
-                <motion.button
-                  type="button"
-                  onClick={() => onEdit(client)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-sm font-medium text-white
-                             transition-colors hover:bg-white/30"
-                >
-                  <PencilSimple className="h-4 w-4" weight="bold" />
-                  {t('details.edit')}
-                </motion.button>
-                <motion.button
-                  type="button"
-                  onClick={() => onDelete(client)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-sm font-medium text-white
-                             transition-colors hover:bg-white/30"
-                >
-                  <Trash className="h-4 w-4" weight="bold" />
-                  {t('details.delete')}
-                </motion.button>
-              </div>
+              {(onEdit || onDelete) && (
+                <div className="mt-4 flex items-center gap-2">
+                  {onEdit && (
+                    <motion.button
+                      type="button"
+                      onClick={() => onEdit(client)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-sm font-medium text-white
+                                 transition-colors hover:bg-white/30"
+                    >
+                      <PencilSimple className="h-4 w-4" weight="bold" />
+                      {t('details.edit')}
+                    </motion.button>
+                  )}
+                  {onDelete && (
+                    <motion.button
+                      type="button"
+                      onClick={() => onDelete(client)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-sm font-medium text-white
+                                 transition-colors hover:bg-white/30"
+                    >
+                      <Trash className="h-4 w-4" weight="bold" />
+                      {t('details.delete')}
+                    </motion.button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Content */}
@@ -365,7 +371,7 @@ function ClientDetailsPanel({
                         {client.tip_stranke === 'vip' ? t('modal.clientType.vip') :
                          client.tip_stranke === 'redna' ? t('modal.clientType.redna') :
                          client.tip_stranke === 'nova' ? t('modal.clientType.nova') :
-                         t('details.genderUnknown')}
+                         t('modal.clientType.none')}
                       </div>
                     </div>
                   </div>
@@ -524,6 +530,19 @@ function ClientDetailsPanel({
                                 <p className="font-medium text-[#1A1F36]">
                                   {apt.storitev_naziv || 'Storitev'}
                                 </p>
+                                {apt.add_on_naziv && (
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <div
+                                      className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                                      style={{ backgroundColor: apt.add_on_barva || '#6366F1' }}
+                                    />
+                                    <span className="text-sm font-medium text-[#1A1F36]">{apt.add_on_naziv}</span>
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                                      <Plus className="h-2.5 w-2.5" weight="bold" />
+                                      Dodatna storitev
+                                    </span>
+                                  </div>
+                                )}
                                 <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
                                   <span className="flex items-center gap-1">
                                     <CalendarBlank className="h-3.5 w-3.5" weight="regular" />

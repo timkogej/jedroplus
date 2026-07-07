@@ -2,11 +2,100 @@ import { fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import type { Employee, EmployeeStats, EmployeeSchedule, ScheduleWithIntervals } from '@/types/employees';
 import { getDefaultGradient, getGradientById, isValidGradient } from '@/lib/constants/gradients';
+import { endOfMonth, endOfWeek, getLocalDateKey, startOfMonth, startOfWeek } from '@/lib/utils/calendar';
 
 import { checkColumnExists } from '@/lib/tableIntrospection';
 
 // Re-export Employee type for convenience
 export type { Employee } from '@/types/employees';
+
+const APPOINTMENT_EMPLOYEE_FIELDS = [
+  'ID osebja',
+  'ID Osebe',
+  'ID osebe',
+  'assigned_person_id',
+  'oseba_id',
+  'person_id',
+  'partner_id',
+  'zaposleni_id',
+  'employee_id',
+] as const;
+
+const EMPLOYEE_ID_FIELDS = [
+  'id',
+  'ID osebja',
+  'ID osebe',
+  'ID Osebe',
+  'assigned_person_id',
+  'oseba_id',
+  'person_id',
+  'partner_id',
+  'zaposleni_id',
+  'employee_id',
+] as const;
+
+const APPOINTMENT_DATE_FIELDS = [
+  'Datum',
+  'datum',
+  'date',
+  'Date',
+  'start_date',
+  'start_at',
+  'startAt',
+] as const;
+
+function pickFirstValue(row: Record<string, unknown>, fields: readonly string[]) {
+  for (const field of fields) {
+    const value = row[field];
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      return value;
+    }
+  }
+  return null;
+}
+
+function normalizeDateKey(value: unknown): string | null {
+  if (!value) return null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return getLocalDateKey(value);
+  }
+
+  const raw = String(value).trim();
+  if (!raw) return null;
+
+  const isoDate = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoDate) {
+    return `${isoDate[1]}-${isoDate[2]}-${isoDate[3]}`;
+  }
+
+  const dotDate = raw.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (dotDate) {
+    const day = dotDate[1].padStart(2, '0');
+    const month = dotDate[2].padStart(2, '0');
+    return `${dotDate[3]}-${month}-${day}`;
+  }
+
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) {
+    return getLocalDateKey(parsed);
+  }
+
+  return null;
+}
+
+function getEmployeeKeys(row: Record<string, unknown>, fallbackId: string): string[] {
+  const keys = new Set<string>();
+  if (fallbackId) keys.add(fallbackId);
+
+  for (const field of EMPLOYEE_ID_FIELDS) {
+    const value = row[field];
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      keys.add(String(value));
+    }
+  }
+
+  return Array.from(keys);
+}
 
 // Detect employee schema from a row
 function detectEmployeeSchema(row: Record<string, unknown>) {
@@ -158,31 +247,33 @@ export async function fetchEmployeesWithCount(companyId: string): Promise<{
     // Fetch appointments to count per employee
     const appointmentsResult = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000);
 
-    // Get today's date string
-    const today = new Date().toISOString().split('T')[0];
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const weekStartStr = weekStart.toISOString().split('T')[0];
+    const now = new Date();
+    const today = getLocalDateKey(now);
+    const weekStartStr = getLocalDateKey(startOfWeek(now));
+    const weekEndStr = getLocalDateKey(endOfWeek(now));
+    const monthStartStr = getLocalDateKey(startOfMonth(now));
+    const monthEndStr = getLocalDateKey(endOfMonth(now));
 
     // Build a map of employee ID to appointment counts
-    const appointmentData = new Map<string, { today: number; week: number; total: number }>();
+    const appointmentData = new Map<string, { today: number; week: number; month: number; total: number }>();
 
     for (const apt of appointmentsResult.data ?? []) {
-      const employeeId = apt['ID osebe'] || apt['ID Osebe'] || apt['oseba_id'] || apt['partner_id'] || apt['zaposleni_id'];
-      const date = apt['datum'] || apt['Datum'] || apt['date'];
+      const employeeId = pickFirstValue(apt, APPOINTMENT_EMPLOYEE_FIELDS);
+      const dateStr = normalizeDateKey(pickFirstValue(apt, APPOINTMENT_DATE_FIELDS));
 
-      if (employeeId) {
+      if (employeeId && dateStr) {
         const id = String(employeeId);
-        const dateStr = date ? String(date).split('T')[0] : null;
-
-        const existing = appointmentData.get(id) || { today: 0, week: 0, total: 0 };
+        const existing = appointmentData.get(id) || { today: 0, week: 0, month: 0, total: 0 };
         existing.total += 1;
 
         if (dateStr === today) {
           existing.today += 1;
         }
-        if (dateStr && dateStr >= weekStartStr) {
+        if (dateStr >= weekStartStr && dateStr <= weekEndStr) {
           existing.week += 1;
+        }
+        if (dateStr >= monthStartStr && dateStr <= monthEndStr) {
+          existing.month += 1;
         }
 
         appointmentData.set(id, existing);
@@ -193,9 +284,12 @@ export async function fetchEmployeesWithCount(companyId: string): Promise<{
     for (const row of employeesResult.data ?? []) {
       const employee = parseEmployee(row);
       if (employee) {
-        const data = appointmentData.get(employee.id);
+        const data = getEmployeeKeys(row, employee.id)
+          .map((key) => appointmentData.get(key))
+          .find(Boolean);
         employee.appointments_today = data?.today || 0;
         employee.appointments_week = data?.week || 0;
+        employee.appointments_month = data?.month || 0;
         employee.total_appointments = data?.total || 0;
         employees.push(employee);
       }

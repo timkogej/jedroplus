@@ -71,7 +71,9 @@
       "placeholder": "Select client type",
       "nova": "New",
       "redna": "Regular",
-      "vip": "VIP"
+      "vip": "VIP",
+      "none": "/",
+      "change": "Change"
     },
     "addInternalNotes": "+ Internal notes",
     "warning": {
@@ -142,6 +144,7 @@
   "table": {
     "headers": {
       "client": "Client",
+      "clientType": "Type",
       "phone": "Phone",
       "appointments": "Appointments",
       "lastInteraction": "Last interaction",

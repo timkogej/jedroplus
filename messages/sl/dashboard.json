@@ -56,6 +56,7 @@
       "time": "Čas",
       "duration": "Trajanje",
       "price": "Cena",
+      "additionalService": "Dodatna storitev",
       "notes": "Opombe",
       "internalNotes": "Interne opombe",
       "phone": "Telefon"

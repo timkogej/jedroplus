@@ -429,6 +429,18 @@ export async function fetchServiceChartData(
       });
       totalServiceOccurrences++;
     }
+
+    // Count add-on service if exists
+    const addOnService = String(row['add_on_storitev_id'] || row['add_on_service_id'] || '').trim();
+    if (addOnService && addOnService !== 'null') {
+      const existing = serviceCounts.get(addOnService) || { count: 0, revenue: 0 };
+      const price = serviceInfo.get(addOnService)?.price || 0;
+      serviceCounts.set(addOnService, {
+        count: existing.count + 1,
+        revenue: existing.revenue + price,
+      });
+      totalServiceOccurrences++;
+    }
   }
 
   console.log('[Analytics] Total completed service occurrences:', totalServiceOccurrences);

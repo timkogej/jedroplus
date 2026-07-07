@@ -10,6 +10,7 @@ import {
   Clock,
   User,
   Scissors,
+  Plus,
 } from '@phosphor-icons/react';
 import type { AppointmentWithDetails } from '@/types/appointments';
 import { useCompany } from '@/app/company-context';
@@ -273,6 +274,16 @@ export default function AppointmentCompletionModal({
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-gray-900 leading-none">{appointment.storitev_3.naziv}</span>
                         <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev_3.barva || '#6366F1' }} />
+                      </div>
+                    )}
+                    {appointment.add_on_naziv && (
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900 leading-none">{appointment.add_on_naziv}</span>
+                        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: appointment.add_on_storitev?.barva || '#6366F1' }} />
+                        <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                          <Plus className="h-2.5 w-2.5" weight="bold" />
+                          Dodatna storitev
+                        </span>
                       </div>
                     )}
                     {!appointment.storitev && <span className="font-medium text-gray-900">-</span>}

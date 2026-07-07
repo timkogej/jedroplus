@@ -29,6 +29,11 @@ export interface AppointmentItem {
   serviceId?: string;
   serviceId2?: string;
   serviceId3?: string;
+  addOnServiceId?: string;
+  addOnName?: string;
+  addOnDuration?: number;
+  addOnServiceColor?: string;
+  addOnFinalCena?: string;
   employeeName: string;
   employeeInitials: string;
   employeeColor?: string;
@@ -105,6 +110,48 @@ function getInitials(firstName: string, lastName: string): string {
   return `${(firstName || '').charAt(0)}${(lastName || '').charAt(0)}`.toUpperCase();
 }
 
+type DashboardServiceInfo = { naziv: string; barva: string; trajanje: number };
+
+function parseOptionalString(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  const text = String(value).trim();
+  return text && text !== 'null' ? text : undefined;
+}
+
+function parseOptionalNumber(value: unknown): number | undefined {
+  const text = parseOptionalString(value);
+  if (!text) return undefined;
+  const numberValue = Number(text);
+  return Number.isFinite(numberValue) ? numberValue : undefined;
+}
+
+function extractAppointmentAddOn(
+  row: Record<string, unknown>,
+  servicesMap: Map<string, DashboardServiceInfo>
+) {
+  const addOnServiceId = parseOptionalString(pickFirst(row, ['add_on_storitev_id', 'add_on_service_id', 'addOnStoritevId']));
+  const addOnName = parseOptionalString(pickFirst(row, ['add_on_naziv', 'add_on_name', 'addOnNaziv']));
+  const addOnService = addOnServiceId ? servicesMap.get(addOnServiceId) : undefined;
+  const addOnDuration =
+    parseOptionalNumber(pickFirst(row, ['add_on_trajanje', 'add_on_duration', 'addOnTrajanje'])) ??
+    addOnService?.trajanje;
+
+  return {
+    addOnServiceId,
+    addOnName,
+    addOnDuration,
+    addOnServiceColor: addOnService?.barva,
+    addOnFinalCena: parseOptionalString(pickFirst(row, ['add_on_final_cena', 'add_on_final_price'])),
+  };
+}
+
+function getAppointmentTotalCena(row: Record<string, unknown>): number | undefined {
+  const main = parseOptionalNumber(pickFirst(row, ['Final cena', 'final_cena', 'koncna_cena', 'cena', 'Cena']));
+  const addOn = parseOptionalNumber(pickFirst(row, ['add_on_final_cena', 'add_on_final_price']));
+  if (main === undefined && addOn === undefined) return undefined;
+  return (main ?? 0) + (addOn ?? 0);
+}
+
 // Fetch today's appointments - all scheduled appointments for today, ordered by time
 async function fetchTodayAppointments(companyId: string, personId?: string | null): Promise<AppointmentItem[]> {
   const today = new Date();
@@ -132,12 +179,13 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
     const clients = clientsRes.data ?? [];
 
     // Build lookup maps for services
-    const servicesMap = new Map<string, { naziv: string; barva: string }>();
+    const servicesMap = new Map<string, DashboardServiceInfo>();
     for (const s of services) {
       const id = String(pickFirst(s, ['id', 'ID storitev', 'ID storitve', 'service_id']) ?? '');
       const naziv = String(pickFirst(s, ['naziv', 'Naziv', 'name', 'service_name']) ?? '');
       const barva = String(pickFirst(s, ['barva', 'Barva', 'color']) ?? '#8B5CF6');
-      if (id) servicesMap.set(id, { naziv, barva });
+      const trajanje = parseOptionalNumber(pickFirst(s, ['Trajanje', 'trajanje', 'duration', 'duration_min'])) ?? 0;
+      if (id) servicesMap.set(id, { naziv, barva, trajanje });
     }
 
     // Build lookup maps for employees
@@ -212,14 +260,14 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
       const service = servicesMap.get(serviceId);
       const service2 = serviceId2 ? servicesMap.get(serviceId2) : undefined;
       const service3 = serviceId3 ? servicesMap.get(serviceId3) : undefined;
+      const addOn = extractAppointmentAddOn(row, servicesMap);
       const employee = employeesMap.get(staffId);
       const client = clientsMap.get(clientId);
 
       // Get additional fields
       const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes', 'Notes']) ?? '');
       const interneOpombe = String(pickFirst(row, ['interne_opombe', 'Interne opombe', 'internal_notes']) ?? '');
-      const cenaRaw = pickFirst(row, ['Final cena', 'final_cena', 'koncna_cena', 'cena', 'Cena']);
-      const cena = cenaRaw ? Number(cenaRaw) : undefined;
+      const cena = getAppointmentTotalCena(row);
 
       todayAppointments.push({
         id,
@@ -238,6 +286,11 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
         serviceId: serviceId || undefined,
         serviceId2: serviceId2 || undefined,
         serviceId3: serviceId3 || undefined,
+        addOnServiceId: addOn.addOnServiceId,
+        addOnName: addOn.addOnName,
+        addOnDuration: addOn.addOnDuration,
+        addOnServiceColor: addOn.addOnServiceColor,
+        addOnFinalCena: addOn.addOnFinalCena,
         employeeName: employee ? `${employee.ime} ${employee.priimek}` : 'Nedoločeno',
         employeeInitials: employee ? getInitials(employee.ime, employee.priimek) : '?',
         employeeColor: employee?.barva || undefined,
@@ -245,7 +298,7 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
         status: 'scheduled',
         opombe: opombe || undefined,
         interneOpombe: interneOpombe || undefined,
-        cena: cena && !isNaN(cena) ? cena : undefined,
+        cena,
       });
     }
 
@@ -287,12 +340,13 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
     const clients = clientsRes.data ?? [];
 
     // Build lookup maps for services
-    const servicesMap = new Map<string, { naziv: string; barva: string }>();
+    const servicesMap = new Map<string, DashboardServiceInfo>();
     for (const s of services) {
       const id = String(pickFirst(s, ['id', 'ID storitev', 'ID storitve', 'service_id']) ?? '');
       const naziv = String(pickFirst(s, ['naziv', 'Naziv', 'name', 'service_name']) ?? '');
       const barva = String(pickFirst(s, ['barva', 'Barva', 'color']) ?? '#8B5CF6');
-      if (id) servicesMap.set(id, { naziv, barva });
+      const trajanje = parseOptionalNumber(pickFirst(s, ['Trajanje', 'trajanje', 'duration', 'duration_min'])) ?? 0;
+      if (id) servicesMap.set(id, { naziv, barva, trajanje });
     }
 
     // Build lookup maps for employees
@@ -366,14 +420,14 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
       const service = servicesMap.get(serviceId);
       const service2 = serviceId2 ? servicesMap.get(serviceId2) : undefined;
       const service3 = serviceId3 ? servicesMap.get(serviceId3) : undefined;
+      const addOn = extractAppointmentAddOn(row, servicesMap);
       const employee = employeesMap.get(staffId);
       const client = clientsMap.get(clientId);
 
       // Get additional fields
       const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes', 'Notes']) ?? '');
       const interneOpombe = String(pickFirst(row, ['interne_opombe', 'Interne opombe', 'internal_notes']) ?? '');
-      const cenaRaw = pickFirst(row, ['Final cena', 'final_cena', 'koncna_cena', 'cena', 'Cena']);
-      const cena = cenaRaw ? Number(cenaRaw) : undefined;
+      const cena = getAppointmentTotalCena(row);
 
       tomorrowAppointments.push({
         id,
@@ -392,6 +446,11 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
         serviceId: serviceId || undefined,
         serviceId2: serviceId2 || undefined,
         serviceId3: serviceId3 || undefined,
+        addOnServiceId: addOn.addOnServiceId,
+        addOnName: addOn.addOnName,
+        addOnDuration: addOn.addOnDuration,
+        addOnServiceColor: addOn.addOnServiceColor,
+        addOnFinalCena: addOn.addOnFinalCena,
         employeeName: employee ? `${employee.ime} ${employee.priimek}` : 'Nedoločeno',
         employeeInitials: employee ? getInitials(employee.ime, employee.priimek) : '?',
         employeeColor: employee?.barva || undefined,
@@ -399,7 +458,7 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
         status: 'scheduled',
         opombe: opombe || undefined,
         interneOpombe: interneOpombe || undefined,
-        cena: cena && !isNaN(cena) ? cena : undefined,
+        cena,
       });
     }
 
@@ -692,6 +751,12 @@ async function fetchTopServices(companyId: string): Promise<TopService[]> {
       if (serviceId3) {
         serviceCounts.set(serviceId3, (serviceCounts.get(serviceId3) || 0) + 1);
       }
+
+      // Count add-on service
+      const addOnServiceId = parseOptionalString(pickFirst(apt, ['add_on_storitev_id', 'add_on_service_id']));
+      if (addOnServiceId) {
+        serviceCounts.set(addOnServiceId, (serviceCounts.get(addOnServiceId) || 0) + 1);
+      }
     }
 
     // Sort by count and get top 3
@@ -927,12 +992,13 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
     const services = servicesRes.data ?? [];
     const staff = staffRes.data ?? [];
 
-    const servicesMap = new Map<string, { naziv: string; barva: string }>();
+    const servicesMap = new Map<string, DashboardServiceInfo>();
     for (const s of services) {
       const id = String(pickFirst(s, ['id', 'ID storitev', 'ID storitve', 'service_id']) ?? '');
       const naziv = String(pickFirst(s, ['naziv', 'Naziv', 'name', 'service_name']) ?? '');
       const barva = String(pickFirst(s, ['barva', 'Barva', 'color']) ?? '#8B5CF6');
-      if (id) servicesMap.set(id, { naziv, barva });
+      const trajanje = parseOptionalNumber(pickFirst(s, ['Trajanje', 'trajanje', 'duration', 'duration_min'])) ?? 0;
+      if (id) servicesMap.set(id, { naziv, barva, trajanje });
     }
 
     const employeesMap = new Map<string, { ime: string; priimek: string; barva: string }>();
@@ -994,10 +1060,12 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
       const clientPhone = String(pickFirst(row, ['Telefon', 'stranka_telefon', 'client_phone', 'Telefon stranke', 'Telefonska številka', 'telefon', 'phone']) ?? '');
       const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
       const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes']) ?? '');
+      const cena = getAppointmentTotalCena(row);
 
       const service = servicesMap.get(serviceId);
       const service2 = serviceId2 ? servicesMap.get(serviceId2) : undefined;
       const service3 = serviceId3 ? servicesMap.get(serviceId3) : undefined;
+      const addOn = extractAppointmentAddOn(row, servicesMap);
       const employee = employeesMap.get(staffId);
 
       candidates.push({
@@ -1019,12 +1087,18 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
           serviceId: serviceId || undefined,
           serviceId2: serviceId2 || undefined,
           serviceId3: serviceId3 || undefined,
+          addOnServiceId: addOn.addOnServiceId,
+          addOnName: addOn.addOnName,
+          addOnDuration: addOn.addOnDuration,
+          addOnServiceColor: addOn.addOnServiceColor,
+          addOnFinalCena: addOn.addOnFinalCena,
           employeeName: employee ? `${employee.ime} ${employee.priimek}` : 'Nedoločeno',
           employeeInitials: employee ? getInitials(employee.ime, employee.priimek) : '?',
           employeeColor: employee?.barva || undefined,
           employeeId: staffId || undefined,
           status: 'scheduled',
           opombe: opombe || undefined,
+          cena,
         },
       });
     }

@@ -15,6 +15,8 @@ const APPOINTMENT_SERVICE_FIELDS = [
   'ID storitev 3',
   'ID storitve 3',
   'ID stoirtve 3',
+  'add_on_storitev_id',
+  'add_on_service_id',
   'ID_storitve',
   'storitev_id',
   'service_id',
@@ -39,7 +41,10 @@ function getAppointmentServiceIds(appointment: Record<string, unknown>): string[
     }
   }
 
-  return ids.filter((id) => id.trim() !== '');
+  return ids.filter((id) => {
+    const value = id.trim();
+    return value !== '' && value !== 'null';
+  });
 }
 
 // Detect service schema from a row
@@ -61,6 +66,8 @@ function detectServiceSchema(row: Record<string, unknown>) {
     descriptionField: pickField(['opis', 'Opis', 'description', 'Description']),
     activeField: pickField(['Status', 'aktivna', 'Aktivna', 'active', 'Active', 'is_active']),
     categoryField: pickField(['kategorija', 'Kategorija', 'category', 'Category']),
+    onlineBookingField: pickField(['spletne_rezervacije', 'Spletne_rezervacije', 'online_booking', 'online_rezervacije']),
+    requiresPaymentField: pickField(['zahteva_placilo', 'Zahteva_placilo', 'Zahteva plačilo', 'requires_payment', 'payment_required']),
     companyField: pickField(['podjetje_id', 'company_id', 'Podjetje']),
     createdAtField: pickField(['created_at', 'Created', 'datum_vnosa', 'Datum vnosa']),
     updatedAtField: pickField(['updated_at', 'Updated', 'datum_posodobitve']),
@@ -155,6 +162,24 @@ function parseService(row: Record<string, unknown>): Service | null {
     cena,
     opis: schema.descriptionField ? String(row[schema.descriptionField] ?? '') || null : null,
     aktivna,
+    spletne_rezervacije: schema.onlineBookingField
+      ? (() => {
+          const v = row[schema.onlineBookingField];
+          if (typeof v === 'boolean') return v;
+          if (typeof v === 'string') return v.toLowerCase() !== 'false' && v !== '0';
+          if (typeof v === 'number') return v !== 0;
+          return true; // default: online booking enabled
+        })()
+      : true,
+    zahteva_placilo: schema.requiresPaymentField
+      ? (() => {
+          const v = row[schema.requiresPaymentField];
+          if (typeof v === 'boolean') return v;
+          if (typeof v === 'string') return v.toLowerCase() === 'true' || v === '1' || v.toLowerCase() === 'yes' || v.toLowerCase() === 'da';
+          if (typeof v === 'number') return v !== 0;
+          return false;
+        })()
+      : false,
     podjetje_id: schema.companyField ? String(row[schema.companyField] ?? '') : '',
     created_at: schema.createdAtField ? String(row[schema.createdAtField] ?? new Date().toISOString()) : new Date().toISOString(),
     updated_at: schema.updatedAtField ? String(row[schema.updatedAtField] ?? new Date().toISOString()) : new Date().toISOString(),

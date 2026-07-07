@@ -304,7 +304,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
   return (
     <div className="flex h-full flex-col">
       {/* Day header - Apple Calendar style */}
-      <div className="flex bg-white">
+      <div className="relative z-20 flex flex-shrink-0 bg-white">
         {/* Time column spacer */}
         <div className="w-[52px] flex-shrink-0" />
 
@@ -391,7 +391,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
 
       {/* Employee headers - only show if there are active employees */}
       {displayEmployees.length > 0 && (
-        <div className="flex bg-white">
+        <div className="relative z-20 flex flex-shrink-0 bg-white">
           {/* Time column spacer */}
           <div className="w-[52px] flex-shrink-0" />
 
@@ -437,7 +437,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
       />
 
       {/* Time grid with appointments by employee */}
-      <TimeGrid columnCount={columnCount} showCurrentTime={isCurrentDay} gridScrollRef={gridScrollRef}>
+      <TimeGrid columnCount={columnCount} showCurrentTime={isCurrentDay} gridScrollRef={gridScrollRef} isMobile={isMobile}>
         {displayEmployees.length > 0 ? (
           <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}>
             {displayEmployees.map((employee, empIndex) => {

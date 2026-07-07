@@ -142,6 +142,12 @@ function ClientTable({
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const getClientTypeLabel = (client: Client) => {
+    if (client.tip_stranke === 'vip') return t('modal.clientType.vip');
+    if (client.tip_stranke === 'redna') return t('modal.clientType.redna');
+    if (client.tip_stranke === 'nova') return t('modal.clientType.nova');
+    return t('modal.clientType.none');
+  };
 
   // Handle sort
   const handleSort = (field: ClientSortField) => {
@@ -254,6 +260,11 @@ function ClientTable({
               </th>
               <th className="px-4 py-4 text-left">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                  {t('table.headers.clientType')}
+                </span>
+              </th>
+              <th className="px-4 py-4 text-left">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
                   {t('table.headers.phone')}
                 </span>
               </th>
@@ -316,6 +327,19 @@ function ClientTable({
                       <Envelope className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
                       <span className="truncate">{client.email || '-'}</span>
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                      client.tip_stranke === 'vip'
+                        ? 'bg-amber-50 text-amber-700'
+                        : client.tip_stranke === 'redna'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : client.tip_stranke === 'nova'
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {getClientTypeLabel(client)}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2 text-sm text-gray-600">

@@ -4,8 +4,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
 
-const WEBHOOK_URL = "https://n8n.jedroplus.com/webhook/main_povezava";
+const DEFAULT_WEBHOOK_URL = "https://n8n.jedroplus.com/webhook/main_povezava";
+const RESCHEDULE_NOTIFICATION_WEBHOOK_URL =
+  "https://n8n.jedroplus.com/webhook/prestavitev-termina-obvestilo";
 const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
+
+function getWebhookUrl(event: unknown) {
+  if (
+    typeof event === "string" &&
+    event.toUpperCase() === "PRESTAVITEV_TERMINA_OBVESTILO"
+  ) {
+    return RESCHEDULE_NOTIFICATION_WEBHOOK_URL;
+  }
+
+  return DEFAULT_WEBHOOK_URL;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,8 +61,10 @@ export async function POST(request: NextRequest) {
       meta: payload.meta ?? { app: "Integrate", version: "1.0" },
     };
 
+    const webhookUrl = getWebhookUrl(normalizedPayload.event);
+
     // ✅ KORAK 4: Pošlji na n8n (z API key če je nastavljen)
-    const response = await fetch(WEBHOOK_URL, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

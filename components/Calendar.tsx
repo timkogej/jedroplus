@@ -25,6 +25,7 @@ import {
   Phone,
 } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
+import type { Client } from '@/types/clients';
 import type { ViewMode } from '@/lib/utils/calendar';
 import ViewToggle from './calendar/ViewToggle';
 import DateStrip from './calendar/DateStrip';
@@ -34,11 +35,13 @@ import DayView from './calendar/DayView';
 import MonthView from './calendar/MonthView';
 import TwoDayView from './calendar/TwoDayView';
 import AppointmentModal, { type AppointmentFormData } from './appointments/AppointmentModal';
+import { RescheduleNotificationModal } from './appointments/RescheduleNotificationModal';
 import DeleteConfirmation from './appointments/DeleteConfirmation';
 import AbsenceModal, { type AbsenceFormData } from './calendar/AbsenceModal';
 import AbsenceDetailModal, { type AbsenceEditData } from './calendar/AbsenceDetailModal';
 import EventModal, { type EventFormData } from './calendar/EventModal';
 import EventViewModal from './calendar/EventViewModal';
+import ClientDetailsPanel from './clients/ClientDetailsPanel';
 import {
   fetchAppointmentsForMonth,
   fetchServices,
@@ -46,6 +49,7 @@ import {
   fetchAbsences,
   type Absence,
 } from '@/lib/supabase/appointments';
+import { getClientById } from '@/lib/supabase/clients';
 import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
 import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, fetchResursiForStoritve, syncTerminResursi, deleteTerminResursi } from '@/lib/supabase/resursi';
 import type { Resurs } from '@/types/resursi';
@@ -132,6 +136,7 @@ function AppointmentDetailModal({
   onNoShow,
   onCancel,
   onDelete,
+  onOpenClientDetails,
 }: {
   appointment: AppointmentWithDetails;
   services: Storitev[];
@@ -143,6 +148,7 @@ function AppointmentDetailModal({
   onNoShow?: (appointment: AppointmentWithDetails) => void;
   onCancel?: (appointment: AppointmentWithDetails) => void;
   onDelete?: (appointment: AppointmentWithDetails) => void;
+  onOpenClientDetails?: (appointment: AppointmentWithDetails) => void | Promise<void>;
 }) {
   const t = useTranslations('appointments');
   const locale = useLocale();
@@ -188,9 +194,13 @@ function AppointmentDetailModal({
     const primaryColor = appointment.storitev?.barva || '#6366F1';
     const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
     const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
+    const addOnService = appointment.add_on_storitev_id
+      ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
+      : appointment.add_on_storitev || null;
     const allColors: string[] = [primaryColor];
     if (service2?.barva) allColors.push(service2.barva);
     if (service3?.barva) allColors.push(service3.barva);
+    if (appointment.add_on_naziv && addOnService?.barva) allColors.push(addOnService.barva);
 
     if (allColors.length === 1) return singleGradient(primaryColor);
     if (allColors.length === 2) {
@@ -238,14 +248,22 @@ function AppointmentDetailModal({
     }
   };
 
-  // Get the service color from the Storitve table
-  const getServiceColor = (serviceId?: string | null) => {
-    if (!serviceId) return '#6366F1';
-    const service = services.find(s => s.id === serviceId);
-    return service?.barva || '#6366F1';
-  };
-
   const isTerminated = ['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel'].includes(String(appointment.status));
+  const serviceGradient = getGradientBackground();
+  const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
+  const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500';
+  const promotionGradient = 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
+  const gradientTextStyle = {
+    backgroundImage: promotionGradient,
+  };
+  const gradientBorderStyle = {
+    border: '1px solid transparent',
+    background: `linear-gradient(#fff, #fff) padding-box, ${promotionGradient} border-box`,
+  };
+  const clientGradientBorderStyle = {
+    border: '1px solid transparent',
+    background: `linear-gradient(#F9FAFB, #F9FAFB) padding-box, ${promotionGradient} border-box`,
+  };
 
   return (
     <motion.div
@@ -260,55 +278,78 @@ function AppointmentDetailModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="relative w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-[#F7F8FA] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Colored header with client name and close button */}
-        <div
-          className="relative flex items-center justify-between px-5 py-3.5"
-          style={{ background: getGradientBackground() }}
-        >
-          <h3 className="text-base font-semibold text-white truncate pr-3">
-            {appointment.stranka_ime || t('calendarView.detailModal.fields.unknownClient')}
-          </h3>
+        <div className="h-1.5 w-full flex-shrink-0" style={{ background: serviceGradient }} />
+
+        {/* Header */}
+        <div className="border-x border-b border-gray-100 bg-white px-5 py-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
+                <h3 className="min-w-0 truncate text-lg font-semibold text-gray-900">
+                  {appointment.stranka_ime || t('calendarView.detailModal.fields.unknownClient')}
+                </h3>
+                <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
+                  {getStatusLabel(appointment.status || 'scheduled')}
+                </span>
+              </div>
+              <p className="mt-0.5 text-sm text-gray-500">
+                {formatModalDate(appointment.datum)}
+              </p>
+            </div>
           <motion.button
             type="button"
             onClick={onClose}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className="rounded-full bg-white/20 p-2 text-white transition-colors hover:bg-white/30 flex-shrink-0"
+            className="flex-shrink-0 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
             aria-label={t('calendarView.appointmentModal.actions.close')}
           >
             <X className="h-5 w-5" weight="bold" />
           </motion.button>
+          </div>
         </div>
 
         {/* Content - scrollable */}
-        <div className="flex-1 overflow-y-auto min-h-0 p-5 space-y-4">
-          {/* Status */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.status')}</label>
-            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(appointment.status || 'scheduled')}`}>
-              {getStatusLabel(appointment.status || 'scheduled')}
-            </span>
-          </div>
-
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto border-x border-gray-100 p-4">
           {/* Client */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.client')}</label>
+          <div className={sectionClass}>
+            <label className={labelClass}>{t('modal.fields.client')}</label>
             <div className="space-y-2">
-              <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-                <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
-                  {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
-                </span>
-                <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
-              </div>
+              {appointment.stranka_id && onOpenClientDetails ? (
+                <motion.button
+                  type="button"
+                  onClick={() => { void onOpenClientDetails(appointment); }}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-all hover:shadow-sm"
+                  style={clientGradientBorderStyle}
+                >
+                  <span className="flex-shrink-0 bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
+                    {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
+                  </span>
+                  <p className="min-w-0 flex-1 truncate font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
+                  <CaretRight className="h-4 w-4 flex-shrink-0 text-gray-400" weight="bold" />
+                </motion.button>
+              ) : (
+                <div
+                  className="flex items-center gap-3 rounded-lg px-4 py-3"
+                  style={clientGradientBorderStyle}
+                >
+                  <span className="flex-shrink-0 bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
+                    {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
+                  </span>
+                  <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
+                </div>
+              )}
               {(appointment.stranka_email || appointment.stranka_telefon) && (
                 <div className="grid grid-cols-2 gap-2">
                   {appointment.stranka_email && (
                     <a
                       href={`mailto:${appointment.stranka_email}`}
-                      className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-violet-300 hover:shadow-sm transition-all"
+                      className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-all hover:border-gray-300 hover:shadow-sm"
                     >
                       <Envelope className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                       <div className="min-w-0">
@@ -320,7 +361,7 @@ function AppointmentDetailModal({
                   {appointment.stranka_telefon && (
                     <a
                       href={`tel:${appointment.stranka_telefon}`}
-                      className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-green-300 hover:shadow-sm transition-all"
+                      className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-all hover:border-gray-300 hover:shadow-sm"
                     >
                       <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                       <div className="min-w-0">
@@ -338,9 +379,14 @@ function AppointmentDetailModal({
           {appointment.storitev && (() => {
             const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
             const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
+            const addOnService = appointment.add_on_storitev_id
+              ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
+              : appointment.add_on_storitev || null;
+            const addOnName = appointment.add_on_naziv?.trim();
+            const addOnDuration = appointment.add_on_trajanje ?? addOnService?.trajanje ?? 0;
             return (
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.service')}</label>
+              <div className={sectionClass}>
+                <label className={labelClass}>{t('modal.fields.service')}</label>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
@@ -363,6 +409,17 @@ function AppointmentDetailModal({
                       {service3.trajanje > 0 && <span className="text-xs text-gray-400">({service3.trajanje} min)</span>}
                     </div>
                   )}
+                  {addOnName && (
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: addOnService?.barva || '#6366F1' }} />
+                      <p className="text-sm font-medium text-[#1A1F36]">{addOnName}</p>
+                      {addOnDuration > 0 && <span className="text-xs text-gray-400">({addOnDuration} min)</span>}
+                      <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                        <Plus className="h-2.5 w-2.5" weight="bold" />
+                        {t('calendarView.detailModal.fields.additionalService')}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -370,9 +427,9 @@ function AppointmentDetailModal({
 
           {/* Employee */}
           {appointment.zaposleni && (
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('calendarView.rescheduleDialog.employee')}</label>
-              <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
+            <div className={sectionClass}>
+              <label className={labelClass}>{t('calendarView.rescheduleDialog.employee')}</label>
+              <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
                 <span
                   className="text-lg font-bold flex-shrink-0"
                   style={{
@@ -391,25 +448,26 @@ function AppointmentDetailModal({
             </div>
           )}
 
-          {/* Date */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.date')}</label>
-            <p className="text-sm font-medium text-[#1A1F36]">{formatModalDate(appointment.datum)}</p>
-          </div>
-
-          {/* Time */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('calendarView.detailModal.fields.time')}</label>
-            <p className="text-sm font-medium text-[#1A1F36]">
-              {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
-            </p>
+          <div className={`${sectionClass} grid grid-cols-2 gap-4`}>
+            <div>
+              <label className={labelClass}>{t('modal.fields.date')}</label>
+              <p className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
+                {formatModalDate(appointment.datum)}
+              </p>
+            </div>
+            <div>
+              <label className={labelClass}>{t('calendarView.detailModal.fields.time')}</label>
+              <p className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
+                {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
+              </p>
+            </div>
           </div>
 
           {/* Duration */}
           {appointment.cas_zacetek && appointment.cas_konec && (
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+            <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
               <span className="text-sm font-medium text-gray-700">{t('calendarView.detailModal.fields.duration')}</span>
-              <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+              <span className="bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
                 {(() => {
                   try {
                     const [sh, sm] = appointment.cas_zacetek.split(':').map(Number);
@@ -429,11 +487,12 @@ function AppointmentDetailModal({
             const finalCena = apt.koncna_cena ?? originalCena;
             const popustTip = apt.popust_tip ?? '€';
             const imaPopust = popustVrednost > 0;
+            const hasAddOnPrice = !!(apt.add_on_naziv && apt.add_on_final_cena);
 
             const getBadge = () => {
-              if (apt.promocija_tip === 'happy_hour') return { label: 'Happy Hour', bg: '#F59E0B', Icon: Clock };
-              if (apt.promocija_tip === 'add_on')     return { label: 'Add-on',     bg: '#3B82F6', Icon: Plus };
-              if (imaPopust)                           return { label: apt.promocija_naziv ?? 'Popust', bg: '#6D5EF7', Icon: Tag };
+              if (apt.promocija_tip === 'happy_hour') return { label: 'Happy Hour', Icon: Clock };
+              if (apt.promocija_tip === 'add_on') return { label: 'Add-on', Icon: Plus };
+              if (imaPopust) return { label: apt.promocija_naziv ?? 'Popust', Icon: Tag };
               return null;
             };
             const badge = getBadge();
@@ -441,7 +500,7 @@ function AppointmentDetailModal({
             const fmt = (val: number) =>
               new Intl.NumberFormat(locale === 'sl' ? 'sl-SI' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
-            if (originalCena === 0 && !imaPopust) return null;
+            if (originalCena === 0 && !imaPopust && !hasAddOnPrice) return null;
 
             return (
               <div className="space-y-3">
@@ -450,13 +509,13 @@ function AppointmentDetailModal({
                     {badge && (
                       <div
                         className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-white text-xs font-semibold"
-                        style={{ backgroundColor: badge.bg }}
+                        style={{ background: promotionGradient }}
                       >
                         <badge.Icon size={11} />
                         <span>{badge.label}</span>
                       </div>
                     )}
-                    <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-2.5">
+                    <div className="space-y-2.5 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">{t('calendarView.detailModal.fields.originalPrice')}</span>
                         <span className="text-gray-400 line-through">{fmt(originalCena)} EUR</span>
@@ -469,32 +528,34 @@ function AppointmentDetailModal({
                       </div>
                       <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
                         <span className="font-semibold text-gray-900">{t('calendarView.detailModal.fields.priceWithDiscount')}</span>
-                        <span className="text-xl font-bold text-green-600">{fmt(finalCena)} EUR</span>
+                        <span className="bg-clip-text text-xl font-bold text-transparent" style={gradientTextStyle}>
+                          {fmt(finalCena)} EUR
+                        </span>
                       </div>
                     </div>
                   </motion.div>
-                ) : (
-                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+                ) : originalCena > 0 ? (
+                  <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
                     <span className="text-sm font-medium text-gray-700">{t('calendarView.detailModal.fields.price')}</span>
-                    <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                    <span className="bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
                       {fmt(originalCena)} EUR
                     </span>
                   </div>
-                )}
+                ) : null}
 
                 {/* ADD-ON section — only when there is actual add-on pricing or an explicit add_on promo */}
-                {apt.storitev_2 && (apt.add_on_final_cena || apt.promocija_tip === 'add_on') && (
+                {apt.add_on_naziv && (apt.add_on_final_cena || apt.promocija_tip === 'add_on') && (
                   <motion.div
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2"
+                    className="space-y-2 rounded-lg border border-blue-100 bg-blue-50 p-4"
                   >
                     <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm mb-2">
                       <Plus size={14} />
                       <span>{t('calendarView.detailModal.fields.additionalService')}</span>
                     </div>
-                    <p className="text-sm font-medium text-gray-800">{apt.storitev_2.naziv}</p>
+                    <p className="text-sm font-medium text-gray-800">{apt.add_on_naziv}</p>
                     {apt.add_on_final_cena && (
                       <>
                         <div className="flex justify-between text-sm">
@@ -519,8 +580,8 @@ function AppointmentDetailModal({
 
           {/* Resources */}
           {aptResursi.length > 0 && (
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">Resursi v uporabi</label>
+            <div className={sectionClass}>
+              <label className={labelClass}>Resursi v uporabi</label>
               <div className="flex flex-wrap gap-1.5">
                 {aptResursi.map((r) => (
                   <span
@@ -540,9 +601,9 @@ function AppointmentDetailModal({
 
           {/* Notes */}
           {appointment.opombe && (
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.notes')}</label>
-              <div className="p-4 bg-gray-50 rounded-xl">
+            <div className={sectionClass}>
+              <label className={labelClass}>{t('modal.fields.notes')}</label>
+              <div className="rounded-lg p-4" style={gradientBorderStyle}>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.opombe}</p>
               </div>
             </div>
@@ -555,9 +616,9 @@ function AppointmentDetailModal({
               || '';
             if (!notes) return null;
             return (
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.fields.internalNotes')}</label>
-                <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
+              <div className={sectionClass}>
+                <label className={labelClass}>{t('modal.fields.internalNotes')}</label>
+                <div className="rounded-lg p-4" style={gradientBorderStyle}>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
                 </div>
               </div>
@@ -566,7 +627,7 @@ function AppointmentDetailModal({
         </div>
 
         {/* Action buttons - right aligned, like Termini page */}
-        <div className="border-t border-gray-100 px-5 py-3">
+        <div className="border-x border-y border-gray-100 bg-white px-5 py-3">
           <div className="flex items-center justify-end gap-1">
             {/* Complete - only if not terminated */}
             {!isTerminated && onComplete && (
@@ -703,6 +764,8 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
   // UI state
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithDetails | null>(null);
+  const [detailsClient, setDetailsClient] = useState<Client | null>(null);
+  const [clientDetailsOpen, setClientDetailsOpen] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -748,6 +811,15 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     newDate: string;
     newStartTime: string;
     newEndTime: string;
+  } | null>(null);
+
+  const [rescheduleNotifyTarget, setRescheduleNotifyTarget] = useState<{
+    appointment: AppointmentWithDetails;
+    newDate: string;
+    newTime: string;
+    newEndTime?: string;
+    channel: 'sms' | 'email' | 'both';
+    source: 'edit' | 'drag_drop';
   } | null>(null);
 
   // Action feedback
@@ -1248,25 +1320,6 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     });
   }, [currentView]);
 
-  // Swipe gesture tracking for 2day (3-day) view
-  const touchStartX = useRef<number | null>(null);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  }, []);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const diff = e.changedTouches[0].clientX - touchStartX.current;
-    touchStartX.current = null;
-    if (Math.abs(diff) < 50) return;
-    if (diff < 0) {
-      handleNext();
-    } else {
-      handlePrev();
-    }
-  }, [handleNext, handlePrev]);
-
   const handleTodayClick = useCallback(() => {
     const today = new Date();
     setCurrentDate(today);
@@ -1288,26 +1341,73 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   }, [currentView, handleViewChange]);
 
   // ── Touch swipe for mobile navigation ──────────────────────────────────────
-  const swipeTouchStartX = useRef<number | null>(null);
-  const swipeTouchStartY = useRef<number | null>(null);
+  const swipeStateRef = useRef<{
+    startX: number;
+    startY: number;
+    lastX: number;
+    lastY: number;
+    axis: 'pending' | 'horizontal' | 'vertical';
+  } | null>(null);
+  const lastSwipeNavigationAtRef = useRef(0);
 
   const handleSwipeTouchStart = useCallback((e: React.TouchEvent) => {
-    swipeTouchStartX.current = e.touches[0].clientX;
-    swipeTouchStartY.current = e.touches[0].clientY;
+    if (!isMobile || e.touches.length !== 1) {
+      swipeStateRef.current = null;
+      return;
+    }
+
+    const touch = e.touches[0];
+    swipeStateRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      lastX: touch.clientX,
+      lastY: touch.clientY,
+      axis: 'pending',
+    };
+  }, [isMobile]);
+
+  const handleSwipeTouchMove = useCallback((e: React.TouchEvent) => {
+    const state = swipeStateRef.current;
+    if (!state || e.touches.length !== 1) return;
+
+    const touch = e.touches[0];
+    state.lastX = touch.clientX;
+    state.lastY = touch.clientY;
+
+    if (state.axis === 'pending') {
+      const deltaX = state.lastX - state.startX;
+      const deltaY = state.lastY - state.startY;
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      if (absX < 12 && absY < 12) return;
+      state.axis = absX > absY * 1.35 ? 'horizontal' : 'vertical';
+    }
+
+    if (state.axis === 'horizontal' && e.cancelable) {
+      e.preventDefault();
+    }
   }, []);
 
   const handleSwipeTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (swipeTouchStartX.current === null || swipeTouchStartY.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - swipeTouchStartX.current;
-    const deltaY = e.changedTouches[0].clientY - swipeTouchStartY.current;
-    swipeTouchStartX.current = null;
-    swipeTouchStartY.current = null;
+    const state = swipeStateRef.current;
+    if (!state) return;
 
-    // Only trigger if the swipe is clearly horizontal (deltaX dominant) and long enough
-    if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+    const changedTouch = e.changedTouches[0];
+    const endX = changedTouch?.clientX ?? state.lastX;
+    const endY = changedTouch?.clientY ?? state.lastY;
+    const deltaX = endX - state.startX;
+    const deltaY = endY - state.startY;
+    swipeStateRef.current = null;
 
-    // Prevent browser from also firing a click event after the swipe
-    e.preventDefault();
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+    const isHorizontalSwipe = state.axis === 'horizontal' && absX >= 56 && absX > absY * 1.45;
+    if (!isHorizontalSwipe) return;
+
+    const now = window.performance.now();
+    if (now - lastSwipeNavigationAtRef.current < 320) return;
+    lastSwipeNavigationAtRef.current = now;
 
     if (deltaX < 0) {
       handleNext(); // swipe left → forward
@@ -1315,6 +1415,10 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       handlePrev(); // swipe right → backward
     }
   }, [handleNext, handlePrev]);
+
+  const handleSwipeTouchCancel = useCallback(() => {
+    swipeStateRef.current = null;
+  }, []);
   // ────────────────────────────────────────────────────────────────────────────
 
   const handleAppointmentClick = useCallback((appointment: AppointmentWithDetails) => {
@@ -1324,6 +1428,37 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   const handleCloseDetailModal = useCallback(() => {
     setSelectedAppointment(null);
   }, []);
+
+  const handleCloseClientDetails = useCallback(() => {
+    setClientDetailsOpen(false);
+    setDetailsClient(null);
+  }, []);
+
+  const handleOpenClientDetails = useCallback(async (appointment: AppointmentWithDetails) => {
+    const clientId = String(appointment.stranka_id ?? '').trim();
+
+    if (!clientId) {
+      setActionError('Ta termin nima povezave na stranko.');
+      return;
+    }
+
+    setActionError(null);
+
+    const result = await getClientById(companyId, clientId);
+
+    if (result.error) {
+      setActionError('Podrobnosti stranke ni bilo mogoče naložiti.');
+      return;
+    }
+
+    if (!result.data) {
+      setActionError('Stranka za ta termin ni bila najdena v tem podjetju.');
+      return;
+    }
+
+    setDetailsClient(result.data);
+    setClientDetailsOpen(true);
+  }, [companyId]);
 
   const handleEditFromDetail = useCallback((appointment: AppointmentWithDetails) => {
     setEditingAppointment(appointment);
@@ -1390,40 +1525,62 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
       // Log zakljucen for all completions
       if (companyId && completeTarget.id) {
+        const idTerminaForZakljucen = completeTarget.id_termina ?? completeTarget.id;
+        console.log('[logZgodovina] zakljucen params:', {
+          idPodjetja: companyId,
+          tipEntitete: 'termin',
+          idEntitete: idTerminaForZakljucen,
+          akcija: 'zakljucen',
+          izvedel: actor,
+          izvedel_tip: role,
+          idTermina: idTerminaForZakljucen,
+          idStranke: completeTarget.stranka_id,
+        });
         logZgodovina({
           idPodjetja: companyId,
           tipEntitete: 'termin',
-          idEntitete: completeTarget.id,
+          idEntitete: idTerminaForZakljucen,
           akcija: 'zakljucen',
           izvedel: actor,
           izvedel_tip: (role as 'owner' | 'admin' | 'staff') ?? 'staff',
-          idTermina: completeTarget.id,
+          idTermina: idTerminaForZakljucen,
           idStranke: completeTarget.stranka_id,
         }).catch(() => {/* ignore logging errors */});
       }
 
       // Ghost termin: soft-delete after successful completion
       if (completeTarget.belezi_termin === false && companyId) {
-        console.log('[handleConfirmComplete] ghost termin detected — writing deleted_at for id:', completeTarget.id);
+        console.log('[handleConfirmComplete] ghost termin detected — id (bigint):', completeTarget.id, '| ID termina (text):', completeTarget.id_termina);
         try {
           const { error: deleteError } = await supabase
             .from('Termini')
             .update({ deleted_at: new Date().toISOString() })
-            .eq('ID termina', completeTarget.id)
+            .eq('id', completeTarget.id)
             .eq('ID podjetja', companyId);
 
           if (deleteError) {
-            console.error('[handleConfirmComplete] deleted_at write failed:', deleteError.message);
+            console.error('[ghost delete] full error:', JSON.stringify(deleteError));
           }
 
+          const idTerminaForLog = completeTarget.id_termina ?? completeTarget.id;
+          console.log('[logZgodovina] izbrisan (ghost) params:', {
+            idPodjetja: companyId,
+            tipEntitete: 'termin',
+            idEntitete: idTerminaForLog,
+            akcija: 'izbrisan',
+            izvedel: actor,
+            izvedel_tip: role,
+            idTermina: idTerminaForLog,
+            idStranke: completeTarget.stranka_id,
+          });
           logZgodovina({
             idPodjetja: companyId,
             tipEntitete: 'termin',
-            idEntitete: completeTarget.id,
+            idEntitete: idTerminaForLog,
             akcija: 'izbrisan',
             izvedel: actor,
             izvedel_tip: (role as 'owner' | 'admin' | 'staff') ?? 'staff',
-            idTermina: completeTarget.id,
+            idTermina: idTerminaForLog,
             idStranke: completeTarget.stranka_id,
           }).catch(() => {/* ignore logging errors */});
         } catch (ghostErr) {
@@ -1813,13 +1970,41 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       }
 
       await loadAppointments();
+
+      if (!isNewAppointment && editingAppointment && companySettings?.obvestilo_prestavitev_omogoceno === true) {
+        const normalizedEditingDatum = editingAppointment.datum?.substring(0, 10) ?? '';
+        const normalizedEditingCas = editingAppointment.cas_zacetek?.substring(0, 5) ?? '';
+        const dateChanged = data.datum !== normalizedEditingDatum;
+        const timeChanged = data.cas_zacetek !== normalizedEditingCas;
+        console.log('[reschedule check]', {
+          formDatum: data.datum,
+          editingDatum: editingAppointment.datum,
+          formCas: data.cas_zacetek,
+          editingCas: editingAppointment.cas_zacetek,
+          dateChanged,
+          timeChanged,
+        });
+        if (dateChanged || timeChanged) {
+          const rawChannel = companySettings?.obvestilo_prestavitev_channel ?? companySettings?.channel ?? companySettings?.chanel_pred ?? 'email';
+          const channel = rawChannel === 'sms' || rawChannel === 'both' ? rawChannel : 'email';
+          setRescheduleNotifyTarget({
+            appointment: editingAppointment,
+            newDate: data.datum,
+            newTime: data.cas_zacetek,
+            newEndTime: data.cas_konec,
+            channel,
+            source: 'edit',
+          });
+        }
+      }
+
       handleCloseModal();
     } catch (err) {
       setActionError(t('errors.saveError'));
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal, t]);
+  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal, editingAppointment, companySettings, t]);
 
   // Drag-and-drop reschedule: callback from WeekView/DayView
   const handleAppointmentDropped = useCallback((
@@ -1925,12 +2110,25 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await loadAppointments();
+
+      if (companySettings?.obvestilo_prestavitev_omogoceno === true) {
+        const rawChannel = companySettings?.obvestilo_prestavitev_channel ?? companySettings?.channel ?? companySettings?.chanel_pred ?? 'email';
+        const channel = rawChannel === 'sms' || rawChannel === 'both' ? rawChannel : 'email';
+        setRescheduleNotifyTarget({
+          appointment,
+          newDate,
+          newTime: newStartTime,
+          newEndTime,
+          channel,
+          source: 'drag_drop',
+        });
+      }
     } catch (err) {
       setActionError(t('calendarView.errors.reschedule'));
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, companySettings, t]);
 
   const handleConfirmReschedule = useCallback(async () => {
     if (!rescheduleConfirm) return;
@@ -1938,6 +2136,189 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
     setRescheduleConfirm(null);
     await handleRescheduleAppointment(appointment, newDate, newStartTime, newEndTime);
   }, [rescheduleConfirm, handleRescheduleAppointment]);
+
+  const handleSendRescheduleNotification = useCallback(async () => {
+    if (!rescheduleNotifyTarget) return;
+    const { appointment, newDate, newTime, newEndTime, channel, source } = rescheduleNotifyTarget;
+
+    const posalji_sms = channel === 'sms' || channel === 'both';
+    const posalji_email = channel === 'email' || channel === 'both';
+    const smsTemplate = companySettings?.obvestilo_prestavitev_template_sms ?? '';
+    const emailTemplate = companySettings?.obvestilo_prestavitev_template_email ?? '';
+    const apptManagementLink =
+      typeof companySettings?.appt_management_link === 'string'
+        ? companySettings.appt_management_link
+        : '';
+
+    const oldDate = appointment.datum?.substring(0, 10) ?? appointment.datum;
+    const oldStartTime = appointment.cas_zacetek?.substring(0, 5) ?? appointment.cas_zacetek;
+    const oldEndTime = appointment.cas_konec?.substring(0, 5) ?? appointment.cas_konec;
+    const resolvedNewEndTime = newEndTime ?? oldEndTime;
+    const appointmentTextId = appointment.id_termina ?? appointment.id;
+    const popustTip = appointment.popust_tip === 'eur'
+      ? '€'
+      : appointment.popust_tip === 'percent'
+        ? '%'
+        : undefined;
+
+    const clientDetails = {
+      id: appointment.stranka_id ?? '',
+      ime: appointment.stranka_ime ?? '',
+      priimek: appointment.stranka_priimek ?? '',
+      email: appointment.stranka_email ?? null,
+      telefon: appointment.stranka_telefon ?? null,
+      barva: appointment.stranka_barva ?? null,
+      notes: null,
+      tags: null,
+      status: null,
+      last_interaction: null,
+    };
+
+    const enhancedData = buildEnhancedAppointmentData({
+      companyId,
+      userEmail: actor,
+      companyProfile: companyPayload,
+      appointmentData: {
+        id: appointmentTextId,
+        datum: newDate,
+        cas_zacetek: newTime,
+        cas_konec: resolvedNewEndTime,
+        stranka_id: appointment.stranka_id ? String(appointment.stranka_id) : undefined,
+        stranka_ime: appointment.stranka_ime,
+        stranka_email: appointment.stranka_email || undefined,
+        stranka_telefon: appointment.stranka_telefon || undefined,
+        storitev_id: appointment.storitev_id ? String(appointment.storitev_id) : (appointment.storitev?.id || ''),
+        storitev_id_2: appointment.storitev_id_2 ? String(appointment.storitev_id_2) : undefined,
+        storitev_id_3: appointment.storitev_id_3 ? String(appointment.storitev_id_3) : undefined,
+        zaposleni_id: appointment.zaposleni_id ? String(appointment.zaposleni_id) : (appointment.zaposleni?.id || ''),
+        status: appointment.status || 'scheduled',
+        opombe: appointment.opombe || undefined,
+        internal_opombe: appointment.interne_opombe || undefined,
+        cena: appointment.cena ?? undefined,
+        popust: appointment.popust ?? undefined,
+        popust_tip: popustTip as '€' | '%' | undefined,
+        valuta: appointment.valuta ?? undefined,
+        belezi_termin: appointment.belezi_termin,
+      },
+      serviceDetails: appointment.storitev ? {
+        id: appointment.storitev.id,
+        naziv: appointment.storitev.naziv,
+        trajanje: appointment.storitev.trajanje,
+        cena: appointment.storitev.cena,
+        barva: appointment.storitev.barva,
+      } : null,
+      serviceDetails2: appointment.storitev_2 ? {
+        id: appointment.storitev_2.id,
+        naziv: appointment.storitev_2.naziv,
+        trajanje: appointment.storitev_2.trajanje,
+        cena: null,
+        barva: appointment.storitev_2.barva,
+      } : null,
+      serviceDetails3: appointment.storitev_3 ? {
+        id: appointment.storitev_3.id,
+        naziv: appointment.storitev_3.naziv,
+        trajanje: appointment.storitev_3.trajanje,
+        cena: null,
+        barva: appointment.storitev_3.barva,
+      } : null,
+      employeeDetails: appointment.zaposleni ? {
+        id: appointment.zaposleni.id,
+        ime: appointment.zaposleni.ime,
+        priimek: appointment.zaposleni.priimek,
+        email: appointment.zaposleni.email,
+        barva: appointment.zaposleni.barva,
+      } : null,
+      clientDetails,
+    });
+
+    const rescheduleDetails = {
+      source,
+      old_date: oldDate,
+      old_start_time: oldStartTime,
+      old_end_time: oldEndTime,
+      new_date: newDate,
+      new_start_time: newTime,
+      new_end_time: resolvedNewEndTime,
+      old_start_at: `${oldDate}T${oldStartTime}:00`,
+      old_end_at: `${oldDate}T${oldEndTime}:00`,
+      new_start_at: `${newDate}T${newTime}:00`,
+      new_end_at: `${newDate}T${resolvedNewEndTime}:00`,
+    };
+
+    const notificationData = {
+      ...enhancedData,
+      appointment_id: appointmentTextId,
+      booking_id: appointmentTextId,
+      appointment_row_id: appointment.id,
+      id_termina: appointmentTextId,
+      stari_datum: oldDate,
+      stari_cas: oldStartTime,
+      stari_konec: oldEndTime,
+      novi_datum: newDate,
+      novi_cas: newTime,
+      novi_konec: resolvedNewEndTime,
+      prestavitev: rescheduleDetails,
+      notification: {
+        channel,
+        posalji_sms,
+        posalji_email,
+        sms_template: smsTemplate,
+        email_template: emailTemplate,
+        appt_management_link: apptManagementLink,
+        povezava_prenarocanje: apptManagementLink,
+      },
+      posalji_sms,
+      posalji_email,
+      sms_template: smsTemplate,
+      email_template: emailTemplate,
+      appt_management_link: apptManagementLink,
+      povezava_prenarocanje: apptManagementLink,
+      podatkiTermina: {
+        ...enhancedData.podatkiTermina,
+        row_id: appointment.id,
+        id_vrstice: appointment.id,
+        id_termina: appointmentTextId,
+        stari_datum: oldDate,
+        stari_cas: oldStartTime,
+        stari_konec: oldEndTime,
+        novi_datum: newDate,
+        novi_cas: newTime,
+        novi_konec: resolvedNewEndTime,
+        prestavitev: rescheduleDetails,
+      },
+    };
+
+    try {
+      const result = await callN8nAction(
+        buildPayload('PRESTAVITEV_TERMINA_OBVESTILO', 'appointments', notificationData)
+      );
+
+      if (!result.ok) {
+        throw new Error(result.error || t('calendarView.errors.reschedule'));
+      }
+
+      if (companyId && appointment.id) {
+        logZgodovina({
+          idPodjetja: companyId,
+          tipEntitete: 'termin',
+          idEntitete: appointmentTextId,
+          akcija: 'prestavljen',
+          spremembe: {
+            prej: { datum: oldDate, cas: oldStartTime, konec: oldEndTime },
+            potem: { datum: newDate, cas: newTime, konec: resolvedNewEndTime },
+          },
+          izvedel: actor,
+          izvedel_tip: (role as 'owner' | 'admin' | 'staff') ?? 'staff',
+          idTermina: appointmentTextId,
+          idStranke: appointment.stranka_id,
+        }).catch(() => {/* ignore logging errors */});
+      }
+
+      setRescheduleNotifyTarget(null);
+    } catch (err) {
+      setActionError(t('calendarView.errors.reschedule'));
+    }
+  }, [rescheduleNotifyTarget, companyId, companySettings, actor, role, companyPayload, buildPayload, t]);
 
   // Handle absence modal
   const handleOpenAbsenceModal = useCallback(() => {
@@ -2123,7 +2504,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       {/* Main calendar area - takes available space */}
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Header – Apple Calendar style */}
-        <header className="relative z-10 flex flex-col border-b border-gray-100 bg-white/90 backdrop-blur-md flex-shrink-0">
+        <header className="sticky top-0 z-30 flex flex-col border-b border-gray-100 bg-white/90 backdrop-blur-md flex-shrink-0">
           {/* Top row: month/year navigation + view toggle + filter */}
           <div className="flex items-center justify-between px-3 py-2.5 md:px-5 md:py-3">
 
@@ -2191,7 +2572,10 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         <div
           className="flex-1 overflow-hidden p-2 md:p-4"
           onTouchStart={handleSwipeTouchStart}
+          onTouchMove={handleSwipeTouchMove}
           onTouchEnd={handleSwipeTouchEnd}
+          onTouchCancel={handleSwipeTouchCancel}
+          style={isMobile ? { touchAction: 'pan-y', overscrollBehavior: 'contain' } as React.CSSProperties : undefined}
         >
           {loading ? (
             <div className="flex h-full items-center justify-center">
@@ -2295,11 +2679,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                 />
               )}
               {currentView === '2day' && (
-                <div
-                  className="h-full"
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                >
+                <div className="h-full">
                   <AnimatePresence mode="popLayout" initial={false} custom={slideDirection}>
                     <motion.div
                       key={animKey}
@@ -2334,6 +2714,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                         onGridSlotClick={handleGridSlotClick}
                         companySchedule={companySchedule}
                         showAllDays={showAllDays}
+                        isMobile={isMobile}
                         appointmentsWithResursi={terminIdsWithResursi}
                       />
                     </motion.div>
@@ -2391,10 +2772,18 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
               onNoShow={aptEditable ? handleNoShowAppointment : undefined}
               onCancel={aptEditable ? handleCancelAppointment : undefined}
               onDelete={aptEditable && canDeleteAppointment ? handleDeleteAppointment : undefined}
+              onOpenClientDetails={handleOpenClientDetails}
             />
           );
         })()}
       </AnimatePresence>
+
+      <ClientDetailsPanel
+        isOpen={clientDetailsOpen}
+        onClose={handleCloseClientDetails}
+        client={detailsClient}
+        companyId={companyId}
+      />
 
       {/* Create/Edit modal - Uses IDENTICAL modal as Termini page */}
       <AppointmentModal
@@ -2546,6 +2935,16 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                           <div className="flex items-center gap-2">
                             <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: completeTarget.storitev_3.barva || '#6366F1' }} />
                             <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.storitev_3.naziv}</p>
+                          </div>
+                        )}
+                        {completeTarget.add_on_naziv && (
+                          <div className="flex items-center gap-2">
+                            <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: completeTarget.add_on_storitev?.barva || '#6366F1' }} />
+                            <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.add_on_naziv}</p>
+                            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                              <Plus className="h-2.5 w-2.5" weight="bold" />
+                              {t('calendarView.detailModal.fields.additionalService')}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -2701,6 +3100,16 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
                           <span className="text-sm font-medium text-[#1A1F36]">{s.naziv}</span>
                         </div>
                       ))}
+                      {rescheduleConfirm.appointment.add_on_naziv && (
+                        <div className="flex items-center gap-2">
+                          <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: rescheduleConfirm.appointment.add_on_storitev?.barva || '#6366F1' }} />
+                          <span className="text-sm font-medium text-[#1A1F36]">{rescheduleConfirm.appointment.add_on_naziv}</span>
+                          <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                            <Plus className="h-2.5 w-2.5" weight="bold" />
+                            {t('calendarView.detailModal.fields.additionalService')}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -2757,6 +3166,19 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Reschedule notification modal */}
+      {rescheduleNotifyTarget && (
+        <RescheduleNotificationModal
+          isOpen={true}
+          onClose={() => setRescheduleNotifyTarget(null)}
+          onConfirm={handleSendRescheduleNotification}
+          appointment={rescheduleNotifyTarget.appointment}
+          newDate={rescheduleNotifyTarget.newDate}
+          newTime={rescheduleNotifyTarget.newTime}
+          channel={rescheduleNotifyTarget.channel}
+        />
+      )}
 
       {/* Error Toast */}
       <AnimatePresence>

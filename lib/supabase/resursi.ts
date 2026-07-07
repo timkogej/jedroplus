@@ -376,6 +376,30 @@ export async function fetchResursiForTermin(
   return { data: (data ?? []).map((r) => String(r['ID resursa'])), error: null };
 }
 
+// Resource row-ids (resurs_id) already attached to a single termin row.
+// Used to suppress conflict warnings for resources the termin itself occupies.
+export async function fetchResursIdsForTerminRow(
+  companyId: string,
+  terminRowId: number,
+): Promise<{ data: Set<number>; error: string | null }> {
+  if (!companyId || !terminRowId) return { data: new Set(), error: null };
+
+  const { data, error } = await supabase
+    .from(TABLE_TERMINI_RESURSI)
+    .select('resurs_id')
+    .eq('ID podjetja', companyId)
+    .eq('termin_id', terminRowId);
+
+  if (error) return { data: new Set(), error: error.message };
+
+  const ids = new Set<number>(
+    (data ?? [])
+      .map((r) => Number((r as Record<string, unknown>)['resurs_id']))
+      .filter((n) => !isNaN(n) && n > 0)
+  );
+  return { data: ids, error: null };
+}
+
 export async function fetchTerminIdsWithResursi(
   companyId: string,
 ): Promise<{ data: Set<number>; error: string | null }> {
@@ -497,7 +521,7 @@ export async function checkResourceConflicts(
     if (urnikRaw && typeof urnikRaw === 'string') {
       try { urnik = JSON.parse(urnikRaw); } catch { urnik = null; }
     } else if (urnikRaw && typeof urnikRaw === 'object') {
-      urnik = urnikRaw as typeof urnik;
+      urnik = urnikRaw as Record<string, { enabled: boolean; intervals: { start: string; end: string }[] }>;
     }
 
     if (urnik !== null) {

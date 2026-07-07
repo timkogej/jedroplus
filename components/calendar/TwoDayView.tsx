@@ -37,6 +37,7 @@ interface TwoDayViewProps {
   onGridSlotClick?: (date: Date, time: string) => void;
   companySchedule?: CompanySchedule | null;
   showAllDays?: boolean;
+  isMobile?: boolean;
   appointmentsWithResursi?: Set<number>;
 }
 
@@ -103,7 +104,7 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
   return layout;
 }
 
-function TwoDayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, onGridSlotClick, companySchedule, showAllDays = true, appointmentsWithResursi }: TwoDayViewProps) {
+function TwoDayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, onDateClick, onGridSlotClick, companySchedule, showAllDays = true, isMobile = false, appointmentsWithResursi }: TwoDayViewProps) {
   const t = useTranslations('appointments');
   const locale = useLocale();
   // When showAllDays=false, compute next 3 weekdays skipping Sat/Sun
@@ -183,7 +184,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
   return (
     <div className="flex h-full flex-col">
       {/* Day headers */}
-      <div className="flex bg-white flex-shrink-0">
+      <div className="relative z-20 flex bg-white flex-shrink-0">
         <div className="w-[52px] flex-shrink-0" />
         <div className="flex-1 grid grid-cols-3">
           {days.map((day, idx) => {
@@ -293,7 +294,7 @@ function TwoDayView({ currentDate, appointments, absences = [], events = [], ser
       />
 
       {/* Time grid */}
-      <TimeGrid columnCount={3} showCurrentTime>
+      <TimeGrid columnCount={3} showCurrentTime isMobile={isMobile}>
         <div className="grid h-full grid-cols-3">
           {days.map((day, dayIndex) => {
             const dateKey = getLocalDateKey(day);

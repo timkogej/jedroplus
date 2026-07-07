@@ -7,7 +7,7 @@ import { Select, SelectOption } from '@/components/ui/animated-select';
 import { ScrollTimePicker } from '@/components/ui/ScrollTimePicker';
 import ClientSearch from './ClientSearch';
 import ClientModal from '@/components/clients/ClientModal';
-import StatusBadge, { type AppointmentStatus, getStatusConfig } from './StatusBadge';
+import StatusBadge from './StatusBadge';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import type { Client } from '@/lib/supabase/clients';
 import type { ClientFormData } from '@/types/clients';
@@ -24,7 +24,7 @@ import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { addMinutesToTime } from '@/lib/promotions';
 import { useTranslations } from 'next-intl';
-import { checkResourceConflicts, type ResourceConflict } from '@/lib/supabase/resursi';
+import { checkResourceConflicts, fetchResursIdsForTerminRow, type ResourceConflict } from '@/lib/supabase/resursi';
 
 type ModalMode = 'view' | 'edit' | 'create';
 
@@ -55,6 +55,9 @@ export interface AppointmentFormData {
   storitev_id: string;
   storitev_id_2?: string; // Second service ID (optional)
   storitev_id_3?: string; // Third service ID (optional)
+  add_on_storitev_id?: string | null;
+  add_on_naziv?: string | null;
+  add_on_trajanje?: number | null;
   stevilo_storitev?: number; // Number of services (1, 2, or 3)
   zaposleni_id: string;
   status: string;
@@ -76,19 +79,6 @@ export interface AppointmentFormData {
   // Ghost termin
   belezi_termin?: boolean;
 }
-
-// Get status dot color for select options
-const getStatusDotColor = (status: AppointmentStatus): string => {
-  const colorMap: Record<AppointmentStatus, string> = {
-    scheduled: '#8B5CF6',
-    confirmed: '#10B981',
-    pending: '#F59E0B',
-    completed: '#3B82F6',
-    cancelled: '#EF4444',
-    no_show: '#6B7280',
-  };
-  return colorMap[status];
-};
 
 // Generate time slots from 5:30 to 23:00 in 15-minute intervals
 function generateTimeSlots(): string[] {
@@ -167,14 +157,6 @@ function AppointmentModal({
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
   const { personId, role, permissions } = useRolePermissions();
-  const STATUS_OPTIONS: { value: AppointmentStatus; label: string }[] = [
-    { value: 'scheduled', label: t('status.scheduled') },
-    { value: 'confirmed', label: t('status.confirmed') },
-    { value: 'pending', label: t('status.pending') },
-    { value: 'completed', label: t('status.completed') },
-    { value: 'cancelled', label: t('status.cancelled') },
-    { value: 'no_show', label: t('status.noShow') },
-  ];
 
   // Detect mobile (< 768px) for time picker variant
   const [isMobile, setIsMobile] = useState(false);
@@ -258,6 +240,8 @@ function AppointmentModal({
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof AppointmentFormData, string>>>({});
   const [resourceConflicts, setResourceConflicts] = useState<ResourceConflict[]>([]);
+  // Resource row-ids this appointment already occupies — suppressed from conflict warnings in edit mode
+  const [ownResursIds, setOwnResursIds] = useState<Set<number>>(new Set());
 
   // Initialize form data when appointment changes
   useEffect(() => {
@@ -310,6 +294,9 @@ function AppointmentModal({
         storitev_id: appointment.storitev_id || appointment.storitev?.id || '',
         storitev_id_2: (storitevId2 && storitevId2 !== 'null') ? storitevId2 : '',
         storitev_id_3: (storitevId3 && storitevId3 !== 'null') ? storitevId3 : '',
+        add_on_storitev_id: appointment.add_on_storitev_id ?? null,
+        add_on_naziv: appointment.add_on_naziv ?? null,
+        add_on_trajanje: appointment.add_on_trajanje ?? null,
         stevilo_storitev: count,
         zaposleni_id: appointment.zaposleni_id || appointment.zaposleni?.id || '',
         status: appointment.status || 'scheduled',
@@ -320,6 +307,13 @@ function AppointmentModal({
         popust_tip: discountType,
         koncna_cena: finalPrice ?? undefined,
         valuta: (apt.valuta as string) || 'EUR',
+        promocija_tip: appointment.promocija_tip ?? null,
+        promocija_naziv: appointment.promocija_naziv ?? null,
+        popust_id: appointment.popust_id ?? null,
+        happy_hour_id: appointment.happy_hour_id ?? null,
+        add_on_popust: appointment.add_on_popust ?? null,
+        add_on_popust_tip: appointment.add_on_popust_tip ?? null,
+        add_on_final_cena: appointment.add_on_final_cena ?? null,
       });
       setServiceCount(count);
       // Set client for display
@@ -420,8 +414,12 @@ function AppointmentModal({
       }
     }
 
+    if (formData.add_on_naziv && formData.add_on_trajanje) {
+      totalDuration += formData.add_on_trajanje;
+    }
+
     return totalDuration;
-  }, [formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3, services, serviceCount]);
+  }, [formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3, formData.add_on_naziv, formData.add_on_trajanje, services, serviceCount]);
 
   // Calculate total price from all selected services (only fiksna prices)
   const calculateTotalServicePrice = useCallback(() => {
@@ -586,6 +584,20 @@ function AppointmentModal({
     }
   }, [formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3, services, serviceCount, calculateTotalServicePrice]);
 
+  // Load the resources this appointment already occupies (edit mode only) so we
+  // don't warn the user that "their own" resource is taken at the appointment's time.
+  useEffect(() => {
+    if (mode !== 'edit' || !companyId || !appointment?.id) {
+      setOwnResursIds(new Set());
+      return;
+    }
+    let cancelled = false;
+    fetchResursIdsForTerminRow(companyId, Number(appointment.id)).then(({ data }) => {
+      if (!cancelled) setOwnResursIds(data);
+    });
+    return () => { cancelled = true; };
+  }, [mode, companyId, appointment]);
+
   // Resource conflict check — debounced, non-blocking
   useEffect(() => {
     const serviceIds = [
@@ -612,7 +624,8 @@ function AppointmentModal({
         formData.cas_konec,
         excludeId,
       );
-      setResourceConflicts(conflicts);
+      // Hide conflicts for resources this appointment already occupies (edit mode)
+      setResourceConflicts(conflicts.filter((c) => !ownResursIds.has(c.resursId)));
     }, 400);
 
     return () => clearTimeout(timer);
@@ -626,6 +639,7 @@ function AppointmentModal({
     companyId,
     mode,
     appointment,
+    ownResursIds,
   ]);
 
   // Calculate final price when price or discount changes
@@ -698,14 +712,25 @@ function AppointmentModal({
       if (!employee.storitve || employee.storitve.length === 0) return activeServices;
       return activeServices.filter(s => employee.storitve?.includes(s.id));
     })();
+    // Always include the services already selected on this appointment, even if the
+    // active/employee filters would otherwise drop them — otherwise the Select can't
+    // resolve its current value and shows the placeholder instead of the chosen service.
+    const selectedIds = [formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3].filter(Boolean) as string[];
+    const withSelected = [...base];
+    for (const id of selectedIds) {
+      if (!base.some(s => s.id === id)) {
+        const svc = services.find(s => s.id === id);
+        if (svc) withSelected.push(svc);
+      }
+    }
     const seen = new Set<string>();
-    return base.filter(s => {
+    return withSelected.filter(s => {
       if (!s.id) return false;
       if (seen.has(s.id)) return false;
       seen.add(s.id);
       return true;
     });
-  }, [services, employees, formData.zaposleni_id]);
+  }, [services, employees, formData.zaposleni_id, formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3]);
 
   // Handle service change - check if current employee can still do the new service
   const handleServiceChange = useCallback((serviceId: string, serviceIndex: 1 | 2 | 3 = 1) => {
@@ -778,6 +803,9 @@ function AppointmentModal({
       setFormData((prev) => ({
         ...prev,
         storitev_id_2: '',
+        add_on_storitev_id: null,
+        add_on_naziv: null,
+        add_on_trajanje: null,
         add_on_popust: null,
         add_on_popust_tip: null,
         add_on_final_cena: null,
@@ -867,11 +895,13 @@ function AppointmentModal({
 
       // Create new client with 7-digit unique ID (same as Stranke page)
       const clientId = await getNextClientId(companyId);
+      const clientType = data.tip_stranke || null;
       const newRow: Record<string, unknown> = {
         'ID stranke': clientId,
         Ime: data.ime,
         Priimek: data.priimek,
         Spol: data.spol,
+        'Tip stranke': clientType,
         Email: data.email,
         Telefon: data.telefon,
         Opombe: data.opombe,
@@ -926,6 +956,7 @@ function AppointmentModal({
         priimek: data.priimek,
         email: data.email,
         telefon: data.telefon,
+        tip_stranke: clientType,
       };
       setSelectedClient(newClient);
       setFormData((prev) => ({
@@ -1080,6 +1111,17 @@ function AppointmentModal({
 
   // Get total duration for display
   const totalDuration = calculateTotalDuration();
+  const promotionGradient = 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
+  const gradientTextStyle = {
+    backgroundImage: promotionGradient,
+  };
+  const clientGradientBorderStyle = {
+    border: '1px solid transparent',
+    background: `linear-gradient(#F9FAFB, #F9FAFB) padding-box, ${promotionGradient} border-box`,
+  };
+  const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60 sm:p-5';
+  const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500';
+  const inputBaseClass = 'w-full max-w-full min-w-0 rounded-lg border bg-white px-3 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900/10';
 
   return (
     <AnimatePresence>
@@ -1100,17 +1142,21 @@ function AppointmentModal({
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="relative w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+          className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
         >
-          {/* Gradient header */}
-          <div className="bg-gradient-to-r from-violet-500 to-cyan-500 px-6 py-5">
+          {/* Header */}
+          <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">{title}</h2>
+              <h2
+                className="bg-clip-text text-xl font-semibold text-transparent"
+                style={gradientTextStyle}
+              >
+                {title}
+              </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-2 text-white/80 transition-colors hover:bg-white/10
-                           hover:text-white"
+                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
               >
                 <X className="h-5 w-5" weight="bold" />
               </button>
@@ -1118,20 +1164,28 @@ function AppointmentModal({
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="px-4 py-5 sm:px-6 space-y-5 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
+          <form onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 custom-scrollbar sm:p-5">
+              <div className="space-y-4">
             {/* Client search - First field */}
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <div className={sectionClass}>
+              <label className={labelClass}>
                 {t('modal.fields.client')}
               </label>
               {isViewMode ? (
                 <div className="space-y-2">
                   {/* Client name */}
-                  <div className="flex items-center gap-3 rounded-xl bg-gray-50 px-4 py-3">
-                    <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent flex-shrink-0">
+                  <div
+                    className="flex items-center gap-3 rounded-xl px-4 py-3"
+                    style={clientGradientBorderStyle}
+                  >
+                    <span className="flex-shrink-0 bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
                       {(() => { const p = (formData.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
                     </span>
-                    <p className="font-medium text-[#1A1F36]">{formData.stranka_ime || '-'}</p>
+                    <p className="min-w-0 flex-1 truncate font-medium text-[#1A1F36]">{formData.stranka_ime || '-'}</p>
+                    <div className="flex-shrink-0">
+                      <StatusBadge status={formData.status} variant="gradient" weight="normal" />
+                    </div>
                   </div>
                   {/* Email and phone boxes */}
                   {(formData.stranka_email || formData.stranka_telefon) && (
@@ -1139,7 +1193,7 @@ function AppointmentModal({
                       {formData.stranka_email && (
                         <a
                           href={`mailto:${formData.stranka_email}`}
-                          className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-violet-300 hover:shadow-sm transition-all"
+                          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-all hover:border-gray-300 hover:shadow-sm"
                         >
                           <Envelope className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                           <div className="min-w-0">
@@ -1151,7 +1205,7 @@ function AppointmentModal({
                       {formData.stranka_telefon && (
                         <a
                           href={`tel:${formData.stranka_telefon}`}
-                          className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 hover:border-green-300 hover:shadow-sm transition-all"
+                          className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-all hover:border-gray-300 hover:shadow-sm"
                         >
                           <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                           <div className="min-w-0">
@@ -1178,8 +1232,8 @@ function AppointmentModal({
             </div>
 
             {/* Service - Second field (supports up to 3 services) */}
-            <div className="space-y-3">
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <div className={`${sectionClass} space-y-3`}>
+              <label className={labelClass}>
                 {t('modal.fields.service')}
               </label>
               {isViewMode ? (
@@ -1243,7 +1297,7 @@ function AppointmentModal({
                   {(selectedService2 || selectedService3) && (
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <span className="text-xs font-medium text-gray-500">{t('modal.totalDuration')}</span>
-                      <span className="text-sm font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      <span className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
                         {totalDuration} min
                       </span>
                     </div>
@@ -1278,10 +1332,10 @@ function AppointmentModal({
                           initial={{ opacity: 0, x: -8 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, x: -8 }}
-                          className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium ${
+                          className={`mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
                             promotions.slot1.type === 'happy_hour'
-                              ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                              : 'bg-violet-50 text-violet-800 border border-violet-200'
+                              ? 'border border-amber-200 bg-amber-50 text-amber-800'
+                              : 'border border-blue-100 bg-blue-50 text-blue-800'
                           }`}
                         >
                           <span>{promotions.slot1.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
@@ -1334,10 +1388,10 @@ function AppointmentModal({
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -8 }}
-                            className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium ${
+                            className={`mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
                               promotions.slot2.type === 'happy_hour'
-                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                                : 'bg-violet-50 text-violet-800 border border-violet-200'
+                                ? 'border border-amber-200 bg-amber-50 text-amber-800'
+                                : 'border border-blue-100 bg-blue-50 text-blue-800'
                             }`}
                           >
                             <span>{promotions.slot2.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
@@ -1391,10 +1445,10 @@ function AppointmentModal({
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -8 }}
-                            className={`mt-2 flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium ${
+                            className={`mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
                               promotions.slot3.type === 'happy_hour'
-                                ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                                : 'bg-violet-50 text-violet-800 border border-violet-200'
+                                ? 'border border-amber-200 bg-amber-50 text-amber-800'
+                                : 'border border-blue-100 bg-blue-50 text-blue-800'
                             }`}
                           >
                             <span>{promotions.slot3.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
@@ -1415,8 +1469,7 @@ function AppointmentModal({
                       onClick={handleAddService}
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-gray-300
-                                 text-gray-600 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 py-2.5 text-gray-600 transition-colors hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
                     >
                       <Plus className="h-4 w-4" weight="bold" />
                       <span className="text-sm font-medium">{t('modal.addService')}</span>
@@ -1430,10 +1483,10 @@ function AppointmentModal({
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 8 }}
-                        className="rounded-xl border border-blue-100 bg-blue-50/50 overflow-hidden"
+                        className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50"
                       >
-                        <div className="px-3 py-2 border-b border-blue-100">
-                          <p className="text-xs font-semibold text-blue-700 uppercase tracking-wider">➕ Dodaj storitev</p>
+                        <div className="border-b border-gray-100 bg-white px-3 py-2">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Dodaj storitev</p>
                         </div>
                         <div className="p-2 space-y-1.5">
                           {availableAddOns.map((ao) => {
@@ -1448,10 +1501,10 @@ function AppointmentModal({
                                 onClick={() => handleSelectAddOn(ao)}
                                 whileHover={{ scale: 1.01 }}
                                 whileTap={{ scale: 0.99 }}
-                                className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between transition-all ${
+                                className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-all ${
                                   isSelected
-                                    ? 'bg-white border-2 border-violet-400 shadow-sm'
-                                    : 'bg-white border border-gray-200 hover:border-violet-300'
+                                    ? 'border border-gray-900 bg-white shadow-sm'
+                                    : 'border border-gray-200 bg-white hover:border-gray-300'
                                 }`}
                               >
                                 <span className="text-sm font-medium text-gray-900">{ao.naziv}</span>
@@ -1470,9 +1523,9 @@ function AppointmentModal({
 
                   {/* Total duration display when multiple services */}
                   {serviceCount > 1 && totalDuration > 0 && (
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+                    <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3">
                       <span className="text-sm font-medium text-gray-700">{t('modal.totalDuration')}</span>
-                      <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                      <span className="bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
                         {totalDuration} min
                       </span>
                     </div>
@@ -1482,8 +1535,8 @@ function AppointmentModal({
             </div>
 
             {/* Employee - Third field */}
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <div className={sectionClass}>
+              <label className={labelClass}>
                 {t('modal.fields.employee')}
               </label>
               {isViewMode || lockEmployee ? (
@@ -1525,14 +1578,16 @@ function AppointmentModal({
             </div>
 
             {/* Date field */}
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <div className={sectionClass}>
+              <label className={labelClass}>
                 {t('modal.fields.date')}
               </label>
               {isViewMode ? (
-                <p className="flex items-center gap-2 text-sm font-medium text-[#1A1F36]">
+                <p className="flex items-center gap-2 text-sm font-bold">
                   <CalendarBlank className="h-4 w-4 text-gray-400" weight="regular" />
-                  {new Date(formData.datum).toLocaleDateString('sl-SI')}
+                  <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
+                    {new Date(formData.datum).toLocaleDateString('sl-SI')}
+                  </span>
                 </p>
               ) : (
                 <>
@@ -1540,8 +1595,7 @@ function AppointmentModal({
                     type="date"
                     value={formData.datum}
                     onChange={(e) => setFormData((prev) => ({ ...prev, datum: e.target.value }))}
-                    className={`w-full max-w-full min-w-0 rounded-xl border bg-white px-2 py-2 text-sm text-[#1A1F36]
-                               focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20
+                    className={`${inputBaseClass}
                                ${errors.datum ? 'border-red-300' : 'border-gray-200'}`}
                   />
                   {errors.datum && (
@@ -1552,15 +1606,17 @@ function AppointmentModal({
             </div>
 
             {/* Time fields - Both start and end time are manually selectable */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className={`${sectionClass} grid grid-cols-2 gap-3`}>
               <div className="min-w-0">
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <label className={labelClass}>
                   {t('modal.fields.startTime')}
                 </label>
                 {isViewMode ? (
-                  <p className="flex items-center gap-2 text-sm font-medium text-[#1A1F36]">
+                  <p className="flex items-center gap-2 text-sm font-bold">
                     <Clock className="h-4 w-4 text-gray-400" weight="regular" />
-                    {formData.cas_zacetek}
+                    <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
+                      {formData.cas_zacetek}
+                    </span>
                   </p>
                 ) : (
                   <>
@@ -1571,7 +1627,7 @@ function AppointmentModal({
                         setFormData((prev) => ({ ...prev, cas_zacetek: e.target.value }));
                         setEndTimeManuallySet(false);
                       }}
-                      className={`w-full max-w-full min-w-0 rounded-xl border bg-white px-2 py-2 text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
+                      className={`${inputBaseClass} ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
                     />
                     {errors.cas_zacetek && (
                       <p className="mt-1 text-xs text-red-500">{errors.cas_zacetek}</p>
@@ -1580,13 +1636,15 @@ function AppointmentModal({
                 )}
               </div>
               <div className="min-w-0">
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <label className={labelClass}>
                   {t('modal.fields.endTime')}
                 </label>
                 {isViewMode ? (
-                  <p className="flex items-center gap-2 text-sm font-medium text-[#1A1F36]">
+                  <p className="flex items-center gap-2 text-sm font-bold">
                     <Clock className="h-4 w-4 text-gray-400" weight="regular" />
-                    {formData.cas_konec}
+                    <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
+                      {formData.cas_konec}
+                    </span>
                   </p>
                 ) : (
                   <>
@@ -1597,7 +1655,7 @@ function AppointmentModal({
                         setFormData((prev) => ({ ...prev, cas_konec: e.target.value }));
                         setEndTimeManuallySet(true);
                       }}
-                      className={`w-full max-w-full min-w-0 rounded-xl border bg-white px-2 py-2 text-sm text-[#1A1F36] focus:outline-none focus:ring-2 focus:ring-violet-300 ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
+                      className={`${inputBaseClass} ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
                     />
                     {errors.cas_konec && (
                       <p className="mt-1 text-xs text-red-500">{errors.cas_konec}</p>
@@ -1609,9 +1667,9 @@ function AppointmentModal({
 
             {/* Duration info display */}
             {formData.cas_zacetek && formData.cas_konec && (
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+              <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
                 <span className="text-sm font-medium text-gray-700">{t('modal.appointmentDuration')}</span>
-                <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                <span className="bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
                   {(() => {
                     const [startH, startM] = formData.cas_zacetek.split(':').map(Number);
                     const [endH, endM] = formData.cas_konec.split(':').map(Number);
@@ -1622,37 +1680,9 @@ function AppointmentModal({
               </div>
             )}
 
-            {/* Status - only show in view or edit mode, not in create mode */}
-            {(isViewMode || mode === 'edit') && (
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
-                  {t('modal.fields.status')}
-                </label>
-                {isViewMode ? (
-                  <StatusBadge status={formData.status} variant="gradient" />
-                ) : (
-                  <Select
-                    value={formData.status}
-                    setValue={(value) => setFormData((prev) => ({ ...prev, status: value }))}
-                    placeholder={t('modal.placeholders.status')}
-                  >
-                    {STATUS_OPTIONS.map((option) => (
-                      <SelectOption
-                        key={option.value}
-                        value={option.value}
-                        colorDot={getStatusDotColor(option.value)}
-                      >
-                        {option.label}
-                      </SelectOption>
-                    ))}
-                  </Select>
-                )}
-              </div>
-            )}
-
             {/* Price field - auto-filled from service */}
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <div className={sectionClass}>
+              <label className={labelClass}>
                 {t('modal.fields.price')}
               </label>
               {isViewMode ? (
@@ -1735,7 +1765,7 @@ function AppointmentModal({
                           initial={{ opacity: 0, y: 6 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.1 }}
-                          className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2"
+                          className="space-y-2 rounded-lg border border-blue-100 bg-blue-50 p-4"
                         >
                           <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm">
                             <Plus size={14} weight="bold" />
@@ -1758,7 +1788,7 @@ function AppointmentModal({
                       ...prev,
                       cena: Math.max(0, (prev.cena ?? 0) - 5)
                     }))}
-                    className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-gray-200 bg-white text-gray-600 transition-all hover:border-violet-300 hover:bg-violet-50 hover:text-violet-600"
+                    className="flex h-12 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-all hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
                   >
                     <span className="text-xl font-semibold">−</span>
                   </button>
@@ -1775,9 +1805,7 @@ function AppointmentModal({
                         cena: e.target.value ? parseFloat(e.target.value) : undefined
                       }))}
                       placeholder="0.00"
-                      className="w-full rounded-xl border-2 border-gray-200 py-3 text-center text-2xl font-bold
-                                 text-[#1A1F36] placeholder-gray-400 focus:border-violet-400 focus:outline-none
-                                 focus:ring-2 focus:ring-violet-100 pr-12"
+                      className="w-full rounded-lg border border-gray-200 py-3 pr-12 text-center text-2xl font-bold text-[#1A1F36] placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-semibold text-gray-500">€</span>
                   </div>
@@ -1789,7 +1817,7 @@ function AppointmentModal({
                       ...prev,
                       cena: (prev.cena ?? 0) + 5
                     }))}
-                    className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-gray-200 bg-white text-gray-600 transition-all hover:border-violet-300 hover:bg-violet-50 hover:text-violet-600"
+                    className="flex h-12 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-all hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
                   >
                     <span className="text-xl font-semibold">+</span>
                   </button>
@@ -1799,9 +1827,9 @@ function AppointmentModal({
 
             {/* Discount Toggle First */}
             {!isViewMode && (
-              <div className="space-y-4">
+              <div className={`${sectionClass} space-y-4`}>
                 {/* Toggle to enable discount */}
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
                   <div>
                     <div className="font-semibold text-gray-900">{t('modal.discount.add')}</div>
                     <div className="text-sm text-gray-600">{t('modal.discount.lower')}</div>
@@ -1831,7 +1859,7 @@ function AppointmentModal({
                 {hasDiscount && (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="relative">
-                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      <label className={labelClass}>
                         {t('modal.discount.amount')}
                       </label>
                       <input
@@ -1844,20 +1872,18 @@ function AppointmentModal({
                           popust: e.target.value ? parseFloat(e.target.value) : undefined
                         }))}
                         placeholder="10"
-                        className="w-full rounded-xl border-2 border-gray-200 py-2.5 pl-4 pr-10 text-sm
-                                   text-[#1A1F36] placeholder-gray-400 focus:border-violet-400 focus:outline-none
-                                   focus:ring-2 focus:ring-violet-100"
+                        className="w-full rounded-lg border border-gray-200 py-2.5 pl-4 pr-10 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                       />
                       <span className="absolute right-4 top-[calc(50%+12px)] -translate-y-1/2 text-gray-500">
                         {formData.popust_tip === '€' ? '€' : '%'}
                       </span>
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                      <label className={labelClass}>
                         {t('modal.discount.type')}
                       </label>
                       {/* Toggle buttons for discount type */}
-                      <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl h-[46px]">
+                      <div className="flex h-[46px] items-center gap-1 rounded-lg bg-gray-100 p-1">
                         <button
                           type="button"
                           onClick={() => setFormData((prev) => ({ ...prev, popust_tip: '€' }))}
@@ -1889,7 +1915,7 @@ function AppointmentModal({
 
             {/* Final price display */}
             {((formData.cena && formData.cena > 0) || (formData.popust && formData.popust > 0)) && (
-              <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
+              <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-gray-700">{t('modal.discount.final')}</span>
                   {formData.popust && formData.popust > 0 && (
@@ -1898,20 +1924,20 @@ function AppointmentModal({
                     </span>
                   )}
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                <span className="bg-clip-text text-xl font-bold text-transparent" style={gradientTextStyle}>
                   {calculateFinalPrice().toFixed(2)} €
                 </span>
               </div>
             )}
 
             {/* Notes */}
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <div className={sectionClass}>
+              <label className={labelClass}>
                 {t('modal.fields.notes')}
               </label>
               {isViewMode ? (
                 formData.opombe ? (
-                  <div className="p-4 bg-gray-50 rounded-xl">
+                  <div className="rounded-lg bg-gray-50 p-4">
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">{formData.opombe}</p>
                   </div>
                 ) : (
@@ -1924,9 +1950,7 @@ function AppointmentModal({
                     onChange={(e) => setFormData((prev) => ({ ...prev, opombe: e.target.value }))}
                     placeholder={t('modal.notesPlaceholder')}
                     rows={3}
-                    className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm
-                               text-[#1A1F36] placeholder-gray-400 focus:outline-none
-                               focus:ring-2 focus:ring-[#1A1F36]/20"
+                    className={`${inputBaseClass} resize-none`}
                   />
                   <p className="mt-1 text-xs text-gray-400">{t('modal.notesHint')}</p>
                 </>
@@ -1937,19 +1961,19 @@ function AppointmentModal({
             {isViewMode ? (
               // View mode: always show if there are notes
               formData.internal_opombe ? (
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className={sectionClass}>
+                  <label className={labelClass}>
                     {t('modal.fields.internalNotes')}
                   </label>
-                  <div className="p-4 bg-white rounded-xl border-2 border-yellow-300">
+                  <div className="rounded-lg border border-yellow-200 bg-yellow-50/40 p-4">
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">{formData.internal_opombe}</p>
                   </div>
                 </div>
               ) : null
             ) : mode === 'edit' ? (
               // Edit mode: always show internal notes field
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <div className={sectionClass}>
+                <label className={labelClass}>
                   {t('modal.fields.internalNotes')}
                 </label>
                 <textarea
@@ -1957,16 +1981,14 @@ function AppointmentModal({
                   onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
                   placeholder={t('modal.internalNotesPlaceholder')}
                   rows={3}
-                  className="w-full rounded-xl border-2 border-yellow-300 bg-white px-4 py-2.5 text-sm
-                             text-[#1A1F36] placeholder-gray-400 focus:outline-none
-                             focus:ring-2 focus:ring-yellow-200 focus:border-yellow-400"
+                  className="w-full resize-none rounded-lg border border-yellow-200 bg-white px-4 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
                 />
               </div>
             ) : (
               // Create mode: show button to toggle internal notes
               showInternalNotes ? (
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className={sectionClass}>
+                  <label className={labelClass}>
                     {t('modal.fields.internalNotes')}
                   </label>
                   <textarea
@@ -1974,9 +1996,7 @@ function AppointmentModal({
                     onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
                     placeholder={t('modal.internalNotesPlaceholder')}
                     rows={3}
-                    className="w-full rounded-xl border-2 border-yellow-300 bg-white px-4 py-2.5 text-sm
-                               text-[#1A1F36] placeholder-gray-400 focus:outline-none
-                               focus:ring-2 focus:ring-yellow-200 focus:border-yellow-400"
+                    className="w-full resize-none rounded-lg border border-yellow-200 bg-white px-4 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
                   />
                 </div>
               ) : (
@@ -1985,8 +2005,7 @@ function AppointmentModal({
                   onClick={() => setShowInternalNotes(true)}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-yellow-300
-                             text-yellow-700 hover:bg-yellow-50 transition-colors"
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-yellow-300 bg-white py-3 text-yellow-700 transition-colors hover:bg-yellow-50"
                 >
                   <span className="text-sm font-medium">{t('modal.addInternalNotes')}</span>
                 </motion.button>
@@ -1995,8 +2014,8 @@ function AppointmentModal({
 
             {/* Ghost termin toggle — owner/admin always see it, staff only if permission granted */}
             {!isViewMode && (role === 'owner' || role === 'admin' || (role === 'staff' && (permissions?.can_create_ghost_termin ?? false))) && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+              <div className={`${sectionClass} space-y-2`}>
+                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
                   <div>
                     <div className="font-semibold text-gray-900">Ne beleži termina</div>
                     <div className="text-sm text-gray-600">Ghost termin — termin se ne beleži v analitiko</div>
@@ -2016,7 +2035,7 @@ function AppointmentModal({
                   </button>
                 </div>
                 {isGhostTermin && (
-                  <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200">
+                  <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                     <Warning className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" weight="fill" />
                     <p className="text-xs text-amber-700">
                       Ta termin ne bo zabeležen v analitiki, zgodovini ali blagajni. Po zaključku bo avtomatsko izbrisan.
@@ -2028,7 +2047,7 @@ function AppointmentModal({
 
             {/* Resource conflict warning */}
             {!isViewMode && resourceConflicts.length > 0 && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
                 <div className="flex items-start gap-2.5">
                   <Warning weight="fill" className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" />
                   <div className="flex-1">
@@ -2050,16 +2069,17 @@ function AppointmentModal({
                 </div>
               </div>
             )}
+              </div>
+            </div>
 
             {/* Actions */}
             {!isViewMode && (
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-3 border-t border-gray-100 bg-white px-5 py-4 sm:px-6">
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600
-                             transition-colors hover:bg-gray-100"
+                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
                 >
                   {t('modal.actions.cancel')}
                 </motion.button>
@@ -2067,9 +2087,12 @@ function AppointmentModal({
                   type="submit"
                   disabled={isSaving}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-medium text-white
-                             bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 shadow-lg
-                             hover:shadow-xl transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+                  style={{
+                    backgroundImage: isSaving
+                      ? 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)'
+                      : gradientTextStyle.backgroundImage,
+                  }}
                 >
                   {isSaving && (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white

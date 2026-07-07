@@ -19,6 +19,8 @@ import {
 } from '@phosphor-icons/react';
 import type { Employee, EmployeeSchedule, EmployeeWorkingHours } from '@/types/employees';
 import type { Service } from '@/types/services';
+import type { IzmenicenUrnik, UrnikData } from '@/types/resursi';
+import { isIzmenicenUrnik } from '@/types/resursi';
 import { defaultWorkingHoursDay as defaultWorkingHours } from '@/types/settings';
 import EmployeeAvatar from './EmployeeAvatar';
 
@@ -92,6 +94,48 @@ function toIntervalsFormat(schedule: EmployeeSchedule | ScheduleWithIntervals): 
   return result;
 }
 
+const WEEK_LABELS = ['Teden A', 'Teden B', 'Teden C', 'Teden D'];
+
+function nearestUpcomingMonday(): string {
+  const today = new Date();
+  const day = today.getDay();
+  const daysUntilMonday = day === 1 ? 0 : (8 - day) % 7;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + daysUntilMonday);
+  const y = monday.getFullYear();
+  const m = String(monday.getMonth() + 1).padStart(2, '0');
+  const d = String(monday.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function defaultVzorec(): ScheduleWithIntervals {
+  const result: ScheduleWithIntervals = {};
+  for (const day of DAYS) {
+    result[day] = { enabled: false, intervals: [{ start: '08:00', end: '17:00' }] };
+  }
+  return result;
+}
+
+function urnikDataToSchedule(urnikData: UrnikData): ScheduleWithIntervals {
+  const result: ScheduleWithIntervals = {};
+  for (const day of DAYS) {
+    const d = urnikData[day as keyof UrnikData];
+    result[day] = d
+      ? { enabled: d.enabled, intervals: d.intervals.length ? d.intervals : [{ start: '08:00', end: '17:00' }] }
+      : { enabled: false, intervals: [{ start: '08:00', end: '17:00' }] };
+  }
+  return result;
+}
+
+function toUrnikData(schedule: ScheduleWithIntervals): UrnikData {
+  const result = {} as UrnikData;
+  for (const day of DAYS) {
+    const d = schedule[day] || { enabled: false, intervals: [] };
+    result[day as keyof UrnikData] = { enabled: d.enabled, intervals: d.intervals };
+  }
+  return result;
+}
+
 function EmployeeSettingsModal({
   isOpen,
   onClose,
@@ -150,29 +194,67 @@ function EmployeeSettingsModal({
   // Track which tab is active
   const [activeTab, setActiveTab] = useState<'schedule' | 'services'>('schedule');
 
+  // Rotating schedule state
+  const [isIzmenicen, setIsIzmenicen] = useState<boolean>(() => {
+    return isIzmenicenUrnik(employee?.urnik);
+  });
+  const [cikelTednov, setCikelTednov] = useState<2 | 3 | 4>(() => {
+    const u = employee?.urnik;
+    if (isIzmenicenUrnik(u)) return u.cikel_tednov as 2 | 3 | 4;
+    return 2;
+  });
+  const [zacetekCikla, setZacetekCikla] = useState<string>(() => {
+    const u = employee?.urnik;
+    if (isIzmenicenUrnik(u)) return u.zacetek_cikla;
+    return nearestUpcomingMonday();
+  });
+  const [vzorci, setVzorci] = useState<Record<string, ScheduleWithIntervals>>(() => {
+    const u = employee?.urnik;
+    if (isIzmenicenUrnik(u)) {
+      return Object.fromEntries(
+        Object.entries(u.vzorci).map(([k, v]) => [k, urnikDataToSchedule(v)])
+      );
+    }
+    return { '0': defaultVzorec(), '1': defaultVzorec() };
+  });
+
   // Reset form when modal opens with new employee
   useEffect(() => {
     if (isOpen && employee) {
-      // Check if uses company schedule from employee.ali_ima_urnik_podjetja
       setUsesCompanySchedule(employee.ali_ima_urnik_podjetja ?? true);
 
-      // Set schedule with intervals
-      if (employee.urnik) {
-        setSchedule(toIntervalsFormat(employee.urnik));
+      const rawUrnik = employee.urnik as unknown;
+
+      if (isIzmenicenUrnik(rawUrnik)) {
+        setIsIzmenicen(true);
+        setCikelTednov(rawUrnik.cikel_tednov as 2 | 3 | 4);
+        setZacetekCikla(rawUrnik.zacetek_cikla);
+        setVzorci(
+          Object.fromEntries(
+            Object.entries(rawUrnik.vzorci).map(([k, v]) => [k, urnikDataToSchedule(v)])
+          )
+        );
+        // Still set standard schedule from the first pattern for display
+        setSchedule(urnikDataToSchedule(rawUrnik.vzorci['0'] ?? {} as UrnikData));
       } else {
-        const initial: ScheduleWithIntervals = {};
-        for (const day of DAYS) {
-          const companyDay = companySchedule[day] || defaultWorkingHours[day];
-          const intervals = companyDay?.intervals || [{ start: companyDay?.start ?? '08:00', end: companyDay?.end ?? '17:00' }];
-          initial[day] = {
-            enabled: companyDay?.enabled ?? true,
-            intervals: intervals,
-          };
+        setIsIzmenicen(false);
+        setCikelTednov(2);
+        setZacetekCikla(nearestUpcomingMonday());
+        setVzorci({ '0': defaultVzorec(), '1': defaultVzorec() });
+
+        if (employee.urnik) {
+          setSchedule(toIntervalsFormat(employee.urnik));
+        } else {
+          const initial: ScheduleWithIntervals = {};
+          for (const day of DAYS) {
+            const companyDay = companySchedule[day] || defaultWorkingHours[day];
+            const intervals = companyDay?.intervals || [{ start: companyDay?.start ?? '08:00', end: companyDay?.end ?? '17:00' }];
+            initial[day] = { enabled: companyDay?.enabled ?? true, intervals };
+          }
+          setSchedule(initial);
         }
-        setSchedule(initial);
       }
 
-      // Set services
       if (employee.storitve && employee.storitve.length > 0) {
         setSelectedServices(employee.storitve);
       } else {
@@ -235,6 +317,79 @@ function EmployeeSettingsModal({
     });
   }, []);
 
+  // Handle cikel_tednov change — ensure all week slots exist
+  const handleCikelTednovChange = useCallback((val: 2 | 3 | 4) => {
+    setCikelTednov(val);
+    setVzorci((prev) => {
+      const next = { ...prev };
+      for (let i = 0; i < val; i++) {
+        if (!next[String(i)]) next[String(i)] = defaultVzorec();
+      }
+      return next;
+    });
+  }, []);
+
+  // Vzorci callbacks (rotating schedule)
+  const toggleVzorciDay = useCallback((weekKey: string, day: string) => {
+    setVzorci((prev) => {
+      console.log('[toggleVzorciDay] weekKey:', weekKey, 'day:', day);
+      console.log('[toggleVzorciDay] prev state:', JSON.stringify(prev));
+      const week = prev[weekKey] ?? defaultVzorec();
+      const next = {
+        ...prev,
+        [weekKey]: { ...week, [day]: { ...week[day], enabled: !week[day]?.enabled } },
+      };
+      console.log('[toggleVzorciDay] next[weekKey][day]:', JSON.stringify(next[weekKey]?.[day]));
+      return next;
+    });
+  }, []);
+
+  const updateVzorciIntervalTime = useCallback((weekKey: string, day: string, idx: number, field: 'start' | 'end', value: string) => {
+    setVzorci((prev) => {
+      const week = prev[weekKey] ?? defaultVzorec();
+      const dayData = week[day];
+      if (!dayData) return prev;
+      const newIntervals = [...dayData.intervals];
+      newIntervals[idx] = { ...newIntervals[idx], [field]: value };
+      return { ...prev, [weekKey]: { ...week, [day]: { ...dayData, intervals: newIntervals } } };
+    });
+  }, []);
+
+  const addVzorciInterval = useCallback((weekKey: string, day: string) => {
+    setVzorci((prev) => {
+      const week = prev[weekKey] ?? defaultVzorec();
+      const dayData = week[day];
+      if (!dayData) return prev;
+      const last = dayData.intervals[dayData.intervals.length - 1];
+      return {
+        ...prev,
+        [weekKey]: {
+          ...week,
+          [day]: { ...dayData, intervals: [...dayData.intervals, { start: last?.end ?? '13:00', end: '17:00' }] },
+        },
+      };
+    });
+  }, []);
+
+  const removeVzorciInterval = useCallback((weekKey: string, day: string, idx: number) => {
+    setVzorci((prev) => {
+      const week = prev[weekKey] ?? defaultVzorec();
+      const dayData = week[day];
+      if (!dayData || dayData.intervals.length <= 1) return prev;
+      return {
+        ...prev,
+        [weekKey]: {
+          ...week,
+          [day]: { ...dayData, intervals: dayData.intervals.filter((_, i) => i !== idx) },
+        },
+      };
+    });
+  }, []);
+
+  const copyFromTedanA = useCallback((weekKey: string) => {
+    setVzorci((prev) => ({ ...prev, [weekKey]: { ...prev['0'] } }));
+  }, []);
+
   // Toggle service selection
   const toggleService = useCallback((serviceId: string) => {
     setSelectedServices((prev) => {
@@ -258,12 +413,28 @@ function EmployeeSettingsModal({
   // Handle save
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
+
+    let urnikToSave: EmployeeSchedule | ScheduleWithIntervals | IzmenicenUrnik = usesCompanySchedule ? {} : schedule;
+
+    if (!usesCompanySchedule && isIzmenicen) {
+      const vzorciUrnikData: Record<string, UrnikData> = {};
+      for (let i = 0; i < cikelTednov; i++) {
+        vzorciUrnikData[String(i)] = toUrnikData(vzorci[String(i)] ?? defaultVzorec());
+      }
+      urnikToSave = {
+        tip: 'izmenicen',
+        cikel_tednov: cikelTednov,
+        zacetek_cikla: zacetekCikla,
+        vzorci: vzorciUrnikData,
+      } satisfies IzmenicenUrnik;
+    }
+
     await onSave({
-      urnik: usesCompanySchedule ? {} : schedule,
+      urnik: urnikToSave as ScheduleWithIntervals,
       storitve: selectedServices,
-      aliImaUrnikPodjetja: usesCompanySchedule,
+      aliImaUrnikPodjetja: usesCompanySchedule && !isIzmenicen,
     });
-  }, [schedule, selectedServices, usesCompanySchedule, onSave]);
+  }, [schedule, selectedServices, usesCompanySchedule, isIzmenicen, cikelTednov, zacetekCikla, vzorci, onSave]);
 
   // Animation variants
   const backdropVariants = {
@@ -284,6 +455,14 @@ function EmployeeSettingsModal({
 
   if (!employee) return null;
 
+  const employeeAccent = employee.barva || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
+  const gradientTextStyle = {
+    backgroundImage: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+  };
+  const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
+  const labelClass = 'mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500';
+  const timeSelectClass = 'appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 pr-8 text-sm font-medium text-[#1A1F36] transition-colors cursor-pointer hover:border-gray-300 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10';
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -300,12 +479,14 @@ function EmployeeSettingsModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Gradient header */}
-            <div className="bg-gradient-to-r from-violet-500 to-cyan-500 p-6">
-              <div className="flex items-start justify-between">
+            <div className="h-1.5 w-full flex-shrink-0" style={{ background: employeeAccent }} />
+
+            {/* Header */}
+            <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
+              <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <EmployeeAvatar
                     firstName={employee.ime}
@@ -314,10 +495,10 @@ function EmployeeSettingsModal({
                     size="lg"
                   />
                   <div>
-                    <h2 className="text-xl font-semibold text-white">
+                    <h2 className="bg-clip-text text-xl font-semibold text-transparent" style={gradientTextStyle}>
                       {t('settings.title')}
                     </h2>
-                    <p className="mt-1 text-sm text-white/80">
+                    <p className="mt-1 text-sm text-gray-500">
                       {employee.ime} {employee.priimek}
                     </p>
                   </div>
@@ -327,7 +508,7 @@ function EmployeeSettingsModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
                   <X className="h-5 w-5" weight="bold" />
                 </motion.button>
@@ -335,14 +516,15 @@ function EmployeeSettingsModal({
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-gray-200">
+            <div className="border-b border-gray-100 bg-white px-4 py-3 sm:px-5">
+              <div className="grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1">
               <button
                 type="button"
                 onClick={() => setActiveTab('schedule')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors
+                className={`flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-all
                            ${activeTab === 'schedule'
-                             ? 'border-b-2 border-violet-500 text-violet-600 bg-violet-50/50'
-                             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                             ? 'bg-white text-gray-900 shadow-sm'
+                             : 'text-gray-500 hover:text-gray-900'
                            }`}
               >
                 <CalendarBlank className="h-4 w-4" weight={activeTab === 'schedule' ? 'fill' : 'regular'} />
@@ -351,23 +533,25 @@ function EmployeeSettingsModal({
               <button
                 type="button"
                 onClick={() => setActiveTab('services')}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors
+                className={`flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-all
                            ${activeTab === 'services'
-                             ? 'border-b-2 border-violet-500 text-violet-600 bg-violet-50/50'
-                             : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                             ? 'bg-white text-gray-900 shadow-sm'
+                             : 'text-gray-500 hover:text-gray-900'
                            }`}
               >
                 <Briefcase className="h-4 w-4" weight={activeTab === 'services' ? 'fill' : 'regular'} />
                 {t('settings.tabServices')} ({selectedServices.length}/{allServices.length})
               </button>
+              </div>
             </div>
 
             {/* Content */}
-            <form onSubmit={handleSubmit} className="max-h-[calc(90vh-280px)] overflow-y-auto p-6">
+            <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
               {activeTab === 'schedule' && (
                 <div className="space-y-4">
                   {/* Use company schedule toggle - CRITICAL */}
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl border border-violet-100">
+                  <div className={sectionClass}>
+                    <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="font-semibold text-[#1A1F36]">{t('settings.companyScheduleTitle')}</div>
                       <div className="text-sm text-gray-500">
@@ -395,118 +579,311 @@ function EmployeeSettingsModal({
                       className="flex items-center gap-2"
                     >
                       {usesCompanySchedule ? (
-                        <ToggleRight className="h-8 w-8 text-violet-500" weight="fill" />
+                        <ToggleRight className="h-8 w-8 text-gray-900" weight="fill" />
                       ) : (
                         <ToggleLeft className="h-8 w-8 text-gray-400" weight="regular" />
                       )}
                     </button>
+                    </div>
                   </div>
 
                   {/* Custom schedule - Only shown if NOT using company schedule */}
                   {!usesCompanySchedule && (
                     <>
-                      <div className="p-4 border-2 border-orange-200 rounded-xl bg-orange-50/30">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Clock className="h-5 w-5 text-orange-600" weight="fill" />
-                          <h3 className="text-base font-semibold text-orange-900">{t('settings.customScheduleTitle')}</h3>
+                      {/* Rotating schedule toggle */}
+                      <div className={sectionClass}>
+                        <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <div className="font-semibold text-[#1A1F36]">Izmenični urnik</div>
+                          <div className="text-sm text-gray-500">Urnik se menjava po tednih v ciklu</div>
                         </div>
-                        <p className="text-sm text-orange-700 mb-4">
-                          {t('settings.customScheduleDesc')}
-                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const enabling = !isIzmenicen;
+                            if (enabling) {
+                              // Re-initialize vzorci so all week slots have all 7 days populated
+                              setVzorci((prev) => {
+                                const next: Record<string, ScheduleWithIntervals> = {};
+                                for (let i = 0; i < cikelTednov; i++) {
+                                  const key = String(i);
+                                  const existing = prev[key];
+                                  // Keep existing only if it already has all 7 days
+                                  next[key] = (existing && DAYS.every((d) => d in existing))
+                                    ? existing
+                                    : defaultVzorec();
+                                }
+                                return next;
+                              });
+                            }
+                            setIsIzmenicen(enabling);
+                          }}
+                          className="flex items-center gap-2"
+                        >
+                          {isIzmenicen ? (
+                            <ToggleRight className="h-8 w-8 text-gray-900" weight="fill" />
+                          ) : (
+                            <ToggleLeft className="h-8 w-8 text-gray-400" weight="regular" />
+                          )}
+                        </button>
+                        </div>
+                      </div>
 
-                        <div className="space-y-3">
-                          {DAYS.map((day) => {
-                            const daySchedule = schedule[day] || { enabled: true, intervals: [{ start: '08:00', end: '17:00' }] };
-                            return (
-                              <div
-                                key={day}
-                                className={`p-4 rounded-xl border transition-colors bg-white
-                                           ${daySchedule.enabled ? 'border-gray-200' : 'border-gray-100 opacity-60'}`}
-                              >
-                                {/* Day header with toggle */}
-                                <div className="flex items-center justify-between mb-3">
+                      {/* Rotating schedule configuration */}
+                      {isIzmenicen ? (
+                        <div className="space-y-4">
+                          {/* Cycle settings */}
+                          <div className={`${sectionClass} space-y-4`}>
+                            <div>
+                              <label className={labelClass}>
+                                Število tednov v ciklu
+                              </label>
+                              <div className="flex gap-2">
+                                {([2, 3, 4] as const).map((n) => (
                                   <button
+                                    key={n}
                                     type="button"
-                                    onClick={() => toggleDay(day)}
-                                    className="flex items-center gap-3"
+                                    onClick={() => handleCikelTednovChange(n)}
+                                    className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-colors
+                                      ${cikelTednov === n
+                                        ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
+                                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-900'
+                                      }`}
                                   >
-                                    {daySchedule.enabled ? (
-                                      <CheckSquare className="h-5 w-5 text-violet-500" weight="fill" />
-                                    ) : (
-                                      <Square className="h-5 w-5 text-gray-400" weight="regular" />
-                                    )}
-                                    <span className={`font-semibold ${daySchedule.enabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
-                                      {dayLabel[day]}
-                                    </span>
+                                    {n} tedna
                                   </button>
-                                  {!daySchedule.enabled && (
-                                    <span className="text-xs text-gray-400 italic">{t('settings.dayOff')}</span>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <label className={labelClass}>
+                                Datum začetka cikla
+                              </label>
+                              <p className="text-xs text-gray-500 mb-2">Izberi ponedeljek kot začetek cikla</p>
+                              <input
+                                type="date"
+                                value={zacetekCikla}
+                                onChange={(e) => {
+                                  const d = new Date(e.target.value);
+                                  if (d.getDay() === 1) setZacetekCikla(e.target.value);
+                                }}
+                                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-[#1A1F36] transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                              />
+                              {zacetekCikla && new Date(zacetekCikla).getDay() !== 1 && (
+                                <p className="text-xs text-red-500 mt-1">Izbrani datum mora biti ponedeljek.</p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Week patterns */}
+                          {Array.from({ length: cikelTednov }, (_, i) => {
+                            const weekKey = String(i);
+                            // Include enabled-state fingerprint in key so React remounts this
+                            // subtree whenever vzorci changes — required because React's
+                            // reconciler reuses the stable-keyed div and the Framer Motion
+                            // ancestor can suppress intermediate re-renders of the subtree.
+                            const weekStateKey = `${weekKey}-${DAYS.map((d) => vzorci[weekKey]?.[d]?.enabled ? '1' : '0').join('')}`;
+                            return (
+                              <div key={weekStateKey} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm shadow-gray-100/60">
+                                {/* Week header */}
+                                <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+                                  <h4 className="font-semibold text-gray-900">{WEEK_LABELS[i]}</h4>
+                                  {i > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => copyFromTedanA(weekKey)}
+                                      className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
+                                    >
+                                      Kopiraj iz Tedna A
+                                    </button>
                                   )}
                                 </div>
 
-                                {/* Intervals */}
-                                {daySchedule.enabled && (
-                                  <div className="space-y-2">
-                                    {daySchedule.intervals.map((interval, idx) => (
-                                      <div key={idx} className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4 text-violet-500 flex-shrink-0" weight="fill" />
-                                        <select
-                                          value={interval.start}
-                                          onChange={(e) => updateIntervalTime(day, idx, 'start', e.target.value)}
-                                          className="appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 pr-8 text-sm font-medium text-[#1A1F36]
-                                                   shadow-sm transition-all cursor-pointer hover:border-violet-300
-                                                   focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/10"
-                                        >
-                                          {TIME_OPTIONS.map((time) => (
-                                            <option key={time} value={time}>{time}</option>
-                                          ))}
-                                        </select>
-                                        <span className="text-gray-400 text-sm">-</span>
-                                        <select
-                                          value={interval.end}
-                                          onChange={(e) => updateIntervalTime(day, idx, 'end', e.target.value)}
-                                          className="appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 pr-8 text-sm font-medium text-[#1A1F36]
-                                                   shadow-sm transition-all cursor-pointer hover:border-violet-300
-                                                   focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/10"
-                                        >
-                                          {TIME_OPTIONS.map((time) => (
-                                            <option key={time} value={time}>{time}</option>
-                                          ))}
-                                        </select>
-                                        {daySchedule.intervals.length > 1 && (
+                                {/* Days */}
+                                <div className="space-y-2 bg-[#F7F8FA] p-3">
+                                  {DAYS.map((day) => {
+                                    // Read directly from vzorci state each render — never from a cached weekSchedule
+                                    const liveDaySchedule: DayScheduleWithIntervals =
+                                      vzorci[weekKey]?.[day] ?? { enabled: false, intervals: [{ start: '08:00', end: '17:00' }] };
+                                    const isEnabled = liveDaySchedule.enabled;
+                                    const intervals = liveDaySchedule.intervals;
+                                    return (
+                                      <div
+                                        key={day}
+                                        className={`rounded-xl border bg-white p-4 transition-colors
+                                                   ${isEnabled ? 'border-gray-100 shadow-sm shadow-gray-100/60' : 'border-gray-100 opacity-60'}`}
+                                      >
+                                        {/* Day header with toggle */}
+                                        <div className="flex items-center justify-between mb-3">
                                           <button
                                             type="button"
-                                            onClick={() => removeInterval(day, idx)}
-                                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                            onClick={() => toggleVzorciDay(weekKey, day)}
+                                            className="flex items-center gap-3"
                                           >
-                                            <Trash className="h-4 w-4" weight="regular" />
+                                            {isEnabled ? (
+                                              <CheckSquare className="h-5 w-5 text-gray-900" weight="fill" />
+                                            ) : (
+                                              <Square className="h-5 w-5 text-gray-400" weight="regular" />
+                                            )}
+                                            <span className={`font-semibold ${isEnabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
+                                              {dayLabel[day]}
+                                            </span>
                                           </button>
+                                          {!isEnabled && (
+                                            <span className="text-xs text-gray-400 italic">{t('settings.dayOff')}</span>
+                                          )}
+                                        </div>
+
+                                        {/* Intervals */}
+                                        {isEnabled && (
+                                          <div className="space-y-2">
+                                            {intervals.map((interval, idx) => (
+                                              <div key={idx} className="flex items-center gap-2">
+                                                <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                                                <select
+                                                  value={interval.start}
+                                                  onChange={(e) => updateVzorciIntervalTime(weekKey, day, idx, 'start', e.target.value)}
+                                                  className={timeSelectClass}
+                                                >
+                                                  {TIME_OPTIONS.map((time) => (
+                                                    <option key={time} value={time}>{time}</option>
+                                                  ))}
+                                                </select>
+                                                <span className="text-gray-400 text-sm">-</span>
+                                                <select
+                                                  value={interval.end}
+                                                  onChange={(e) => updateVzorciIntervalTime(weekKey, day, idx, 'end', e.target.value)}
+                                                  className={timeSelectClass}
+                                                >
+                                                  {TIME_OPTIONS.map((time) => (
+                                                    <option key={time} value={time}>{time}</option>
+                                                  ))}
+                                                </select>
+                                                {intervals.length > 1 && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => removeVzorciInterval(weekKey, day, idx)}
+                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                  >
+                                                    <Trash className="h-4 w-4" weight="regular" />
+                                                  </button>
+                                                )}
+                                              </div>
+                                            ))}
+                                            <button
+                                              type="button"
+                                              onClick={() => addVzorciInterval(weekKey, day)}
+                                              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
+                                            >
+                                              <Plus className="h-4 w-4" weight="bold" />
+                                              {t('settings.addInterval')}
+                                            </button>
+                                          </div>
                                         )}
                                       </div>
-                                    ))}
-
-                                    {/* Add interval button */}
-                                    <button
-                                      type="button"
-                                      onClick={() => addInterval(day)}
-                                      className="flex items-center gap-1.5 w-full justify-center py-2 rounded-lg border border-dashed border-violet-300
-                                               text-sm font-medium text-violet-600 hover:bg-violet-50 transition-colors mt-2"
-                                    >
-                                      <Plus className="h-4 w-4" weight="bold" />
-                                      {t('settings.addInterval')}
-                                    </button>
-                                  </div>
-                                )}
+                                    );
+                                  })}
+                                </div>
                               </div>
                             );
                           })}
                         </div>
-                      </div>
+                      ) : (
+                        <div className={sectionClass}>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Clock className="h-5 w-5 text-gray-500" weight="regular" />
+                            <h3 className="text-base font-semibold text-gray-900">{t('settings.customScheduleTitle')}</h3>
+                          </div>
+                          <p className="text-sm text-gray-500 mb-4">
+                            {t('settings.customScheduleDesc')}
+                          </p>
+
+                          <div className="space-y-3">
+                            {DAYS.map((day) => {
+                              const daySchedule = schedule[day] || { enabled: true, intervals: [{ start: '08:00', end: '17:00' }] };
+                              return (
+                                <div
+                                  key={day}
+                                  className={`rounded-xl border bg-white p-4 transition-colors
+                                             ${daySchedule.enabled ? 'border-gray-100 shadow-sm shadow-gray-100/60' : 'border-gray-100 opacity-60'}`}
+                                >
+                                  <div className="flex items-center justify-between mb-3">
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleDay(day)}
+                                      className="flex items-center gap-3"
+                                    >
+                                      {daySchedule.enabled ? (
+                                        <CheckSquare className="h-5 w-5 text-gray-900" weight="fill" />
+                                      ) : (
+                                        <Square className="h-5 w-5 text-gray-400" weight="regular" />
+                                      )}
+                                      <span className={`font-semibold ${daySchedule.enabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
+                                        {dayLabel[day]}
+                                      </span>
+                                    </button>
+                                    {!daySchedule.enabled && (
+                                      <span className="text-xs text-gray-400 italic">{t('settings.dayOff')}</span>
+                                    )}
+                                  </div>
+
+                                  {daySchedule.enabled && (
+                                    <div className="space-y-2">
+                                      {daySchedule.intervals.map((interval, idx) => (
+                                        <div key={idx} className="flex items-center gap-2">
+                                          <Clock className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
+                                          <select
+                                            value={interval.start}
+                                            onChange={(e) => updateIntervalTime(day, idx, 'start', e.target.value)}
+                                            className={timeSelectClass}
+                                          >
+                                            {TIME_OPTIONS.map((time) => (
+                                              <option key={time} value={time}>{time}</option>
+                                            ))}
+                                          </select>
+                                          <span className="text-gray-400 text-sm">-</span>
+                                          <select
+                                            value={interval.end}
+                                            onChange={(e) => updateIntervalTime(day, idx, 'end', e.target.value)}
+                                            className={timeSelectClass}
+                                          >
+                                            {TIME_OPTIONS.map((time) => (
+                                              <option key={time} value={time}>{time}</option>
+                                            ))}
+                                          </select>
+                                          {daySchedule.intervals.length > 1 && (
+                                            <button
+                                              type="button"
+                                              onClick={() => removeInterval(day, idx)}
+                                              className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                            >
+                                              <Trash className="h-4 w-4" weight="regular" />
+                                            </button>
+                                          )}
+                                        </div>
+                                      ))}
+
+                                      <button
+                                        type="button"
+                                        onClick={() => addInterval(day)}
+                                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
+                                      >
+                                        <Plus className="h-4 w-4" weight="bold" />
+                                        {t('settings.addInterval')}
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </>
                   )}
 
                   {usesCompanySchedule && (
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3">
+                    <div className={`${sectionClass} space-y-3`}>
                       <p className="text-sm text-gray-500 mb-2">
                         {t('settings.usingCompanySchedule')}
                       </p>
@@ -537,7 +914,8 @@ function EmployeeSettingsModal({
               {activeTab === 'services' && (
                 <div className="space-y-4">
                   {/* Performs all services toggle */}
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                  <div className={sectionClass}>
+                    <div className="flex items-center justify-between gap-4">
                     <div>
                       <div className="font-semibold text-[#1A1F36]">{t('settings.allServicesTitle')}</div>
                       <div className="text-sm text-gray-500">
@@ -556,11 +934,12 @@ function EmployeeSettingsModal({
                       className="flex items-center gap-2"
                     >
                       {selectedServices.length === allServices.length ? (
-                        <ToggleRight className="h-8 w-8 text-violet-500" weight="fill" />
+                        <ToggleRight className="h-8 w-8 text-gray-900" weight="fill" />
                       ) : (
                         <ToggleLeft className="h-8 w-8 text-gray-400" weight="regular" />
                       )}
                     </button>
+                    </div>
                   </div>
 
                   {selectedServices.length !== allServices.length && (
@@ -573,7 +952,7 @@ function EmployeeSettingsModal({
                           <button
                             type="button"
                             onClick={selectAllServices}
-                            className="text-xs font-medium text-violet-600 hover:text-violet-700"
+                            className="text-xs font-medium text-gray-900 hover:text-gray-700"
                           >
                             {t('settings.selectAll')}
                           </button>
@@ -588,7 +967,7 @@ function EmployeeSettingsModal({
                         </div>
                       </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {allServices.map((service) => {
                       const isSelected = selectedServices.includes(service.id);
                       return (
@@ -598,21 +977,21 @@ function EmployeeSettingsModal({
                           onClick={() => toggleService(service.id)}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className={`flex items-center gap-3 p-4 rounded-xl border transition-all text-left
+                          className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-all
                                      ${isSelected
-                                       ? 'bg-violet-50 border-violet-200 ring-1 ring-violet-200'
-                                       : 'bg-white border-gray-200 hover:border-gray-300'
+                                       ? 'border-gray-900 bg-white shadow-sm ring-1 ring-gray-900/10'
+                                       : 'border-gray-100 bg-white hover:border-gray-300'
                                      }`}
                         >
                           {/* Color indicator */}
                           <div
                             className="h-4 w-4 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: service.barva || '#6366F1' }}
+                            style={{ background: service.barva || '#6366F1' }}
                           />
 
                           {/* Service info */}
                           <div className="flex-1 min-w-0">
-                            <p className={`font-medium truncate ${isSelected ? 'text-violet-700' : 'text-[#1A1F36]'}`}>
+                            <p className={`truncate font-medium ${isSelected ? 'text-gray-900' : 'text-[#1A1F36]'}`}>
                               {service.naziv}
                             </p>
                             <p className="text-xs text-gray-500">
@@ -623,7 +1002,7 @@ function EmployeeSettingsModal({
 
                           {/* Checkbox */}
                           {isSelected ? (
-                            <CheckSquare className="h-5 w-5 text-violet-500 flex-shrink-0" weight="fill" />
+                            <CheckSquare className="h-5 w-5 text-gray-900 flex-shrink-0" weight="fill" />
                           ) : (
                             <Square className="h-5 w-5 text-gray-300 flex-shrink-0" weight="regular" />
                           )}
@@ -645,13 +1024,13 @@ function EmployeeSettingsModal({
             </form>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
+            <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-white px-5 py-4 sm:px-6">
               <motion.button
                 type="button"
                 onClick={onClose}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
+                className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
               >
                 {tCommon('buttons.cancel')}
               </motion.button>
@@ -661,9 +1040,7 @@ function EmployeeSettingsModal({
                 disabled={isSaving}
                 whileHover={{ scale: isSaving ? 1 : 1.02 }}
                 whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5
-                           text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
-                           hover:shadow-xl hover:shadow-cyan-500/30 disabled:opacity-70"
+                className="flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800 disabled:opacity-70"
               >
                 {isSaving ? (
                   <>

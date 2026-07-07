@@ -63,6 +63,14 @@ function TimeGrid({ children, columnCount = 7, showCurrentTime = true, gridScrol
 
   const totalHours = END_HOUR - START_HOUR + 1;
   const gridHeight = totalHours * HOUR_HEIGHT;
+  const gridScrollStyle: React.CSSProperties | undefined = isMobile
+    ? {
+        WebkitOverflowScrolling: 'touch',
+        overscrollBehavior: 'contain',
+        touchAction: 'pan-x pan-y',
+        transform: 'translateZ(0)',
+      }
+    : undefined;
 
   return (
     <div className="flex flex-1 overflow-hidden bg-white">
@@ -102,7 +110,7 @@ function TimeGrid({ children, columnCount = 7, showCurrentTime = true, gridScrol
           ref={effectiveGridRef as React.RefObject<HTMLDivElement>}
           className="relative flex-1 overflow-auto"
           onScroll={handleGridScroll}
-          style={isMobile ? { WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity' } as React.CSSProperties : undefined}
+          style={gridScrollStyle}
         >
           <div className="relative" style={{ height: gridHeight, minWidth: contentMinWidth || '100%' }}>
             {/* Horizontal hour lines */}

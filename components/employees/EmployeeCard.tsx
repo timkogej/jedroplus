@@ -133,7 +133,7 @@ function EmployeeCard({
           </div>
           <div className="h-8 w-px bg-gray-200" />
           <div className="text-center">
-            <p className="text-lg font-normal text-[#1A1F36]">{employee.appointments_month || employee.total_appointments || 0}</p>
+            <p className="text-lg font-normal text-[#1A1F36]">{employee.appointments_month ?? 0}</p>
             <p className="text-xs text-gray-500">{t('card.statsMonth')}</p>
           </div>
         </div>

@@ -57,6 +57,9 @@ export interface AppointmentWithDetails {
   storitev_id?: string;
   storitev_id_2?: string; // Second service ID (from "ID storitev 2" column)
   storitev_id_3?: string; // Third service ID (from "ID storitev 3" column)
+  add_on_storitev_id?: string | null;
+  add_on_naziv?: string | null;
+  add_on_trajanje?: number | null;
   zaposleni_id?: string;
   status: TerminStatus;
   opombe?: string;
@@ -78,6 +81,7 @@ export interface AppointmentWithDetails {
   // Ghost termin fields
   belezi_termin?: boolean; // false = ghost termin (excluded from analytics/history)
   deleted_at?: string | null; // set when ghost termin is soft-deleted after completion
+  id_termina?: string; // text "ID termina" column value (e.g. "T-12345678"), distinct from bigint `id`
   // Service details
   storitev: {
     id: string;
@@ -93,6 +97,12 @@ export interface AppointmentWithDetails {
     trajanje: number;
   } | null;
   storitev_3?: {
+    id: string;
+    naziv: string;
+    barva: string;
+    trajanje: number;
+  } | null;
+  add_on_storitev?: {
     id: string;
     naziv: string;
     barva: string;

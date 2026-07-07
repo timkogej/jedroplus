@@ -26,7 +26,7 @@ export interface ClientFormData {
   ime: string;
   priimek: string;
   spol: Gender | '';
-  tip_stranke: ClientType;
+  tip_stranke: ClientType | '';
   email: string;
   telefon: string;
   opombe: string;
@@ -44,6 +44,9 @@ export interface ClientAppointment {
   cas_konec: string;
   storitev_naziv: string;
   storitev_barva: string;
+  add_on_naziv?: string | null;
+  add_on_barva?: string | null;
+  add_on_trajanje?: number | null;
   zaposleni_ime: string;
   status: string;
   opombe?: string | null;

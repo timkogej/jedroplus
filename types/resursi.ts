@@ -83,3 +83,16 @@ export interface ResursFormData {
   status: 'active' | 'inactive';
   storitve_ids: string[];
 }
+
+export interface IzmenicenUrnik {
+  tip: 'izmenicen';
+  cikel_tednov: number; // 2, 3, or 4
+  zacetek_cikla: string; // ISO date string "YYYY-MM-DD", always a Monday
+  vzorci: Record<string, UrnikData>; // key is "0", "1", "2", "3"
+}
+
+export type UrnikConfig = UrnikData | IzmenicenUrnik;
+
+export function isIzmenicenUrnik(urnik: unknown): urnik is IzmenicenUrnik {
+  return typeof urnik === 'object' && urnik !== null && (urnik as Record<string, unknown>).tip === 'izmenicen';
+}

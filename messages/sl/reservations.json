@@ -102,6 +102,26 @@
       "interval30": "30 minut",
       "interval60": "60 minut (1 ura)"
     },
+    "payments": {
+      "sectionTitle": "Spletna plačila",
+      "sectionDesc": "Nastavitve plačila pri spletni rezervaciji",
+      "enableLabel": "Omogoči Stripe plačila",
+      "enableDesc": "Stranke lahko plačajo pri spletni rezervaciji, če storitev to zahteva.",
+      "lockedDesc": "Za vklop potrebujete paket Jedro Pro in davčno blagajno PRO ali PLUS.",
+      "checking": "Preverjam pogoje za spletna plačila...",
+      "requirementsTitle": "Za vklop mora biti omogočeno:",
+      "requirementPlan": "Paket Jedro Pro",
+      "requirementPos": "Davčna blagajna PRO ali PLUS",
+      "ok": "Omogočeno",
+      "missing": "Manjka",
+      "modeLabel": "Vrsta plačila rezervacije",
+      "modeDesc": "Izberite ali stranka plača celoten znesek ali samo depozit.",
+      "modePlaceholder": "Izberi vrsto plačila",
+      "modeFull": "Celotno plačilo",
+      "modeDeposit": "Depozit",
+      "depositLabel": "Višina depozita",
+      "depositDesc": "Odstotek zneska, ki ga stranka plača ob rezervaciji."
+    },
     "mainLink": {
       "sectionTitle": "Glavni booking link",
       "sectionDesc": "Link, ki se uporablja pri pošiljanju strankam",

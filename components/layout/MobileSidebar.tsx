@@ -47,6 +47,7 @@ function cn(...classes: (string | boolean | undefined)[]) {
 
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const pathname = usePathname();
+  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(?=\/|$)/, '') || '/';
   const router = useRouter();
   const t = useTranslations('layout');
   const { companyId, companySettings } = useCompany();
@@ -194,9 +195,9 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
-      return pathname === '/dashboard' || pathname === '/';
+      return pathnameWithoutLocale === '/dashboard' || pathnameWithoutLocale === '/';
     }
-    return pathname.startsWith(href);
+    return pathnameWithoutLocale === href || pathnameWithoutLocale.startsWith(`${href}/`);
   };
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || t('fallbacks.userName');
@@ -326,7 +327,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
                                 : 'text-gray-600 hover:bg-gray-50'
                             )}
                           >
-                            <Icon className="w-5 h-5" weight={active ? 'fill' : 'regular'} />
+                            <Icon className="w-5 h-5" weight="regular" />
                             <span className="flex-1">{item.name}</span>
                           </Link>
                         </motion.div>

@@ -56,6 +56,7 @@
       "time": "Time",
       "duration": "Duration",
       "price": "Price",
+      "additionalService": "Additional service",
       "notes": "Notes",
       "internalNotes": "Internal notes",
       "phone": "Phone"

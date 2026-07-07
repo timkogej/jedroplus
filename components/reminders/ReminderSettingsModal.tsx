@@ -100,6 +100,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
 
   // Reschedule notification
   const [obvestiloPrestavitevOmogoceno, setObvestiloPrestavitevOmogoceno] = useState(false);
+  const [obvestiloPrestavitevChannel, setObvestiloPrestavitevChannel] = useState<'sms' | 'email'>('email');
   const [obvestiloPrestavitevTemplateSms, setObvestiloPrestavitevTemplateSms] = useState('');
   const [obvestiloPrestavitevTemplateEmail, setObvestiloPrestavitevTemplateEmail] = useState('');
 
@@ -228,6 +229,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           setSmsNavodilaPo(parseBool(data['sms_navodila_po']));
 
           setObvestiloPrestavitevOmogoceno(parseBool(data['obvestilo_prestavitev_omogoceno']));
+          const rescheduleChannel = String(data['obvestilo_prestavitev_channel'] ?? 'email').toLowerCase();
+          setObvestiloPrestavitevChannel(rescheduleChannel === 'sms' ? 'sms' : 'email');
           setObvestiloPrestavitevTemplateSms(String(data['obvestilo_prestavitev_template_sms'] ?? ''));
           setObvestiloPrestavitevTemplateEmail(String(data['obvestilo_prestavitev_template_email'] ?? ''));
         }
@@ -336,6 +339,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
             lastna_predloga: smsModePo === 'manual' ? smsTemplatePo : lastnaPredlogaPo,
           },
           obvestilo_prestavitev_omogoceno: obvestiloPrestavitevOmogoceno,
+          obvestilo_prestavitev_channel: obvestiloPrestavitevChannel,
           obvestilo_prestavitev_template_sms: obvestiloPrestavitevTemplateSms,
           obvestilo_prestavitev_template_email: obvestiloPrestavitevTemplateEmail,
         },
@@ -1048,31 +1052,87 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
 
                     {obvestiloPrestavitevOmogoceno && (
                       <>
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">SMS predloga</label>
-                          <Textarea
-                            value={obvestiloPrestavitevTemplateSms}
-                            onChange={(e) => setObvestiloPrestavitevTemplateSms(e.target.value)}
-                            rows={4}
-                            placeholder="Spoštovani {{ime_stranke}}, vaš termin je bil prestavljen na {{datum}} ob {{ura}}. Lep pozdrav, {{naziv_podjetja}}"
-                          />
-                          <p className="text-xs text-gray-400">
-                            Spremenljivke: {'{{ime_stranke}}'}, {'{{datum}}'}, {'{{ura}}'}, {'{{naziv_podjetja}}'}
-                          </p>
-                        </div>
+                        <SettingRow
+                          label="Način pošiljanja"
+                          description="Izberite kanal za obvestilo ob prestavitvi termina."
+                        >
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1">
+                              <button
+                                type="button"
+                                onClick={() => setObvestiloPrestavitevChannel('email')}
+                                className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                                  obvestiloPrestavitevChannel === 'email'
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-900'
+                                }`}
+                              >
+                                <EnvelopeSimple className="h-4 w-4" weight={obvestiloPrestavitevChannel === 'email' ? 'fill' : 'regular'} />
+                                Email
+                              </button>
+                              <button
+                                type="button"
+                                disabled={smsLockedForPlan}
+                                onClick={() => !smsLockedForPlan && setObvestiloPrestavitevChannel('sms')}
+                                className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-all ${
+                                  obvestiloPrestavitevChannel === 'sms' && !smsLockedForPlan
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : smsLockedForPlan
+                                      ? 'cursor-not-allowed text-gray-400'
+                                      : 'text-gray-500 hover:text-gray-900'
+                                }`}
+                              >
+                                <DeviceMobile className="h-4 w-4" weight={obvestiloPrestavitevChannel === 'sms' && !smsLockedForPlan ? 'fill' : 'regular'} />
+                                SMS
+                              </button>
+                            </div>
+                            {smsLockedForPlan && (
+                              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                                <span>SMS je na voljo v višjih paketih.</span>
+                                <button
+                                  type="button"
+                                  onClick={() => { onClose(); router.push('/billing'); }}
+                                  className="inline-flex items-center gap-1 font-semibold text-gray-900 underline underline-offset-2"
+                                >
+                                  Nadgradi paket <ArrowRight className="h-3 w-3" weight="bold" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </SettingRow>
 
-                        <div className="space-y-2">
-                          <label className="block text-sm font-medium text-gray-700">Email predloga</label>
-                          <Textarea
-                            value={obvestiloPrestavitevTemplateEmail}
-                            onChange={(e) => setObvestiloPrestavitevTemplateEmail(e.target.value)}
-                            rows={4}
-                            placeholder="Spoštovani {{ime_stranke}}, vaš termin je bil prestavljen na {{datum}} ob {{ura}}. Lep pozdrav, {{naziv_podjetja}}"
-                          />
-                          <p className="text-xs text-gray-400">
-                            Spremenljivke: {'{{ime_stranke}}'}, {'{{datum}}'}, {'{{ura}}'}, {'{{naziv_podjetja}}'}
-                          </p>
-                        </div>
+                        {obvestiloPrestavitevChannel === 'sms' && (
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">SMS predloga</label>
+                            <TemplateEditor
+                              value={obvestiloPrestavitevTemplateSms}
+                              onChange={setObvestiloPrestavitevTemplateSms}
+                              maxLength={155}
+                              rows={4}
+                              placeholder="Spoštovani {{ime}}, vaš termin je bil prestavljen na {{datum}} ob {{cas}}. {{ime_podjetja}}"
+                              varLengths={smsVarLengths}
+                            />
+                            <p className="text-xs text-gray-400">
+                              Uporabite lahko enake spremenljivke kot pri opomnikih pred in po terminu.
+                            </p>
+                          </div>
+                        )}
+
+                        {obvestiloPrestavitevChannel === 'email' && (
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">Email predloga</label>
+                            <TemplateEditor
+                              value={obvestiloPrestavitevTemplateEmail}
+                              onChange={setObvestiloPrestavitevTemplateEmail}
+                              maxLength={0}
+                              rows={4}
+                              placeholder="Spoštovani {{ime}}, vaš termin je bil prestavljen na {{datum}} ob {{cas}}. Lep pozdrav, {{ime_podjetja}}"
+                            />
+                            <p className="text-xs text-gray-400">
+                              Email predloga nima omejitve znakov in podpira šumnike.
+                            </p>
+                          </div>
+                        )}
                       </>
                     )}
                   </SettingsSection>

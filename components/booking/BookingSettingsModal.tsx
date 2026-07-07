@@ -17,6 +17,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
+import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
 
 interface BookingSettingsModalProps {
   isOpen: boolean;
@@ -92,7 +93,7 @@ function ChannelPicker({
 
 export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalProps) {
   const t = useTranslations('reservations');
-  const { companyId, planCode } = useCompany();
+  const { companyId, companyUuid, planCode } = useCompany();
   const { user } = useAuth();
   const router = useRouter();
   const smsLockedForPlan = planCode === 'JEDRO_PLUS';
@@ -108,6 +109,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const [bookingSecondary, setBookingSecondary] = useState('#44D0C6');
   const [bookingBgFrom, setBookingBgFrom] = useState('#7C75FC');
   const [bookingBgTo, setBookingBgTo] = useState('#44D0C6');
+  const [stripeEnabled, setStripeEnabled] = useState(false);
+  const [stripePaymentMode, setStripePaymentMode] = useState<'full' | 'deposit'>('full');
+  const [stripeDepositPercent, setStripeDepositPercent] = useState('30');
+  const [hasPosSubscription, setHasPosSubscription] = useState(false);
+  const [checkingPosSubscription, setCheckingPosSubscription] = useState(false);
 
   const [cancelApptDays, setCancelApptDays] = useState('1');
   const [rescheduleApptDays, setRescheduleApptDays] = useState('1');
@@ -125,6 +131,33 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const [isLoading, setIsLoading] = useState(true);
 
   const actor = user?.email ?? 'unknown';
+  const hasProPlan = isJedroProPlan(planCode);
+  const hasOnlinePaymentAccess = hasProPlan && hasPosSubscription;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPosSubscription() {
+      if (!isOpen || !companyUuid) {
+        setHasPosSubscription(false);
+        setCheckingPosSubscription(false);
+        return;
+      }
+
+      setCheckingPosSubscription(true);
+      const hasSubscription = await hasPosOnlinePaymentsSubscription(companyUuid);
+      if (!cancelled) {
+        setHasPosSubscription(hasSubscription);
+        setCheckingPosSubscription(false);
+      }
+    }
+
+    loadPosSubscription();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [companyUuid, isOpen]);
 
   // Load settings
   useEffect(() => {
@@ -160,6 +193,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           setBookingSecondary(String(data['Booking_secondary'] ?? data['booking_secondary'] ?? '#44D0C6'));
           setBookingBgFrom(String(data['Booking_bg_from'] ?? data['booking_bg_from'] ?? data['Booking_primary'] ?? data['booking_primary'] ?? '#7C75FC'));
           setBookingBgTo(String(data['Booking_bg_to'] ?? data['booking_bg_to'] ?? data['Booking_secondary'] ?? data['booking_secondary'] ?? '#44D0C6'));
+          setStripeEnabled(parseSettingBool(data['stripe_enabled'] ?? data['Stripe_enabled'], false));
+          const paymentMode = String(data['stripe_payment_mode'] ?? 'full').toLowerCase();
+          setStripePaymentMode(paymentMode === 'deposit' ? 'deposit' : 'full');
+          const depositPercent = Number(data['stripe_deposit_percent'] ?? 30);
+          setStripeDepositPercent(String(Number.isFinite(depositPercent) && depositPercent > 0 ? depositPercent : 30));
 
           const bl1 = String(data['booking_link_1'] ?? data['Booking_link_1'] ?? '');
           const bl2 = String(data['booking_link_2'] ?? data['Booking_link_2'] ?? '');
@@ -191,6 +229,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
     setSaving(true);
 
     try {
+      const normalizedDepositPercent = Math.min(100, Math.max(1, parseInt(stripeDepositPercent, 10) || 30));
+      const effectiveStripeEnabled = hasOnlinePaymentAccess ? stripeEnabled : false;
+      const effectivePaymentMode = effectiveStripeEnabled ? stripePaymentMode : 'full';
       const webhookPayload = {
         event: 'BOOKING_SETTINGS_UPDATED',
         entity: 'settings',
@@ -224,6 +265,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           online_confirmation_channel: potrdiloOnlineChannel,
           cancel_appt_days: parseInt(cancelApptDays, 10),
           reschedule_appt_days: parseInt(rescheduleApptDays, 10),
+          stripe_enabled: effectiveStripeEnabled,
+          stripe_payment_mode: effectivePaymentMode,
+          stripe_deposit_percent: effectivePaymentMode === 'deposit' ? normalizedDepositPercent : null,
         },
       };
 
@@ -325,6 +369,77 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         <SelectOption value="60">{t('modal.general.interval60')}</SelectOption>
                       </Select>
                     </SettingRow>
+                  </SettingsSection>
+
+                  {/* Online payments */}
+                  <SettingsSection title={t('modal.payments.sectionTitle')} description={t('modal.payments.sectionDesc')}>
+                    <SettingRow
+                      label={t('modal.payments.enableLabel')}
+                      description={hasOnlinePaymentAccess ? t('modal.payments.enableDesc') : t('modal.payments.lockedDesc')}
+                    >
+                      <Switch
+                        checked={hasOnlinePaymentAccess && stripeEnabled}
+                        onChange={setStripeEnabled}
+                        disabled={!hasOnlinePaymentAccess || checkingPosSubscription}
+                      />
+                    </SettingRow>
+
+                    {(!hasOnlinePaymentAccess || checkingPosSubscription) && (
+                      <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                        <p className="mb-2 text-xs font-medium text-gray-600">
+                          {checkingPosSubscription ? t('modal.payments.checking') : t('modal.payments.requirementsTitle')}
+                        </p>
+                        <div className="space-y-1.5 text-xs text-gray-500">
+                          <div className="flex items-center justify-between gap-3">
+                            <span>{t('modal.payments.requirementPlan')}</span>
+                            <span className={hasProPlan ? 'text-emerald-600' : 'text-amber-600'}>
+                              {hasProPlan ? t('modal.payments.ok') : t('modal.payments.missing')}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span>{t('modal.payments.requirementPos')}</span>
+                            <span className={hasPosSubscription ? 'text-emerald-600' : 'text-amber-600'}>
+                              {hasPosSubscription ? t('modal.payments.ok') : t('modal.payments.missing')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {hasOnlinePaymentAccess && stripeEnabled && (
+                      <>
+                        <SettingRow
+                          label={t('modal.payments.modeLabel')}
+                          description={t('modal.payments.modeDesc')}
+                        >
+                          <Select
+                            value={stripePaymentMode}
+                            setValue={(value) => setStripePaymentMode(value === 'deposit' ? 'deposit' : 'full')}
+                            placeholder={t('modal.payments.modePlaceholder')}
+                            className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
+                          >
+                            <SelectOption value="full">{t('modal.payments.modeFull')}</SelectOption>
+                            <SelectOption value="deposit">{t('modal.payments.modeDeposit')}</SelectOption>
+                          </Select>
+                        </SettingRow>
+
+                        {stripePaymentMode === 'deposit' && (
+                          <SettingRow
+                            label={t('modal.payments.depositLabel')}
+                            description={t('modal.payments.depositDesc')}
+                          >
+                            <Input
+                              type="number"
+                              min={1}
+                              max={100}
+                              value={stripeDepositPercent}
+                              onChange={(e) => setStripeDepositPercent(e.target.value)}
+                              suffix="%"
+                            />
+                          </SettingRow>
+                        )}
+                      </>
+                    )}
                   </SettingsSection>
 
                   {/* Main Booking Link */}

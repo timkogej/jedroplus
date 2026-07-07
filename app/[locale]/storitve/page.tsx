@@ -41,6 +41,7 @@ import {
 import { getNextServiceId } from '@/src/lib/idGenerators';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
+import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
 
 // Components
 import ServiceGrid from '@/components/services/ServiceGrid';
@@ -208,7 +209,7 @@ function Toast({
 
 export default function StoritvePage() {
   const router = useRouter();
-  const { companyId, companySettings, loading: companyLoading } = useCompany();
+  const { companyId, companyUuid, companySettings, planCode, loading: companyLoading } = useCompany();
   const { user } = useAuth();
   const t = useTranslations('services');
 
@@ -242,12 +243,45 @@ export default function StoritvePage() {
   const [availableResursi, setAvailableResursi] = useState<Resurs[]>([]);
   const [storitveResursiLinks, setStoritveResursiLinks] = useState<StoritevResurs[]>([]);
   const [pendingResursiIds, setPendingResursiIds] = useState<string[]>([]);
+  const [hasPosSubscription, setHasPosSubscription] = useState(false);
+  const [isCheckingPosSubscription, setIsCheckingPosSubscription] = useState(false);
 
   const actor = user?.email ?? 'unknown';
   const companyPayload = useMemo(
     () => getPodatkiPodjetja(companySettings ?? undefined),
     [companySettings]
   );
+  const hasProPlan = useMemo(() => isJedroProPlan(planCode), [planCode]);
+  const stripeEnabled = useMemo(
+    () => parseSettingBool(companySettings?.stripe_enabled ?? companySettings?.Stripe_enabled, false),
+    [companySettings]
+  );
+  const paymentRequirementAvailable = hasProPlan && hasPosSubscription && stripeEnabled;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPosSubscription() {
+      if (!companyUuid) {
+        setHasPosSubscription(false);
+        setIsCheckingPosSubscription(false);
+        return;
+      }
+
+      setIsCheckingPosSubscription(true);
+      const hasSubscription = await hasPosOnlinePaymentsSubscription(companyUuid);
+      if (!cancelled) {
+        setHasPosSubscription(hasSubscription);
+        setIsCheckingPosSubscription(false);
+      }
+    }
+
+    loadPosSubscription();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [companyUuid]);
 
   const buildPayload = useCallback(
     (event: string, entity: string, data: Record<string, unknown>) => ({
@@ -396,6 +430,9 @@ export default function StoritvePage() {
     setIsSaving(true);
     try {
       const companyColumn = await getCompanyColumnForTable(TABLES.services, companyId);
+      const zahtevaPlacilo = paymentRequirementAvailable && data.spletne_rezervacije
+        ? data.zahteva_placilo
+        : false;
 
       if (modalMode === 'edit' && selectedService) {
         // Update existing service
@@ -406,6 +443,9 @@ export default function StoritvePage() {
           Trajanje: data.trajanje,
           Cena: data.cena ? parseFloat(data.cena) : null,
           Opis: data.opis,
+          Spletne_rezervacije: data.spletne_rezervacije,
+          zahteva_placilo: zahtevaPlacilo,
+          requires_payment: zahtevaPlacilo,
           [companyColumn]: companyId,
         };
 
@@ -439,6 +479,9 @@ export default function StoritvePage() {
           Cena: data.cena ? parseFloat(data.cena) : null,
           Opis: data.opis,
           Aktivna: true,
+          Spletne_rezervacije: data.spletne_rezervacije,
+          zahteva_placilo: zahtevaPlacilo,
+          requires_payment: zahtevaPlacilo,
           [companyColumn]: companyId,
         };
 
@@ -503,6 +546,7 @@ export default function StoritvePage() {
     t,
     services,
     pendingResursiIds,
+    paymentRequirementAvailable,
   ]);
 
   // Toggle service active status
@@ -780,6 +824,13 @@ export default function StoritvePage() {
         availableResursi={availableResursi}
         linkedResursiIds={pendingResursiIds}
         onLinkedResursiChange={setPendingResursiIds}
+        paymentRequirementAvailable={paymentRequirementAvailable}
+        paymentRequirementChecks={{
+          hasProPlan,
+          hasPosSubscription,
+          stripeEnabled,
+          loading: isCheckingPosSubscription,
+        }}
       />
 
       {/* Delete Modal */}

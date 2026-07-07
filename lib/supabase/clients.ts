@@ -31,7 +31,7 @@ function detectClientSchema(row: Record<string, unknown>) {
 }
 
 // Parse client from raw row
-function parseClient(row: Record<string, unknown>): Client | null {
+export function parseClient(row: Record<string, unknown>): Client | null {
   const schema = detectClientSchema(row);
   const id = schema.idField ? String(row[schema.idField] ?? '') : '';
   if (!id) return null;
@@ -337,6 +337,17 @@ export async function getClientWithAppointments(
         const serviceFromName = !serviceFromId && normalizedServiceName
           ? serviceByName.get(normalizedServiceName.toLowerCase())
           : undefined;
+        const addOnServiceId = normalizeOptionalText(
+          pickValue(apt, ['add_on_storitev_id', 'add_on_service_id', 'addOnStoritevId'])
+        );
+        const addOnService = addOnServiceId ? serviceById.get(addOnServiceId) : undefined;
+        const addOnNaziv = normalizeOptionalText(
+          pickValue(apt, ['add_on_naziv', 'add_on_name', 'addOnNaziv'])
+        );
+        const addOnTrajanjeValue = pickValue(apt, ['add_on_trajanje', 'add_on_duration', 'addOnTrajanje']);
+        const addOnTrajanje = addOnTrajanjeValue !== null && addOnTrajanjeValue !== undefined && String(addOnTrajanjeValue).trim() !== ''
+          ? Number(addOnTrajanjeValue)
+          : null;
         const appointmentNotes = normalizeOptionalText(pickValue(apt, ['Opombe', 'opombe', 'notes', 'Notes']));
         const appointmentInternalNotes = normalizeOptionalText(
           pickValue(apt, ['Interne opombe', 'interne_opombe', 'internal_notes', 'Internal notes'])
@@ -378,6 +389,9 @@ export async function getClientWithAppointments(
           cas_konec: normalizeText(endTimeValue),
           storitev_naziv: normalizedServiceName || serviceFromId?.naziv || serviceFromName?.naziv || '',
           storitev_barva: normalizeText(pickValue(apt, ['storitev_barva'])) || serviceFromId?.barva || serviceFromName?.barva || '#6366F1',
+          add_on_naziv: addOnNaziv,
+          add_on_barva: addOnService?.barva || null,
+          add_on_trajanje: addOnTrajanje !== null && Number.isFinite(addOnTrajanje) ? addOnTrajanje : null,
           zaposleni_ime: normalizeText(pickValue(apt, ['zaposleni_ime', 'Zaposleni', 'employee', 'Oseba', 'oseba'])),
           status: normalizeText(statusValue) || 'scheduled',
           opombe: appointmentNotes,

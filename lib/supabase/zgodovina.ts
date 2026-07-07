@@ -25,6 +25,11 @@ export async function logZgodovina(params: LogZgodovinaParams): Promise<void> {
     idStranke,
   } = params;
 
+  if (!idPodjetja || !idEntitete) {
+    console.warn('[logZgodovina] skipped — missing required fields', { idPodjetja, idEntitete, akcija });
+    return;
+  }
+
   const { error } = await supabase.from('zgodovina').insert({
     'ID podjetja': idPodjetja,
     tip_entitete: tipEntitete,

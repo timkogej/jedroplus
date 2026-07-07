@@ -102,6 +102,26 @@
       "interval30": "30 minutes",
       "interval60": "60 minutes (1 hour)"
     },
+    "payments": {
+      "sectionTitle": "Online payments",
+      "sectionDesc": "Payment settings for online bookings",
+      "enableLabel": "Enable Stripe payments",
+      "enableDesc": "Clients can pay during online booking when a service requires it.",
+      "lockedDesc": "You need the Jedro Pro plan and a PRO or PLUS POS subscription to enable this.",
+      "checking": "Checking online payment requirements...",
+      "requirementsTitle": "To enable this, you need:",
+      "requirementPlan": "Jedro Pro plan",
+      "requirementPos": "PRO or PLUS POS subscription",
+      "ok": "Enabled",
+      "missing": "Missing",
+      "modeLabel": "Booking payment type",
+      "modeDesc": "Choose whether the client pays the full amount or only a deposit.",
+      "modePlaceholder": "Select payment type",
+      "modeFull": "Full payment",
+      "modeDeposit": "Deposit",
+      "depositLabel": "Deposit amount",
+      "depositDesc": "Percentage of the amount the client pays when booking."
+    },
     "mainLink": {
       "sectionTitle": "Main booking link",
       "sectionDesc": "The link used when sending clients bookings",

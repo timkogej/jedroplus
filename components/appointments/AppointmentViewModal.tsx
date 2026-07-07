@@ -115,10 +115,16 @@ function AppointmentViewModal({
     appointment.add_on_popust_tip
   );
 
-  const hasMultipleServices = !!(appointment.storitev_id_2 || appointment.storitev_id_3);
+  const hasAddOn = !!appointment.add_on_naziv?.trim();
+  const hasMultipleServices = !!(appointment.storitev_id_2 || appointment.storitev_id_3 || hasAddOn);
   const hasDiscount = !!(appointment.promocija_tip || (rawDiscountValue != null && rawDiscountValue > 0));
   const promotionType = appointment.promocija_tip || (hasDiscount ? 'popust' : null);
   const showPriceSummary = hasMultipleServices;
+  const serviceDurationTotal =
+    (appointment.storitev?.trajanje ?? 0) +
+    (appointment.storitev_2?.trajanje ?? 0) +
+    (appointment.storitev_3?.trajanje ?? 0) +
+    (hasAddOn ? (appointment.add_on_trajanje ?? appointment.add_on_storitev?.trajanje ?? 0) : 0);
 
   const totalOriginal =
     baseCena != null || addOnOriginalPrice != null
@@ -126,7 +132,7 @@ function AppointmentViewModal({
       : null;
   const mainFinal = finalCena ?? baseCena;
   const addOnFinalNum = appointment.add_on_final_cena ? parseFloat(appointment.add_on_final_cena) : 0;
-  const totalFinal = mainFinal != null ? mainFinal + (hasMultipleServices ? addOnFinalNum : 0) : null;
+  const totalFinal = mainFinal != null ? mainFinal + addOnFinalNum : null;
   const totalSaving = totalOriginal != null && totalFinal != null ? Math.max(0, totalOriginal - totalFinal) : 0;
 
   // Animation variants
@@ -182,10 +188,13 @@ function AppointmentViewModal({
           >
             <div className="flex items-start justify-between">
               <div>
-                {/* Client Name - Large */}
-                <h2 className="text-3xl font-bold text-white mb-3">
-                  {appointment.stranka_ime || '-'}
-                </h2>
+                <div className="mb-3 flex min-w-0 items-center gap-3">
+                  {/* Client Name - Large */}
+                  <h2 className="truncate text-3xl font-bold text-white">
+                    {appointment.stranka_ime || '-'}
+                  </h2>
+                  <StatusBadge status={appointment.status || 'scheduled'} size="md" variant="gradient" weight="normal" />
+                </div>
 
                 {/* Service Name */}
                 <div className="flex items-center gap-2 text-white/95 mb-2">
@@ -205,9 +214,6 @@ function AppointmentViewModal({
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Status Badge */}
-                <StatusBadge status={appointment.status || 'scheduled'} size="md" />
-
                 {/* Close button */}
                 <button
                   type="button"
@@ -235,7 +241,7 @@ function AppointmentViewModal({
                     <Calendar className="w-5 h-5 text-gray-900" weight="bold" />
                     <div>
                       <div className="text-sm text-gray-600">Datum</div>
-                      <div className="font-semibold text-gray-900">
+                      <div className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text font-bold text-transparent">
                         {formattedDate}
                       </div>
                     </div>
@@ -254,7 +260,7 @@ function AppointmentViewModal({
                     <Clock className="w-5 h-5 text-gray-900" weight="bold" />
                     <div>
                       <div className="text-sm text-gray-600">Čas</div>
-                      <div className="font-semibold text-gray-900">
+                      <div className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text font-bold text-transparent">
                         {appointment.cas_zacetek} - {appointment.cas_konec || '-'}
                       </div>
                     </div>
@@ -274,11 +280,11 @@ function AppointmentViewModal({
               </div>
 
               {/* Skupno trajanje - only show if multiple services */}
-              {(appointment.storitev_id_2 || appointment.storitev_id_3) && (
+              {hasMultipleServices && (
                 <div className="flex items-center justify-between p-3 bg-gradient-to-r from-violet-50 to-cyan-50 rounded-xl">
                   <span className="text-sm font-medium text-gray-700">Skupno trajanje</span>
                   <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                    {duration > 0 ? `${duration} min` : '-'}
+                    {(serviceDurationTotal || duration) > 0 ? `${serviceDurationTotal || duration} min` : '-'}
                   </span>
                 </div>
               )}
@@ -362,7 +368,7 @@ function AppointmentViewModal({
               })()}
 
               {/* Add-on service section */}
-              {appointment.storitev_id_2 && appointment.add_on_final_cena && (
+              {hasAddOn && appointment.add_on_final_cena && (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -373,9 +379,7 @@ function AppointmentViewModal({
                       <Plus className="w-3.5 h-3.5" weight="bold" />
                       <span>Dodatna storitev</span>
                     </div>
-                    {appointment.storitev_2 && (
-                      <p className="text-sm font-medium text-gray-900">{appointment.storitev_2.naziv}</p>
-                    )}
+                    <p className="text-sm font-medium text-gray-900">{appointment.add_on_naziv}</p>
                     {addOnHasDiscount ? (
                       <div className="space-y-1">
                         {addOnOriginalPrice != null && (
@@ -445,6 +449,22 @@ function AppointmentViewModal({
                     {appointment.storitev?.trajanje && appointment.storitev.trajanje > 0 && (
                       <div className="text-xs text-gray-500 mt-1">
                         {appointment.storitev.trajanje} minut
+                      </div>
+                    )}
+                    {hasAddOn && (
+                      <div className="mt-3 flex items-center gap-2">
+                        <div
+                          className="h-3 w-3 rounded-full flex-shrink-0"
+                          style={{ background: appointment.add_on_storitev?.barva || '#6366F1' }}
+                        />
+                        <span className="text-sm font-medium text-gray-900">{appointment.add_on_naziv}</span>
+                        {(appointment.add_on_trajanje ?? 0) > 0 && (
+                          <span className="text-xs text-gray-500">{appointment.add_on_trajanje} minut</span>
+                        )}
+                        <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                          <Plus className="h-2.5 w-2.5" weight="bold" />
+                          Dodatna storitev
+                        </span>
                       </div>
                     )}
                   </div>

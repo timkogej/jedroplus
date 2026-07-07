@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Warning, Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle } from '@phosphor-icons/react';
+import { Warning, Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle, Plus } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import type { AppointmentWithDetails } from '@/types/appointments';
 
@@ -142,11 +142,22 @@ function DeleteConfirmation({
 
                     {/* Service */}
                     {appointment.storitev?.naziv && (
-                      <div className="flex items-center gap-2 col-span-2">
+                      <div className="flex items-start gap-2 col-span-2">
                         <Briefcase className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
-                        <span className="text-sm text-gray-700">
-                          {appointment.storitev.naziv}
-                        </span>
+                        <div className="space-y-1">
+                          <span className="block text-sm text-gray-700">
+                            {appointment.storitev.naziv}
+                          </span>
+                          {appointment.add_on_naziv && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-700">{appointment.add_on_naziv}</span>
+                              <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                                <Plus className="h-2.5 w-2.5" weight="bold" />
+                                Dodatna storitev
+                              </span>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
 

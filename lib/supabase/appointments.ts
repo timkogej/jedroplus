@@ -176,6 +176,40 @@ export function extractPricingFields(row: Record<string, unknown>): {
   return { koncna_cena, cena, popust, popust_tip };
 }
 
+// Extract add-on service fields from raw booking row
+export function extractAddOnFields(row: Record<string, unknown>): {
+  add_on_storitev_id: string | null;
+  add_on_naziv: string | null;
+  add_on_trajanje: number | null;
+  add_on_popust: string | null;
+  add_on_popust_tip: string | null;
+  add_on_final_cena: string | null;
+  valuta: string | null;
+} {
+  const toString = (v: unknown): string | null => {
+    if (v === null || v === undefined) return null;
+    const value = String(v).trim();
+    if (!value || value === 'null') return null;
+    return value;
+  };
+  const toNum = (v: unknown): number | null => {
+    const value = toString(v);
+    if (value === null) return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  return {
+    add_on_storitev_id: toString(pickFirst(row, ['add_on_storitev_id', 'add_on_service_id', 'addOnStoritevId'])),
+    add_on_naziv: toString(pickFirst(row, ['add_on_naziv', 'add_on_name', 'addOnNaziv'])),
+    add_on_trajanje: toNum(pickFirst(row, ['add_on_trajanje', 'add_on_duration', 'addOnTrajanje'])),
+    add_on_popust: toString(pickFirst(row, ['add_on_popust', 'add_on_discount'])),
+    add_on_popust_tip: toString(pickFirst(row, ['add_on_popust_tip', 'add_on_discount_type'])),
+    add_on_final_cena: toString(pickFirst(row, ['add_on_final_cena', 'add_on_final_price'])),
+    valuta: toString(pickFirst(row, ['Valuta', 'valuta', 'currency', 'Currency'])),
+  };
+}
+
 // Extract additional service IDs (2 and 3) from raw booking row
 export function extractAdditionalServiceIds(row: Record<string, unknown>): { serviceId2: string; serviceId3: string } {
   const SERVICE_ID_2_FIELDS = ['ID storitev 2', 'ID storitve 2', 'storitev_id_2', 'service_id_2'];
@@ -395,18 +429,22 @@ export async function fetchAppointmentsForMonth(
       // Extract pricing and promotion fields
       const pricing = extractPricingFields(row);
       const promo = extractPromotionFields(row);
+      const addOn = extractAddOnFields(row);
+      const addOnService = addOn.add_on_storitev_id ? (serviceMap.get(addOn.add_on_storitev_id) || null) : null;
 
       // Extract ghost termin fields
       const beleziTermin = row['belezi_termin'];
       const belezi_termin = beleziTermin === false || beleziTermin === 0 ? false : true;
       const deletedAt = row['deleted_at'];
       const deleted_at = deletedAt && String(deletedAt) !== 'null' ? String(deletedAt) : null;
+      const id_termina = row['ID termina'] ? String(row['ID termina']) : undefined;
 
       // Ghost termini with deleted_at set are soft-deleted — exclude from all views
       if (deleted_at !== null) continue;
 
       appointments.push({
         id,
+        id_termina,
         datum: bookingDate.toISOString(),
         cas_zacetek: startTime,
         cas_konec: endTime,
@@ -418,6 +456,9 @@ export async function fetchAppointmentsForMonth(
         storitev_id: serviceId || undefined,
         storitev_id_2: serviceId2 || undefined,
         storitev_id_3: serviceId3 || undefined,
+        add_on_storitev_id: addOn.add_on_storitev_id,
+        add_on_naziv: addOn.add_on_naziv,
+        add_on_trajanje: addOn.add_on_trajanje,
         zaposleni_id: staffId || undefined,
         status: normalizedStatus,
         opombe: notes || undefined,
@@ -430,11 +471,16 @@ export async function fetchAppointmentsForMonth(
         promocija_naziv: promo.promocija_naziv,
         popust_id: promo.popust_id,
         happy_hour_id: promo.happy_hour_id,
+        add_on_popust: addOn.add_on_popust,
+        add_on_popust_tip: addOn.add_on_popust_tip,
+        add_on_final_cena: addOn.add_on_final_cena,
+        valuta: addOn.valuta,
         belezi_termin,
         deleted_at,
         storitev: serviceData,
         storitev_2: storitev2,
         storitev_3: storitev3,
+        add_on_storitev: addOnService,
         zaposleni: staffMap.get(staffId) || null,
       });
     }
@@ -641,12 +687,20 @@ export async function fetchAppointmentById(
 
     // Extract additional service IDs from raw row
     const { serviceId2, serviceId3 } = extractAdditionalServiceIds(booking);
+    const storitev2 = serviceId2 ? (serviceMap.get(serviceId2) || null) : null;
+    const storitev3 = serviceId3 ? (serviceMap.get(serviceId3) || null) : null;
 
     // Extract pricing fields
     const pricing = extractPricingFields(booking);
+    const promo = extractPromotionFields(booking);
+    const addOn = extractAddOnFields(booking);
+    const addOnService = addOn.add_on_storitev_id ? (serviceMap.get(addOn.add_on_storitev_id) || null) : null;
+
+    const id_termina = booking['ID termina'] ? String(booking['ID termina']) : undefined;
 
     const appointment: AppointmentWithDetails = {
       id,
+      id_termina,
       datum: bookingDate?.toISOString() ?? new Date().toISOString(),
       cas_zacetek: startTime,
       cas_konec: endTime,
@@ -657,6 +711,9 @@ export async function fetchAppointmentById(
       storitev_id: serviceId || undefined,
       storitev_id_2: serviceId2 || undefined,
       storitev_id_3: serviceId3 || undefined,
+      add_on_storitev_id: addOn.add_on_storitev_id,
+      add_on_naziv: addOn.add_on_naziv,
+      add_on_trajanje: addOn.add_on_trajanje,
       zaposleni_id: staffId || undefined,
       status: normalizedStatus,
       opombe: notes || undefined,
@@ -665,7 +722,18 @@ export async function fetchAppointmentById(
       popust: pricing.popust,
       popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,
       koncna_cena: pricing.koncna_cena,
+      promocija_tip: promo.promocija_tip,
+      promocija_naziv: promo.promocija_naziv,
+      popust_id: promo.popust_id,
+      happy_hour_id: promo.happy_hour_id,
+      add_on_popust: addOn.add_on_popust,
+      add_on_popust_tip: addOn.add_on_popust_tip,
+      add_on_final_cena: addOn.add_on_final_cena,
+      valuta: addOn.valuta,
       storitev: serviceData,
+      storitev_2: storitev2,
+      storitev_3: storitev3,
+      add_on_storitev: addOnService,
       zaposleni: staffMap.get(staffId) || null,
     };
 
@@ -828,18 +896,22 @@ export async function fetchAllAppointments(
       // Extract pricing and promotion fields
       const pricing = extractPricingFields(row);
       const promo = extractPromotionFields(row);
+      const addOn = extractAddOnFields(row);
+      const addOnService = addOn.add_on_storitev_id ? (serviceMap.get(addOn.add_on_storitev_id) || null) : null;
 
       // Extract ghost termin fields
       const beleziTermin = row['belezi_termin'];
       const belezi_termin = beleziTermin === false || beleziTermin === 0 ? false : true;
       const deletedAt = row['deleted_at'];
       const deleted_at = deletedAt && String(deletedAt) !== 'null' ? String(deletedAt) : null;
+      const id_termina = row['ID termina'] ? String(row['ID termina']) : undefined;
 
       // Ghost termini with deleted_at set are soft-deleted — exclude from all views
       if (deleted_at !== null) continue;
 
       appointments.push({
         id,
+        id_termina,
         datum: bookingDate.toISOString(),
         cas_zacetek: startTime,
         cas_konec: endTime,
@@ -851,6 +923,9 @@ export async function fetchAllAppointments(
         storitev_id: serviceId || undefined,
         storitev_id_2: serviceId2 || undefined,
         storitev_id_3: serviceId3 || undefined,
+        add_on_storitev_id: addOn.add_on_storitev_id,
+        add_on_naziv: addOn.add_on_naziv,
+        add_on_trajanje: addOn.add_on_trajanje,
         zaposleni_id: staffId || undefined,
         status: normalizedStatus,
         opombe: notes || undefined,
@@ -863,11 +938,16 @@ export async function fetchAllAppointments(
         promocija_naziv: promo.promocija_naziv,
         popust_id: promo.popust_id,
         happy_hour_id: promo.happy_hour_id,
+        add_on_popust: addOn.add_on_popust,
+        add_on_popust_tip: addOn.add_on_popust_tip,
+        add_on_final_cena: addOn.add_on_final_cena,
+        valuta: addOn.valuta,
         belezi_termin,
         deleted_at,
         storitev: serviceData,
         storitev_2: storitev2,
         storitev_3: storitev3,
+        add_on_storitev: addOnService,
         zaposleni: staffMap.get(staffId) || null,
       });
     }

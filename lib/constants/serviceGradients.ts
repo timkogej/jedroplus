@@ -125,6 +125,54 @@ export const SERVICE_GRADIENTS: ServiceGradient[] = [
     gradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 50%, #1E3A8A 100%)',
     preview: { start: '#3B82F6', end: '#1E3A8A' },
   },
+  {
+    id: 17,
+    name: 'Rose',
+    gradient: 'linear-gradient(135deg, #FDA4AF 0%, #FB7185 50%, #E11D48 100%)',
+    preview: { start: '#FDA4AF', end: '#E11D48' },
+  },
+  {
+    id: 18,
+    name: 'Sky',
+    gradient: 'linear-gradient(135deg, #BAE6FD 0%, #38BDF8 50%, #0284C7 100%)',
+    preview: { start: '#BAE6FD', end: '#0284C7' },
+  },
+  {
+    id: 19,
+    name: 'Lime',
+    gradient: 'linear-gradient(135deg, #D9F99D 0%, #84CC16 50%, #3F6212 100%)',
+    preview: { start: '#D9F99D', end: '#3F6212' },
+  },
+  {
+    id: 20,
+    name: 'Plum',
+    gradient: 'linear-gradient(135deg, #E9D5FF 0%, #A855F7 50%, #6B21A8 100%)',
+    preview: { start: '#E9D5FF', end: '#6B21A8' },
+  },
+  {
+    id: 21,
+    name: 'Gold',
+    gradient: 'linear-gradient(135deg, #FEF3C7 0%, #F59E0B 50%, #B45309 100%)',
+    preview: { start: '#FEF3C7', end: '#B45309' },
+  },
+  {
+    id: 22,
+    name: 'Teal',
+    gradient: 'linear-gradient(135deg, #99F6E4 0%, #14B8A6 50%, #0F766E 100%)',
+    preview: { start: '#99F6E4', end: '#0F766E' },
+  },
+  {
+    id: 23,
+    name: 'Ruby',
+    gradient: 'linear-gradient(135deg, #FECACA 0%, #EF4444 50%, #991B1B 100%)',
+    preview: { start: '#FECACA', end: '#991B1B' },
+  },
+  {
+    id: 24,
+    name: 'Steel',
+    gradient: 'linear-gradient(135deg, #CBD5E1 0%, #64748B 50%, #334155 100%)',
+    preview: { start: '#CBD5E1', end: '#334155' },
+  },
 ];
 
 // Default gradient for new services

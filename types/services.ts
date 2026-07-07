@@ -15,6 +15,8 @@ export interface Service {
   cena: number | null;
   opis: string | null;
   aktivna: boolean;
+  spletne_rezervacije: boolean; // whether this service can be booked online
+  zahteva_placilo: boolean; // whether online booking requires payment for this service
   podjetje_id: string;
   created_at: string;
   updated_at: string;
@@ -33,6 +35,8 @@ export interface ServiceFormData {
   tip_cene: PriceType; // 'fiksna' or 'po_dogovoru'
   cena: string; // string for form input, converted to number when saving
   opis: string;
+  spletne_rezervacije: boolean; // whether this service can be booked online
+  zahteva_placilo: boolean; // whether online booking requires payment for this service
 }
 
 // Buffer options (displayed as "Rezervni čas" in UI, but stored as buffer internally)

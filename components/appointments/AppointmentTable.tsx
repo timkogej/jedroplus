@@ -373,7 +373,8 @@ function AppointmentTable({
                     {(() => {
                       const hasService2 = !!appointment.storitev_id_2;
                       const hasService3 = !!appointment.storitev_id_3;
-                      const additionalServicesCount = (hasService2 ? 1 : 0) + (hasService3 ? 1 : 0);
+                      const hasAddOn = !!appointment.add_on_naziv;
+                      const additionalServicesCount = (hasService2 ? 1 : 0) + (hasService3 ? 1 : 0) + (hasAddOn ? 1 : 0);
 
                       return (
                         <div className="flex items-center gap-2">

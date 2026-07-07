@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import Image from 'next/image';
+import { useEffect, useState, useCallback, type CSSProperties } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import {
@@ -48,7 +47,13 @@ interface BookingDesign {
   id: number;
   designKey: string;
   linkKey: keyof ReservationSettings;
-  image: string;
+  accent: string;
+  squareStyle: CSSProperties;
+  badgeStyle: CSSProperties;
+  titleStyle: CSSProperties;
+  subtitleStyle: CSSProperties;
+  bodyStyle: CSSProperties;
+  dividerStyle: CSSProperties;
 }
 
 const STANDARD_DESIGNS: BookingDesign[] = [
@@ -56,19 +61,84 @@ const STANDARD_DESIGNS: BookingDesign[] = [
     id: 1,
     designKey: 'classic',
     linkKey: 'bookingLink1',
-    image: '/booking-designs/booking-classic.jpg',
+    accent: 'linear-gradient(135deg, #7c3aed, #2563eb, #06b6d4)',
+    squareStyle: {
+      background: 'linear-gradient(135deg, #7C3AED 0%, #4F46E5 58%, #06B6D4 100%)',
+      color: 'rgba(255,255,255,0.96)',
+      borderColor: 'rgba(255,255,255,0.22)',
+      fontFamily: '"Nunito", var(--font-geist-sans), Arial, sans-serif',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)',
+    },
+    badgeStyle: {
+      background: 'rgba(255,255,255,0.18)',
+      color: 'rgba(255,255,255,0.92)',
+      borderColor: 'rgba(255,255,255,0.26)',
+    },
+    titleStyle: {
+      color: '#FFFFFF',
+      fontFamily: '"Nunito", var(--font-geist-sans), Arial, sans-serif',
+      fontWeight: 800,
+    },
+    subtitleStyle: { color: 'rgba(255,255,255,0.72)' },
+    bodyStyle: { color: 'rgba(255,255,255,0.78)' },
+    dividerStyle: {
+      background: 'linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.08))',
+    },
   },
   {
     id: 2,
     designKey: 'modern',
     linkKey: 'bookingLink2',
-    image: '/booking-designs/booking-modern.jpg',
+    accent: 'linear-gradient(135deg, #111827, #f43f5e)',
+    squareStyle: {
+      background: 'linear-gradient(135deg, #0F0F1A 0%, #1A0A1E 56%, #111827 100%)',
+      color: '#F8FAFC',
+      borderColor: 'rgba(244,63,94,0.28)',
+      fontFamily: '"DM Sans", var(--font-geist-sans), Arial, sans-serif',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+    },
+    badgeStyle: {
+      background: 'rgba(244,63,94,0.12)',
+      color: '#FDA4AF',
+      borderColor: 'rgba(244,63,94,0.36)',
+    },
+    titleStyle: {
+      color: '#F8FAFC',
+      fontFamily: '"Clash Display", var(--font-geist-sans), Arial, sans-serif',
+      fontWeight: 400,
+    },
+    subtitleStyle: { color: 'rgba(248,250,252,0.6)' },
+    bodyStyle: { color: 'rgba(248,250,252,0.68)' },
+    dividerStyle: {
+      background: 'linear-gradient(90deg, #F43F5E, rgba(244,63,94,0.05))',
+    },
   },
   {
     id: 3,
     designKey: 'elegant',
     linkKey: 'bookingLink3',
-    image: '/booking-designs/booking-elegant.jpg',
+    accent: 'linear-gradient(135deg, #3d2b1f, #c4956a)',
+    squareStyle: {
+      background: 'linear-gradient(180deg, rgba(196,149,106,0.12) 0%, #FFFFFF 22%, #FFFFFF 78%, rgba(196,149,106,0.08) 100%)',
+      color: '#3D2B1F',
+      borderColor: '#E8DDD1',
+      fontFamily: 'Inter, var(--font-geist-sans), Arial, sans-serif',
+    },
+    badgeStyle: {
+      background: '#FAF7F2',
+      color: '#9C8572',
+      borderColor: '#E8DDD1',
+    },
+    titleStyle: {
+      color: '#3D2B1F',
+      fontFamily: 'Georgia, "Times New Roman", serif',
+      fontWeight: 500,
+    },
+    subtitleStyle: { color: '#9C8572' },
+    bodyStyle: { color: '#6F5A49' },
+    dividerStyle: {
+      background: '#C4956A',
+    },
   },
 ];
 
@@ -77,19 +147,100 @@ const PREMIUM_DESIGNS: BookingDesign[] = [
     id: 4,
     designKey: 'seasonal',
     linkKey: 'bookingLink4',
-    image: '/booking-designs/booking-seasonal.jpg',
+    accent: 'linear-gradient(135deg, #38BDF8, #FACC15)',
+    squareStyle: {
+      background: 'linear-gradient(150deg, #E0F7FF 0%, #BAE6FD 58%, #F0F9FF 100%)',
+      color: '#0F172A',
+      borderColor: 'rgba(14,165,233,0.22)',
+      fontFamily: '"Quicksand", var(--font-geist-sans), Arial, sans-serif',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9)',
+    },
+    badgeStyle: {
+      background: 'rgba(255,255,255,0.62)',
+      color: '#0F172A',
+      borderColor: 'rgba(14,165,233,0.24)',
+    },
+    titleStyle: {
+      color: '#0F172A',
+      fontFamily: '"Quicksand", var(--font-geist-sans), Arial, sans-serif',
+      fontWeight: 700,
+    },
+    subtitleStyle: { color: 'rgba(15,23,42,0.72)' },
+    bodyStyle: { color: 'rgba(15,23,42,0.72)' },
+    dividerStyle: {
+      background: 'linear-gradient(90deg, #0EA5E9, rgba(250,204,21,0.55), transparent)',
+    },
   },
   {
     id: 5,
     designKey: 'magazine',
     linkKey: 'bookingLink5',
-    image: '/booking-designs/booking-magazine.jpg',
+    accent: 'linear-gradient(135deg, #1a1a2e, #8b5cf6)',
+    squareStyle: {
+      background: '#FAFAF9',
+      color: '#1A1A1A',
+      borderColor: 'rgba(0,0,0,0.1)',
+      fontFamily: 'Georgia, "Times New Roman", serif',
+    },
+    badgeStyle: {
+      background: '#FFFFFF',
+      color: '#6B6B6B',
+      borderColor: 'rgba(0,0,0,0.12)',
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+    },
+    titleStyle: {
+      color: '#1A1A1A',
+      fontFamily: 'Georgia, "Times New Roman", serif',
+      fontWeight: 500,
+    },
+    subtitleStyle: {
+      color: '#6B6B6B',
+      fontStyle: 'italic',
+    },
+    bodyStyle: { color: '#525252' },
+    dividerStyle: {
+      borderTop: '1px dotted rgba(0,0,0,0.28)',
+      background: 'transparent',
+    },
   },
   {
     id: 6,
     designKey: 'casino',
     linkKey: 'bookingLink6',
-    image: '/booking-designs/booking-casino.jpg',
+    accent: 'linear-gradient(135deg, #a07830, #c9a84c, #e8c96d)',
+    squareStyle: {
+      background:
+        'repeating-linear-gradient(45deg, rgba(201,168,76,0.018) 0 1px, transparent 1px 12px), repeating-linear-gradient(-45deg, rgba(201,168,76,0.012) 0 1px, transparent 1px 14px), radial-gradient(circle at 20% 20%, #145228 0%, transparent 34%), radial-gradient(circle at 80% 78%, #0D3B1E 0%, transparent 38%), #060F08',
+      color: '#F5EDD6',
+      borderColor: 'rgba(201,168,76,0.3)',
+      fontFamily: 'Georgia, "Times New Roman", serif',
+      boxShadow: 'inset 0 1px 0 rgba(232,201,109,0.13)',
+    },
+    badgeStyle: {
+      background: 'rgba(201,168,76,0.12)',
+      color: '#E8C96D',
+      borderColor: 'rgba(201,168,76,0.38)',
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+    },
+    titleStyle: {
+      color: '#F5EDD6',
+      fontFamily: 'Georgia, "Times New Roman", serif',
+      fontWeight: 700,
+    },
+    subtitleStyle: {
+      color: '#C9A84C',
+      textTransform: 'uppercase',
+      letterSpacing: '0.08em',
+    },
+    bodyStyle: {
+      color: '#E8D9B8',
+      fontStyle: 'italic',
+    },
+    dividerStyle: {
+      background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.75), transparent)',
+    },
   },
 ];
 
@@ -219,19 +370,116 @@ export default function RezervacijePage() {
   }
 
   const hasIncompleteSettings = !loading && !settings.mainBookingLink.trim();
+  const renderDesignCard = (design: BookingDesign) => {
+    const designUrl = getDesignLink(design);
+    const isCopied = copiedDesignId === design.id;
+    const designName = t(`designs.${design.designKey}.name`);
+
+    return (
+      <motion.article
+        key={design.id}
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ y: -2 }}
+        className="group flex h-full w-[260px] flex-none flex-col rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition-shadow hover:border-gray-300 hover:shadow-lg md:w-full md:p-4"
+      >
+        <div
+          className="relative aspect-square overflow-hidden rounded-lg border p-4 sm:p-5"
+          style={design.squareStyle}
+        >
+          {design.designKey === 'seasonal' && (
+            <>
+              <div className="pointer-events-none absolute -right-6 -top-6 h-20 w-20 rounded-full bg-[#FACC15] shadow-[0_0_36px_rgba(250,204,21,0.5)] sm:-right-7 sm:-top-7 sm:h-24 sm:w-24 sm:shadow-[0_0_44px_rgba(250,204,21,0.52)]" />
+              <div className="pointer-events-none absolute right-3 top-3 h-10 w-10 rounded-full border border-yellow-300/60 sm:right-4 sm:top-4 sm:h-12 sm:w-12" />
+            </>
+          )}
+          <div className="relative z-10 flex h-full flex-col justify-between">
+            <div className="flex items-center">
+              <span
+                className="flex h-7 min-w-7 items-center justify-center rounded-md border px-2 text-[11px] font-semibold"
+                style={design.badgeStyle}
+              >
+                {String(design.id).padStart(2, '0')}
+              </span>
+            </div>
+
+            <div>
+              <div className="mb-3 h-px w-16 sm:mb-5 sm:w-20" style={design.dividerStyle} />
+              <h3 className="text-xl leading-tight sm:text-2xl" style={design.titleStyle}>
+                {designName}
+              </h3>
+              <p className="mt-1.5 text-xs font-medium leading-5 sm:mt-2 sm:text-sm" style={design.subtitleStyle}>
+                {t(`designs.${design.designKey}.subtitle`)}
+              </p>
+              <p
+                className="mt-3 text-xs leading-5 sm:mt-4 sm:text-sm sm:leading-6"
+                style={{
+                  ...design.bodyStyle,
+                  display: '-webkit-box',
+                  WebkitBoxOrient: 'vertical',
+                  WebkitLineClamp: 4,
+                  overflow: 'hidden',
+                }}
+              >
+                {t(`designs.${design.designKey}.description`)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-[1fr_40px] gap-2">
+          <motion.button
+            whileHover={designUrl ? { scale: 1.01 } : undefined}
+            whileTap={designUrl ? { scale: 0.99 } : undefined}
+            onClick={() => copyToClipboard(designUrl, design.id)}
+            disabled={!designUrl}
+            className="flex h-10 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-45"
+          >
+            {isCopied ? (
+              <>
+                <Check className="h-4 w-4 text-green-500" weight="bold" />
+                <span className="text-green-600">{t('designs.copied')}</span>
+              </>
+            ) : (
+              <>
+                <Copy className="h-4 w-4 text-gray-500" weight="regular" />
+                <span>{t('designs.copy')}</span>
+              </>
+            )}
+          </motion.button>
+          <motion.button
+            whileHover={designUrl ? { scale: 1.03 } : undefined}
+            whileTap={designUrl ? { scale: 0.97 } : undefined}
+            onClick={() => window.open(designUrl, '_blank')}
+            disabled={!designUrl}
+            aria-label={`${designName} ${t('designs.bookingLinkLabel')}`}
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-white shadow-sm transition-opacity disabled:cursor-not-allowed disabled:opacity-45"
+            style={{ background: design.accent }}
+          >
+            <ArrowSquareOut className="h-4 w-4" weight="bold" />
+          </motion.button>
+        </div>
+      </motion.article>
+    );
+  };
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-slate-50">
-        <div className="mx-auto max-w-7xl px-6 py-8">
+      <main className="min-h-screen bg-[#F7F8FB]">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 flex flex-wrap items-start justify-between gap-4"
+            className="mb-6 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-bold text-[#1A1F36]">{t('page.title')}</h1>
+              <h1
+                className="text-3xl font-normal text-[#1A1F36]"
+                style={{ fontFamily: '"Clash Display", var(--font-geist-sans), Arial, sans-serif' }}
+              >
+                {t('page.title')}
+              </h1>
               <p className="mt-1 text-sm text-gray-500">
                 {t('page.subtitle')}
               </p>
@@ -243,12 +491,12 @@ export default function RezervacijePage() {
                 onClick={() => setShowSettingsModal(true)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="relative w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
                 title={t('modal.title')}
               >
                 <Gear size={20} weight="bold" className="text-gray-900" />
                 {hasIncompleteSettings && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-white border border-white" style={{ fontSize: 9, fontWeight: 700, lineHeight: 1 }}>!</span>
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-orange-500 text-white" style={{ fontSize: 9, fontWeight: 700, lineHeight: 1 }}>!</span>
                 )}
               </motion.button>
             )}
@@ -259,7 +507,7 @@ export default function RezervacijePage() {
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 flex items-center gap-3 rounded-2xl px-5 py-3.5 bg-orange-50 border border-orange-200"
+              className="mb-6 flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 px-5 py-3.5"
             >
               <Warning size={18} weight="fill" className="text-orange-500 flex-shrink-0" />
               <p className="text-sm text-orange-800 flex-1">
@@ -276,44 +524,47 @@ export default function RezervacijePage() {
             </motion.div>
           )}
 
-          {/* Monthly designs announcement banner */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-3 flex items-center gap-3 rounded-2xl px-5 py-3.5"
-            style={{
-              background: 'linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.06) 50%, rgba(6,182,212,0.08) 100%)',
-              border: '1px solid rgba(139,92,246,0.15)',
-            }}
-          >
-            <span style={{ fontSize: 16 }}>✦</span>
-            <p className="text-sm font-semibold" style={{
-              background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}>
-              {t('newDesignsBanner')}
-            </p>
-          </motion.div>
+          <div className="mb-6 grid gap-3 lg:grid-cols-[0.85fr_1.15fr]">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 rounded-lg border border-violet-100 bg-white px-5 py-4 shadow-sm"
+            >
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-violet-50">
+                <Palette className="h-4 w-4 text-violet-600" weight="bold" />
+              </div>
+              <p
+                className="text-sm font-semibold"
+                style={{
+                  background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                {t('newDesignsBanner')}
+              </p>
+            </motion.div>
 
-          {/* Multi-channel info banner */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="mb-6 flex items-start gap-3 rounded-2xl px-5 py-3.5 bg-amber-50 border border-amber-100"
-          >
-            <span className="text-amber-500 mt-0.5 flex-shrink-0" style={{ fontSize: 16 }}>💡</span>
-            <p className="text-sm text-amber-800">
-              <span className="font-semibold">{t('multiChannelBanner.bold')}</span>{' '}
-              {t('multiChannelBanner.body')}
-            </p>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="flex items-start gap-3 rounded-lg border border-amber-100 bg-white px-5 py-4 shadow-sm"
+            >
+              <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-amber-50">
+                <Link className="h-4 w-4 text-amber-600" weight="bold" />
+              </div>
+              <p className="text-sm leading-6 text-gray-600">
+                <span className="font-semibold text-gray-900">{t('multiChannelBanner.bold')}</span>{' '}
+                {t('multiChannelBanner.body')}
+              </p>
+            </motion.div>
+          </div>
 
           {/* Loading state */}
           {loading ? (
-            <div className="flex items-center justify-center py-20 bg-white">
+            <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white py-20 shadow-sm">
               <GradientSpinner />
             </div>
           ) : (
@@ -323,83 +574,25 @@ export default function RezervacijePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6"
+                className="mb-6 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
               >
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-[#1A1F36] mb-1">{t('standardSection.title')}</h2>
-                  <p className="text-sm text-gray-500">{t('standardSection.subtitle')}</p>
-                </div>
-                <div className="overflow-x-auto pb-4 -mx-2 px-2">
-                  <div className="flex gap-5" style={{ minWidth: 'max-content' }}>
-                    {STANDARD_DESIGNS.map((design) => {
-                      const designUrl = getDesignLink(design);
-                      const isCopied = copiedDesignId === design.id;
-                      return (
-                        <div
-                          key={design.id}
-                          className="w-64 sm:w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-gray-300 hover:shadow-md transition-all"
-                        >
-                          <div className="mb-3 overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                            <Image
-                              src={design.image}
-                              alt={`${t(`designs.${design.designKey}.name`)} booking dizajn`}
-                              width={320}
-                              height={200}
-                              sizes="(max-width: 640px) 256px, 320px"
-                              className="w-full h-auto block"
-                            />
-                          </div>
-                          <h3 className="font-semibold text-left text-gray-900 text-sm">{t(`designs.${design.designKey}.name`)}</h3>
-                          <p className="text-xs text-left text-gray-500 mt-0.5">{t(`designs.${design.designKey}.subtitle`)}</p>
-                          <p className="text-[10px] text-left text-gray-400 mt-1 mb-3 leading-relaxed">{t(`designs.${design.designKey}.description`)}</p>
-                          <div className="space-y-2">
-                            <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
-                              <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">{t('designs.bookingLinkLabel')}</p>
-                              {designUrl ? (
-                                <p
-                                  className="text-xs truncate"
-                                  style={{
-                                    background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
-                                  }}
-                                >
-                                  {designUrl}
-                                </p>
-                              ) : (
-                                <p className="text-xs text-gray-400">{t('designs.notAvailable')}</p>
-                              )}
-                            </div>
-                            <div className="flex gap-2">
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => copyToClipboard(designUrl, design.id)}
-                                disabled={!designUrl}
-                                className="flex-1 h-8 flex items-center justify-center gap-1 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 text-xs"
-                              >
-                                {isCopied ? (
-                                  <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">{t('designs.copied')}</span></>
-                                ) : (
-                                  <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('designs.copy')}</span></>
-                                )}
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => window.open(designUrl, '_blank')}
-                                disabled={!designUrl}
-                                className="h-8 w-8 flex items-center justify-center bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-lg shadow-sm disabled:opacity-50"
-                              >
-                                <ArrowSquareOut className="w-3.5 h-3.5" weight="bold" />
-                              </motion.button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h2 className="mb-1 text-lg font-semibold text-[#1A1F36]">{t('standardSection.title')}</h2>
+                    <p className="text-sm text-gray-500">{t('standardSection.subtitle')}</p>
                   </div>
+                  <div className="flex gap-1.5">
+                    {STANDARD_DESIGNS.map((design) => (
+                      <span
+                        key={design.id}
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ background: design.accent }}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-3">
+                  {STANDARD_DESIGNS.map((design) => renderDesignCard(design))}
                 </div>
               </motion.div>
 
@@ -408,14 +601,14 @@ export default function RezervacijePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-8"
+                className="mb-8 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
               >
-                <div className="mb-4 flex items-center gap-3">
+                <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
                       <h2 className="text-lg font-semibold text-[#1A1F36]">{t('premiumSection.title')}</h2>
                       <span
-                        className="text-xs font-semibold px-2 py-0.5 rounded-full text-white"
+                        className="rounded-md px-2 py-0.5 text-xs font-semibold text-white"
                         style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)' }}
                       >
                         Premium
@@ -423,79 +616,18 @@ export default function RezervacijePage() {
                     </div>
                     <p className="text-sm text-gray-500">{t('premiumSection.subtitle')}</p>
                   </div>
-                </div>
-                <div className="overflow-x-auto pb-4 -mx-2 px-2">
-                  <div className="flex gap-5" style={{ minWidth: 'max-content' }}>
-                    {PREMIUM_DESIGNS.map((design) => {
-                      const designUrl = getDesignLink(design);
-                      const isCopied = copiedDesignId === design.id;
-                      return (
-                        <div
-                          key={design.id}
-                          className="w-64 sm:w-80 flex-shrink-0 border border-gray-200 rounded-xl p-4 hover:border-violet-200 hover:shadow-md transition-all"
-                          style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.03), rgba(6,182,212,0.03))' }}
-                        >
-                          <div className="mb-3 overflow-hidden rounded-lg border border-violet-200 bg-violet-50/30">
-                            <Image
-                              src={design.image}
-                              alt={`${t(`designs.${design.designKey}.name`)} booking dizajn`}
-                              width={320}
-                              height={200}
-                              sizes="(max-width: 640px) 256px, 320px"
-                              className="w-full h-auto block"
-                            />
-                          </div>
-                          <h3 className="font-semibold text-left text-gray-900 text-sm">{t(`designs.${design.designKey}.name`)}</h3>
-                          <p className="text-xs text-left text-gray-500 mt-0.5">{t(`designs.${design.designKey}.subtitle`)}</p>
-                          <p className="text-[10px] text-left text-gray-400 mt-1 mb-3 leading-relaxed">{t(`designs.${design.designKey}.description`)}</p>
-                          <div className="space-y-2">
-                            <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
-                              <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">{t('designs.bookingLinkLabel')}</p>
-                              {designUrl ? (
-                                <p
-                                  className="text-xs truncate"
-                                  style={{
-                                    background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
-                                  }}
-                                >
-                                  {designUrl}
-                                </p>
-                              ) : (
-                                <p className="text-xs text-gray-400">{t('designs.comingSoon')}</p>
-                              )}
-                            </div>
-                            <div className="flex gap-2">
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => copyToClipboard(designUrl, design.id)}
-                                disabled={!designUrl}
-                                className="flex-1 h-8 flex items-center justify-center gap-1 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors disabled:opacity-50 text-xs"
-                              >
-                                {isCopied ? (
-                                  <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">{t('designs.copied')}</span></>
-                                ) : (
-                                  <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('designs.copy')}</span></>
-                                )}
-                              </motion.button>
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => window.open(designUrl, '_blank')}
-                                disabled={!designUrl}
-                                className="h-8 w-8 flex items-center justify-center bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-lg shadow-sm disabled:opacity-50"
-                              >
-                                <ArrowSquareOut className="w-3.5 h-3.5" weight="bold" />
-                              </motion.button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="flex gap-1.5">
+                    {PREMIUM_DESIGNS.map((design) => (
+                      <span
+                        key={design.id}
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ background: design.accent }}
+                      />
+                    ))}
                   </div>
+                </div>
+                <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-3">
+                  {PREMIUM_DESIGNS.map((design) => renderDesignCard(design))}
                 </div>
               </motion.div>
 
@@ -504,9 +636,11 @@ export default function RezervacijePage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.22 }}
-                className="mb-6 flex items-center gap-3 rounded-2xl px-5 py-4 bg-white shadow-sm ring-1 ring-gray-100"
+                className="mb-6 flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-5 py-4 shadow-sm"
               >
-                <span className="text-lg flex-shrink-0">✉️</span>
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-gray-50">
+                  <Link className="h-4 w-4 text-gray-500" weight="bold" />
+                </div>
                 <p className="text-sm text-gray-600">
                   {t('customCta.text')}{' '}
                   <a
@@ -530,7 +664,7 @@ export default function RezervacijePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.23 }}
-                  className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6"
+                  className="mb-6 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Link className="w-5 h-5 text-violet-400" weight="regular" />
@@ -539,7 +673,7 @@ export default function RezervacijePage() {
                   <p className="text-xs text-gray-500 mb-3">
                     {t('mainLink.subtitle')}
                   </p>
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
                     <div className="flex-1 min-w-0">
                       <a
                         href={settings.mainBookingLink}
@@ -592,7 +726,7 @@ export default function RezervacijePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.25 }}
-                  className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-6"
+                  className="mb-6 rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
                 >
                   <div className="flex items-center gap-2 mb-4">
                     <Link className="w-5 h-5 text-gray-400" weight="regular" />
@@ -601,7 +735,7 @@ export default function RezervacijePage() {
                   <p className="text-xs text-gray-500 mb-3">
                     {t('mgmtLink.subtitle')}
                   </p>
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
                     <div className="flex-1 min-w-0">
                       <a
                         href={settings.apptManagementLink}
@@ -653,7 +787,7 @@ export default function RezervacijePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
+                className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
               >
                 <h2 className="text-base font-semibold text-[#1A1F36] mb-4">{t('settingsOverview.title')}</h2>
                 <div className="space-y-3">

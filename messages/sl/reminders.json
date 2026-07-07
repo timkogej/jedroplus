@@ -2,10 +2,23 @@
   "page": {
     "title": "Opomniki",
     "subtitle": "Pregled nastavitev avtomatskih opomnikov",
+    "kicker": "Komunikacija",
     "incompleteBannerTitle": "Izpolnite nastavitve označene s !",
     "incompleteBannerDesc": "za brezhibno delovanje in izkoriščanje celotnega potenciala opomnikov.",
     "openSettings": "Odpri nastavitve →",
     "settingsButton": "Nastavitve",
+    "flow": {
+      "eyebrow": "Tokovi",
+      "title": "Pregled pošiljanja",
+      "beforeEyebrow": "Pred terminom",
+      "afterEyebrow": "Po terminu",
+      "rescheduleEyebrow": "Sprememba termina",
+      "considers": "Upošteva",
+      "disabledReminder": "Ta tok trenutno ne pošilja opomnikov.",
+      "disabledReschedule": "Obvestila ob prestavitvi termina niso aktivna.",
+      "detailsEyebrow": "Podrobnosti",
+      "settingsEyebrow": "Nastavitve"
+    },
     "stats": {
       "sentToday": "Poslano Danes",
       "sentTodayDesc": "Opomnikov pred terminom",
@@ -25,6 +38,11 @@
       "senderIdDesc": "Uporablja se pri SMS pošiljanju",
       "tips": "Nasveti glede na storitev",
       "colors": "Barve emaila",
+      "customerAddressing": "Nagovor strank",
+      "informalAddressing": "Tikanje",
+      "formalAddressing": "Vikanje",
+      "automaticTag": "Oznaka samodejni opomnik",
+      "staffInReminder": "Izvajalec v opomniku",
       "notSet": "Ni nastavljeno"
     },
     "before": {
@@ -33,6 +51,8 @@
       "channel": "Način pošiljanja",
       "timeLabel": "Čas pošiljanja",
       "timeValue": "1 dan pred terminom",
+      "dayBefore": "1 dan pred terminom",
+      "daysBefore": "{count} dni pred terminom",
       "instructions": "Navodila",
       "smsType": "Vrsta SMS sporočila",
       "aiMode": "AI ustvari",
@@ -55,6 +75,12 @@
       "manualMode": "Lastna predloga",
       "includeService": "Vključi storitev",
       "noSpecialInstructions": "Ni posebnih navodil"
+    },
+    "reschedule": {
+      "sectionTitle": "Prestavljanje termina",
+      "channel": "Način pošiljanja",
+      "smsTemplate": "SMS predloga",
+      "emailTemplate": "Email predloga"
     },
     "info": {
       "title": "O Opomnikih",

@@ -15,6 +15,7 @@ interface StatusBadgeProps {
   status: string;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'gradient';
+  weight?: 'normal' | 'medium';
 }
 
 // Map various status strings to normalized status
@@ -102,7 +103,7 @@ export function getStatusConfig(status: AppointmentStatus): {
   }
 }
 
-function StatusBadge({ status, size = 'md', variant = 'default' }: StatusBadgeProps) {
+function StatusBadge({ status, size = 'md', variant = 'default', weight = 'medium' }: StatusBadgeProps) {
   const t = useTranslations('appointments');
   const normalizedStatus = normalizeStatus(status);
   const config = getStatusConfig(normalizedStatus);
@@ -127,11 +128,12 @@ function StatusBadge({ status, size = 'md', variant = 'default' }: StatusBadgePr
     md: 'h-2 w-2',
     lg: 'h-2.5 w-2.5',
   };
+  const weightClass = weight === 'normal' ? 'font-normal' : 'font-medium';
 
   if (variant === 'gradient') {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full font-medium text-white
+        className={`inline-flex items-center gap-1.5 rounded-full ${weightClass} text-white
                    shadow-sm ${sizeClasses[size]} ${config.gradientClass}`}
       >
         {label}
@@ -141,7 +143,7 @@ function StatusBadge({ status, size = 'md', variant = 'default' }: StatusBadgePr
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full font-medium
+      className={`inline-flex items-center gap-1.5 rounded-full ${weightClass}
                  ${sizeClasses[size]} ${config.bgClass} ${config.textClass}`}
     >
       <span className={`rounded-full ${dotSizes[size]} ${config.dotClass}`} />

@@ -31,11 +31,12 @@ interface ClientModalProps {
 }
 
 // Normalize client type value from DB to form values
-function normalizeClientType(value: string | undefined | null): ClientType {
+function normalizeClientType(value: string | undefined | null): ClientType | '' {
   const v = (value || '').toLowerCase().trim();
   if (v === 'redna') return 'redna';
   if (v === 'vip') return 'vip';
-  return 'nova';
+  if (v === 'nova') return 'nova';
+  return '';
 }
 
 // Normalize gender value from DB to form values
@@ -87,6 +88,7 @@ function ClientModal({
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [showInternalNotes, setShowInternalNotes] = useState(false);
+  const [showClientTypeSelect, setShowClientTypeSelect] = useState(false);
   const [contactWarning, setContactWarning] = useState<{
     missingEmail: boolean;
     missingPhone: boolean;
@@ -137,8 +139,16 @@ function ClientModal({
       setEmailExists(false);
       setContactWarning(null);
       setShowInternalNotes(mode === 'edit');
+      setShowClientTypeSelect(false);
     }
   }, [isOpen, mode, client]);
+
+  const getClientTypeLabel = useCallback((type: ClientType | '') => {
+    if (type === 'vip') return t('modal.clientType.vip');
+    if (type === 'redna') return t('modal.clientType.redna');
+    if (type === 'nova') return t('modal.clientType.nova');
+    return t('modal.clientType.none');
+  }, [t]);
 
   // Validate individual field
   const validateField = useCallback((name: keyof ClientFormData, value: string): string => {
@@ -414,21 +424,38 @@ function ClientModal({
                   <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.fields.clientType')}
                   </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                      <Tag className="h-4 w-4" weight="regular" />
+                  {!showClientTypeSelect ? (
+                    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+                      <div className="flex items-center gap-2 text-sm text-gray-700">
+                        <Tag className="h-4 w-4 text-gray-400" weight="regular" />
+                        <span>{getClientTypeLabel(formData.tip_stranke)}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowClientTypeSelect(true)}
+                        className="text-xs font-semibold text-gray-600 underline underline-offset-2 hover:text-gray-900"
+                      >
+                        {t('modal.clientType.change')}
+                      </button>
                     </div>
-                    <Select
-                      value={formData.tip_stranke}
-                      setValue={(value) => handleChange('tip_stranke', value)}
-                      placeholder={t('modal.clientType.placeholder')}
-                      className="[&>button]:rounded-lg [&>button]:pl-10 [&>button]:focus:ring-gray-900/10"
-                    >
-                      <SelectOption value="nova">{t('modal.clientType.nova')}</SelectOption>
-                      <SelectOption value="redna">{t('modal.clientType.redna')}</SelectOption>
-                      <SelectOption value="vip">{t('modal.clientType.vip')}</SelectOption>
-                    </Select>
-                  </div>
+                  ) : (
+                    <div className="relative">
+                      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <Tag className="h-4 w-4" weight="regular" />
+                      </div>
+                      <Select
+                        value={formData.tip_stranke || '__none__'}
+                        setValue={(value) => handleChange('tip_stranke', value === '__none__' ? '' : value)}
+                        placeholder={t('modal.clientType.placeholder')}
+                        className="[&>button]:rounded-lg [&>button]:pl-10 [&>button]:focus:ring-gray-900/10"
+                      >
+                        <SelectOption value="__none__" dimmed>{t('modal.clientType.none')}</SelectOption>
+                        <SelectOption value="nova">{t('modal.clientType.nova')}</SelectOption>
+                        <SelectOption value="redna">{t('modal.clientType.redna')}</SelectOption>
+                        <SelectOption value="vip">{t('modal.clientType.vip')}</SelectOption>
+                      </Select>
+                    </div>
+                  )}
                 </div>
 
                 {/* Email */}

@@ -2,10 +2,23 @@
   "page": {
     "title": "Reminders",
     "subtitle": "Overview of automatic reminder settings",
+    "kicker": "Communication",
     "incompleteBannerTitle": "Complete settings marked with !",
     "incompleteBannerDesc": "for seamless operation and full use of reminder potential.",
     "openSettings": "Open settings →",
     "settingsButton": "Settings",
+    "flow": {
+      "eyebrow": "Flows",
+      "title": "Sending overview",
+      "beforeEyebrow": "Before appointment",
+      "afterEyebrow": "After appointment",
+      "rescheduleEyebrow": "Appointment change",
+      "considers": "Considers",
+      "disabledReminder": "This flow is not currently sending reminders.",
+      "disabledReschedule": "Reschedule notifications are not active.",
+      "detailsEyebrow": "Details",
+      "settingsEyebrow": "Settings"
+    },
     "stats": {
       "sentToday": "Sent Today",
       "sentTodayDesc": "Pre-appointment reminders",
@@ -25,6 +38,11 @@
       "senderIdDesc": "Used for SMS sending",
       "tips": "Service-based tips",
       "colors": "Email colors",
+      "customerAddressing": "Customer addressing",
+      "informalAddressing": "Informal",
+      "formalAddressing": "Formal",
+      "automaticTag": "Automatic reminder tag",
+      "staffInReminder": "Staff member in reminder",
       "notSet": "Not set"
     },
     "before": {
@@ -33,6 +51,8 @@
       "channel": "Sending method",
       "timeLabel": "Sending time",
       "timeValue": "1 day before appointment",
+      "dayBefore": "1 day before appointment",
+      "daysBefore": "{count} days before appointment",
       "instructions": "Instructions",
       "smsType": "SMS message type",
       "aiMode": "AI creates",
@@ -55,6 +75,12 @@
       "manualMode": "Custom template",
       "includeService": "Include service",
       "noSpecialInstructions": "No special instructions"
+    },
+    "reschedule": {
+      "sectionTitle": "Rescheduled appointment",
+      "channel": "Sending method",
+      "smsTemplate": "SMS template",
+      "emailTemplate": "Email template"
     },
     "info": {
       "title": "About Reminders",

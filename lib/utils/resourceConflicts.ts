@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabaseClient';
-import type { UrnikData } from '@/types/resursi';
+import type { IzmenicenUrnik, UrnikData } from '@/types/resursi';
+import { getUrnikZaDan } from '@/lib/utils/urnik';
 
 export interface ResourceConflict {
   resursId: string;
@@ -15,7 +16,7 @@ export interface ResourceConflictResult {
 
 // Check if a time slot falls within a resource's schedule
 function isTimeInUrnik(
-  urnik: UrnikData,
+  urnik: UrnikData | IzmenicenUrnik | null | undefined,
   datum: string,
   casZacetek: string,
   casKonec: string,
@@ -25,8 +26,9 @@ function isTimeInUrnik(
   ];
 
   const date = new Date(datum);
+  const activeUrnik = getUrnikZaDan(urnik, date);
   const dayName = dayNames[date.getDay()];
-  const daySchedule = urnik[dayName];
+  const daySchedule = activeUrnik[dayName];
 
   if (!daySchedule?.enabled) return false;
 
@@ -150,11 +152,11 @@ export async function checkResourceConflicts(
       // Check schedule availability
       const urnikRaw = row['Urnik'];
       if (urnikRaw) {
-        let urnik: UrnikData | null = null;
+        let urnik: UrnikData | IzmenicenUrnik | null = null;
         try {
           urnik = typeof urnikRaw === 'string'
-            ? JSON.parse(urnikRaw) as UrnikData
-            : urnikRaw as UrnikData;
+            ? JSON.parse(urnikRaw) as UrnikData | IzmenicenUrnik
+            : urnikRaw as UrnikData | IzmenicenUrnik;
         } catch { /* ignore parse errors */ }
 
         if (urnik && !isTimeInUrnik(urnik, datum, casZacetek, casKonec)) {

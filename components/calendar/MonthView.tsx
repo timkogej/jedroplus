@@ -36,6 +36,13 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
   const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
   const monthDays = useMemo(() => getMonthGrid(currentDate), [currentDate]);
   const todayRef = useRef<HTMLDivElement>(null);
+  const scrollStyle: React.CSSProperties | undefined = isMobile
+    ? {
+        WebkitOverflowScrolling: 'touch',
+        overscrollBehavior: 'contain',
+        touchAction: 'pan-y',
+      }
+    : undefined;
 
   // Scroll to today's date when the view mounts or month changes
   useEffect(() => {
@@ -90,28 +97,30 @@ function MonthView({ currentDate, appointments, absences = [], events = [], serv
   const daysHeader = [1, 2, 3, 4, 5, 6, 0].map((i) => getDaysAbbr(locale)[i]);
 
   return (
-    <div className="flex h-full flex-col bg-white overflow-auto">
-      {/* Days header - Apple Calendar style */}
-      <div className="grid grid-cols-7">
-        {daysHeader.map((day, index) => (
-          <div
-            key={index}
-            className="flex h-9 items-center justify-center"
-          >
-            <span className="text-[10px] font-normal uppercase tracking-wider text-gray-400">
-              {day}
-            </span>
-          </div>
-        ))}
-      </div>
+    <div className="flex h-full flex-col overflow-y-auto bg-white" style={scrollStyle}>
+      <div className="sticky top-0 z-20 flex-shrink-0 bg-white">
+        {/* Days header - Apple Calendar style */}
+        <div className="grid grid-cols-7">
+          {daysHeader.map((day, index) => (
+            <div
+              key={index}
+              className="flex h-9 items-center justify-center"
+            >
+              <span className="text-[10px] font-normal uppercase tracking-wider text-gray-400">
+                {day}
+              </span>
+            </div>
+          ))}
+        </div>
 
-      {/* Separator */}
-      <div
-        style={{
-          height: '1px',
-          background: 'rgba(0, 0, 0, 0.06)',
-        }}
-      />
+        {/* Separator */}
+        <div
+          style={{
+            height: '1px',
+            background: 'rgba(0, 0, 0, 0.06)',
+          }}
+        />
+      </div>
 
       {/* Calendar grid - Apple Calendar style: clean, minimal borders */}
       <div className="grid grid-cols-7 grid-rows-6 flex-1 min-h-[840px]">

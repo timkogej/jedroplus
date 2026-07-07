@@ -71,7 +71,9 @@
       "placeholder": "Izberi tip stranke",
       "nova": "Nova",
       "redna": "Redna",
-      "vip": "VIP"
+      "vip": "VIP",
+      "none": "/",
+      "change": "Spremeni"
     },
     "addInternalNotes": "+ Interne opombe",
     "warning": {
@@ -142,6 +144,7 @@
   "table": {
     "headers": {
       "client": "Stranka",
+      "clientType": "Tip",
       "phone": "Telefon",
       "appointments": "Termini",
       "lastInteraction": "Zadnja interakcija",

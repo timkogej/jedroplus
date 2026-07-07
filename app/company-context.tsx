@@ -30,6 +30,13 @@ export type CompanySettings = {
   "Tabela osebe"?: string;
   "Tabela storitve"?: string;
   sendgrid_api_key?: string;
+  obvestilo_prestavitev_omogoceno?: boolean;
+  obvestilo_prestavitev_template_sms?: string;
+  obvestilo_prestavitev_template_email?: string;
+  obvestilo_prestavitev_channel?: string;
+  stripe_enabled?: boolean;
+  stripe_payment_mode?: string;
+  stripe_deposit_percent?: number;
   [key: string]: unknown;
 };
 

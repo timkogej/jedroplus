@@ -153,9 +153,13 @@ function AppointmentDetailModal({
     const primaryColor = appointment.storitev?.barva || '#6366F1';
     const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
     const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
+    const addOnService = appointment.add_on_storitev_id
+      ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
+      : appointment.add_on_storitev || null;
     const allColors: string[] = [primaryColor];
     if (service2?.barva) allColors.push(service2.barva);
     if (service3?.barva) allColors.push(service3.barva);
+    if (appointment.add_on_naziv && addOnService?.barva) allColors.push(addOnService.barva);
 
     if (allColors.length === 1) return singleGradient(primaryColor);
     if (allColors.length === 2) return `linear-gradient(135deg, ${extractFirst(allColors[0])} 0%, ${extractLast(allColors[1])} 100%)`;
@@ -200,8 +204,17 @@ function AppointmentDetailModal({
   const serviceGradient = getGradientBackground();
   const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
   const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500';
+  const promotionGradient = 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
   const gradientTextStyle = {
-    backgroundImage: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
+    backgroundImage: promotionGradient,
+  };
+  const gradientBorderStyle = {
+    border: '1px solid transparent',
+    background: `linear-gradient(#fff, #fff) padding-box, ${promotionGradient} border-box`,
+  };
+  const clientGradientBorderStyle = {
+    border: '1px solid transparent',
+    background: `linear-gradient(#F9FAFB, #F9FAFB) padding-box, ${promotionGradient} border-box`,
   };
 
   return (
@@ -217,24 +230,23 @@ function AppointmentDetailModal({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+        className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-[#F7F8FA] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="h-1.5 w-full flex-shrink-0" style={{ background: serviceGradient }} />
 
         {/* Header */}
-        <div className="border-b border-gray-100 bg-white px-5 py-4">
+        <div className="border-x border-b border-gray-100 bg-white px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="mb-1.5 flex items-center gap-2">
-                <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full" style={{ background: serviceGradient }} />
-                <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusColor(appointment.status || 'scheduled')}`}>
+              <div className="flex min-w-0 items-center gap-2">
+                <h3 className="min-w-0 truncate text-lg font-semibold text-gray-900">
+                  {appointment.stranka_ime || t('recentActivity.unknownClient')}
+                </h3>
+                <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
                   {getStatusLabel(appointment.status || 'scheduled')}
                 </span>
               </div>
-              <h3 className="truncate text-lg font-semibold text-gray-900">
-                {appointment.stranka_ime || t('recentActivity.unknownClient')}
-              </h3>
               <p className="mt-0.5 text-sm text-gray-500">{formatModalDate(appointment.datum)}</p>
             </div>
           <motion.button
@@ -251,12 +263,15 @@ function AppointmentDetailModal({
         </div>
 
         {/* Content - scrollable */}
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto border-x border-gray-100 p-4">
           {/* Client */}
           <div className={sectionClass}>
             <label className={labelClass}>{t('detailModal.fields.client')}</label>
             <div className="space-y-2">
-              <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
+              <div
+                className="flex items-center gap-3 rounded-lg px-4 py-3"
+                style={clientGradientBorderStyle}
+              >
                 <span className="flex-shrink-0 bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
                   {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
                 </span>
@@ -297,6 +312,11 @@ function AppointmentDetailModal({
           {appointment.storitev && (() => {
             const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
             const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
+            const addOnService = appointment.add_on_storitev_id
+              ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
+              : appointment.add_on_storitev || null;
+            const addOnName = appointment.add_on_naziv?.trim();
+            const addOnDuration = appointment.add_on_trajanje ?? addOnService?.trajanje ?? 0;
             return (
               <div className={sectionClass}>
                 <label className={labelClass}>{t('detailModal.fields.service')}</label>
@@ -320,6 +340,17 @@ function AppointmentDetailModal({
                       <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: service3.barva || '#6366F1' }} />
                       <p className="text-sm font-medium text-[#1A1F36]">{service3.naziv}</p>
                       {service3.trajanje > 0 && <span className="text-xs text-gray-400">({service3.trajanje} min)</span>}
+                    </div>
+                  )}
+                  {addOnName && (
+                    <div className="flex items-center gap-2">
+                      <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: addOnService?.barva || '#6366F1' }} />
+                      <p className="text-sm font-medium text-[#1A1F36]">{addOnName}</p>
+                      {addOnDuration > 0 && <span className="text-xs text-gray-400">({addOnDuration} min)</span>}
+                      <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                        <Plus className="h-2.5 w-2.5" weight="bold" />
+                        {t('detailModal.fields.additionalService')}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -353,11 +384,13 @@ function AppointmentDetailModal({
           <div className={`${sectionClass} grid grid-cols-2 gap-4`}>
             <div>
               <label className={labelClass}>{t('detailModal.fields.date')}</label>
-              <p className="text-sm font-medium text-[#1A1F36]">{formatModalDate(appointment.datum)}</p>
+              <p className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
+                {formatModalDate(appointment.datum)}
+              </p>
             </div>
             <div>
               <label className={labelClass}>{t('detailModal.fields.time')}</label>
-              <p className="text-sm font-medium text-[#1A1F36]">
+              <p className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
                 {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
               </p>
             </div>
@@ -400,7 +433,7 @@ function AppointmentDetailModal({
           {appointment.opombe && (
             <div className={sectionClass}>
               <label className={labelClass}>{t('detailModal.fields.notes')}</label>
-              <div className="rounded-lg bg-gray-50 p-4">
+              <div className="rounded-lg p-4" style={gradientBorderStyle}>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.opombe}</p>
               </div>
             </div>
@@ -415,7 +448,7 @@ function AppointmentDetailModal({
             return (
               <div className={sectionClass}>
                 <label className={labelClass}>{t('detailModal.fields.internalNotes')}</label>
-                <div className="rounded-lg border border-yellow-200 bg-yellow-50/40 p-4">
+                <div className="rounded-lg p-4" style={gradientBorderStyle}>
                   <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
                 </div>
               </div>
@@ -424,7 +457,7 @@ function AppointmentDetailModal({
         </div>
 
         {/* Action buttons */}
-        <div className="border-t border-gray-100 bg-white px-5 py-3">
+        <div className="border-x border-y border-gray-100 bg-white px-5 py-3">
           <div className="flex items-center justify-end gap-1">
             {!isTerminated && onComplete && (
               <motion.button
@@ -700,6 +733,9 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   // ── Convert AppointmentItem → AppointmentWithDetails ─────────────────────
   const convertToAppointmentWithDetails = useCallback((item: AppointmentItem): AppointmentWithDetails => {
     const primaryService = item.serviceId ? services.find(s => s.id === item.serviceId) : null;
+    const service2 = item.serviceId2 ? services.find(s => s.id === item.serviceId2) : null;
+    const service3 = item.serviceId3 ? services.find(s => s.id === item.serviceId3) : null;
+    const addOnService = item.addOnServiceId ? services.find(s => s.id === item.addOnServiceId) : null;
     const employee = item.employeeId ? employees.find(e => e.id === item.employeeId) : null;
 
     return {
@@ -715,16 +751,31 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       storitev_id: item.serviceId,
       storitev_id_2: item.serviceId2,
       storitev_id_3: item.serviceId3,
+      add_on_storitev_id: item.addOnServiceId ?? null,
+      add_on_naziv: item.addOnName ?? null,
+      add_on_trajanje: item.addOnDuration ?? null,
       zaposleni_id: item.employeeId,
       status: (item.status || 'scheduled') as AppointmentWithDetails['status'],
       opombe: item.opombe,
       interne_opombe: item.interneOpombe,
       cena: item.cena ?? null,
       koncna_cena: item.cena ?? null,
+      add_on_final_cena: item.addOnFinalCena ?? null,
       storitev: primaryService
         ? { id: primaryService.id, naziv: primaryService.naziv, barva: primaryService.barva, trajanje: primaryService.trajanje, cena: primaryService.cena }
         : item.serviceId
           ? { id: item.serviceId, naziv: item.serviceName, barva: item.serviceColor, trajanje: 0, cena: item.cena ?? null }
+          : null,
+      storitev_2: service2
+        ? { id: service2.id, naziv: service2.naziv, barva: service2.barva, trajanje: service2.trajanje }
+        : null,
+      storitev_3: service3
+        ? { id: service3.id, naziv: service3.naziv, barva: service3.barva, trajanje: service3.trajanje }
+        : null,
+      add_on_storitev: addOnService
+        ? { id: addOnService.id, naziv: addOnService.naziv, barva: addOnService.barva, trajanje: addOnService.trajanje }
+        : item.addOnServiceId && item.addOnName
+          ? { id: item.addOnServiceId, naziv: item.addOnName, barva: item.addOnServiceColor || '#6366F1', trajanje: item.addOnDuration ?? 0 }
           : null,
       zaposleni: employee
         ? { id: employee.id, ime: employee.ime, priimek: employee.priimek, email: employee.email, initials: employee.initials, barva: employee.barva }
@@ -938,9 +989,11 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     try {
       const companyColumn = await getCompanyColumnForTable(TABLES.clients, companyId);
       const clientId = await getNextClientId(companyId);
+      const clientType = data.tip_stranke || null;
       const newRow = {
         'ID stranke': clientId,
         Ime: data.ime, Priimek: data.priimek, Spol: data.spol,
+        'Tip stranke': clientType,
         Email: data.email, Telefon: data.telefon,
         Opombe: data.opombe, 'Interne opombe': data.interne_opombe,
         [companyColumn]: companyId,
@@ -1073,10 +1126,21 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                 <button
                   type="button"
                   onClick={() => setShowNewClientModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                  className="relative inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 font-medium transition-colors hover:bg-gray-50"
                 >
-                  <UserPlus size={18} weight="bold" />
-                  <span className="hidden sm:inline">{t('quickActions.newClient')}</span>
+                  <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
+                    <defs>
+                      <linearGradient id="dashboard-new-client-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#8B5CF6" />
+                        <stop offset="50%" stopColor="#3B82F6" />
+                        <stop offset="100%" stopColor="#06B6D4" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <UserPlus size={18} weight="bold" color="url(#dashboard-new-client-gradient)" />
+                  <span className="hidden bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent sm:inline">
+                    {t('quickActions.newClient')}
+                  </span>
                 </button>
               </div>
             </div>
@@ -1133,7 +1197,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                           background: (() => {
                             const c1 = nextAppointment.serviceColor || '#8B5CF6';
                             const c2 = nextAppointment.serviceColor2;
-                            const c3 = nextAppointment.serviceColor3;
+                            const c3 = nextAppointment.serviceColor3 || nextAppointment.addOnServiceColor;
                             const extractFirst = (b: string) => { const m = b.includes('gradient') ? b.match(/#[0-9A-Fa-f]{6}/g) : null; return m ? m[0] : b; };
                             const extractLast = (b: string) => { const m = b.includes('gradient') ? b.match(/#[0-9A-Fa-f]{6}/g) : null; return m ? m[m.length - 1] : b; };
                             const singleGrad = (b: string) => {
@@ -1160,7 +1224,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                         <div className="font-normal text-gray-900 truncate">{nextAppointment.clientName}</div>
                         <div className="flex items-center gap-1 text-sm text-gray-600">
                           <span className="truncate">{nextAppointment.serviceName}</span>
-                          {((nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0)) > 0 && (
+                          {((nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0) + (nextAppointment.addOnName ? 1 : 0)) > 0 && (
                             <span
                               className="text-sm font-normal flex-shrink-0"
                               style={{
@@ -1169,7 +1233,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                                 WebkitTextFillColor: 'transparent',
                               }}
                             >
-                              +{(nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0)}
+                              +{(nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0) + (nextAppointment.addOnName ? 1 : 0)}
                             </span>
                           )}
                         </div>
@@ -1432,6 +1496,16 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                           <div className="flex items-center gap-2">
                             <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: completeTarget.storitev_3.barva || '#6366F1' }} />
                             <p className="text-sm font-normal text-[#1A1F36]">{completeTarget.storitev_3.naziv}</p>
+                          </div>
+                        )}
+                        {completeTarget.add_on_naziv && (
+                          <div className="flex items-center gap-2">
+                            <div className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ background: completeTarget.add_on_storitev?.barva || '#6366F1' }} />
+                            <p className="text-sm font-normal text-[#1A1F36]">{completeTarget.add_on_naziv}</p>
+                            <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                              <Plus className="h-2.5 w-2.5" weight="bold" />
+                              {t('detailModal.fields.additionalService')}
+                            </span>
                           </div>
                         )}
                       </div>

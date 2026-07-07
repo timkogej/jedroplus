@@ -663,6 +663,9 @@ export function buildEnhancedAppointmentData({
     storitev_id: string;
     storitev_id_2?: string; // Second service ID (optional)
     storitev_id_3?: string; // Third service ID (optional)
+    add_on_storitev_id?: string | null;
+    add_on_naziv?: string | null;
+    add_on_trajanje?: number | null;
     stevilo_storitev?: number; // Number of services (1, 2, or 3)
     zaposleni_id: string;
     status: string;
@@ -671,7 +674,15 @@ export function buildEnhancedAppointmentData({
     cena?: number; // Base price
     popust?: number; // Discount value
     popust_tip?: '€' | '%'; // Discount type
+    koncna_cena?: number; // Final price, when already computed by caller
     valuta?: string; // Currency
+    promocija_tip?: 'popust' | 'happy_hour' | 'add_on' | null;
+    promocija_naziv?: string | null;
+    popust_id?: string | null;
+    happy_hour_id?: string | null;
+    add_on_popust?: string | null;
+    add_on_popust_tip?: string | null;
+    add_on_final_cena?: string | null;
     belezi_termin?: boolean; // false = ghost termin
   };
   serviceDetails: {
@@ -778,6 +789,9 @@ export function buildEnhancedAppointmentData({
       service_id: serviceDetails?.id ?? null, // Primary service ID
       service_id_2: serviceDetails2?.id ?? null, // Second service ID
       service_id_3: serviceDetails3?.id ?? null, // Third service ID
+      add_on_storitev_id: appointmentData.add_on_storitev_id ?? null,
+      add_on_naziv: appointmentData.add_on_naziv ?? null,
+      add_on_trajanje: appointmentData.add_on_trajanje ?? null,
       stevilo_storitev: steviloStoritev, // Number of services (1, 2, or 3)
       service_name: serviceDetails?.naziv ?? null,
       service_names: serviceNames, // Array of all service names
@@ -811,6 +825,13 @@ export function buildEnhancedAppointmentData({
       currency: currency,
       discount: discountValue,
       discount_type: discountType,
+      promocija_tip: appointmentData.promocija_tip ?? null,
+      promocija_naziv: appointmentData.promocija_naziv ?? null,
+      popust_id: appointmentData.popust_id ?? null,
+      happy_hour_id: appointmentData.happy_hour_id ?? null,
+      add_on_popust: appointmentData.add_on_popust ?? null,
+      add_on_popust_tip: appointmentData.add_on_popust_tip ?? null,
+      add_on_final_cena: appointmentData.add_on_final_cena ?? null,
       prepaid: null,
       // Notes
       notes: appointmentData.opombe ?? null,

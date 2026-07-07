@@ -9,6 +9,7 @@ const COMPANY_COLUMN_CANDIDATES = [
 ];
 
 const columnCache = new Map<string, string>();
+const columnFailedTables = new Set<string>(); // tables where all candidates failed
 const columnPending = new Map<string, Promise<string>>();
 
 type CompanyScopedResult<T> = {
@@ -34,6 +35,12 @@ export async function getCompanyColumnForTable(
   const cached = columnCache.get(tableName);
   if (cached) {
     return cached;
+  }
+
+  // If detection already failed once, don't re-probe — return first candidate as
+  // a best-effort fallback so callers don't hammer Supabase with 400s on every fetch.
+  if (columnFailedTables.has(tableName)) {
+    return COMPANY_COLUMN_CANDIDATES[0];
   }
 
   // Deduplicate concurrent detections for the same table
@@ -64,6 +71,9 @@ export async function getCompanyColumnForTable(
       }
     }
 
+    // All candidates exhausted — cache the failure so we don't re-probe on
+    // every subsequent fetchTableRows call (which caused repeated 400 bursts).
+    columnFailedTables.add(tableName);
     columnPending.delete(tableName);
     throw new Error(lastError ?? "Company column not found.");
   })();

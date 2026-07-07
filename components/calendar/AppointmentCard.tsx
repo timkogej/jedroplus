@@ -2,7 +2,7 @@
 
 import { memo, useMemo, useRef, useLayoutEffect, useState, useCallback, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { X, Tag, Clock, Plus, Cube } from '@phosphor-icons/react';
+import { X, Plus } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import { formatTime, getGradientCSS } from '@/lib/utils/calendar';
 
@@ -208,10 +208,13 @@ function AppointmentCard({
 
     const service2 = appointment.storitev_2 || (id2 && services.length > 0 ? services.find(s => s.id === id2) : null);
     const service3 = appointment.storitev_3 || (id3 && services.length > 0 ? services.find(s => s.id === id3) : null);
+    const addOnService = appointment.add_on_storitev ||
+      (appointment.add_on_storitev_id && services.length > 0 ? services.find(s => s.id === appointment.add_on_storitev_id) : null);
 
     const allColors: string[] = [primaryColor];
     if (service2?.barva) allColors.push(service2.barva);
     if (service3?.barva) allColors.push(service3.barva);
+    if (appointment.add_on_naziv && addOnService?.barva) allColors.push(addOnService.barva);
 
     if (allColors.length === 1) return getGradientCSS(primaryColor);
     return createCombinedGradient(allColors);
@@ -273,7 +276,7 @@ function AppointmentCard({
     onPointerCancel: handlePointerUp,
     onContextMenu: handleContextMenu,
   } : {};
-  const longPressTouchStyle: React.CSSProperties = longPressActive ? { touchAction: 'none' } : {};
+  const longPressTouchStyle: React.CSSProperties = longPressActive ? { touchAction: 'pan-y' } : {};
 
   const handleClick = (e: React.MouseEvent) => {
     if (longPressActivated.current) {
@@ -302,13 +305,27 @@ function AppointmentCard({
 
   const PromoIcon = () => {
     if (!_hasPromotion) return null;
+
+    if (_promoType === 'popust' || _promoType === 'happy_hour') {
+      return (
+        <motion.div
+          animate={{ scale: [1, 1.15, 1] }}
+          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
+          className="absolute top-0.5 right-0.5 pointer-events-none z-10 select-none leading-none"
+          style={{
+            fontSize: 13,
+            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.28))',
+          }}
+          title={_promoLabel}
+          aria-hidden
+        >
+          {_promoType === 'happy_hour' ? '🕒' : '🏷️'}
+        </motion.div>
+      );
+    }
+
     const badgeColor =
-      _promoType === 'happy_hour' ? '#F59E0B' :
       _promoType === 'add_on' ? '#3B82F6' : '#6D5EF7';
-    const icon =
-      _promoType === 'happy_hour' ? <Clock size={10} weight="fill" /> :
-      _promoType === 'add_on' ? <Plus size={10} weight="bold" /> :
-      <Tag size={10} weight="fill" />;
     return (
       <motion.div
         animate={{ scale: [1, 1.15, 1] }}
@@ -318,7 +335,7 @@ function AppointmentCard({
         title={_promoLabel}
         aria-hidden
       >
-        {icon}
+        <Plus size={10} weight="bold" />
       </motion.div>
     );
   };
@@ -421,9 +438,9 @@ function AppointmentCard({
         {appointment.storitev && (
           <p className="text-xs opacity-90 truncate mb-2 text-white">
             <span className="truncate">{appointment.storitev.naziv}</span>
-            {(appointment.storitev_id_2 || appointment.storitev_id_3) && (
+            {(appointment.storitev_id_2 || appointment.storitev_id_3 || appointment.add_on_naziv) && (
               <span className="font-bold flex-shrink-0 ml-1">
-                +{(appointment.storitev_id_2 ? 1 : 0) + (appointment.storitev_id_3 ? 1 : 0)}
+                +{(appointment.storitev_id_2 ? 1 : 0) + (appointment.storitev_id_3 ? 1 : 0) + (appointment.add_on_naziv ? 1 : 0)}
               </span>
             )}
           </p>
@@ -482,8 +499,8 @@ function AppointmentCard({
   // Service name (primary + +N indicator)
   const serviceLabel = appointment.storitev
     ? appointment.storitev.naziv +
-      ((appointment.storitev_id_2 || appointment.storitev_id_3)
-        ? ` +${(appointment.storitev_id_2 ? 1 : 0) + (appointment.storitev_id_3 ? 1 : 0)}`
+      ((appointment.storitev_id_2 || appointment.storitev_id_3 || appointment.add_on_naziv)
+        ? ` +${(appointment.storitev_id_2 ? 1 : 0) + (appointment.storitev_id_3 ? 1 : 0) + (appointment.add_on_naziv ? 1 : 0)}`
         : '')
     : null;
 
@@ -591,9 +608,7 @@ function AppointmentCard({
         <PromoIcon />
         <GhostIcon />
         {hasResursi && (
-          <div className="absolute bottom-1 right-1 pointer-events-none z-10">
-            <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />
-          </div>
+          <span className="absolute bottom-1 left-1 text-[10px] leading-none select-none pointer-events-none z-10">📦</span>
         )}
         <div className="px-2.5 py-1.5 h-full flex items-center gap-1.5" style={{ color: '#FFFFFF' }}>
           <SmartClientName
@@ -649,9 +664,7 @@ function AppointmentCard({
         <PromoIcon />
         <GhostIcon />
         {hasResursi && (
-          <div className="absolute bottom-1 right-1 pointer-events-none z-10">
-            <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />
-          </div>
+          <span className="absolute bottom-1 left-1 text-[10px] leading-none select-none pointer-events-none z-10">📦</span>
         )}
         <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
           {/* Row 1: client name + initials */}
@@ -711,9 +724,7 @@ function AppointmentCard({
       <PromoIcon />
       <GhostIcon />
       {hasResursi && (
-        <div className="absolute bottom-1 right-1 pointer-events-none z-10">
-          <Cube className="w-2.5 h-2.5 text-white/60" weight="fill" />
-        </div>
+        <span className="absolute bottom-1 left-1 text-[10px] leading-none select-none pointer-events-none z-10">📦</span>
       )}
       <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
         {/* Row 1: client name + initials */}

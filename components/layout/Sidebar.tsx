@@ -232,7 +232,7 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
       {!collapsed && active && (
         <motion.span
           layoutId="sidebar-active-bar"
-          className="absolute left-0 top-2 bottom-2 w-0.5 bg-[#6D5EF7] rounded-r-full"
+          className="absolute left-0 top-2 bottom-2 w-0.5 bg-gray-900 rounded-r-full"
           transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
         />
       )}
@@ -242,7 +242,7 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
           weight="regular"
           className={cn(
             'w-5 h-5 transition-colors',
-            active ? 'text-[#6D5EF7]' : 'text-gray-400 group-hover:text-gray-700'
+            active ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'
           )}
         />
         {collapsed && hasAlert && (
@@ -274,6 +274,7 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
 
 export function Sidebar() {
   const pathname = usePathname();
+  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(?=\/|$)/, '') || '/';
   const router = useRouter();
   const desktopNavRef = useRef<HTMLElement>(null);
   const t = useTranslations('layout');
@@ -379,7 +380,7 @@ export function Sidebar() {
         activeEl.scrollIntoView({ block: 'nearest', behavior: 'instant' });
       }
     });
-  }, [pathname]);
+  }, [pathnameWithoutLocale]);
 
   // -------------------------------------------------------------------------
   // Active route check
@@ -387,9 +388,9 @@ export function Sidebar() {
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
-      return pathname === '/dashboard' || pathname === '/';
+      return pathnameWithoutLocale === '/dashboard' || pathnameWithoutLocale === '/';
     }
-    return pathname.startsWith(href);
+    return pathnameWithoutLocale === href || pathnameWithoutLocale.startsWith(`${href}/`);
   };
 
   // -------------------------------------------------------------------------
@@ -487,7 +488,7 @@ export function Sidebar() {
           {!isCollapsed && isActive('/nastavitve') && (
             <motion.span
               layoutId="sidebar-active-bar"
-              className="absolute left-0 top-2 bottom-2 w-0.5 bg-[#6D5EF7] rounded-r-full"
+              className="absolute left-0 top-2 bottom-2 w-0.5 bg-gray-900 rounded-r-full"
               transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
             />
           )}
@@ -496,7 +497,7 @@ export function Sidebar() {
               weight="regular"
               className={cn(
                 'w-5 h-5 transition-colors',
-                isActive('/nastavitve') ? 'text-[#6D5EF7]' : 'text-gray-400 group-hover:text-gray-700'
+                isActive('/nastavitve') ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'
               )}
             />
             {any_incomplete && (
@@ -640,7 +641,7 @@ export function Sidebar() {
                 {isActive('/nastavitve') && (
                   <motion.span
                     layoutId="sidebar-active-bar-mobile"
-                    className="absolute left-0 top-2 bottom-2 w-0.5 bg-[#6D5EF7] rounded-r-full"
+                    className="absolute left-0 top-2 bottom-2 w-0.5 bg-gray-900 rounded-r-full"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
                   />
                 )}
@@ -649,7 +650,7 @@ export function Sidebar() {
                     weight="regular"
                     className={cn(
                       'w-5 h-5 transition-colors',
-                      isActive('/nastavitve') ? 'text-[#6D5EF7]' : 'text-gray-400 group-hover:text-gray-700'
+                      isActive('/nastavitve') ? 'text-gray-900' : 'text-gray-400 group-hover:text-gray-700'
                     )}
                   />
                   {any_incomplete && (

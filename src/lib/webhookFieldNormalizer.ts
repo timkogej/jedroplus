@@ -179,6 +179,8 @@ export function normalizeService(raw: AnyRow | null | undefined) {
     category: toValue(data.category ?? data.Kategorija ?? data.kategorija),
     online_booking: toValue(data.online_booking ?? data.Spletne_rezervacije ?? data.spletne_rezervacije ?? data.online_rezervacije),
     spletne_rezervacije: toValue(data.Spletne_rezervacije ?? data.spletne_rezervacije ?? data.online_booking ?? data.online_rezervacije),
+    requires_payment: toValue(data.requires_payment ?? data.zahteva_placilo ?? data.Zahteva_placilo ?? data['Zahteva plačilo']),
+    zahteva_placilo: toValue(data.zahteva_placilo ?? data.Zahteva_placilo ?? data['Zahteva plačilo'] ?? data.requires_payment),
   };
   return { ...data, ...normalized };
 }
