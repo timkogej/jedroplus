@@ -153,7 +153,12 @@ export default function ExportAppointmentsModal({
     try {
       const rows = filtered.map((a) => {
         const d = new Date(a.datum);
-        const storitev = [a.storitev?.naziv, a.storitev_2?.naziv, a.storitev_3?.naziv]
+        const storitev = [
+          a.storitev?.naziv,
+          a.storitev_2?.naziv,
+          a.storitev_3?.naziv,
+          a.add_on_naziv ? `${a.add_on_naziv} (Dodatna storitev)` : null,
+        ]
           .filter(Boolean)
           .join(' + ');
 
