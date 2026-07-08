@@ -614,7 +614,7 @@ export default function ClientsClient({
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-[#F7F8FA]">
+      <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">

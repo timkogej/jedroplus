@@ -340,7 +340,7 @@ export default function ResursiPage() {
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-[linear-gradient(180deg,#FAFBFF_0%,#F7F8FA_36%,#F7F8FA_100%)]">
+      <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-7xl px-6 py-8">
 
           {/* Header */}

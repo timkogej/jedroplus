@@ -4,7 +4,6 @@ import { memo } from 'react';
 import { motion } from 'motion/react';
 import {
   Clock,
-  CurrencyEur,
   CalendarBlank,
   Folder,
   PencilSimple,
@@ -16,6 +15,7 @@ import { useTranslations } from 'next-intl';
 import { SERVICE_CATEGORIES } from '@/types/services';
 import type { Service } from '@/types/services';
 import { isGradient, DEFAULT_SERVICE_GRADIENT, getGradientStartColor } from '@/lib/constants/serviceGradients';
+import { formatServicePrice } from '@/lib/utils/currency';
 
 interface ServiceCardProps {
   service: Service;
@@ -96,12 +96,9 @@ function ServiceCard({
           {service.cena !== null && (
             <>
               <span className="text-gray-300">|</span>
-              <div className="flex items-center gap-1">
-                <CurrencyEur className="h-4 w-4 text-gray-400" weight="regular" />
-                <span className="font-medium">
-                  {service.cena.toFixed(2)}{service.currency ? ` ${service.currency}` : ''}
-                </span>
-              </div>
+              <span className="font-medium">
+                {formatServicePrice(service.cena, service.currency)}
+              </span>
             </>
           )}
         </div>

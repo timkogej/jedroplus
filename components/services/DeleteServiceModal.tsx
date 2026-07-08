@@ -13,6 +13,7 @@ import {
 import { useTranslations } from 'next-intl';
 import type { Service } from '@/types/services';
 import { generateGradient } from '@/lib/utils/colors';
+import { isGradient, DEFAULT_SERVICE_GRADIENT } from '@/lib/constants/serviceGradients';
 
 interface DeleteServiceModalProps {
   isOpen: boolean;
@@ -55,6 +56,12 @@ function DeleteServiceModal({
 
   if (!service) return null;
 
+  const headerBackground = isGradient(service.barva)
+    ? service.barva
+    : service.barva
+      ? generateGradient(service.barva, 25)
+      : DEFAULT_SERVICE_GRADIENT;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -77,7 +84,7 @@ function DeleteServiceModal({
             {/* Header with service color */}
             <div
               className="relative p-6"
-              style={{ background: generateGradient(service.barva, 25) }}
+              style={{ background: headerBackground }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">

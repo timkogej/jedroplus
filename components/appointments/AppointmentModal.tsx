@@ -1245,28 +1245,27 @@ function AppointmentModal({
                 </div>
               ) : (
                 <>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-                    <div className="min-w-0 flex-1">
-                      <ClientSearch
-                        selectedClient={selectedClient}
-                        onSelect={handleClientSelect}
-                        onCreateNew={handleOpenCreateClient}
-                      />
-                    </div>
-                    <CommunicationLanguageControl
-                      value={formData.language ?? defaultLanguage}
-                      onChange={(value) => setFormData((prev) => ({ ...prev, language: value }))}
-                      label={t('modal.fields.communicationLanguage')}
-                      compact
-                      className="sm:w-[132px]"
-                    />
-                  </div>
+                  <ClientSearch
+                    selectedClient={selectedClient}
+                    onSelect={handleClientSelect}
+                    onCreateNew={handleOpenCreateClient}
+                  />
                   {errors.stranka_ime && (
                     <p className="mt-1 text-xs text-red-500">{errors.stranka_ime}</p>
                   )}
                 </>
               )}
             </div>
+
+            {/* Communication language - minimal divider between client and service */}
+            {!isViewMode && (
+              <CommunicationLanguageControl
+                value={formData.language ?? defaultLanguage}
+                onChange={(value) => setFormData((prev) => ({ ...prev, language: value }))}
+                label={t('modal.fields.communicationLanguage')}
+                variant="divider"
+              />
+            )}
 
             {/* Service - Second field (supports up to 3 services) */}
             <div className={`${sectionClass} space-y-3`}>

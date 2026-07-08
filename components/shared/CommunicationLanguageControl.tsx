@@ -15,6 +15,7 @@ interface CommunicationLanguageControlProps {
   label?: string;
   changeLabel?: string;
   compact?: boolean;
+  variant?: 'default' | 'divider';
   className?: string;
 }
 
@@ -24,10 +25,49 @@ function CommunicationLanguageControl({
   label,
   changeLabel = 'Spremeni',
   compact = false,
+  variant = 'default',
   className = '',
 }: CommunicationLanguageControlProps) {
   const [isOpen, setIsOpen] = useState(false);
   const option = getCommunicationLanguageOption(value);
+
+  if (variant === 'divider') {
+    return (
+      <div className={className}>
+        {!isOpen ? (
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-gray-100" />
+            <button
+              type="button"
+              onClick={() => setIsOpen(true)}
+              title={label ? `${label}: ${option.label}` : option.label}
+              aria-label={label ? `${label}: ${option.label}` : option.label}
+              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-sm leading-none shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
+            >
+              {option.flag}
+            </button>
+            <div className="h-px flex-1 bg-gray-100" />
+          </div>
+        ) : (
+          <Select
+            value={option.value}
+            setValue={(nextValue) => {
+              onChange(normalizeCommunicationLanguage(nextValue));
+              setIsOpen(false);
+            }}
+            className="[&>button]:rounded-xl [&>button]:focus:ring-gray-900/10"
+          >
+            {COMMUNICATION_LANGUAGES.map((language) => (
+              <SelectOption key={language.value} value={language.value} description={language.label}>
+                <span className="mr-2">{language.flag}</span>
+                {language.code}
+              </SelectOption>
+            ))}
+          </Select>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={className}>

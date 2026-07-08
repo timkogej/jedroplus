@@ -434,7 +434,7 @@ export default function RemindersPage() {
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-[#F5F6F8]">
+      <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}

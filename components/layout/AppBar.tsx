@@ -174,8 +174,9 @@ export function AppBar() {
           </button>
 
           {/* Brand name — mobile only */}
-          <Link href="/dashboard" className="md:hidden">
-            <span className="text-sm font-semibold text-gray-900">Jedro+</span>
+          <Link href="/dashboard" className="md:hidden flex items-center gap-1.5">
+            <img src="/icon.png" alt="Jedro+" width={22} height={22} className="rounded-md" />
+            <span className="bg-gradient-to-r from-[#7B4BEA] via-[#4C74E0] to-[#35D2D2] bg-clip-text text-lg font-bold text-transparent">Jedro+</span>
           </Link>
 
           {/* Breadcrumbs — desktop only */}

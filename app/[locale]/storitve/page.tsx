@@ -661,7 +661,7 @@ export default function StoritvePage() {
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-[#F7F8FA]">
+      <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
@@ -774,8 +774,8 @@ export default function StoritvePage() {
               whileTap={{ scale: 0.98 }}
               className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all
                          ${showInactive
-                           ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
-                           : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'
+                           ? 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'
+                           : 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
                          }`}
             >
               {showInactive ? t('page.showAll') : t('page.showActiveOnly')}

@@ -23,7 +23,7 @@ export default function PromotionsLayout({ children }: { children: React.ReactNo
 
   return (
     <ProtectedLayout>
-    <div className="min-h-screen bg-[linear-gradient(180deg,#FAFBFF_0%,#F7F8FA_36%,#F7F8FA_100%)]">
+    <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-7xl px-6 py-8">
         {/* Header */}
         <motion.div
