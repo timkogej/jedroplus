@@ -20,7 +20,6 @@ import {
   SignOut,
   Bell,
   Envelope,
-  Package,
   Lock,
   Tag,
   CaretLeft,
@@ -108,12 +107,6 @@ function buildNavigationSectionsPaid(t: T): NavSection[] {
         { name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine },
       ],
     },
-    {
-      label: t('sidebar.sections.account'),
-      items: [
-        { name: t('sidebar.items.billing'), href: '/billing', icon: Package },
-      ],
-    },
   ];
 }
 
@@ -157,12 +150,6 @@ function buildNavigationSectionsFree(t: T): NavSection[] {
       label: t('sidebar.sections.analytics'),
       items: [
         { name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine },
-      ],
-    },
-    {
-      label: t('sidebar.sections.billing'),
-      items: [
-        { name: t('sidebar.items.billing'), href: '/billing', icon: Package },
       ],
     },
   ];
@@ -316,12 +303,10 @@ export function Sidebar() {
     if (role === 'owner' || role === null) return true;
 
     if (role === 'admin') {
-      return href !== '/billing';
+      return true;
     }
 
     if (role === 'staff') {
-      if (href === '/billing') return false;
-
       if (!permissions) return true;
 
       const staffMap: Partial<Record<string, keyof StaffPermissions>> = {
@@ -349,11 +334,6 @@ export function Sidebar() {
       items: section.items.filter((item) => isNavVisible(item.href)),
     }))
     .filter((section) => section.items.length > 0);
-
-  const staffPaketiSection: NavSection | null =
-    role === 'staff'
-      ? { label: t('sidebar.sections.account'), items: [{ name: t('sidebar.items.plans'), href: '/billing', icon: Package }] }
-      : null;
 
   // User info
   const companyName = String(companySettings?.['Naziv Podjetja'] || companySettings?.['ID Podjetja'] || t('fallbacks.companyName'));
@@ -407,7 +387,7 @@ export function Sidebar() {
   // Shared nav sections list
   // -------------------------------------------------------------------------
 
-  const allSections = [...navigationSections, ...(staffPaketiSection ? [staffPaketiSection] : [])];
+  const allSections = navigationSections;
 
   // -------------------------------------------------------------------------
   // Desktop sidebar

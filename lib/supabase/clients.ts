@@ -1,6 +1,7 @@
 import { fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst, safeDate } from '@/lib/dashboardHelpers';
+import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
 import type { Client, ClientWithAppointments, ClientAppointment, ClientStats, Gender, ClientType } from '@/types/clients';
 
 // Re-export Client type for backward compatibility
@@ -18,6 +19,7 @@ function detectClientSchema(row: Record<string, unknown>) {
     lastNameField: pickField(['Priimek', 'priimek', 'last_name', 'lastName', 'surname']),
     genderField: pickField(['Spol', 'spol', 'gender', 'Gender']),
     clientTypeField: pickField(['Tip stranke', 'tip_stranke', 'client_type', 'Tip Stranke']),
+    languageField: pickField(['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language']),
     emailField: pickField(['Email', 'email', 'e-mail', 'E-mail', 'Email stranke']),
     phoneField: pickField(['Telefonska številka', 'Telefon', 'telefon', 'phone', 'Phone', 'tel']),
     notesField: pickField(['Opombe stranke', 'Opombe', 'opombe', 'notes', 'Notes', 'Opombe strank']),
@@ -79,6 +81,7 @@ export function parseClient(row: Record<string, unknown>): Client | null {
     priimek: schema.lastNameField ? String(row[schema.lastNameField] ?? '') : '',
     spol, // Read from "Spol" column
     tip_stranke: tipStranke, // Read from "Tip stranke" column
+    language: normalizeCommunicationLanguage(schema.languageField ? row[schema.languageField] : undefined),
     email: schema.emailField ? String(row[schema.emailField] ?? '') : '',
     telefon: schema.phoneField ? String(row[schema.phoneField] ?? '') || null : null,
     opombe: schema.notesField ? String(row[schema.notesField] ?? '') || null : null, // Always include opombe

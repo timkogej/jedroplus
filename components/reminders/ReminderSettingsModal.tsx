@@ -415,7 +415,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
             <span>{t(`modal.${context}.smsUpgradeHint`)}</span>
             <button
               type="button"
-              onClick={() => { onClose(); router.push('/billing'); }}
+              onClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
               className="inline-flex items-center gap-1 font-semibold text-gray-900 underline underline-offset-2"
             >
               {t(`modal.${context}.upgradeButton`)} <ArrowRight className="h-3 w-3" weight="bold" />
@@ -1091,7 +1091,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                 <span>SMS je na voljo v višjih paketih.</span>
                                 <button
                                   type="button"
-                                  onClick={() => { onClose(); router.push('/billing'); }}
+                                  onClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
                                   className="inline-flex items-center gap-1 font-semibold text-gray-900 underline underline-offset-2"
                                 >
                                   Nadgradi paket <ArrowRight className="h-3 w-3" weight="bold" />

@@ -39,7 +39,7 @@
     },
     "info": {
       "title": "O Izgubljenih strankah",
-      "body": "Sistem avtomatsko zazna stranke, ki v določenem obdobju niso imele termina, in jim pošlje personalizirano sporočilo za povratno naročanje.\n\nAI generira vsebino sporočila glede na vašo konfiguracijo — besedilo se prilagodi vsaki stranki posebej, ob upoštevanju njene zgodovine in storitev. Tako vaše sporočilo nikoli ne zveni kot množična pošta, ampak kot osebno povabilo nazaj.\n\nZahvaljujoč temu sistemu pridobite stranke, ki bi sicer odšle h konkurenci — brez ročnega dela in brez pozabljenih kontaktov.\n\nV kolikor imate kakršnakoli vprašanja, nas kontaktirajte na help@jedroplus.com."
+      "body": "Sistem <highlight>avtomatsko zazna stranke</highlight>, ki v določenem obdobju niso imele termina, in jim pošlje personalizirano sporočilo za povratno naročanje.\n\nAI <highlight>generira vsebino sporočila glede na vašo konfiguracijo</highlight> — besedilo se prilagodi vsaki stranki posebej, ob upoštevanju njene zgodovine in storitev. Tako vaše sporočilo nikoli ne zveni kot množična pošta, ampak kot osebno povabilo nazaj.\n\nZahvaljujoč temu sistemu <highlight>pridobite stranke, ki bi sicer odšle h konkurenci</highlight> — brez ročnega dela in brez pozabljenih kontaktov.\n\nV kolikor imate kakršnakoli vprašanja, nas kontaktirajte na help@jedroplus.com."
     }
   },
   "status": {

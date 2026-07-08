@@ -172,14 +172,18 @@ export default function ProtectedLayout({
   const requiredPlan = getRequiredPlan(pathnameWithoutLocale);
 
   // ── Role-based access gate ──────────────────────────────────────────────
-  // Admin cannot access /billing at all.
+  // Admin/staff cannot manage billing plans.
   // Staff access to certain routes depends on staff_role_permissions.
   // NOTE: plan is checked FIRST; role gate only applies when the plan allows the route.
   function getRoleGate(): React.ReactNode | null {
     if (role === 'owner' || role === null) return null;
 
     if (role === 'admin') {
-      if (pathnameWithoutLocale === '/billing' || pathnameWithoutLocale.startsWith('/billing/')) {
+      if (
+        pathnameWithoutLocale === '/billing' ||
+        pathnameWithoutLocale.startsWith('/billing/') ||
+        pathnameWithoutLocale === '/nastavitve/paketi'
+      ) {
         return <RoleAccessGate message={t('roleAccessGate.billingOwnerOnly')} />;
       }
       return null;
@@ -188,8 +192,12 @@ export default function ProtectedLayout({
     if (role === 'staff') {
       const p = permissions;
 
-      // /billing is always accessible for staff (page itself handles the restricted view)
-      if (pathnameWithoutLocale === '/billing' || pathnameWithoutLocale.startsWith('/billing/')) return null;
+      if (pathnameWithoutLocale === '/nastavitve/paketi') {
+        return <RoleAccessGate message={t('roleAccessGate.billingOwnerOnly')} />;
+      }
+
+      // Stripe checkout status pages stay accessible for staff if they land there from an existing flow.
+      if (pathnameWithoutLocale.startsWith('/billing/')) return null;
 
       const routePermMap: { prefix: string; key: keyof StaffPermissions }[] = [
         { prefix: '/analytics', key: 'can_view_analytics' },

@@ -39,7 +39,7 @@
     },
     "info": {
       "title": "About Lost Clients",
-      "body": "The system automatically detects clients who have not had an appointment within a set period, and sends them a personalized re-booking message.\n\nAI generates the message content based on your configuration — the text is tailored to each client individually, taking into account their history and services. This way your message never sounds like mass mail, but like a personal invitation to return.\n\nWith this system you win back clients who would otherwise go to a competitor — without manual work and without forgotten contacts.\n\nIf you have any questions, contact us at help@jedroplus.com."
+      "body": "The system <highlight>automatically detects clients</highlight> who have not had an appointment within a set period, and sends them a personalized re-booking message.\n\nAI <highlight>generates the message content based on your configuration</highlight> — the text is tailored to each client individually, taking into account their history and services. This way your message never sounds like mass mail, but like a personal invitation to return.\n\nWith this system you <highlight>win back clients who would otherwise go to a competitor</highlight> — without manual work and without forgotten contacts.\n\nIf you have any questions, contact us at help@jedroplus.com."
     }
   },
   "status": {

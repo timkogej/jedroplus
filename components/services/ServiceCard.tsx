@@ -98,7 +98,9 @@ function ServiceCard({
               <span className="text-gray-300">|</span>
               <div className="flex items-center gap-1">
                 <CurrencyEur className="h-4 w-4 text-gray-400" weight="regular" />
-                <span className="font-medium">{service.cena.toFixed(2)}</span>
+                <span className="font-medium">
+                  {service.cena.toFixed(2)}{service.currency ? ` ${service.currency}` : ''}
+                </span>
               </div>
             </>
           )}

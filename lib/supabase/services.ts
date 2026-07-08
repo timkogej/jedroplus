@@ -63,6 +63,7 @@ function detectServiceSchema(row: Record<string, unknown>) {
     totalTimeField: pickField(['skupni_cas', 'Skupni čas', 'total_time']),
     priceTypeField: pickField(['tip_cene', 'Tip cene', 'price_type']),
     priceField: pickField(['cena', 'Cena', 'price', 'Price']),
+    currencyField: pickField(['currency', 'Currency', 'valuta', 'Valuta']),
     descriptionField: pickField(['opis', 'Opis', 'description', 'Description']),
     activeField: pickField(['Status', 'aktivna', 'Aktivna', 'active', 'Active', 'is_active']),
     categoryField: pickField(['kategorija', 'Kategorija', 'category', 'Category']),
@@ -160,6 +161,7 @@ function parseService(row: Record<string, unknown>): Service | null {
     skupni_cas: skupniCas,
     tip_cene: tipCene,
     cena,
+    currency: schema.currencyField ? String(row[schema.currencyField] ?? '') || null : null,
     opis: schema.descriptionField ? String(row[schema.descriptionField] ?? '') || null : null,
     aktivna,
     spletne_rezervacije: schema.onlineBookingField

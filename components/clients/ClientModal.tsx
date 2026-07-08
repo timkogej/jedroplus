@@ -17,6 +17,12 @@ import { useTranslations } from 'next-intl';
 import type { Client, ClientFormData, Gender, ClientType } from '@/types/clients';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { checkEmailExists } from '@/lib/supabase/clients';
+import { useCompany } from '@/app/company-context';
+import {
+  getCompanyCommunicationLanguage,
+  normalizeCommunicationLanguage,
+} from '@/lib/communicationLanguage';
+import CommunicationLanguageControl from '@/components/shared/CommunicationLanguageControl';
 
 type ModalMode = 'create' | 'edit';
 
@@ -71,6 +77,8 @@ function ClientModal({
   isSaving = false,
 }: ClientModalProps) {
   const t = useTranslations('clients');
+  const { companySettings } = useCompany();
+  const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
 
   // Form state
   const [formData, setFormData] = useState<ClientFormData>({
@@ -78,6 +86,7 @@ function ClientModal({
     priimek: '',
     spol: '',
     tip_stranke: 'nova',
+    language: defaultLanguage,
     email: '',
     telefon: '',
     opombe: '',
@@ -118,6 +127,7 @@ function ClientModal({
           priimek: client.priimek || '',
           spol: normalizeGender(client.spol),
           tip_stranke: normalizeClientType(tipStranke),
+          language: normalizeCommunicationLanguage(client.language ?? clientRecord.language ?? clientRecord.Language, defaultLanguage),
           email: client.email || '',
           telefon: client.telefon || '',
           opombe: opombe,
@@ -129,6 +139,7 @@ function ClientModal({
           priimek: '',
           spol: '',
           tip_stranke: 'nova',
+          language: defaultLanguage,
           email: '',
           telefon: '',
           opombe: '',
@@ -141,7 +152,7 @@ function ClientModal({
       setShowInternalNotes(mode === 'edit');
       setShowClientTypeSelect(false);
     }
-  }, [isOpen, mode, client]);
+  }, [isOpen, mode, client, defaultLanguage]);
 
   const getClientTypeLabel = useCallback((type: ClientType | '') => {
     if (type === 'vip') return t('modal.clientType.vip');
@@ -595,6 +606,15 @@ function ClientModal({
                     <span className="text-sm font-medium">{t('modal.addInternalNotes')}</span>
                   </motion.button>
                 )}
+
+                <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                  <CommunicationLanguageControl
+                    value={formData.language}
+                    onChange={(value) => handleChange('language', value)}
+                    label={t('modal.fields.communicationLanguage')}
+                    changeLabel={t('modal.language.change')}
+                  />
+                </div>
               </div>
 
               {/* Contact warning panel */}

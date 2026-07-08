@@ -251,6 +251,17 @@ export default function StoritvePage() {
     () => getPodatkiPodjetja(companySettings ?? undefined),
     [companySettings]
   );
+  const defaultCurrency = useMemo(() => {
+    const value =
+      companySettings?.default_currency ??
+      companySettings?.currency ??
+      companySettings?.valuta ??
+      companySettings?.Valuta;
+
+    return typeof value === 'string' && value.trim()
+      ? value.trim().toUpperCase()
+      : 'EUR';
+  }, [companySettings]);
   const hasProPlan = useMemo(() => isJedroProPlan(planCode), [planCode]);
   const stripeEnabled = useMemo(
     () => parseSettingBool(companySettings?.stripe_enabled ?? companySettings?.Stripe_enabled, false),
@@ -433,15 +444,22 @@ export default function StoritvePage() {
       const zahtevaPlacilo = paymentRequirementAvailable && data.spletne_rezervacije
         ? data.zahteva_placilo
         : false;
+      const category = data.kategorija.trim();
+      const serviceCurrency = data.currency.trim().toUpperCase() || defaultCurrency;
 
       if (modalMode === 'edit' && selectedService) {
         // Update existing service
         const updatedRow = {
           id: selectedService.id,
           Naziv: data.naziv,
+          Kategorija: category,
+          category,
           Barva: data.barva,
           Trajanje: data.trajanje,
           Cena: data.cena ? parseFloat(data.cena) : null,
+          Valuta: serviceCurrency,
+          valuta: serviceCurrency,
+          currency: serviceCurrency,
           Opis: data.opis,
           Spletne_rezervacije: data.spletne_rezervacije,
           zahteva_placilo: zahtevaPlacilo,
@@ -474,9 +492,14 @@ export default function StoritvePage() {
         const newRow = {
           service_id: serviceId,
           Naziv: data.naziv,
+          Kategorija: category,
+          category,
           Barva: data.barva,
           Trajanje: data.trajanje,
           Cena: data.cena ? parseFloat(data.cena) : null,
+          Valuta: serviceCurrency,
+          valuta: serviceCurrency,
+          currency: serviceCurrency,
           Opis: data.opis,
           Aktivna: true,
           Spletne_rezervacije: data.spletne_rezervacije,
@@ -547,6 +570,7 @@ export default function StoritvePage() {
     services,
     pendingResursiIds,
     paymentRequirementAvailable,
+    defaultCurrency,
   ]);
 
   // Toggle service active status
@@ -820,6 +844,7 @@ export default function StoritvePage() {
         mode={modalMode}
         onSave={handleSaveService}
         isSaving={isSaving}
+        currency={defaultCurrency}
         existingCategories={[...new Set(services.map(s => s.kategorija).filter((c): c is string => Boolean(c)))]}
         availableResursi={availableResursi}
         linkedResursiIds={pendingResursiIds}

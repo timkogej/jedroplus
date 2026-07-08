@@ -21,7 +21,7 @@ import {
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import type { Service, ServiceFormData } from '@/types/services';
-import { DURATION_OPTIONS } from '@/types/services';
+import { CURRENCY_OPTIONS, DURATION_OPTIONS } from '@/types/services';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/constants/serviceGradients';
 import type { Resurs } from '@/types/resursi';
@@ -69,6 +69,7 @@ function ServiceModal({
   const t = useTranslations('services');
   const tCommon = useTranslations('common');
   const [selectedResursiIds, setSelectedResursiIds] = useState<string[]>([]);
+  const defaultCurrency = currency.trim().toUpperCase() || 'EUR';
 
   // Form state
   const [formData, setFormData] = useState<ServiceFormData>({
@@ -80,6 +81,7 @@ function ServiceModal({
     buffer_po: 0,
     tip_cene: 'fiksna',
     cena: '',
+    currency: defaultCurrency,
     opis: '',
     spletne_rezervacije: true,
     zahteva_placilo: false,
@@ -88,6 +90,11 @@ function ServiceModal({
   const [customDuration, setCustomDuration] = useState(false);
   const [customCategory, setCustomCategory] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof ServiceFormData, string>>>({});
+  const currencyOptions = CURRENCY_OPTIONS.some((option) => option.value === formData.currency)
+    ? CURRENCY_OPTIONS
+    : formData.currency
+      ? [{ value: formData.currency, label: formData.currency }, ...CURRENCY_OPTIONS]
+      : CURRENCY_OPTIONS;
 
   // Gradient pagination state - 4 colors per page
   const COLORS_PER_PAGE = 4;
@@ -116,6 +123,7 @@ function ServiceModal({
           buffer_po: service.buffer_po || 0,
           tip_cene: service.tip_cene || 'fiksna',
           cena: service.cena?.toString() || '',
+          currency: service.currency || defaultCurrency,
           opis: service.opis || '',
           spletne_rezervacije: service.spletne_rezervacije ?? true,
           zahteva_placilo: paymentRequirementAvailable ? service.zahteva_placilo ?? false : false,
@@ -131,6 +139,7 @@ function ServiceModal({
           buffer_po: 0,
           tip_cene: 'fiksna',
           cena: '',
+          currency: defaultCurrency,
           opis: '',
           spletne_rezervacije: true,
           zahteva_placilo: false,
@@ -146,7 +155,7 @@ function ServiceModal({
       // Init linked resursi
       setSelectedResursiIds(linkedResursiIds);
     }
-  }, [isOpen, mode, service, existingCategories, linkedResursiIds, paymentRequirementAvailable]);
+  }, [isOpen, mode, service, existingCategories, linkedResursiIds, paymentRequirementAvailable, defaultCurrency]);
 
   useEffect(() => {
     if (!paymentRequirementAvailable || !formData.spletne_rezervacije) {
@@ -181,6 +190,9 @@ function ServiceModal({
         if (value && (isNaN(Number(value)) || Number(value) < 0)) {
           return t('modal.validationPriceInvalid');
         }
+        return '';
+      case 'currency':
+        if (!String(value).trim()) return t('modal.validationCurrencyRequired');
         return '';
       case 'opis':
         if (String(value).length > 500) return t('modal.validationDescriptionMaxLength');
@@ -621,35 +633,54 @@ function ServiceModal({
                       )}
                     </div>
 
-                    {/* Price (always fixed) */}
+                    {/* Price and currency */}
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-900">
-                        {t('modal.priceLabel')}
-                      </label>
-                      <div className="relative">
-                        <CurrencyEur className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
-                        <input
-                          type="number"
-                          value={formData.cena}
-                          onChange={(e) => handleChange('cena', e.target.value)}
-                          placeholder="35.00"
-                          step="0.01"
-                          min={0}
-                          className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-16 text-sm text-gray-900 placeholder-gray-400
-                                     transition-colors focus:outline-none focus:ring-2
-                                     ${errors.cena
-                                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                       : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
-                                     }`}
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
-                          {currency}
-                        </span>
+                      <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                            {t('modal.priceLabel')}
+                          </label>
+                          <div className="relative">
+                            <CurrencyEur className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                            <input
+                              type="number"
+                              value={formData.cena}
+                              onChange={(e) => handleChange('cena', e.target.value)}
+                              placeholder="35.00"
+                              step="0.01"
+                              min={0}
+                              className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                                         transition-colors focus:outline-none focus:ring-2
+                                         ${errors.cena
+                                           ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
+                                           : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                         }`}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                            {t('modal.currencyLabel')}
+                          </label>
+                          <Select
+                            value={formData.currency}
+                            setValue={(value) => handleChange('currency', value.toUpperCase())}
+                            placeholder={t('modal.currencySelectPlaceholder')}
+                            className="[&>button]:rounded-lg [&>button]:px-3 [&>button]:focus:ring-gray-900/10"
+                          >
+                            {currencyOptions.map((option) => (
+                              <SelectOption key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectOption>
+                            ))}
+                          </Select>
+                        </div>
                       </div>
-                      {errors.cena && (
+                      {(errors.cena || errors.currency) && (
                         <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
                           <Warning className="h-3 w-3" weight="fill" />
-                          {errors.cena}
+                          {errors.cena || errors.currency}
                         </p>
                       )}
                     </div>

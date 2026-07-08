@@ -84,7 +84,7 @@
     },
     "info": {
       "title": "O Opomnikih",
-      "body": "Opomniki se pošiljajo avtomatsko na podlagi tukaj prikazanih nastavitev — brez ročnega dela. Vsaka stranka prejme sporočilo pred in/ali po terminu, odvisno od vaše konfiguracije.\n\nKo je aktiviran AI, sporočila niso nikoli enaka — AI si zapomni kontekst stranke, omeni pravo storitev in prilagodi vsebino, da zveni naravno in osebno. To pomeni večjo odprtost, bolj zapomnjena sporočila in stranke, ki se počutijo cenjene.\n\nZa lažje upravljanje je na voljo tudi možnost lastne predloge sporočila, kadar želite popoln nadzor nad vsebino.\n\nV kolikor imate karšnakoli vprašanja, nas kontaktirajte na help@jedroplus.com."
+      "body": "Opomniki se <highlight>pošiljajo avtomatsko</highlight> na podlagi tukaj prikazanih nastavitev — brez ročnega dela. Vsaka stranka prejme sporočilo pred in/ali po terminu, odvisno od vaše konfiguracije.\n\nKo je aktiviran AI, <highlight>sporočila niso nikoli enaka</highlight> — AI si zapomni kontekst stranke, omeni pravo storitev in prilagodi vsebino, da zveni naravno in osebno. To pomeni večjo odprtost, bolj zapomnjena sporočila in stranke, ki se počutijo cenjene.\n\nZa lažje upravljanje je na voljo tudi možnost <highlight>lastne predloge sporočila</highlight>, kadar želite popoln nadzor nad vsebino.\n\nV kolikor imate karšnakoli vprašanja, nas kontaktirajte na help@jedroplus.com."
     }
   },
   "status": {

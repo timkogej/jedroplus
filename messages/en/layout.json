@@ -8,7 +8,7 @@
       "promotions": "Promotions",
       "analytics": "Analytics",
       "account": "Account",
-      "billing": "Plans & Quotas",
+      "billing": "Plans",
       "settings": "Settings"
     },
     "items": {
@@ -25,7 +25,7 @@
       "staff": "Staff",
       "promotions": "Promotions",
       "analytics": "Analytics",
-      "billing": "Plans & Quotas",
+      "billing": "Plans",
       "plans": "Plans",
       "settings": "Settings",
       "signOut": "Sign out",

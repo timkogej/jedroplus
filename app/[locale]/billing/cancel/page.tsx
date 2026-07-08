@@ -5,6 +5,15 @@ import { motion } from 'motion/react';
 import { XCircle, ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 
+function getSafeReturnPath(): string {
+  if (typeof window === 'undefined') return '/nastavitve/paketi';
+  const returnTo = new URLSearchParams(window.location.search).get('return_to');
+  if (!returnTo || !returnTo.startsWith('/') || returnTo.startsWith('//')) {
+    return '/nastavitve/paketi';
+  }
+  return returnTo;
+}
+
 export default function BillingCancelPage() {
   const t = useTranslations('billing');
   const router = useRouter();
@@ -52,7 +61,7 @@ export default function BillingCancelPage() {
           className="space-y-3"
         >
           <button
-            onClick={() => router.push('/billing')}
+            onClick={() => router.push(getSafeReturnPath())}
             className="w-full py-3 px-4 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" weight="bold" />

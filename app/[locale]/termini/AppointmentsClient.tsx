@@ -412,6 +412,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
         tags?: string[] | string | null;
         status?: string | null;
         last_interaction?: string | null;
+        language?: string | null;
       } | null = null;
 
       if (data.stranka_id) {
@@ -452,6 +453,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
           const notesValue = pickFirst(clientRow, ['Opombe', 'opombe', 'notes', 'Notes', 'Opombe stranke', 'Opombe strank']);
           const tagsValue = pickFirst(clientRow, ['Tags', 'tags']);
           const statusValue = pickFirst(clientRow, ['Status', 'status']);
+          const languageValue = pickFirst(clientRow, ['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language']);
           const lastInteractionValue = pickFirst(clientRow, [
             'Zadnja interakcija',
             'zadnja_interakcija',
@@ -475,6 +477,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
               : null,
             status: statusValue ? String(statusValue) : null,
             last_interaction: lastInteractionValue ? String(lastInteractionValue) : null,
+            language: languageValue ? String(languageValue) : null,
           };
         }
       }
@@ -610,6 +613,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
             previous_status: appointment.status,
             stranka_ime: appointment.stranka_ime,
             stranka_id: appointment.stranka_id,
+            language: appointment.language,
             datum: appointment.datum,
             cas_zacetek: appointment.cas_zacetek,
           }
@@ -654,6 +658,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
             previous_status: appointment.status,
             stranka_ime: appointment.stranka_ime,
             stranka_id: appointment.stranka_id,
+            language: appointment.language,
             datum: appointment.datum,
             cas_zacetek: appointment.cas_zacetek,
           }

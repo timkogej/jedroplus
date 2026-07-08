@@ -1,4 +1,5 @@
 // TypeScript types for calendar appointments
+import type { CommunicationLanguageCode } from '@/lib/communicationLanguage';
 
 export interface Termin {
   id: string;
@@ -54,6 +55,7 @@ export interface AppointmentWithDetails {
   stranka_email?: string;
   stranka_telefon?: string;
   stranka_barva?: string; // Client color - gradient CSS string
+  language?: CommunicationLanguageCode;
   storitev_id?: string;
   storitev_id_2?: string; // Second service ID (from "ID storitev 2" column)
   storitev_id_3?: string; // Third service ID (from "ID storitev 3" column)

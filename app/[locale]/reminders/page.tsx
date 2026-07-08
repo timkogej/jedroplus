@@ -7,7 +7,6 @@ import {
   Gear,
   CheckCircle,
   Clock,
-  Info,
   EnvelopeSimple,
   Palette,
   ChatText,
@@ -446,7 +445,7 @@ export default function RemindersPage() {
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
                 {t('page.kicker')}
               </p>
-              <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">{t('page.title')}</h1>
+              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
               <p className="mt-2 text-sm leading-6 text-zinc-500">{t('page.subtitle')}</p>
             </div>
 
@@ -656,9 +655,16 @@ export default function RemindersPage() {
                   className="mt-6"
                 >
                   <SectionPanel eyebrow={t('page.flow.detailsEyebrow')} title={t('page.info.title')}>
-                    <div className="mt-5 flex items-start gap-3 border-t border-zinc-100 pt-5">
-                      <Info size={18} weight="bold" className="mt-0.5 flex-shrink-0 text-zinc-500" />
-                      <p className="whitespace-pre-wrap text-sm leading-7 text-zinc-600">{t('page.info.body')}</p>
+                    <div className="mt-5 border-t border-zinc-100 pt-5">
+                      <p className="whitespace-pre-wrap text-sm leading-7 text-zinc-600">
+                        {t.rich('page.info.body', {
+                          highlight: (chunks) => (
+                            <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text font-semibold text-transparent">
+                              {chunks}
+                            </span>
+                          ),
+                        })}
+                      </p>
                     </div>
                   </SectionPanel>
                 </motion.div>

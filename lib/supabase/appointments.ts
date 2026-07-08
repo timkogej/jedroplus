@@ -1,11 +1,20 @@
 import { fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst } from '@/lib/dashboardHelpers';
+import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import { supabase } from '@/lib/supabaseClient';
 
 // If the 'absences' table doesn't exist skip future queries to avoid repeated 400 errors.
 let absencesTableMissing = false;
+
+const CLIENT_ID_FIELDS = ['ID stranke', 'id', 'ID_stranke', 'client_id'];
+const CLIENT_LAST_NAME_FIELDS = ['Priimek', 'priimek', 'last_name', 'lastName', 'surname'];
+const LANGUAGE_FIELDS = ['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language'];
+
+function pickLanguage(row: Record<string, unknown>, fallback?: unknown) {
+  return normalizeCommunicationLanguage(pickFirst(row, LANGUAGE_FIELDS) ?? fallback);
+}
 
 // Absence type with employee details
 export interface Absence {
@@ -318,16 +327,22 @@ export async function fetchAppointmentsForMonth(
       }
     }
 
-    // Build client surname map: clientId → priimek (from Stranke table)
+    // Build client maps from Stranke table
     const clientPriimekMap = new Map<string, string>();
+    const clientLanguageMap = new Map<string, ReturnType<typeof normalizeCommunicationLanguage>>();
     for (const row of clients) {
       const rowKeys = Object.keys(row);
-      const idField = rowKeys.find(k => ['ID stranke', 'id', 'ID_stranke', 'client_id'].includes(k));
-      const priimekField = rowKeys.find(k => ['Priimek', 'priimek', 'last_name', 'lastName', 'surname'].includes(k));
-      if (idField && priimekField) {
+      const idField = rowKeys.find(k => CLIENT_ID_FIELDS.includes(k));
+      const priimekField = rowKeys.find(k => CLIENT_LAST_NAME_FIELDS.includes(k));
+      if (idField) {
         const cid = String(row[idField] ?? '');
-        const priimek = String(row[priimekField] ?? '');
-        if (cid && priimek) clientPriimekMap.set(cid, priimek);
+        if (cid) {
+          if (priimekField) {
+            const priimek = String(row[priimekField] ?? '');
+            if (priimek) clientPriimekMap.set(cid, priimek);
+          }
+          clientLanguageMap.set(cid, pickLanguage(row));
+        }
       }
     }
 
@@ -386,6 +401,7 @@ export async function fetchAppointmentsForMonth(
       const clientPhone = String(
         pickFirst(row, ['Telefon', 'Telefonska številka', 'client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
       );
+      const language = pickLanguage(row, clientId ? clientLanguageMap.get(clientId) : undefined);
       const notes = String(
         pickFirst(row, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
       );
@@ -453,6 +469,7 @@ export async function fetchAppointmentsForMonth(
         stranka_priimek: (clientId && clientPriimekMap.get(clientId)) || undefined,
         stranka_email: clientEmail || undefined,
         stranka_telefon: clientPhone || undefined,
+        language,
         storitev_id: serviceId || undefined,
         storitev_id_2: serviceId2 || undefined,
         storitev_id_3: serviceId3 || undefined,
@@ -652,6 +669,7 @@ export async function fetchAppointmentById(
     const clientPhone = String(
       pickFirst(booking, ['Telefon', 'Telefonska številka', 'client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
     );
+    const language = pickLanguage(booking);
     const notes = String(
       pickFirst(booking, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
     );
@@ -708,6 +726,7 @@ export async function fetchAppointmentById(
       stranka_ime: clientName,
       stranka_email: clientEmail || undefined,
       stranka_telefon: clientPhone || undefined,
+      language,
       storitev_id: serviceId || undefined,
       storitev_id_2: serviceId2 || undefined,
       storitev_id_3: serviceId3 || undefined,
@@ -785,16 +804,22 @@ export async function fetchAllAppointments(
       }
     }
 
-    // Build client surname map: clientId → priimek
+    // Build client maps from Stranke table
     const clientPriimekMap = new Map<string, string>();
+    const clientLanguageMap = new Map<string, ReturnType<typeof normalizeCommunicationLanguage>>();
     for (const row of clients) {
       const rowKeys = Object.keys(row);
-      const idField = rowKeys.find(k => ['ID stranke', 'id', 'ID_stranke', 'client_id'].includes(k));
-      const priimekField = rowKeys.find(k => ['Priimek', 'priimek', 'last_name', 'lastName', 'surname'].includes(k));
-      if (idField && priimekField) {
+      const idField = rowKeys.find(k => CLIENT_ID_FIELDS.includes(k));
+      const priimekField = rowKeys.find(k => CLIENT_LAST_NAME_FIELDS.includes(k));
+      if (idField) {
         const cid = String(row[idField] ?? '');
-        const priimek = String(row[priimekField] ?? '');
-        if (cid && priimek) clientPriimekMap.set(cid, priimek);
+        if (cid) {
+          if (priimekField) {
+            const priimek = String(row[priimekField] ?? '');
+            if (priimek) clientPriimekMap.set(cid, priimek);
+          }
+          clientLanguageMap.set(cid, pickLanguage(row));
+        }
       }
     }
 
@@ -853,6 +878,7 @@ export async function fetchAllAppointments(
       const clientPhone = String(
         pickFirst(row, ['Telefon', 'Telefonska številka', 'client_phone', 'stranka_telefon', 'Telefon stranke', 'telefon', 'phone']) ?? ''
       );
+      const language = pickLanguage(row, clientId ? clientLanguageMap.get(clientId) : undefined);
       const notes = String(
         pickFirst(row, ['opombe', 'notes', 'Opombe', 'description', 'opis']) ?? ''
       );
@@ -920,6 +946,7 @@ export async function fetchAllAppointments(
         stranka_priimek: (clientId && clientPriimekMap.get(clientId)) || undefined,
         stranka_email: clientEmail || undefined,
         stranka_telefon: clientPhone || undefined,
+        language,
         storitev_id: serviceId || undefined,
         storitev_id_2: serviceId2 || undefined,
         storitev_id_3: serviceId3 || undefined,

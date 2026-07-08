@@ -23,6 +23,13 @@ import { getNextClientId } from '@/src/lib/idGenerators';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { addMinutesToTime } from '@/lib/promotions';
+import {
+  getCompanyCommunicationLanguage,
+  getCommunicationLanguageOption,
+  normalizeCommunicationLanguage,
+  type CommunicationLanguageCode,
+} from '@/lib/communicationLanguage';
+import CommunicationLanguageControl from '@/components/shared/CommunicationLanguageControl';
 import { useTranslations } from 'next-intl';
 import { checkResourceConflicts, fetchResursIdsForTerminRow, type ResourceConflict } from '@/lib/supabase/resursi';
 
@@ -52,6 +59,7 @@ export interface AppointmentFormData {
   stranka_ime: string;
   stranka_email?: string;
   stranka_telefon?: string;
+  language?: CommunicationLanguageCode;
   storitev_id: string;
   storitev_id_2?: string; // Second service ID (optional)
   storitev_id_3?: string; // Third service ID (optional)
@@ -155,6 +163,7 @@ function AppointmentModal({
 }: AppointmentModalProps) {
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
+  const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
   const { user } = useAuth();
   const { personId, role, permissions } = useRolePermissions();
 
@@ -178,6 +187,7 @@ function AppointmentModal({
     stranka_ime: '',
     stranka_email: '',
     stranka_telefon: '',
+    language: defaultLanguage,
     storitev_id: '',
     storitev_id_2: '',
     storitev_id_3: '',
@@ -291,6 +301,7 @@ function AppointmentModal({
         stranka_ime: appointment.stranka_ime || '',
         stranka_email: appointment.stranka_email || '',
         stranka_telefon: appointment.stranka_telefon || '',
+        language: normalizeCommunicationLanguage(appointment.language, defaultLanguage),
         storitev_id: appointment.storitev_id || appointment.storitev?.id || '',
         storitev_id_2: (storitevId2 && storitevId2 !== 'null') ? storitevId2 : '',
         storitev_id_3: (storitevId3 && storitevId3 !== 'null') ? storitevId3 : '',
@@ -324,6 +335,7 @@ function AppointmentModal({
           priimek: appointment.stranka_ime.split(' ').slice(1).join(' ') || '',
           email: appointment.stranka_email || '',
           telefon: appointment.stranka_telefon || '',
+          language: normalizeCommunicationLanguage(appointment.language, defaultLanguage),
         });
       }
     } else if (mode === 'create') {
@@ -347,6 +359,7 @@ function AppointmentModal({
         stranka_ime: '',
         stranka_email: '',
         stranka_telefon: '',
+        language: defaultLanguage,
         storitev_id: '',
         storitev_id_2: '',
         storitev_id_3: '',
@@ -381,7 +394,7 @@ function AppointmentModal({
     } else {
       setIsGhostTermin(false);
     }
-  }, [appointment, mode, employees, initialDate, initialStartTime, initialEmployeeId, personId]);
+  }, [appointment, mode, employees, initialDate, initialStartTime, initialEmployeeId, personId, defaultLanguage]);
 
   // Track if end time was manually set by user
   const [endTimeManuallySet, setEndTimeManuallySet] = useState(false);
@@ -863,6 +876,7 @@ function AppointmentModal({
         stranka_ime: `${client.ime} ${client.priimek}`.trim(),
         stranka_email: client.email,
         stranka_telefon: client.telefon ?? '',
+        language: normalizeCommunicationLanguage(client.language, defaultLanguage),
       }));
     } else {
       setFormData((prev) => ({
@@ -871,6 +885,7 @@ function AppointmentModal({
         stranka_ime: '',
         stranka_email: '',
         stranka_telefon: '',
+        language: defaultLanguage,
       }));
     }
     if (errors.stranka_ime) {
@@ -902,6 +917,7 @@ function AppointmentModal({
         Priimek: data.priimek,
         Spol: data.spol,
         'Tip stranke': clientType,
+        language: data.language,
         Email: data.email,
         Telefon: data.telefon,
         Opombe: data.opombe,
@@ -957,6 +973,7 @@ function AppointmentModal({
         email: data.email,
         telefon: data.telefon,
         tip_stranke: clientType,
+        language: data.language,
       };
       setSelectedClient(newClient);
       setFormData((prev) => ({
@@ -965,6 +982,7 @@ function AppointmentModal({
         stranka_ime: `${data.ime} ${data.priimek}`.trim(),
         stranka_email: data.email,
         stranka_telefon: data.telefon,
+        language: data.language,
       }));
 
       // Clear any client validation errors
@@ -1119,6 +1137,7 @@ function AppointmentModal({
     border: '1px solid transparent',
     background: `linear-gradient(#F9FAFB, #F9FAFB) padding-box, ${promotionGradient} border-box`,
   };
+  const currentLanguageOption = getCommunicationLanguageOption(formData.language ?? defaultLanguage);
   const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60 sm:p-5';
   const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500';
   const inputBaseClass = 'w-full max-w-full min-w-0 rounded-lg border bg-white px-3 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900/10';
@@ -1183,6 +1202,13 @@ function AppointmentModal({
                       {(() => { const p = (formData.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
                     </span>
                     <p className="min-w-0 flex-1 truncate font-medium text-[#1A1F36]">{formData.stranka_ime || '-'}</p>
+                    <span
+                      className="flex-shrink-0 text-base leading-none"
+                      title={currentLanguageOption.label}
+                      aria-label={currentLanguageOption.label}
+                    >
+                      {currentLanguageOption.flag}
+                    </span>
                     <div className="flex-shrink-0">
                       <StatusBadge status={formData.status} variant="gradient" weight="normal" />
                     </div>
@@ -1219,11 +1245,22 @@ function AppointmentModal({
                 </div>
               ) : (
                 <>
-                  <ClientSearch
-                    selectedClient={selectedClient}
-                    onSelect={handleClientSelect}
-                    onCreateNew={handleOpenCreateClient}
-                  />
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                    <div className="min-w-0 flex-1">
+                      <ClientSearch
+                        selectedClient={selectedClient}
+                        onSelect={handleClientSelect}
+                        onCreateNew={handleOpenCreateClient}
+                      />
+                    </div>
+                    <CommunicationLanguageControl
+                      value={formData.language ?? defaultLanguage}
+                      onChange={(value) => setFormData((prev) => ({ ...prev, language: value }))}
+                      label={t('modal.fields.communicationLanguage')}
+                      compact
+                      className="sm:w-[132px]"
+                    />
+                  </div>
                   {errors.stranka_ime && (
                     <p className="mt-1 text-xs text-red-500">{errors.stranka_ime}</p>
                   )}

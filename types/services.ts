@@ -13,6 +13,7 @@ export interface Service {
   skupni_cas: number; // total time: trajanje + buffer_pred + buffer_po
   tip_cene: PriceType; // 'fiksna' or 'po_dogovoru'
   cena: number | null;
+  currency: string | null;
   opis: string | null;
   aktivna: boolean;
   spletne_rezervacije: boolean; // whether this service can be booked online
@@ -34,6 +35,7 @@ export interface ServiceFormData {
   buffer_po: number; // buffer after in minutes (default 0)
   tip_cene: PriceType; // 'fiksna' or 'po_dogovoru'
   cena: string; // string for form input, converted to number when saving
+  currency: string;
   opis: string;
   spletne_rezervacije: boolean; // whether this service can be booked online
   zahteva_placilo: boolean; // whether online booking requires payment for this service
@@ -52,6 +54,20 @@ export const BUFFER_OPTIONS = [
 export const PRICE_TYPE_OPTIONS = [
   { value: 'fiksna', label: 'Fiksna cena' },
   { value: 'po_dogovoru', label: 'Cena po dogovoru' },
+] as const;
+
+export const CURRENCY_OPTIONS = [
+  { value: 'EUR', label: 'EUR' },
+  { value: 'USD', label: 'USD' },
+  { value: 'GBP', label: 'GBP' },
+  { value: 'CHF', label: 'CHF' },
+  { value: 'HRK', label: 'HRK' },
+  { value: 'BAM', label: 'BAM' },
+  { value: 'RSD', label: 'RSD' },
+  { value: 'MKD', label: 'MKD' },
+  { value: 'HUF', label: 'HUF' },
+  { value: 'CZK', label: 'CZK' },
+  { value: 'PLN', label: 'PLN' },
 ] as const;
 
 // Filter and sort types

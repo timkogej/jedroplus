@@ -1,6 +1,6 @@
 {
   "page": {
-    "pageTitle": "{role, select, staff {Paketi} other {Paketi in kvote}}"
+    "pageTitle": "Paketi"
   },
   "currentPlan": {
     "label": "Trenutni paket",
@@ -182,11 +182,11 @@
   "roleAccessGate": {
     "title": "Dostop omejen",
     "defaultMessage": "Nimate dostopa do te strani. Obrnite se na lastnika podjetja.",
-    "billingOwnerOnly": "Stran 'Paketi in kvote' je dostopna samo lastniku podjetja.",
+    "billingOwnerOnly": "Stran 'Paketi' je dostopna samo lastniku podjetja.",
     "staffRestricted": "Ta funkcija je za vaš račun onemogočena. Za dostop kontaktirajte lastnika podjetja."
   },
   "paketi": {
-    "title": "Paketi in kvote",
+    "title": "Paketi",
     "subtitle": "Pregled vašega paketa in porabe",
     "currentBadge": "Trenutni",
     "recommendedBadge": "Priporočeno",

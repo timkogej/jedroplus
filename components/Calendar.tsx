@@ -42,6 +42,7 @@ import AbsenceDetailModal, { type AbsenceEditData } from './calendar/AbsenceDeta
 import EventModal, { type EventFormData } from './calendar/EventModal';
 import EventViewModal from './calendar/EventViewModal';
 import ClientDetailsPanel from './clients/ClientDetailsPanel';
+import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
 import {
   fetchAppointmentsForMonth,
   fetchServices,
@@ -291,6 +292,7 @@ function AppointmentDetailModal({
                 <h3 className="min-w-0 truncate text-lg font-semibold text-gray-900">
                   {appointment.stranka_ime || t('calendarView.detailModal.fields.unknownClient')}
                 </h3>
+                <CommunicationLanguageFlag value={appointment.language} />
                 <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
                   {getStatusLabel(appointment.status || 'scheduled')}
                 </span>
@@ -1624,6 +1626,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
             previous_status: appointment.status,
             stranka_ime: appointment.stranka_ime,
             stranka_id: appointment.stranka_id,
+            language: appointment.language,
             datum: appointment.datum,
             cas_zacetek: appointment.cas_zacetek,
           }
@@ -1666,6 +1669,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
             previous_status: appointment.status,
             stranka_ime: appointment.stranka_ime,
             stranka_id: appointment.stranka_id,
+            language: appointment.language,
             datum: appointment.datum,
             cas_zacetek: appointment.cas_zacetek,
           }
@@ -1800,6 +1804,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         tags?: string[] | string | null;
         status?: string | null;
         last_interaction?: string | null;
+        language?: string | null;
       } | null = null;
 
       if (data.stranka_id) {
@@ -1839,6 +1844,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
           const notesValue = pickFirst(clientRow, ['Opombe', 'opombe', 'notes', 'Notes', 'Opombe stranke', 'Opombe strank']);
           const tagsValue = pickFirst(clientRow, ['Tags', 'tags']);
           const statusValue = pickFirst(clientRow, ['Status', 'status']);
+          const languageValue = pickFirst(clientRow, ['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language']);
           const lastInteractionValue = pickFirst(clientRow, [
             'Zadnja interakcija',
             'zadnja_interakcija',
@@ -1862,6 +1868,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
               : null,
             status: statusValue ? String(statusValue) : null,
             last_interaction: lastInteractionValue ? String(lastInteractionValue) : null,
+            language: languageValue ? String(languageValue) : null,
           };
         }
       }
@@ -2048,6 +2055,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         stranka_ime: appointment.stranka_ime,
         stranka_email: appointment.stranka_email || undefined,
         stranka_telefon: appointment.stranka_telefon || undefined,
+        language: appointment.language,
         storitev_id: appointment.storitev_id ? String(appointment.storitev_id) : (appointment.storitev?.id || ''),
         storitev_id_2: appointment.storitev_id_2 ? String(appointment.storitev_id_2) : undefined,
         storitev_id_3: appointment.storitev_id_3 ? String(appointment.storitev_id_3) : undefined,
@@ -2168,6 +2176,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
       email: appointment.stranka_email ?? null,
       telefon: appointment.stranka_telefon ?? null,
       barva: appointment.stranka_barva ?? null,
+      language: appointment.language ?? null,
       notes: null,
       tags: null,
       status: null,
@@ -2187,6 +2196,7 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
         stranka_ime: appointment.stranka_ime,
         stranka_email: appointment.stranka_email || undefined,
         stranka_telefon: appointment.stranka_telefon || undefined,
+        language: appointment.language,
         storitev_id: appointment.storitev_id ? String(appointment.storitev_id) : (appointment.storitev?.id || ''),
         storitev_id_2: appointment.storitev_id_2 ? String(appointment.storitev_id_2) : undefined,
         storitev_id_3: appointment.storitev_id_3 ? String(appointment.storitev_id_3) : undefined,

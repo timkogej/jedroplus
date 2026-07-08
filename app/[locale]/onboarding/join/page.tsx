@@ -87,7 +87,7 @@ export default function JoinCompanyPage() {
       const result = await joinCompany(normalizedJoinCode);
 
       if (result.code === 'NO_FREE_USER_SLOT') {
-        const redirectUrl = result.redirect_url || 'https://app.jedroplus.com/billing';
+        const redirectUrl = result.redirect_url || 'https://app.jedroplus.com/sl/nastavitve/paketi';
         toast.error(result.message || t('join.toasts.noFreeSlot'));
         setTimeout(() => {
           window.location.href = redirectUrl;

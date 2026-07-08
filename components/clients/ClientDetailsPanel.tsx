@@ -28,6 +28,7 @@ import {
 import type { Client, ClientWithAppointments, ClientAppointment } from '@/types/clients';
 import { getClientWithAppointments } from '@/lib/supabase/clients';
 import ClientInitialsBadge from './ClientInitialsBadge';
+import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
 
 interface ClientDetailsPanelProps {
   isOpen: boolean;
@@ -211,6 +212,7 @@ function ClientDetailsPanel({
   if (!client) return null;
 
   const detailsClient = clientData ?? client;
+  const clientLanguage = detailsClient.language ?? client.language;
 
   return (
     <AnimatePresence>
@@ -234,10 +236,16 @@ function ClientDetailsPanel({
             {/* Header - NO INITIALS, JUST NAME */}
             <div className="sticky top-0 z-10 bg-gradient-to-r from-violet-500 to-cyan-500 p-8">
               <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-3xl font-bold text-white mb-2">
-                    {client.ime} {client.priimek}
-                  </h2>
+                <div className="min-w-0">
+                  <div className="mb-2 flex min-w-0 items-center gap-2">
+                    <h2 className="truncate text-3xl font-bold text-white">
+                      {client.ime} {client.priimek}
+                    </h2>
+                    <CommunicationLanguageFlag
+                      value={clientLanguage}
+                      className="bg-white/20 text-white shadow-none"
+                    />
+                  </div>
                   {/* Date added - from created_at */}
                   <div className="text-white/90 text-sm">
                     {t('details.added')} {formatDate(client.created_at || '')}

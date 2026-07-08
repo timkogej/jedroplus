@@ -2,6 +2,7 @@ import { format, startOfMonth, endOfMonth, addDays, subDays } from "date-fns";
 import { fetchTableRows } from "@/lib/companyScope";
 import { TABLES } from "@/lib/data";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
+import { normalizeCommunicationLanguage, type CommunicationLanguageCode } from "@/lib/communicationLanguage";
 
 // Types for dashboard data
 export interface DashboardStats {
@@ -21,6 +22,7 @@ export interface AppointmentItem {
   clientEmail?: string;
   clientPhone?: string;
   clientColor?: string;
+  language?: CommunicationLanguageCode;
   clientId?: string;
   serviceName: string;
   serviceColor: string;
@@ -112,6 +114,12 @@ function getInitials(firstName: string, lastName: string): string {
 
 type DashboardServiceInfo = { naziv: string; barva: string; trajanje: number };
 
+const LANGUAGE_FIELDS = ['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language'];
+
+function pickLanguage(row: Record<string, unknown>, fallback?: unknown) {
+  return normalizeCommunicationLanguage(pickFirst(row, LANGUAGE_FIELDS) ?? fallback);
+}
+
 function parseOptionalString(value: unknown): string | undefined {
   if (value === null || value === undefined) return undefined;
   const text = String(value).trim();
@@ -199,11 +207,11 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
     }
 
     // Build lookup maps for clients
-    const clientsMap = new Map<string, { barva: string }>();
+    const clientsMap = new Map<string, { barva: string; language: CommunicationLanguageCode }>();
     for (const c of clients) {
       const id = String(pickFirst(c, ['id', 'ID stranke', 'client_id']) ?? '');
       const barva = String(pickFirst(c, ['barva', 'Barva', 'color']) ?? '');
-      if (id) clientsMap.set(id, { barva });
+      if (id) clientsMap.set(id, { barva, language: pickLanguage(c) });
     }
 
     // Filter bookings for today with status 'scheduled'
@@ -268,6 +276,7 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
       const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes', 'Notes']) ?? '');
       const interneOpombe = String(pickFirst(row, ['interne_opombe', 'Interne opombe', 'internal_notes']) ?? '');
       const cena = getAppointmentTotalCena(row);
+      const language = pickLanguage(row, client?.language);
 
       todayAppointments.push({
         id,
@@ -278,6 +287,7 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
         clientEmail: clientEmail || undefined,
         clientPhone: clientPhone || undefined,
         clientColor: client?.barva || undefined,
+        language,
         clientId: clientId || undefined,
         serviceName: service?.naziv || 'Neznana storitev',
         serviceColor: service?.barva || '#8B5CF6',
@@ -360,11 +370,11 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
     }
 
     // Build lookup maps for clients
-    const clientsMap = new Map<string, { barva: string }>();
+    const clientsMap = new Map<string, { barva: string; language: CommunicationLanguageCode }>();
     for (const c of clients) {
       const id = String(pickFirst(c, ['id', 'ID stranke', 'client_id']) ?? '');
       const barva = String(pickFirst(c, ['barva', 'Barva', 'color']) ?? '');
-      if (id) clientsMap.set(id, { barva });
+      if (id) clientsMap.set(id, { barva, language: pickLanguage(c) });
     }
 
     // Filter bookings for tomorrow with status 'scheduled'
@@ -428,6 +438,7 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
       const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes', 'Notes']) ?? '');
       const interneOpombe = String(pickFirst(row, ['interne_opombe', 'Interne opombe', 'internal_notes']) ?? '');
       const cena = getAppointmentTotalCena(row);
+      const language = pickLanguage(row, client?.language);
 
       tomorrowAppointments.push({
         id,
@@ -438,6 +449,7 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
         clientEmail: clientEmail || undefined,
         clientPhone: clientPhone || undefined,
         clientColor: client?.barva || undefined,
+        language,
         clientId: clientId || undefined,
         serviceName: service?.naziv || 'Neznana storitev',
         serviceColor: service?.barva || '#8B5CF6',
@@ -1061,6 +1073,7 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
       const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
       const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes']) ?? '');
       const cena = getAppointmentTotalCena(row);
+      const language = pickLanguage(row);
 
       const service = servicesMap.get(serviceId);
       const service2 = serviceId2 ? servicesMap.get(serviceId2) : undefined;
@@ -1079,6 +1092,7 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
           clientName,
           clientEmail: clientEmail || undefined,
           clientPhone: clientPhone || undefined,
+          language,
           clientId: clientId || undefined,
           serviceName: service?.naziv || 'Neznana storitev',
           serviceColor: service?.barva || '#8B5CF6',

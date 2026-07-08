@@ -18,6 +18,7 @@ import { format, startOfMonth, endOfMonth, addDays, subDays } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { pickFirst, detectBookingSchema } from "@/lib/dashboardHelpers";
 import { TABLES } from "@/lib/data";
+import { normalizeCommunicationLanguage, type CommunicationLanguageCode } from "@/lib/communicationLanguage";
 import type {
   DashboardData,
   DashboardStats,
@@ -80,6 +81,12 @@ const bookingStaffId = (row: Row) =>
   String(pickFirst(row, ["ID osebja", "ID osebe", "ID Osebe", "oseba_id", "person_id"]) ?? "");
 
 type DashboardServiceInfo = { naziv: string; barva: string; trajanje: number };
+
+const LANGUAGE_FIELDS = ["language", "Language", "Jezik komunikacije", "jezik_komunikacije", "Jezik", "jezik", "preferred_language"];
+
+function pickLanguage(row: Row, fallback?: unknown) {
+  return normalizeCommunicationLanguage(pickFirst(row, LANGUAGE_FIELDS) ?? fallback);
+}
 
 function parseOptionalString(value: unknown): string | undefined {
   if (value === null || value === undefined) return undefined;
@@ -171,11 +178,11 @@ function buildEmployeesMap(staff: Row[]) {
 }
 
 function buildClientsMap(clients: Row[]) {
-  const map = new Map<string, { barva: string }>();
+  const map = new Map<string, { barva: string; language: CommunicationLanguageCode }>();
   for (const c of clients) {
     const id = String(pickFirst(c, ["id", "ID stranke", "client_id"]) ?? "");
     const barva = String(pickFirst(c, ["barva", "Barva", "color"]) ?? "");
-    if (id) map.set(id, { barva });
+    if (id) map.set(id, { barva, language: pickLanguage(c) });
   }
   return map;
 }
@@ -286,6 +293,7 @@ function buildAppointmentsForDate(
     const opombe = String(pickFirst(row, ["opombe", "Opombe", "notes", "Notes"]) ?? "");
     const interneOpombe = String(pickFirst(row, ["interne_opombe", "Interne opombe", "internal_notes"]) ?? "");
     const cena = getAppointmentTotalCena(row);
+    const language = pickLanguage(row, client?.language);
 
     out.push({
       id,
@@ -296,6 +304,7 @@ function buildAppointmentsForDate(
       clientEmail: clientEmail || undefined,
       clientPhone: clientPhone || undefined,
       clientColor: client?.barva || undefined,
+      language,
       clientId: clientId || undefined,
       serviceName: service?.naziv || "Neznana storitev",
       serviceColor: service?.barva || "#8B5CF6",
@@ -529,6 +538,7 @@ function buildNextPersonAppointment(
     const addOn = extractAppointmentAddOn(row, servicesMap);
     const employee = employeesMap.get(staffId);
     const cena = getAppointmentTotalCena(row);
+    const language = pickLanguage(row);
 
     candidates.push({
       dateStr: bookingDateStr,
@@ -541,6 +551,7 @@ function buildNextPersonAppointment(
         clientName,
         clientEmail: clientEmail || undefined,
         clientPhone: clientPhone || undefined,
+        language,
         clientId: clientId || undefined,
         serviceName: service?.naziv || "Neznana storitev",
         serviceColor: service?.barva || "#8B5CF6",

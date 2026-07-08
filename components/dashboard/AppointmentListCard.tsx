@@ -6,6 +6,7 @@ import { Calendar, ArrowRight, X, Copy, Check, Plus } from "@phosphor-icons/reac
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { AppointmentItem } from "@/lib/dashboard/fetchDashboardData";
+import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
 
 function extractFirstColor(barva: string): string {
   if (!barva) return '#8B5CF6';
@@ -224,6 +225,7 @@ function AppointmentDetailModal({
                 <h3 className="min-w-0 truncate text-lg font-semibold text-gray-900">
                   {appointment.clientName}
                 </h3>
+                <CommunicationLanguageFlag value={appointment.language} />
                 <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
                   {getStatusLabel(appointment.status || 'scheduled')}
                 </span>

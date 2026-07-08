@@ -44,6 +44,7 @@ export function normalizeCompanyProfile(raw: AnyRow | null | undefined) {
     address: toValue(data.address ?? data.naslov),
     tax_number: toValue(data.tax_number ?? data["Davčna številka"]),
     website: toValue(data.website),
+    language: toValue(data.language ?? data.Language ?? data.preferred_language),
   };
   return { ...data, ...normalized };
 }
@@ -76,6 +77,8 @@ export function normalizeClient(raw: AnyRow | null | undefined) {
     // Client type (Tip stranke): 'nova' | 'redna' | 'vip'
     tip_stranke: toValue(data["Tip stranke"] ?? data.tip_stranke),
     "Tip stranke": toValue(data["Tip stranke"] ?? data.tip_stranke),
+    // Communication language
+    language: toValue(data.language ?? data.Language ?? data.preferred_language),
     // Color
     barva: toValue(data.barva ?? data.Barva ?? data.color),
   };
@@ -121,6 +124,7 @@ export function normalizeBooking(raw: AnyRow | null | undefined) {
     start_at: toValue(startAt),
     end_at: toValue(endAt),
     status: toValue(data.status ?? data.Status),
+    language: toValue(data.language ?? data.Language),
     location_id: toValue(data.location_id),
     base_total_price: toValue(data.base_total_price),
     final_total_price: toValue(

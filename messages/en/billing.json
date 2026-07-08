@@ -1,6 +1,6 @@
 {
   "page": {
-    "pageTitle": "{role, select, staff {Plans} other {Plans and quotas}}"
+    "pageTitle": "Plans"
   },
   "currentPlan": {
     "label": "Current plan",
@@ -182,11 +182,11 @@
   "roleAccessGate": {
     "title": "Access restricted",
     "defaultMessage": "You do not have access to this page. Contact the business owner.",
-    "billingOwnerOnly": "The 'Plans and quotas' page is only accessible to the business owner.",
+    "billingOwnerOnly": "The 'Plans' page is only accessible to the business owner.",
     "staffRestricted": "This feature is disabled for your account. Contact the business owner for access."
   },
   "paketi": {
-    "title": "Plans and quotas",
+    "title": "Plans",
     "subtitle": "Overview of your plan and usage",
     "currentBadge": "Current",
     "recommendedBadge": "Recommended",

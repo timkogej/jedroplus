@@ -494,7 +494,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                               {t('modal.confirmations.smsPlanNotePrefix')}{' '}
                               <button
                                 type="button"
-                                onClick={() => { onClose(); router.push('/billing'); }}
+                                onClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
                                 className="font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
                               >
                                 {t('modal.confirmations.smsPlanNoteLink')}
@@ -506,7 +506,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             value={potrdiloChannel}
                             onChange={setPotrdiloChannel}
                             smsLocked={smsLockedForPlan}
-                            onUpgradeClick={() => { onClose(); router.push('/billing'); }}
+                            onUpgradeClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
                             t={t}
                           />
                         </motion.div>
@@ -537,7 +537,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                               {t('modal.confirmations.smsPlanNotePrefix')}{' '}
                               <button
                                 type="button"
-                                onClick={() => { onClose(); router.push('/billing'); }}
+                                onClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
                                 className="font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
                               >
                                 {t('modal.confirmations.smsPlanNoteLink')}
@@ -549,7 +549,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             value={potrdiloOnlineChannel}
                             onChange={setPotrdiloOnlineChannel}
                             smsLocked={smsLockedForPlan}
-                            onUpgradeClick={() => { onClose(); router.push('/billing'); }}
+                            onUpgradeClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
                             t={t}
                           />
                         </motion.div>

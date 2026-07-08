@@ -2,6 +2,7 @@ import { supabaseReadOnly } from "@/src/lib/supabaseReadOnly";
 import { getCompanyColumnForTable } from "@/lib/companyScope";
 import { checkColumnExists } from "@/lib/tableIntrospection";
 import { combineDateAndTime, safeDate } from "@/lib/dashboardHelpers";
+import { normalizeCommunicationLanguage } from "@/lib/communicationLanguage";
 import {
   normalizeBooking,
   normalizeClient,
@@ -660,6 +661,7 @@ export function buildEnhancedAppointmentData({
     stranka_ime: string;
     stranka_email?: string;
     stranka_telefon?: string;
+    language?: string;
     storitev_id: string;
     storitev_id_2?: string; // Second service ID (optional)
     storitev_id_3?: string; // Third service ID (optional)
@@ -728,6 +730,7 @@ export function buildEnhancedAppointmentData({
     tags?: string[] | string | null;
     status?: string | null;
     last_interaction?: string | null;
+    language?: string | null;
   } | null;
   unique8DigitId?: string;
 }) {
@@ -754,6 +757,7 @@ export function buildEnhancedAppointmentData({
   const discountValue = appointmentData.popust ?? 0;
   const discountType = appointmentData.popust_tip ?? '€';
   const finalPrice = calculateFinalPrice(basePrice, discountValue, discountType);
+  const language = normalizeCommunicationLanguage(appointmentData.language ?? clientDetails?.language);
 
   // Build service IDs array for multiple services
   const serviceIds: string[] = [];
@@ -784,6 +788,7 @@ export function buildEnhancedAppointmentData({
       // Client info
       client_id: clientDetails?.id ?? appointmentData.stranka_id ?? null,
       client_name: appointmentData.stranka_ime,
+      language,
       // Service info - now supports multiple services
       service_ids: serviceIds,
       service_id: serviceDetails?.id ?? null, // Primary service ID
@@ -859,6 +864,7 @@ export function buildEnhancedAppointmentData({
       tags: clientDetails?.tags ?? null,
       status: clientDetails?.status ?? 'active',
       last_interaction: clientDetails?.last_interaction ?? null,
+      language,
     },
     // Service data (simplified, not using full REQUIRED_SERVICE_KEYS)
     podatkiStoritve: serviceDetails

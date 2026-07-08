@@ -84,7 +84,7 @@
     },
     "info": {
       "title": "About Reminders",
-      "body": "Reminders are sent automatically based on the settings shown here — no manual work required. Each client receives a message before and/or after their appointment, depending on your configuration.\n\nWith AI enabled, messages are never the same — AI remembers the client's context, mentions the right service and tailors the content to sound natural and personal. This means higher open rates, more memorable messages and clients who feel valued.\n\nFor easier management, a custom message template is also available when you want full control over the content.\n\nIf you have any questions, contact us at help@jedroplus.com."
+      "body": "Reminders are <highlight>sent automatically</highlight> based on the settings shown here — no manual work required. Each client receives a message before and/or after their appointment, depending on your configuration.\n\nWith AI enabled, <highlight>messages are never the same</highlight> — AI remembers the client's context, mentions the right service and tailors the content to sound natural and personal. This means higher open rates, more memorable messages and clients who feel valued.\n\nFor easier management, a <highlight>custom message template</highlight> is also available when you want full control over the content.\n\nIf you have any questions, contact us at help@jedroplus.com."
     }
   },
   "status": {

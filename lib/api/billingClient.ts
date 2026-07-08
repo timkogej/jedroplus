@@ -272,6 +272,39 @@ export interface CheckoutResult {
   error?: string;
 }
 
+interface CheckoutUrlOptions {
+  successUrl?: string;
+  cancelUrl?: string;
+  successPath?: string;
+  cancelPath?: string;
+  returnTo?: string;
+}
+
+function getAppOrigin(): string {
+  return typeof window !== 'undefined' ? window.location.origin : '';
+}
+
+function getLocalePrefix(): string {
+  if (typeof window === 'undefined') return '';
+  const match = window.location.pathname.match(/^\/(sl|en)(?=\/|$)/);
+  return match?.[0] ?? '';
+}
+
+function toAppUrl(pathOrUrl: string): string {
+  if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
+    return pathOrUrl;
+  }
+
+  const path = pathOrUrl.startsWith('/') ? pathOrUrl : `/${pathOrUrl}`;
+  const localePrefix = getLocalePrefix();
+  const localizedPath =
+    localePrefix && path !== localePrefix && !path.startsWith(`${localePrefix}/`)
+      ? `${localePrefix}${path}`
+      : path;
+
+  return `${getAppOrigin()}${localizedPath}`;
+}
+
 /**
  * Start Stripe checkout session for plan upgrade
  * Returns a Stripe Checkout URL to redirect user to
@@ -284,9 +317,12 @@ export async function startCheckout(
   companyUuid: string,
   planCode: string,
   email?: string,
-  billingPeriod: 'monthly' | 'yearly' = 'monthly'
+  billingPeriod: 'monthly' | 'yearly' = 'monthly',
+  urls: CheckoutUrlOptions = {}
 ): Promise<CheckoutResult> {
-  const appBaseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const returnTo = urls.returnTo ? `return_to=${encodeURIComponent(urls.returnTo)}` : '';
+  const successQuery = `session_id={CHECKOUT_SESSION_ID}${returnTo ? `&${returnTo}` : ''}`;
+  const cancelQuery = returnTo ? `?${returnTo}` : '';
 
   return apiRequest<CheckoutResult>('/billing/checkout/start', {
     method: 'POST',
@@ -294,8 +330,8 @@ export async function startCheckout(
       company_id: companyUuid,
       plan_code: planCode,
       billing_period: billingPeriod,
-      success_url: `${appBaseUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appBaseUrl}/billing/cancel`
+      success_url: urls.successUrl ?? `${toAppUrl(urls.successPath ?? '/billing/success')}?${successQuery}`,
+      cancel_url: urls.cancelUrl ?? `${toAppUrl(urls.cancelPath ?? '/billing/cancel')}${cancelQuery}`
     })
   });
 }
@@ -311,12 +347,12 @@ export interface PortalResult {
  * Get Stripe Customer Portal URL for managing subscription
  * companyUuid must be profiles.default_company_id (= companies.id UUID)
  */
-export async function getCustomerPortal(companyUuid: string): Promise<PortalResult> {
+export async function getCustomerPortal(companyUuid: string, returnUrl = '/nastavitve/paketi'): Promise<PortalResult> {
   return apiRequest<PortalResult>('/billing/portal', {
     method: 'POST',
     body: JSON.stringify({
       company_id: companyUuid,
-      return_url: `${window.location.origin}/billing`
+      return_url: toAppUrl(returnUrl)
     })
   });
 }

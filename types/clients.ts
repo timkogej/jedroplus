@@ -1,4 +1,5 @@
 // TypeScript types for clients
+import type { CommunicationLanguageCode } from '@/lib/communicationLanguage';
 
 export type Gender = 'moški' | 'ženska' | 'drugo';
 
@@ -10,6 +11,7 @@ export interface Client {
   priimek: string;
   spol?: Gender | null;
   tip_stranke?: ClientType | null; // "Tip stranke" column
+  language?: CommunicationLanguageCode | null; // Communication language
   email: string;
   telefon?: string | null;
   opombe?: string | null;
@@ -27,6 +29,7 @@ export interface ClientFormData {
   priimek: string;
   spol: Gender | '';
   tip_stranke: ClientType | '';
+  language: CommunicationLanguageCode;
   email: string;
   telefon: string;
   opombe: string;

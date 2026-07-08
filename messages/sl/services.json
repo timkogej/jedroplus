@@ -54,6 +54,8 @@
     "durationUnit": "minut",
     "durationBackToPreset": "Nazaj na prednastavljene vrednosti",
     "priceLabel": "Cena (fiksna)",
+    "currencyLabel": "Valuta",
+    "currencySelectPlaceholder": "Izberi valuto",
     "descriptionLabel": "Opis (opcijsko)",
     "descriptionPlaceholder": "Kratek opis storitve...",
     "resourcesTitle": "Potrebni resursi",
@@ -80,6 +82,7 @@
     "validationDurationMin": "Trajanje mora biti večje od 0",
     "validationDurationMax": "Trajanje ne sme presegati 8 ur (480 min)",
     "validationPriceInvalid": "Cena mora biti pozitivno število",
+    "validationCurrencyRequired": "Valuta je obvezna",
     "validationDescriptionMaxLength": "Opis lahko vsebuje največ 500 znakov"
   },
   "deleteModal": {

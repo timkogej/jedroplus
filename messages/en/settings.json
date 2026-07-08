@@ -16,7 +16,7 @@
         "description": "Team, roles, and permissions for staff"
       },
       "plans": {
-        "label": "Plans and quotas",
+        "label": "Plans",
         "description": "Overview of your plan and monthly usage"
       },
       "messages": {

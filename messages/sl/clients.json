@@ -58,6 +58,7 @@
       "notes": "Opombe",
       "notesPlaceholder": "Opombe o stranki...",
       "notesHint": "Opombe se uporabljajo pri opomnikih in sporočanju",
+      "communicationLanguage": "Jezik komunikacije",
       "internalNotes": "Interne opombe",
       "internalNotesPlaceholder": "Interne opombe (ne pošiljajo se stranki)..."
     },
@@ -73,6 +74,9 @@
       "redna": "Redna",
       "vip": "VIP",
       "none": "/",
+      "change": "Spremeni"
+    },
+    "language": {
       "change": "Spremeni"
     },
     "addInternalNotes": "+ Interne opombe",

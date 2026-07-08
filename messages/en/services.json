@@ -54,6 +54,8 @@
     "durationUnit": "minutes",
     "durationBackToPreset": "Back to preset values",
     "priceLabel": "Price (fixed)",
+    "currencyLabel": "Currency",
+    "currencySelectPlaceholder": "Select currency",
     "descriptionLabel": "Description (optional)",
     "descriptionPlaceholder": "Brief service description...",
     "resourcesTitle": "Required resources",
@@ -80,6 +82,7 @@
     "validationDurationMin": "Duration must be greater than 0",
     "validationDurationMax": "Duration cannot exceed 8 hours (480 min)",
     "validationPriceInvalid": "Price must be a positive number",
+    "validationCurrencyRequired": "Currency is required",
     "validationDescriptionMaxLength": "Description can be at most 500 characters"
   },
   "deleteModal": {

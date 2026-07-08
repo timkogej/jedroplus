@@ -70,6 +70,7 @@ import { TABLES } from "@/lib/data";
 import { useUserPersonId } from "@/hooks/useUserPersonId";
 import { useRolePermissions } from "@/app/role-permission-context";
 import { useTranslations } from "next-intl";
+import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
 
 // ─── Copy button (reused in detail modal) ────────────────────────────────────
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -243,6 +244,7 @@ function AppointmentDetailModal({
                 <h3 className="min-w-0 truncate text-lg font-semibold text-gray-900">
                   {appointment.stranka_ime || t('recentActivity.unknownClient')}
                 </h3>
+                <CommunicationLanguageFlag value={appointment.language} />
                 <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
                   {getStatusLabel(appointment.status || 'scheduled')}
                 </span>
@@ -748,6 +750,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       stranka_email: item.clientEmail,
       stranka_telefon: item.clientPhone,
       stranka_barva: item.clientColor,
+      language: item.language,
       storitev_id: item.serviceId,
       storitev_id_2: item.serviceId2,
       storitev_id_3: item.serviceId3,
@@ -821,6 +824,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         barva?: string | null; notes?: string | null;
         tags?: string[] | string | null; status?: string | null;
         last_interaction?: string | null;
+        language?: string | null;
       } | null = null;
 
       if (data.stranka_id) {
@@ -844,7 +848,12 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
             spol: pickFirst(clientRow, ['Spol', 'spol', 'gender']) ? String(pickFirst(clientRow, ['Spol', 'spol', 'gender'])) : null,
             barva: pickFirst(clientRow, ['Barva', 'barva', 'color']) ? String(pickFirst(clientRow, ['Barva', 'barva', 'color'])) : null,
             notes: pickFirst(clientRow, ['Opombe', 'opombe', 'notes']) ? String(pickFirst(clientRow, ['Opombe', 'opombe', 'notes'])) : null,
-            tags: null, status: null, last_interaction: null,
+            tags: null,
+            status: null,
+            last_interaction: null,
+            language: pickFirst(clientRow, ['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language'])
+              ? String(pickFirst(clientRow, ['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language']))
+              : null,
           };
         }
       }
@@ -920,6 +929,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         company_id: companyId, user_email: actor, company_profile: companyPayload,
         status: 'no_show', previous_status: appointment.status,
         stranka_ime: appointment.stranka_ime, stranka_id: appointment.stranka_id,
+        language: appointment.language,
         datum: appointment.datum, cas_zacetek: appointment.cas_zacetek,
       }));
       if (!result.ok) throw new Error('Prišlo je do napake pri označevanju kot No Show.');
@@ -945,6 +955,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         company_id: companyId, user_email: actor, company_profile: companyPayload,
         status: 'cancelled', previous_status: appointment.status,
         stranka_ime: appointment.stranka_ime, stranka_id: appointment.stranka_id,
+        language: appointment.language,
         datum: appointment.datum, cas_zacetek: appointment.cas_zacetek,
       }));
       if (!result.ok) throw new Error('Prišlo je do napake pri odpovedi termina.');
@@ -994,6 +1005,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         'ID stranke': clientId,
         Ime: data.ime, Priimek: data.priimek, Spol: data.spol,
         'Tip stranke': clientType,
+        language: data.language,
         Email: data.email, Telefon: data.telefon,
         Opombe: data.opombe, 'Interne opombe': data.interne_opombe,
         [companyColumn]: companyId,

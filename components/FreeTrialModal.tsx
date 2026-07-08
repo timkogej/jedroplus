@@ -58,7 +58,7 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
   const handleTry = () => {
     markShownToday();
     onDismiss();
-    router.push('/billing');
+    router.push('/nastavitve/paketi');
   };
 
   return (

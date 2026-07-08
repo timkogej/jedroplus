@@ -12,6 +12,13 @@ import { getBillingStatus } from '@/lib/api/billingClient';
 const MAX_POLL_TIME_MS = 60000;
 const POLL_INTERVAL_MS = 3000;
 
+function getSafeReturnPath(value: string | null): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) {
+    return '/nastavitve/paketi';
+  }
+  return value;
+}
+
 // Plan features mapping — keys map to billing.json plans.{key}.features
 const PLAN_FEATURE_KEYS: Record<string, string> = {
   JEDRO_PLUS:    'jedroPlus',
@@ -132,6 +139,7 @@ function BillingSuccessContent() {
   const hasSucceeded = useRef(false);
 
   const sessionId = searchParams.get('session_id');
+  const returnPath = getSafeReturnPath(searchParams.get('return_to'));
 
   const pollSubscription = useCallback(async () => {
     if (hasSucceeded.current) return;
@@ -196,7 +204,7 @@ function BillingSuccessContent() {
   }, [sessionId, pollSubscription]);
 
   const handleContinue = () => {
-    router.push('/billing');
+    router.push(returnPath);
   };
 
   const handleGoToDashboard = () => {
@@ -231,7 +239,7 @@ function BillingSuccessContent() {
             {t('success.missingSession.message')}
           </p>
           <button
-            onClick={() => router.push('/billing')}
+            onClick={() => router.push(returnPath)}
             className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
           >
             {t('success.missingSession.backButton')}
@@ -427,7 +435,7 @@ function BillingSuccessContent() {
                 {t('success.timeout.retryButton')}
               </button>
               <button
-                onClick={() => router.push('/billing')}
+                onClick={() => router.push(returnPath)}
                 className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
               >
                 {t('success.timeout.backButton')}
@@ -446,7 +454,7 @@ function BillingSuccessContent() {
               {t('success.error.message')}
             </p>
             <button
-              onClick={() => router.push('/billing')}
+              onClick={() => router.push(returnPath)}
               className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
             >
               {t('success.error.backButton')}

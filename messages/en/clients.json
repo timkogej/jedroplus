@@ -58,6 +58,7 @@
       "notes": "Notes",
       "notesPlaceholder": "Notes about this client...",
       "notesHint": "Notes are used in reminders and messaging",
+      "communicationLanguage": "Communication language",
       "internalNotes": "Internal notes",
       "internalNotesPlaceholder": "Internal notes (not sent to the client)..."
     },
@@ -73,6 +74,9 @@
       "redna": "Regular",
       "vip": "VIP",
       "none": "/",
+      "change": "Change"
+    },
+    "language": {
       "change": "Change"
     },
     "addInternalNotes": "+ Internal notes",

@@ -88,6 +88,7 @@
       "price": "Cena",
       "notes": "Opombe",
       "internalNotes": "Interne opombe",
+      "communicationLanguage": "Jezik komunikacije",
       "phone": "Telefon"
     },
     "placeholders": {

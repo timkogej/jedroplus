@@ -10,7 +10,6 @@ import {
   UserCheck,
   EnvelopeSimple,
   Phone,
-  Info,
   ChatText,
   CalendarX,
   CheckCircle,
@@ -518,24 +517,25 @@ export default function LostLeadsPage() {
           </motion.div>
 
           {/* Info Box */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-xl"
-          >
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white flex-shrink-0">
-                <Info className="h-4 w-4" weight="bold" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-gray-900 mb-1">{t('page.info.title')}</h4>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {t('page.info.body')}
-                </p>
-              </div>
-            </div>
-          </motion.div>
+          {!loading && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
+            >
+              <h4 className="mb-3 text-base font-semibold text-gray-900">{t('page.info.title')}</h4>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
+                {t.rich('page.info.body', {
+                  highlight: (chunks) => (
+                    <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text font-semibold text-transparent">
+                      {chunks}
+                    </span>
+                  ),
+                })}
+              </p>
+            </motion.div>
+          )}
         </div>
       </main>
 

@@ -430,6 +430,7 @@ export default function ClientsClient({
           Priimek: data.priimek,
           Spol: data.spol,
           'Tip stranke': clientType,
+          language: data.language,
           Email: data.email.trim() || null,
           Telefon: data.telefon.trim() || null,
           Opombe: data.opombe,
@@ -464,6 +465,7 @@ export default function ClientsClient({
           Priimek: data.priimek,
           Spol: data.spol,
           'Tip stranke': clientType,
+          language: data.language,
           Email: data.email.trim() || null,
           Telefon: data.telefon.trim() || null,
           Opombe: data.opombe,
@@ -575,6 +577,7 @@ export default function ClientsClient({
         'Email': c.email ?? '',
         'Telefon': c.telefon ?? '',
         'Tip stranke': c.tip_stranke ?? '',
+        'Jezik komunikacije': c.language ?? '',
         'Spol': c.spol ?? '',
         'Opombe': c.opombe ?? '',
         'Datum vpisa': c.created_at

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   CaretLeft,
@@ -14,13 +15,14 @@ import {
   X,
   CreditCard,
   SpinnerGap,
+  Warning,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { supabase } from '@/lib/supabaseClient';
-import { getCustomerPortal } from '@/lib/api/billingClient';
+import { getCustomerPortal, startCheckout } from '@/lib/api/billingClient';
 import { Input } from '@/components/settings';
 
 // ─── Plan definitions ───────────────────────────────────────────────────────
@@ -41,7 +43,7 @@ interface PlanDef {
 
 const PLANS: PlanDef[] = [
   { id: 'JEDRO_PLUS',  name: 'Jedro Plus',  price: { monthly: 19, annual: 15 } },
-  { id: 'JEDRO_PRO',   name: 'Jedro Pro',   price: { monthly: 35, annual: 28 }, recommended: true },
+  { id: 'JEDRO_PRO',   name: 'Jedro Pro',   price: { monthly: 39, annual: 31 }, recommended: true },
   { id: 'ENTERPRISE',  name: 'Enterprise',  price: null },
 ];
 
@@ -122,6 +124,8 @@ function PlanCard({
   plan,
   isCurrent,
   loading,
+  ctaLoading,
+  disabled,
   billingPeriod,
   onCta,
   t,
@@ -129,6 +133,8 @@ function PlanCard({
   plan: PlanDef;
   isCurrent: boolean;
   loading: boolean;
+  ctaLoading: boolean;
+  disabled: boolean;
   billingPeriod: BillingPeriod;
   onCta: (plan: PlanDef) => void;
   t: ReturnType<typeof useTranslations<'billing'>>;
@@ -215,16 +221,27 @@ function PlanCard({
       <button
         type="button"
         onClick={() => onCta(plan)}
-        disabled={isCurrent}
+        disabled={isCurrent || ctaLoading || disabled}
         className={`mt-6 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
           isCurrent
             ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+            : ctaLoading
+            ? 'bg-[#0a0a0a] text-white cursor-wait'
+            : disabled
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
             : plan.id === 'ENTERPRISE'
             ? 'bg-white border border-gray-200 text-gray-900 hover:border-gray-300 hover:bg-gray-50'
             : 'bg-[#0a0a0a] text-white hover:bg-[#1f1f1f]'
         }`}
       >
-        {isCurrent
+        {ctaLoading
+          ? (
+            <span className="inline-flex items-center justify-center gap-2">
+              <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
+              {t('plans.ctaLoading')}
+            </span>
+          )
+          : isCurrent
           ? t('paketi.planButtons.active')
           : plan.id === 'ENTERPRISE'
           ? t('paketi.planButtons.sendInquiry')
@@ -412,7 +429,8 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 
 export default function PaketiPage() {
   const t = useTranslations('billing');
-  const { companyId, companyUuid, planCode, subscription, smsQuota } = useCompany();
+  const router = useRouter();
+  const { companyId, companyUuid, planCode, subscription, smsQuota, isPlanActive } = useCompany();
   const { user } = useAuth();
 
   const [loadingQuotas, setLoadingQuotas] = useState(true);
@@ -433,6 +451,8 @@ export default function PaketiPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [isLoadingPortal, setIsLoadingPortal] = useState(false);
   const [portalError, setPortalError] = useState<string | null>(null);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const currentPlanId = normalizePlanId(planCode || 'FREE');
 
@@ -581,7 +601,7 @@ export default function PaketiPage() {
     setIsLoadingPortal(true);
     setPortalError(null);
     try {
-      const result = await getCustomerPortal(companyUuid);
+      const result = await getCustomerPortal(companyUuid, '/nastavitve/paketi');
       const portalUrl = result.url || result.portal_url;
       if (result.ok && portalUrl && portalUrl.startsWith('http')) {
         window.location.assign(portalUrl);
@@ -595,11 +615,70 @@ export default function PaketiPage() {
     }
   };
 
-  const handleCta = (plan: PlanDef) => {
+  const handleCta = async (plan: PlanDef) => {
     if (plan.id === 'ENTERPRISE') {
       setEnterpriseOpen(true);
-    } else {
-      window.location.href = `/billing?period=${billingPeriod}`;
+      return;
+    }
+
+    if (!companyId || !user?.email) {
+      router.push('/login');
+      return;
+    }
+
+    if (plan.id === currentPlanId && isPlanActive) return;
+
+    setLoadingPlan(plan.id);
+    setCheckoutError(null);
+
+    try {
+      let checkoutCompanyUuid = companyUuid;
+
+      if (!checkoutCompanyUuid) {
+        const { data: companyData, error: companyError } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('company_id', companyId)
+          .single();
+
+        if (companyError || !companyData?.id) {
+          setCheckoutError(t('errors.companyDataError'));
+          setLoadingPlan(null);
+          return;
+        }
+
+        checkoutCompanyUuid = companyData.id;
+      }
+
+      if (!checkoutCompanyUuid) {
+        setCheckoutError(t('errors.companyDataError'));
+        setLoadingPlan(null);
+        return;
+      }
+
+      const result = await startCheckout(
+        checkoutCompanyUuid,
+        plan.id,
+        user.email,
+        billingPeriod === 'annual' ? 'yearly' : 'monthly',
+        { returnTo: '/nastavitve/paketi' }
+      );
+
+      if (result.ok && result.checkout_url) {
+        const checkoutUrl = result.checkout_url;
+        if (!checkoutUrl.startsWith('http')) {
+          setCheckoutError(t('errors.invalidCheckoutUrl'));
+          setLoadingPlan(null);
+          return;
+        }
+        window.location.assign(checkoutUrl);
+      } else {
+        setCheckoutError(t('errors.checkoutError'));
+        setLoadingPlan(null);
+      }
+    } catch {
+      setCheckoutError(t('errors.serverError'));
+      setLoadingPlan(null);
     }
   };
 
@@ -631,12 +710,12 @@ export default function PaketiPage() {
             <p className="text-sm text-gray-500 mt-1">{planDescription}</p>
           </div>
           {canUpgrade && (
-            <Link
-              href="/billing"
+            <a
+              href="#razpolozljivi-paketi"
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors flex-shrink-0"
             >
               {t('paketi.upgradeButton')}
-            </Link>
+            </a>
           )}
         </div>
         <div className="border-t border-gray-100 mt-5 pt-4 flex items-center justify-between">
@@ -688,7 +767,7 @@ export default function PaketiPage() {
       </div>
 
       {/* Section 4 — Available plans */}
-      <div className="mb-5">
+      <div id="razpolozljivi-paketi" className="mb-5 scroll-mt-20">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
             {t('paketi.availablePlans')}
@@ -727,6 +806,12 @@ export default function PaketiPage() {
             </button>
           </div>
         </div>
+        {checkoutError && (
+          <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <Warning className="h-4 w-4 flex-shrink-0 mt-0.5" weight="fill" />
+            <span>{checkoutError}</span>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {PLANS.map((plan) => (
             <PlanCard
@@ -734,6 +819,8 @@ export default function PaketiPage() {
               plan={plan}
               isCurrent={plan.id === currentPlanId}
               loading={loadingPlans}
+              ctaLoading={loadingPlan === plan.id}
+              disabled={loadingPlan !== null}
               billingPeriod={billingPeriod}
               onCta={handleCta}
               t={t}

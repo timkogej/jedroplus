@@ -21,6 +21,7 @@ import { sl } from 'date-fns/locale';
 import type { AppointmentWithDetails } from '@/types/appointments';
 import StatusBadge from './StatusBadge';
 import { formatCurrency, formatDiscount, computeAddOnOriginalPrice } from '@/lib/formatPromotion';
+import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
 
 interface AppointmentViewModalProps {
   isOpen: boolean;
@@ -96,6 +97,14 @@ function AppointmentViewModal({
   if (!isOpen || !appointment) return null;
 
   const apt = appointment as unknown as Record<string, unknown>;
+  const communicationLanguage =
+    appointment.language ??
+    apt.language ??
+    apt.Language ??
+    apt['Jezik komunikacije'] ??
+    apt.jezik_komunikacije ??
+    apt.Jezik ??
+    apt.jezik;
 
   const duration = calculateDuration(appointment.cas_zacetek, appointment.cas_konec || '');
 
@@ -193,6 +202,10 @@ function AppointmentViewModal({
                   <h2 className="truncate text-3xl font-bold text-white">
                     {appointment.stranka_ime || '-'}
                   </h2>
+                  <CommunicationLanguageFlag
+                    value={communicationLanguage}
+                    className="bg-white/20 text-white shadow-none"
+                  />
                   <StatusBadge status={appointment.status || 'scheduled'} size="md" variant="gradient" weight="normal" />
                 </div>
 

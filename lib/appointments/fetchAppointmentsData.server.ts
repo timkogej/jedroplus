@@ -23,6 +23,7 @@ import { startOfMonth, subMonths, format } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
 import { TABLES } from "@/lib/data";
+import { normalizeCommunicationLanguage } from "@/lib/communicationLanguage";
 import {
   parseService,
   parseStaff,
@@ -35,6 +36,14 @@ import type { AppointmentWithDetails, Storitev, Zaposleni } from "@/types/appoin
 
 type Row = Record<string, unknown>;
 type ServerClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
+
+const CLIENT_ID_FIELDS = ["ID stranke", "id", "ID_stranke", "client_id"];
+const CLIENT_LAST_NAME_FIELDS = ["Priimek", "priimek", "last_name", "lastName", "surname"];
+const LANGUAGE_FIELDS = ["language", "Language", "Jezik komunikacije", "jezik_komunikacije", "Jezik", "jezik", "preferred_language"];
+
+function pickLanguage(row: Row, fallback?: unknown) {
+  return normalizeCommunicationLanguage(pickFirst(row, LANGUAGE_FIELDS) ?? fallback);
+}
 
 export interface AppointmentsInitialData {
   appointments: AppointmentWithDetails[];
@@ -186,14 +195,20 @@ function buildAppointments(
   }
 
   const clientPriimekMap = new Map<string, string>();
+  const clientLanguageMap = new Map<string, ReturnType<typeof normalizeCommunicationLanguage>>();
   for (const row of clients) {
     const rowKeys = Object.keys(row);
-    const idField = rowKeys.find((k) => ["ID stranke", "id", "ID_stranke", "client_id"].includes(k));
-    const priimekField = rowKeys.find((k) => ["Priimek", "priimek", "last_name", "lastName", "surname"].includes(k));
-    if (idField && priimekField) {
+    const idField = rowKeys.find((k) => CLIENT_ID_FIELDS.includes(k));
+    const priimekField = rowKeys.find((k) => CLIENT_LAST_NAME_FIELDS.includes(k));
+    if (idField) {
       const cid = String(row[idField] ?? "");
-      const priimek = String(row[priimekField] ?? "");
-      if (cid && priimek) clientPriimekMap.set(cid, priimek);
+      if (cid) {
+        if (priimekField) {
+          const priimek = String(row[priimekField] ?? "");
+          if (priimek) clientPriimekMap.set(cid, priimek);
+        }
+        clientLanguageMap.set(cid, pickLanguage(row));
+      }
     }
   }
 
@@ -244,6 +259,7 @@ function buildAppointments(
     const clientPhone = String(
       pickFirst(row, ["Telefon", "Telefonska številka", "client_phone", "stranka_telefon", "Telefon stranke", "telefon", "phone"]) ?? ""
     );
+    const language = pickLanguage(row, clientId ? clientLanguageMap.get(clientId) : undefined);
     const notes = String(pickFirst(row, ["opombe", "notes", "Opombe", "description", "opis"]) ?? "");
     const interneOpombe = String(pickFirst(row, ["Interne opombe", "interne_opombe", "internal_notes"]) ?? "");
 
@@ -290,6 +306,7 @@ function buildAppointments(
       stranka_priimek: (clientId && clientPriimekMap.get(clientId)) || undefined,
       stranka_email: clientEmail || undefined,
       stranka_telefon: clientPhone || undefined,
+      language,
       storitev_id: serviceId || undefined,
       storitev_id_2: serviceId2 || undefined,
       storitev_id_3: serviceId3 || undefined,
