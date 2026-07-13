@@ -95,8 +95,9 @@ import { useTranslations, useLocale } from 'next-intl';
 interface CalendarProps {
   companyId: string;
   initialEmployeeId?: string | null;
-  /** Server-seeded data for the default (today/day-view) landing state.
-   *  Accepted but NOT consumed yet — the seeding wiring lands separately. */
+  /** Server-seeded data for the default (today/day-view) landing state. Used
+   *  only when it matches this mount's companyId and the client's "today";
+   *  otherwise discarded and the normal client fetches run unchanged. */
   initialData?: CalendarInitialData | null;
 }
 
@@ -724,7 +725,7 @@ function AppointmentDetailModal({
   );
 }
 
-function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
+function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) {
   const t = useTranslations('appointments');
   const locale = useLocale();
   const { companySettings } = useCompany();
@@ -755,17 +756,45 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-  // Data state
-  const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
-  const [services, setServices] = useState<Storitev[]>([]);
-  const [employees, setEmployees] = useState<(Zaposleni & { initials: string })[]>([]);
-  const [absences, setAbsences] = useState<Absence[]>([]);
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [terminIdsWithResursi, setTerminIdsWithResursi] = useState<Set<number>>(new Set());
-  const [terminResursiMap, setTerminResursiMap] = useState<Map<number, Set<number>>>(new Map());
-  const [activeResursi, setActiveResursi] = useState<Resurs[]>([]);
+  // Server-seeded initial data (from the Koledar Server Component). Usable only
+  // when it provably matches what this mount's first fetch would return anyway:
+  // fetched for the same company the client resolved, and seeded for the client's
+  // current "today". The default landing state is day view + today; if the
+  // localStorage view preference switches views after mount, that changes
+  // loadAppointments'/loadEvents' dependencies and triggers a normal client fetch
+  // regardless of the seed. Evaluated exactly once (lazy initializer) so later
+  // prop or clock changes can't retroactively re-seed.
+  const [seed] = useState<CalendarInitialData | null>(() => {
+    if (!initialData) return null;
+    if (initialData.companyId !== companyId) return null;
+    if (initialData.seededForDate !== new Date().toISOString().split('T')[0]) return null;
+    return initialData;
+  });
+
+  // When seeded, skip exactly the FIRST run of each mount-time fetch effect.
+  // Consume-on-first-run refs: any later dependency change (view switch from the
+  // saved preference, date navigation, company change) re-runs the effect with
+  // the flag already cleared and fetches as before. Post-mutation refreshes call
+  // loadAppointments()/loadEvents() directly and never pass through these guards.
+  const skipInitialStaticFetch = useRef(!!seed);
+  const skipInitialAppointmentsFetch = useRef(!!seed);
+  const skipInitialEventsFetch = useRef(!!seed);
+
+  // Data state — seeded from the server payload when the guard above passed.
+  const [appointments, setAppointments] = useState<AppointmentWithDetails[]>(seed?.appointments ?? []);
+  const [services, setServices] = useState<Storitev[]>(seed?.services ?? []);
+  const [employees, setEmployees] = useState<(Zaposleni & { initials: string })[]>(seed?.employees ?? []);
+  const [absences, setAbsences] = useState<Absence[]>(seed?.absences ?? []);
+  const [events, setEvents] = useState<CalendarEvent[]>(seed?.events ?? []);
+  const [terminIdsWithResursi, setTerminIdsWithResursi] = useState<Set<number>>(
+    () => new Set(seed?.terminIdsWithResursi ?? [])
+  );
+  const [terminResursiMap, setTerminResursiMap] = useState<Map<number, Set<number>>>(
+    () => new Map((seed?.terminResursiMapEntries ?? []).map(([resursId, terminIds]) => [resursId, new Set(terminIds)]))
+  );
+  const [activeResursi, setActiveResursi] = useState<Resurs[]>(seed?.activeResursi ?? []);
   const [selectedResursId, setSelectedResursId] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!seed);
   const [error, setError] = useState<string | null>(null);
 
   // UI state
@@ -944,6 +973,10 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
 
   // Load services, employees, absences, and resource-linked appointment IDs
   useEffect(() => {
+    if (skipInitialStaticFetch.current) {
+      skipInitialStaticFetch.current = false;
+      return;
+    }
     const loadStaticData = async () => {
       const [servicesResult, employeesResult, absencesResult, resursiIdsResult, resursiMapResult, activeResursiResult] = await Promise.all([
         fetchServices(companyId),
@@ -1057,6 +1090,10 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   }, [companyId, currentDate, currentView]);
 
   useEffect(() => {
+    if (skipInitialAppointmentsFetch.current) {
+      skipInitialAppointmentsFetch.current = false;
+      return;
+    }
     loadAppointments();
   }, [loadAppointments]);
 
@@ -1096,6 +1133,10 @@ function Calendar({ companyId, initialEmployeeId }: CalendarProps) {
   }, [companyId, currentDate, currentView]);
 
   useEffect(() => {
+    if (skipInitialEventsFetch.current) {
+      skipInitialEventsFetch.current = false;
+      return;
+    }
     loadEvents();
   }, [loadEvents]);
 

@@ -6,10 +6,10 @@
 // (current month's appointments, today's events, company-wide services/staff/
 // absences/resursi), and hands the result to the client shell as `initialData`.
 //
-// The client shell (KoledarClient → Calendar) does not consume initialData yet;
-// this entry only establishes the server-side auth/cookie/fetch flow. When the
-// cookie is absent (e.g. first load right after login) initialData is null and
-// the page behaves exactly like the previous fully-client version.
+// Calendar seeds its initial state from initialData only when the payload
+// matches the default landing state (same company as the client resolved, seeded
+// for the client's "today"); any mismatch — or an absent company_id cookie (e.g.
+// first load right after login) — falls back to the original client fetches.
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";

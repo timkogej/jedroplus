@@ -2,8 +2,8 @@
 
 // Client shell for the Koledar page — the former page.tsx contents, unchanged
 // except for accepting `initialData` from the Server Component entry and
-// threading it through to Calendar. Calendar does not consume it yet (that
-// wiring lands separately); behavior is identical to the fully-client page.
+// threading it through to Calendar, which seeds its initial state from it when
+// it matches the default landing state (today, matching company).
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
