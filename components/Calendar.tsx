@@ -25,6 +25,7 @@ import {
   Phone,
 } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
+import type { CalendarInitialData } from '@/lib/calendar/fetchCalendarData.server';
 import type { Client } from '@/types/clients';
 import type { ViewMode } from '@/lib/utils/calendar';
 import ViewToggle from './calendar/ViewToggle';
@@ -94,6 +95,9 @@ import { useTranslations, useLocale } from 'next-intl';
 interface CalendarProps {
   companyId: string;
   initialEmployeeId?: string | null;
+  /** Server-seeded data for the default (today/day-view) landing state.
+   *  Accepted but NOT consumed yet — the seeding wiring lands separately. */
+  initialData?: CalendarInitialData | null;
 }
 
 // Copy button component for contact info
