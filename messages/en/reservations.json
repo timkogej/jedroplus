@@ -146,7 +146,13 @@
       "smsUpgradeNote": "SMS is available on higher plans.",
       "smsUpgradeLink": "Upgrade plan",
       "smsPlanNotePrefix": "To send SMS confirmations",
-      "smsPlanNoteLink": "upgrade your plan"
+      "smsPlanNoteLink": "upgrade your plan",
+      "smsSettings": "SMS message settings",
+      "modeAI": "AI composes",
+      "modeManual": "Custom template",
+      "templateHint": "SMS message template (max 155 characters)",
+      "templatePlaceholder": "E.g.: Your booking is confirmed for {{datum}} at {{cas}}. {{ime_podjetja}}.",
+      "noEmojiHint": "No emojis or special characters."
     },
     "policy": {
       "sectionTitle": "Cancellation & rescheduling policy",

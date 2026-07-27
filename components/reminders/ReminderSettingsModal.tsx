@@ -19,7 +19,7 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
-import { TemplateEditor, migrateTemplate } from '@/components/reminders/TemplateEditor';
+import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
 import { useTranslations } from 'next-intl';
 
 const SENDING_LANGUAGES = [
@@ -187,7 +187,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           setSmsIncludeServicePred(data['sms_include_service_pred'] !== false && data['sms_include_service_pred'] !== 'false');
           setSmsIncludeNotesPred(data['sms_include_notes_pred'] === true || data['sms_include_notes_pred'] === 'true');
           setSmsTipPred(data['sms_tip_pred'] === true || data['sms_tip_pred'] === 'true');
-          setSmsTemplatePred(migrateTemplate(String(data['lastna_predloga_pred'] ?? data['sms_template_pred'] ?? '')));
+          setSmsTemplatePred(sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_pred'] ?? data['sms_template_pred'] ?? ''))));
 
           // SMS config - after
           const smsTypePo = String(data['sms_type_po'] ?? data['sms_mode_po'] ?? 'AI').toUpperCase();
@@ -195,7 +195,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           setSmsIncludeServicePo(data['sms_include_service_po'] !== false && data['sms_include_service_po'] !== 'false');
           setSmsIncludeNotesPo(data['sms_include_notes_po'] === true || data['sms_include_notes_po'] === 'true');
           setSmsTipPo(data['sms_tip_po'] === true || data['sms_tip_po'] === 'true');
-          setSmsTemplatePo(migrateTemplate(String(data['lastna_predloga_po'] ?? data['sms_template_po'] ?? '')));
+          setSmsTemplatePo(sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_po'] ?? data['sms_template_po'] ?? ''))));
 
           // SMS sender ID — read from companies table
           if (companyUuid) {

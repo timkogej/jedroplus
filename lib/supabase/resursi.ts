@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
 import { generateUnique8DigitId } from '@/lib/utils/uniqueIdGenerator';
-import type { Resurs, ResursFormData, StoritevResurs, TerminResurs, UrnikData } from '@/types/resursi';
+import { getUrnikZaDan } from '@/lib/utils/urnik';
+import type { IzmenicenUrnik, Resurs, ResursFormData, StoritevResurs, UrnikData, UrnikInterval } from '@/types/resursi';
 
 const TABLE_RESURSI = 'Resursi';
 const TABLE_STORITVE_RESURSI = 'Storitve_Resursi';
@@ -20,8 +21,8 @@ function parseResurs(row: Record<string, unknown>): Resurs | null {
     urnik = urnikRaw as UrnikData;
   }
 
-  const kolicina = Number(row['Kolicina'] ?? 1) || 1;
-  const kapaciteta = Number(row['Kapaciteta'] ?? 1) || 1;
+  const kolicina = positiveNumber(row['Kolicina']);
+  const kapaciteta = positiveNumber(row['Kapaciteta']);
 
   const prikaziRaw = row['Prikazi v bookingu'];
   const prikazi = prikaziRaw === 'true' || prikaziRaw === true;
@@ -47,6 +48,121 @@ function parseResurs(row: Record<string, unknown>): Resurs | null {
     created_at: String(row['created_at'] ?? new Date().toISOString()),
     skupna_kapaciteta: kolicina * kapaciteta,
   };
+}
+
+function positiveNumber(value: unknown, fallback = 1): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function isEnabledValue(value: unknown): boolean {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value === 1;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    return ['true', '1', 'yes', 'enabled', 'omogoceno', 'omogočeno'].includes(normalized);
+  }
+  return false;
+}
+
+function resourceCapacity(row: Record<string, unknown>): number {
+  return positiveNumber(row['Kolicina']) * positiveNumber(row['Kapaciteta']);
+}
+
+function parseDateKey(datum: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(datum);
+  if (!match) return new Date(datum);
+
+  const [, year, month, day] = match;
+  return new Date(Number(year), Number(month) - 1, Number(day));
+}
+
+function parseMinutes(time: unknown): number | null {
+  const match = /^(\d{1,2}):(\d{2})/.exec(String(time ?? ''));
+  if (!match) return null;
+
+  const [, hours, minutes] = match;
+  const total = Number(hours) * 60 + Number(minutes);
+  return Number.isFinite(total) ? total : null;
+}
+
+function parseUrnik(raw: unknown): UrnikData | IzmenicenUrnik | null {
+  if (!raw) return null;
+
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as UrnikData | IzmenicenUrnik;
+    } catch {
+      return null;
+    }
+  }
+
+  if (typeof raw === 'object') return raw as UrnikData | IzmenicenUrnik;
+
+  return null;
+}
+
+function getIntervals(daySchedule: unknown): UrnikInterval[] {
+  if (!daySchedule || typeof daySchedule !== 'object') return [];
+
+  const day = daySchedule as Record<string, unknown>;
+  if (Array.isArray(day.intervals)) {
+    return day.intervals.filter((interval): interval is UrnikInterval => {
+      if (!interval || typeof interval !== 'object') return false;
+      const candidate = interval as Record<string, unknown>;
+      return typeof candidate.start === 'string' && typeof candidate.end === 'string';
+    });
+  }
+
+  if (typeof day.start === 'string' && typeof day.end === 'string') {
+    return [{ start: day.start, end: day.end }];
+  }
+
+  return [];
+}
+
+function isTimeInResourceSchedule(
+  urnik: UrnikData | IzmenicenUrnik,
+  datum: string,
+  casZacetek: string,
+  casKonec: string,
+): boolean {
+  const dayMap: Record<number, keyof UrnikData> = {
+    0: 'Nedelja',
+    1: 'Ponedeljek',
+    2: 'Torek',
+    3: 'Sreda',
+    4: 'Četrtek',
+    5: 'Petek',
+    6: 'Sobota',
+  };
+
+  const date = parseDateKey(datum);
+  const activeUrnik = getUrnikZaDan(urnik, date);
+  const daySchedule = activeUrnik[dayMap[date.getDay()]] as unknown;
+
+  if (!daySchedule || typeof daySchedule !== 'object') return false;
+  if (!isEnabledValue((daySchedule as Record<string, unknown>).enabled)) return false;
+
+  const intervals = getIntervals(daySchedule);
+  if (intervals.length === 0) return true;
+
+  const start = parseMinutes(casZacetek);
+  const end = parseMinutes(casKonec);
+  if (start === null || end === null) return false;
+
+  return intervals.some((interval) => {
+    const intervalStart = parseMinutes(interval.start);
+    const intervalEnd = parseMinutes(interval.end);
+    if (intervalStart === null || intervalEnd === null) return false;
+
+    return start >= intervalStart && end <= intervalEnd;
+  });
+}
+
+function isBlockingAppointment(row: Record<string, unknown>): boolean {
+  const status = String(row['Status'] ?? '').trim().toLowerCase();
+  return !['cancelled', 'canceled', 'odpovedan', 'odpovedano'].includes(status);
 }
 
 // ─── Fetch resources for a company ──────────────────────────────────────────
@@ -140,11 +256,47 @@ export async function fetchResursiForStoritve(
 
   if (error) return { data: [], error: error.message };
 
-  const result = (data ?? []).map((r) => ({
-    resursRowId: Number((r as Record<string, unknown>)['resurs_id']),
-    resursTextId: String((r as Record<string, unknown>)['ID resursa'] ?? ''),
-  }));
-  return { data: result, error: null };
+  const linked = (data ?? []).map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      resursRowId: Number(row['resurs_id']),
+      resursTextId: String(row['ID resursa'] ?? ''),
+    };
+  });
+
+  const missingRowIds = linked
+    .filter((r) => (!Number.isFinite(r.resursRowId) || r.resursRowId <= 0) && r.resursTextId)
+    .map((r) => r.resursTextId);
+
+  const rowIdByTextId = new Map<string, number>();
+  if (missingRowIds.length > 0) {
+    const { data: resursiRows, error: resursiErr } = await supabase
+      .from(TABLE_RESURSI)
+      .select('id, "ID resursa"')
+      .eq('ID podjetja', companyId)
+      .in('ID resursa', [...new Set(missingRowIds)]);
+
+    if (resursiErr) return { data: [], error: resursiErr.message };
+
+    for (const row of (resursiRows ?? []) as Record<string, unknown>[]) {
+      const textId = String(row['ID resursa'] ?? '');
+      const rowId = Number(row['id']);
+      if (textId && Number.isFinite(rowId) && rowId > 0) {
+        rowIdByTextId.set(textId, rowId);
+      }
+    }
+  }
+
+  const unique = new Map<string, { resursRowId: number; resursTextId: string }>();
+  for (const item of linked) {
+    const resursRowId = Number.isFinite(item.resursRowId) && item.resursRowId > 0
+      ? item.resursRowId
+      : rowIdByTextId.get(item.resursTextId) ?? 0;
+    if (!resursRowId || !item.resursTextId) continue;
+    unique.set(`${resursRowId}:${item.resursTextId}`, { resursRowId, resursTextId: item.resursTextId });
+  }
+
+  return { data: [...unique.values()], error: null };
 }
 
 // ─── Save resource (create or update) ────────────────────────────────────────
@@ -165,8 +317,8 @@ export async function saveResurs(
     'Booking naziv': formData.booking_naziv || null,
     'Opis': formData.opis || null,
     'Barva': formData.barva,
-    'Kolicina': Number(formData.kolicina),
-    'Kapaciteta': Number(formData.kapaciteta),
+    'Kolicina': positiveNumber(formData.kolicina),
+    'Kapaciteta': positiveNumber(formData.kapaciteta),
     'Prikazi v bookingu': formData.prikazi_v_bookingu ? 'true' : 'false',
     'Urnik': formData.urnik ? JSON.stringify(formData.urnik) : null,
     'Status': formData.status,
@@ -472,67 +624,75 @@ export async function checkResourceConflicts(
   );
   if (resursiErr || !resursiData?.length) return { conflicts: [], error: resursiErr };
 
-  const resursRowIds = resursiData.map((r) => r.resursRowId);
+  const resursRowIds = [...new Set(
+    resursiData
+      .map((r) => r.resursRowId)
+      .filter((id) => Number.isFinite(id) && id > 0)
+  )];
+
+  if (resursRowIds.length === 0) return { conflicts: [], error: null };
 
   // Fetch resursiRows with Urnik for schedule validation
-  const { data: resursiRows } = await supabase
+  const { data: resursiRows, error: resursiRowsErr } = await supabase
     .from(TABLE_RESURSI)
     .select('id, "Naziv", "Kolicina", "Kapaciteta", "Urnik"')
     .eq('ID podjetja', companyId)
     .in('id', resursRowIds);
 
+  if (resursiRowsErr) return { conflicts: [], error: resursiRowsErr.message };
+
   // Fetch all termini for this date without time filter
-  const { data: terminiOnDate } = await supabase
+  const { data: terminiOnDate, error: terminiErr } = await supabase
     .from('Termini')
-    .select('id, "Čas", "Konec", "Status"')
+    .select('id, "Čas", "Konec", "Status", deleted_at')
     .eq('ID podjetja', companyId)
     .eq('Datum', datum);
+
+  if (terminiErr) return { conflicts: [], error: terminiErr.message };
+
+  const requestedStart = parseMinutes(casZacetek);
+  const requestedEnd = parseMinutes(casKonec);
+  if (requestedStart === null || requestedEnd === null || requestedStart >= requestedEnd) {
+    return { conflicts: [], error: null };
+  }
 
   // Filter time overlap in JavaScript (avoids special character issues with PostgREST)
   const overlappingIds = (terminiOnDate ?? [])
     .filter((t) => {
       const row = t as Record<string, unknown>;
-      const status = String(row['Status'] ?? '');
-      if (status === 'cancelled' || status === 'Odpovedan') return false;
+      if (!isBlockingAppointment(row)) return false;
+      if (row['deleted_at']) return false;
       if (excludeTerminId && Number(row['id']) === excludeTerminId) return false;
-      const tStart = String(row['Čas'] ?? '');
-      const tEnd = String(row['Konec'] ?? '');
+      const tStart = parseMinutes(row['Čas']);
+      const tEnd = parseMinutes(row['Konec']);
+      if (tStart === null || tEnd === null) return false;
       // Overlap: existing starts before our end AND existing ends after our start
-      return tStart < casKonec && tEnd > casZacetek;
+      return tStart < requestedEnd && tEnd > requestedStart;
     })
     .map((t) => Number((t as Record<string, unknown>)['id']));
-
-  const dayMap: Record<number, string> = {
-    0: 'Nedelja', 1: 'Ponedeljek', 2: 'Torek', 3: 'Sreda',
-    4: 'Četrtek', 5: 'Petek', 6: 'Sobota',
-  };
 
   const conflicts: ResourceConflict[] = [];
   const schedulePassedIds: number[] = [];
 
   for (const r of (resursiRows ?? []) as Record<string, unknown>[]) {
     const rid = Number(r['id']);
+    if (!Number.isFinite(rid) || rid <= 0) continue;
+
     const naziv = String(r['Naziv'] ?? '');
     const textId = resursiData.find((x) => x.resursRowId === rid)?.resursTextId ?? '';
 
     // Schedule check
-    const urnikRaw = r['Urnik'];
-    let urnik: Record<string, { enabled: boolean; intervals: { start: string; end: string }[] }> | null = null;
-    if (urnikRaw && typeof urnikRaw === 'string') {
-      try { urnik = JSON.parse(urnikRaw); } catch { urnik = null; }
-    } else if (urnikRaw && typeof urnikRaw === 'object') {
-      urnik = urnikRaw as Record<string, { enabled: boolean; intervals: { start: string; end: string }[] }>;
-    }
-
+    const urnik = parseUrnik(r['Urnik']);
     if (urnik !== null) {
-      const dayName = dayMap[new Date(datum).getDay()];
-      const daySchedule = urnik[dayName];
-      const available = daySchedule?.enabled === true &&
-        daySchedule.intervals.some(
-          (interval) => interval.start <= casZacetek && interval.end >= casKonec
-        );
-      if (!available) {
-        conflicts.push({ resursId: rid, resursTextId: textId, naziv, trenutnoZasedeno: 0, maxKapaciteta: 0, tip: 'urnik' });
+      if (!isTimeInResourceSchedule(urnik, datum, casZacetek, casKonec)) {
+        conflicts.push({
+          resursId: rid,
+          resursTextId: textId,
+          naziv,
+          trenutnoZasedeno: 0,
+          maxKapaciteta: resourceCapacity(r),
+          tip: 'urnik',
+        });
         continue;
       }
     }
@@ -558,9 +718,7 @@ export async function checkResourceConflicts(
     for (const rid of schedulePassedIds) {
       const r = ((resursiRows ?? []) as Record<string, unknown>[]).find((row) => Number(row['id']) === rid);
       if (!r) continue;
-      const kolicina = Number(r['Kolicina'] ?? 1);
-      const kapaciteta = Number(r['Kapaciteta'] ?? 1);
-      const max = kolicina * kapaciteta;
+      const max = resourceCapacity(r);
       const used = usageMap.get(rid) ?? 0;
       if (used >= max) {
         conflicts.push({

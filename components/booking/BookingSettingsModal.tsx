@@ -18,6 +18,7 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
+import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
 
 interface BookingSettingsModalProps {
   isOpen: boolean;
@@ -105,6 +106,17 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const [potrdiloChannel, setPotrdiloChannel] = useState<'sms' | 'email'>('email');
   const [potrdiloOnline, setPotrdiloOnline] = useState(false);
   const [potrdiloOnlineChannel, setPotrdiloOnlineChannel] = useState<'sms' | 'email'>('email');
+
+  // SMS config - confirmation ("potrdilo")
+  const [smsModePotrdilo, setSmsModePotrdilo] = useState<'ai' | 'manual'>('ai');
+  const [smsTemplatePotrdilo, setSmsTemplatePotrdilo] = useState('');
+  const [lastnaPredlogaPotrdilo, setLastnaPredlogaPotrdilo] = useState('');
+
+  // Company data for SMS variable length estimation
+  const [kompanyEmail, setKompanyEmail] = useState('');
+  const [nazivPodjetja, setNazivPodjetja] = useState('');
+  const [naslovPodjetja, setNaslovPodjetja] = useState('');
+  const [apptManagementLink, setApptManagementLink] = useState('');
   const [bookingPrimary, setBookingPrimary] = useState('#7C75FC');
   const [bookingSecondary, setBookingSecondary] = useState('#44D0C6');
   const [bookingBgFrom, setBookingBgFrom] = useState('#7C75FC');
@@ -133,6 +145,21 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const actor = user?.email ?? 'unknown';
   const hasProPlan = isJedroProPlan(planCode);
   const hasOnlinePaymentAccess = hasProPlan && hasPosSubscription;
+
+  // Variable estimated lengths for SMS character counting
+  const smsVarLengths: Record<string, number> = {
+    '{{cas}}': 5,
+    '{{datum}}': 6,
+    '{{telefon_podjetja}}': 9,
+    '{{email_podjetja}}': kompanyEmail.length || 20,
+    '{{ime}}': 10,
+    '{{priimek}}': 10,
+    '{{ime_izvajalca}}': 20,
+    '{{ime_podjetja}}': nazivPodjetja.length || 15,
+    '{{naslov}}': naslovPodjetja.length || 20,
+    '{{leto}}': 4,
+    '{{povezava_prenarocanje}}': apptManagementLink.length || 30,
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -181,6 +208,18 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           // Read potrdilo_channel
           const ch = String(data['potrdilo_channel'] ?? 'email').toLowerCase();
           setPotrdiloChannel(ch === 'sms' ? 'sms' : 'email');
+
+          // SMS config - confirmation ("potrdilo")
+          const smsTypePotrdilo = String(data['sms_type_potrdilo'] ?? 'AI').toUpperCase();
+          setSmsModePotrdilo(smsTypePotrdilo === 'LP' ? 'manual' : 'ai');
+          setSmsTemplatePotrdilo(sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_potrdilo'] ?? ''))));
+          setLastnaPredlogaPotrdilo(sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_potrdilo'] ?? ''))));
+
+          // Company data for SMS variable length estimation
+          setKompanyEmail(String(data['Kontaktni email'] ?? data['kontaktni_email'] ?? data['from_email'] ?? ''));
+          setNazivPodjetja(String(data['Naziv podjetja'] ?? data['Naziv Podjetja'] ?? data['naziv_podjetja'] ?? ''));
+          setNaslovPodjetja(String(data['Naslov podjetja'] ?? data['naslov_podjetja'] ?? data['Naslov'] ?? ''));
+          setApptManagementLink(String(data['appt_management_link'] ?? ''));
 
           const potrdiloOnl = data['Potrdilo online termina'] ?? data['Potrdilo online rez'];
           setPotrdiloOnline(potrdiloOnl === true || potrdiloOnl === 'true' || potrdiloOnl === 'yes' || potrdiloOnl === 'da');
@@ -244,6 +283,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           'Potrdilo po rezervaciji': potrdiloReservation ? 'true' : 'false',
           'Potrdilo ob rezervaciji': potrdiloReservation ? 'true' : 'false',
           'potrdilo_channel': potrdiloChannel,
+          'sms_type_potrdilo': smsModePotrdilo === 'manual' ? 'LP' : 'AI',
+          'lastna_predloga_potrdilo': smsModePotrdilo === 'manual' ? smsTemplatePotrdilo : lastnaPredlogaPotrdilo,
           'Potrdilo online termina': potrdiloOnline ? 'true' : 'false',
           'Potrdilo online rez': potrdiloOnline ? 'true' : 'false',
           'potrdilo_online_channel': potrdiloOnlineChannel,
@@ -509,6 +550,48 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             onUpgradeClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
                             t={t}
                           />
+
+                          {potrdiloChannel === 'sms' && !smsLockedForPlan && (
+                            <div className="mt-3 space-y-4 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                              <div className="font-semibold text-gray-900 text-sm">{t('modal.confirmations.smsSettings')}</div>
+
+                              {/* Mode selector */}
+                              <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
+                                {([
+                                  { value: 'ai' as const, labelKey: 'modal.confirmations.modeAI' },
+                                  { value: 'manual' as const, labelKey: 'modal.confirmations.modeManual' },
+                                ]).map((opt) => (
+                                  <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => setSmsModePotrdilo(opt.value)}
+                                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                                      smsModePotrdilo === opt.value
+                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900'
+                                    }`}
+                                  >
+                                    {t(opt.labelKey)}
+                                  </button>
+                                ))}
+                              </div>
+
+                              {smsModePotrdilo === 'manual' && (
+                                <div className="space-y-2">
+                                  <p className="text-xs text-gray-500">{t('modal.confirmations.templateHint')}</p>
+                                  <TemplateEditor
+                                    value={smsTemplatePotrdilo}
+                                    onChange={setSmsTemplatePotrdilo}
+                                    maxLength={155}
+                                    placeholder={t('modal.confirmations.templatePlaceholder')}
+                                    rows={4}
+                                    varLengths={smsVarLengths}
+                                  />
+                                  <p className="text-xs text-gray-400">{t('modal.confirmations.noEmojiHint')}</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </motion.div>
                       )}
                     </div>

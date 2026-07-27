@@ -116,6 +116,14 @@ function buildHTML(template: string): string {
     .join('');
 }
 
+// Matches emoji glyphs, variation selectors, ZWJ and flag/regional-indicator pairs
+const EMOJI_REGEX = /\p{Extended_Pictographic}|\u{FE0F}|\u{200D}|[\u{1F1E6}-\u{1F1FF}]/gu;
+
+// Strips emoji and collapses any newlines so templates stay a single line
+export function sanitizeTemplateText(text: string): string {
+  return text.replace(EMOJI_REGEX, '').replace(/[\r\n]+/g, ' ');
+}
+
 // Extract raw template string from contentEditable DOM
 function extractTemplate(el: HTMLElement): string {
   let result = '';
@@ -186,6 +194,24 @@ export function TemplateEditor({
   const handleInput = useCallback(() => {
     if (!editorRef.current) return;
     const raw = extractTemplate(editorRef.current);
+    const sanitized = sanitizeTemplateText(raw);
+    if (sanitized !== raw) {
+      // Rebuild the DOM to strip emoji/newlines that slipped in (e.g. via IME or drag-drop)
+      editorRef.current.innerHTML = buildHTML(sanitized);
+      isInternalRef.current = true;
+      lastRawRef.current = sanitized;
+      onChange(sanitized);
+      // Move caret to the end after rebuilding
+      const sel = window.getSelection();
+      if (sel) {
+        const range = document.createRange();
+        range.selectNodeContents(editorRef.current);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      return;
+    }
     isInternalRef.current = true;
     lastRawRef.current = raw;
     onChange(raw);
@@ -193,7 +219,13 @@ export function TemplateEditor({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (!editorRef.current || !maxLength) return;
+      if (!editorRef.current) return;
+      if (e.key === 'Enter') {
+        // Templates must stay on a single line
+        e.preventDefault();
+        return;
+      }
+      if (!maxLength) return;
       const printable = e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey;
       if (printable) {
         const raw = extractTemplate(editorRef.current);
@@ -204,6 +236,43 @@ export function TemplateEditor({
       }
     },
     [maxLength, varLengths]
+  );
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      e.preventDefault();
+      if (!editorRef.current) return;
+      const pasted = sanitizeTemplateText(e.clipboardData.getData('text/plain'));
+      if (!pasted) return;
+
+      const raw = extractTemplate(editorRef.current);
+      let toInsert = pasted;
+      if (maxLength) {
+        const currentEffective = computeEffectiveLength(raw, varLengths);
+        const available = maxLength - currentEffective;
+        if (available <= 0) return;
+        toInsert = pasted.slice(0, Math.max(0, available));
+      }
+      if (!toInsert) return;
+
+      editorRef.current.focus();
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && editorRef.current.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        const textNode = document.createTextNode(toInsert);
+        range.insertNode(textNode);
+        range.setStartAfter(textNode);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else {
+        editorRef.current.appendChild(document.createTextNode(toInsert));
+      }
+
+      handleInput();
+    },
+    [handleInput, maxLength, varLengths]
   );
 
   const insertToken = useCallback(
@@ -309,6 +378,7 @@ export function TemplateEditor({
           suppressContentEditableWarning
           onInput={handleInput}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           className={`w-full rounded-xl border-2 px-3 py-2 text-sm text-gray-900 focus:outline-none leading-7 ${
             isOverLimit
               ? 'border-red-300 focus:border-red-400'

@@ -146,7 +146,13 @@
       "smsUpgradeNote": "SMS je na voljo v višjih paketih.",
       "smsUpgradeLink": "Nadgradi paket",
       "smsPlanNotePrefix": "Za pošiljanje SMS potrdil",
-      "smsPlanNoteLink": "nadgradite paket"
+      "smsPlanNoteLink": "nadgradite paket",
+      "smsSettings": "Nastavitve SMS sporočila",
+      "modeAI": "AI sestavi",
+      "modeManual": "Lastna predloga",
+      "templateHint": "Predloga SMS sporočila (max 155 znakov)",
+      "templatePlaceholder": "Npr: Vaša rezervacija je potrjena za {{datum}} ob {{cas}}. {{ime_podjetja}}.",
+      "noEmojiHint": "Brez emojijev in posebnih znakov."
     },
     "policy": {
       "sectionTitle": "Politika odpovedi in prestavitev",
