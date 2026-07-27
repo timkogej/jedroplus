@@ -439,6 +439,7 @@ export default function PaketiPage() {
   const [emailUsed, setEmailUsed] = useState(0);
   const [emailTotal, setEmailTotal] = useState(0);
   const [smsTotal, setSmsTotal] = useState(0);
+  const [teamMemberTotal, setTeamMemberTotal] = useState<number | null>(null);
   const [memberCount, setMemberCount] = useState(0);
   const [clientCount, setClientCount] = useState(0);
   const [terminiCount, setTerminiCount] = useState(0);
@@ -510,17 +511,24 @@ export default function PaketiPage() {
 
       const { data: subData } = await supabaseReadOnly
         .from('company_subscriptions')
-        .select('plan_id')
+        .select('plan_id, sms_addon_monthly, email_addon_monthly, sms_quota_override, email_quota_override')
         .eq('company_id', companyUuid)
         .maybeSingle();
       if (subData?.plan_id) {
         const { data: planData } = await supabaseReadOnly
           .from('plans')
-          .select('email_quota_monthly, sms_quota_monthly')
+          .select('email_quota_monthly, sms_quota_monthly, max_employees')
           .eq('id', subData.plan_id)
           .maybeSingle();
-        setEmailTotal(planData?.email_quota_monthly ?? 0);
-        setSmsTotal(planData?.sms_quota_monthly ?? 0);
+        setEmailTotal(
+          subData.email_quota_override ??
+            ((planData?.email_quota_monthly ?? 0) + (subData.email_addon_monthly ?? 0))
+        );
+        setSmsTotal(
+          subData.sms_quota_override ??
+            ((planData?.sms_quota_monthly ?? 0) + (subData.sms_addon_monthly ?? 0))
+        );
+        setTeamMemberTotal(planData?.max_employees ?? null);
       }
 
       setMemberCount(membersRes.count ?? 0);
@@ -572,7 +580,7 @@ export default function PaketiPage() {
       icon: <UsersThree className="w-4 h-4" weight="regular" />,
       label: t('paketi.quotaLabels.teamMembers'),
       used: memberCount,
-      total: currentPlanId === 'JEDRO_PLUS' ? 10 : currentPlanId === 'JEDRO_PRO' ? 25 : null,
+      total: teamMemberTotal,
     },
     {
       icon: <AddressBook className="w-4 h-4" weight="regular" />,

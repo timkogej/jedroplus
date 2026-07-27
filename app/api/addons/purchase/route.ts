@@ -7,11 +7,11 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const N8N_BASE = 'https://tikej.app.n8n.cloud';
 
 const SMS_PACKAGES = {
-  'sms-50':   { quantity: 50,   priceId: process.env.STRIPE_SMS_50_PRICE_ID!,   priceMonthly: 6  },
-  'sms-100':  { quantity: 100,  priceId: process.env.STRIPE_SMS_100_PRICE_ID!,  priceMonthly: 11 },
-  'sms-200':  { quantity: 200,  priceId: process.env.STRIPE_SMS_200_PRICE_ID!,  priceMonthly: 20 },
-  'sms-500':  { quantity: 500,  priceId: process.env.STRIPE_SMS_500_PRICE_ID!,  priceMonthly: 45 },
-  'sms-1000': { quantity: 1000, priceId: process.env.STRIPE_SMS_1000_PRICE_ID!, priceMonthly: 80 },
+  'sms-50':   { quantity: 50,   priceId: process.env.STRIPE_SMS_50_PRICE_ID!,   priceMonthly: 4  },
+  'sms-100':  { quantity: 100,  priceId: process.env.STRIPE_SMS_100_PRICE_ID!,  priceMonthly: 8  },
+  'sms-200':  { quantity: 200,  priceId: process.env.STRIPE_SMS_200_PRICE_ID!,  priceMonthly: 16 },
+  'sms-500':  { quantity: 500,  priceId: process.env.STRIPE_SMS_500_PRICE_ID!,  priceMonthly: 35 },
+  'sms-1000': { quantity: 1000, priceId: process.env.STRIPE_SMS_1000_PRICE_ID!, priceMonthly: 65 },
 } as const;
 
 const EMAIL_PACKAGES = {
