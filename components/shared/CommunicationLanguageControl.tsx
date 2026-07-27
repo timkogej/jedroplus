@@ -36,17 +36,17 @@ function CommunicationLanguageControl({
       <div className={className}>
         {!isOpen ? (
           <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-100" />
+            <div className="h-px flex-1 bg-white" />
             <button
               type="button"
               onClick={() => setIsOpen(true)}
               title={label ? `${label}: ${option.label}` : option.label}
               aria-label={label ? `${label}: ${option.label}` : option.label}
-              className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-sm leading-none shadow-sm transition-colors hover:border-gray-300 hover:bg-gray-50"
+              className="flex h-7 flex-shrink-0 items-center justify-center px-1 text-lg leading-none transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
             >
               {option.flag}
             </button>
-            <div className="h-px flex-1 bg-gray-100" />
+            <div className="h-px flex-1 bg-white" />
           </div>
         ) : (
           <Select

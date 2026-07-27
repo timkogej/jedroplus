@@ -96,6 +96,32 @@ body {
   background: #a8a8a8;
 }
 
+.native-date-time-input {
+  box-sizing: border-box;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.native-date-time-input::-webkit-date-and-time-value {
+  min-height: 1.25rem;
+  text-align: left;
+}
+
+.native-date-time-input::-webkit-calendar-picker-indicator {
+  margin-left: auto;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .native-date-time-input {
+    font-size: 16px;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
 /* Smooth transitions */
 .transition-smooth {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);

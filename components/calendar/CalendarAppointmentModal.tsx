@@ -22,6 +22,7 @@ import type { Storitev, Zaposleni, AppointmentWithDetails } from '@/types/appoin
 import { minutesToTime, parseTimeToMinutes } from '@/lib/utils/calendar';
 import { useTranslations } from 'next-intl';
 import { checkResourceConflicts, type ResourceConflictResult } from '@/lib/utils/resourceConflicts';
+import { useModalScrollLock } from '@/hooks/useModalScrollLock';
 
 export type ModalMode = 'view' | 'edit' | 'create';
 
@@ -87,6 +88,8 @@ function CalendarAppointmentModal({
   onCreateClient,
   companyId,
 }: CalendarAppointmentModalProps) {
+  useModalScrollLock(isOpen);
+
   // Form state
   const [formData, setFormData] = useState<CalendarAppointmentFormData>({
     datum: '',
@@ -346,7 +349,7 @@ function CalendarAppointmentModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black/40 p-2 backdrop-blur-sm overscroll-none sm:p-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -354,11 +357,11 @@ function CalendarAppointmentModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Gradient header - NO X BUTTON */}
-            <div className="bg-gradient-to-r from-violet-500 to-cyan-500 p-6">
+            <div className="flex-shrink-0 bg-gradient-to-r from-violet-500 to-cyan-500 p-5 sm:p-6">
               <div>
                 <h2 className="text-xl font-semibold text-white">
                   {mode === 'create' ? t('modal.title.create') : mode === 'edit' ? t('modal.title.edit') : t('modal.title.view')}
@@ -370,7 +373,10 @@ function CalendarAppointmentModal({
             </div>
 
             {/* Modal body */}
-            <div className="max-h-[60vh] overflow-y-auto p-6 custom-scrollbar">
+            <div
+              className="min-h-0 flex-1 touch-pan-y overflow-y-auto overflow-x-hidden overscroll-contain p-4 custom-scrollbar sm:p-6"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
               <div className="space-y-6">
                 {/* Section 1: Appointment details */}
                 <div>
@@ -390,7 +396,7 @@ function CalendarAppointmentModal({
                         value={formData.datum}
                         onChange={(e) => setFormData(prev => ({ ...prev, datum: e.target.value }))}
                         disabled={isViewMode}
-                        className={`w-full rounded-xl border px-4 py-2.5 text-sm text-[#1A1F36]
+                        className={`native-date-time-input w-full rounded-xl border px-4 py-2.5 text-sm text-[#1A1F36]
                                    transition-all focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20
                                    ${errors.datum ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}
                                    ${isViewMode ? 'cursor-not-allowed bg-gray-50' : ''}`}
@@ -401,8 +407,8 @@ function CalendarAppointmentModal({
                     </div>
 
                     {/* Time range */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
+                    <div className="grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+                      <div className="min-w-0">
                         <label className="mb-1.5 block text-xs font-medium text-gray-500">
                           {t('modal.fields.startTime')}
                         </label>
@@ -430,13 +436,13 @@ function CalendarAppointmentModal({
                           <p className="mt-1 text-xs text-red-500">{errors.cas_zacetek}</p>
                         )}
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <label className="mb-1.5 block text-xs font-medium text-gray-500">
                           {t('modal.fields.endTime')}
                         </label>
-                        <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-600">
-                          <Clock className="h-4 w-4" weight="regular" />
-                          {formData.cas_konec}
+                        <div className="flex min-h-[42px] min-w-0 items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-600">
+                          <Clock className="h-4 w-4 flex-shrink-0" weight="regular" />
+                          <span className="min-w-0 truncate">{formData.cas_konec}</span>
                         </div>
                       </div>
                     </div>
@@ -592,7 +598,7 @@ function CalendarAppointmentModal({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
+            <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-5 py-4 sm:px-6">
               <motion.button
                 type="button"
                 onClick={onClose}

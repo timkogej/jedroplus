@@ -72,7 +72,6 @@ export default function CrmImportModal({
   actor,
   existingClients,
   onImportComplete,
-  onSendToN8n,
 }: CrmImportModalProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [file, setFile] = useState<File | null>(null);
@@ -83,6 +82,8 @@ export default function CrmImportModal({
   const [parseError, setParseError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
+  // Summary counts for step 4: from the n8n response when provided, else client-side
+  const [counts, setCounts] = useState<{ nove: number; posodobi: number; preskoci: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Column mapping state: fieldLabel → selected header
@@ -100,6 +101,7 @@ export default function CrmImportModal({
       setParseError(null);
       setIsProcessing(false);
       setResult(null);
+      setCounts(null);
       setMapping({});
     }
   }, [isOpen]);
@@ -112,7 +114,7 @@ export default function CrmImportModal({
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const wb = XLSX.read(data, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json<ParsedRow>(ws, { defval: '' });
+        const rows = XLSX.utils.sheet_to_json<ParsedRow>(ws, { defval: '', raw: false });
         if (rows.length === 0) {
           setParseError('Datoteka je prazna ali nima veljavnih podatkov.');
           return;
@@ -166,14 +168,33 @@ export default function CrmImportModal({
   }, [handleFileSelect]);
 
   const handleImport = useCallback(async () => {
-    if (!allRows.length) return;
+    console.log('[CrmImport] handleImport called', {
+      step,
+      mapping,
+      rowCount: allRows.length,
+    });
+
+    if (!allRows.length) {
+      console.log('[CrmImport] blocked: no rows parsed from file');
+      setParseError('Ni vrstic za uvoz. Vrnite se na prejšnji korak in ponovno naložite datoteko.');
+      return;
+    }
+
+    const unmappedRequired = REQUIRED_FIELDS.filter((f) => !mapping[f]);
+    console.log('[CrmImport] required-field mapping check', { unmappedRequired });
+    if (unmappedRequired.length > 0) {
+      setParseError(`Povežite še zahtevana polja: ${unmappedRequired.join(', ')}.`);
+      return;
+    }
+
+    setParseError(null);
     setIsProcessing(true);
     setStep(3);
 
     try {
       const parsed: MappedClient[] = allRows.map((row) => {
-        const imeRaw = mapping['Ime'] ? (row[mapping['Ime']] ?? '') : '';
-        const priimekRaw = mapping['Priimek ali celotno ime'] ? (row[mapping['Priimek ali celotno ime']] ?? '') : '';
+        const imeRaw = mapping['Ime'] ? String(row[mapping['Ime']] ?? '') : '';
+        const priimekRaw = mapping['Priimek ali celotno ime'] ? String(row[mapping['Priimek ali celotno ime']] ?? '') : '';
 
         let ime = imeRaw.trim();
         let priimek = priimekRaw.trim();
@@ -188,11 +209,11 @@ export default function CrmImportModal({
         return {
           ime,
           priimek,
-          email: mapping['Email'] ? (row[mapping['Email']] ?? '').trim() : '',
-          telefon: mapping['Telefon'] ? (row[mapping['Telefon']] ?? '').trim() : '',
-          spol: normalizeSpol(mapping['Spol'] ? (row[mapping['Spol']] ?? '') : ''),
-          opombe: mapping['Opombe'] ? (row[mapping['Opombe']] ?? '').trim() : '',
-          datum_vpisa: mapping['Datum vpisa'] ? (row[mapping['Datum vpisa']] ?? '').trim() : '',
+          email: mapping['Email'] ? String(row[mapping['Email']] ?? '').trim() : '',
+          telefon: mapping['Telefon'] ? String(row[mapping['Telefon']] ?? '').trim() : '',
+          spol: normalizeSpol(mapping['Spol'] ? String(row[mapping['Spol']] ?? '') : ''),
+          opombe: mapping['Opombe'] ? String(row[mapping['Opombe']] ?? '').trim() : '',
+          datum_vpisa: mapping['Datum vpisa'] ? String(row[mapping['Datum vpisa']] ?? '').trim() : '',
         };
       });
 
@@ -224,30 +245,50 @@ export default function CrmImportModal({
       const importResult: ImportResult = { nove, posodobi, preskoci };
       setResult(importResult);
 
-      const res = await onSendToN8n({
-        event: 'UVOZ_CRM',
-        entity: 'Stranke',
-        data: {
-          nove,
-          posodobi,
-          preskoci,
+      // Dedicated CRM-import workflow, proxied server-side so the n8n URL
+      // stays out of the client bundle and company access is verified
+      const response = await fetch('/api/webhook-crm-import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           company_id: companyId,
-        },
-        company_id: companyId,
-        actor,
-        timestamp: new Date().toISOString(),
-        meta: { app: 'Integrate', version: '1.0' },
+          data: {
+            nove,
+            posodobi,
+            preskoci,
+          },
+        }),
       });
 
-      if (!res.ok) throw new Error(res.error ?? 'Napaka pri uvozu');
+      let serverResult: Record<string, unknown> | null = null;
+      try {
+        serverResult = await response.json();
+      } catch {
+        serverResult = null; // empty body — fall back to client-side counts
+      }
+      if (!response.ok || serverResult?.ok === false) {
+        throw new Error(
+          typeof serverResult?.error === 'string' ? serverResult.error : 'Napaka pri uvozu'
+        );
+      }
+
+      const asCount = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+      const returned = (serverResult?.counts ?? serverResult) as Record<string, unknown> | null;
+      setCounts({
+        nove: asCount(returned?.nove) ?? nove.length,
+        posodobi: asCount(returned?.posodobi) ?? posodobi.length,
+        preskoci: asCount(returned?.preskoci) ?? preskoci.length,
+      });
       setStep(4);
-    } catch {
-      setParseError('Napaka pri pošiljanju podatkov. Poskusite znova.');
+    } catch (err) {
+      console.log('[CrmImport] import failed', err);
+      const message = err instanceof Error && err.message ? err.message : 'Napaka pri pošiljanju podatkov.';
+      setParseError(`${message} Poskusite znova.`);
       setStep(2);
     } finally {
       setIsProcessing(false);
     }
-  }, [allRows, mapping, existingClients, companyId, actor, onSendToN8n]);
+  }, [step, allRows, mapping, existingClients, companyId]);
 
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
@@ -486,17 +527,17 @@ export default function CrmImportModal({
                     <div className="flex items-center gap-3 px-4 py-3">
                       <CheckCircle className="h-5 w-5 flex-shrink-0 text-emerald-500" weight="fill" />
                       <span className="flex-1 text-sm text-gray-700">Novih strank uvoženih</span>
-                      <span className="text-sm font-semibold text-gray-900">{result.nove.length}</span>
+                      <span className="text-sm font-semibold text-gray-900">{counts?.nove ?? result.nove.length}</span>
                     </div>
                     <div className="flex items-center gap-3 px-4 py-3">
                       <ArrowsClockwise className="h-5 w-5 flex-shrink-0 text-blue-500" weight="fill" />
                       <span className="flex-1 text-sm text-gray-700">Strank posodobljenih</span>
-                      <span className="text-sm font-semibold text-gray-900">{result.posodobi.length}</span>
+                      <span className="text-sm font-semibold text-gray-900">{counts?.posodobi ?? result.posodobi.length}</span>
                     </div>
                     <div className="flex items-center gap-3 px-4 py-3">
                       <SkipForward className="h-5 w-5 flex-shrink-0 text-gray-400" weight="fill" />
                       <span className="flex-1 text-sm text-gray-700">Strank preskočenih (duplikati)</span>
-                      <span className="text-sm font-semibold text-gray-900">{result.preskoci.length}</span>
+                      <span className="text-sm font-semibold text-gray-900">{counts?.preskoci ?? result.preskoci.length}</span>
                     </div>
                   </div>
                 </div>

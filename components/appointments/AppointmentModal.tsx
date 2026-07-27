@@ -2,9 +2,8 @@
 
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, CalendarBlank, LockSimple, Plus, Minus, Envelope, Phone, Tag, Warning } from '@phosphor-icons/react';
+import { X, Clock, CalendarBlank, Plus, Minus, Envelope, Phone, Tag, Warning } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
-import { ScrollTimePicker } from '@/components/ui/ScrollTimePicker';
 import ClientSearch from './ClientSearch';
 import ClientModal from '@/components/clients/ClientModal';
 import StatusBadge from './StatusBadge';
@@ -14,6 +13,7 @@ import type { ClientFormData } from '@/types/clients';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useRolePermissions } from '@/app/role-permission-context';
+import { useModalScrollLock } from '@/hooks/useModalScrollLock';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import {
   buildClientCreateData,
@@ -88,21 +88,6 @@ export interface AppointmentFormData {
   belezi_termin?: boolean;
 }
 
-// Generate time slots from 5:30 to 23:00 in 15-minute intervals
-function generateTimeSlots(): string[] {
-  const slots: string[] = [];
-  // Start from 5:00, 5-minute steps — covers 10/20/25/35/40/50/55-min services
-  for (let minutes = 5 * 60; minutes <= 23 * 60 + 55; minutes += 5) {
-    const hour = Math.floor(minutes / 60);
-    const min = minutes % 60;
-    slots.push(`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`);
-  }
-  return slots;
-}
-
-const TIME_SLOTS = generateTimeSlots();
-
-
 // Map JS day index (0=Sunday) to Slovenian day names
 const DAY_INDEX_TO_SLOVENIAN: Record<number, string> = {
   0: 'Nedelja',
@@ -166,15 +151,7 @@ function AppointmentModal({
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
   const { user } = useAuth();
   const { personId, role, permissions } = useRolePermissions();
-
-  // Detect mobile (< 768px) for time picker variant
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
+  useModalScrollLock(isOpen);
 
   // Inline client creation state
   const [showClientModal, setShowClientModal] = useState(false);
@@ -252,6 +229,12 @@ function AppointmentModal({
   const [resourceConflicts, setResourceConflicts] = useState<ResourceConflict[]>([]);
   // Resource row-ids this appointment already occupies — suppressed from conflict warnings in edit mode
   const [ownResursIds, setOwnResursIds] = useState<Set<number>>(new Set());
+  const resourceConflictTitle = useMemo(() => {
+    if (resourceConflicts.length === 0) return '';
+    if (resourceConflicts.every((c) => c.tip === 'zaseden')) return 'Resurs zaseden';
+    if (resourceConflicts.every((c) => c.tip === 'urnik')) return 'Resurs ni na voljo';
+    return 'Preveri razpoložljivost resursa';
+  }, [resourceConflicts]);
 
   // Initialize form data when appointment changes
   useEffect(() => {
@@ -1141,10 +1124,11 @@ function AppointmentModal({
   const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60 sm:p-5';
   const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500';
   const inputBaseClass = 'w-full max-w-full min-w-0 rounded-lg border bg-white px-3 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900/10';
+  const nativeDateTimeInputClass = `${inputBaseClass} native-date-time-input`;
 
   return (
     <AnimatePresence>
-      <div key="appointment-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div key="appointment-modal" className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-2 overscroll-none sm:p-4">
         {/* Backdrop */}
         <motion.div
           variants={backdropVariants}
@@ -1161,7 +1145,7 @@ function AppointmentModal({
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+          className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl sm:max-h-[90vh]"
         >
           {/* Header */}
           <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
@@ -1184,7 +1168,10 @@ function AppointmentModal({
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 custom-scrollbar sm:p-5">
+            <div
+              className="min-h-0 flex-1 touch-pan-y overflow-y-auto overflow-x-hidden overscroll-contain p-4 custom-scrollbar sm:p-5"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
               <div className="space-y-4">
             {/* Client search - First field */}
             <div className={sectionClass}>
@@ -1256,16 +1243,6 @@ function AppointmentModal({
                 </>
               )}
             </div>
-
-            {/* Communication language - minimal divider between client and service */}
-            {!isViewMode && (
-              <CommunicationLanguageControl
-                value={formData.language ?? defaultLanguage}
-                onChange={(value) => setFormData((prev) => ({ ...prev, language: value }))}
-                label={t('modal.fields.communicationLanguage')}
-                variant="divider"
-              />
-            )}
 
             {/* Service - Second field (supports up to 3 services) */}
             <div className={`${sectionClass} space-y-3`}>
@@ -1613,91 +1590,91 @@ function AppointmentModal({
               )}
             </div>
 
-            {/* Date field */}
-            <div className={sectionClass}>
-              <label className={labelClass}>
-                {t('modal.fields.date')}
-              </label>
-              {isViewMode ? (
-                <p className="flex items-center gap-2 text-sm font-bold">
-                  <CalendarBlank className="h-4 w-4 text-gray-400" weight="regular" />
-                  <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
-                    {new Date(formData.datum).toLocaleDateString('sl-SI')}
-                  </span>
-                </p>
-              ) : (
-                <>
-                  <input
-                    type="date"
-                    value={formData.datum}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, datum: e.target.value }))}
-                    className={`${inputBaseClass}
-                               ${errors.datum ? 'border-red-300' : 'border-gray-200'}`}
-                  />
-                  {errors.datum && (
-                    <p className="mt-1 text-xs text-red-500">{errors.datum}</p>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Time fields - Both start and end time are manually selectable */}
-            <div className={`${sectionClass} grid grid-cols-2 gap-3`}>
+            {/* Date and time fields */}
+            <div className={`${sectionClass} space-y-3`}>
               <div className="min-w-0">
                 <label className={labelClass}>
-                  {t('modal.fields.startTime')}
+                  {t('modal.fields.date')}
                 </label>
                 {isViewMode ? (
                   <p className="flex items-center gap-2 text-sm font-bold">
-                    <Clock className="h-4 w-4 text-gray-400" weight="regular" />
+                    <CalendarBlank className="h-4 w-4 text-gray-400" weight="regular" />
                     <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
-                      {formData.cas_zacetek}
+                      {new Date(formData.datum).toLocaleDateString('sl-SI')}
                     </span>
                   </p>
                 ) : (
                   <>
                     <input
-                      type="time"
-                      value={formData.cas_zacetek}
-                      onChange={(e) => {
-                        setFormData((prev) => ({ ...prev, cas_zacetek: e.target.value }));
-                        setEndTimeManuallySet(false);
-                      }}
-                      className={`${inputBaseClass} ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
+                      type="date"
+                      value={formData.datum}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, datum: e.target.value }))}
+                      className={`${nativeDateTimeInputClass} ${errors.datum ? 'border-red-300' : 'border-gray-200'}`}
                     />
-                    {errors.cas_zacetek && (
-                      <p className="mt-1 text-xs text-red-500">{errors.cas_zacetek}</p>
+                    {errors.datum && (
+                      <p className="mt-1 text-xs text-red-500">{errors.datum}</p>
                     )}
                   </>
                 )}
               </div>
-              <div className="min-w-0">
-                <label className={labelClass}>
-                  {t('modal.fields.endTime')}
-                </label>
-                {isViewMode ? (
-                  <p className="flex items-center gap-2 text-sm font-bold">
-                    <Clock className="h-4 w-4 text-gray-400" weight="regular" />
-                    <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
-                      {formData.cas_konec}
-                    </span>
-                  </p>
-                ) : (
-                  <>
-                    <input
-                      type="time"
-                      value={formData.cas_konec}
-                      onChange={(e) => {
-                        setFormData((prev) => ({ ...prev, cas_konec: e.target.value }));
-                        setEndTimeManuallySet(true);
-                      }}
-                      className={`${inputBaseClass} ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
-                    />
-                    {errors.cas_konec && (
-                      <p className="mt-1 text-xs text-red-500">{errors.cas_konec}</p>
-                    )}
-                  </>
-                )}
+
+              <div className="grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2">
+                <div className="min-w-0">
+                  <label className={labelClass}>
+                    {t('modal.fields.startTime')}
+                  </label>
+                  {isViewMode ? (
+                    <p className="flex items-center gap-2 text-sm font-bold">
+                      <Clock className="h-4 w-4 text-gray-400" weight="regular" />
+                      <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
+                        {formData.cas_zacetek}
+                      </span>
+                    </p>
+                  ) : (
+                    <>
+                      <input
+                        type="time"
+                        value={formData.cas_zacetek}
+                        onChange={(e) => {
+                          setFormData((prev) => ({ ...prev, cas_zacetek: e.target.value }));
+                          setEndTimeManuallySet(false);
+                        }}
+                        className={`${nativeDateTimeInputClass} ${errors.cas_zacetek ? 'border-red-300' : 'border-gray-200'}`}
+                      />
+                      {errors.cas_zacetek && (
+                        <p className="mt-1 text-xs text-red-500">{errors.cas_zacetek}</p>
+                      )}
+                    </>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <label className={labelClass}>
+                    {t('modal.fields.endTime')}
+                  </label>
+                  {isViewMode ? (
+                    <p className="flex items-center gap-2 text-sm font-bold">
+                      <Clock className="h-4 w-4 text-gray-400" weight="regular" />
+                      <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
+                        {formData.cas_konec}
+                      </span>
+                    </p>
+                  ) : (
+                    <>
+                      <input
+                        type="time"
+                        value={formData.cas_konec}
+                        onChange={(e) => {
+                          setFormData((prev) => ({ ...prev, cas_konec: e.target.value }));
+                          setEndTimeManuallySet(true);
+                        }}
+                        className={`${nativeDateTimeInputClass} ${errors.cas_konec ? 'border-red-300' : 'border-gray-200'}`}
+                      />
+                      {errors.cas_konec && (
+                        <p className="mt-1 text-xs text-red-500">{errors.cas_konec}</p>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -2048,6 +2025,17 @@ function AppointmentModal({
               )
             )}
 
+            {/* Communication language - low-priority control near the bottom */}
+            {!isViewMode && (
+              <CommunicationLanguageControl
+                value={formData.language ?? defaultLanguage}
+                onChange={(value) => setFormData((prev) => ({ ...prev, language: value }))}
+                label={t('modal.fields.communicationLanguage')}
+                variant="divider"
+                className="py-1"
+              />
+            )}
+
             {/* Ghost termin toggle — owner/admin always see it, staff only if permission granted */}
             {!isViewMode && (role === 'owner' || role === 'admin' || (role === 'staff' && (permissions?.can_create_ghost_termin ?? false))) && (
               <div className={`${sectionClass} space-y-2`}>
@@ -2088,7 +2076,7 @@ function AppointmentModal({
                   <Warning weight="fill" className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" />
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-amber-800">
-                      Resurs zaseden
+                      {resourceConflictTitle}
                     </p>
                     {resourceConflicts.map((c) => (
                       <p key={c.resursId} className="mt-0.5 text-xs text-amber-700">
