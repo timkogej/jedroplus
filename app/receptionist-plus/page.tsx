@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
 import {
   Gear,
   ClockCounterClockwise,
@@ -410,7 +411,7 @@ function transactionLabel(tx: CreditTransaction): string {
     case 'deduction':
       return `Klic ${sign}${amount} kreditov`;
     case 'trial_grant':
-      return `Preizkusni krediti ${sign}${amount}`;
+      return `Brezplačna preizkusna doba ${sign}${amount} kreditov`;
     case 'adjustment':
       return `Prilagoditev ${sign}${amount} kreditov`;
     default:
@@ -544,12 +545,27 @@ function KreditiTab() {
 }
 
 // ─── Not-activated state ────────────────────────────────────────────────────
-// ReceptionistPlus requires backend provisioning (Twilio number + LiveKit
-// worker) — it isn't self-serve like SMS/email credits. If no
-// receptionist_settings row exists yet, the product hasn't been provisioned
-// for this company.
+// Self-serve activation: creates the receptionist_settings row (if this is
+// the company's first-ever activation, also seeds a 30-credit free trial).
 
-function NotActivated() {
+function NotActivated({ onActivated }: { onActivated: () => void }) {
+  const [activating, setActivating] = useState(false);
+
+  const activate = useCallback(async () => {
+    setActivating(true);
+    try {
+      const res = await fetch('/api/receptionistplus/activate', { method: 'POST' });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      onActivated();
+    } catch (e) {
+      console.error('[ReceptionistPlus] activate error:', e);
+      toast.error('Aktivacija ni uspela. Poskusite znova.');
+    } finally {
+      setActivating(false);
+    }
+  }, [onActivated]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -560,9 +576,18 @@ function NotActivated() {
         <Phone className="w-7 h-7 text-gray-400" weight="regular" />
       </div>
       <h2 className="text-lg font-semibold text-gray-900 mb-1">ReceptionistPlus ni aktiviran</h2>
-      <p className="text-sm text-gray-500 max-w-sm mx-auto">
-        Ta funkcija za vaše podjetje še ni bila aktivirana. Za aktivacijo kontaktirajte Jedro+ podporo.
+      <p className="text-sm text-gray-500 max-w-sm mx-auto mb-5">
+        Omogočite AI recepcionistko za vaše podjetje in prejmite 30 brezplačnih preizkusnih kreditov.
       </p>
+      <button
+        type="button"
+        onClick={activate}
+        disabled={activating}
+        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity disabled:opacity-60"
+        style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 55%, #2AD4C5 100%)' }}
+      >
+        {activating ? 'Aktiviram…' : 'Aktiviraj ReceptionistPlus'}
+      </button>
     </motion.div>
   );
 }
@@ -637,7 +662,7 @@ export default function ReceptionistPlusPage() {
               <p className="text-sm text-red-700">Napaka pri nalaganju strani.</p>
             </div>
           ) : !provisioned ? (
-            <NotActivated />
+            <NotActivated onActivated={load} />
           ) : (
             <>
               {/* Tabs */}
