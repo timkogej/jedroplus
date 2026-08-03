@@ -24,6 +24,7 @@ import {
   Tag,
   CaretLeft,
   Cube,
+  Phone,
 } from '@phosphor-icons/react';
 import { useSidebar } from './sidebar-context';
 import { useCompany } from '@/app/company-context';
@@ -67,23 +68,22 @@ function buildNavigationSectionsPaid(t: T): NavSection[] {
       ],
     },
     {
-      label: t('sidebar.sections.ai'),
-      items: [
-        // Asistent+ - začasno skrito, logika ohranjena v /asistent
-        // { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'new' },
-        // Chatbot+ - začasno skrito, bo dodano kasneje
-        // { name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'new' },
-        // Receptionist+ - začasno skrito, logika ohranjena v /receptionist-plus
-        // { name: 'Receptionist+', href: '/receptionist-plus', icon: Phone, badge: 'new' },
-      ],
-    },
-    {
       label: t('sidebar.sections.communication'),
       items: [
         { name: t('sidebar.items.communication'), href: '/komunikacija', icon: Envelope },
         { name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell },
         { name: t('sidebar.items.reservations'), href: '/rezervacije', icon: CalendarCheck },
         { name: t('sidebar.items.lostLeads'), href: '/lost-leads', icon: TrendDown },
+      ],
+    },
+    {
+      label: t('sidebar.sections.ai'),
+      items: [
+        { name: t('sidebar.items.receptionistPlus'), href: '/receptionist-plus', icon: Phone },
+        // Asistent+ - začasno skrito, logika ohranjena v /asistent
+        // { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'new' },
+        // Chatbot+ - začasno skrito, bo dodano kasneje
+        // { name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'new' },
       ],
     },
     {
@@ -134,8 +134,6 @@ function buildNavigationSectionsFree(t: T): NavSection[] {
         { name: t('sidebar.items.promotions'), href: '/promotions', icon: Tag },
       ],
     },
-    // AI sekcija začasno skrita - bo dodana kasneje
-    // { label: t('sidebar.sections.ai'), items: [{ name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'new' }] },
     {
       label: t('sidebar.sections.communication'),
       items: [
@@ -143,6 +141,12 @@ function buildNavigationSectionsFree(t: T): NavSection[] {
         { name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell },
         { name: t('sidebar.items.reservations'), href: '/rezervacije', icon: CalendarCheck },
         { name: t('sidebar.items.lostLeads'), href: '/lost-leads', icon: TrendDown },
+      ],
+    },
+    {
+      label: t('sidebar.sections.ai'),
+      items: [
+        { name: t('sidebar.items.receptionistPlus'), href: '/receptionist-plus', icon: Phone },
       ],
     },
     {
@@ -285,7 +289,24 @@ export function Sidebar() {
     !String(companySettings?.['from_name'] ?? companySettings?.['From_name'] ?? '').trim() ||
     !String(companySettings?.['reply_to'] ?? companySettings?.['reply_to_email'] ?? '').trim()
   );
-  const rezervacije_incomplete = hasOpomnikiPlan && !String(companySettings?.['main_booking_link'] ?? '').trim();
+  const bookingEnabledValue = companySettings?.['booking_omogocen'] ?? companySettings?.['Booking_omogocen'];
+  const bookingEnabled = bookingEnabledValue !== false && bookingEnabledValue !== 'false';
+  const hasAnyBookingLink = [
+    'booking_link_1',
+    'Booking_link_1',
+    'booking_link_2',
+    'Booking_link_2',
+    'booking_link_3',
+    'Booking_link_3',
+    'booking_link_4',
+    'Booking_link_4',
+    'booking_link_5',
+    'Booking_link_5',
+    'booking_link_6',
+    'Booking_link_6',
+  ].some((key) => String(companySettings?.[key] ?? '').trim());
+  const rezervacije_incomplete =
+    hasOpomnikiPlan && bookingEnabled && hasAnyBookingLink && !String(companySettings?.['main_booking_link'] ?? '').trim();
   const chatbot_incomplete = hasChatbotPlan && !String(companySettings?.['chatbot_link'] ?? '').trim();
   const any_incomplete = opomniki_incomplete || rezervacije_incomplete || chatbot_incomplete;
 

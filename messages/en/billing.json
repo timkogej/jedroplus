@@ -183,6 +183,7 @@
     "title": "Access restricted",
     "defaultMessage": "You do not have access to this page. Contact the business owner.",
     "billingOwnerOnly": "The 'Plans' page is only accessible to the business owner.",
+    "receptionistPlusOwnerOnly": "The 'ReceptionistPlus' page is only accessible to the business owner.",
     "staffRestricted": "This feature is disabled for your account. Contact the business owner for access."
   },
   "paketi": {

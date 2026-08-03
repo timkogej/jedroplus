@@ -35,7 +35,7 @@ export async function proxy(request: NextRequest) {
 
   // 3. Internal dev pages — English UI, not locale-routed
   // TODO(i18n-review): confirm if these dev pages should be removed or included in i18n
-  const devPaths = ['/app', '/calendar', '/bookings', '/settings'];
+  const devPaths = ['/app', '/calendar', '/bookings', '/settings', '/receptionist-plus'];
   if (devPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
     return NextResponse.next();
   }
@@ -87,6 +87,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Match all routes except API, Next.js internals, static files, and images
-    '/((?!api|_next/static|_next/image|favicon.ico|apple-icon\\.png|icon\\.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|apple-icon\\.png|icon\\.png|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)',
   ],
 };

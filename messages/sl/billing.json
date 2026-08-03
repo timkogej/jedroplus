@@ -183,6 +183,7 @@
     "title": "Dostop omejen",
     "defaultMessage": "Nimate dostopa do te strani. Obrnite se na lastnika podjetja.",
     "billingOwnerOnly": "Stran 'Paketi' je dostopna samo lastniku podjetja.",
+    "receptionistPlusOwnerOnly": "Stran 'ReceptionistPlus' je dostopna samo lastniku podjetja.",
     "staffRestricted": "Ta funkcija je za vaš račun onemogočena. Za dostop kontaktirajte lastnika podjetja."
   },
   "paketi": {

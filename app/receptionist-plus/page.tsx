@@ -1,342 +1,673 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import {
-  Copy,
-  Check,
-  Phone,
-  PhoneCall,
   Gear,
-  ChatText,
-  Books,
-  ArrowsLeftRight,
-  CheckCircle,
-  Sparkle,
-  Clock,
+  ClockCounterClockwise,
+  Coins,
+  Warning,
+  Phone,
+  CaretDown,
+  CaretUp,
+  CalendarCheck,
+  ArrowLeft,
+  ArrowRight,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import { ReceptionistSettingsModal } from '@/components/receptionist/ReceptionistSettingsModal';
+import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import { useCompany } from '@/app/company-context';
+import {
+  SettingsSection,
+  SettingRow,
+  Switch,
+  Select,
+  Input,
+  Textarea,
+  SaveIndicator,
+} from '@/components/settings';
 
-const GRADIENT = 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
+// ─── Brand glow background ─────────────────────────────────────────────────
+// Ambient bottom-anchored glow using the Jedro+ brand gradient
+// (see app/globals.css .gradient-text / addoni's BRAND_GRADIENT for the same
+// #6D5EF7 -> #2F80ED -> #2AD4C5 tokens), weighted toward purple since it
+// "shines" from below. Subtle, low-opacity, non-interactive.
+function BrandGlow() {
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden">
+      <div
+        className="absolute left-1/2 bottom-[-30%] h-[70vh] w-[140vw] -translate-x-1/2 rounded-full opacity-[0.16]"
+        style={{
+          background:
+            'radial-gradient(closest-side, #6D5EF7 0%, #2F80ED 45%, #2AD4C5 75%, transparent 100%)',
+          filter: 'blur(90px)',
+        }}
+      />
+    </div>
+  );
+}
 
-const CAPABILITIES = [
-  {
-    title: 'Samodejno rezerviranje',
-    description: 'Rezervira termine namesto vas',
-    icon: Clock,
-  },
-  {
-    title: 'Odgovarja na vprašanja',
-    description: 'Uporabi bazo znanja za odgovore',
-    icon: ChatText,
-  },
-  {
-    title: 'Preusmeritev klicev',
-    description: 'Ko je potrebna človeška pomoč',
-    icon: ArrowsLeftRight,
-  },
-  {
-    title: '24/7 dostopnost',
-    description: 'Vedno na voljo za vaše stranke',
-    icon: Phone,
-  },
+// ─── Tabs ───────────────────────────────────────────────────────────────────
+
+type TabKey = 'nastavitve' | 'dnevnik' | 'krediti';
+
+const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
+  { key: 'nastavitve', label: 'Nastavitve', icon: Gear },
+  { key: 'dnevnik', label: 'Klicni dnevnik', icon: ClockCounterClockwise },
+  { key: 'krediti', label: 'Krediti', icon: Coins },
 ];
 
-export default function ReceptionistPlusPage() {
-  const [copiedPhone, setCopiedPhone] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
+// ─── Settings tab ───────────────────────────────────────────────────────────
 
-  const phoneNumber = '';
-  const greetingText = '';
-  const handoffNumber = '';
-  const knowledgeDocsCount = 0;
+interface ReceptionistSettings {
+  enabled: boolean;
+  low_balance_threshold: number;
+  greeting_text: string | null;
+  language: string;
+}
 
-  const copyToClipboard = async (text: string) => {
+const DEFAULT_GREETING = 'Pozdravljeni, dobrodošli! Kako vam lahko pomagam?';
+
+const LANGUAGE_OPTIONS = [{ value: 'sl', label: 'Slovenščina' }];
+
+function NastavitveTab({
+  settings,
+  onSave,
+}: {
+  settings: ReceptionistSettings;
+  onSave: (patch: Partial<ReceptionistSettings>) => Promise<void>;
+}) {
+  const [local, setLocal] = useState(settings);
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  const save = useCallback(async (patch: Partial<ReceptionistSettings>) => {
+    setSaving(true);
     try {
-      await navigator.clipboard.writeText(text);
-      setCopiedPhone(true);
-      setTimeout(() => setCopiedPhone(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
+      await onSave(patch);
+      setLastSaved(new Date());
+    } finally {
+      setSaving(false);
     }
-  };
+  }, [onSave]);
+
+  return (
+    <div>
+      <div className="flex items-center justify-end mb-3 h-5">
+        <SaveIndicator saving={saving} lastSaved={lastSaved} />
+      </div>
+
+      <SettingsSection title="Splošno">
+        <SettingRow
+          label="Omogoči ReceptionistPlus"
+          description="Ko je vklopljeno, AI recepcionistka odgovarja na klice v imenu vašega podjetja."
+        >
+          <div className="flex justify-end sm:justify-start">
+            <Switch
+              checked={local.enabled}
+              onChange={(checked) => {
+                setLocal((s) => ({ ...s, enabled: checked }));
+                save({ enabled: checked });
+              }}
+              variant="brand"
+            />
+          </div>
+        </SettingRow>
+
+        <SettingRow
+          label="Jezik"
+          description="Jezik, v katerem AI recepcionistka odgovarja na klice."
+        >
+          <Select
+            value={local.language}
+            onChange={(value) => {
+              setLocal((s) => ({ ...s, language: value }));
+              save({ language: value });
+            }}
+            options={LANGUAGE_OPTIONS}
+            disabled={LANGUAGE_OPTIONS.length <= 1}
+          />
+        </SettingRow>
+
+        <SettingRow
+          label="Prag za nizko stanje kreditov"
+          description="Ko stanje pade pod to vrednost, boste obveščeni o nizkem stanju kreditov."
+        >
+          <Input
+            type="number"
+            min={0}
+            step={1}
+            suffix="kreditov"
+            value={local.low_balance_threshold}
+            onChange={(e) => setLocal((s) => ({ ...s, low_balance_threshold: Number(e.target.value) }))}
+            onBlur={(e) => save({ low_balance_threshold: Number(e.target.value) })}
+          />
+        </SettingRow>
+      </SettingsSection>
+
+      <SettingsSection
+        title="Pozdravno besedilo"
+        description="Poljubno. Če pustite prazno, bo uporabljeno privzeto pozdravno besedilo."
+      >
+        <SettingRow label="Pozdrav ob klicu" fullWidth>
+          <Textarea
+            rows={3}
+            placeholder={DEFAULT_GREETING}
+            value={local.greeting_text ?? ''}
+            onChange={(e) => setLocal((s) => ({ ...s, greeting_text: e.target.value }))}
+            onBlur={(e) => save({ greeting_text: e.target.value })}
+          />
+        </SettingRow>
+      </SettingsSection>
+    </div>
+  );
+}
+
+// ─── Call log tab ───────────────────────────────────────────────────────────
+
+interface TranscriptMessage {
+  role: 'assistant' | 'user' | string;
+  text: string;
+  ts: string;
+}
+
+interface ReceptionistCall {
+  id: string;
+  started_at: string;
+  ended_at: string | null;
+  duration_sec: number | null;
+  billed_credits: number | null;
+  outcome: string;
+  transcript: TranscriptMessage[] | null;
+  created_termin_id: string | null;
+}
+
+const OUTCOME_LABELS: Record<string, string> = {
+  booked: 'Rezervirano',
+  info_only: 'Samo informacije',
+  message_taken: 'Sporočilo prevzeto',
+  abandoned: 'Prekinjeno',
+  no_credits: 'Ni kreditov',
+};
+
+const OUTCOME_COLORS: Record<string, string> = {
+  booked: 'bg-emerald-50 text-emerald-700',
+  info_only: 'bg-blue-50 text-blue-700',
+  message_taken: 'bg-amber-50 text-amber-700',
+  abandoned: 'bg-gray-100 text-gray-600',
+  no_credits: 'bg-red-50 text-red-700',
+};
+
+function formatDuration(sec: number | null): string {
+  if (!sec && sec !== 0) return '—';
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return m > 0 ? `${m} min ${s} s` : `${s} s`;
+}
+
+function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString('sl-SI', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function CallTranscript({ messages }: { messages: TranscriptMessage[] }) {
+  if (messages.length === 0) {
+    return <p className="text-xs text-gray-400 italic">Ni zapisa pogovora.</p>;
+  }
+  return (
+    <div className="space-y-2">
+      {messages.map((m, i) => (
+        <div
+          key={i}
+          className={`flex ${m.role === 'assistant' ? 'justify-start' : 'justify-end'}`}
+        >
+          <div
+            className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
+              m.role === 'assistant'
+                ? 'bg-gray-100 text-gray-800'
+                : 'bg-[#6D5EF7]/10 text-gray-900'
+            }`}
+          >
+            {m.text}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CallRow({ call }: { call: ReceptionistCall }) {
+  const [expanded, setExpanded] = useState(false);
+  const outcomeLabel = OUTCOME_LABELS[call.outcome] ?? call.outcome;
+  const outcomeColor = OUTCOME_COLORS[call.outcome] ?? 'bg-gray-100 text-gray-600';
+  const hasTranscript = (call.transcript?.length ?? 0) > 0;
+
+  return (
+    <div className="border border-gray-100 rounded-2xl overflow-hidden bg-white">
+      <div className="flex items-start gap-3 p-4">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${outcomeColor}`}>
+              {outcomeLabel}
+            </span>
+            {call.created_termin_id && (
+              <span className="inline-flex items-center gap-1 text-xs text-emerald-700">
+                <CalendarCheck className="w-3.5 h-3.5" weight="fill" />
+                Termin #{call.created_termin_id.slice(0, 8)}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+            <span>{formatDateTime(call.started_at)}</span>
+            <span>·</span>
+            <span>{formatDuration(call.duration_sec)}</span>
+            <span>·</span>
+            <span>{(call.billed_credits ?? 0).toFixed(2)} kreditov</span>
+          </div>
+        </div>
+
+        {hasTranscript && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors"
+          >
+            {expanded ? <CaretUp className="w-3.5 h-3.5" /> : <CaretDown className="w-3.5 h-3.5" />}
+            {expanded ? 'Skrči' : 'Prepis'}
+          </button>
+        )}
+      </div>
+
+      {expanded && hasTranscript && (
+        <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+          <CallTranscript messages={call.transcript!} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DnevnikTab() {
+  const [calls, setCalls] = useState<ReceptionistCall[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const pageSize = 20;
+
+  const load = useCallback(async (p: number) => {
+    setIsLoading(true);
+    setError(false);
+    try {
+      const res = await fetch(`/api/receptionistplus/calls?page=${p}`);
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      setCalls(data.calls);
+      setTotalCount(data.totalCount);
+    } catch (e) {
+      console.error('[ReceptionistPlus] load calls error:', e);
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load(page);
+  }, [load, page]);
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  if (isLoading && calls.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <GradientSpinner size={32} />
+      </div>
+    );
+  }
+
+  if (error && calls.length === 0) {
+    return (
+      <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
+        <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
+        <p className="text-sm text-red-700">Napaka pri nalaganju klicnega dnevnika.</p>
+      </div>
+    );
+  }
+
+  if (calls.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-100 px-6 py-14 text-center">
+        <p className="text-sm font-medium text-gray-500">Ni še nobenega klica</p>
+        <p className="text-xs text-gray-400 mt-1">Klici bodo prikazani tukaj, ko jih AI recepcionistka sprejme.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {calls.map((call) => (
+        <CallRow key={call.id} call={call} />
+      ))}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between gap-4 pt-4">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Prejšnja
+          </button>
+          <span className="text-xs text-gray-500">
+            {page + 1} od {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+          >
+            Naslednja
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Credits tab ────────────────────────────────────────────────────────────
+
+interface CreditTransaction {
+  id: string;
+  delta_credits: number;
+  balance_after: number | null;
+  type: string;
+  note: string | null;
+  created_at: string;
+}
+
+const PACKS: { key: 'zagon' | 'standard' | 'profi'; label: string; credits: number; price: string }[] = [
+  { key: 'zagon', label: 'Zagon', credits: 100, price: '15 €' },
+  { key: 'standard', label: 'Standard', credits: 300, price: '39 €' },
+  { key: 'profi', label: 'Profi', credits: 750, price: '89 €' },
+];
+
+function transactionLabel(tx: CreditTransaction): string {
+  const amount = Math.abs(tx.delta_credits).toFixed(2).replace(/\.00$/, '');
+  const sign = tx.delta_credits >= 0 ? '+' : '-';
+  switch (tx.type) {
+    case 'purchase':
+      return `Nakup ${sign}${amount} kreditov`;
+    case 'deduction':
+      return `Klic ${sign}${amount} kreditov`;
+    case 'trial_grant':
+      return `Preizkusni krediti ${sign}${amount}`;
+    case 'adjustment':
+      return `Prilagoditev ${sign}${amount} kreditov`;
+    default:
+      return `${tx.type} ${sign}${amount} kreditov`;
+  }
+}
+
+function KreditiTab() {
+  const { companyUuid } = useCompany();
+  const [balance, setBalance] = useState<number | null>(null);
+  const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [buyingPack, setBuyingPack] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setIsLoading(true);
+    setError(false);
+    try {
+      const res = await fetch('/api/receptionistplus/credits');
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      setBalance(data.balance);
+      setTransactions(data.transactions);
+    } catch (e) {
+      console.error('[ReceptionistPlus] load credits error:', e);
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const buy = useCallback(async (pack: string) => {
+    if (!companyUuid) return;
+    setBuyingPack(pack);
+    try {
+      const res = await fetch('/api/receptionistplus/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company_id: companyUuid, pack }),
+      });
+      const data = await res.json();
+      if (!data.ok || !data.checkout_url) throw new Error(data.error ?? 'Napaka pri ustvarjanju Checkout seje');
+      window.location.href = data.checkout_url;
+    } catch (e) {
+      console.error('[ReceptionistPlus] checkout error:', e);
+      setBuyingPack(null);
+    }
+  }, [companyUuid]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <GradientSpinner size={32} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
+        <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
+        <p className="text-sm text-red-700">Napaka pri nalaganju kreditov.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Balance hero */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl mb-6 p-6"
+        style={{
+          background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 55%, #2AD4C5 100%)',
+        }}
+      >
+        <p className="text-white/70 text-sm font-medium mb-1">Trenutno stanje</p>
+        <p className="text-4xl font-bold text-white">{(balance ?? 0).toFixed(2)} kreditov</p>
+      </motion.div>
+
+      {/* Packs */}
+      <SettingsSection title="Kupi kredite">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {PACKS.map((pack) => (
+            <button
+              key={pack.key}
+              type="button"
+              onClick={() => buy(pack.key)}
+              disabled={!companyUuid || buyingPack !== null}
+              className="flex flex-col items-start gap-1 rounded-xl border border-gray-200 px-4 py-3.5 text-left hover:border-[#6D5EF7] hover:bg-[#6D5EF7]/5 transition-colors disabled:opacity-50"
+            >
+              <span className="font-semibold text-gray-900">{pack.label}</span>
+              <span className="text-sm text-gray-500">{pack.credits} kreditov</span>
+              <span className="text-sm font-medium text-gray-900 mt-1">
+                {buyingPack === pack.key ? 'Nalaganje…' : pack.price}
+              </span>
+            </button>
+          ))}
+        </div>
+      </SettingsSection>
+
+      {/* Recent transactions */}
+      <SettingsSection title="Nedavne transakcije">
+        {transactions.length === 0 ? (
+          <p className="text-sm text-gray-400">Ni še transakcij.</p>
+        ) : (
+          <div className="space-y-1">
+            {transactions.map((tx) => (
+              <div key={tx.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                <div>
+                  <p className="text-sm text-gray-800">{transactionLabel(tx)}</p>
+                  <p className="text-xs text-gray-400">{formatDateTime(tx.created_at)}</p>
+                </div>
+                <span className={`text-sm font-medium ${tx.delta_credits >= 0 ? 'text-emerald-600' : 'text-gray-500'}`}>
+                  {tx.delta_credits >= 0 ? '+' : ''}
+                  {tx.delta_credits.toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </SettingsSection>
+    </div>
+  );
+}
+
+// ─── Not-activated state ────────────────────────────────────────────────────
+// ReceptionistPlus requires backend provisioning (Twilio number + LiveKit
+// worker) — it isn't self-serve like SMS/email credits. If no
+// receptionist_settings row exists yet, the product hasn't been provisioned
+// for this company.
+
+function NotActivated() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="rounded-2xl bg-white border border-gray-100 p-10 text-center"
+    >
+      <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+        <Phone className="w-7 h-7 text-gray-400" weight="regular" />
+      </div>
+      <h2 className="text-lg font-semibold text-gray-900 mb-1">ReceptionistPlus ni aktiviran</h2>
+      <p className="text-sm text-gray-500 max-w-sm mx-auto">
+        Ta funkcija za vaše podjetje še ni bila aktivirana. Za aktivacijo kontaktirajte Jedro+ podporo.
+      </p>
+    </motion.div>
+  );
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────────
+
+export default function ReceptionistPlusPage() {
+  const [tab, setTab] = useState<TabKey>('nastavitve');
+  const [provisioned, setProvisioned] = useState<boolean | null>(null);
+  const [settings, setSettings] = useState<ReceptionistSettings | null>(null);
+  const [error, setError] = useState(false);
+
+  const load = useCallback(async () => {
+    setError(false);
+    try {
+      const res = await fetch('/api/receptionistplus/settings');
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      setProvisioned(Boolean(data.provisioned));
+      setSettings(data.settings);
+    } catch (e) {
+      console.error('[ReceptionistPlus] load settings error:', e);
+      setError(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tab') === 'krediti') {
+      setTab('krediti');
+    }
+  }, []);
+
+  const saveSettings = useCallback(async (patch: Partial<ReceptionistSettings>) => {
+    const res = await fetch('/api/receptionistplus/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error ?? 'Napaka');
+    setSettings((s) => (s ? { ...s, ...patch } : s));
+  }, []);
 
   return (
     <ProtectedLayout>
-      {/* Mesh gradient background */}
-      <div
-        className="min-h-screen"
-        style={{
-          background:
-            'radial-gradient(at 20% 20%, rgba(139, 92, 246, 0.08) 0px, transparent 50%), ' +
-            'radial-gradient(at 80% 10%, rgba(6, 182, 212, 0.06) 0px, transparent 50%), ' +
-            'radial-gradient(at 40% 80%, rgba(59, 130, 246, 0.05) 0px, transparent 50%), ' +
-            'linear-gradient(180deg, #FAFBFF 0%, #F0F4FF 100%)',
-        }}
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative min-h-screen">
+        <BrandGlow />
 
-          {/* Page Header */}
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-10 flex items-start justify-between"
-          >
-            <div>
-              <h1
-                className="text-3xl font-bold"
-                style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-              >
-                Receptionist+
-              </h1>
-              <p className="mt-1 text-base text-gray-500">Vaša AI telefonska asistentka</p>
-            </div>
-            <motion.button
-              onClick={() => setShowSettingsModal(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:border-gray-300 transition-all"
-              title="Nastavitve"
-            >
-              <Gear size={20} weight="bold" className="text-gray-900" />
-            </motion.button>
-          </motion.div>
-
-          {/* Phone Number Hero Card */}
-          {phoneNumber ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="relative overflow-hidden rounded-3xl mb-8"
-              style={{
-                background: GRADIENT,
-                boxShadow: '0 20px 60px rgba(139, 92, 246, 0.3), 0 8px 24px rgba(0, 0, 0, 0.1)',
-              }}
-            >
-              {/* Decorative blobs */}
-              <div
-                className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  filter: 'blur(40px)',
-                  transform: 'translate(30%, -50%)',
-                }}
-              />
-              <div
-                className="absolute bottom-0 left-0 w-48 h-48 rounded-full pointer-events-none"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  filter: 'blur(32px)',
-                  transform: 'translate(-25%, 50%)',
-                }}
-              />
-
-              <div className="relative p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-                  <div className="flex items-center gap-5">
-                    {/* Phone icon */}
-                    <div
-                      className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
-                      style={{
-                        background: 'rgba(255,255,255,0.2)',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.15), inset 0 2px 0 rgba(255,255,255,0.2)',
-                      }}
-                    >
-                      <Phone size={32} weight="regular" color="white" />
-                    </div>
-
-                    <div>
-                      <p className="text-white/70 text-sm font-medium mb-1">Telefonska številka</p>
-                      <h2 className="text-3xl font-bold text-white tracking-wide">{phoneNumber}</h2>
-
-                      {/* Pulsing status */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="relative flex h-3 w-3">
-                          <motion.span
-                            animate={{ scale: [1, 2, 1], opacity: [0.7, 0, 0.7] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="absolute inline-flex h-full w-full rounded-full"
-                            style={{ background: '#34D399' }}
-                          />
-                          <span className="relative inline-flex rounded-full h-3 w-3" style={{ background: '#10B981' }} />
-                        </span>
-                        <span className="text-white/80 text-sm font-medium">Aktivna in pripravljena</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action buttons */}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <motion.button
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => copyToClipboard(phoneNumber)}
-                      className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-medium text-white transition-colors"
-                      style={{ background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)' }}
-                    >
-                      {copiedPhone ? <Check size={18} weight="bold" /> : <Copy size={18} weight="regular" />}
-                      {copiedPhone ? 'Kopirano!' : 'Kopiraj'}
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => { window.location.href = `tel:${phoneNumber}`; }}
-                      className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold transition-all"
-                      style={{
-                        background: 'white',
-                        color: '#7C3AED',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                      }}
-                    >
-                      <PhoneCall size={18} weight="regular" />
-                      Testiraj klic
-                    </motion.button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            /* Empty state – no phone number */
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="relative overflow-hidden rounded-3xl mb-8 border-2 border-dashed border-gray-200"
-              style={{ background: 'linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)' }}
-            >
-              <div className="p-8 text-center">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
-                  style={{ background: '#E5E7EB' }}
-                >
-                  <Phone size={32} weight="regular" className="text-gray-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">Telefonska številka ni na voljo</h3>
-                <p className="text-gray-500 mb-6">Kontaktirajte podporo za aktivacijo vaše AI telefonske linije</p>
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="px-6 py-3 rounded-xl text-white font-semibold"
-                  style={{ background: GRADIENT, boxShadow: '0 4px 16px rgba(139,92,246,0.3)' }}
-                >
-                  Zahtevaj aktivacijo
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Nastavitve */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 mb-8"
-          >
-            <h2 className="text-base font-semibold text-[#1A1F36] mb-4">Nastavitve</h2>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-gray-400" weight="regular" />
-                  <span className="text-sm font-medium text-gray-700">Telefonska številka</span>
-                </div>
-                {phoneNumber ? (
-                  <span className="text-sm font-semibold text-gray-900">{phoneNumber}</span>
-                ) : (
-                  <span className="text-sm text-gray-400">Ni nastavljeno</span>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <ArrowsLeftRight className="w-4 h-4 text-gray-400" weight="regular" />
-                  <span className="text-sm font-medium text-gray-700">Preusmeritev</span>
-                </div>
-                {handoffNumber ? (
-                  <span className="text-sm font-semibold text-gray-900 font-mono">{handoffNumber}</span>
-                ) : (
-                  <span className="text-sm text-gray-400">Ni nastavljeno</span>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <Books className="w-4 h-4 text-gray-400" weight="regular" />
-                  <span className="text-sm font-medium text-gray-700">Baza znanja</span>
-                </div>
-                <span className="text-sm font-semibold text-gray-900">{knowledgeDocsCount} dokumentov</span>
-              </div>
-
-              <div className="py-2.5">
-                <div className="flex items-center gap-2 mb-2">
-                  <ChatText className="w-4 h-4 text-gray-400" weight="regular" />
-                  <span className="text-sm font-medium text-gray-700">Pozdravno besedilo</span>
-                </div>
-                {greetingText ? (
-                  <p className="text-sm text-gray-600 italic pl-6">"{greetingText}"</p>
-                ) : (
-                  <span className="text-sm text-gray-400 pl-6">Ni nastavljeno</span>
-                )}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Capabilities Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
             className="mb-8"
-            style={{
-              background: 'linear-gradient(135deg, rgba(139,92,246,0.04) 0%, rgba(6,182,212,0.04) 100%)',
-              border: '1px solid rgba(139,92,246,0.1)',
-              borderRadius: 20,
-              padding: 24,
-            }}
           >
-            <div className="flex items-center gap-3 mb-6">
-              <span style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-flex' }}>
-                <Sparkle size={24} weight="fill" />
-              </span>
-              <h3 className="font-semibold text-gray-800 text-lg">Zmožnosti</h3>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {CAPABILITIES.map((capability, index) => (
-                <motion.div
-                  key={capability.title}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.08 }}
-                  className="flex items-start gap-3 p-4 rounded-xl"
-                  style={{
-                    background: 'rgba(255,255,255,0.6)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.8)',
-                  }}
-                >
-                  <span style={{ background: GRADIENT, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', display: 'inline-flex', flexShrink: 0, marginTop: 2 }}>
-                    <CheckCircle size={18} weight="fill" />
-                  </span>
-                  <div>
-                    <h4 className="font-medium text-gray-800 text-sm">{capability.title}</h4>
-                    <p className="text-xs text-gray-500 mt-0.5">{capability.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#6D5EF7] via-[#2F80ED] to-[#2AD4C5] bg-clip-text text-transparent">
+              ReceptionistPlus
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">Vaša AI telefonska asistentka</p>
           </motion.div>
 
+          {provisioned === null && !error ? (
+            <div className="flex items-center justify-center py-16">
+              <GradientSpinner size={32} />
+            </div>
+          ) : error && provisioned === null ? (
+            <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
+              <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
+              <p className="text-sm text-red-700">Napaka pri nalaganju strani.</p>
+            </div>
+          ) : !provisioned ? (
+            <NotActivated />
+          ) : (
+            <>
+              {/* Tabs */}
+              <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm border border-gray-100 rounded-xl p-1 mb-6 w-fit">
+                {TABS.map(({ key, label, icon: Icon }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setTab(key)}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      tab === key
+                        ? 'bg-gray-900 text-white shadow-sm'
+                        : 'text-gray-500 hover:text-gray-900'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" weight={tab === key ? 'fill' : 'regular'} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {tab === 'nastavitve' && settings && (
+                <NastavitveTab settings={settings} onSave={saveSettings} />
+              )}
+              {tab === 'dnevnik' && <DnevnikTab />}
+              {tab === 'krediti' && <KreditiTab />}
+            </>
+          )}
         </div>
       </div>
-
-      {/* Settings Modal */}
-      <ReceptionistSettingsModal
-        isOpen={showSettingsModal}
-        onClose={() => setShowSettingsModal(false)}
-      />
     </ProtectedLayout>
   );
 }

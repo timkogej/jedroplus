@@ -72,8 +72,8 @@ export async function POST(request: NextRequest) {
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: [{ price: packConfig.priceId, quantity: 1 }],
-    success_url: `${origin}/nastavitve/receptionistplus-test?checkout=success`,
-    cancel_url: `${origin}/nastavitve/receptionistplus-test?checkout=canceled`,
+    success_url: `${origin}/receptionist-plus?tab=krediti&checkout=success`,
+    cancel_url: `${origin}/receptionist-plus?tab=krediti&checkout=canceled`,
     metadata: {
       product: 'receptionistplus_credits',
       company_slug: companySlug,

@@ -36,8 +36,9 @@ export const ROUTE_MIN_PLAN: Record<string, PlanCode> = {
   '/lost-leads': 'JEDRO_PRO',
   '/chatbot-plus': 'JEDRO_PRO',
 
-  // JEDRO_PREMIUM
-  '/receptionist-plus': 'JEDRO_PREMIUM',
+  // Note: /receptionist-plus is intentionally NOT plan-gated — access is
+  // entitlement-based (has the company been provisioned with ReceptionistPlus?),
+  // checked in the page itself, not by subscription tier.
 };
 
 /** Human-readable plan names (for the upgrade page). */

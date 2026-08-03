@@ -186,6 +186,9 @@ export default function ProtectedLayout({
       ) {
         return <RoleAccessGate message={t('roleAccessGate.billingOwnerOnly')} />;
       }
+      if (pathnameWithoutLocale === '/receptionist-plus') {
+        return <RoleAccessGate message={t('roleAccessGate.receptionistPlusOwnerOnly')} />;
+      }
       return null;
     }
 
@@ -194,6 +197,10 @@ export default function ProtectedLayout({
 
       if (pathnameWithoutLocale === '/nastavitve/paketi') {
         return <RoleAccessGate message={t('roleAccessGate.billingOwnerOnly')} />;
+      }
+
+      if (pathnameWithoutLocale === '/receptionist-plus') {
+        return <RoleAccessGate message={t('roleAccessGate.receptionistPlusOwnerOnly')} />;
       }
 
       // Stripe checkout status pages stay accessible for staff if they land there from an existing flow.

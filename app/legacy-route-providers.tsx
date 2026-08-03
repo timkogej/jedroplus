@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
+import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { Providers } from './providers';
+import './globals.css';
 import common from '@/messages/sl/common.json';
 import auth from '@/messages/sl/auth.json';
 import onboarding from '@/messages/sl/onboarding.json';
@@ -43,10 +45,39 @@ const messages = {
   resursi,
 };
 
+const geistSans = Geist({
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+});
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+});
+
+const playfair = Playfair_Display({
+  variable: '--font-serif',
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '500', '600'],
+  display: 'swap',
+});
+
+// Legacy top-level routes (/calendar, /bookings, /settings, /chatbot-plus,
+// /receptionist-plus, ...) live outside app/[locale], so they never pass
+// through app/[locale]/layout.tsx — the only place that otherwise renders
+// <html>/<body> and loads globals.css. app/layout.tsx (the true Next.js
+// root layout) deliberately renders nothing but `children` for that reason.
+// Without this shell, a genuinely fresh/server-rendered load of a legacy
+// route (as opposed to a client-side navigation into it from an already
+// mounted [locale] page) has no <html>/<body> and no CSS at all.
 export function LegacyRouteProviders({ children }: { children: ReactNode }) {
   return (
-    <NextIntlClientProvider locale="sl" messages={messages}>
-      <Providers>{children}</Providers>
-    </NextIntlClientProvider>
+    <html lang="sl">
+      <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}>
+        <NextIntlClientProvider locale="sl" messages={messages}>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }
