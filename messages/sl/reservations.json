@@ -4,10 +4,14 @@
     "subtitle": "Upravljanje spletnega sistema za rezervacije"
   },
   "incompleteBanner": {
-    "message": "Izpolnite nastavitve označene s ! za brezhibno delovanje in izkoriščanje celotnega potenciala rezervacij.",
+    "message": "Izberite glavni booking link v nastavitvah, da bo sistem vedel, kateri link pošiljati strankam.",
     "openButton": "Odpri nastavitve →"
   },
   "newDesignsBanner": "Vsak mesec novi dizajni za booking strani",
+  "requestsNav": {
+    "title": "Zahteve za termin",
+    "subtitle": "Preglejte in potrdite zahteve, ki jih pošljejo stranke"
+  },
   "multiChannelBanner": {
     "bold": "Vsak booking link lahko uporabite na drugem kanalu.",
     "body": "Na Instagram profilu en dizajn, na spletni strani drug, v email podpisu tretji – vsak kanal ima lahko svojega. Stranke vsakič pristanejo na isti vaši strani, samo z drugačnim videzom."
@@ -82,6 +86,7 @@
     "onlineConfirm": "Potrdilo po spletni rezervaciji",
     "mainLinkLabel": "Glavni booking link",
     "linkSet": "Nastavljen",
+    "notConfigured": "Ni nastavljen",
     "colors": "Barve",
     "mgmtLinkLabel": "Link za prenaročanje in odpoved",
     "yes": "Da",
@@ -128,6 +133,8 @@
       "selectLabel": "Izberi glavni booking link",
       "selectDesc": "Ta link se bo uporabljal pri pošiljanju rezervacij strankam",
       "selectPlaceholder": "Izberi link...",
+      "missingRequired": "Izberite glavni booking link.",
+      "noLinksAvailable": "Booking linki še niso na voljo",
       "classic": "Klasičen",
       "modern": "Moderen",
       "minimal": "Minimalen",

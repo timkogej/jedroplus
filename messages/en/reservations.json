@@ -4,10 +4,14 @@
     "subtitle": "Manage your online booking page"
   },
   "incompleteBanner": {
-    "message": "Complete the settings marked with ! for a fully functional booking experience.",
+    "message": "Select a main booking link in settings so the system knows which link to send to clients.",
     "openButton": "Open settings →"
   },
   "newDesignsBanner": "New booking page designs every month",
+  "requestsNav": {
+    "title": "Booking requests",
+    "subtitle": "Review and confirm requests submitted by clients"
+  },
   "multiChannelBanner": {
     "bold": "Use each booking link on a different channel.",
     "body": "One design on your Instagram profile, another on your website, a third in your email signature – every channel can have its own. Clients always land on your page, just with a different look."
@@ -82,6 +86,7 @@
     "onlineConfirm": "Online booking confirmation",
     "mainLinkLabel": "Main booking link",
     "linkSet": "Configured",
+    "notConfigured": "Not configured",
     "colors": "Colors",
     "mgmtLinkLabel": "Rescheduling & cancellation link",
     "yes": "Yes",
@@ -128,6 +133,8 @@
       "selectLabel": "Select main booking link",
       "selectDesc": "This link will be used when sending booking confirmations to clients",
       "selectPlaceholder": "Select link...",
+      "missingRequired": "Select a main booking link.",
+      "noLinksAvailable": "Booking links are not available yet",
       "classic": "Classic",
       "modern": "Modern",
       "minimal": "Minimal",

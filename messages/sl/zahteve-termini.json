@@ -1,0 +1,71 @@
+{
+  "page": {
+    "title": "Zahteve za termin",
+    "subtitle": "Preglejte zahteve strank in potrdite točen termin",
+    "backLink": "Nazaj na Rezervacije"
+  },
+  "filters": {
+    "all": "Vse",
+    "pending": "V pregledu",
+    "confirmed": "Potrjeno",
+    "rejected": "Zavrnjeno"
+  },
+  "empty": {
+    "title": "Ni zahtev",
+    "subtitle": "Nove zahteve za termin strank se bodo prikazale tukaj."
+  },
+  "loadError": "Nalaganje zahtev za termin ni uspelo.",
+  "status": {
+    "v_pregledu": "V pregledu",
+    "potrjeno": "Potrjeno",
+    "zavrnjeno": "Zavrnjeno"
+  },
+  "delDneva": {
+    "dopoldan": "Dopoldan",
+    "popoldan": "Popoldan",
+    "vseeno": "Vseeno"
+  },
+  "card": {
+    "preferredRange": "Želeno: {from} – {to}",
+    "requested": "Zahtevano {date}",
+    "confirm": "Potrdi",
+    "reject": "Zavrni",
+    "rejectedReason": "Razlog: {reason}"
+  },
+  "rejectModal": {
+    "title": "Zavrni zahtevo",
+    "subtitle": "Obvestite {name}, zakaj termina ni mogoče razporediti.",
+    "reasonLabel": "Razlog",
+    "reasonPlaceholder": "Npr. ni prostih terminov v želenem obdobju",
+    "reasonRequired": "Vnesite razlog.",
+    "cancel": "Prekliči",
+    "confirm": "Zavrni zahtevo",
+    "rejecting": "Zavračanje...",
+    "success": "Zahteva zavrnjena.",
+    "error": "Zavrnitev zahteve ni uspela."
+  },
+  "confirmModal": {
+    "title": "Potrdi zahtevo",
+    "subtitle": "Dodelite storitev in osebo, nato izberite termin.",
+    "steps": {
+      "service": "Storitev",
+      "employee": "Oseba",
+      "slot": "Datum in ura"
+    },
+    "serviceLabel": "Storitev",
+    "servicePlaceholder": "Izberite storitev...",
+    "employeeLabel": "Oseba",
+    "employeePlaceholder": "Izberite osebo...",
+    "loadingSlots": "Iskanje prostih terminov...",
+    "noSlots": "V želenem obdobju ni prostih terminov.",
+    "slotsError": "Nalaganje prostih terminov ni uspelo.",
+    "back": "Nazaj",
+    "next": "Naprej",
+    "confirmButton": "Potrdi termin",
+    "confirming": "Potrjevanje...",
+    "success": "Termin potrjen.",
+    "error": "Potrditev termina ni uspela.",
+    "unavailableDay": "Nedosegljivo",
+    "fullyBookedDay": "Zasedeno"
+  }
+}

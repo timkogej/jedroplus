@@ -14,9 +14,12 @@ import {
   Check,
   Link,
   Warning,
+  ClipboardText,
+  CaretRight,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
+import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
@@ -318,7 +321,18 @@ export default function RezervacijeClient({
     );
   }
 
-  const hasIncompleteSettings = !loading && !settings.mainBookingLink.trim();
+  const availableBookingLinks = [
+    settings.bookingLink1,
+    settings.bookingLink2,
+    settings.bookingLink3,
+    settings.bookingLink4,
+    settings.bookingLink5,
+    settings.bookingLink6,
+  ].filter((link) => String(link).trim());
+  const hasBookingLinksAvailable = availableBookingLinks.length > 0;
+  const hasMainBookingLink = Boolean(settings.mainBookingLink.trim());
+  const hasIncompleteSettings =
+    !loading && settings.bookingOmogocen && hasBookingLinksAvailable && !hasMainBookingLink;
   const renderDesignCard = (design: BookingDesign) => {
     const designUrl = getDesignLink(design);
     const isCopied = copiedDesignId === design.id;
@@ -414,8 +428,9 @@ export default function RezervacijeClient({
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
+      <main className="relative isolate min-h-screen bg-white">
+        <AmbientBottomGlow tone="turquoise" />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -472,6 +487,24 @@ export default function RezervacijeClient({
               )}
             </motion.div>
           )}
+
+          {/* Zahteve za termin nav card */}
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -1 }}
+            onClick={() => router.push('/rezervacije/zahteve')}
+            className="mb-3 flex w-full items-center gap-3 rounded-lg border border-gray-200 bg-white px-5 py-4 text-left shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-violet-50">
+              <ClipboardText className="h-4 w-4 text-violet-600" weight="bold" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-gray-900">{t('requestsNav.title')}</p>
+              <p className="text-xs text-gray-500">{t('requestsNav.subtitle')}</p>
+            </div>
+            <CaretRight className="h-4 w-4 flex-shrink-0 text-gray-400" weight="bold" />
+          </motion.button>
 
           <div className="mb-6 grid gap-3 lg:grid-cols-[0.85fr_1.15fr]">
             <motion.div
@@ -608,7 +641,7 @@ export default function RezervacijeClient({
               </motion.div>
 
               {/* Main Booking Link */}
-              {settings.mainBookingLink && (
+              {hasMainBookingLink && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -802,21 +835,23 @@ export default function RezervacijeClient({
                   </div>
 
                   {/* Main Booking Link row */}
-                  {settings.mainBookingLink && (
+                  {(hasBookingLinksAvailable || hasMainBookingLink) && (
                     <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
                       <div className="flex items-center gap-2">
                         <Link className="w-4 h-4 text-gray-400" weight="regular" />
                         <span className="text-sm font-medium text-gray-700">{t('settingsOverview.mainLinkLabel')}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-violet-400" />
-                        <span className="text-sm font-semibold text-violet-600">{t('settingsOverview.linkSet')}</span>
+                        <div className={cn("w-2.5 h-2.5 rounded-full", hasMainBookingLink ? "bg-violet-400" : "bg-orange-500")} />
+                        <span className={cn("text-sm font-semibold", hasMainBookingLink ? "text-violet-600" : "text-orange-600")}>
+                          {hasMainBookingLink ? t('settingsOverview.linkSet') : t('settingsOverview.notConfigured')}
+                        </span>
                       </div>
                     </div>
                   )}
 
                   {/* Colors */}
-                  <div className={`flex items-center justify-between py-2.5 ${(settings.apptManagementLink || settings.mainBookingLink) ? 'border-b border-gray-100' : ''}`}>
+                  <div className={`flex items-center justify-between py-2.5 ${(settings.apptManagementLink || hasMainBookingLink) ? 'border-b border-gray-100' : ''}`}>
                     <div className="flex items-center gap-2">
                       <Palette className="w-4 h-4 text-gray-400" weight="regular" />
                       <span className="text-sm font-medium text-gray-700">{t('settingsOverview.colors')}</span>

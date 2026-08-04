@@ -21,10 +21,11 @@ const N8N_BASE_URL = process.env.N8N_WEBHOOK_URL || 'https://n8n.jedroplus.com/w
 const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 
 // Webhook paths callers actually use (see lib/api/billingClient.ts,
-// app/chatbot-plus/page.tsx, components/asistent/AssistantChat.tsx).
+// app/chatbot-plus/page.tsx, components/asistent/AssistantChat.tsx,
+// lib/bookingRequests.ts).
 // Entries ending in "/" are namespace prefixes; the rest are exact endpoints.
 const ALLOWED_PATH_PREFIXES = ['onboarding/', 'billing/', 'sms/'];
-const ALLOWED_EXACT_PATHS = ['chatbot-plus-message', 'asistent'];
+const ALLOWED_EXACT_PATHS = ['chatbot-plus-message', 'asistent', 'booking-v2'];
 
 function isPathAllowed(path: string): boolean {
   return (

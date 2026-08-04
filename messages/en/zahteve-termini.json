@@ -1,0 +1,71 @@
+{
+  "page": {
+    "title": "Booking requests",
+    "subtitle": "Review requests submitted by clients and confirm an exact time",
+    "backLink": "Back to Reservations"
+  },
+  "filters": {
+    "all": "All",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "rejected": "Rejected"
+  },
+  "empty": {
+    "title": "No requests here",
+    "subtitle": "New booking requests from clients will show up here."
+  },
+  "loadError": "Failed to load booking requests.",
+  "status": {
+    "v_pregledu": "Pending review",
+    "potrjeno": "Confirmed",
+    "zavrnjeno": "Rejected"
+  },
+  "delDneva": {
+    "dopoldan": "Morning",
+    "popoldan": "Afternoon",
+    "vseeno": "Any time"
+  },
+  "card": {
+    "preferredRange": "Preferred: {from} – {to}",
+    "requested": "Requested {date}",
+    "confirm": "Confirm",
+    "reject": "Reject",
+    "rejectedReason": "Reason: {reason}"
+  },
+  "rejectModal": {
+    "title": "Reject request",
+    "subtitle": "Let {name} know why this request can't be scheduled.",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "E.g. no availability in the requested period",
+    "reasonRequired": "Enter a reason.",
+    "cancel": "Cancel",
+    "confirm": "Reject request",
+    "rejecting": "Rejecting...",
+    "success": "Request rejected.",
+    "error": "Failed to reject the request."
+  },
+  "confirmModal": {
+    "title": "Confirm request",
+    "subtitle": "Assign a service and staff member, then pick a time.",
+    "steps": {
+      "service": "Service",
+      "employee": "Staff member",
+      "slot": "Date & time"
+    },
+    "serviceLabel": "Service",
+    "servicePlaceholder": "Select service...",
+    "employeeLabel": "Staff member",
+    "employeePlaceholder": "Select staff member...",
+    "loadingSlots": "Looking for available times...",
+    "noSlots": "No available times in the requested period.",
+    "slotsError": "Failed to load available times.",
+    "back": "Back",
+    "next": "Next",
+    "confirmButton": "Confirm appointment",
+    "confirming": "Confirming...",
+    "success": "Appointment confirmed.",
+    "error": "Failed to confirm the appointment.",
+    "unavailableDay": "Unavailable",
+    "fullyBookedDay": "Fully booked"
+  }
+}
