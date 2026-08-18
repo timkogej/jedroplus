@@ -18,6 +18,7 @@ import {
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useCompany } from '@/app/company-context';
+import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import {
   SettingsSection,
   SettingRow,
@@ -34,18 +35,7 @@ import {
 // #6D5EF7 -> #2F80ED -> #2AD4C5 tokens), weighted toward purple since it
 // "shines" from below. Subtle, low-opacity, non-interactive.
 function BrandGlow() {
-  return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden">
-      <div
-        className="absolute left-1/2 bottom-[-30%] h-[70vh] w-[140vw] -translate-x-1/2 rounded-full opacity-[0.16]"
-        style={{
-          background:
-            'radial-gradient(closest-side, #6D5EF7 0%, #2F80ED 45%, #2AD4C5 75%, transparent 100%)',
-          filter: 'blur(90px)',
-        }}
-      />
-    </div>
-  );
+  return <AmbientBottomGlow tone="brand" className="h-[48vh]" />;
 }
 
 // ─── Tabs ───────────────────────────────────────────────────────────────────
@@ -646,7 +636,15 @@ export default function ReceptionistPlusPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-[#6D5EF7] via-[#2F80ED] to-[#2AD4C5] bg-clip-text text-transparent">
+            <h1
+              className="inline-block text-3xl font-bold text-transparent"
+              style={{
+                background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 52%, #2AD4C5 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
               ReceptionistPlus
             </h1>
             <p className="mt-1 text-sm text-gray-500">Vaša AI telefonska asistentka</p>

@@ -145,6 +145,15 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const actor = user?.email ?? 'unknown';
   const hasProPlan = isJedroProPlan(planCode);
   const hasOnlinePaymentAccess = hasProPlan && hasPosSubscription;
+  const bookingLinkOptions = [
+    { value: bookingLink1, label: t('modal.mainLink.classic') },
+    { value: bookingLink2, label: t('modal.mainLink.modern') },
+    { value: bookingLink3, label: t('modal.mainLink.minimal') },
+    { value: bookingLink4, label: t('modal.mainLink.seasonal') },
+    { value: bookingLink5, label: t('modal.mainLink.magazine') },
+  ].filter((option) => option.value.trim());
+  const hasBookingLinkOptions = bookingLinkOptions.length > 0;
+  const needsMainBookingLink = hasBookingLinkOptions && !mainBookingLink.trim();
 
   // Variable estimated lengths for SMS character counting
   const smsVarLengths: Record<string, number> = {
@@ -486,20 +495,35 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                   {/* Main Booking Link */}
                   <SettingsSection title={t('modal.mainLink.sectionTitle')} description={t('modal.mainLink.sectionDesc')}>
                     <SettingRow
-                      label={t('modal.mainLink.selectLabel')}
+                      label={(
+                        <span className="inline-flex items-center gap-2">
+                          {t('modal.mainLink.selectLabel')}
+                          {needsMainBookingLink && (
+                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold leading-none text-white">
+                              !
+                            </span>
+                          )}
+                        </span>
+                      )}
                       description={t('modal.mainLink.selectDesc')}
+                      error={needsMainBookingLink ? t('modal.mainLink.missingRequired') : undefined}
                     >
                       <Select
                         value={mainBookingLink}
                         setValue={setMainBookingLink}
-                        placeholder={t('modal.mainLink.selectPlaceholder')}
+                        placeholder={
+                          hasBookingLinkOptions
+                            ? t('modal.mainLink.selectPlaceholder')
+                            : t('modal.mainLink.noLinksAvailable')
+                        }
+                        disabled={!hasBookingLinkOptions}
                         className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
                       >
-                        {bookingLink1 && <SelectOption value={bookingLink1}>{t('modal.mainLink.classic')}</SelectOption>}
-                        {bookingLink2 && <SelectOption value={bookingLink2}>{t('modal.mainLink.modern')}</SelectOption>}
-                        {bookingLink3 && <SelectOption value={bookingLink3}>{t('modal.mainLink.minimal')}</SelectOption>}
-                        {bookingLink4 && <SelectOption value={bookingLink4}>{t('modal.mainLink.seasonal')}</SelectOption>}
-                        {bookingLink5 && <SelectOption value={bookingLink5}>{t('modal.mainLink.magazine')}</SelectOption>}
+                        {bookingLinkOptions.map((option) => (
+                          <SelectOption key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectOption>
+                        ))}
                       </Select>
                     </SettingRow>
                     {mainBookingLink && (
@@ -583,7 +607,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                                     value={smsTemplatePotrdilo}
                                     onChange={setSmsTemplatePotrdilo}
                                     maxLength={155}
-                                    placeholder={t('modal.confirmations.templatePlaceholder')}
+                                    placeholder={String(t.raw('modal.confirmations.templatePlaceholder'))}
                                     rows={4}
                                     varLengths={smsVarLengths}
                                   />

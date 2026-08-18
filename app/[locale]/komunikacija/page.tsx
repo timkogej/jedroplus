@@ -12,6 +12,7 @@ import {
   CaretRight,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
+import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import CustomerList from '@/components/komunikacija/CustomerList';
 import AIMessageGenerator from '@/components/komunikacija/AIMessageGenerator';
 import MessageComposer from '@/components/komunikacija/MessageComposer';
@@ -507,8 +508,9 @@ export default function KomunikacijaPage() {
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-white">
-        <div className="mx-auto max-w-2xl px-4 sm:px-6 py-6 sm:py-8">
+      <main className="relative isolate min-h-screen bg-white">
+        <AmbientBottomGlow tone="turquoise" />
+        <div className="relative z-10 mx-auto max-w-2xl px-4 sm:px-6 py-6 sm:py-8">
 
           {/* Header */}
           <div className="flex items-start justify-between mb-6">

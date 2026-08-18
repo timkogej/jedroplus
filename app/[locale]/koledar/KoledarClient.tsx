@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ProtectedLayout from '@/components/ProtectedLayout';
+import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import Calendar from '@/components/Calendar';
@@ -42,12 +43,15 @@ export default function KoledarClient({ initialData }: { initialData: CalendarIn
     <ProtectedLayout>
       {/* Fixed height layout - calendar content scrolls within the available space */}
       {/* 4rem = 64px for the app bar */}
-      <div className="h-[calc(100vh-4rem)] overflow-hidden">
-        <Calendar
-          companyId={companyId}
-          initialEmployeeId={userPersonId}
-          initialData={initialData ?? undefined}
-        />
+      <div className="relative isolate h-[calc(100vh-4rem)] overflow-hidden bg-white">
+        <AmbientBottomGlow tone="purple" />
+        <div className="relative z-10 h-full">
+          <Calendar
+            companyId={companyId}
+            initialEmployeeId={userPersonId}
+            initialData={initialData ?? undefined}
+          />
+        </div>
       </div>
     </ProtectedLayout>
   );

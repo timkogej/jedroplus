@@ -1,7 +1,7 @@
 'use client';
 
 interface SettingRowProps {
-  label: string;
+  label: React.ReactNode;
   description?: string;
   children: React.ReactNode;
   error?: string;

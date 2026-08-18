@@ -810,7 +810,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   value={smsTemplatePred}
                                   onChange={setSmsTemplatePred}
                                   maxLength={155}
-                                  placeholder={t('modal.before.templatePlaceholder')}
+                                  placeholder={String(t.raw('modal.before.templatePlaceholder'))}
                                   rows={4}
                                   varLengths={smsVarLengths}
                                 />
@@ -966,7 +966,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   value={smsTemplatePo}
                                   onChange={setSmsTemplatePo}
                                   maxLength={155}
-                                  placeholder={t('modal.after.templatePlaceholder')}
+                                  placeholder={String(t.raw('modal.after.templatePlaceholder'))}
                                   rows={4}
                                   varLengths={smsVarLengths}
                                 />

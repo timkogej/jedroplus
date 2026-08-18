@@ -15,6 +15,7 @@ import {
   DownloadSimple,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
+import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import AppointmentFilters, { type FilterState } from '@/components/appointments/AppointmentFilters';
@@ -775,8 +776,9 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-8">
+      <main className="relative isolate min-h-screen bg-white">
+        <AmbientBottomGlow tone="purple" />
+        <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}

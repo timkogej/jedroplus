@@ -12,6 +12,9 @@ const columnCache = new Map<string, string>();
 const columnFailedTables = new Set<string>(); // tables where all candidates failed
 const columnPending = new Map<string, Promise<string>>();
 
+const orderColumnCache = new Map<string, string | null>();
+const orderColumnPending = new Map<string, Promise<string | null>>();
+
 type CompanyScopedResult<T> = {
   data: T[] | null;
   error: string | null;
@@ -97,10 +100,54 @@ export function resolveCompanyTables(settings?: Record<string, unknown> | null) 
   };
 }
 
+// Detect which of a set of candidate columns exists on the table, so we can
+// order by it (e.g. a date/timestamp column). Without this, Postgres/PostgREST
+// returns rows in an unspecified order, and a `.limit()` on a table with more
+// rows than the limit can silently drop the newest (e.g. just-inserted-by-n8n)
+// rows instead of the oldest.
+export async function detectOrderColumn(
+  tableName: string,
+  companyColumn: string,
+  companyId: string,
+  candidates: string[]
+): Promise<string | null> {
+  const cacheKey = `${tableName}:${candidates.join(",")}`;
+  const cached = orderColumnCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
+  const pending = orderColumnPending.get(cacheKey);
+  if (pending) return pending;
+
+  const detection = (async () => {
+    for (const candidate of candidates) {
+      const { error } = await supabaseReadOnly
+        .from(tableName)
+        .select(candidate)
+        .eq(companyColumn, companyId)
+        .order(candidate, { ascending: false })
+        .limit(1);
+
+      if (!error) {
+        orderColumnCache.set(cacheKey, candidate);
+        orderColumnPending.delete(cacheKey);
+        return candidate;
+      }
+    }
+
+    orderColumnCache.set(cacheKey, null);
+    orderColumnPending.delete(cacheKey);
+    return null;
+  })();
+
+  orderColumnPending.set(cacheKey, detection);
+  return detection;
+}
+
 export async function fetchTableRows<T>(
   tableName: string,
   companyId: string,
-  limit = 200
+  limit = 200,
+  orderByCandidates?: string[]
 ): Promise<CompanyScopedResult<T>> {
   // Return empty result if companyId is not valid
   if (!companyId || companyId.trim() === "") {
@@ -109,11 +156,24 @@ export async function fetchTableRows<T>(
 
   try {
     const companyColumn = await getCompanyColumnForTable(tableName, companyId);
-    const { data, error } = await supabaseReadOnly
+    let query = supabaseReadOnly
       .from(tableName)
       .select("*")
-      .eq(companyColumn, companyId)
-      .limit(limit);
+      .eq(companyColumn, companyId);
+
+    if (orderByCandidates && orderByCandidates.length > 0) {
+      const orderColumn = await detectOrderColumn(
+        tableName,
+        companyColumn,
+        companyId,
+        orderByCandidates
+      );
+      if (orderColumn) {
+        query = query.order(orderColumn, { ascending: false });
+      }
+    }
+
+    const { data, error } = await query.limit(limit);
 
     return { data: data as T[] | null, error: error?.message ?? null };
   } catch (error) {

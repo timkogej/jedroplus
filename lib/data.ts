@@ -1,6 +1,15 @@
 import { supabaseReadOnly } from "@/src/lib/supabaseReadOnly";
-import { getCompanyColumnForTable } from "./companyScope";
+import { getCompanyColumnForTable, detectOrderColumn } from "./companyScope";
 import { detectIdColumn, detectPrimaryKey } from "./tableIntrospection";
+
+// Same candidate columns used to order bookings elsewhere (see
+// lib/supabase/appointments.ts BOOKING_ORDER_CANDIDATES) — without an ORDER BY,
+// a `.limit()` on a table with more rows than the limit returns an arbitrary
+// subset and can silently drop the newest bookings.
+const BOOKING_ORDER_CANDIDATES = [
+  "start_at", "Start", "startAt", "Zacetek", "začetek",
+  "Datum", "datum", "date", "Date", "start_date", "booking_date",
+];
 
 export const TABLES = {
   clients: "Stranke",
@@ -41,11 +50,20 @@ export async function fetchClients(companyId: string, limit = 500) {
 
 export async function fetchBookings(companyId: string, limit = 1000) {
   const companyColumn = await getCompanyColumnForTable(TABLES.bookings, companyId);
-  return supabaseReadOnly
+  const orderColumn = await detectOrderColumn(
+    TABLES.bookings,
+    companyColumn,
+    companyId,
+    BOOKING_ORDER_CANDIDATES
+  );
+  let query = supabaseReadOnly
     .from(TABLES.bookings)
     .select("*")
-    .eq(companyColumn, companyId)
-    .limit(limit);
+    .eq(companyColumn, companyId);
+  if (orderColumn) {
+    query = query.order(orderColumn, { ascending: false });
+  }
+  return query.limit(limit);
 }
 
 export async function getClientIdentifier(row: Record<string, unknown>) {

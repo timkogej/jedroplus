@@ -13,6 +13,7 @@ import {
   Warning,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
+import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
@@ -434,8 +435,9 @@ export default function RemindersPage() {
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+      <main className="relative isolate min-h-screen bg-white">
+        <AmbientBottomGlow tone="turquoise" />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

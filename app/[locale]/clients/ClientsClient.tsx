@@ -19,6 +19,7 @@ import {
   CaretDown,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
+import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useRolePermissions } from '@/app/role-permission-context';
@@ -614,8 +615,9 @@ export default function ClientsClient({
 
   return (
     <ProtectedLayout>
-      <main className="min-h-screen bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-8">
+      <main className="relative isolate min-h-screen bg-white">
+        <AmbientBottomGlow tone="purple" />
+        <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>

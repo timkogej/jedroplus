@@ -8,6 +8,16 @@ import { supabase } from '@/lib/supabaseClient';
 // If the 'absences' table doesn't exist skip future queries to avoid repeated 400 errors.
 let absencesTableMissing = false;
 
+// Same candidate columns detectBookingSchema() looks for (see dashboardHelpers.ts),
+// tried in the order most likely to be an actual sortable timestamp/date column.
+// Used so `fetchTableRows` orders by the newest booking first: without this, a
+// `.limit()` on a company with more bookings than the limit could silently drop
+// the most recently inserted rows instead of the oldest.
+const BOOKING_ORDER_CANDIDATES = [
+  'start_at', 'Start', 'startAt', 'Zacetek', 'začetek',
+  'Datum', 'datum', 'date', 'Date', 'start_date', 'booking_date',
+];
+
 const CLIENT_ID_FIELDS = ['ID stranke', 'id', 'ID_stranke', 'client_id'];
 const CLIENT_LAST_NAME_FIELDS = ['Priimek', 'priimek', 'last_name', 'lastName', 'surname'];
 const LANGUAGE_FIELDS = ['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language'];
@@ -295,7 +305,7 @@ export async function fetchAppointmentsForMonth(
   try {
     // Fetch all bookings, services, staff, and clients
     const [bookingsRes, servicesRes, staffRes, clientsRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000),
+      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000, BOOKING_ORDER_CANDIDATES),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
       fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),
@@ -589,7 +599,7 @@ export async function fetchAppointmentById(
 ): Promise<{ data: AppointmentWithDetails | null; error: Error | null }> {
   try {
     const [bookingsRes, servicesRes, staffRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000),
+      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000, BOOKING_ORDER_CANDIDATES),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
     ]);
@@ -772,7 +782,7 @@ export async function fetchAllAppointments(
   try {
     // Fetch all bookings, services, staff, and clients
     const [bookingsRes, servicesRes, staffRes, clientsRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
+      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000, BOOKING_ORDER_CANDIDATES),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
       fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),

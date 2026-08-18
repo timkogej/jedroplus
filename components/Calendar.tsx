@@ -2555,7 +2555,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   }, [currentView, currentDate, filteredAppointments]);
 
   return (
-    <div className="flex h-full bg-white">
+    <div className="flex h-full bg-transparent">
       {/* Main calendar area - takes available space */}
       <main className="flex flex-1 flex-col overflow-hidden">
         {/* Header – Apple Calendar style */}

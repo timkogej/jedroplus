@@ -7,6 +7,12 @@ import type { Client, ClientWithAppointments, ClientAppointment, ClientStats, Ge
 // Re-export Client type for backward compatibility
 export type { Client } from '@/types/clients';
 
+// Same candidates as detectClientSchema()'s createdAtField, tried in order.
+// Used so `fetchTableRows` orders by newest client first: without this, a
+// `.limit()` on a company with more clients than the limit returns an
+// arbitrary subset and can silently drop the most recently added clients.
+const CLIENT_ORDER_CANDIDATES = ['Datum vpisa', 'datum_vpisa', 'created_at', 'Created', 'datum_vnosa', 'Datum vnosa'];
+
 // Detect client schema from a row
 function detectClientSchema(row: Record<string, unknown>) {
   const keys = Object.keys(row);
@@ -187,7 +193,7 @@ export async function fetchClientsWithCount(companyId: string): Promise<{
 }> {
   try {
     // Fetch clients
-    const clientsResult = await fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 1000);
+    const clientsResult = await fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 1000, CLIENT_ORDER_CANDIDATES);
 
     if (clientsResult.error) {
       throw new Error(clientsResult.error);

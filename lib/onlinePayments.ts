@@ -1,5 +1,23 @@
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 
+type SupabaseQueryError = {
+  code?: string;
+  message?: string;
+};
+
+const POS_SUBSCRIPTION_TABLES = ['pos_subscriptions', 'pos subscriptions'];
+
+function isMissingRelationError(error: SupabaseQueryError): boolean {
+  const message = String(error.message ?? '').toLowerCase();
+  return (
+    error.code === '42P01' ||
+    error.code === 'PGRST106' ||
+    error.code === 'PGRST205' ||
+    message.includes('could not find the table') ||
+    message.includes('schema cache')
+  );
+}
+
 export function isJedroProPlan(planCode?: string | null): boolean {
   const normalized = String(planCode ?? '').toUpperCase().replace(/[\s-]+/g, '_');
   return normalized === 'JEDRO_PRO' || normalized === 'JEDRO_PREMIUM';
@@ -20,19 +38,25 @@ export async function hasPosOnlinePaymentsSubscription(companyUuid?: string | nu
   if (!companyUuid) return false;
 
   try {
-    const { data, error } = await supabaseReadOnly
-      .from('pos subscriptions')
-      .select('plan')
-      .eq('company_id', companyUuid)
-      .in('plan', ['pro', 'plus'])
-      .limit(1);
+    for (const table of POS_SUBSCRIPTION_TABLES) {
+      const { data, error } = await supabaseReadOnly
+        .from(table)
+        .select('plan')
+        .eq('company_id', companyUuid)
+        .in('plan', ['pro', 'plus'])
+        .limit(1);
 
-    if (error) {
-      console.warn('[onlinePayments] Unable to read POS subscription:', error.message);
-      return false;
+      if (!error) {
+        return (data ?? []).some((row) => ['pro', 'plus'].includes(String(row.plan ?? '').toLowerCase()));
+      }
+
+      if (!isMissingRelationError(error)) {
+        console.warn('[onlinePayments] Unable to read POS subscription:', error.message);
+        return false;
+      }
     }
 
-    return (data ?? []).some((row) => ['pro', 'plus'].includes(String(row.plan ?? '').toLowerCase()));
+    return false;
   } catch (error) {
     console.warn('[onlinePayments] POS subscription check failed:', error);
     return false;
