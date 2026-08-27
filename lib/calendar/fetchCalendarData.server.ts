@@ -56,6 +56,8 @@ const COMPANY_COLUMN_CANDIDATES = [
   "companyId",
 ];
 
+const DATE_COLUMN = "Datum";
+
 const isMissingColumnError = (error: { message?: string; code?: string }) => {
   if (error.code === "42703") return true;
   if (!error.message) return false;
@@ -66,19 +68,76 @@ async function fetchTableOnce(
   supabase: ServerClient,
   tableName: string,
   companyId: string,
-  limit: number
+  orderColumn?: string
 ): Promise<Row[]> {
   for (const col of COMPANY_COLUMN_CANDIDATES) {
-    const { data, error } = await supabase
-      .from(tableName)
-      .select("*")
-      .eq(col, companyId)
-      .limit(limit);
-    if (!error) return (data as Row[] | null) ?? [];
-    if (!isMissingColumnError(error)) {
-      console.warn(`[Calendar.server] ${tableName} fetch error:`, error.message);
-      return [];
+    const rows: Row[] = [];
+    let columnExists = false;
+
+    for (let from = 0; ; from += 1000) {
+      let query = supabase
+        .from(tableName)
+        .select("*")
+        .eq(col, companyId);
+
+      if (orderColumn) {
+        query = query.order(orderColumn, { ascending: false });
+      }
+
+      const { data, error } = await query.range(from, from + 999);
+
+      if (error) {
+        if (isMissingColumnError(error)) break;
+        console.warn(`[Calendar.server] ${tableName} fetch error:`, error.message);
+        return [];
+      }
+
+      columnExists = true;
+      const page = (data as Row[] | null) ?? [];
+      rows.push(...page);
+
+      if (page.length < 1000) return rows;
     }
+
+    if (columnExists) return rows;
+  }
+  return [];
+}
+
+async function fetchBookingsForMonth(
+  supabase: ServerClient,
+  companyId: string,
+  fromInclusive: string,
+  toExclusive: string
+): Promise<Row[]> {
+  for (const col of COMPANY_COLUMN_CANDIDATES) {
+    const rows: Row[] = [];
+    let columnExists = false;
+
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from(TABLES.bookings)
+        .select("*")
+        .eq(col, companyId)
+        .gte(DATE_COLUMN, fromInclusive)
+        .lt(DATE_COLUMN, toExclusive)
+        .order(DATE_COLUMN, { ascending: false })
+        .range(from, from + 999);
+
+      if (error) {
+        if (isMissingColumnError(error)) break;
+        console.warn(`[Calendar.server] Termini fetch error:`, error.message);
+        return [];
+      }
+
+      columnExists = true;
+      const page = (data as Row[] | null) ?? [];
+      rows.push(...page);
+
+      if (page.length < 1000) return rows;
+    }
+
+    if (columnExists) return rows;
   }
   return [];
 }
@@ -574,13 +633,16 @@ export async function fetchCalendarDataServer(companyId: string): Promise<Calend
   const year = now.getFullYear();
   const month = now.getMonth();
   const todayStr = now.toISOString().split("T")[0];
+  const monthStart = `${year}-${String(month + 1).padStart(2, "0")}-01`;
+  const nextMonthDate = new Date(year, month + 1, 1);
+  const nextMonthStart = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}-01`;
 
   const [bookings, services, staff, clients, absences, events, activeResursi, terminResursiLinks] =
     await Promise.all([
-      fetchTableOnce(supabase, TABLES.bookings, companyId, 2000),
-      fetchTableOnce(supabase, TABLES.services, companyId, 500),
-      fetchTableOnce(supabase, TABLES.staff, companyId, 200),
-      fetchTableOnce(supabase, TABLES.clients, companyId, 2000),
+      fetchBookingsForMonth(supabase, companyId, monthStart, nextMonthStart),
+      fetchTableOnce(supabase, TABLES.services, companyId),
+      fetchTableOnce(supabase, TABLES.staff, companyId),
+      fetchTableOnce(supabase, TABLES.clients, companyId),
       buildAbsences(supabase, companyId),
       buildEvents(supabase, companyId, todayStr, todayStr),
       buildActiveResursi(supabase, companyId),

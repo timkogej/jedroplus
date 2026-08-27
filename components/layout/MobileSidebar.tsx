@@ -23,7 +23,7 @@ import {
 } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
-import { fetchTableRows } from '@/lib/companyScope';
+import { fetchAllTableRows, fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst } from '@/lib/dashboardHelpers';
 
@@ -115,7 +115,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
       }
 
       // Fetch all bookings
-      const bookingsRes = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000);
+      const bookingsRes = await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId);
       const bookings = bookingsRes.data ?? [];
 
       const now = new Date();

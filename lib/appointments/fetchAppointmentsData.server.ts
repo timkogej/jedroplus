@@ -84,20 +84,35 @@ const isMissingColumnError = (error: { message?: string; code?: string }) => {
 async function fetchTableOnce(
   supabase: ServerClient,
   tableName: string,
-  companyId: string,
-  limit: number
+  companyId: string
 ): Promise<Row[]> {
   for (const col of COMPANY_COLUMN_CANDIDATES) {
-    const { data, error } = await supabase
-      .from(tableName)
-      .select("*")
-      .eq(col, companyId)
-      .limit(limit);
-    if (!error) return (data as Row[] | null) ?? [];
-    if (!isMissingColumnError(error)) {
-      console.warn(`[Appointments.server] ${tableName} fetch error:`, error.message);
-      return [];
+    const rows: Row[] = [];
+    let columnExists = false;
+
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select("*")
+        .eq(col, companyId)
+        .range(from, from + 999);
+
+      if (error) {
+        if (isMissingColumnError(error)) break;
+        console.warn(`[Appointments.server] ${tableName} fetch error:`, error.message);
+        return [];
+      }
+
+      columnExists = true;
+      const page = (data as Row[] | null) ?? [];
+      rows.push(...page);
+
+      if (page.length < 1000) {
+        return rows;
+      }
     }
+
+    if (columnExists) return rows;
   }
   return [];
 }
@@ -111,27 +126,59 @@ async function fetchBookingsFrom(
   fromDate: string
 ): Promise<Row[]> {
   for (const col of COMPANY_COLUMN_CANDIDATES) {
-    const { data, error } = await supabase
-      .from(TABLES.bookings)
-      .select("*")
-      .eq(col, companyId)
-      .gte(DATE_COLUMN, fromDate)
-      .limit(5000);
-    if (!error) return (data as Row[] | null) ?? [];
-    if (isMissingColumnError(error)) {
-      // The missing column could be the company col OR "Datum". Retry this company
-      // column without the date filter; if that works, the date column was the
-      // problem and we fall back to the full set.
-      const { data: d2, error: e2 } = await supabase
+    const rows: Row[] = [];
+    let dateFilteredColumnExists = false;
+
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabase
         .from(TABLES.bookings)
         .select("*")
         .eq(col, companyId)
-        .limit(5000);
-      if (!e2) return (d2 as Row[] | null) ?? [];
+        .gte(DATE_COLUMN, fromDate)
+        .order(DATE_COLUMN, { ascending: false })
+        .range(from, from + 999);
+
+      if (error) {
+        if (isMissingColumnError(error)) break;
+        console.warn(`[Appointments.server] Termini fetch error:`, error.message);
+        return [];
+      }
+
+      dateFilteredColumnExists = true;
+      const page = (data as Row[] | null) ?? [];
+      rows.push(...page);
+
+      if (page.length < 1000) {
+        return rows;
+      }
+    }
+
+    if (dateFilteredColumnExists) return rows;
+
+    {
+      // The missing column could be the company col OR "Datum". Retry this company
+      // column without the date filter; if that works, the date column was the
+      // problem and we fall back to the full set.
+      const fallbackRows: Row[] = [];
+      let fallbackColumnExists = false;
+      for (let from = 0; ; from += 1000) {
+        const { data: d2, error: e2 } = await supabase
+          .from(TABLES.bookings)
+          .select("*")
+          .eq(col, companyId)
+          .range(from, from + 999);
+
+        if (e2) break;
+
+        fallbackColumnExists = true;
+        const page = (d2 as Row[] | null) ?? [];
+        fallbackRows.push(...page);
+
+        if (page.length < 1000) return fallbackRows;
+      }
+      if (fallbackColumnExists) return fallbackRows;
       continue; // company column invalid — try the next candidate
     }
-    console.warn(`[Appointments.server] Termini fetch error:`, error.message);
-    return [];
   }
   return [];
 }
@@ -384,9 +431,9 @@ export async function fetchAppointmentsDataServer(
 
   const [bookings, services, staff, clients] = await Promise.all([
     fetchBookingsFrom(supabase, companyId, windowFrom),
-    fetchTableOnce(supabase, TABLES.services, companyId, 500),
-    fetchTableOnce(supabase, TABLES.staff, companyId, 200),
-    fetchTableOnce(supabase, TABLES.clients, companyId, 2000),
+    fetchTableOnce(supabase, TABLES.services, companyId),
+    fetchTableOnce(supabase, TABLES.staff, companyId),
+    fetchTableOnce(supabase, TABLES.clients, companyId),
   ]);
 
   // For view-own-only staff, restrict to their own person's appointments server-side.

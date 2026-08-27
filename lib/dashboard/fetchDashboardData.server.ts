@@ -132,19 +132,38 @@ async function fetchTableOnce(
   supabase: ServerClient,
   tableName: string,
   companyId: string,
-  limit: number
+  orderColumn?: string
 ): Promise<Row[]> {
   for (const col of COMPANY_COLUMN_CANDIDATES) {
-    const { data, error } = await supabase
-      .from(tableName)
-      .select("*")
-      .eq(col, companyId)
-      .limit(limit);
-    if (!error) return (data as Row[] | null) ?? [];
-    if (!isMissingColumnError(error)) {
-      console.warn(`[Dashboard.server] ${tableName} fetch error:`, error.message);
-      return [];
+    const rows: Row[] = [];
+    let columnExists = false;
+
+    for (let from = 0; ; from += 1000) {
+      let query = supabase
+        .from(tableName)
+        .select("*")
+        .eq(col, companyId);
+
+      if (orderColumn) {
+        query = query.order(orderColumn, { ascending: false });
+      }
+
+      const { data, error } = await query.range(from, from + 999);
+
+      if (error) {
+        if (isMissingColumnError(error)) break;
+        console.warn(`[Dashboard.server] ${tableName} fetch error:`, error.message);
+        return [];
+      }
+
+      columnExists = true;
+      const page = (data as Row[] | null) ?? [];
+      rows.push(...page);
+
+      if (page.length < 1000) return rows;
     }
+
+    if (columnExists) return rows;
   }
   return [];
 }
@@ -622,10 +641,10 @@ export async function fetchDashboardDataServer(companyId: string): Promise<Dashb
 
   // Single fetch per table, shared across all aggregators (was ~8× before).
   const [bookings, services, staff, clients] = await Promise.all([
-    fetchTableOnce(supabase, TABLES.bookings, companyId, 5000),
-    fetchTableOnce(supabase, TABLES.services, companyId, 500),
-    fetchTableOnce(supabase, TABLES.staff, companyId, 200),
-    fetchTableOnce(supabase, TABLES.clients, companyId, 2000),
+    fetchTableOnce(supabase, TABLES.bookings, companyId, "Datum"),
+    fetchTableOnce(supabase, TABLES.services, companyId),
+    fetchTableOnce(supabase, TABLES.staff, companyId),
+    fetchTableOnce(supabase, TABLES.clients, companyId),
   ]);
 
   const maps: Maps = {

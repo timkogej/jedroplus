@@ -1,4 +1,4 @@
-import { fetchTableRows } from '@/lib/companyScope';
+import { fetchAllTableRows, fetchTableRows, fetchTableRowsByDateRange } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst } from '@/lib/dashboardHelpers';
 import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
@@ -17,6 +17,18 @@ const BOOKING_ORDER_CANDIDATES = [
   'start_at', 'Start', 'startAt', 'Zacetek', 'začetek',
   'Datum', 'datum', 'date', 'Date', 'start_date', 'booking_date',
 ];
+
+const BOOKING_DATE_RANGE_CANDIDATES = [
+  'Datum', 'datum', 'date', 'Date', 'start_date', 'booking_date',
+  'start_at', 'Start', 'startAt', 'Zacetek', 'začetek',
+];
+
+function formatMonthBoundary(year: number, month: number): string {
+  const date = new Date(year, month, 1);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  return `${yyyy}-${mm}-01`;
+}
 
 const CLIENT_ID_FIELDS = ['ID stranke', 'id', 'ID_stranke', 'client_id'];
 const CLIENT_LAST_NAME_FIELDS = ['Priimek', 'priimek', 'last_name', 'lastName', 'surname'];
@@ -303,12 +315,22 @@ export async function fetchAppointmentsForMonth(
   month: number // 0-indexed (0 = January)
 ): Promise<{ data: AppointmentWithDetails[] | null; error: Error | null }> {
   try {
+    const monthStart = formatMonthBoundary(year, month);
+    const nextMonthStart = formatMonthBoundary(year, month + 1);
+
     // Fetch all bookings, services, staff, and clients
     const [bookingsRes, servicesRes, staffRes, clientsRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000, BOOKING_ORDER_CANDIDATES),
+      fetchTableRowsByDateRange<Record<string, unknown>>(
+        TABLES.bookings,
+        companyId,
+        BOOKING_DATE_RANGE_CANDIDATES,
+        monthStart,
+        nextMonthStart,
+        BOOKING_ORDER_CANDIDATES
+      ),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
-      fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.clients, companyId),
     ]);
 
     if (bookingsRes.error) {
@@ -599,7 +621,7 @@ export async function fetchAppointmentById(
 ): Promise<{ data: AppointmentWithDetails | null; error: Error | null }> {
   try {
     const [bookingsRes, servicesRes, staffRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000, BOOKING_ORDER_CANDIDATES),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId, BOOKING_ORDER_CANDIDATES),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
     ]);
@@ -782,10 +804,10 @@ export async function fetchAllAppointments(
   try {
     // Fetch all bookings, services, staff, and clients
     const [bookingsRes, servicesRes, staffRes, clientsRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000, BOOKING_ORDER_CANDIDATES),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId, BOOKING_ORDER_CANDIDATES),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
-      fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.clients, companyId),
     ]);
 
     if (bookingsRes.error) {

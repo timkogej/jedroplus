@@ -1,5 +1,5 @@
 import { format, startOfMonth, endOfMonth, addDays, subDays } from "date-fns";
-import { fetchTableRows } from "@/lib/companyScope";
+import { fetchAllTableRows, fetchTableRows } from "@/lib/companyScope";
 import { TABLES } from "@/lib/data";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
 import { normalizeCommunicationLanguage, type CommunicationLanguageCode } from "@/lib/communicationLanguage";
@@ -170,7 +170,7 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
   try {
     // Use fetchTableRows which properly handles company column detection
     const [bookingsRes, servicesRes, staffRes, clientsRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
       fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 1000),
@@ -333,7 +333,7 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
   try {
     // Use fetchTableRows which properly handles company column detection
     const [bookingsRes, servicesRes, staffRes, clientsRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 2000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
       fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 1000),
@@ -501,7 +501,7 @@ async function fetchStats(companyId: string, personId?: string | null): Promise<
   try {
     // Fetch all data using fetchTableRows which handles company column detection
     const [bookingsRes, clientsRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId),
       fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),
     ]);
 
@@ -624,7 +624,7 @@ async function fetchWeeklyChart(companyId: string, personId?: string | null): Pr
 
   try {
     // Fetch all bookings using fetchTableRows
-    const bookingsRes = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000);
+    const bookingsRes = await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId);
 
     if (bookingsRes.error) {
       console.error('[Dashboard] Error fetching weekly chart data:', bookingsRes.error);
@@ -703,7 +703,7 @@ async function fetchTopServices(companyId: string): Promise<TopService[]> {
   try {
     // Use fetchTableRows for proper company column handling
     const [bookingsRes, servicesRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
     ]);
 
@@ -805,7 +805,7 @@ async function fetchTopEmployees(companyId: string): Promise<TopEmployee[]> {
   try {
     // Use fetchTableRows for proper company column handling
     const [bookingsRes, staffRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
     ]);
 
@@ -890,7 +890,7 @@ async function fetchTopEmployees(companyId: string): Promise<TopEmployee[]> {
 async function fetchRecentActivity(companyId: string): Promise<RecentActivity[]> {
   try {
     // Use fetchTableRows for proper company column handling
-    const bookingsRes = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000);
+    const bookingsRes = await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId);
 
     const bookings = bookingsRes.data ?? [];
 
@@ -993,7 +993,7 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
 
   try {
     const [bookingsRes, servicesRes, staffRes] = await Promise.all([
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 500),
       fetchTableRows<Record<string, unknown>>(TABLES.staff, companyId, 200),
     ]);

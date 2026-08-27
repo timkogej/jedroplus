@@ -1,4 +1,4 @@
-import { fetchTableRows } from '@/lib/companyScope';
+import { fetchAllTableRows, fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import type { Service, ServiceStats, PriceType } from '@/types/services';
 
@@ -202,7 +202,7 @@ export async function fetchServicesWithCount(companyId: string): Promise<{
     }
 
     // Fetch appointments to count per service
-    const appointmentsResult = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000);
+    const appointmentsResult = await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId);
 
     // Build a map of service ID to appointment count and last used date
     const appointmentData = new Map<string, { count: number; lastUsed: string | null }>();
@@ -292,7 +292,7 @@ export async function checkServiceHasAppointments(
   serviceId: string
 ): Promise<{ hasAppointments: boolean; count: number; error: Error | null }> {
   try {
-    const appointmentsResult = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000);
+    const appointmentsResult = await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId);
 
     if (appointmentsResult.error) {
       throw new Error(appointmentsResult.error);

@@ -1,4 +1,4 @@
-import { fetchTableRows } from '@/lib/companyScope';
+import { fetchAllTableRows, fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst, safeDate } from '@/lib/dashboardHelpers';
 import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
@@ -193,14 +193,14 @@ export async function fetchClientsWithCount(companyId: string): Promise<{
 }> {
   try {
     // Fetch clients
-    const clientsResult = await fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 1000, CLIENT_ORDER_CANDIDATES);
+    const clientsResult = await fetchAllTableRows<Record<string, unknown>>(TABLES.clients, companyId, CLIENT_ORDER_CANDIDATES);
 
     if (clientsResult.error) {
       throw new Error(clientsResult.error);
     }
 
     // Fetch appointments to count per client
-    const appointmentsResult = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000);
+    const appointmentsResult = await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId);
 
     // Build a map of client ID to appointment count
     const appointmentCounts = new Map<string, number>();
@@ -301,7 +301,7 @@ export async function getClientWithAppointments(
   try {
     const [clientsResult, appointmentsResult, servicesResult] = await Promise.all([
       fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 1000),
-      fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 1000),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId),
       fetchTableRows<Record<string, unknown>>(TABLES.services, companyId, 1000),
     ]);
 

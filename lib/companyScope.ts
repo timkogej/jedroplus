@@ -20,6 +20,36 @@ type CompanyScopedResult<T> = {
   error: string | null;
 };
 
+const DEFAULT_PAGE_SIZE = 1000;
+
+const DEFAULT_ORDER_CANDIDATES_BY_TABLE: Record<string, string[]> = {
+  Termini: [
+    "start_at",
+    "Start",
+    "startAt",
+    "Zacetek",
+    "začetek",
+    "Datum",
+    "datum",
+    "date",
+    "Date",
+    "start_date",
+    "booking_date",
+    "id",
+    "ID termina",
+  ],
+  Stranke: [
+    "Datum vpisa",
+    "datum_vpisa",
+    "created_at",
+    "Created",
+    "datum_vnosa",
+    "Datum vnosa",
+    "id",
+    "ID stranke",
+  ],
+};
+
 const isMissingColumnError = (error: { message?: string; code?: string }) => {
   if (error.code === "42703") return true;
   if (!error.message) return false;
@@ -179,6 +209,151 @@ export async function fetchTableRows<T>(
   } catch (error) {
     // Log but don't throw - return empty data to prevent cascading failures
     console.warn(`[fetchTableRows] Error fetching ${tableName}:`, error);
+    return {
+      data: [],
+      error: error instanceof Error ? error.message : "Unknown error.",
+    };
+  }
+}
+
+export async function fetchAllTableRows<T>(
+  tableName: string,
+  companyId: string,
+  orderByCandidates?: string[],
+  pageSize = DEFAULT_PAGE_SIZE
+): Promise<CompanyScopedResult<T>> {
+  if (!companyId || companyId.trim() === "") {
+    return { data: [], error: null };
+  }
+
+  try {
+    const companyColumn = await getCompanyColumnForTable(tableName, companyId);
+    const resolvedOrderCandidates =
+      orderByCandidates && orderByCandidates.length > 0
+        ? orderByCandidates
+        : DEFAULT_ORDER_CANDIDATES_BY_TABLE[tableName] ?? [];
+    const orderColumn =
+      resolvedOrderCandidates.length > 0
+        ? await detectOrderColumn(
+            tableName,
+            companyColumn,
+            companyId,
+            resolvedOrderCandidates
+          )
+        : null;
+    const rows: T[] = [];
+    const normalizedPageSize = Math.max(1, Math.floor(pageSize));
+
+    for (let from = 0; ; from += normalizedPageSize) {
+      const to = from + normalizedPageSize - 1;
+      let query = supabaseReadOnly
+        .from(tableName)
+        .select("*")
+        .eq(companyColumn, companyId);
+
+      if (orderColumn) {
+        query = query.order(orderColumn, { ascending: false });
+      }
+
+      const { data, error } = await query.range(from, to);
+
+      if (error) {
+        return { data: rows, error: error.message };
+      }
+
+      const page = (data ?? []) as T[];
+      rows.push(...page);
+
+      if (page.length < normalizedPageSize) {
+        break;
+      }
+    }
+
+    return { data: rows, error: null };
+  } catch (error) {
+    console.warn(`[fetchAllTableRows] Error fetching ${tableName}:`, error);
+    return {
+      data: [],
+      error: error instanceof Error ? error.message : "Unknown error.",
+    };
+  }
+}
+
+export async function fetchTableRowsByDateRange<T>(
+  tableName: string,
+  companyId: string,
+  dateColumnCandidates: string[],
+  fromInclusive: string,
+  toExclusive: string,
+  orderByCandidates?: string[],
+  pageSize = DEFAULT_PAGE_SIZE
+): Promise<CompanyScopedResult<T>> {
+  if (!companyId || companyId.trim() === "") {
+    return { data: [], error: null };
+  }
+
+  try {
+    const companyColumn = await getCompanyColumnForTable(tableName, companyId);
+    const dateColumn = await detectOrderColumn(
+      tableName,
+      companyColumn,
+      companyId,
+      dateColumnCandidates
+    );
+
+    if (!dateColumn) {
+      return fetchAllTableRows<T>(
+        tableName,
+        companyId,
+        orderByCandidates,
+        pageSize
+      );
+    }
+
+    const resolvedOrderCandidates =
+      orderByCandidates && orderByCandidates.length > 0
+        ? orderByCandidates
+        : [dateColumn];
+    const orderColumn =
+      resolvedOrderCandidates.length > 0
+        ? await detectOrderColumn(
+            tableName,
+            companyColumn,
+            companyId,
+            resolvedOrderCandidates
+          )
+        : dateColumn;
+    const rows: T[] = [];
+    const normalizedPageSize = Math.max(1, Math.floor(pageSize));
+
+    for (let from = 0; ; from += normalizedPageSize) {
+      const to = from + normalizedPageSize - 1;
+      let query = supabaseReadOnly
+        .from(tableName)
+        .select("*")
+        .eq(companyColumn, companyId)
+        .gte(dateColumn, fromInclusive)
+        .lt(dateColumn, toExclusive);
+
+      query = query.order(orderColumn ?? dateColumn, { ascending: false });
+
+      const { data, error } = await query.range(from, to);
+
+      if (error) {
+        return { data: rows, error: error.message };
+      }
+
+      const page = (data ?? []) as T[];
+      rows.push(...page);
+
+      if (page.length < normalizedPageSize) {
+        break;
+      }
+    }
+
+    return { data: rows, error: null };
+  } catch (error) {
+    console.warn(`[fetchTableRowsByDateRange] Error fetching ${tableName}:`, error);
     return {
       data: [],
       error: error instanceof Error ? error.message : "Unknown error.",

@@ -1,4 +1,4 @@
-import { fetchTableRows } from '@/lib/companyScope';
+import { fetchAllTableRows, fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import type { Employee, EmployeeStats, EmployeeSchedule, ScheduleWithIntervals } from '@/types/employees';
 import { getDefaultGradient, getGradientById, isValidGradient } from '@/lib/constants/gradients';
@@ -245,7 +245,7 @@ export async function fetchEmployeesWithCount(companyId: string): Promise<{
     }
 
     // Fetch appointments to count per employee
-    const appointmentsResult = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000);
+    const appointmentsResult = await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId);
 
     const now = new Date();
     const today = getLocalDateKey(now);

@@ -1,5 +1,5 @@
 import { supabaseReadOnly } from "@/src/lib/supabaseReadOnly";
-import { getCompanyColumnForTable, detectOrderColumn } from "./companyScope";
+import { fetchAllTableRows, getCompanyColumnForTable } from "./companyScope";
 import { detectIdColumn, detectPrimaryKey } from "./tableIntrospection";
 
 // Same candidate columns used to order bookings elsewhere (see
@@ -48,22 +48,12 @@ export async function fetchClients(companyId: string, limit = 500) {
     .limit(limit);
 }
 
-export async function fetchBookings(companyId: string, limit = 1000) {
-  const companyColumn = await getCompanyColumnForTable(TABLES.bookings, companyId);
-  const orderColumn = await detectOrderColumn(
+export async function fetchBookings(companyId: string, _limit = 1000) {
+  return fetchAllTableRows<Record<string, unknown>>(
     TABLES.bookings,
-    companyColumn,
     companyId,
     BOOKING_ORDER_CANDIDATES
   );
-  let query = supabaseReadOnly
-    .from(TABLES.bookings)
-    .select("*")
-    .eq(companyColumn, companyId);
-  if (orderColumn) {
-    query = query.order(orderColumn, { ascending: false });
-  }
-  return query.limit(limit);
 }
 
 export async function getClientIdentifier(row: Record<string, unknown>) {

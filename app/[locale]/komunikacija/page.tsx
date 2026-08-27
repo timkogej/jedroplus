@@ -21,7 +21,7 @@ import SendSection from '@/components/komunikacija/SendSection';
 import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
-import { fetchTableRows } from '@/lib/companyScope';
+import { fetchAllTableRows, fetchTableRows } from '@/lib/companyScope';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst, safeDate, combineDateAndTime } from '@/lib/dashboardHelpers';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
@@ -297,7 +297,7 @@ export default function KomunikacijaPage() {
       setLoadingCustomers(true);
       try {
         const [bookingsRes, clientsRes] = await Promise.all([
-          fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, 5000),
+          fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId),
           fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 2000),
         ]);
 
