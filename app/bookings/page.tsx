@@ -141,7 +141,7 @@ export default function BookingsPage() {
       setBookings({
         data: bookingsRes.data ?? [],
         loading: false,
-        error: bookingsRes.error ? String(bookingsRes.error.message ?? bookingsRes.error) : null,
+        error: bookingsRes.error ? String(bookingsRes.error) : null,
       });
       setClients({
         data: clientsRes.data ?? [],
