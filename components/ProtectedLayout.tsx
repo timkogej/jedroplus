@@ -13,7 +13,8 @@ import RoleAccessGate from "@/components/RoleAccessGate";
 import { useRolePermissions } from "@/app/role-permission-context";
 import { supabase } from "@/lib/supabaseClient";
 import type { StaffPermissions } from "@/types/roles";
-import FreeTrialModal, { wasShownToday } from "@/components/FreeTrialModal";
+import FreeTrialModal, { wasShownRecently } from "@/components/FreeTrialModal";
+import QuotaBanner from "@/components/billing/QuotaBanner";
 import { useTranslations } from "next-intl";
 
 // ============================================================================
@@ -22,14 +23,17 @@ import { useTranslations } from "next-intl";
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const { isMobile, isCollapsed, setNotificationCount } = useSidebar();
-  const { companyId, companyUuid } = useCompany();
+  const { companyId, companyUuid, planCode, loading: companyLoading } = useCompany();
+  const { role } = useRolePermissions();
   const pathname = usePathname();
   const [showTrialModal, setShowTrialModal] = useState(false);
 
-  // Check has_used_trial once company is loaded
+  // Offer the Jedro Plus trial only to owners on the free plan who haven't
+  // used it — never to paying customers, never to staff.
   useEffect(() => {
-    if (!companyId) return;
-    if (wasShownToday()) return;
+    if (!companyId || companyLoading) return;
+    if (planCode !== 'FREE' || role !== 'owner') return;
+    if (wasShownRecently()) return;
 
     const checkTrial = async () => {
       const { data } = await supabase
@@ -42,7 +46,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       }
     };
     checkTrial();
-  }, [companyId]);
+  }, [companyId, companyLoading, planCode, role]);
 
   const contentMargin = isMobile ? 0 : isCollapsed ? 64 : 240;
 
@@ -81,6 +85,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Main content with padding for app bar */}
         <main className="flex-1 pt-14 overflow-hidden">
+          {(role === 'owner' || role === 'admin') && <QuotaBanner />}
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={pathname}

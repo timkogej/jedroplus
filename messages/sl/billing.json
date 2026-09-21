@@ -211,10 +211,10 @@
       "appointments": "Termini ta mesec"
     },
     "planDescriptions": {
-      "jedroPlus": "Vključuje opomnike, email pošiljanje in analitiko.",
+      "jedroPlus": "Vključuje opomnike, e-pošto, spletno naročanje in analitiko. SMS lahko dokupite.",
       "jedroPro": "Vključuje SMS, izgubljene stranke in napredne funkcije.",
       "enterprise": "Prilagojen paket za posebne poslovne potrebe.",
-      "free": "Brezplačen preizkusni dostop."
+      "free": "Brezplačno za vedno: koledar, termini, stranke, storitve in zaposleni."
     },
     "planButtons": {
       "active": "Aktiven",
@@ -233,7 +233,8 @@
         "phone": "Telefon",
         "message": "Sporočilo",
         "messagePlaceholder": "Opišite, kaj potrebujete..."
-      }
+      },
+      "sendFailed": "Pošiljanje ni uspelo. Pišite nam neposredno na <email>timkogej@jedroplus.com</email>."
     },
     "inquiryToast": "Povpraševanje poslano. Kmalu vas kontaktiramo.",
     "plans": {
@@ -267,6 +268,52 @@
           "Dedicirani manager in prioritetna podpora"
         ]
       }
-    }
+    },
+    "freeRenewal": "Brezplačno, brez obnove",
+    "quotaNotIncluded": "Ni vključeno",
+    "quotaUnlimited": "Neomejeno"
+  },
+  "trialModal": {
+    "badge": "Brezplačna preizkušnja",
+    "title": "Izkoristite brezplačno preizkušnjo Jedro Plus",
+    "subtitle": "Vse, kar potrebujete za urejeno poslovanje — brez tveganja, brez obveznosti.",
+    "featuresTitle": "Kaj dobite z Jedro Plus",
+    "features": {
+      "reminders": {
+        "title": "Personalizirani opomniki",
+        "desc": "Avtomatski opomniki strankam pred in po vsakem terminu — brez ročnega dela."
+      },
+      "booking": {
+        "title": "Spletno naročanje in različni dizajni",
+        "desc": "Povezava za rezervacije z izborom dizajna — stranke se naročajo same, kadarkoli."
+      },
+      "communication": {
+        "title": "Komunikacija s strankami",
+        "desc": "SMS, e-pošta in opomniki na enem mestu."
+      },
+      "analytics": {
+        "title": "Celotna analitika",
+        "desc": "Pregled prihodkov, zasedenosti, rasti strank in uspešnosti poslovanja."
+      }
+    },
+    "cta": "Preizkusi brezplačno",
+    "later": "Mogoče kasneje",
+    "close": "Zapri"
+  },
+  "quotaBanner": {
+    "emailName": "E-pošta",
+    "nearLimit": {
+      "title": "{name}: porabljenih {used} od {total}.",
+      "body": "Ko kvota zmanjka, se sporočila in opomniki po tem kanalu ne pošiljajo več."
+    },
+    "exhausted": {
+      "title": "Opomniki in sporočila po {nameLoc} se ne pošiljajo.",
+      "body": "Porabili ste vseh {total} v tem obdobju ({used}/{total}), zato jih stranke ne prejemajo."
+    },
+    "alsoOther": "Tudi druga kvota je skoraj ali povsem porabljena.",
+    "dismiss": "Skrij za danes",
+    "ctaSms": "Dokupi SMS",
+    "ctaEmail": "Dokupi e-pošto",
+    "emailNameLoc": "e-pošti"
   }
 }

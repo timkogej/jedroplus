@@ -20,6 +20,7 @@ import {
 import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
+import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { supabase } from '@/lib/supabaseClient';
 import { getCustomerPortal, startCheckout } from '@/lib/api/billingClient';
@@ -74,6 +75,7 @@ interface QuotaItem {
 }
 
 function QuotaRow({ item, loading }: { item: QuotaItem; loading: boolean }) {
+  const t = useTranslations('billing');
   if (loading) {
     return (
       <div className="space-y-1.5 animate-pulse">
@@ -86,6 +88,7 @@ function QuotaRow({ item, loading }: { item: QuotaItem; loading: boolean }) {
     );
   }
 
+  const notIncluded = item.total === 0;
   const pct = item.total ? Math.round((item.used / item.total) * 100) : 0;
   const barColor =
     item.total === null
@@ -104,14 +107,23 @@ function QuotaRow({ item, loading }: { item: QuotaItem; loading: boolean }) {
           <span className="text-sm font-medium text-gray-900 truncate">{item.label}</span>
         </div>
         <span className="text-sm tabular-nums whitespace-nowrap">
-          <span className="text-gray-900 font-medium">{item.used}</span>
-          <span className="text-gray-400"> / {item.total ?? '∞'}</span>
+          {notIncluded ? (
+            <span className="text-gray-400">{t('paketi.quotaNotIncluded')}</span>
+          ) : (
+            <>
+              <span className="text-gray-900 font-medium">{item.used}</span>
+              <span className="text-gray-400">
+                {' / '}
+                {item.total === null ? <span title={t('paketi.quotaUnlimited')}>∞</span> : item.total}
+              </span>
+            </>
+          )}
         </span>
       </div>
       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-          style={{ width: item.total === null ? '20%' : `${Math.min(pct, 100)}%` }}
+          style={{ width: item.total === null ? '20%' : notIncluded ? '0%' : `${Math.min(pct, 100)}%` }}
         />
       </div>
     </div>
@@ -273,6 +285,7 @@ function EnterpriseModal({
   onSuccess: () => void;
   t: ReturnType<typeof useTranslations<'billing'>>;
 }) {
+  const { companyId } = useCompany();
   const [form, setForm] = useState<InquiryForm>({
     name: '',
     email: defaultEmail,
@@ -280,8 +293,10 @@ function EnterpriseModal({
     message: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const [sendFailed, setSendFailed] = useState(false);
 
   useEffect(() => {
+    if (open) setSendFailed(false);
     if (open) setForm((f) => ({ ...f, email: defaultEmail }));
   }, [open, defaultEmail]);
 
@@ -289,16 +304,19 @@ function EnterpriseModal({
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) return;
     setSubmitting(true);
+    setSendFailed(false);
     try {
-      await fetch('/api/enterprise-inquiry', {
+      const res = await fetch('/api/enterprise-inquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, company_id: companyId ?? undefined }),
       });
+      if (!res.ok) throw new Error('delivery_failed');
       onSuccess();
       onClose();
     } catch {
-      // ignore
+      // Never pretend it was sent — show the address instead.
+      setSendFailed(true);
     } finally {
       setSubmitting(false);
     }
@@ -382,6 +400,17 @@ function EnterpriseModal({
               className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-[#6D5EF7]/30 focus:border-[#6D5EF7]/40 placeholder:text-gray-400"
             />
           </div>
+          {sendFailed && (
+            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+              {t.rich('paketi.enterpriseModal.sendFailed', {
+                email: (chunks) => (
+                  <a href="mailto:timkogej@jedroplus.com" className="font-semibold underline">
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
+          )}
           <div className="flex items-center gap-3 pt-1">
             <button
               type="submit"
@@ -430,23 +459,20 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 export default function PaketiPage() {
   const t = useTranslations('billing');
   const router = useRouter();
-  const { companyId, companyUuid, planCode, subscription, smsQuota, isPlanActive } = useCompany();
+  const { companyId, companyUuid, planCode, subscription, isPlanActive } = useCompany();
   const { user } = useAuth();
+  // SMS, email and team seats come from the same source as the Dodatki page.
+  const { usage: billingUsage, loading: billingLoading } = useBillingUsage();
 
   const [loadingQuotas, setLoadingQuotas] = useState(true);
   const [loadingPlans] = useState(false);
 
-  const [emailUsed, setEmailUsed] = useState(0);
-  const [emailTotal, setEmailTotal] = useState(0);
-  const [smsTotal, setSmsTotal] = useState(0);
-  const [teamMemberTotal, setTeamMemberTotal] = useState<number | null>(null);
-  const [memberCount, setMemberCount] = useState(0);
   const [clientCount, setClientCount] = useState(0);
   const [terminiCount, setTerminiCount] = useState(0);
 
   const [renewalDate, setRenewalDate] = useState('—');
 
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual');
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
 
   const [enterpriseOpen, setEnterpriseOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -490,49 +516,12 @@ export default function PaketiPage() {
     }
   }, [subscription]);
 
+  // Clients and appointments are unlimited on every plan; SMS, email and seats
+  // come from useBillingUsage above.
   const fetchQuotas = useCallback(async () => {
     if (!companyUuid) return;
     setLoadingQuotas(true);
     try {
-      const [emailRes, membersRes] = await Promise.all([
-        supabaseReadOnly
-          .from('company_email_usage')
-          .select('sent_count, period_end')
-          .eq('company_id', companyUuid)
-          .maybeSingle(),
-        supabaseReadOnly
-          .from('company_members')
-          .select('id', { count: 'exact', head: true })
-          .eq('company_id', companyUuid),
-      ]);
-
-      const emailSent = emailRes.data?.sent_count ?? 0;
-      setEmailUsed(emailSent);
-
-      const { data: subData } = await supabaseReadOnly
-        .from('company_subscriptions')
-        .select('plan_id, sms_addon_monthly, email_addon_monthly, sms_quota_override, email_quota_override')
-        .eq('company_id', companyUuid)
-        .maybeSingle();
-      if (subData?.plan_id) {
-        const { data: planData } = await supabaseReadOnly
-          .from('plans')
-          .select('email_quota_monthly, sms_quota_monthly, max_employees')
-          .eq('id', subData.plan_id)
-          .maybeSingle();
-        setEmailTotal(
-          subData.email_quota_override ??
-            ((planData?.email_quota_monthly ?? 0) + (subData.email_addon_monthly ?? 0))
-        );
-        setSmsTotal(
-          subData.sms_quota_override ??
-            ((planData?.sms_quota_monthly ?? 0) + (subData.sms_addon_monthly ?? 0))
-        );
-        setTeamMemberTotal(planData?.max_employees ?? null);
-      }
-
-      setMemberCount(membersRes.count ?? 0);
-
       try {
         const { count: cCount } = await supabaseReadOnly
           .from('Stranke')
@@ -565,22 +554,20 @@ export default function PaketiPage() {
     {
       icon: <ChatCircleText className="w-4 h-4" weight="regular" />,
       label: t('paketi.quotaLabels.sms'),
-      used: smsQuota?.used_current_month ?? 0,
-      total: (smsTotal || smsQuota?.quota_effective || 0) > 0
-        ? (smsTotal || smsQuota?.quota_effective!)
-        : null,
+      used: billingUsage?.sms.used ?? 0,
+      total: billingUsage?.sms.total ?? 0,
     },
     {
       icon: <EnvelopeSimple className="w-4 h-4" weight="regular" />,
       label: t('paketi.quotaLabels.email'),
-      used: emailUsed,
-      total: emailTotal || null,
+      used: billingUsage?.email.used ?? 0,
+      total: billingUsage?.email.total ?? 0,
     },
     {
       icon: <UsersThree className="w-4 h-4" weight="regular" />,
       label: t('paketi.quotaLabels.teamMembers'),
-      used: memberCount,
-      total: teamMemberTotal,
+      used: billingUsage?.seats.used ?? 0,
+      total: billingUsage?.seats.total ?? null,
     },
     {
       icon: <AddressBook className="w-4 h-4" weight="regular" />,
@@ -728,7 +715,9 @@ export default function PaketiPage() {
         </div>
         <div className="border-t border-gray-100 mt-5 pt-4 flex items-center justify-between">
           <span className="text-xs text-gray-500">{t('paketi.renewalLabel')}</span>
-          <span className="text-xs font-medium text-gray-700">{renewalDate}</span>
+          <span className="text-xs font-medium text-gray-700">
+            {currentPlanId === 'FREE' ? t('paketi.freeRenewal') : renewalDate}
+          </span>
         </div>
 
         {currentPlanId !== 'FREE' && (
@@ -769,7 +758,7 @@ export default function PaketiPage() {
         </p>
         <div className="space-y-5">
           {quotas.map((q, i) => (
-            <QuotaRow key={i} item={q} loading={loadingQuotas} />
+            <QuotaRow key={i} item={q} loading={loadingQuotas || billingLoading} />
           ))}
         </div>
       </div>

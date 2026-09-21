@@ -85,6 +85,28 @@
     "info": {
       "title": "About Reminders",
       "body": "Reminders are <highlight>sent automatically</highlight> based on the settings shown here — no manual work required. Each client receives a message before and/or after their appointment, depending on your configuration.\n\nWith AI enabled, <highlight>messages are never the same</highlight> — AI remembers the client's context, mentions the right service and tailors the content to sound natural and personal. This means higher open rates, more memorable messages and clients who feel valued.\n\nFor easier management, a <highlight>custom message template</highlight> is also available when you want full control over the content.\n\nIf you have any questions, contact us at help@jedroplus.com."
+    },
+    "sendingStatus": {
+      "title": "Sending status",
+      "ok": {
+        "title": "{name} reminders are being sent",
+        "body": "{remaining} of {total} left this period."
+      },
+      "nearLimit": {
+        "title": "{name} quota almost used up",
+        "body": "{used} of {total} used. When it runs out, {name} reminders stop being sent."
+      },
+      "exhausted": {
+        "title": "{name} reminders are not being sent",
+        "body": "You've used all {total} for this period ({used}/{total}). Clients are not receiving {name} reminders."
+      },
+      "unavailable": {
+        "title": "{name} reminders are not being sent",
+        "body": "Your plan doesn't include {name} messages, so reminders on this channel aren't sent. Buy a package or choose another channel in settings."
+      },
+      "renews": "The quota renews on {date}.",
+      "buySms": "Buy SMS",
+      "buyEmail": "Buy email"
     }
   },
   "status": {
@@ -215,6 +237,15 @@
       "discountPlaceholder": "10% discount on next visit",
       "timingTitle": "Sending time",
       "timingValue": "Fixed: immediately after completed appointment"
+    },
+    "smsAccess": {
+      "notIncluded": "Your plan doesn't include SMS messages. Buy an SMS package or upgrade to Jedro Pro, which includes 200 SMS per month.",
+      "notIncludedFree": "SMS reminders are available on paid plans.",
+      "buySms": "Buy SMS",
+      "comparePlans": "Compare plans",
+      "remaining": "{remaining} of {total} SMS left this period.",
+      "nearLimit": "{used} of {total} SMS used. When they run out, SMS messages are not sent.",
+      "exhausted": "You've used all SMS for this period ({used}/{total}). SMS messages are not sent until you buy a package or the period renews."
     }
   }
 }

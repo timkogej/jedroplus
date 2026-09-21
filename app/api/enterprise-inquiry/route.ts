@@ -3,17 +3,20 @@ import { z } from 'zod';
 import { rateLimit } from '@/lib/rateLimit';
 import { sanitizeInput, isHoneypotFilled } from '@/lib/validation/publicForm';
 
-// TODO: Wire up a real persistence channel here when ready.
-// Options:
-//   1. Insert into `enterprise_inquiries` Supabase table (create it first).
-//   2. Forward to n8n webhook → email the owner.
-// For now, the request is logged on the server and the client receives a 200.
+// Enterprise inquiries are forwarded to n8n, which emails them to the team.
+// The n8n workflow must exist at N8N_ENTERPRISE_WEBHOOK: Webhook (POST, header
+// X-API-Key) → Send Email to `to`. If delivery fails the client is told so and
+// shown the address directly — an inquiry is never silently dropped again.
+const N8N_ENTERPRISE_WEBHOOK = 'https://n8n.jedroplus.com/webhook/enterprise-inquiry';
+const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
+const INQUIRY_RECIPIENT = process.env.ENTERPRISE_INQUIRY_EMAIL ?? 'timkogej@jedroplus.com';
 
 const inquirySchema = z.object({
   name: z.string().trim().min(2).max(100),
   email: z.string().trim().email().max(254),
   phone: z.string().trim().max(20).optional(),
   message: z.string().trim().min(2).max(2000),
+  company_id: z.string().max(100).optional(),
   website: z.string().max(0).optional(), // honeypot
 });
 
@@ -53,16 +56,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, phone, message } = parsed.data;
-
-    // TODO: replace this log with a real action (Supabase insert / n8n webhook)
-    console.log('[enterprise-inquiry] New inquiry:', {
+    const { name, email, phone, message, company_id } = parsed.data;
+    const inquiry = {
+      to: INQUIRY_RECIPIENT,
       name: sanitizeInput(name),
       email,
-      phone,
+      phone: phone ?? null,
       message: sanitizeInput(message),
+      company_id: company_id ?? null,
       receivedAt: new Date().toISOString(),
-    });
+    };
+
+    // Keep a server-side trace even when delivery works.
+    console.log('[enterprise-inquiry] New inquiry:', inquiry);
+
+    try {
+      const res = await fetch(N8N_ENTERPRISE_WEBHOOK, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(N8N_API_KEY ? { 'X-API-Key': N8N_API_KEY } : {}),
+        },
+        body: JSON.stringify(inquiry),
+      });
+      if (!res.ok) {
+        console.error('[enterprise-inquiry] n8n delivery failed:', res.status);
+        return NextResponse.json({ ok: false, error: 'delivery_failed' }, { status: 502 });
+      }
+    } catch (err) {
+      console.error('[enterprise-inquiry] n8n delivery error:', err);
+      return NextResponse.json({ ok: false, error: 'delivery_failed' }, { status: 502 });
+    }
 
     return NextResponse.json({ ok: true });
   } catch {
