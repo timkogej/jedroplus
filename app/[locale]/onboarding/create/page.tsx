@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter as useLocaleRouter, usePathname as useLocalePathname } from '@/i18n/navigation';
 import { getServiceSuggestions } from '@/lib/onboarding/serviceSuggestions';
 import { saveSeedPlan, type SeedService } from '@/lib/onboarding/firstRunSeed';
+import { markTrialOfferShownNow } from '@/components/FreeTrialModal';
 import { Input } from '@/components/ui/input';
 import { createCompany, type UrnikDay } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
@@ -348,7 +349,7 @@ export default function CreateCompanyPage() {
       });
 
       if (result.ok && result.company_id) {
-        const companyUUID = result.company_id;
+        let companyUUID = result.company_id;
         let publicId = (result as unknown as Record<string, unknown>).company_slug as string | undefined;
 
         if (!publicId) {
@@ -364,6 +365,22 @@ export default function CreateCompanyPage() {
             } catch {
               console.warn(`[CreateCompany] Attempt ${attempt + 1} failed, retrying...`);
             }
+          }
+        }
+
+        // The n8n response has returned the literal "{{$json.company_id}}"
+        // instead of the UUID. Look the real one up so nothing downstream
+        // (local storage, first-run setup) is keyed by a template string.
+        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (publicId && !UUID_RE.test(companyUUID)) {
+          for (let attempt = 0; attempt < 3; attempt++) {
+            if (attempt > 0) await new Promise(r => setTimeout(r, attempt * 1000));
+            const { data: company } = await supabase
+              .from('companies')
+              .select('id')
+              .eq('company_id', publicId)
+              .maybeSingle();
+            if (company?.id) { companyUUID = String(company.id); break; }
           }
         }
 
@@ -403,6 +420,10 @@ export default function CreateCompanyPage() {
               ownerConnected: false,
             });
           }
+
+          // Let the owner get going first: the trial offer waits a week
+          // instead of covering the dashboard on their very first visit.
+          markTrialOfferShownNow();
 
           setCreatedCompanyPublicId(publicId);
           setShowConfetti(true);

@@ -9,7 +9,10 @@ import { useAuth } from '@/app/auth-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import {
   clearSeedPlan,
+  clearSetupReady,
+  isSetupReady,
   isSeedComplete,
+  markSetupReady,
   loadSeedPlan,
   runSeedPlan,
   saveSeedPlan,
@@ -27,6 +30,10 @@ interface FirstRunSetupProps {
 
 const STEPS: Exclude<SeedStep, 'done'>[] = ['services', 'owner', 'connect'];
 
+// One setup per company at a time, even if the dashboard remounts this card
+// mid-run (it does while reloading) — a second run would duplicate services.
+const inFlight = new Map<string, Promise<boolean>>();
+
 /**
  * Finishes the account setup chosen in onboarding (starter services, owner as
  * first staff member) and then points the owner at their first appointment.
@@ -41,48 +48,67 @@ export default function FirstRunSetup({ onCreateAppointment, onSeeded }: FirstRu
   const [phase, setPhase] = useState<Phase>('idle');
   const [step, setStep] = useState<SeedStep>('services');
   const [includesOwner, setIncludesOwner] = useState(true);
-  const running = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const run = useCallback(async () => {
-    if (running.current || !companyId || !companyUuid || !user?.id || !user.email) return;
-    const plan = loadSeedPlan(companyUuid);
-    if (!plan) return;
-    if (isSeedComplete(plan)) {
-      clearSeedPlan(companyUuid);
-      return;
+    if (!companyId || !companyUuid || !user?.id || !user.email) return;
+
+    let job = inFlight.get(companyUuid);
+    if (!job) {
+      const plan = loadSeedPlan(companyUuid);
+      if (!plan) return;
+      if (isSeedComplete(plan)) {
+        clearSeedPlan(companyUuid);
+        return;
+      }
+      setIncludesOwner(plan.addOwnerAsStaff);
+      const ctx = {
+        companyId,
+        companyUuid,
+        companySettings: (companySettings as Record<string, unknown> | null) ?? null,
+        userId: user.id,
+        userEmail: user.email,
+      };
+      job = runSeedPlan(plan, ctx, (s) => mounted.current && setStep(s), saveSeedPlan)
+        .then(() => {
+          clearSeedPlan(companyUuid);
+          markSetupReady(companyUuid);
+          return true;
+        })
+        .catch((error) => {
+          console.error('[FirstRunSetup] setup failed:', error);
+          return false;
+        })
+        .finally(() => inFlight.delete(companyUuid));
+      inFlight.set(companyUuid, job);
     }
 
-    running.current = true;
-    setIncludesOwner(plan.addOwnerAsStaff);
     setPhase('running');
-    try {
-      await runSeedPlan(
-        plan,
-        {
-          companyId,
-          companyUuid,
-          companySettings: (companySettings as Record<string, unknown> | null) ?? null,
-          userId: user.id,
-          userEmail: user.email,
-        },
-        setStep,
-        saveSeedPlan
-      );
-      clearSeedPlan(companyUuid);
-      setPhase('done');
-      onSeeded?.();
-    } catch (error) {
-      console.error('[FirstRunSetup] setup failed:', error);
-      setPhase('error');
-    } finally {
-      running.current = false;
-    }
+    const ok = await job;
+    if (!mounted.current) return;
+    setPhase(ok ? 'done' : 'error');
+    if (ok) onSeeded?.();
   }, [companyId, companyUuid, companySettings, user?.id, user?.email, onSeeded]);
 
   useEffect(() => {
     if (role !== 'owner') return;
+    if (isSetupReady(companyUuid)) {
+      setPhase('done');
+      return;
+    }
     run();
-  }, [role, run]);
+  }, [role, run, companyUuid]);
+
+  const closeReady = () => {
+    if (companyUuid) clearSetupReady(companyUuid);
+    setPhase('idle');
+  };
 
   if (phase === 'idle') return null;
 
@@ -133,7 +159,7 @@ export default function FirstRunSetup({ onCreateAppointment, onSeeded }: FirstRu
             <button
               type="button"
               onClick={() => {
-                setPhase('idle');
+                closeReady();
                 onCreateAppointment();
               }}
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/25"
@@ -143,7 +169,7 @@ export default function FirstRunSetup({ onCreateAppointment, onSeeded }: FirstRu
             </button>
             <button
               type="button"
-              onClick={() => setPhase('idle')}
+              onClick={closeReady}
               aria-label={t('dismiss')}
               className="rounded-lg p-2 text-gray-400 hover:bg-white/60 hover:text-gray-700"
             >

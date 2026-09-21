@@ -74,6 +74,35 @@ export function clearSeedPlan(companyUuid: string) {
   }
 }
 
+// The "ready for your first appointment" card must survive the dashboard
+// reloading (which unmounts it), so its state lives in storage until dismissed.
+const READY_PREFIX = 'jedroplus_first_run_ready:';
+
+export function markSetupReady(companyUuid: string) {
+  try {
+    localStorage.setItem(READY_PREFIX + companyUuid, '1');
+  } catch {
+    // ignore
+  }
+}
+
+export function isSetupReady(companyUuid: string | null | undefined): boolean {
+  if (!companyUuid) return false;
+  try {
+    return localStorage.getItem(READY_PREFIX + companyUuid) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function clearSetupReady(companyUuid: string) {
+  try {
+    localStorage.removeItem(READY_PREFIX + companyUuid);
+  } catch {
+    // ignore
+  }
+}
+
 export function isSeedComplete(plan: FirstRunSeedPlan): boolean {
   const servicesDone = plan.createdServiceIds.length >= plan.services.length;
   const ownerDone = !plan.addOwnerAsStaff || (plan.ownerStaffId !== null && plan.ownerConnected);

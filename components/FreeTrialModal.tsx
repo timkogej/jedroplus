@@ -10,6 +10,11 @@ export const TRIAL_MODAL_SESSION_KEY = 'jedroplus_trial_modal_shown';
 // Show the offer at most once a week — daily felt like nagging.
 const SHOW_EVERY_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** Starts the one-week quiet period now (used right after onboarding). */
+export function markTrialOfferShownNow() {
+  markShown();
+}
+
 function markShown() {
   try {
     localStorage.setItem(TRIAL_MODAL_SESSION_KEY, String(Date.now()));
