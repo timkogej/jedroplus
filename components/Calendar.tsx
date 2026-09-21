@@ -1806,19 +1806,28 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     setIsModalOpen(true);
   }, [canCreateAppointment]);
 
-  // "Nov termin" button and /koledar?action=new: today → the next half hour,
-  // any other day → 09:00.
+  // "Nov termin" button and /koledar?action=new: today → the next half hour
+  // within sensible hours (07:00–21:00), otherwise 09:00 (tomorrow if it's
+  // already late); any other day → 09:00.
   const openNewAppointment = useCallback(() => {
     const now = new Date();
     const target = currentDate ?? now;
     const isTodayTarget = getLocalDateKey(target) === getLocalDateKey(now);
-    let time = '09:00';
-    if (isTodayTarget) {
-      const minutes = now.getHours() * 60 + now.getMinutes();
-      const next = Math.min(Math.ceil((minutes + 1) / 30) * 30, 23 * 60 + 30);
-      time = `${String(Math.floor(next / 60)).padStart(2, '0')}:${String(next % 60).padStart(2, '0')}`;
+    if (!isTodayTarget) {
+      handleGridSlotClick(target, '09:00');
+      return;
     }
-    handleGridSlotClick(isTodayTarget ? now : target, time);
+    const minutes = now.getHours() * 60 + now.getMinutes();
+    const next = Math.ceil((minutes + 1) / 30) * 30;
+    if (next < 7 * 60) {
+      handleGridSlotClick(now, '09:00');
+    } else if (next > 21 * 60) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      handleGridSlotClick(tomorrow, '09:00');
+    } else {
+      handleGridSlotClick(now, `${String(Math.floor(next / 60)).padStart(2, '0')}:${String(next % 60).padStart(2, '0')}`);
+    }
   }, [currentDate, handleGridSlotClick]);
 
   useEffect(() => {
