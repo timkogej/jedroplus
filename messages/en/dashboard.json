@@ -133,5 +133,22 @@
     "subtitle": "Last 7 days overview",
     "tooltipValue": "{value, plural, =1 {1 appointment} other {{value} appointments}}",
     "tooltipLabel": "No. of appointments"
+  },
+  "firstRun": {
+    "preparingTitle": "Setting up your account",
+    "steps": {
+      "services": "Creating your services",
+      "owner": "Adding you as a staff member",
+      "connect": "Linking your login to your schedule",
+      "done": "Ready"
+    },
+    "doneTitle": "Everything is ready for your first appointment",
+    "doneBody": "Your services and schedule are set up. Book your first appointment and see how it looks in the calendar.",
+    "cta": "Book first appointment",
+    "errorTitle": "We couldn't finish the setup",
+    "errorBody": "Something went wrong while talking to the server. What's already created stays — try again, or add services in Services.",
+    "retry": "Try again",
+    "openServices": "Open Services",
+    "dismiss": "Close"
   }
 }

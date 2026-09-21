@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { joinCompany, type JoinCompanyResult } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 
 const STORAGE_KEY = "jedroplus_company_id";
 const STORAGE_KEY_UUID = "jedroplus_company_uuid";
@@ -196,7 +197,7 @@ export default function JoinCompanyPage() {
           toast.success(t('join.toasts.success'));
         }
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = `/${window.location.pathname.split('/')[1] || 'sl'}/dashboard`;
         }, 500);
       } else {
         if (result.reason === 'invalid_join_code') {
@@ -204,7 +205,11 @@ export default function JoinCompanyPage() {
         } else if (result.reason === 'company_not_found') {
           toast.error(t('join.toasts.companyNotFound'));
         } else {
-          toast.error(result.reason || t('join.toasts.errorJoin'));
+          // Never show raw backend codes to the user.
+          const reason = String(result.reason ?? '').toLowerCase();
+          toast.error(
+            /seat|slot|limit|mest/.test(reason) ? t('join.toasts.noFreeSlot') : t('join.toasts.errorJoin')
+          );
         }
         setLoading(false);
       }
@@ -310,7 +315,8 @@ export default function JoinCompanyPage() {
   const isAdmin = selectedRole === 'admin';
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+    <div className="relative min-h-screen flex items-center justify-center bg-white p-4">
+      <PublicLanguageToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">
           {isAdmin ? t('join.form.adminTitle') : t('join.form.employeeTitle')}
@@ -327,7 +333,7 @@ export default function JoinCompanyPage() {
             <Input
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              placeholder="ABCD2345"
+              placeholder="••••••"
               maxLength={8}
               disabled={loading}
               className="text-2xl font-mono text-center tracking-widest uppercase"

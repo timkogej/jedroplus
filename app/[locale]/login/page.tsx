@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Link, useRouter } from '@/i18n/navigation';
 import { SpinnerGap } from '@phosphor-icons/react';
 import { useTranslations, useLocale } from 'next-intl';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 
 const STORAGE_KEY = 'jedroplus_company_id';
 
@@ -112,7 +113,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+    <div className="relative min-h-screen flex items-center justify-center bg-white p-4">
+      <PublicLanguageToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-md">
         {/* Heading */}
         <div className="text-center mb-8">

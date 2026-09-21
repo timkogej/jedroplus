@@ -133,5 +133,22 @@
     "subtitle": "Pregled zadnjih 7 dni",
     "tooltipValue": "{value, plural, =1 {1 termin} =2 {2 termina} few {{value} termine} other {{value} terminov}}",
     "tooltipLabel": "Št. terminov"
+  },
+  "firstRun": {
+    "preparingTitle": "Pripravljamo vaš račun",
+    "steps": {
+      "services": "Ustvarjamo storitve",
+      "owner": "Dodajamo vas kot zaposlenega",
+      "connect": "Povezujemo vaš račun z vašim urnikom",
+      "done": "Pripravljeno"
+    },
+    "doneTitle": "Vse je pripravljeno za prvi termin",
+    "doneBody": "Storitve in vaš urnik so nastavljeni. Vpišite prvi termin in poglejte, kako izgleda v koledarju.",
+    "cta": "Ustvari prvi termin",
+    "errorTitle": "Priprave nismo mogli dokončati",
+    "errorBody": "Nekaj ni uspelo pri povezavi s strežnikom. Kar je že ustvarjeno, ostane — poskusite znova ali storitve dodajte v Storitvah.",
+    "retry": "Poskusi znova",
+    "openServices": "Odpri Storitve",
+    "dismiss": "Zapri"
   }
 }
