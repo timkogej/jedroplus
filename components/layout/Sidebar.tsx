@@ -208,6 +208,7 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
     <Link
       href={item.href}
       data-active={active ? 'true' : undefined}
+      data-tour={`nav-${item.href.replace(/^\//, '')}`}
       onClick={onClick}
       title={collapsed ? item.name : undefined}
       className={cn(
@@ -476,6 +477,7 @@ export function Sidebar() {
       <div className={cn('border-t border-gray-100 space-y-0.5 flex-shrink-0', isCollapsed ? 'p-1' : 'p-3')}>
         <Link
           href="/nastavitve"
+          data-tour="nav-nastavitve"
           title={isCollapsed ? t('sidebar.items.settings') : undefined}
           className={cn(
             'group relative flex items-center rounded-lg text-sm transition-colors duration-150',

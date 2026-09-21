@@ -90,5 +90,80 @@
   "fallbacks": {
     "companyName": "My Company",
     "userName": "User"
+  },
+  "guide": {
+    "stepOf": "Step {current} of {total}",
+    "close": "Close guide",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Done",
+    "menuItem": "App guide",
+    "tours": {
+      "dashboard": {
+        "welcome": {
+          "title": "Welcome to Jedro+",
+          "body": "In one minute we'll show you where everything is. You can replay this guide any time from the profile menu at the top right."
+        },
+        "newAppointment": {
+          "title": "New appointment",
+          "body": "The fastest way to book: pick a client, a service and a time. You can add a new client on the spot."
+        },
+        "calendar": {
+          "title": "Calendar",
+          "body": "Your day, week or month in one place. Click an empty slot and a new appointment opens at that day and time."
+        },
+        "appointments": {
+          "title": "Appointments",
+          "body": "Every appointment with search and filters. This is also where you mark appointments as completed."
+        },
+        "clients": {
+          "title": "Clients",
+          "body": "Your client base with visit history and contact details."
+        },
+        "services": {
+          "title": "Services",
+          "body": "What you offer, how long it takes and what it costs. Appointment length and price come from here."
+        },
+        "staff": {
+          "title": "Staff",
+          "body": "The people who perform services and their schedules. Invite colleagues into the app with the code in Settings → General."
+        },
+        "reminders": {
+          "title": "Reminders",
+          "body": "Automatic messages to clients before and after appointments. Fewer no-shows, no manual work."
+        },
+        "settings": {
+          "title": "Settings",
+          "body": "Company details, working hours, team, plans and add-ons."
+        },
+        "gettingStarted": {
+          "title": "Your first steps",
+          "body": "This list walks you through getting started. Each step ticks itself off when you've done it."
+        },
+        "userMenu": {
+          "title": "Guide and language",
+          "body": "Replay this guide or change the app language here."
+        }
+      },
+      "calendar": {
+        "grid": {
+          "title": "Click an empty slot",
+          "body": "A new appointment opens at that day and time. Hatched areas are outside your working hours."
+        },
+        "newAppointment": {
+          "title": "Or use the button",
+          "body": "You can also start a new appointment here, at the next free time."
+        },
+        "views": {
+          "title": "Day, week or month",
+          "body": "Pick the view that suits you best."
+        },
+        "filters": {
+          "title": "Filters",
+          "body": "Show only selected staff or services when the calendar gets busy."
+        }
+      }
+    }
   }
 }

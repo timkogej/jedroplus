@@ -25,6 +25,7 @@ import {
   getOffHourRanges,
 } from '@/lib/utils/calendar';
 import { useTranslations, useLocale } from 'next-intl';
+import { useSlotHover } from './useSlotHover';
 
 interface DayViewProps {
   currentDate: Date;
@@ -207,6 +208,8 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
   const slDayName = JS_DAY_TO_SLOVENIAN[currentDate.getDay()];
   const dayScheduleEntry = companySchedule?.[slDayName];
   const offRanges = companySchedule ? getOffHourRanges(dayScheduleEntry) : [];
+
+  const slotHover = useSlotHover(Boolean(onGridSlotClick));
 
   const handleColumnClick = useCallback((e: React.MouseEvent) => {
     if (!onGridSlotClick) return;
@@ -457,7 +460,10 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                              ${onGridSlotClick ? 'cursor-pointer' : ''}`}
                   style={empIndex < displayEmployees.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
                   onClick={onGridSlotClick ? handleColumnClick : undefined}
+                  onMouseMove={(e) => slotHover.onMouseMove(e, `emp-${employee.id}`)}
+                  onMouseLeave={slotHover.onMouseLeave}
                 >
+                  {slotHover.renderHint(`emp-${employee.id}`)}
                   {/* Company schedule: shade off-hours */}
                   {offRanges.map((range, i) => {
                     const top = ((range.start - START_HOUR * 60) / 60) * HOUR_HEIGHT;
@@ -604,7 +610,10 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
           <div
             className={`relative h-full ${isCurrentDay ? 'bg-[#1A1F36]/[0.015]' : ''} ${onGridSlotClick ? 'cursor-pointer' : ''}`}
             onClick={onGridSlotClick ? handleColumnClick : undefined}
+            onMouseMove={(e) => slotHover.onMouseMove(e, 'single')}
+            onMouseLeave={slotHover.onMouseLeave}
           >
+            {slotHover.renderHint('single')}
             {/* Company schedule: shade off-hours */}
             {offRanges.map((range, i) => {
               const top = ((range.start - START_HOUR * 60) / 60) * HOUR_HEIGHT;

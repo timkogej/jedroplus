@@ -15,6 +15,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { StaffPermissions } from "@/types/roles";
 import FreeTrialModal, { wasShownRecently } from "@/components/FreeTrialModal";
 import QuotaBanner from "@/components/billing/QuotaBanner";
+import { TourProvider, useOptionalTour } from "@/components/guide/TourProvider";
 import { useTranslations } from "next-intl";
 
 // ============================================================================
@@ -26,6 +27,13 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const { companyId, companyUuid, planCode, loading: companyLoading } = useCompany();
   const { role } = useRolePermissions();
   const pathname = usePathname();
+  const tour = useOptionalTour();
+  const tourActive = Boolean(tour?.activeTour);
+  // Once someone has taken a tour in this visit, don't follow it with a sales pop-up.
+  const [hadTour, setHadTour] = useState(false);
+  useEffect(() => {
+    if (tourActive) setHadTour(true);
+  }, [tourActive]);
   const [showTrialModal, setShowTrialModal] = useState(false);
 
   // Offer the Jedro Plus trial only to owners on the free plan who haven't
@@ -108,7 +116,8 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       <SearchModal />
 
       {/* Free Trial Modal */}
-      <FreeTrialModal show={showTrialModal} onDismiss={() => setShowTrialModal(false)} />
+      {/* Never stack the sales offer on top of a guided tour. */}
+      <FreeTrialModal show={showTrialModal && !tourActive && !hadTour} onDismiss={() => setShowTrialModal(false)} />
     </div>
   );
 }
@@ -242,6 +251,7 @@ export default function ProtectedLayout({
 
   return (
     <SidebarProvider>
+      <TourProvider>
       <LayoutContent>
         {/* Plan is checked FIRST — it always takes precedence over role */}
         {!accessAllowed
@@ -250,6 +260,7 @@ export default function ProtectedLayout({
           ? roleGate
           : children}
       </LayoutContent>
+      </TourProvider>
     </SidebarProvider>
   );
 }

@@ -15,6 +15,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import { useMarkVisited } from '@/hooks/useMarkVisited';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -195,6 +196,7 @@ function PermissionToggle({
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ClaniPage() {
+  useMarkVisited('team');
   const t = useTranslations('settings');
   const { companyUuid, companyId } = useCompany();
   const { user } = useAuth();

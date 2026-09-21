@@ -370,7 +370,8 @@
     "navigation": {
       "prev": "Back",
       "next": "Next",
-      "filters": "Filters"
+      "filters": "Filters",
+      "newAppointment": "New appointment"
     },
     "toast": {
       "eventCreated": "Event created",

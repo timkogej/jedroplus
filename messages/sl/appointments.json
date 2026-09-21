@@ -370,7 +370,8 @@
     "navigation": {
       "prev": "Nazaj",
       "next": "Naprej",
-      "filters": "Filtri"
+      "filters": "Filtri",
+      "newAppointment": "Nov termin"
     },
     "toast": {
       "eventCreated": "Dogodek ustvarjen",

@@ -90,5 +90,80 @@
   "fallbacks": {
     "companyName": "Moje Podjetje",
     "userName": "Uporabnik"
+  },
+  "guide": {
+    "stepOf": "Korak {current} od {total}",
+    "close": "Zapri vodič",
+    "skip": "Preskoči",
+    "back": "Nazaj",
+    "next": "Naprej",
+    "finish": "Končaj",
+    "menuItem": "Vodič po aplikaciji",
+    "tours": {
+      "dashboard": {
+        "welcome": {
+          "title": "Dobrodošli v Jedro+",
+          "body": "V minuti vam pokažemo, kje je kaj. Vodič lahko kadarkoli ponovite v meniju profila zgoraj desno."
+        },
+        "newAppointment": {
+          "title": "Nov termin",
+          "body": "Najhitrejša pot do novega termina: izberete stranko, storitev in čas. Stranko lahko dodate kar sproti."
+        },
+        "calendar": {
+          "title": "Koledar",
+          "body": "Vaš dan, teden ali mesec na enem mestu. Kliknite na prosto polje in termin se odpre na ta dan in uro."
+        },
+        "appointments": {
+          "title": "Termini",
+          "body": "Seznam vseh terminov z iskanjem in filtri. Tu termine tudi zaključite, ko je stranka bila pri vas."
+        },
+        "clients": {
+          "title": "Stranke",
+          "body": "Vaša baza strank z zgodovino obiskov in kontakti."
+        },
+        "services": {
+          "title": "Storitve",
+          "body": "Kaj ponujate, koliko traja in koliko stane. Iz tega se izračuna trajanje in cena termina."
+        },
+        "staff": {
+          "title": "Osebje",
+          "body": "Ljudje, ki izvajajo storitve, in njihov urnik. Sodelavce v aplikacijo povabite s kodo v Nastavitve → Splošno."
+        },
+        "reminders": {
+          "title": "Opomniki",
+          "body": "Samodejna sporočila strankam pred in po terminu. Manj pozabljenih terminov, brez ročnega dela."
+        },
+        "settings": {
+          "title": "Nastavitve",
+          "body": "Podatki podjetja, delovni čas, ekipa, paketi in dodatki."
+        },
+        "gettingStarted": {
+          "title": "Vaši prvi koraki",
+          "body": "Ta seznam vas vodi skozi začetek. Ko korak opravite, se obkljuka sam."
+        },
+        "userMenu": {
+          "title": "Vodič in jezik",
+          "body": "Tu lahko ta vodič kadarkoli ponovite in zamenjate jezik aplikacije."
+        }
+      },
+      "calendar": {
+        "grid": {
+          "title": "Kliknite na prosto polje",
+          "body": "Termin se odpre z izbranim dnem in uro. Šrafirani deli so izven vašega delovnega časa."
+        },
+        "newAppointment": {
+          "title": "Ali uporabite gumb",
+          "body": "Nov termin lahko odprete tudi tukaj, za naslednji prosti čas."
+        },
+        "views": {
+          "title": "Dan, teden ali mesec",
+          "body": "Izberite pogled, ki vam najbolj ustreza."
+        },
+        "filters": {
+          "title": "Filtri",
+          "body": "Prikažite samo izbrane zaposlene ali storitve, ko je koledar poln."
+        }
+      }
+    }
   }
 }

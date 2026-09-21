@@ -17,11 +17,13 @@ import {
   CaretDown,
   Command,
   Package,
+  Compass,
 } from '@phosphor-icons/react';
 import { useSidebar } from './sidebar-context';
 import { useAuth } from '@/app/auth-context';
 import { useCompany } from '@/app/company-context';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useOptionalTour } from '@/components/guide/TourProvider';
 
 // ============================================================================
 // Types
@@ -62,6 +64,7 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 
 export function AppBar() {
   const pathname = usePathname();
+  const tour = useOptionalTour();
   const t = useTranslations('layout');
   const { toggle, isMobile, isOpen, isCollapsed, openSearch, notificationCount } = useSidebar();
   const { user, signOut } = useAuth();
@@ -258,6 +261,7 @@ export function AppBar() {
           {/* Profile */}
           <div ref={profileRef} className="relative ml-1">
             <button
+              data-tour="user-menu"
               onClick={() => setIsProfileOpen((prev) => !prev)}
               className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
             >
@@ -320,6 +324,19 @@ export function AppBar() {
                       <Package weight="regular" className="w-4 h-4" />
                       <span>{t('appbar.plans')}</span>
                     </Link>
+                    {tour && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsProfileOpen(false);
+                          tour.startTour(pathname.includes('/koledar') ? 'calendar' : 'dashboard');
+                        }}
+                        className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      >
+                        <Compass weight="regular" className="w-4 h-4" />
+                        <span>{t('guide.menuItem')}</span>
+                      </button>
+                    )}
                   </div>
 
                   {/* Language switcher */}
