@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter as useLocaleRouter, usePathname as useLocalePathname } from '@/i18n/navigation';
+import { getServiceSuggestions } from '@/lib/onboarding/serviceSuggestions';
+import { saveSeedPlan, type SeedService } from '@/lib/onboarding/firstRunSeed';
+import { markTrialOfferShownNow } from '@/components/FreeTrialModal';
 import { Input } from '@/components/ui/input';
 import { createCompany, type UrnikDay } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
@@ -194,10 +198,29 @@ export default function CreateCompanyPage() {
   const t = useTranslations('onboarding');
   const tCommon = useTranslations('common');
   const [step, setStep] = useState(0);
+  const locale = useLocale();
+  const localeRouter = useLocaleRouter();
+  const localePathname = useLocalePathname();
 
-  // Step 0: locale
+  // Step 0: locale. The language choice switches the interface immediately;
+  // country survives the switch through the query string.
   const [country, setCountry] = useState('Slovenia');
-  const [language, setLanguage] = useState('slo');
+  useEffect(() => {
+    const fromQuery = new URLSearchParams(window.location.search).get('country');
+    if (fromQuery && COUNTRIES_DATA.some((c) => c.value === fromQuery)) setCountry(fromQuery);
+  }, []);
+  const [language, setLanguage] = useState(locale === 'en' ? 'eng' : 'slo');
+
+  const chooseLanguage = (value: string) => {
+    setLanguage(value);
+    const nextLocale = value === 'eng' ? 'en' : 'sl';
+    if (nextLocale === locale) return;
+    document.cookie = `NEXT_LOCALE=${nextLocale};path=/;max-age=${60 * 60 * 24 * 365}`;
+    localeRouter.replace(
+      { pathname: localePathname, query: { country } },
+      { locale: nextLocale }
+    );
+  };
 
   // Step 1: name
   const [companyName, setCompanyName] = useState('');
@@ -212,17 +235,68 @@ export default function CreateCompanyPage() {
     JSON.parse(JSON.stringify(DEFAULT_URNIK))
   );
 
+  // Step 4: starter services + owner as first staff member
+  type DraftService = SeedService & { key: string; selected: boolean };
+  const [draftServices, setDraftServices] = useState<DraftService[]>([]);
+  const [servicesForIndustry, setServicesForIndustry] = useState<string | null>(null);
+  const [addOwnerAsStaff, setAddOwnerAsStaff] = useState(true);
+  const [ownerName, setOwnerName] = useState('');
+
+  const industryKey = PANOGE_DATA.find((p) => p.value === selectedPanoga)?.key ?? 'other';
+
+  // Refill suggestions whenever the industry changes (not on every visit to
+  // the step, so the owner's edits survive going back and forth).
+  useEffect(() => {
+    if (step !== 4 || servicesForIndustry === industryKey) return;
+    const lang = locale === 'en' ? 'en' : 'sl';
+    setDraftServices(
+      getServiceSuggestions(industryKey).map((sug, i) => ({
+        key: `${industryKey}-${i}`,
+        name: sug.name[lang],
+        durationMin: sug.durationMin,
+        priceEur: sug.priceEur,
+        selected: true,
+      }))
+    );
+    setServicesForIndustry(industryKey);
+  }, [step, industryKey, servicesForIndustry, locale]);
+
+  // Prefill the owner's name from their account.
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      const meta = (user?.user_metadata ?? {}) as Record<string, unknown>;
+      const name =
+        (typeof meta.full_name === 'string' && meta.full_name) ||
+        (typeof meta.display_name === 'string' && meta.display_name) ||
+        (typeof meta.name === 'string' && meta.name) ||
+        '';
+      if (name) setOwnerName((current) => current || name);
+    });
+  }, []);
+
+  const updateDraft = (key: string, patch: Partial<DraftService>) =>
+    setDraftServices((prev) => prev.map((d) => (d.key === key ? { ...d, ...patch } : d)));
+
+  const addDraft = () =>
+    setDraftServices((prev) => [
+      ...prev,
+      { key: `custom-${Date.now()}`, name: '', durationMin: 30, priceEur: 0, selected: true },
+    ]);
+
+  const removeDraft = (key: string) => setDraftServices((prev) => prev.filter((d) => d.key !== key));
+
   const [loading, setLoading] = useState(false);
   const [createdCompanyPublicId, setCreatedCompanyPublicId] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const TOTAL_STEPS = 4;
+  const TOTAL_STEPS = 5;
 
   // --- Validation per step ---
   const canAdvance = () => {
     if (step === 0) return Boolean(country && language);
     if (step === 1) return Boolean(companyName.trim());
     if (step === 2) return Boolean(panoga.trim());
+    if (step === 4) return !addOwnerAsStaff || Boolean(ownerName.trim());
     return true; // step 3 (schedule) always valid
   };
 
@@ -275,7 +349,7 @@ export default function CreateCompanyPage() {
       });
 
       if (result.ok && result.company_id) {
-        const companyUUID = result.company_id;
+        let companyUUID = result.company_id;
         let publicId = (result as unknown as Record<string, unknown>).company_slug as string | undefined;
 
         if (!publicId) {
@@ -294,6 +368,22 @@ export default function CreateCompanyPage() {
           }
         }
 
+        // The n8n response has returned the literal "{{$json.company_id}}"
+        // instead of the UUID. Look the real one up so nothing downstream
+        // (local storage, first-run setup) is keyed by a template string.
+        const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (publicId && !UUID_RE.test(companyUUID)) {
+          for (let attempt = 0; attempt < 3; attempt++) {
+            if (attempt > 0) await new Promise(r => setTimeout(r, attempt * 1000));
+            const { data: company } = await supabase
+              .from('companies')
+              .select('id')
+              .eq('company_id', publicId)
+              .maybeSingle();
+            if (company?.id) { companyUUID = String(company.id); break; }
+          }
+        }
+
         if (publicId) {
           localStorage.setItem(STORAGE_KEY, publicId);
           localStorage.setItem(STORAGE_KEY_UUID, companyUUID);
@@ -308,11 +398,38 @@ export default function CreateCompanyPage() {
             }
           });
 
+          // The dashboard creates these through the normal n8n flows once the
+          // company is loaded (see components/onboarding/FirstRunSetup).
+          const chosen = draftServices
+            .filter((d) => d.selected && d.name.trim())
+            .map(({ name, durationMin, priceEur }) => ({
+              name: name.trim(),
+              durationMin: Math.max(5, Math.round(durationMin) || 30),
+              priceEur: Math.max(0, priceEur || 0),
+            }));
+          const [firstName, ...rest] = ownerName.trim().split(/\s+/);
+          if (chosen.length > 0 || addOwnerAsStaff) {
+            saveSeedPlan({
+              companyUuid: companyUUID,
+              services: chosen,
+              addOwnerAsStaff,
+              ownerFirstName: firstName ?? '',
+              ownerLastName: rest.join(' '),
+              createdServiceIds: [],
+              ownerStaffId: null,
+              ownerConnected: false,
+            });
+          }
+
+          // Let the owner get going first: the trial offer waits a week
+          // instead of covering the dashboard on their very first visit.
+          markTrialOfferShownNow();
+
           setCreatedCompanyPublicId(publicId);
           setShowConfetti(true);
           toast.success(t('create.toasts.success'));
           setTimeout(() => {
-            window.location.href = '/dashboard';
+            window.location.href = `/${locale}/dashboard`;
           }, 1500);
         } else {
           toast.error(t('create.toasts.errorLoad'));
@@ -364,6 +481,7 @@ export default function CreateCompanyPage() {
     t('create.steps.companyName'),
     t('create.steps.industry'),
     t('create.steps.schedule'),
+    t('create.steps.services'),
   ];
 
   return (
@@ -414,7 +532,7 @@ export default function CreateCompanyPage() {
                     <button
                       key={lang.value}
                       type="button"
-                      onClick={() => setLanguage(lang.value)}
+                      onClick={() => chooseLanguage(lang.value)}
                       className="flex-1 h-11 rounded-xl border-2 text-sm font-semibold transition-all duration-200"
                       style={
                         language === lang.value
@@ -441,8 +559,12 @@ export default function CreateCompanyPage() {
                 onChange={e => setCompanyName(e.target.value)}
                 placeholder={t('create.companyName.placeholder')}
                 autoFocus
+                aria-describedby="company-name-hint"
                 onKeyDown={e => e.key === 'Enter' && canAdvance() && handleNext()}
               />
+              <p id="company-name-hint" className="mt-2 text-xs text-gray-500">
+                {t('create.companyName.hint')}
+              </p>
             </div>
           )}
 
@@ -542,6 +664,115 @@ export default function CreateCompanyPage() {
                   </div>
                 );
               })}
+            </div>
+          )}
+
+          {/* STEP 4 — Starter services + owner as staff */}
+          {step === 4 && (
+            <div className="space-y-4">
+              <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+                {t('create.services.hint')}
+              </p>
+
+              <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                {draftServices.map((d) => (
+                  <div
+                    key={d.key}
+                    className="rounded-xl border-2 px-3 py-2.5 transition-all duration-150"
+                    style={{ borderColor: d.selected ? '#E9D5FF' : '#F3F4F6', background: d.selected ? 'rgba(139,92,246,0.03)' : '#FAFAFA' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        id={`svc-sel-${d.key}`}
+                        type="checkbox"
+                        checked={d.selected}
+                        onChange={(e) => updateDraft(d.key, { selected: e.target.checked })}
+                        className="h-4 w-4 accent-violet-600"
+                        aria-label={d.name || t('create.services.nameLabel')}
+                      />
+                      <input
+                        id={`svc-name-${d.key}`}
+                        value={d.name}
+                        onChange={(e) => updateDraft(d.key, { name: e.target.value })}
+                        placeholder={t('create.services.newServicePlaceholder')}
+                        aria-label={t('create.services.nameLabel')}
+                        className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-gray-900 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeDraft(d.key)}
+                        className="text-xs text-gray-400 hover:text-gray-700"
+                      >
+                        {t('create.services.remove')}
+                      </button>
+                    </div>
+                    {d.selected && (
+                      <div className="mt-2 flex gap-2 pl-6">
+                        <label className="flex flex-1 items-center gap-2 text-xs text-gray-500">
+                          {t('create.services.durationLabel')}
+                          <input
+                            id={`svc-dur-${d.key}`}
+                            type="number"
+                            min={5}
+                            step={5}
+                            value={d.durationMin}
+                            onChange={(e) => updateDraft(d.key, { durationMin: Number(e.target.value) })}
+                            className="h-8 w-20 rounded-lg border border-gray-200 px-2 text-sm text-gray-800 tabular-nums focus:outline-none focus:ring-2 focus:ring-violet-400"
+                          />
+                        </label>
+                        <label className="flex flex-1 items-center gap-2 text-xs text-gray-500">
+                          {t('create.services.priceLabel')}
+                          <input
+                            id={`svc-price-${d.key}`}
+                            type="number"
+                            min={0}
+                            step={1}
+                            value={d.priceEur}
+                            onChange={(e) => updateDraft(d.key, { priceEur: Number(e.target.value) })}
+                            className="h-8 w-20 rounded-lg border border-gray-200 px-2 text-sm text-gray-800 tabular-nums focus:outline-none focus:ring-2 focus:ring-violet-400"
+                          />
+                        </label>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={addDraft}
+                className="w-full rounded-xl border-2 border-dashed border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+              >
+                + {t('create.services.addCustom')}
+              </button>
+
+              {!draftServices.some((d) => d.selected && d.name.trim()) && (
+                <p className="text-xs text-amber-700">{t('create.services.noneSelected')}</p>
+              )}
+
+              <div className="rounded-xl border-2 border-gray-100 px-4 py-3 space-y-3">
+                <label htmlFor="owner-as-staff" className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    id="owner-as-staff"
+                    type="checkbox"
+                    checked={addOwnerAsStaff}
+                    onChange={(e) => setAddOwnerAsStaff(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 accent-violet-600"
+                  />
+                  <span>
+                    <span className="block text-sm font-semibold text-gray-900">{t('create.services.ownerToggle')}</span>
+                    <span className="block text-xs text-gray-500 mt-0.5">{t('create.services.ownerToggleHint')}</span>
+                  </span>
+                </label>
+                {addOwnerAsStaff && (
+                  <div>
+                    <label htmlFor="owner-name" className="block text-xs font-medium text-gray-600 mb-1">
+                      {t('create.services.ownerNameLabel')}
+                    </label>
+                    <Input id="owner-name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} />
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

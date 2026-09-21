@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabaseClient';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 
 const STORAGE_KEY = "jedroplus_company_id";
 
@@ -92,7 +93,8 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
+    <div className="relative min-h-screen flex items-center justify-center bg-white p-4">
+      <PublicLanguageToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-4xl">
         {/* Header - no J+ symbol, just text */}
         <div className="text-center mb-12">

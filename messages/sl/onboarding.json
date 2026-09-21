@@ -20,7 +20,8 @@
       "localization": "Lokalizacija",
       "companyName": "Ime podjetja",
       "industry": "Panoga",
-      "schedule": "Delovni urnik"
+      "schedule": "Delovni urnik",
+      "services": "Vaše storitve"
     },
     "localization": {
       "countryLabel": "Država",
@@ -28,7 +29,8 @@
     },
     "companyName": {
       "label": "Ime podjetja",
-      "placeholder": "Jedro Plus d.o.o."
+      "placeholder": "npr. Frizerski salon Ana",
+      "hint": "To ime vidijo vaše stranke v opomnikih in na strani za rezervacije."
     },
     "industry": {
       "label": "Panoga / dejavnost",
@@ -110,6 +112,19 @@
       "carService": "Avtoservis",
       "cleaningAndMaintenance": "Čiščenje in vzdrževanje",
       "other": "Drugo"
+    },
+    "services": {
+      "hint": "Predlagali smo nekaj storitev za vašo panogo. Obkljukajte tiste, ki jih ponujate, in popravite ceno ter trajanje. Vse lahko kasneje uredite v Storitvah.",
+      "nameLabel": "Naziv storitve",
+      "durationLabel": "Trajanje (min)",
+      "priceLabel": "Cena (€)",
+      "addCustom": "Dodaj svojo storitev",
+      "remove": "Odstrani",
+      "newServicePlaceholder": "npr. Posvet",
+      "ownerToggle": "Tudi jaz izvajam storitve",
+      "ownerToggleHint": "Dodamo vas kot prvega zaposlenega, da lahko takoj vpišete prvi termin. Sodelavce lahko dodate kasneje.",
+      "ownerNameLabel": "Vaše ime in priimek",
+      "noneSelected": "Brez storitev bo treba pred prvim terminom dodati vsaj eno storitev v Storitvah."
     }
   },
   "join": {
@@ -135,8 +150,8 @@
       "employeeSubtitle": "Vnesite kodo za zaposlene, ki ste jo prejeli od administratorja",
       "adminCodeLabel": "Koda za admine",
       "employeeCodeLabel": "Koda za zaposlene",
-      "adminCodeHint": "8-mestna koda za admine",
-      "employeeCodeHint": "8-mestna koda za zaposlene",
+      "adminCodeHint": "Kodo vam da lastnik podjetja. Najde jo v Nastavitve → Splošno.",
+      "employeeCodeHint": "Kodo za zaposlene vam da lastnik ali administrator. Najde jo v Nastavitve → Splošno.",
       "submit": "Pridruži se",
       "submitting": "Pridružujem..."
     },

@@ -71,6 +71,7 @@ import { useUserPersonId } from "@/hooks/useUserPersonId";
 import { useRolePermissions } from "@/app/role-permission-context";
 import { useTranslations } from "next-intl";
 import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
+import FirstRunSetup from "@/components/onboarding/FirstRunSetup";
 
 // ─── Copy button (reused in detail modal) ────────────────────────────────────
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -1157,6 +1158,12 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               </div>
             </div>
           </motion.div>
+
+          {/* Finishes the setup chosen in onboarding, then invites the first appointment */}
+          <FirstRunSetup
+            onCreateAppointment={() => setShowNewAppointmentModal(true)}
+            onSeeded={loadDashboard}
+          />
 
           {/* Metrics Cards */}
           {role === 'staff' ? (

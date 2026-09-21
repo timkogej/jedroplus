@@ -20,7 +20,8 @@
       "localization": "Localization",
       "companyName": "Company name",
       "industry": "Industry",
-      "schedule": "Working hours"
+      "schedule": "Working hours",
+      "services": "Your services"
     },
     "localization": {
       "countryLabel": "Country",
@@ -28,7 +29,8 @@
     },
     "companyName": {
       "label": "Company name",
-      "placeholder": "My Business LLC"
+      "placeholder": "e.g. Ana's Hair Studio",
+      "hint": "Your clients see this name in reminders and on your booking page."
     },
     "industry": {
       "label": "Industry / activity",
@@ -110,6 +112,19 @@
       "carService": "Car service",
       "cleaningAndMaintenance": "Cleaning & maintenance",
       "other": "Other"
+    },
+    "services": {
+      "hint": "We've suggested a few services for your industry. Tick the ones you offer and adjust the price and duration. You can edit everything later in Services.",
+      "nameLabel": "Service name",
+      "durationLabel": "Duration (min)",
+      "priceLabel": "Price (€)",
+      "addCustom": "Add your own service",
+      "remove": "Remove",
+      "newServicePlaceholder": "e.g. Consultation",
+      "ownerToggle": "I perform services too",
+      "ownerToggleHint": "We'll add you as the first staff member so you can book your first appointment right away. You can add colleagues later.",
+      "ownerNameLabel": "Your first and last name",
+      "noneSelected": "Without services you'll need to add at least one in Services before your first appointment."
     }
   },
   "join": {
@@ -135,8 +150,8 @@
       "employeeSubtitle": "Enter the staff code you received from an admin",
       "adminCodeLabel": "Admin code",
       "employeeCodeLabel": "Staff code",
-      "adminCodeHint": "8-character admin code",
-      "employeeCodeHint": "8-character staff code",
+      "adminCodeHint": "The company owner gives you this code. They'll find it in Settings → General.",
+      "employeeCodeHint": "The owner or an admin gives you this code. They'll find it in Settings → General.",
       "submit": "Join",
       "submitting": "Joining..."
     },
