@@ -90,6 +90,9 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
             className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none"
           >
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-label={t('title')}
               className="pointer-events-auto w-full max-w-md max-h-[90vh] rounded-2xl bg-white shadow-2xl overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
