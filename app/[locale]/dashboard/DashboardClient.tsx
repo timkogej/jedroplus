@@ -72,6 +72,7 @@ import { useRolePermissions } from "@/app/role-permission-context";
 import { useTranslations } from "next-intl";
 import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
 import FirstRunSetup from "@/components/onboarding/FirstRunSetup";
+import GettingStarted from "@/components/guide/GettingStarted";
 
 // ─── Copy button (reused in detail modal) ────────────────────────────────────
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -589,6 +590,8 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
 
   // New appointment modal
   const [showNewAppointmentModal, setShowNewAppointmentModal] = useState(false);
+  // Re-counts the getting-started checklist after a booking is saved.
+  const [checklistRefresh, setChecklistRefresh] = useState(0);
   const [isNewAppointmentSaving, setIsNewAppointmentSaving] = useState(false);
 
   // New client modal
@@ -880,7 +883,10 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await loadDashboard();
 
-      if (isNew) setShowNewAppointmentModal(false);
+      if (isNew) {
+        setShowNewAppointmentModal(false);
+        setChecklistRefresh((n) => n + 1);
+      }
       else setEditingAppointment(null);
     } catch (err) {
       setActionError(t('toast.saveError'));
@@ -1129,6 +1135,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                 {canCreateAppointment && (
                   <button
                     type="button"
+                    data-tour="new-appointment"
                     onClick={() => setShowNewAppointmentModal(true)}
                     className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-medium shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all"
                   >
@@ -1163,6 +1170,11 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           <FirstRunSetup
             onCreateAppointment={() => setShowNewAppointmentModal(true)}
             onSeeded={loadDashboard}
+          />
+
+          <GettingStarted
+            onCreateAppointment={() => setShowNewAppointmentModal(true)}
+            refreshKey={checklistRefresh}
           />
 
           {/* Metrics Cards */}

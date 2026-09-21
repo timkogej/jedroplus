@@ -150,5 +150,36 @@
     "retry": "Poskusi znova",
     "openServices": "Odpri Storitve",
     "dismiss": "Zapri"
+  },
+  "gettingStarted": {
+    "title": "Začnite z Jedro+",
+    "subtitle": "Opravljeno {done} od {total}",
+    "hide": "Skrij seznam",
+    "items": {
+      "tour": {
+        "title": "Oglejte si vodič (1 min)",
+        "body": "Pokažemo vam, kje je kaj."
+      },
+      "appointment": {
+        "title": "Vpišite prvi termin",
+        "body": "Izberite stranko, storitev in čas."
+      },
+      "client": {
+        "title": "Dodajte prvo stranko",
+        "body": "Ali uvozite obstoječe stranke iz Excela."
+      },
+      "hours": {
+        "title": "Preverite delovni čas",
+        "body": "Po njem se ravna koledar in spletno naročanje."
+      },
+      "reminders": {
+        "title": "Spoznajte opomnike",
+        "body": "Stranke samodejno opomnimo na termin."
+      },
+      "team": {
+        "title": "Dodajte sodelavce",
+        "body": "Če ne delate sami, dodajte ekipo in njihove urnike."
+      }
+    }
   }
 }

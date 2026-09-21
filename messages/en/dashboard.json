@@ -150,5 +150,36 @@
     "retry": "Try again",
     "openServices": "Open Services",
     "dismiss": "Close"
+  },
+  "gettingStarted": {
+    "title": "Get started with Jedro+",
+    "subtitle": "{done} of {total} done",
+    "hide": "Hide list",
+    "items": {
+      "tour": {
+        "title": "Take the tour (1 min)",
+        "body": "We'll show you where everything is."
+      },
+      "appointment": {
+        "title": "Book your first appointment",
+        "body": "Pick a client, a service and a time."
+      },
+      "client": {
+        "title": "Add your first client",
+        "body": "Or import existing clients from Excel."
+      },
+      "hours": {
+        "title": "Check your working hours",
+        "body": "The calendar and online booking follow them."
+      },
+      "reminders": {
+        "title": "Meet reminders",
+        "body": "Clients get reminded of appointments automatically."
+      },
+      "team": {
+        "title": "Add colleagues",
+        "body": "If you don't work alone, add your team and their schedules."
+      }
+    }
   }
 }

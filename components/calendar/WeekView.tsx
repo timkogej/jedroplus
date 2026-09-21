@@ -24,6 +24,7 @@ import {
   JS_DAY_TO_SLOVENIAN,
   getOffHourRanges,
 } from '@/lib/utils/calendar';
+import { useSlotHover } from './useSlotHover';
 
 interface WeekViewProps {
   currentDate: Date;
@@ -262,6 +263,8 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
       }
     });
   }, [isMobile, weekDays, columnCount]);
+
+  const slotHover = useSlotHover(Boolean(onGridSlotClick) && !dragging);
 
   const handleColumnClick = useCallback((e: React.MouseEvent, day: Date) => {
     if (!onGridSlotClick) return;
@@ -508,7 +511,10 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                            ${onGridSlotClick && !dragging ? 'cursor-pointer' : ''}`}
                 style={dayIndex < weekDays.length - 1 ? { borderColor: 'rgba(0,0,0,0.04)' } : undefined}
                 onClick={onGridSlotClick && !dragging ? (e) => handleColumnClick(e, day) : undefined}
+                onMouseMove={(e) => slotHover.onMouseMove(e, dateKey)}
+                onMouseLeave={slotHover.onMouseLeave}
               >
+                {slotHover.renderHint(dateKey)}
                 {/* Company schedule: shade off-hours */}
                 {offRanges.map((range, i) => {
                   const top = ((range.start - START_HOUR * 60) / 60) * HOUR_HEIGHT;

@@ -15,6 +15,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { StaffPermissions } from "@/types/roles";
 import FreeTrialModal, { wasShownRecently } from "@/components/FreeTrialModal";
 import QuotaBanner from "@/components/billing/QuotaBanner";
+import { TourProvider } from "@/components/guide/TourProvider";
 import { useTranslations } from "next-intl";
 
 // ============================================================================
@@ -242,6 +243,7 @@ export default function ProtectedLayout({
 
   return (
     <SidebarProvider>
+      <TourProvider>
       <LayoutContent>
         {/* Plan is checked FIRST — it always takes precedence over role */}
         {!accessAllowed
@@ -250,6 +252,7 @@ export default function ProtectedLayout({
           ? roleGate
           : children}
       </LayoutContent>
+      </TourProvider>
     </SidebarProvider>
   );
 }

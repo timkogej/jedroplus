@@ -91,6 +91,7 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { useTranslations, useLocale } from 'next-intl';
+import { useOptionalTour } from '@/components/guide/TourProvider';
 
 interface CalendarProps {
   companyId: string;
@@ -1805,6 +1806,43 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     setIsModalOpen(true);
   }, [canCreateAppointment]);
 
+  // "Nov termin" button and /koledar?action=new: today → the next half hour,
+  // any other day → 09:00.
+  const openNewAppointment = useCallback(() => {
+    const now = new Date();
+    const target = currentDate ?? now;
+    const isTodayTarget = getLocalDateKey(target) === getLocalDateKey(now);
+    let time = '09:00';
+    if (isTodayTarget) {
+      const minutes = now.getHours() * 60 + now.getMinutes();
+      const next = Math.min(Math.ceil((minutes + 1) / 30) * 30, 23 * 60 + 30);
+      time = `${String(Math.floor(next / 60)).padStart(2, '0')}:${String(next % 60).padStart(2, '0')}`;
+    }
+    handleGridSlotClick(isTodayTarget ? now : target, time);
+  }, [currentDate, handleGridSlotClick]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('action') !== 'new') return;
+    openNewAppointment();
+    params.delete('action');
+    const query = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+    // Run once on arrival only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // First visit: a short guided tour of the calendar.
+  const tour = useOptionalTour();
+  useEffect(() => {
+    if (!tour) return;
+    const timer = window.setTimeout(() => {
+      if (document.querySelector('[role="dialog"]')) return;
+      tour.startTourOnce('calendar');
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [tour]);
+
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingAppointment(null);
@@ -2597,10 +2635,26 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
 
             {/* Right: view toggle + filter */}
             <div className="flex items-center gap-2 md:gap-3">
-              <ViewToggle currentView={currentView} onViewChange={handleViewChange} isMobile={isMobile} />
+              {canCreateAppointment && (
+                <button
+                  type="button"
+                  data-tour="calendar-new"
+                  onClick={openNewAppointment}
+                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#1A1F36] px-3 text-sm font-medium text-white
+                             transition-colors hover:bg-[#2A3050]"
+                  aria-label={t('calendarView.navigation.newAppointment')}
+                >
+                  <Plus className="h-4 w-4" weight="bold" />
+                  <span className="hidden md:inline">{t('calendarView.navigation.newAppointment')}</span>
+                </button>
+              )}
+              <span data-tour="calendar-views" className="inline-flex">
+                <ViewToggle currentView={currentView} onViewChange={handleViewChange} isMobile={isMobile} />
+              </span>
 
               <motion.button
                 type="button"
+                data-tour="calendar-filters"
                 onClick={handleToggleSidebar}
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.92 }}
@@ -2625,6 +2679,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
 
         {/* Calendar content – swipe left/right to navigate */}
         <div
+          data-tour="calendar-grid"
           className="flex-1 overflow-hidden p-2 md:p-4"
           onTouchStart={handleSwipeTouchStart}
           onTouchMove={handleSwipeTouchMove}

@@ -19,6 +19,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import type { WorkingHoursDay, TimeInterval } from '@/types/settings';
 import { defaultWorkingHoursDay } from '@/types/settings';
+import { useMarkVisited } from '@/hooks/useMarkVisited';
 
 const DAYS_OF_WEEK = [
   'Ponedeljek',
@@ -42,6 +43,7 @@ const DAY_KEYS: Record<string, 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | '
 };
 
 export default function CompanySettingsPage() {
+  useMarkVisited('workingHours');
   const t = useTranslations('settings');
   const tc = useTranslations('common');
   const { companyId } = useCompany();

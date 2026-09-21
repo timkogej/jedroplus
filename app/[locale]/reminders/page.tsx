@@ -23,6 +23,7 @@ import { SendingStatus } from '@/components/reminders/SendingStatus';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useTranslations } from 'next-intl';
+import { useMarkVisited } from '@/hooks/useMarkVisited';
 
 type ReminderRow = Record<string, unknown>;
 
@@ -234,6 +235,7 @@ function ColorSwatches({ colors, emptyLabel }: { colors: string[]; emptyLabel: s
 }
 
 export default function RemindersPage() {
+  useMarkVisited('reminders');
   const t = useTranslations('reminders');
   const { companyId, companyUuid, companySettings } = useCompany();
   const { role, permissions } = useRolePermissions();
