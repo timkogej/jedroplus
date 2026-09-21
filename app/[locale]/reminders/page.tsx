@@ -19,6 +19,8 @@ import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
+import { SendingStatus } from '@/components/reminders/SendingStatus';
+import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useTranslations } from 'next-intl';
 
@@ -241,6 +243,7 @@ export default function RemindersPage() {
   );
   const [reminderRow, setReminderRow] = useState<ReminderRow | null>(null);
   const [loading, setLoading] = useState(true);
+  const { usage: billingUsage } = useBillingUsage();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   // Settings values (read-only display)
@@ -425,6 +428,11 @@ export default function RemindersPage() {
     smsStoritevPo ? t('page.after.includeService') : null,
     smsNavodilaPo ? t('page.after.instructions') : null,
   ].filter((item): item is string => Boolean(item));
+  const channelsInUse = (['sms', 'email'] as const).filter((channel) =>
+    (enabledBefore && beforeChannel === channel) ||
+    (enabledAfter && afterChannel === channel) ||
+    (rescheduleEnabled && rescheduleChannel === channel)
+  );
   const rescheduleTemplate = rescheduleChannel === 'sms' ? rescheduleTemplateSms : rescheduleTemplateEmail;
   const renderTextValue = (value: string) =>
     value.trim() ? (
@@ -468,6 +476,16 @@ export default function RemindersPage() {
               </motion.button>
             )}
           </motion.div>
+
+          {!loading && billingUsage && (
+            <SendingStatus
+              channels={[...channelsInUse]}
+              sms={billingUsage.sms}
+              email={billingUsage.email}
+              periodEnd={billingUsage.periodEnd}
+              canBuy={canManageSettings && !billingUsage.isFree}
+            />
+          )}
 
           {hasIncompleteSettings && (
             <motion.div

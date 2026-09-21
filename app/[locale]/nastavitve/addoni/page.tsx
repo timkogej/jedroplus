@@ -11,6 +11,8 @@ import {
   Warning,
 } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';
+import { fetchBillingStatus } from '@/hooks/useBillingUsage';
+import { computeBillingUsage } from '@/lib/billing/usage';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -162,9 +164,7 @@ function CurrentPlanCard({ subscription }: { subscription: SubscriptionData | nu
             </h2>
             <p className="mt-2 text-sm font-medium text-gray-700">{priceEur.toFixed(0)}€ / mesec</p>
           </div>
-          <span className="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-gray-600">
-            {plan.code}
-          </span>
+          {/* internal plan code intentionally not shown to users */}
         </div>
         <div className="mt-5 border-t border-gray-100 pt-4">
           <p className="text-xs text-gray-500">
@@ -440,7 +440,7 @@ function EmployeesCard({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="text-base font-semibold tracking-tight text-gray-950">Zaposleni</h3>
-            <p className="mt-0.5 text-xs text-gray-500">Razširite število aktivnih uporabnikov v ekipi.</p>
+            <p className="mt-0.5 text-xs text-gray-500">Koliko ljudi se lahko prijavi v aplikacijo. Zaposleni v koledarju (Osebje) so neomejeni.</p>
           </div>
           <span className="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700">
             {activeCount} / {maxUsers}
@@ -606,13 +606,23 @@ export default function AddoniPage() {
     if (!companyUuid) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/addons/status?company_id=${companyUuid}`);
-      const data = await res.json();
+      // force=true: always fresh here, and refreshes the shared cache that the
+      // quota banner and Paketi read from.
+      // The route returns the full rows; this page uses the richer local types.
+      const data = (await fetchBillingStatus(companyUuid, true)) as unknown as {
+        subscription: SubscriptionData | null;
+        smsUsage: UsageData | null;
+        emailUsage: UsageData | null;
+        employeeLimits: EmployeeLimitsData | null;
+        memberCount?: number;
+      } | null;
+      if (!data) throw new Error('status unavailable');
       setSubscription(data.subscription);
       setSmsUsage(data.smsUsage);
       setEmailUsage(data.emailUsage);
       setEmployeeLimits(data.employeeLimits);
-      setActiveEmployeeCount(data.activeEmployeeCount ?? 0);
+      // Seats count people with a login, not calendar staff.
+      setActiveEmployeeCount(data.memberCount ?? 0);
       setExtraEmployees(data.employeeLimits?.extra_users ?? 0);
     } catch {
       showToast('Napaka pri nalaganju podatkov', 'error');
@@ -625,14 +635,11 @@ export default function AddoniPage() {
     fetchData();
   }, [fetchData]);
 
-  const totalSmsQuota =
-    subscription?.sms_quota_override ??
-    ((subscription?.plan?.sms_quota_monthly ?? 0) + (subscription?.sms_addon_monthly ?? 0));
-  const totalEmailQuota =
-    subscription?.email_quota_override ??
-    ((subscription?.plan?.email_quota_monthly ?? 0) + (subscription?.email_addon_monthly ?? 0));
-  const smsUsed = smsUsage?.sent_count ?? 0;
-  const emailUsed = emailUsage?.sent_count ?? 0;
+  const billingUsage = computeBillingUsage({ subscription, smsUsage, emailUsage, employeeLimits });
+  const totalSmsQuota = billingUsage.sms.total;
+  const totalEmailQuota = billingUsage.email.total;
+  const smsUsed = billingUsage.sms.used;
+  const emailUsed = billingUsage.email.used;
   const smsPercent = totalSmsQuota > 0 ? Math.min((smsUsed / totalSmsQuota) * 100, 100) : 0;
   const emailPercent = totalEmailQuota > 0 ? Math.min((emailUsed / totalEmailQuota) * 100, 100) : 0;
   const includedEmployees = subscription?.plan?.max_employees ?? 1;

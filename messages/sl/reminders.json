@@ -85,6 +85,28 @@
     "info": {
       "title": "O Opomnikih",
       "body": "Opomniki se <highlight>pošiljajo avtomatsko</highlight> na podlagi tukaj prikazanih nastavitev — brez ročnega dela. Vsaka stranka prejme sporočilo pred in/ali po terminu, odvisno od vaše konfiguracije.\n\nKo je aktiviran AI, <highlight>sporočila niso nikoli enaka</highlight> — AI si zapomni kontekst stranke, omeni pravo storitev in prilagodi vsebino, da zveni naravno in osebno. To pomeni večjo odprtost, bolj zapomnjena sporočila in stranke, ki se počutijo cenjene.\n\nZa lažje upravljanje je na voljo tudi možnost <highlight>lastne predloge sporočila</highlight>, kadar želite popoln nadzor nad vsebino.\n\nV kolikor imate karšnakoli vprašanja, nas kontaktirajte na help@jedroplus.com."
+    },
+    "sendingStatus": {
+      "title": "Stanje pošiljanja",
+      "ok": {
+        "title": "{name} opomniki se pošiljajo",
+        "body": "Na voljo še {remaining} od {total} v tem obdobju."
+      },
+      "nearLimit": {
+        "title": "{name} kvota je skoraj porabljena",
+        "body": "Porabljenih {used} od {total}. Ko zmanjka, se {name} opomniki ne pošiljajo več."
+      },
+      "exhausted": {
+        "title": "{name} opomniki se ne pošiljajo",
+        "body": "Porabili ste vseh {total} v tem obdobju ({used}/{total}). Stranke ne prejemajo {name} opomnikov."
+      },
+      "unavailable": {
+        "title": "{name} opomniki se ne pošiljajo",
+        "body": "Vaš paket ne vključuje {name} sporočil, zato se opomniki po tem kanalu ne pošljejo. Dokupite paket ali v nastavitvah izberite drug kanal."
+      },
+      "renews": "Kvota se obnovi {date}.",
+      "buySms": "Dokupi SMS",
+      "buyEmail": "Dokupi e-pošto"
     }
   },
   "status": {
@@ -215,6 +237,15 @@
       "discountPlaceholder": "10% popust na naslednji obisk",
       "timingTitle": "Čas pošiljanja",
       "timingValue": "Fiksno: Takoj po zaključenem terminu"
+    },
+    "smsAccess": {
+      "notIncluded": "Vaš paket ne vključuje SMS sporočil. Dokupite SMS paket ali nadgradite na Jedro Pro, ki vključuje 200 SMS na mesec.",
+      "notIncludedFree": "SMS opomniki so na voljo v plačljivih paketih.",
+      "buySms": "Dokupi SMS",
+      "comparePlans": "Primerjaj pakete",
+      "remaining": "Na voljo še {remaining} od {total} SMS v tem obdobju.",
+      "nearLimit": "Porabljenih {used} od {total} SMS. Ko jih zmanjka, se SMS sporočila ne pošiljajo.",
+      "exhausted": "Porabili ste vse SMS-e v tem obdobju ({used}/{total}). SMS sporočila se ne pošiljajo, dokler ne dokupite paketa ali se obdobje ne obnovi."
     }
   }
 }

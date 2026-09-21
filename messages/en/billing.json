@@ -211,10 +211,10 @@
       "appointments": "Appointments this month"
     },
     "planDescriptions": {
-      "jedroPlus": "Includes reminders, email sending, and analytics.",
+      "jedroPlus": "Includes reminders, email, online booking and analytics. SMS can be added.",
       "jedroPro": "Includes SMS, lost leads, and advanced features.",
       "enterprise": "Customized plan for specific business needs.",
-      "free": "Free trial access."
+      "free": "Free forever: calendar, appointments, clients, services and staff."
     },
     "planButtons": {
       "active": "Active",
@@ -233,7 +233,8 @@
         "phone": "Phone",
         "message": "Message",
         "messagePlaceholder": "Describe what you need..."
-      }
+      },
+      "sendFailed": "We couldn't send your inquiry. Please email us directly at <email>timkogej@jedroplus.com</email>."
     },
     "inquiryToast": "Inquiry sent. We'll contact you shortly.",
     "plans": {
@@ -267,6 +268,52 @@
           "Dedicated manager and priority support"
         ]
       }
-    }
+    },
+    "freeRenewal": "Free, no renewal",
+    "quotaNotIncluded": "Not included",
+    "quotaUnlimited": "Unlimited"
+  },
+  "trialModal": {
+    "badge": "Free trial",
+    "title": "Try Jedro Plus for free",
+    "subtitle": "Everything you need to run your business smoothly — no risk, no commitment.",
+    "featuresTitle": "What you get with Jedro Plus",
+    "features": {
+      "reminders": {
+        "title": "Personalized reminders",
+        "desc": "Automatic reminders to clients before and after every appointment — no manual work."
+      },
+      "booking": {
+        "title": "Online booking with multiple designs",
+        "desc": "A booking link with a choice of page designs — clients book themselves, any time."
+      },
+      "communication": {
+        "title": "Client communication",
+        "desc": "SMS, email and reminders in one place."
+      },
+      "analytics": {
+        "title": "Full analytics",
+        "desc": "Revenue, occupancy, client growth and business performance at a glance."
+      }
+    },
+    "cta": "Try for free",
+    "later": "Maybe later",
+    "close": "Close"
+  },
+  "quotaBanner": {
+    "emailName": "Email",
+    "nearLimit": {
+      "title": "{name}: {used} of {total} used.",
+      "body": "When the quota runs out, messages and reminders on this channel stop being sent."
+    },
+    "exhausted": {
+      "title": "{name} reminders and messages are not being sent.",
+      "body": "You've used all {total} for this period ({used}/{total}), so clients aren't receiving them."
+    },
+    "alsoOther": "Another quota is also nearly or fully used.",
+    "dismiss": "Hide for today",
+    "ctaSms": "Buy SMS",
+    "ctaEmail": "Buy email",
+    "emailNameLoc": "email"
   }
 }

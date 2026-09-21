@@ -15,6 +15,7 @@ import {
 } from '@/components/settings';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { sendWebhook, WEBHOOK_EVENTS } from '@/components/utils/webhookUtils';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
@@ -23,6 +24,9 @@ export default function GeneralSettingsPage() {
   const t = useTranslations('settings');
   const { companyId } = useCompany();
   const { user } = useAuth();
+  const { role, loading: roleLoading } = useRolePermissions();
+  // Join codes grant access to the company, so only owners and admins see them.
+  const canSeeJoinCodes = role === 'owner' || role === 'admin';
 
   const [userName, setUserName] = useState('');
   const userEmail = user?.email || '';
@@ -61,14 +65,10 @@ export default function GeneralSettingsPage() {
 
         const { data: companyRow } = await supabaseReadOnly
           .from('companies')
-          .select('slug, join_code_admin, join_code_staff')
+          .select('slug')
           .eq('company_id', companyId)
           .maybeSingle();
-        if (companyRow) {
-          if (companyRow.slug) setCompanySlug(String(companyRow.slug));
-          if (companyRow.join_code_admin) setAdminCode(String(companyRow.join_code_admin));
-          if (companyRow.join_code_staff) setStaffCode(String(companyRow.join_code_staff));
-        }
+        if (companyRow?.slug) setCompanySlug(String(companyRow.slug));
       } catch (error) {
         console.error('Error loading settings:', error);
       } finally {
@@ -78,6 +78,27 @@ export default function GeneralSettingsPage() {
 
     loadSettings();
   }, [companyId, user]);
+
+  // Join codes come from a server route that checks the caller's role.
+  useEffect(() => {
+    if (roleLoading || !canSeeJoinCodes) {
+      setAdminCode('');
+      setStaffCode('');
+      return;
+    }
+    let cancelled = false;
+    fetch('/api/company/join-codes')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { adminCode?: string | null; staffCode?: string | null } | null) => {
+        if (cancelled || !data) return;
+        setAdminCode(data.adminCode ?? '');
+        setStaffCode(data.staffCode ?? '');
+      })
+      .catch((error) => console.error('Error loading join codes:', error));
+    return () => {
+      cancelled = true;
+    };
+  }, [roleLoading, canSeeJoinCodes, companyId]);
 
   const saveSettings = useCallback(async () => {
     if (!companyId) return;
@@ -242,7 +263,8 @@ export default function GeneralSettingsPage() {
           </SettingRow>
         </SettingsSection>
 
-        {/* Company ID & Codes */}
+        {/* Company ID & Codes — owners and admins only */}
+        {canSeeJoinCodes && (
         <SettingsSection title={t('general.companyData.title')} description={t('general.companyData.subtitle')}>
           <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
             {/* Company ID */}
@@ -268,31 +290,33 @@ export default function GeneralSettingsPage() {
 
             <div className="border-t border-gray-100" />
 
-            {/* Admin Code */}
+            {/* Admin Code — owner only (the API returns null for admins) */}
+            {adminCode && (
+            <>
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-900 mb-0.5">{t('general.companyData.adminCodeLabel')}</p>
                 <p className="text-xs text-gray-500 mb-2">{t('general.companyData.adminCodeNote')}</p>
                 <div className="text-2xl font-bold gradient-text tracking-tight">
-                  {adminCode || '—'}
+                  {adminCode}
                 </div>
               </div>
-              {adminCode && (
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => copyToClipboard(adminCode, 'adminCode')}
-                  className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
-                >
-                  {copiedAdminCode ? (
-                    <Check className="w-4 h-4 text-gray-900" weight="bold" />
-                  ) : (
-                    <Copy className="w-4 h-4 text-gray-500" />
-                  )}
-                </motion.button>
-              )}
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => copyToClipboard(adminCode, 'adminCode')}
+                className="p-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                {copiedAdminCode ? (
+                  <Check className="w-4 h-4 text-gray-900" weight="bold" />
+                ) : (
+                  <Copy className="w-4 h-4 text-gray-500" />
+                )}
+              </motion.button>
             </div>
 
             <div className="border-t border-gray-100" />
+            </>
+            )}
 
             {/* Employee Code */}
             <div className="flex items-center justify-between">
@@ -342,6 +366,7 @@ export default function GeneralSettingsPage() {
             </div>
           </div>
         </SettingsSection>
+        )}
 
         {/* QR code */}
         <SettingsSection title={t('general.qr.title')} description={t('general.qr.subtitle')}>

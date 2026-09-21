@@ -1,46 +1,40 @@
 'use client';
 
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Bell, Globe, ChatCircleText, Robot, ChartLineUp } from '@phosphor-icons/react';
+import { X, Bell, Globe, ChatCircleText, ChartLineUp } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 export const TRIAL_MODAL_SESSION_KEY = 'jedroplus_trial_modal_shown';
 
-function markShownToday() {
-  localStorage.setItem(TRIAL_MODAL_SESSION_KEY, new Date().toDateString());
+// Show the offer at most once a week — daily felt like nagging.
+const SHOW_EVERY_MS = 7 * 24 * 60 * 60 * 1000;
+
+function markShown() {
+  try {
+    localStorage.setItem(TRIAL_MODAL_SESSION_KEY, String(Date.now()));
+  } catch {
+    // storage unavailable — the modal may show again next visit
+  }
 }
 
-export function wasShownToday(): boolean {
-  return localStorage.getItem(TRIAL_MODAL_SESSION_KEY) === new Date().toDateString();
+export function wasShownRecently(): boolean {
+  try {
+    const raw = localStorage.getItem(TRIAL_MODAL_SESSION_KEY);
+    const at = raw ? Number(raw) : NaN;
+    // Older builds stored a date string; treat it as "not recent".
+    return Number.isFinite(at) && Date.now() - at < SHOW_EVERY_MS;
+  } catch {
+    return false;
+  }
 }
 
 const FEATURES = [
-  {
-    icon: Bell,
-    title: 'Personalizirani opomniki',
-    desc: 'Avtomatski opomniki strankam pred in po vsakem terminu — brez ročnega dela.',
-  },
-  {
-    icon: Globe,
-    title: 'Spletno naročanje + različni dizajni',
-    desc: 'Booking link z izborom dizajna strani — stranke se naročajo same, kadarkoli.',
-  },
-  {
-    icon: ChatCircleText,
-    title: 'Komunikacija s strankami',
-    desc: 'Funkcija, ki poenostavi vso komunikacijo — SMS, email in opomniki na enem mestu.',
-  },
-  {
-    icon: Robot,
-    title: 'Asistent+',
-    desc: 'AI asistent za upravljanje terminov, strank in odgovarjanje na poizvedbe.',
-  },
-  {
-    icon: ChartLineUp,
-    title: 'Celotna analitika',
-    desc: 'Pregled prihodkov, zasedenosti, rasti strank in uspešnosti poslovanja.',
-  },
-];
+  { icon: Bell, key: 'reminders' },
+  { icon: Globe, key: 'booking' },
+  { icon: ChatCircleText, key: 'communication' },
+  { icon: ChartLineUp, key: 'analytics' },
+] as const;
 
 interface FreeTrialModalProps {
   show: boolean;
@@ -49,14 +43,15 @@ interface FreeTrialModalProps {
 
 export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps) {
   const router = useRouter();
+  const t = useTranslations('billing.trialModal');
 
   const handleDismiss = () => {
-    markShownToday();
+    markShown();
     onDismiss();
   };
 
   const handleTry = () => {
-    markShownToday();
+    markShown();
     onDismiss();
     router.push('/nastavitve/paketi');
   };
@@ -101,28 +96,29 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
                 <button
                   type="button"
                   onClick={handleDismiss}
+                  aria-label={t('close')}
                   className="absolute top-4 right-4 rounded-full p-1.5 bg-white/20 hover:bg-white/30 text-white transition-colors"
                 >
                   <X className="h-4 w-4" weight="bold" />
                 </button>
                 <span className="inline-block bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-2.5">
-                  🎁 Brezplačna preizkušnja
+                  {t('badge')}
                 </span>
                 <h2 className="text-xl font-bold text-white leading-tight">
-                  Izkoristite brezplačno<br />preizkušnjo Jedro Plus!
+                  {t('title')}
                 </h2>
                 <p className="text-white/80 text-sm mt-1.5">
-                  Vse kar potrebujete za urejeno poslovanje — brez tveganja, brez obveznosti.
+                  {t('subtitle')}
                 </p>
               </div>
 
               {/* Features — scrollable */}
               <div className="px-6 py-4 space-y-3 overflow-y-auto flex-1">
                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
-                  Kaj dobite z Jedro Plus
+                  {t('featuresTitle')}
                 </p>
-                {FEATURES.map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="flex items-start gap-3">
+                {FEATURES.map(({ icon: Icon, key }) => (
+                  <div key={key} className="flex items-start gap-3">
                     <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-50 ring-1 ring-gray-100">
                       <Icon
                         className="h-[18px] w-[18px]"
@@ -131,8 +127,8 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 leading-snug">{title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{desc}</p>
+                      <p className="text-sm font-semibold text-gray-800 leading-snug">{t(`features.${key}.title`)}</p>
+                      <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{t(`features.${key}.desc`)}</p>
                     </div>
                   </div>
                 ))}
@@ -148,14 +144,14 @@ export default function FreeTrialModal({ show, onDismiss }: FreeTrialModalProps)
                   className="w-full rounded-xl py-3 font-semibold text-white shadow-lg transition-all"
                   style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 60%, #06B6D4 100%)' }}
                 >
-                  Preizkusi brezplačno
+                  {t('cta')}
                 </motion.button>
                 <button
                   type="button"
                   onClick={handleDismiss}
                   className="w-full rounded-xl py-2.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  Mogoče kasneje
+                  {t('later')}
                 </button>
               </div>
             </div>

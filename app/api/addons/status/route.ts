@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireCompanyAccess } from '@/lib/auth/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -11,6 +12,10 @@ export async function GET(request: NextRequest) {
   if (!company_id) {
     return NextResponse.json({ success: false, message: 'company_id is required' }, { status: 400 });
   }
+
+  // Subscription, usage and Stripe ids are private to the company's members.
+  const auth = await requireCompanyAccess(request, company_id);
+  if ('response' in auth) return auth.response;
 
   if (!serviceRoleKey) {
     return NextResponse.json({ success: false, message: 'Service role key not configured' }, { status: 500 });
@@ -42,7 +47,12 @@ export async function GET(request: NextRequest) {
 
     const today = new Date().toISOString().split('T')[0];
 
-    const [{ data: smsUsage }, { data: emailUsage }, { data: employeeLimits }] = await Promise.all([
+    const [
+      { data: smsUsage },
+      { data: emailUsage },
+      { data: employeeLimits },
+      { count: memberCount },
+    ] = await Promise.all([
       admin
         .from('company_sms_usage')
         .select('sent_count, period_start, period_end')
@@ -68,6 +78,13 @@ export async function GET(request: NextRequest) {
         .select('included_users, extra_users, max_users, stripe_subscription_item_id, cancel_at_period_end')
         .eq('company_id', company_id)
         .maybeSingle(),
+
+      // People with a login in this company (owner, admins, staff) — the
+      // thing the "team members" seat limit actually counts.
+      admin
+        .from('company_members')
+        .select('id', { count: 'exact', head: true })
+        .eq('company_id', company_id),
     ]);
 
     // Count active employees from Osebe table.
@@ -86,6 +103,7 @@ export async function GET(request: NextRequest) {
       emailUsage,
       employeeLimits,
       activeEmployeeCount: activeEmployeeCount ?? 0,
+      memberCount: memberCount ?? 0,
     });
   } catch (e) {
     console.error('[api/addons/status]', e);

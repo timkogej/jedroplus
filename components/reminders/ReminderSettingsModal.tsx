@@ -15,6 +15,7 @@ import {
 } from '@/components/settings';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { useCompany } from '@/app/company-context';
+import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
@@ -39,7 +40,53 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
   const { companyId, companyUuid, planCode } = useCompany();
   const { user } = useAuth();
   const router = useRouter();
-  const smsLockedForPlan = planCode === 'JEDRO_PLUS';
+  // SMS is usable whenever the plan or purchased add-ons provide any SMS
+  // (Plus has 0 included but can buy add-ons; Pro includes 200).
+  const { usage: billingUsage } = useBillingUsage();
+  const smsLockedForPlan = planCode === 'FREE' || (billingUsage?.sms.unavailable ?? false);
+
+  const smsAccessNote = () => {
+    const goTo = (path: string) => { onClose(); router.push(path); };
+    const linkClass = 'inline-flex items-center gap-1 font-semibold text-gray-900 underline underline-offset-2';
+
+    if (smsLockedForPlan) {
+      const isFree = planCode === 'FREE';
+      return (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+          <span>{t(isFree ? 'modal.smsAccess.notIncludedFree' : 'modal.smsAccess.notIncluded')}</span>
+          {!isFree && (
+            <button type="button" onClick={() => goTo('/nastavitve/addoni')} className={linkClass}>
+              {t('modal.smsAccess.buySms')} <ArrowRight className="h-3 w-3" weight="bold" />
+            </button>
+          )}
+          <button type="button" onClick={() => goTo('/nastavitve/paketi')} className={linkClass}>
+            {t('modal.smsAccess.comparePlans')} <ArrowRight className="h-3 w-3" weight="bold" />
+          </button>
+        </div>
+      );
+    }
+
+    if (!billingUsage) return null;
+    const { sms } = billingUsage;
+    const values = { used: sms.used, total: sms.total, remaining: sms.remaining };
+
+    if (sms.exhausted || sms.nearLimit) {
+      return (
+        <div
+          className={`flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg px-3 py-2 text-xs ${
+            sms.exhausted ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'
+          }`}
+        >
+          <span>{t(sms.exhausted ? 'modal.smsAccess.exhausted' : 'modal.smsAccess.nearLimit', values)}</span>
+          <button type="button" onClick={() => goTo('/nastavitve/addoni')} className={linkClass}>
+            {t('modal.smsAccess.buySms')} <ArrowRight className="h-3 w-3" weight="bold" />
+          </button>
+        </div>
+      );
+    }
+
+    return <p className="text-xs text-gray-500">{t('modal.smsAccess.remaining', values)}</p>;
+  };
 
   // Settings from "Podatki podjetij" table
   const [sendingLanguage, setSendingLanguage] = useState('sl');
@@ -373,11 +420,8 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
 
   const renderChannelSelector = (
     value: string,
-    onChange: (next: string) => void,
-    context: 'before' | 'after'
+    onChange: (next: string) => void
   ) => {
-    const smsUnavailable = t(`modal.${context}.smsNotAvailable`);
-
     return (
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1">
@@ -409,19 +453,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
             SMS
           </button>
         </div>
-        {smsLockedForPlan && (
-          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-            <span>{smsUnavailable}</span>
-            <span>{t(`modal.${context}.smsUpgradeHint`)}</span>
-            <button
-              type="button"
-              onClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
-              className="inline-flex items-center gap-1 font-semibold text-gray-900 underline underline-offset-2"
-            >
-              {t(`modal.${context}.upgradeButton`)} <ArrowRight className="h-3 w-3" weight="bold" />
-            </button>
-          </div>
-        )}
+        {(smsLockedForPlan || value === 'sms') && smsAccessNote()}
       </div>
     );
   };
@@ -710,7 +742,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           label={t('modal.before.channelLabel')}
                           description={t('modal.before.channelDesc')}
                         >
-                          {renderChannelSelector(chanelPred, setChanelPred, 'before')}
+                          {renderChannelSelector(chanelPred, setChanelPred)}
                         </SettingRow>
 
                         {chanelPred === 'sms' && (
@@ -866,7 +898,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                           label={t('modal.after.channelLabel')}
                           description={t('modal.after.channelDesc')}
                         >
-                          {renderChannelSelector(chanelPo, setChanelPo, 'after')}
+                          {renderChannelSelector(chanelPo, setChanelPo)}
                         </SettingRow>
 
                         {chanelPo === 'sms' && (
@@ -1086,18 +1118,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                 SMS
                               </button>
                             </div>
-                            {smsLockedForPlan && (
-                              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-                                <span>SMS je na voljo v višjih paketih.</span>
-                                <button
-                                  type="button"
-                                  onClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
-                                  className="inline-flex items-center gap-1 font-semibold text-gray-900 underline underline-offset-2"
-                                >
-                                  Nadgradi paket <ArrowRight className="h-3 w-3" weight="bold" />
-                                </button>
-                              </div>
-                            )}
+                            {(smsLockedForPlan || obvestiloPrestavitevChannel === 'sms') && smsAccessNote()}
                           </div>
                         </SettingRow>
 
