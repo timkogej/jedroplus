@@ -17,7 +17,8 @@
       "disabledReminder": "Ta tok trenutno ne pošilja opomnikov.",
       "disabledReschedule": "Obvestila ob prestavitvi termina niso aktivna.",
       "detailsEyebrow": "Podrobnosti",
-      "settingsEyebrow": "Nastavitve"
+      "settingsEyebrow": "Nastavitve",
+      "edit": "Uredi"
     },
     "stats": {
       "sentToday": "Poslano Danes",
@@ -43,7 +44,8 @@
       "formalAddressing": "Vikanje",
       "automaticTag": "Oznaka samodejni opomnik",
       "staffInReminder": "Izvajalec v opomniku",
-      "notSet": "Ni nastavljeno"
+      "notSet": "Ni nastavljeno",
+      "notSetTemplate": "Lastna predloga ni nastavljena"
     },
     "before": {
       "sectionTitle": "Opomniki pred terminom",
@@ -210,13 +212,14 @@
       "instructionsHint": "Navedite poslovne navade, posebne nasvete pred določenimi storitvami, kaj naj AI omeni ali izpostavi, kakšen odnos do stranke si želite ipd.",
       "instructionsPlaceholder": "Npr: Stranke vedno nagovorite po imenu. Pred masažo opomni, da naj pridejo spočiti in ne takoj po jedi. Za storitev 'gel lak' opomni, da naj ne namakajo nohtov vsaj dan prej. Ton naj bo topel in profesionalen.",
       "templateHint": "Predloga SMS sporočila (max 155 znakov)",
-      "templatePlaceholder": "Npr: Spomin na vaš termin jutri ob {{cas}}. {{ime_podjetja}}. Za odpoved pokličite {{telefon_podjetja}}.",
+      "templatePlaceholder": "Npr: Opomnik za vas termin jutri ob {{cas}}. {{ime_podjetja}}. Za odpoved poklicite {{telefon_podjetja}}.",
       "noEmojiHint": "Brez emojijev in posebnih znakov.",
       "emailInstructionsTitle": "Navodila za opomnik pred terminom",
       "emailInstructionsDesc": "Dodatna navodila ali informacije za opomnik pred terminom",
       "emailPlaceholder": "Npr: Prosimo pridite 5 minut pred terminom. Parkirišče je na zadnji strani stavbe.",
       "timingTitle": "Čas pošiljanja opomnika",
-      "timingValue": "Fiksno: 1 dan pred terminom"
+      "timingValue": "Fiksno: 1 dan pred terminom",
+      "timingDays": "{count, plural, one {# dan} two {# dneva} few {# dni} other {# dni}} pred terminom"
     },
     "after": {
       "sectionTitle": "Opomniki po terminu",
@@ -263,6 +266,20 @@
       "remaining": "Na voljo še {remaining} od {total} SMS v tem obdobju.",
       "nearLimit": "Porabljenih {used} od {total} SMS. Ko jih zmanjka, se SMS sporočila ne pošiljajo.",
       "exhausted": "Porabili ste vse SMS-e v tem obdobju ({used}/{total}). SMS sporočila se ne pošiljajo, dokler ne dokupite paketa ali se obdobje ne obnovi."
+    }
+  },
+  "preview": {
+    "label": "Tako bo videla stranka",
+    "stats": "{length} znakov · {parts, plural, one {# SMS} two {# SMS-a} few {# SMS-i} other {# SMS-ov}}",
+    "gsmHint": "Brez šumnikov in emojijev: tako ima en SMS do 160 znakov.",
+    "unicodeWarning": "Sporočilo vsebuje znake, ki niso v standardni SMS abecedi ({chars}). Po standardu SMS ima tako sporočilo največ 70 znakov na SMS, zato se prej razdeli na več SMS-ov in stane več. Namesto č, š, ž uporabite c, s, z.",
+    "sample": {
+      "firstName": "Ana",
+      "lastName": "Novak",
+      "service": "Manikura",
+      "staff": "Maja",
+      "company": "Salon Ana",
+      "address": "Glavna ulica 1"
     }
   }
 }

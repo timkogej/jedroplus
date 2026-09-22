@@ -17,7 +17,8 @@
       "disabledReminder": "This flow is not currently sending reminders.",
       "disabledReschedule": "Reschedule notifications are not active.",
       "detailsEyebrow": "Details",
-      "settingsEyebrow": "Settings"
+      "settingsEyebrow": "Settings",
+      "edit": "Edit"
     },
     "stats": {
       "sentToday": "Sent Today",
@@ -43,7 +44,8 @@
       "formalAddressing": "Formal",
       "automaticTag": "Automatic reminder tag",
       "staffInReminder": "Staff member in reminder",
-      "notSet": "Not set"
+      "notSet": "Not set",
+      "notSetTemplate": "No custom template set"
     },
     "before": {
       "sectionTitle": "Pre-appointment reminders",
@@ -216,7 +218,8 @@
       "emailInstructionsDesc": "Additional instructions or information for the pre-appointment reminder",
       "emailPlaceholder": "E.g.: Please arrive 5 minutes before your appointment. Parking is at the back of the building.",
       "timingTitle": "Reminder sending time",
-      "timingValue": "Fixed: 1 day before appointment"
+      "timingValue": "Fixed: 1 day before appointment",
+      "timingDays": "{count, plural, one {# day} other {# days}} before the appointment"
     },
     "after": {
       "sectionTitle": "Post-appointment reminders",
@@ -263,6 +266,20 @@
       "remaining": "{remaining} of {total} SMS left this period.",
       "nearLimit": "{used} of {total} SMS used. When they run out, SMS messages are not sent.",
       "exhausted": "You've used all SMS for this period ({used}/{total}). SMS messages are not sent until you buy a package or the period renews."
+    }
+  },
+  "preview": {
+    "label": "What the client will see",
+    "stats": "{length} characters · {parts, plural, one {# SMS} other {# SMS}}",
+    "gsmHint": "No special letters or emoji: one SMS fits up to 160 characters.",
+    "unicodeWarning": "The message contains characters outside the standard SMS alphabet ({chars}). By the SMS standard such a message fits only 70 characters per SMS, so it splits into more messages and costs more. Use plain letters instead (e.g. c, s, z instead of č, š, ž).",
+    "sample": {
+      "firstName": "Ana",
+      "lastName": "Novak",
+      "service": "Manicure",
+      "staff": "Maja",
+      "company": "Salon Ana",
+      "address": "Main Street 1"
     }
   }
 }
