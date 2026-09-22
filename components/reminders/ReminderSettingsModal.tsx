@@ -60,7 +60,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   const { companyId, companyUuid, planCode, companySettings } = useCompany();
   const previewCompanyName = (() => {
     const row = (companySettings ?? {}) as Record<string, unknown>;
-    const name = row['Ime podjetja'] ?? row['ime_podjetja'] ?? row['Naziv'] ?? row['naziv'] ?? row['name'];
+    const name = row['Naziv Podjetja'] ?? row['Ime podjetja'] ?? row['ime_podjetja'] ?? row['Naziv'] ?? row['naziv'] ?? row['name'];
     return typeof name === 'string' ? name : undefined;
   })();
   const { user } = useAuth();
