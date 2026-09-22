@@ -583,7 +583,7 @@ export default function OsebjePage() {
 
     setIsConnecting(true);
     try {
-      const response = await fetch('https://n8n.jedroplus.com/webhook/connect-user', {
+      const response = await fetch('/api/team/connect-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

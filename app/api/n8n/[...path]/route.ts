@@ -15,7 +15,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/rateLimit';
-import { authenticateRequest } from '@/lib/auth/apiAuth';
+import { authenticateRequest, requireCompanyAccess } from '@/lib/auth/apiAuth';
 
 const N8N_BASE_URL = process.env.N8N_WEBHOOK_URL || 'https://n8n.jedroplus.com/webhook';
 const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
@@ -79,6 +79,21 @@ export async function POST(
 
     // ✅ KORAK 4: Preberi body
     const body = await request.json().catch(() => ({}));
+
+    // ✅ KORAK 4b: If the request names a company, the caller must belong to
+    // it. Onboarding is exempt: there the user is creating or joining a
+    // company they are not a member of yet.
+    if (!joinedPath.startsWith('onboarding/') && body && typeof body === 'object') {
+      const b = body as Record<string, unknown>;
+      const data = (b.data && typeof b.data === 'object' ? b.data : {}) as Record<string, unknown>;
+      const companyRef = [b.company_uuid, b.company_id, b.companyId, data.company_uuid, data.company_id].find(
+        (v): v is string => typeof v === 'string' && v.trim() !== ''
+      );
+      if (companyRef) {
+        const access = await requireCompanyAccess(request, companyRef);
+        if ('response' in access) return access.response;
+      }
+    }
 
     // ✅ KORAK 5: Pošlji na n8n z API key IN user auth
     const authHeader = request.headers.get('Authorization');

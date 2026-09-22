@@ -9,7 +9,9 @@ export interface WebhookPayload {
   data: Record<string, unknown>;
 }
 
-const WEBHOOK_URL = 'https://n8n.jedroplus.com/webhook/main_povezava';
+// Through the app's API route: it checks the session and company access and
+// adds the n8n API key server-side.
+const WEBHOOK_URL = '/api/webhook';
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000; // 1 second
 

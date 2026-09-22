@@ -1,8 +1,13 @@
 // app/api/webhook/route.ts
-// ✅ SECURE: API key + Rate limiting
+// ✅ SECURE: session + company access + API key + rate limiting
+//
+// Only a signed-in member of the company in the payload can trigger its n8n
+// workflows, and `actor` is always the signed-in user (never trusted from
+// the body).
 
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
+import { requireCompanyAccess } from "@/lib/auth/apiAuth";
 
 const DEFAULT_WEBHOOK_URL = "https://n8n.jedroplus.com/webhook/main_povezava";
 const RESCHEDULE_NOTIFICATION_WEBHOOK_URL =
@@ -50,13 +55,26 @@ export async function POST(request: NextRequest) {
     }
 
     // ✅ KORAK 3: Preberi payload
-    const payload = await request.json();
+    const payload = await request.json().catch(() => null);
+    if (!payload || typeof payload !== "object") {
+      return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const companyId: string = payload?.company_id || payload?.data?.company_id || "";
+
+    // ✅ Prijavljen uporabnik, ki pripada podjetju iz zahteve
+    const access = await requireCompanyAccess(request, companyId);
+    if ("response" in access) return access.response;
+    const actor = access.user.email ?? access.user.id;
 
     // Normaliziraj payload
     const normalizedPayload = {
       ...payload,
-      company_id: payload.company_id || payload.data?.company_id || "",
-      actor: payload.actor && payload.actor.trim() ? payload.actor : "unknown",
+      company_id: companyId,
+      actor,
+      ...(payload?.data && typeof payload.data === "object" && "user_id" in payload.data
+        ? { data: { ...payload.data, user_id: actor } }
+        : {}),
       timestamp: payload.timestamp || new Date().toISOString(),
       meta: payload.meta ?? { app: "Integrate", version: "1.0" },
     };

@@ -1,9 +1,10 @@
 // app/api/communication/[action]/route.ts
-// ✅ SECURE: API key + Rate limiting
+// ✅ SECURE: session + company access + API key + rate limiting
 // Proxies to n8n communication webhooks (generate / send)
 
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
+import { requireCompanyAccess } from "@/lib/auth/apiAuth";
 
 export const maxDuration = 60;
 
@@ -60,10 +61,16 @@ export async function POST(
     // ✅ KORAK 3: Preberi payload
     const payload = await request.json().catch(() => ({}));
 
+    const companyId: string = payload.company_id || payload.data?.company_id || "";
+
+    // ✅ Prijavljen uporabnik, ki pripada podjetju iz zahteve
+    const access = await requireCompanyAccess(request, companyId);
+    if ("response" in access) return access.response;
+
     const normalizedPayload = {
       ...payload,
-      company_id: payload.company_id || payload.data?.company_id || "",
-      actor: payload.actor && payload.actor.trim() ? payload.actor : "unknown",
+      company_id: companyId,
+      actor: access.user.email ?? access.user.id,
       timestamp: payload.timestamp || new Date().toISOString(),
     };
 
