@@ -24,9 +24,11 @@
     "selectAll": "Izberi vse",
     "deselectAll": "Odznači vse",
     "selectedCount": "Izbrano: {count}",
-    "resultCount": "{count, plural, =1 {1 stranka} other {{count} strank}}",
+    "resultCount": "{count, plural, one {# stranka} two {# stranki} few {# stranke} other {# strank}}",
     "empty": "Ni strank za prikaz",
-    "emptyHint": "Spremenite filtre ali iskanje"
+    "emptyHint": "Spremenite filtre ali iskanje",
+    "showAll": "Pokaži vse stranke",
+    "emptyNoClients": "Stranke dodate v meniju Stranke ali pa se dodajo same ob prvem terminu."
   },
   "filters": {
     "sectionLabel": "Termini",

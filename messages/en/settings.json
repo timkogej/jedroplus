@@ -77,10 +77,10 @@
       "disclaimer": "Share codes only with trusted people. Administrators have full system access; staff only have access to their own appointments."
     },
     "qr": {
-      "title": "QR code for client registration",
-      "subtitle": "Clients scan the code and register in your system",
+      "title": "QR code for client sign-up",
+      "subtitle": "For your front desk or door: clients scan it and add themselves to your client list. It does not book an appointment.",
       "noSlug": "Company slug not set.",
-      "caption": "Clients scan the code and register in your system."
+      "caption": "For online booking, use the link on the Bookings page."
     }
   },
   "company": {

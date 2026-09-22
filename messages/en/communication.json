@@ -26,7 +26,9 @@
     "selectedCount": "Selected: {count}",
     "resultCount": "{count, plural, =1 {1 client} other {{count} clients}}",
     "empty": "No clients to display",
-    "emptyHint": "Change filters or search"
+    "emptyHint": "Change filters or search",
+    "showAll": "Show all clients",
+    "emptyNoClients": "Add clients under Clients, or they are added automatically with their first appointment."
   },
   "filters": {
     "sectionLabel": "Appointments",

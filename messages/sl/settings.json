@@ -78,9 +78,9 @@
     },
     "qr": {
       "title": "QR koda za registracijo strank",
-      "subtitle": "Stranke skenirajo kodo in se registrirajo v vaš sistem",
+      "subtitle": "Za pult ali vrata: stranka skenira kodo in se sama vpiše med vaše stranke. Termina s tem ne rezervira.",
       "noSlug": "Slug podjetja ni nastavljen.",
-      "caption": "Stranke skenirajo kodo in se registrirajo v vaš sistem."
+      "caption": "Za spletno naročanje na termin uporabite povezavo na strani Rezervacije."
     }
   },
   "company": {

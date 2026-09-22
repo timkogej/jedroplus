@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, FloppyDisk, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
@@ -97,7 +98,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const { companyId, companyUuid, planCode } = useCompany();
   const { user } = useAuth();
   const router = useRouter();
-  const smsLockedForPlan = planCode === 'JEDRO_PLUS';
+  // SMS works whenever the plan + add-ons (or the free trial) leave SMS
+  // available — same rule as the reminder editor. Jedro Plus with bought SMS
+  // add-ons can send SMS confirmations.
+  const { usage: billingUsage } = useBillingUsage();
+  const smsLockedForPlan = billingUsage ? billingUsage.sms.unavailable : planCode === 'FREE';
 
   // Settings from "Podatki podjetij" table
   const [bookingOmogocen, setBookingOmogocen] = useState(true);
@@ -559,7 +564,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                               {t('modal.confirmations.smsPlanNotePrefix')}{' '}
                               <button
                                 type="button"
-                                onClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
+                                onClick={() => { onClose(); router.push(billingUsage && !billingUsage.isFree ? '/nastavitve/addoni' : '/nastavitve/paketi#razpolozljivi-paketi'); }}
                                 className="font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
                               >
                                 {t('modal.confirmations.smsPlanNoteLink')}
@@ -571,7 +576,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             value={potrdiloChannel}
                             onChange={setPotrdiloChannel}
                             smsLocked={smsLockedForPlan}
-                            onUpgradeClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
+                            onUpgradeClick={() => { onClose(); router.push(billingUsage && !billingUsage.isFree ? '/nastavitve/addoni' : '/nastavitve/paketi#razpolozljivi-paketi'); }}
                             t={t}
                           />
 
@@ -644,7 +649,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                               {t('modal.confirmations.smsPlanNotePrefix')}{' '}
                               <button
                                 type="button"
-                                onClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
+                                onClick={() => { onClose(); router.push(billingUsage && !billingUsage.isFree ? '/nastavitve/addoni' : '/nastavitve/paketi#razpolozljivi-paketi'); }}
                                 className="font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
                               >
                                 {t('modal.confirmations.smsPlanNoteLink')}
@@ -656,7 +661,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             value={potrdiloOnlineChannel}
                             onChange={setPotrdiloOnlineChannel}
                             smsLocked={smsLockedForPlan}
-                            onUpgradeClick={() => { onClose(); router.push('/nastavitve/paketi'); }}
+                            onUpgradeClick={() => { onClose(); router.push(billingUsage && !billingUsage.isFree ? '/nastavitve/addoni' : '/nastavitve/paketi#razpolozljivi-paketi'); }}
                             t={t}
                           />
                         </motion.div>
