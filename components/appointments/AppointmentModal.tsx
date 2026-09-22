@@ -1192,11 +1192,12 @@ function AppointmentModal({
                     </span>
                     <p className="min-w-0 flex-1 truncate font-medium text-[#1A1F36]">{formData.stranka_ime || '-'}</p>
                     <span
-                      className="flex-shrink-0 text-base leading-none"
-                      title={currentLanguageOption.label}
-                      aria-label={currentLanguageOption.label}
+                      className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600"
+                      title={`${t('modal.fields.communicationLanguage')}: ${currentLanguageOption.label}`}
                     >
-                      {currentLanguageOption.flag}
+                      <span className="text-sm leading-none" aria-hidden="true">{currentLanguageOption.flag}</span>
+                      <span className="sr-only">{t('modal.fields.communicationLanguage')}: </span>
+                      {currentLanguageOption.code}
                     </span>
                     <div className="flex-shrink-0">
                       <StatusBadge status={formData.status} variant="gradient" weight="normal" />
