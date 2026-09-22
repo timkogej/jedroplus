@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -23,6 +23,7 @@ import {
   Lock,
   Tag,
   CaretLeft,
+  CaretDown,
   Cube,
   Phone,
 } from '@phosphor-icons/react';
@@ -390,6 +391,31 @@ export function Sidebar() {
   }, [pathnameWithoutLocale]);
 
   // -------------------------------------------------------------------------
+  // On short screens the menu scrolls; fade the edges so it's clear there is
+  // more above/below (the scrollbar itself is hidden).
+  // -------------------------------------------------------------------------
+
+  const [navOverflow, setNavOverflow] = useState({ above: false, below: false });
+
+  useEffect(() => {
+    const nav = desktopNavRef.current;
+    if (!nav) return;
+    const update = () => {
+      const above = nav.scrollTop > 4;
+      const below = nav.scrollTop + nav.clientHeight < nav.scrollHeight - 4;
+      setNavOverflow((prev) => (prev.above === above && prev.below === below ? prev : { above, below }));
+    };
+    update();
+    nav.addEventListener('scroll', update, { passive: true });
+    const ro = new ResizeObserver(update);
+    ro.observe(nav);
+    return () => {
+      nav.removeEventListener('scroll', update);
+      ro.disconnect();
+    };
+  }, [isCollapsed]);
+
+  // -------------------------------------------------------------------------
   // Active route check
   // -------------------------------------------------------------------------
 
@@ -460,7 +486,11 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav ref={desktopNavRef} className={cn('flex-1 overflow-y-auto py-3 [&::-webkit-scrollbar]:hidden', isCollapsed ? 'px-1' : 'px-3')}>
+      <div className="relative flex min-h-0 flex-1 flex-col">
+      {navOverflow.above && (
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-gradient-to-b from-white to-transparent" aria-hidden="true" />
+      )}
+      <nav ref={desktopNavRef} className={cn('flex-1 overflow-y-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden', isCollapsed ? 'px-1' : 'px-3')}>
         {allSections.map((section) => (
           <div key={section.label} className={isCollapsed ? 'mb-1' : 'mb-4'}>
             <div className="space-y-0.5">
@@ -478,6 +508,12 @@ export function Sidebar() {
           </div>
         ))}
       </nav>
+      {navOverflow.below && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex h-10 items-end justify-center bg-gradient-to-t from-white via-white/80 to-transparent pb-1" aria-hidden="true">
+          <CaretDown className="h-3.5 w-3.5 text-gray-400" weight="bold" />
+        </div>
+      )}
+      </div>
 
       {/* Footer */}
       <div className={cn('border-t border-gray-100 space-y-0.5 flex-shrink-0', isCollapsed ? 'p-1' : 'p-3')}>

@@ -83,6 +83,23 @@ export function AppBar() {
     '/termini': t('appbar.breadcrumbs.appointments'),
     '/clients': t('appbar.breadcrumbs.clients'),
     '/services': t('appbar.breadcrumbs.services'),
+    '/storitve': t('appbar.breadcrumbs.services'),
+    '/resursi': t('appbar.breadcrumbs.resources'),
+    '/promotions': t('appbar.breadcrumbs.promotions'),
+    '/komunikacija': t('appbar.breadcrumbs.communication'),
+    '/receptionist-plus': t('appbar.breadcrumbs.receptionistPlus'),
+    '/qr-koda': t('appbar.breadcrumbs.qrCode'),
+    '/promotions/discounts': t('appbar.breadcrumbs.discounts'),
+    '/promotions/happy-hours': t('appbar.breadcrumbs.happyHours'),
+    '/promotions/add-ons': t('appbar.breadcrumbs.serviceAddOns'),
+    '/rezervacije/zahteve': t('appbar.breadcrumbs.requests'),
+    '/nastavitve/paketi': t('appbar.breadcrumbs.plans'),
+    '/nastavitve/addoni': t('appbar.breadcrumbs.addons'),
+    '/nastavitve/clani': t('appbar.breadcrumbs.team'),
+    '/nastavitve/podjetje': t('appbar.breadcrumbs.company'),
+    '/nastavitve/splosno': t('appbar.breadcrumbs.general'),
+    '/nastavitve/sporocila': t('appbar.breadcrumbs.messages'),
+    '/nastavitve/zgodovina': t('appbar.breadcrumbs.history'),
     '/staff': t('appbar.breadcrumbs.staff'),
     '/reminders': t('appbar.breadcrumbs.reminders'),
     '/lost-leads': t('appbar.breadcrumbs.lostLeads'),
@@ -143,7 +160,7 @@ export function AppBar() {
       <div className="h-full px-4 md:px-5 flex items-center justify-between gap-4">
 
         {/* Left: hamburger (mobile) + logo text (mobile) + breadcrumbs (desktop) */}
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
 
           {/* Hamburger — mobile only */}
           <button
@@ -193,7 +210,7 @@ export function AppBar() {
             </Link>
 
             {breadcrumbs.map((crumb, index) => (
-              <div key={crumb.href || index} className="flex items-center gap-1.5">
+              <div key={crumb.href || index} className="flex min-w-0 items-center gap-1.5">
                 <CaretRight weight="regular" className="w-3 h-3 text-gray-300 flex-shrink-0" />
                 {index === breadcrumbs.length - 1 ? (
                   <span className="font-medium text-gray-900 truncate">{crumb.label}</span>
@@ -211,7 +228,7 @@ export function AppBar() {
         </div>
 
         {/* Right: search, bell, settings, profile */}
-        <div className="flex items-center gap-1">
+        <div className="flex flex-shrink-0 items-center gap-1">
 
           {/* Search bar — desktop */}
           <button
@@ -219,7 +236,7 @@ export function AppBar() {
             className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-colors group text-sm mr-1"
           >
             <MagnifyingGlass weight="regular" className="w-4 h-4 text-gray-400 group-hover:text-gray-600 flex-shrink-0 transition-colors" />
-            <span className="text-gray-400 group-hover:text-gray-600 transition-colors min-w-[120px] text-left">
+            <span className="hidden lg:inline text-gray-400 group-hover:text-gray-600 transition-colors min-w-[120px] text-left">
               {t('appbar.search')}
             </span>
             <span className="flex items-center gap-0.5 text-[11px] text-gray-300 ml-1">

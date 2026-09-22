@@ -70,10 +70,12 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  loading = false,
 }: {
   icon: React.ElementType;
   label: string;
   value: number;
+  loading?: boolean;
   trend?: { value: number; positive: boolean };
   gradientIndex?: number;
 }) {
@@ -85,7 +87,7 @@ function StatCard({
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-3xl font-normal text-gray-900 mb-1">{value}</p>
+          <p className="text-3xl font-normal text-gray-900 mb-1">{loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}</p>
           <p className="text-sm font-medium text-gray-600">{label}</p>
         </div>
         <div className="text-black flex-shrink-0">
@@ -722,24 +724,28 @@ export default function OsebjePage() {
           {/* Stats Cards */}
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
+              loading={isLoading}
               icon={Users}
               label={t('stats.total')}
               value={stats?.total || 0}
               gradientIndex={0}
             />
             <StatCard
+              loading={isLoading}
               icon={UserCirclePlus}
               label={t('stats.active')}
               value={stats?.active || 0}
               gradientIndex={1}
             />
             <StatCard
+              loading={isLoading}
               icon={Briefcase}
               label={t('stats.inactive')}
               value={stats?.inactive || 0}
               gradientIndex={2}
             />
             <StatCard
+              loading={isLoading}
               icon={CalendarCheck}
               label={t('stats.today')}
               value={stats?.appointmentsToday || 0}

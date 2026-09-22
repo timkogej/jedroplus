@@ -63,9 +63,10 @@ interface StatCardProps {
   value: number;
   label: string;
   delay?: number;
+  loading?: boolean;
 }
 
-function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
+function StatCard({ icon, value, label, delay = 0, loading = false }: StatCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -83,7 +84,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
             transition={{ delay: delay * 0.1 + 0.2 }}
             className="text-3xl text-gray-900 mb-1"
           >
-            {value}
+            {loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}
           </motion.p>
           <p className="text-sm font-medium text-gray-600">{label}</p>
         </div>
@@ -824,18 +825,21 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
           {/* Stats cards */}
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
+              loading={isLoading}
               icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
               value={currentMonthCount}
               label={t('page.stats.thisMonth')}
               delay={0}
             />
             <StatCard
+              loading={isLoading}
               icon={<Clock className="h-6 w-6" weight="regular" />}
               value={todayCount}
               label={t('page.stats.today')}
               delay={1}
             />
             <StatCard
+              loading={isLoading}
               icon={<ArrowRight className="h-6 w-6" weight="regular" />}
               value={upcomingCount}
               label={t('page.stats.upcoming')}

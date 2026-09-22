@@ -71,7 +71,23 @@
       "settings": "Settings",
       "billing": "Plans",
       "notifications": "Notifications",
-      "reservations": "Bookings"
+      "reservations": "Bookings",
+      "resources": "Resources",
+      "promotions": "Promotions",
+      "communication": "Communication",
+      "receptionistPlus": "Receptionist+",
+      "qrCode": "QR code",
+      "plans": "Plans",
+      "addons": "Add-ons",
+      "team": "Team & access",
+      "company": "Company",
+      "general": "General",
+      "messages": "Messages",
+      "history": "History",
+      "discounts": "Discounts",
+      "happyHours": "Happy Hours",
+      "serviceAddOns": "Service add-ons",
+      "requests": "Requests"
     }
   },
   "search": {

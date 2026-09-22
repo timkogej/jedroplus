@@ -71,7 +71,23 @@
       "settings": "Nastavitve",
       "billing": "Paketi",
       "notifications": "Obvestila",
-      "reservations": "Rezervacije"
+      "reservations": "Rezervacije",
+      "resources": "Resursi",
+      "promotions": "Promocije",
+      "communication": "Komunikacija",
+      "receptionistPlus": "Receptionist+",
+      "qrCode": "QR koda",
+      "plans": "Paketi",
+      "addons": "Dodatki",
+      "team": "Ekipa in dostop",
+      "company": "Podjetje",
+      "general": "Splošno",
+      "messages": "Sporočila",
+      "history": "Zgodovina",
+      "discounts": "Popusti",
+      "happyHours": "Happy Hours",
+      "serviceAddOns": "Dodajanje storitev",
+      "requests": "Zahteve"
     }
   },
   "search": {

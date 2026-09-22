@@ -60,9 +60,10 @@ interface StatCardProps {
   value: number;
   label: string;
   delay?: number;
+  loading?: boolean;
 }
 
-function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
+function StatCard({ icon, value, label, delay = 0, loading = false }: StatCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -80,7 +81,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
             transition={{ delay: delay * 0.1 + 0.2 }}
             className="text-3xl text-gray-900 mb-1"
           >
-            {value}
+            {loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}
           </motion.p>
           <p className="text-sm font-medium text-gray-600">{label}</p>
         </div>
@@ -796,18 +797,21 @@ export default function ClientsClient({
           {stats && (
             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <StatCard
+                loading={isLoading}
                 icon={<Users className="h-6 w-6" weight="regular" />}
                 value={stats.total}
                 label={t('stats.total')}
                 delay={0}
               />
               <StatCard
+                loading={isLoading}
                 icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
                 value={stats.withAppointments}
                 label={t('stats.withAppointments')}
                 delay={1}
               />
               <StatCard
+                loading={isLoading}
                 icon={<UserPlus className="h-6 w-6" weight="regular" />}
                 value={stats.newThisMonth}
                 label={t('stats.newThisMonth')}

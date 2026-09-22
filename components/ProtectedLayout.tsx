@@ -171,24 +171,10 @@ export default function ProtectedLayout({
     }
   }, [user, companyId, companyLoading, authLoading, router, pathname]);
 
-  // Show loading while checking auth/company/plan - minimalist white bg + gradient spinner
+  // While auth/company/plan load, show the outline of the app instead of a
+  // blank spinner, so a refresh doesn't feel like the app is starting over.
   if (isLoading || !user || !companyId) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="w-10 h-10">
-            <svg className="w-10 h-10 animate-spin" viewBox="0 0 50 50">
-              <defs>
-                <linearGradient id="protected-spinner" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8B5CF6" />
-                  <stop offset="50%" stopColor="#3B82F6" />
-                  <stop offset="100%" stopColor="#06B6D4" />
-                </linearGradient>
-              </defs>
-              <circle cx="25" cy="25" r="20" fill="none" stroke="url(#protected-spinner)" strokeWidth="3" strokeLinecap="round" strokeDasharray="80 50" />
-            </svg>
-          </div>
-      </div>
-    );
+    return <AppShellSkeleton />;
   }
 
   // ── Plan-based access gate ──────────────────────────────────────────────
@@ -273,5 +259,48 @@ export default function ProtectedLayout({
       </LayoutContent>
       </TourProvider>
     </SidebarProvider>
+  );
+}
+
+function AppShellSkeleton() {
+  const bar = 'animate-pulse rounded-md bg-gray-100';
+  return (
+    <div className="min-h-screen bg-gray-50/30" aria-busy="true" aria-live="polite">
+      <span className="sr-only">Nalaganje …</span>
+      <aside className="fixed inset-y-0 left-0 hidden w-[240px] flex-col border-r border-gray-100 bg-white p-5 md:flex" aria-hidden="true">
+        <div className={`h-7 w-28 ${bar}`} />
+        <div className="mt-8 flex items-center gap-3">
+          <div className="h-9 w-9 animate-pulse rounded-full bg-gray-100" />
+          <div className="flex-1 space-y-2">
+            <div className={`h-3 w-24 ${bar}`} />
+            <div className={`h-2.5 w-32 ${bar}`} />
+          </div>
+        </div>
+        <div className="mt-8 space-y-4">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div className={`h-4 w-4 ${bar}`} />
+              <div className={`h-3 ${bar}`} style={{ width: `${55 + ((i * 17) % 40)}%` }} />
+            </div>
+          ))}
+        </div>
+      </aside>
+      <div className="md:ml-[240px]" aria-hidden="true">
+        <div className="flex h-14 items-center justify-between border-b border-gray-100 bg-white px-6">
+          <div className={`h-3.5 w-40 ${bar}`} />
+          <div className="h-8 w-8 animate-pulse rounded-full bg-gray-100" />
+        </div>
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <div className={`h-7 w-56 ${bar}`} />
+          <div className={`mt-3 h-4 w-80 max-w-full ${bar}`} />
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-28 animate-pulse rounded-2xl bg-white ring-1 ring-gray-100" />
+            ))}
+          </div>
+          <div className="mt-6 h-72 animate-pulse rounded-2xl bg-white ring-1 ring-gray-100" />
+        </div>
+      </div>
+    </div>
   );
 }

@@ -64,3 +64,19 @@ export function formatDateLong(iso: string | Date | null | undefined, locale = '
   if (Number.isNaN(d.getTime())) return '—';
   return d.toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'long', year: 'numeric' });
 }
+
+/**
+ * Notification texts come from the backend with raw ISO dates
+ * ("Termin 2026-09-28 ob 10:00:00"). Show them the way people write them.
+ */
+export function humanizeDates(text: string | null | undefined, locale = 'sl'): string {
+  if (!text) return '';
+  return text
+    .replace(/\b(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?\b/g, (match, y, m, d, hh, mm) => {
+      const date = new Date(Number(y), Number(m) - 1, Number(d));
+      if (Number.isNaN(date.getTime())) return match;
+      const day = date.toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'numeric', year: 'numeric' });
+      return hh ? `${day} ${hh}:${mm}` : day;
+    })
+    .replace(/\b(\d{1,2}):(\d{2}):\d{2}\b/g, '$1:$2');
+}

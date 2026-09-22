@@ -32,6 +32,11 @@ export const MONTHS_SHORT = [
   'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'
 ];
 
+// Inside a date Slovenian writes months in lowercase: "2. februar 2026".
+// Keep MONTHS_FULL for standalone headings ("Februar 2026").
+const MONTHS_FULL_IN_DATE = MONTHS_FULL.map((m) => m.toLowerCase());
+const MONTHS_SHORT_IN_DATE = MONTHS_SHORT.map((m) => m.toLowerCase());
+
 // Day names in English
 const DAYS_FULL_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DAYS_SHORT_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -53,6 +58,8 @@ export function getDaysShort(locale: string) { return locale === 'en' ? DAYS_SHO
 export function getDaysAbbr(locale: string) { return locale === 'en' ? DAYS_ABBR_EN : DAYS_ABBR; }
 export function getMonthsFull(locale: string) { return locale === 'en' ? MONTHS_FULL_EN : MONTHS_FULL; }
 export function getMonthsShort(locale: string) { return locale === 'en' ? MONTHS_SHORT_EN : MONTHS_SHORT; }
+/** Month names for use right after a day number ("2. februar"). */
+export function getMonthsInDate(locale: string) { return locale === 'en' ? MONTHS_FULL_EN : MONTHS_FULL_IN_DATE; }
 
 // Get start of day (midnight)
 export function startOfDay(date: Date): Date {
@@ -241,11 +248,11 @@ export function formatDate(date: Date, format: 'full' | 'short' | 'dayMonth' = '
 
   switch (format) {
     case 'full':
-      return `${DAYS_FULL[dayOfWeek]}, ${day}. ${MONTHS_FULL[month]} ${year}`;
+      return `${DAYS_FULL[dayOfWeek]}, ${day}. ${MONTHS_FULL_IN_DATE[month]} ${year}`;
     case 'short':
-      return `${day}. ${MONTHS_SHORT[month]}`;
+      return `${day}. ${MONTHS_SHORT_IN_DATE[month]}`;
     case 'dayMonth':
-      return `${day}. ${MONTHS_FULL[month]}`;
+      return `${day}. ${MONTHS_FULL_IN_DATE[month]}`;
     default:
       return date.toLocaleDateString('sl-SI');
   }
@@ -269,11 +276,11 @@ export function formatWeekRange(date: Date, isMobile = false): string {
 
   // Desktop: use full month names
   if (start.getMonth() === end.getMonth()) {
-    return `${start.getDate()}. - ${end.getDate()}. ${MONTHS_FULL[start.getMonth()]} ${start.getFullYear()}`;
+    return `${start.getDate()}. - ${end.getDate()}. ${MONTHS_FULL_IN_DATE[start.getMonth()]} ${start.getFullYear()}`;
   } else if (start.getFullYear() === end.getFullYear()) {
-    return `${start.getDate()}. ${MONTHS_SHORT[start.getMonth()]} - ${end.getDate()}. ${MONTHS_SHORT[end.getMonth()]} ${start.getFullYear()}`;
+    return `${start.getDate()}. ${MONTHS_SHORT_IN_DATE[start.getMonth()]} - ${end.getDate()}. ${MONTHS_SHORT_IN_DATE[end.getMonth()]} ${start.getFullYear()}`;
   } else {
-    return `${start.getDate()}. ${MONTHS_SHORT[start.getMonth()]} ${start.getFullYear()} - ${end.getDate()}. ${MONTHS_SHORT[end.getMonth()]} ${end.getFullYear()}`;
+    return `${start.getDate()}. ${MONTHS_SHORT_IN_DATE[start.getMonth()]} ${start.getFullYear()} - ${end.getDate()}. ${MONTHS_SHORT_IN_DATE[end.getMonth()]} ${end.getFullYear()}`;
   }
 }
 
@@ -288,10 +295,10 @@ export function formatDateResponsive(date: Date, view: ViewMode, isMobile = fals
     case 'day':
       if (isMobile) {
         // Mobile: "12. Februar"
-        return `${day}. ${MONTHS_FULL[month]}`;
+        return `${day}. ${MONTHS_FULL_IN_DATE[month]}`;
       }
       // Desktop: "Ponedeljek, 2. februar 2026"
-      return `${DAYS_FULL[dayOfWeek]}, ${day}. ${MONTHS_FULL[month]} ${year}`;
+      return `${DAYS_FULL[dayOfWeek]}, ${day}. ${MONTHS_FULL_IN_DATE[month]} ${year}`;
     case 'week':
       if (isMobile) {
         // Mobile: "Februar" or "Februar - Marec"
@@ -309,14 +316,14 @@ export function formatDateResponsive(date: Date, view: ViewMode, isMobile = fals
       const nextMonth = nextDay.getMonth();
       if (isMobile) {
         if (month === nextMonth) {
-          return `${day}. - ${nextDayOfMonth}. ${MONTHS_FULL[month]}`;
+          return `${day}. - ${nextDayOfMonth}. ${MONTHS_FULL_IN_DATE[month]}`;
         }
-        return `${day}. ${MONTHS_SHORT[month]} - ${nextDayOfMonth}. ${MONTHS_SHORT[nextMonth]}`;
+        return `${day}. ${MONTHS_SHORT_IN_DATE[month]} - ${nextDayOfMonth}. ${MONTHS_SHORT_IN_DATE[nextMonth]}`;
       }
       if (month === nextMonth) {
-        return `${DAYS_FULL[dayOfWeek]}, ${day}. - ${nextDayOfMonth}. ${MONTHS_FULL[month]} ${year}`;
+        return `${DAYS_FULL[dayOfWeek]}, ${day}. - ${nextDayOfMonth}. ${MONTHS_FULL_IN_DATE[month]} ${year}`;
       }
-      return `${day}. ${MONTHS_SHORT[month]} - ${nextDayOfMonth}. ${MONTHS_SHORT[nextMonth]} ${year}`;
+      return `${day}. ${MONTHS_SHORT_IN_DATE[month]} - ${nextDayOfMonth}. ${MONTHS_SHORT_IN_DATE[nextMonth]} ${year}`;
     }
     case 'month':
       if (isMobile) {
