@@ -177,7 +177,57 @@
     "heading": "This feature requires the {plan} plan",
     "subtitle": "Upgrade your plan to unlock this feature and get the full potential of Jedro+.",
     "upgradeButton": "Upgrade plan",
-    "hint": "Browse all available plans and choose the one that fits you best."
+    "hint": "Browse all available plans and choose the one that fits you best.",
+    "badge": "{plan} plan",
+    "includedIn": "Included in {plan}",
+    "price": "€{monthly}/month · €{annual}/month billed yearly",
+    "comparePlans": "Compare plans",
+    "back": "Back to dashboard",
+    "ownerOnly": "The account owner can upgrade in Settings → Plans.",
+    "features": {
+      "reminders": {
+        "title": "Reminders that cut no-shows",
+        "lead": "Clients get reminded before their appointment and thanked after it — no calls, no manual messages.",
+        "p1": "Email or SMS reminder the day before",
+        "p2": "A follow-up after the visit, optionally with a discount",
+        "p3": "Your own template or a personal message written by AI"
+      },
+      "booking": {
+        "title": "Let clients book themselves",
+        "lead": "Share a link or QR code and clients pick a time on their own — even at 10 pm. You get a notification and the appointment in your calendar.",
+        "p1": "A link for Instagram, your website and email signature",
+        "p2": "Several booking page designs",
+        "p3": "Review booking requests before confirming"
+      },
+      "communication": {
+        "title": "Message clients in one place",
+        "lead": "Send an announcement or offer to selected clients: everyone, today's, those with a given service.",
+        "p1": "Pick clients by appointments and filters",
+        "p2": "Send by email from one window",
+        "p3": "AI helps write the text"
+      },
+      "analytics": {
+        "title": "See how your business is doing",
+        "lead": "Revenue, occupancy, top services and team performance in one view.",
+        "p1": "Revenue and appointments over time",
+        "p2": "Most popular services and staff",
+        "p3": "Client base growth"
+      },
+      "lostLeads": {
+        "title": "Win back clients who stopped coming",
+        "lead": "The system spots clients who haven't booked in a while and sends them a personal invitation back.",
+        "p1": "Automatic detection of inactive clients",
+        "p2": "A personal message written by AI",
+        "p3": "No manual searching or sending"
+      },
+      "ai": {
+        "title": "AI assistants",
+        "lead": "Smart assistants for working with clients and appointments.",
+        "p1": "Answers to common questions",
+        "p2": "Help with appointments and clients",
+        "p3": "Tailored to your business"
+      }
+    }
   },
   "roleAccessGate": {
     "title": "Access restricted",
@@ -244,6 +294,7 @@
           "Service and staff database",
           "Personalized reminders before and after appointments",
           "Email sending (500 emails/month)",
+          "SMS reminders with add-on SMS packs (from €4 for 50 SMS)",
           "Communication",
           "Full analytics",
           "Online booking",
@@ -271,7 +322,20 @@
     },
     "freeRenewal": "Free, no renewal",
     "quotaNotIncluded": "Not included",
-    "quotaUnlimited": "Unlimited"
+    "quotaUnlimited": "Unlimited",
+    "perMonth": "/month",
+    "freeCard": {
+      "name": "Free",
+      "price": "€0",
+      "priceNote": "Free forever",
+      "features": [
+        "Calendar, appointments and clients",
+        "Unlimited services and staff",
+        "1 app user",
+        "Import clients from Excel"
+      ],
+      "trialFeature": "Reminder trial: {sms} SMS and {email} emails"
+    }
   },
   "trialModal": {
     "badge": "Free trial",
@@ -289,7 +353,7 @@
       },
       "communication": {
         "title": "Client communication",
-        "desc": "SMS, email and reminders in one place."
+        "desc": "Announcements and offers to selected clients by email."
       },
       "analytics": {
         "title": "Full analytics",
@@ -314,6 +378,17 @@
     "dismiss": "Hide for today",
     "ctaSms": "Buy SMS",
     "ctaEmail": "Buy email",
-    "emailNameLoc": "email"
+    "emailNameLoc": "email",
+    "trial": {
+      "nearLimit": {
+        "title": "Free {name} reminders: {remaining} of {total} left.",
+        "body": "After that, reminders on this channel stop."
+      },
+      "exhausted": {
+        "title": "Free {name} reminders are used up.",
+        "body": "Clients no longer receive them. With Jedro Plus reminders keep going."
+      },
+      "cta": "Upgrade to Jedro Plus"
+    }
   }
 }

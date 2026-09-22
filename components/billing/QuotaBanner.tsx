@@ -64,7 +64,9 @@ export default function QuotaBanner() {
   const exhausted = top.level === 'exhausted';
   const name = top.channel === 'sms' ? 'SMS' : t('emailName');
   const nameLoc = top.channel === 'sms' ? 'SMS' : t('emailNameLoc');
-  const values = { name, nameLoc, used: top.usage.used, total: top.usage.total };
+  const values = { name, nameLoc, used: top.usage.used, total: top.usage.total, remaining: top.usage.remaining };
+  const isFree = usage.isFree;
+  const prefix = isFree ? `trial.${top.level}` : top.level;
   const Icon = exhausted ? XCircle : WarningCircle;
 
   return (
@@ -76,17 +78,17 @@ export default function QuotaBanner() {
     >
       <Icon size={18} weight="fill" className="shrink-0" aria-hidden="true" />
       <p className="min-w-0 flex-1">
-        <span className="font-semibold">{t(`${top.level}.title`, values)}</span>{' '}
-        <span className="opacity-90">{t(`${top.level}.body`, values)}</span>
+        <span className="font-semibold">{t(`${prefix}.title`, values)}</span>{' '}
+        <span className="opacity-90">{t(`${prefix}.body`, values)}</span>
         {issues.length > 1 && <span className="opacity-90"> {t('alsoOther')}</span>}
       </p>
       <Link
-        href="/nastavitve/addoni"
+        href={isFree ? '/nastavitve/paketi' : '/nastavitve/addoni'}
         className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white ${
           exhausted ? 'bg-red-700 hover:bg-red-800' : 'bg-amber-700 hover:bg-amber-800'
         }`}
       >
-        {t(top.channel === 'sms' ? 'ctaSms' : 'ctaEmail')}
+        {isFree ? t('trial.cta') : t(top.channel === 'sms' ? 'ctaSms' : 'ctaEmail')}
       </Link>
       <button
         type="button"

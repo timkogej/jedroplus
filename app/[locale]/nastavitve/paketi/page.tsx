@@ -21,6 +21,7 @@ import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
+import { PLANS, type PlanDef } from '@/lib/billing/plans';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { supabase } from '@/lib/supabaseClient';
 import { getCustomerPortal, startCheckout } from '@/lib/api/billingClient';
@@ -30,23 +31,6 @@ import { Input } from '@/components/settings';
 
 type BillingPeriod = 'monthly' | 'annual';
 
-interface PlanPrice {
-  monthly: number;
-  annual: number;
-}
-
-interface PlanDef {
-  id: string;
-  name: string;
-  price: PlanPrice | null;
-  recommended?: boolean;
-}
-
-const PLANS: PlanDef[] = [
-  { id: 'JEDRO_PLUS',  name: 'Jedro Plus',  price: { monthly: 19, annual: 15 } },
-  { id: 'JEDRO_PRO',   name: 'Jedro Pro',   price: { monthly: 39, annual: 31 }, recommended: true },
-  { id: 'ENTERPRISE',  name: 'Enterprise',  price: null },
-];
 
 function normalizePlanId(code: string): string {
   const c = code.toUpperCase().replace(/[\s-]+/g, '_');
@@ -132,6 +116,48 @@ function QuotaRow({ item, loading }: { item: QuotaItem; loading: boolean }) {
 
 // ─── Plan card ───────────────────────────────────────────────────────────────
 
+// Shown to free accounts so they can see what they already have next to what
+// an upgrade adds.
+function FreePlanCard({
+  t,
+  trialSms,
+  trialEmail,
+}: {
+  t: ReturnType<typeof useTranslations<'billing'>>;
+  trialSms: number;
+  trialEmail: number;
+}) {
+  const features = t.raw('paketi.freeCard.features') as string[];
+  return (
+    <div className="bg-white border rounded-2xl p-5 flex flex-col border-[#6D5EF7]/40 ring-1 ring-[#6D5EF7]/20">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <h3 className="text-base font-semibold text-gray-900">{t('paketi.freeCard.name')}</h3>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
+          {t('paketi.currentBadge')}
+        </span>
+      </div>
+      <div className="mb-5">
+        <span className="text-3xl font-bold tracking-tight text-gray-900">{t('paketi.freeCard.price')}</span>
+        <p className="text-xs text-gray-400 mt-1 h-4">{t('paketi.freeCard.priceNote')}</p>
+      </div>
+      <ul className="space-y-2 flex-1">
+        {features.map((f, i) => (
+          <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+            <Check weight="bold" className="w-4 h-4 text-[#6D5EF7] flex-shrink-0 mt-0.5" />
+            <span>{f}</span>
+          </li>
+        ))}
+        {(trialSms > 0 || trialEmail > 0) && (
+          <li className="flex items-start gap-2 text-sm text-gray-700">
+            <Check weight="bold" className="w-4 h-4 text-[#6D5EF7] flex-shrink-0 mt-0.5" />
+            <span>{t('paketi.freeCard.trialFeature', { sms: trialSms, email: trialEmail })}</span>
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+}
+
 function PlanCard({
   plan,
   isCurrent,
@@ -206,7 +232,7 @@ function PlanCard({
                 {plan.price[billingPeriod]}€
               </motion.span>
             </AnimatePresence>
-            <span className="text-sm text-gray-500 ml-1">/mesec</span>
+            <span className="text-sm text-gray-500 ml-1">{t('paketi.perMonth')}</span>
           </div>
           <p className="text-xs text-gray-400 mt-1 h-4">
             {billingPeriod === 'annual' ? t('paketi.billingPeriod.billedYearly') : ' '}
@@ -809,7 +835,18 @@ export default function PaketiPage() {
             <span>{checkoutError}</span>
           </div>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div
+          className={`grid grid-cols-1 gap-3 ${
+            currentPlanId === 'FREE' ? 'md:grid-cols-2 xl:grid-cols-4' : 'md:grid-cols-3'
+          }`}
+        >
+          {currentPlanId === 'FREE' && (
+            <FreePlanCard
+              t={t}
+              trialSms={billingUsage?.sms.total ?? 0}
+              trialEmail={billingUsage?.email.total ?? 0}
+            />
+          )}
           {PLANS.map((plan) => (
             <PlanCard
               key={plan.id}

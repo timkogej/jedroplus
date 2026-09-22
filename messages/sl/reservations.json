@@ -21,8 +21,12 @@
     "subtitle": "Klasičen, Moderen in Eleganten dizajn"
   },
   "premiumSection": {
-    "title": "Premium strani za rezervacijo",
-    "subtitle": "Sezonsko in Magazine dizajn"
+    "title": "Dizajni Jedro Pro",
+    "subtitle": "Sezonsko, Magazine in Casino. Vključeno v paketu Jedro Pro.",
+    "badge": "Pro",
+    "lockedNote": "Na vašem paketu so ti dizajni zaklenjeni. Oglejte si jih in jih odklenite z Jedro Pro.",
+    "upgrade": "Odkleni z Jedro Pro",
+    "lockedLabel": "Zaklenjeno"
   },
   "designs": {
     "bookingLinkLabel": "Booking link",

@@ -14,6 +14,8 @@ interface SendingStatusProps {
   email: ChannelUsage | null;
   periodEnd: string | null;
   canBuy: boolean;
+  /** Free plan: the quota is a one-time trial and the fix is an upgrade. */
+  isFree?: boolean;
 }
 
 /**
@@ -21,20 +23,29 @@ interface SendingStatusProps {
  * out. When a quota is used up the backend silently skips messages, so this is
  * the one place that must say so plainly.
  */
-export function SendingStatus({ channels, sms, email, periodEnd, canBuy }: SendingStatusProps) {
+export function SendingStatus({ channels, sms, email, periodEnd, canBuy, isFree = false }: SendingStatusProps) {
   const t = useTranslations('reminders.page.sendingStatus');
   const locale = useLocale();
-  if (channels.length === 0) return null;
+  if (channels.length === 0 && !isFree) return null;
 
   const renewal = periodEnd
     ? new Date(periodEnd).toLocaleDateString(locale === 'sl' ? 'sl-SI' : locale, { day: 'numeric', month: 'numeric', year: 'numeric' })
     : null;
 
   return (
-    <section
-      aria-label={t('title')}
-      className="mb-7 grid gap-2 sm:grid-cols-2"
-    >
+    <section aria-label={t('title')} className="mb-7 space-y-2">
+      {isFree && (sms?.total || email?.total) ? (
+        <div className="rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-3 text-sm text-violet-900">
+          <p className="font-semibold">{t('trial.introTitle')}</p>
+          <p className="mt-1 text-xs leading-5 opacity-90">
+            {t('trial.introBody', { sms: sms?.total ?? 0, email: email?.total ?? 0 })}
+          </p>
+          <Link href="/nastavitve/paketi" className="mt-1 inline-flex text-xs font-semibold underline underline-offset-2">
+            {t('trial.upgrade')}
+          </Link>
+        </div>
+      ) : null}
+      <div className="grid gap-2 sm:grid-cols-2">
       {channels.map((channel) => {
         const usage = channel === 'sms' ? sms : email;
         if (!usage) return null;
@@ -61,12 +72,19 @@ export function SendingStatus({ channels, sms, email, periodEnd, canBuy }: Sendi
           <div key={channel} className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${tone}`}>
             <Icon size={18} weight="fill" className="mt-0.5 shrink-0" aria-hidden="true" />
             <div className="min-w-0 space-y-1">
-              <p className="font-semibold">{t(`${state}.title`, values)}</p>
-              <p className="text-xs leading-5 opacity-90">
-                {t(`${state}.body`, values)}
-                {state === 'exhausted' && renewal ? ` ${t('renews', values)}` : ''}
+              <p className="font-semibold">
+                {t(isFree && state !== 'unavailable' ? `trial.${state}.title` : `${state}.title`, values)}
               </p>
-              {state !== 'ok' && canBuy && (
+              <p className="text-xs leading-5 opacity-90">
+                {t(isFree && state !== 'unavailable' ? `trial.${state}.body` : `${state}.body`, values)}
+                {state === 'exhausted' && renewal && !isFree ? ` ${t('renews', values)}` : ''}
+              </p>
+              {state !== 'ok' && isFree && (
+                <Link href="/nastavitve/paketi" className="inline-flex text-xs font-semibold underline underline-offset-2">
+                  {t('trial.upgrade')}
+                </Link>
+              )}
+              {state !== 'ok' && canBuy && !isFree && (
                 <Link
                   href="/nastavitve/addoni"
                   className="inline-flex text-xs font-semibold underline underline-offset-2"
@@ -78,6 +96,7 @@ export function SendingStatus({ channels, sms, email, periodEnd, canBuy }: Sendi
           </div>
         );
       })}
+      </div>
     </section>
   );
 }

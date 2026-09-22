@@ -486,6 +486,7 @@ export default function RemindersPage() {
               email={billingUsage.email}
               periodEnd={billingUsage.periodEnd}
               canBuy={canManageSettings && !billingUsage.isFree}
+              isFree={billingUsage.isFree}
             />
           )}
 
