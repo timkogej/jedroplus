@@ -16,6 +16,7 @@ import {
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { useCompany } from '@/app/company-context';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
+import { MessagePreview } from './MessagePreview';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
@@ -33,11 +34,35 @@ const SENDING_LANGUAGES = [
 interface ReminderSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Scroll to this part of the form when opening ("Uredi" on a flow). */
+  initialSection?: 'general' | 'before' | 'after' | 'reschedule';
 }
 
-export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModalProps) {
+export function ReminderSettingsModal({ isOpen, onClose, initialSection }: ReminderSettingsModalProps) {
+  useEffect(() => {
+    if (!isOpen || !initialSection || initialSection === 'general') return;
+    // Settings load after opening; retry until the section is rendered.
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      const el = document.getElementById(`reminder-section-${initialSection}`);
+      tries += 1;
+      if (el) {
+        el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        window.clearInterval(timer);
+      } else if (tries > 20) {
+        window.clearInterval(timer);
+      }
+    }, 150);
+    return () => window.clearInterval(timer);
+  }, [isOpen, initialSection]);
+
   const t = useTranslations('reminders');
-  const { companyId, companyUuid, planCode } = useCompany();
+  const { companyId, companyUuid, planCode, companySettings } = useCompany();
+  const previewCompanyName = (() => {
+    const row = (companySettings ?? {}) as Record<string, unknown>;
+    const name = row['Ime podjetja'] ?? row['ime_podjetja'] ?? row['Naziv'] ?? row['naziv'] ?? row['name'];
+    return typeof name === 'string' ? name : undefined;
+  })();
   const { user } = useAuth();
   const router = useRouter();
   // SMS is usable whenever the plan or purchased add-ons provide any SMS
@@ -518,6 +543,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   {/* General Reminder Settings */}
+                  <div id="reminder-section-general" className="scroll-mt-4" />
                   <SettingsSection
                     title={t('modal.general.sectionTitle')}
                     description={t('modal.general.sectionDesc')}
@@ -729,6 +755,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                   </SettingsSection>
 
                   {/* Before Appointment Reminders */}
+                  <div id="reminder-section-before" className="scroll-mt-4" />
                   <SettingsSection
                     title={t('modal.before.sectionTitle')}
                     description={t('modal.before.sectionDesc')}
@@ -853,7 +880,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   rows={4}
                                   varLengths={smsVarLengths}
                                 />
-                                <p className="text-xs text-gray-400">{t('modal.before.noEmojiHint')}</p>
+                                <MessagePreview template={smsTemplatePred} companyName={previewCompanyName} />
                               </div>
                             )}
                           </div>
@@ -877,7 +904,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                         <div className={infoPanelClass}>
                           <div className="font-semibold text-gray-900 mb-1">{t('modal.before.timingTitle')}</div>
                           <div className="text-sm text-gray-700">
-                            {t('modal.before.timingValue')}
+                            {t('modal.before.timingDays', { count: Number(dniPrej) || 1 })}
                           </div>
                         </div>
                       </>
@@ -885,6 +912,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                   </SettingsSection>
 
                   {/* After Appointment Reminders */}
+                  <div id="reminder-section-after" className="scroll-mt-4" />
                   <SettingsSection
                     title={t('modal.after.sectionTitle')}
                     description={t('modal.after.sectionDesc')}
@@ -1009,7 +1037,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                                   rows={4}
                                   varLengths={smsVarLengths}
                                 />
-                                <p className="text-xs text-gray-400">{t('modal.after.noEmojiHint')}</p>
+                                <MessagePreview template={smsTemplatePo} companyName={previewCompanyName} />
                               </div>
                             )}
                           </div>
@@ -1075,6 +1103,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                   </SettingsSection>
 
                   {/* Reschedule notification section */}
+                  <div id="reminder-section-reschedule" className="scroll-mt-4" />
                   <SettingsSection
                     title="Obvestilo ob prestavitvi termina"
                     description="Stranka prejme obvestilo, ko ji prestavite termin."
@@ -1137,12 +1166,13 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                               onChange={setObvestiloPrestavitevTemplateSms}
                               maxLength={155}
                               rows={4}
-                              placeholder="Spoštovani {{ime}}, vaš termin je bil prestavljen na {{datum}} ob {{cas}}. {{ime_podjetja}}"
+                              placeholder="Pozdravljeni {{ime}}, vas termin je prestavljen na {{datum}} ob {{cas}}. {{ime_podjetja}}"
                               varLengths={smsVarLengths}
                             />
                             <p className="text-xs text-gray-400">
                               Uporabite lahko enake spremenljivke kot pri opomnikih pred in po terminu.
                             </p>
+                            <MessagePreview template={obvestiloPrestavitevTemplateSms} companyName={previewCompanyName} />
                           </div>
                         )}
 
@@ -1159,6 +1189,7 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
                             <p className="text-xs text-gray-400">
                               Email predloga nima omejitve znakov in podpira šumnike.
                             </p>
+                            <MessagePreview template={obvestiloPrestavitevTemplateEmail} companyName={previewCompanyName} sms={false} />
                           </div>
                         )}
                       </>

@@ -20,6 +20,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
 import { SendingStatus } from '@/components/reminders/SendingStatus';
+import { MessagePreview } from '@/components/reminders/MessagePreview';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useTranslations } from 'next-intl';
@@ -176,6 +177,8 @@ function FlowStep({
   title,
   enabled,
   statusLabel,
+  editLabel,
+  onEdit,
   children,
 }: {
   icon: ReactNode;
@@ -183,6 +186,8 @@ function FlowStep({
   title: string;
   enabled: boolean;
   statusLabel: string;
+  editLabel?: string;
+  onEdit?: () => void;
   children: ReactNode;
 }) {
   return (
@@ -198,7 +203,18 @@ function FlowStep({
             </p>
             <h3 className="mt-1 text-lg font-semibold text-zinc-950">{title}</h3>
           </div>
-          <StatusPill enabled={enabled} label={statusLabel} />
+          <div className="flex items-center gap-2">
+            <StatusPill enabled={enabled} label={statusLabel} />
+            {onEdit && editLabel ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-800 transition hover:border-zinc-900"
+              >
+                {editLabel}
+              </button>
+            ) : null}
+          </div>
         </div>
         <div className="mt-4 space-y-4">{children}</div>
       </div>
@@ -238,6 +254,11 @@ export default function RemindersPage() {
   useMarkVisited('reminders');
   const t = useTranslations('reminders');
   const { companyId, companyUuid, companySettings } = useCompany();
+  const previewCompanyName = (() => {
+    const row = (companySettings ?? {}) as Record<string, unknown>;
+    const name = row['Ime podjetja'] ?? row['ime_podjetja'] ?? row['Naziv'] ?? row['naziv'] ?? row['name'];
+    return typeof name === 'string' ? name : undefined;
+  })();
   const { role, permissions } = useRolePermissions();
   const canManageSettings = role !== 'staff' || (permissions?.can_manage_opomniki ?? true);
   const [companyRow, setCompanyRow] = useState<Record<string, unknown> | null>(
@@ -247,6 +268,11 @@ export default function RemindersPage() {
   const [loading, setLoading] = useState(true);
   const { usage: billingUsage } = useBillingUsage();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [modalSection, setModalSection] = useState<'general' | 'before' | 'after' | 'reschedule'>('general');
+  const openSettings = (section: 'general' | 'before' | 'after' | 'reschedule' = 'general') => {
+    setModalSection(section);
+    setShowSettingsModal(true);
+  };
 
   // Settings values (read-only display)
   const [sendingLanguage, setSendingLanguage] = useState('sl');
@@ -463,13 +489,13 @@ export default function RemindersPage() {
 
             {canManageSettings && (
               <motion.button
-                onClick={() => setShowSettingsModal(true)}
+                onClick={() => openSettings()}
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.98 }}
-                className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-950 shadow-sm transition hover:border-zinc-900"
-                title={t('page.settingsButton')}
+                className="relative inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-300 bg-white px-3.5 text-sm font-medium text-zinc-950 shadow-sm transition hover:border-zinc-900"
               >
-                <Gear size={20} weight="bold" />
+                <Gear size={18} weight="bold" />
+                {t('page.settingsButton')}
                 {hasIncompleteSettings && (
                   <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-amber-500 text-[9px] font-bold leading-none text-white">
                     !
@@ -503,7 +529,7 @@ export default function RemindersPage() {
               </p>
               {canManageSettings ? (
                 <button
-                  onClick={() => setShowSettingsModal(true)}
+                  onClick={() => openSettings()}
                   className="text-xs font-semibold text-amber-900 underline underline-offset-4 transition hover:text-amber-700"
                 >
                   {t('page.openSettings')}
@@ -530,6 +556,8 @@ export default function RemindersPage() {
                       icon={<Bell size={20} weight="bold" />}
                       eyebrow={t('page.flow.beforeEyebrow')}
                       title={t('page.before.sectionTitle')}
+                      editLabel={t('page.flow.edit')}
+                      onEdit={canManageSettings ? () => openSettings('before') : undefined}
                       enabled={enabledBefore}
                       statusLabel={enabledBefore ? t('status.enabled') : t('status.disabled')}
                     >
@@ -565,7 +593,11 @@ export default function RemindersPage() {
 
                           {beforeChannel === 'sms' && smsModePred === 'manual' ? (
                             <DetailBlock label={t('page.before.manualMode')}>
-                              {renderTextValue(smsTemplatePred)}
+                              {smsTemplatePred.trim() ? (
+                                <MessagePreview template={smsTemplatePred} companyName={previewCompanyName} />
+                              ) : (
+                                renderTextValue(smsTemplatePred)
+                              )}
                             </DetailBlock>
                           ) : null}
 
@@ -584,6 +616,8 @@ export default function RemindersPage() {
                       icon={<CheckCircle size={20} weight="bold" />}
                       eyebrow={t('page.flow.afterEyebrow')}
                       title={t('page.after.sectionTitle')}
+                      editLabel={t('page.flow.edit')}
+                      onEdit={canManageSettings ? () => openSettings('after') : undefined}
                       enabled={enabledAfter}
                       statusLabel={enabledAfter ? t('status.enabled') : t('status.disabled')}
                     >
@@ -619,7 +653,11 @@ export default function RemindersPage() {
 
                           {afterChannel === 'sms' && smsModePo === 'manual' ? (
                             <DetailBlock label={t('page.after.manualMode')}>
-                              {renderTextValue(smsTemplatePo)}
+                              {smsTemplatePo.trim() ? (
+                                <MessagePreview template={smsTemplatePo} companyName={previewCompanyName} />
+                              ) : (
+                                renderTextValue(smsTemplatePo)
+                              )}
                             </DetailBlock>
                           ) : null}
 
@@ -644,6 +682,8 @@ export default function RemindersPage() {
                       icon={<Clock size={20} weight="bold" />}
                       eyebrow={t('page.flow.rescheduleEyebrow')}
                       title={t('page.reschedule.sectionTitle')}
+                      editLabel={t('page.flow.edit')}
+                      onEdit={canManageSettings ? () => openSettings('reschedule') : undefined}
                       enabled={rescheduleEnabled}
                       statusLabel={rescheduleEnabled ? t('status.enabled') : t('status.disabled')}
                     >
@@ -661,7 +701,15 @@ export default function RemindersPage() {
                                 : t('page.reschedule.emailTemplate')
                             }
                           >
-                            {renderTextValue(rescheduleTemplate)}
+                            {rescheduleTemplate.trim() ? (
+                              <MessagePreview
+                                template={rescheduleTemplate}
+                                companyName={previewCompanyName}
+                                sms={rescheduleChannel === 'sms'}
+                              />
+                            ) : (
+                              <span className="text-zinc-400">{t('page.general.notSetTemplate')}</span>
+                            )}
                           </DetailBlock>
                         </>
                       ) : (
@@ -789,6 +837,7 @@ export default function RemindersPage() {
       <ReminderSettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
+        initialSection={modalSection}
       />
     </ProtectedLayout>
   );
