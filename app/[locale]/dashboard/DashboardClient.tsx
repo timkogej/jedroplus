@@ -73,7 +73,7 @@ import { useTranslations } from "next-intl";
 import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
 import FirstRunSetup from "@/components/onboarding/FirstRunSetup";
 import GettingStarted from "@/components/guide/GettingStarted";
-import { useOptionalTour } from "@/components/guide/TourProvider";
+import StaffTourStarter from "@/components/guide/StaffTourStarter";
 import NextLink from "next/link";
 
 // ─── Copy button (reused in detail modal) ────────────────────────────────────
@@ -564,15 +564,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   const { role, personId: rolePersonId, permissions, loading: roleLoading } = useRolePermissions();
   // Staff only see colleagues' stats when allowed to see all appointments.
   const staffSeesAll = role !== 'staff' || permissions?.can_view_all_appointments === true;
-  const tour = useOptionalTour();
-  useEffect(() => {
-    if (role !== 'staff' || !tour) return;
-    const timer = window.setTimeout(() => {
-      if (document.querySelector('[role="dialog"]')) return;
-      tour.startTourOnce('staff');
-    }, 1200);
-    return () => window.clearTimeout(timer);
-  }, [role, tour]);
+
 
   // RBAC: appointment permissions for staff
   const canCreateAppointment = role !== 'staff' || (permissions?.can_create_appointments ?? true);
@@ -1184,6 +1176,9 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
             onCreateAppointment={() => setShowNewAppointmentModal(true)}
             onSeeded={loadDashboard}
           />
+
+          {/* Inside ProtectedLayout, so it can reach the tour provider */}
+          <StaffTourStarter />
 
           <GettingStarted
             onCreateAppointment={() => setShowNewAppointmentModal(true)}

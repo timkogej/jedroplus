@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Check, Copy, EnvelopeSimple, WhatsappLogo, ChatText, X, Warning } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';
-import { fetchEmployees } from '@/lib/supabase/employees';
 import { buildInviteUrl } from '@/lib/team/invite';
 
 interface InviteDialogProps {
@@ -21,19 +20,17 @@ interface InviteDialogProps {
 type Role = 'staff' | 'admin';
 
 /**
- * "Invite to team": builds a personal link that carries the join code (and
- * optionally the staff card to link), ready to send by email, WhatsApp or SMS.
- * No codes to read out, and the invitee lands linked to their own schedule.
+ * "Invite to team": builds a personal link that carries the join code, ready
+ * to send by email, WhatsApp or SMS. No codes to read out; joining creates the
+ * person's staff card and links their login to it.
  */
 export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFree }: InviteDialogProps) {
   const t = useTranslations('settings.members.invite');
   const locale = useLocale();
-  const { companyId, companySettings } = useCompany();
+  const { companySettings } = useCompany();
 
   const [codes, setCodes] = useState<{ adminCode: string | null; staffCode: string | null } | null>(null);
-  const [people, setPeople] = useState<{ id: string; name: string }[]>([]);
   const [role, setRole] = useState<Role>('staff');
-  const [personId, setPersonId] = useState('');
   const [copied, setCopied] = useState(false);
 
   const companyName = useMemo(() => {
@@ -49,17 +46,10 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setCodes(data ? { adminCode: data.adminCode ?? null, staffCode: data.staffCode ?? null } : null))
       .catch(() => setCodes(null));
-    if (companyId) {
-      fetchEmployees(companyId).then((res) => {
-        const rows = (res.data ?? []) as { id: string | number; ime?: string; priimek?: string }[];
-        setPeople(
-          rows
-            .map((r) => ({ id: String(r.id), name: `${r.ime ?? ''} ${r.priimek ?? ''}`.trim() }))
-            .filter((p) => p.name)
-        );
-      });
-    }
-  }, [open, companyId]);
+    // Joining creates the person's staff card automatically (n8n join-company),
+    // so there is no card to pick here yet — linking to an existing card would
+    // leave a duplicate until join-company accepts a person_id.
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -76,7 +66,6 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
     code && typeof window !== 'undefined'
       ? buildInviteUrl(window.location.origin, locale, {
           code,
-          personId: role === 'staff' && personId ? personId : undefined,
           companyName: companyName || undefined,
         })
       : '';
@@ -168,29 +157,6 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
                 })}
               </div>
             </fieldset>
-
-            {/* Staff card */}
-            {role === 'staff' && (
-              <div>
-                <label htmlFor="invite-person" className="text-sm font-semibold text-gray-900">
-                  {t('personLabel')}
-                </label>
-                <p className="mt-0.5 text-xs text-gray-500">{t('personHint')}</p>
-                <select
-                  id="invite-person"
-                  value={personId}
-                  onChange={(e) => setPersonId(e.target.value)}
-                  className="mt-2 h-10 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400"
-                >
-                  <option value="">{t('personNone')}</option>
-                  {people.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
 
             {/* Link + share */}
             <div>

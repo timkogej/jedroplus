@@ -427,9 +427,11 @@ export default function JoinCompanyPage() {
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
             />
-            <p className="text-xs text-gray-500 mt-2 text-center">
-              {isAdmin ? t('join.form.adminCodeHint') : t('join.form.employeeCodeHint')}
-            </p>
+            {!invite && (
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                {isAdmin ? t('join.form.adminCodeHint') : t('join.form.employeeCodeHint')}
+              </p>
+            )}
           </div>
 
           <button
