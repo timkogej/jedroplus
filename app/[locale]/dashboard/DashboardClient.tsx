@@ -710,7 +710,11 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       role === 'staff' &&
       (permissions?.can_view_only_own_appointments === true ||
         permissions?.can_view_all_appointments === false);
-    const effectivePersonId = staffViewOwnOnly ? (rolePersonId ?? userPersonId) : userPersonId;
+    // Owners and admins see the whole company. They are often also on the
+    // calendar (onboarding adds the owner as the first staff member), which
+    // used to narrow their stats and revenue to their own appointments.
+    const effectivePersonId =
+      role === 'staff' ? (staffViewOwnOnly ? (rolePersonId ?? userPersonId) : userPersonId) : null;
 
     setLoading(true);
     setError(null);

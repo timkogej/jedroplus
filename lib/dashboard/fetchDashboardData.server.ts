@@ -632,9 +632,12 @@ function buildNextPersonAppointment(
 async function resolvePersonId(supabase: ServerClient, userId: string): Promise<string | null> {
   const { data } = await supabase
     .from("company_members")
-    .select("person_id")
+    .select("person_id, role")
     .eq("user_id", userId)
     .maybeSingle();
+  // Only staff get a personal dashboard. Owners/admins see the whole company
+  // even when their login is linked to a staff card.
+  if (data?.role !== "staff") return null;
   const personId = data?.person_id;
   if (!personId || personId === "") return null;
   return String(personId);
