@@ -1142,7 +1142,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                     {displayName}
                   </span>
                 </h1>
-                <p className="mt-1 text-gray-500 capitalize">{todayFormatted}</p>
+                <p className="mt-1 text-gray-500">{todayFormatted}</p>
               </div>
 
               {/* Quick Actions */}
