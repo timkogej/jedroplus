@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { Check, Copy, EnvelopeSimple, WhatsappLogo, ChatText, X, Warning } from '@phosphor-icons/react';
@@ -95,8 +96,9 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
   const shareClass =
     'flex h-10 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50';
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+  // Portal to <body> so the fixed sidebar can't sit on top of the dialog.
+  return createPortal(
+    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -239,6 +241,7 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
