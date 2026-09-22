@@ -14,7 +14,7 @@
 // its exported types are intentionally left untouched.
 
 import "server-only";
-import { format, startOfMonth, endOfMonth, addDays, subDays } from "date-fns";
+import { format, startOfMonth, endOfMonth, addDays, subDays, subMonths } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { pickFirst, detectBookingSchema } from "@/lib/dashboardHelpers";
 import { TABLES } from "@/lib/data";
@@ -28,6 +28,11 @@ import type {
   TopEmployee,
   RecentActivity,
 } from "./fetchDashboardData";
+
+/** Same window Termini loads by default (start of last month), so the count
+ * on the dashboard matches the list it links to. */
+const PAST_OPEN_FROM = () => format(startOfMonth(subMonths(new Date(), 1)), "yyyy-MM-dd");
+
 
 type Row = Record<string, unknown>;
 type ServerClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -258,7 +263,7 @@ function buildStats(
       // counted separately so the owner can close them (revenue counts only
       // completed appointments).
       if (bookingDateStr >= todayStr) activeCount++;
-      else if (bookingDateStr && isRecorded(row)) pastOpenCount++;
+      else if (bookingDateStr >= PAST_OPEN_FROM() && isRecorded(row)) pastOpenCount++;
     }
 
     const isCompletedStatus =

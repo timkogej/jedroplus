@@ -297,7 +297,9 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
     role !== 'staff' || (permissions?.can_create_appointments ?? true);
 
   const pastOpenIds = useMemo(() => {
-    const now = Date.now();
+    // Days before today, like the dashboard count that links here.
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     const ids = new Set<string>();
     for (const apt of appointments) {
       if (!apt.datum) continue;
@@ -305,9 +307,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
       if (staffViewOwnOnly && apt.zaposleni_id !== rolePersonId) continue;
       const status = normalizeStatus(apt.status || 'scheduled');
       if (status !== 'scheduled' && status !== 'confirmed' && status !== 'pending') continue;
-      const time = (apt.cas_konec || apt.cas_zacetek || '23:59').slice(0, 5);
-      const end = new Date(`${String(apt.datum).slice(0, 10)}T${time}`);
-      if (!Number.isNaN(end.getTime()) && end.getTime() < now) ids.add(apt.id);
+      if (String(apt.datum).slice(0, 10) < todayStr) ids.add(apt.id);
     }
     return ids;
   }, [appointments, staffViewOwnOnly, rolePersonId]);

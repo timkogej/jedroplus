@@ -1,8 +1,13 @@
-import { format, startOfMonth, endOfMonth, addDays, subDays } from "date-fns";
+import { format, startOfMonth, endOfMonth, addDays, subDays, subMonths } from "date-fns";
 import { fetchAllTableRows, fetchTableRows } from "@/lib/companyScope";
 import { TABLES } from "@/lib/data";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
 import { normalizeCommunicationLanguage, type CommunicationLanguageCode } from "@/lib/communicationLanguage";
+
+/** Same window Termini loads by default (start of last month), so the count
+ * on the dashboard matches the list it links to. */
+const PAST_OPEN_FROM = () => format(startOfMonth(subMonths(new Date(), 1)), "yyyy-MM-dd");
+
 
 // Types for dashboard data
 export interface DashboardStats {
@@ -553,7 +558,7 @@ async function fetchStats(companyId: string, personId?: string | null): Promise<
         ['scheduled', 'načrtovan', 'nacrtovan', 'confirm', 'potrj', 'pending'].some((s) => status.includes(s));
       if (open) {
         if (bookingDateStr >= todayStr) activeCount++;
-        else if (bookingDateStr && row['belezi_termin'] !== false) pastOpenCount++;
+        else if (bookingDateStr >= PAST_OPEN_FROM() && row['belezi_termin'] !== false) pastOpenCount++;
       }
 
       // Calculate revenue for this month - completed appointments only
