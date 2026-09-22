@@ -55,7 +55,9 @@ export function MessagePreview({ template, companyName, sms = true }: MessagePre
     '{{povezava_prenarocanje}}': 'jedro.link/abc',
   };
 
-  const text = migrateTemplate(template || '').replace(/\{\{[a-z_]+\}\}/g, (token) => sample[token] ?? token);
+  const migrated = migrateTemplate(template || '');
+  const unknown = Array.from(new Set(migrated.match(/\{\{[^}]*\}\}/g) ?? [])).filter((token) => !(token in sample));
+  const text = migrated.replace(/\{\{[a-z_]+\}\}/g, (token) => sample[token] ?? token);
   if (!text.trim()) return null;
   const stats = smsStats(text);
 
@@ -67,6 +69,11 @@ export function MessagePreview({ template, companyName, sms = true }: MessagePre
           <p className="whitespace-pre-wrap break-words">{text}</p>
         </div>
       </div>
+      {unknown.length > 0 && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-xs leading-5 text-red-700">
+          {t('unknownVars', { tokens: unknown.join(', ') })}
+        </p>
+      )}
       {sms && (
         <div className="space-y-1">
           <p className="text-xs text-gray-500 tabular-nums">
