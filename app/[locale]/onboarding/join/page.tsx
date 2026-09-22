@@ -214,7 +214,7 @@ export default function JoinCompanyPage() {
         // so "my appointments" works on the first visit.
         if (invite?.personId) {
           try {
-            await fetch('https://n8n.jedroplus.com/webhook/connect-user', {
+            await fetch('/api/team/connect-user', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

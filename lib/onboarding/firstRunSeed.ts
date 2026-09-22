@@ -292,7 +292,7 @@ export async function runSeedPlan(
     const personId = await findStaffRowId(ctx, current.ownerStaffId);
     if (!personId) throw new Error('owner_not_found');
 
-    const response = await fetch('https://n8n.jedroplus.com/webhook/connect-user', {
+    const response = await fetch('/api/team/connect-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
