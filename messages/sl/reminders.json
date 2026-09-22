@@ -280,6 +280,7 @@
       "staff": "Maja",
       "company": "Salon Ana",
       "address": "Glavna ulica 1"
-    }
+    },
+    "unknownVars": "Neznana spremenljivka: {tokens}. Stranka bo videla to besedilo dobesedno. Zamenjajte jo s spremenljivko s seznama zgoraj (npr. Telefon podjetja)."
   }
 }

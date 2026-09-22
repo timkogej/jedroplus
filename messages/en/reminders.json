@@ -280,6 +280,7 @@
       "staff": "Maja",
       "company": "Salon Ana",
       "address": "Main Street 1"
-    }
+    },
+    "unknownVars": "Unknown variable: {tokens}. The client will see this text as is. Replace it with one from the list above (e.g. Company phone)."
   }
 }
