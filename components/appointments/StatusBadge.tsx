@@ -25,7 +25,7 @@ export function normalizeStatus(status: string): AppointmentStatus {
   if (normalized.includes('confirm') || normalized.includes('potrj')) {
     return 'confirmed';
   }
-  if (normalized.includes('complet') || normalized.includes('zakljuc') || normalized.includes('done') || normalized.includes('končan')) {
+  if (normalized.includes('complet') || normalized.includes('zakljuc') || normalized.includes('zaključ') || normalized.includes('done') || normalized.includes('končan')) {
     return 'completed';
   }
   if (normalized.includes('cancel') || normalized.includes('odpoved') || normalized.includes('preklic')) {

@@ -1,4 +1,5 @@
 import { fetchAllTableRows, fetchTableRows, fetchTableRowsByDateRange } from '@/lib/companyScope';
+import { normalizeAppointmentStatus } from '@/lib/appointments/status';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst } from '@/lib/dashboardHelpers';
 import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
@@ -415,16 +416,7 @@ export async function fetchAppointmentsForMonth(
         : 'scheduled';
 
       // Map status to expected values
-      let normalizedStatus: AppointmentWithDetails['status'] = 'scheduled';
-      if (status.includes('confirm') || status.includes('potrj')) {
-        normalizedStatus = 'confirmed';
-      } else if (status.includes('complet') || status.includes('zakljuc') || status.includes('done')) {
-        normalizedStatus = 'completed';
-      } else if (status.includes('cancel') || status.includes('odpoved') || status.includes('preklic')) {
-        normalizedStatus = 'cancelled';
-      } else if (status.includes('no_show') || status.includes('ni_prisel') || status.includes('no show')) {
-        normalizedStatus = 'no_show';
-      }
+      const normalizedStatus: AppointmentWithDetails['status'] = normalizeAppointmentStatus(status);
 
       // Get additional client fields
       const clientEmail = String(
@@ -683,16 +675,7 @@ export async function fetchAppointmentById(
       ? String(booking[schema.statusField] ?? 'scheduled').toLowerCase()
       : 'scheduled';
 
-    let normalizedStatus: AppointmentWithDetails['status'] = 'scheduled';
-    if (status.includes('confirm') || status.includes('potrj')) {
-      normalizedStatus = 'confirmed';
-    } else if (status.includes('complet') || status.includes('zakljuc') || status.includes('done')) {
-      normalizedStatus = 'completed';
-    } else if (status.includes('cancel') || status.includes('odpoved') || status.includes('preklic')) {
-      normalizedStatus = 'cancelled';
-    } else if (status.includes('no_show') || status.includes('ni_prisel') || status.includes('no show')) {
-      normalizedStatus = 'no_show';
-    }
+    const normalizedStatus: AppointmentWithDetails['status'] = normalizeAppointmentStatus(status);
 
     // Get additional client fields
     const clientEmail = String(
@@ -892,16 +875,7 @@ export async function fetchAllAppointments(
         : 'scheduled';
 
       // Map status to expected values
-      let normalizedStatus: AppointmentWithDetails['status'] = 'scheduled';
-      if (status.includes('confirm') || status.includes('potrj')) {
-        normalizedStatus = 'confirmed';
-      } else if (status.includes('complet') || status.includes('zakljuc') || status.includes('done')) {
-        normalizedStatus = 'completed';
-      } else if (status.includes('cancel') || status.includes('odpoved') || status.includes('preklic')) {
-        normalizedStatus = 'cancelled';
-      } else if (status.includes('no_show') || status.includes('ni_prisel') || status.includes('no show')) {
-        normalizedStatus = 'no_show';
-      }
+      const normalizedStatus: AppointmentWithDetails['status'] = normalizeAppointmentStatus(status);
 
       // Get additional client fields
       const clientEmail = String(

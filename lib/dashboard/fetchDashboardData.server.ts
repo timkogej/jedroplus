@@ -14,6 +14,7 @@
 // its exported types are intentionally left untouched.
 
 import "server-only";
+import { isOpenAppointmentStatus } from "@/lib/appointments/status";
 import { format, startOfMonth, endOfMonth, addDays, subDays, subMonths } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { pickFirst, detectBookingSchema } from "@/lib/dashboardHelpers";
@@ -219,18 +220,6 @@ type Maps = {
 
 // ── Aggregators (pure; operate on pre-fetched rows + maps) ───────────────────
 
-function isOpenStatus(status: string): boolean {
-  return (
-    status === "" ||
-    status.includes("scheduled") ||
-    status.includes("načrtovan") ||
-    status.includes("nacrtovan") ||
-    status.includes("confirm") ||
-    status.includes("potrj") ||
-    status.includes("pending")
-  );
-}
-
 function isRecorded(row: Row): boolean {
   const flag = pickFirst(row, ["belezi_termin", "Beleži termin"]);
   return flag !== false && String(flag).toLowerCase() !== "false";
@@ -258,7 +247,7 @@ function buildStats(
     if (bookingDateStr === todayStr) todayCount++;
 
     const status = String(pickFirst(row, ["status", "Status", "stanje"]) ?? "").toLowerCase();
-    if (isOpenStatus(status)) {
+    if (isOpenAppointmentStatus(status) && !row["deleted_at"]) {
       // Upcoming = still to happen; past ones that were never closed are
       // counted separately so the owner can close them (revenue counts only
       // completed appointments).

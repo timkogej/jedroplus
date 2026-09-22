@@ -19,6 +19,7 @@
 // functions in lib/supabase/appointments.ts are left untouched.
 
 import "server-only";
+import { normalizeAppointmentStatus } from "@/lib/appointments/status";
 import { startOfMonth, subMonths, format } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
@@ -289,16 +290,7 @@ function buildAppointments(
       ? String(row[schema.statusField] ?? "scheduled").toLowerCase()
       : "scheduled";
 
-    let normalizedStatus: AppointmentWithDetails["status"] = "scheduled";
-    if (status.includes("confirm") || status.includes("potrj")) {
-      normalizedStatus = "confirmed";
-    } else if (status.includes("complet") || status.includes("zakljuc") || status.includes("done")) {
-      normalizedStatus = "completed";
-    } else if (status.includes("cancel") || status.includes("odpoved") || status.includes("preklic")) {
-      normalizedStatus = "cancelled";
-    } else if (status.includes("no_show") || status.includes("ni_prisel") || status.includes("no show")) {
-      normalizedStatus = "no_show";
-    }
+    const normalizedStatus: AppointmentWithDetails["status"] = normalizeAppointmentStatus(status);
 
     const clientEmail = String(
       pickFirst(row, ["Email", "client_email", "stranka_email", "Email stranke", "email"]) ?? ""

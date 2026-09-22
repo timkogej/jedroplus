@@ -85,7 +85,7 @@ function getStatusConfig(status: string): { label: string; bgClass: string; text
   if (normalized.includes('confirm') || normalized.includes('potrj')) {
     return { label: 'Potrjen', bgClass: 'bg-gradient-to-r from-green-50 to-emerald-50', textClass: 'text-green-700', dotClass: 'bg-green-500' };
   }
-  if (normalized.includes('complet') || normalized.includes('zakljuc') || normalized.includes('done')) {
+  if (normalized.includes('complet') || normalized.includes('zakljuc') || normalized.includes('zaključ') || normalized.includes('done')) {
     return { label: 'Zaključen', bgClass: 'bg-gray-100', textClass: 'text-gray-700', dotClass: 'bg-gray-500' };
   }
   if (normalized.includes('cancel') || normalized.includes('odpoved')) {
@@ -172,7 +172,7 @@ function ClientDetailsPanel({
   const getStatusLabel = useCallback((status: string): string => {
     const normalized = status.toLowerCase();
     if (normalized.includes('confirm') || normalized.includes('potrj')) return tAppt('status.confirmed');
-    if (normalized.includes('complet') || normalized.includes('zakljuc') || normalized.includes('done')) return tAppt('status.completed');
+    if (normalized.includes('complet') || normalized.includes('zakljuc') || normalized.includes('zaključ') || normalized.includes('done')) return tAppt('status.completed');
     if (normalized.includes('cancel') || normalized.includes('odpoved')) return tAppt('status.cancelled');
     if (normalized.includes('no_show') || normalized.includes('ni_prisel')) return tAppt('status.noShow');
     return tAppt('status.scheduled');

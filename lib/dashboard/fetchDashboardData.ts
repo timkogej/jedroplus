@@ -1,4 +1,5 @@
 import { format, startOfMonth, endOfMonth, addDays, subDays, subMonths } from "date-fns";
+import { isOpenAppointmentStatus } from '@/lib/appointments/status';
 import { fetchAllTableRows, fetchTableRows } from "@/lib/companyScope";
 import { TABLES } from "@/lib/data";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
@@ -553,9 +554,7 @@ async function fetchStats(companyId: string, personId?: string | null): Promise<
 
       // Upcoming vs. past-but-never-closed (see fetchDashboardData.server.ts)
       const status = String(pickFirst(row, ['status', 'Status', 'stanje']) ?? '').toLowerCase();
-      const open =
-        status === '' ||
-        ['scheduled', 'načrtovan', 'nacrtovan', 'confirm', 'potrj', 'pending'].some((s) => status.includes(s));
+      const open = isOpenAppointmentStatus(status) && !row['deleted_at'];
       if (open) {
         if (bookingDateStr >= todayStr) activeCount++;
         else if (bookingDateStr >= PAST_OPEN_FROM() && row['belezi_termin'] !== false) pastOpenCount++;
