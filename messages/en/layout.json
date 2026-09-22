@@ -127,7 +127,7 @@
         },
         "staff": {
           "title": "Staff",
-          "body": "The people who perform services and their schedules. Invite colleagues into the app with the code in Settings → General."
+          "body": "The people who perform services and their schedules. Invite colleagues into the app in Settings → Team & access."
         },
         "reminders": {
           "title": "Reminders",
@@ -162,6 +162,32 @@
         "filters": {
           "title": "Filters",
           "body": "Show only selected staff or services when the calendar gets busy."
+        }
+      },
+      "staff": {
+        "welcome": {
+          "title": "Welcome to the team",
+          "body": "A quick look at where to find your schedule, appointments and clients."
+        },
+        "calendar": {
+          "title": "Your calendar",
+          "body": "Your appointments by day and week. Click an empty slot to book a new one."
+        },
+        "newAppointment": {
+          "title": "New appointment",
+          "body": "A client calls or walks in? Book them here: client, service, time."
+        },
+        "appointments": {
+          "title": "Appointments",
+          "body": "Your appointments list. Mark an appointment as completed here after the visit."
+        },
+        "clients": {
+          "title": "Clients",
+          "body": "Client contacts and visit history. You can also add a client while booking."
+        },
+        "userMenu": {
+          "title": "Guide and language",
+          "body": "Replay this guide here any time."
         }
       }
     }

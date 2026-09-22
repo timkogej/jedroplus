@@ -439,8 +439,8 @@ function EmployeesCard({
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-base font-semibold tracking-tight text-gray-950">Zaposleni</h3>
-            <p className="mt-0.5 text-xs text-gray-500">Koliko ljudi se lahko prijavi v aplikacijo. Zaposleni v koledarju (Osebje) so neomejeni.</p>
+            <h3 className="text-base font-semibold tracking-tight text-gray-950">Prijave v aplikacijo</h3>
+            <p className="mt-0.5 text-xs text-gray-500">Koliko ljudi se lahko prijavi v aplikacijo. Zaposlene v koledarju lahko dodajate brez omejitev.</p>
           </div>
           <span className="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700">
             {activeCount} / {maxUsers}

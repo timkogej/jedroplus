@@ -73,6 +73,8 @@ import { useTranslations } from "next-intl";
 import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
 import FirstRunSetup from "@/components/onboarding/FirstRunSetup";
 import GettingStarted from "@/components/guide/GettingStarted";
+import { useOptionalTour } from "@/components/guide/TourProvider";
+import NextLink from "next/link";
 
 // ─── Copy button (reused in detail modal) ────────────────────────────────────
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -560,6 +562,17 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   const { user, loading: authLoading } = useAuth();
   const userPersonId = useUserPersonId(user?.id);
   const { role, personId: rolePersonId, permissions, loading: roleLoading } = useRolePermissions();
+  // Staff only see colleagues' stats when allowed to see all appointments.
+  const staffSeesAll = role !== 'staff' || permissions?.can_view_all_appointments === true;
+  const tour = useOptionalTour();
+  useEffect(() => {
+    if (role !== 'staff' || !tour) return;
+    const timer = window.setTimeout(() => {
+      if (document.querySelector('[role="dialog"]')) return;
+      tour.startTourOnce('staff');
+    }, 1200);
+    return () => window.clearTimeout(timer);
+  }, [role, tour]);
 
   // RBAC: appointment permissions for staff
   const canCreateAppointment = role !== 'staff' || (permissions?.can_create_appointments ?? true);
@@ -1177,6 +1190,23 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
             refreshKey={checklistRefresh}
           />
 
+          {role === 'staff' && !roleLoading && !rolePersonId && (
+            <section className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+              <h2 className="text-base font-semibold text-amber-900">{t('staffNotLinked.title')}</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-amber-900/90">
+                {permissions?.can_view_staff ? t('staffNotLinked.bodyCanLink') : t('staffNotLinked.bodyAskOwner')}
+              </p>
+              {permissions?.can_view_staff && (
+                <NextLink
+                  href="/staff"
+                  className="mt-3 inline-flex rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+                >
+                  {t('staffNotLinked.cta')}
+                </NextLink>
+              )}
+            </section>
+          )}
+
           {/* Metrics Cards */}
           {role === 'staff' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -1353,10 +1383,10 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           </div>
 
           {/* Bottom Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 gap-6 ${staffSeesAll ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
             <TopServicesCard services={dashboardData?.topServices ?? []} />
-            <TopEmployeesCard employees={dashboardData?.topEmployees ?? []} />
-            <RecentActivityCard activities={dashboardData?.recentActivity ?? []} />
+            {staffSeesAll && <TopEmployeesCard employees={dashboardData?.topEmployees ?? []} />}
+            {staffSeesAll && <RecentActivityCard activities={dashboardData?.recentActivity ?? []} />}
           </div>
 
           {/* Quick Navigation Footer */}

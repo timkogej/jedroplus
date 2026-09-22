@@ -16,6 +16,7 @@ import { useAuth } from '@/app/auth-context';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useMarkVisited } from '@/hooks/useMarkVisited';
+import InviteDialog from '@/components/team/InviteDialog';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -198,7 +199,8 @@ function PermissionToggle({
 export default function ClaniPage() {
   useMarkVisited('team');
   const t = useTranslations('settings');
-  const { companyUuid, companyId } = useCompany();
+  const { companyUuid, companyId, planCode } = useCompany();
+  const [inviteOpen, setInviteOpen] = useState(false);
   const { user } = useAuth();
 
   const [currentRole, setCurrentRole] = useState<MemberRole | null>(null);
@@ -412,10 +414,27 @@ export default function ClaniPage() {
         {t('back')}
       </Link>
 
-      <div>
-        <h1 className="text-xl font-semibold text-gray-900">{t('members.title')}</h1>
-        <p className="text-sm text-gray-500 mt-1">{t('members.subtitle')}</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">{t('members.title')}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('members.subtitle')}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setInviteOpen(true)}
+          className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
+        >
+          + {t('members.invite.button')}
+        </button>
       </div>
+
+      <InviteDialog
+        open={inviteOpen}
+        onClose={() => setInviteOpen(false)}
+        usedSeats={members.length}
+        maxSeats={maxUsers}
+        isFree={planCode === 'FREE'}
+      />
 
       {/* User limit banner */}
       {maxUsers !== null && (

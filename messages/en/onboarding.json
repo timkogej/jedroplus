@@ -168,6 +168,15 @@
       "success": "You joined the company!",
       "invalidCode": "Invalid company code",
       "companyNotFound": "No company found with this ID"
+    },
+    "invite": {
+      "eyebrow": "Invitation",
+      "title": "You're invited to join the team",
+      "titleWithName": "You're invited to {name}",
+      "body": "Create an account or log in. We'll add you to the team automatically — no code to type.",
+      "signUp": "Create account",
+      "logIn": "I have an account — log in",
+      "readyBody": "The code is already filled in. Click Join."
     }
   }
 }

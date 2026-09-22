@@ -12,8 +12,8 @@
         "description": "Account, language, notifications, and company codes"
       },
       "members": {
-        "label": "Members",
-        "description": "Team, roles, and permissions for staff"
+        "label": "Team & access",
+        "description": "Invite colleagues, roles and permissions"
       },
       "plans": {
         "label": "Plans",
@@ -125,8 +125,8 @@
     }
   },
   "members": {
-    "title": "Members",
-    "subtitle": "Team, roles, and permissions for staff",
+    "title": "Team & access",
+    "subtitle": "Who can log in to the app, with roles and permissions. People in the calendar are managed in Staff.",
     "noAccess": {
       "title": "Access restricted",
       "message": "This page is only visible to company owners."
@@ -135,8 +135,8 @@
     "maxUsersLabel": "Maximum number of app users",
     "currentTeamLabel": "Currently in team",
     "list": {
-      "title": "Members",
-      "subtitle": "All users that are part of this company",
+      "title": "Who can log in",
+      "subtitle": "Users with a login for this company",
       "empty": "No members found."
     },
     "permissions": {
@@ -186,6 +186,41 @@
         "can_manage_lost_leads": "Manage Lost Leads",
         "can_create_ghost_termin": "Can create ghost appointments"
       }
+    },
+    "invite": {
+      "button": "Invite to team",
+      "title": "Invite to team",
+      "subtitle": "Send a personal link. The invitee creates an account and joins automatically — no code to type.",
+      "close": "Close",
+      "seats": "App logins: {used} of {total}",
+      "fullTitle": "All login seats are taken",
+      "fullBodyFree": "The free plan allows 1 login. With Jedro Plus 2 people can log in, and you can add more seats.",
+      "fullBodyPaid": "Add a seat in Add-ons & quotas for a new colleague.",
+      "staffStillFree": "You can add unlimited staff to the calendar (Staff); a seat is only needed to log in to the app.",
+      "upgrade": "Compare plans",
+      "addSeats": "Add seats",
+      "roleLabel": "Role",
+      "roles": {
+        "staff": {
+          "title": "Staff",
+          "body": "Sees their own schedule and appointments. Set what else they can do in the permissions below."
+        },
+        "admin": {
+          "title": "Administrator",
+          "body": "Full access to appointments, clients, services, staff, analytics and settings."
+        }
+      },
+      "personLabel": "Link to staff member",
+      "personHint": "Pick who this person is in the calendar. After joining they'll see their own appointments right away.",
+      "personNone": "Don't link now",
+      "linkLabel": "Invite link",
+      "loading": "Preparing link …",
+      "copy": "Copy",
+      "copied": "Copied",
+      "viaEmail": "Email",
+      "emailSubject": "Invitation to join {company}",
+      "message": "Hi! I'm inviting you to join {company} on Jedro+. Open the link and create an account: {url}",
+      "privacyNote": "The link contains the join code. Only send it to the person you're inviting."
     }
   },
   "messages": {

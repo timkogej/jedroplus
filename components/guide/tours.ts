@@ -33,6 +33,15 @@ export const TOURS: Record<TourId, TourStep[]> = {
     { key: 'gettingStarted', target: '[data-tour="getting-started"]', placement: 'bottom' },
     { key: 'userMenu', target: '[data-tour="user-menu"]', placement: 'bottom' },
   ],
+  // First login for invited staff: their day, not the owner's setup.
+  staff: [
+    { key: 'welcome', placement: 'center' },
+    { key: 'calendar', target: nav('koledar'), placement: 'right' },
+    { key: 'newAppointment', target: '[data-tour="new-appointment"]', placement: 'bottom' },
+    { key: 'appointments', target: nav('termini'), placement: 'right' },
+    { key: 'clients', target: nav('clients'), placement: 'right' },
+    { key: 'userMenu', target: '[data-tour="user-menu"]', placement: 'bottom' },
+  ],
   calendar: [
     { key: 'grid', target: '[data-tour="calendar-grid"]', placement: 'center' },
     { key: 'newAppointment', target: '[data-tour="calendar-new"]', placement: 'bottom' },
