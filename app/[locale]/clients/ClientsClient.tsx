@@ -60,9 +60,10 @@ interface StatCardProps {
   value: number;
   label: string;
   delay?: number;
+  loading?: boolean;
 }
 
-function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
+function StatCard({ icon, value, label, delay = 0, loading = false }: StatCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -80,7 +81,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
             transition={{ delay: delay * 0.1 + 0.2 }}
             className="text-3xl text-gray-900 mb-1"
           >
-            {value}
+            {loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}
           </motion.p>
           <p className="text-sm font-medium text-gray-600">{label}</p>
         </div>
@@ -115,9 +116,7 @@ function EmptyState({ onCreateClient }: { onCreateClient: () => void }) {
         onClick={onCreateClient}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="mt-6 flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-6 py-3
-                   text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
-                   hover:shadow-xl hover:shadow-cyan-500/30"
+        className="mt-6 flex items-center gap-2 rounded-xl bg-[#0a0a0a] px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
       >
         <UserPlus className="h-5 w-5" weight="regular" />
         {t('emptyState.addFirst')}
@@ -656,7 +655,7 @@ export default function ClientsClient({
                              hover:bg-gray-50 hover:shadow-md"
                 >
                   <DownloadSimple className="h-4 w-4" weight="regular" />
-                  <span className="hidden md:inline">Import CRM</span>
+                  <span className="hidden md:inline">{t('crm.importButton')}</span>
                   <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${importDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
                 </motion.button>
 
@@ -697,7 +696,7 @@ export default function ClientsClient({
                           {t('crm.importOther')}
                         </button>
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
-                          Kmalu na voljo
+                          {t('crm.comingSoon')}
                         </span>
                       </div>
                     </motion.div>
@@ -722,7 +721,7 @@ export default function ClientsClient({
                              hover:bg-gray-50 hover:shadow-md"
                 >
                   <UploadSimple className="h-4 w-4" weight="regular" />
-                  <span className="hidden md:inline">Export CRM</span>
+                  <span className="hidden md:inline">{t('crm.exportButton')}</span>
                   <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
                 </motion.button>
 
@@ -754,7 +753,7 @@ export default function ClientsClient({
                           {t('crm.exportCsv')}
                         </button>
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
-                          Kmalu na voljo
+                          {t('crm.comingSoon')}
                         </span>
                       </div>
                       <div className="relative group">
@@ -766,7 +765,7 @@ export default function ClientsClient({
                           {t('crm.exportPdf')}
                         </button>
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
-                          Kmalu na voljo
+                          {t('crm.comingSoon')}
                         </span>
                       </div>
                     </motion.div>
@@ -782,9 +781,7 @@ export default function ClientsClient({
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5
-                           text-sm font-medium text-white shadow-lg shadow-cyan-500/25 transition-all
-                           hover:shadow-xl hover:shadow-cyan-500/30"
+                className="flex items-center gap-2 rounded-xl bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
               >
                 <Plus className="h-5 w-5 flex-shrink-0" weight="regular" />
                 <span className="whitespace-nowrap">{t('page.newClient')}</span>
@@ -796,18 +793,21 @@ export default function ClientsClient({
           {stats && (
             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <StatCard
+                loading={isLoading}
                 icon={<Users className="h-6 w-6" weight="regular" />}
                 value={stats.total}
                 label={t('stats.total')}
                 delay={0}
               />
               <StatCard
+                loading={isLoading}
                 icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
                 value={stats.withAppointments}
                 label={t('stats.withAppointments')}
                 delay={1}
               />
               <StatCard
+                loading={isLoading}
                 icon={<UserPlus className="h-6 w-6" weight="regular" />}
                 value={stats.newThisMonth}
                 label={t('stats.newThisMonth')}

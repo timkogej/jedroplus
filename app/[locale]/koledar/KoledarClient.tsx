@@ -13,6 +13,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import Calendar from '@/components/Calendar';
 import { useUserPersonId } from '@/hooks/useUserPersonId';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import type { CalendarInitialData } from '@/lib/calendar/fetchCalendarData.server';
 
@@ -21,6 +22,7 @@ export default function KoledarClient({ initialData }: { initialData: CalendarIn
   const { companyId, loading } = useCompany();
   const { user } = useAuth();
   const userPersonId = useUserPersonId(user?.id);
+  const { role } = useRolePermissions();
 
   // Redirect to company selection if no company is selected
   useEffect(() => {
@@ -48,7 +50,8 @@ export default function KoledarClient({ initialData }: { initialData: CalendarIn
         <div className="relative z-10 h-full">
           <Calendar
             companyId={companyId}
-            initialEmployeeId={userPersonId}
+            // Staff open on their own column; owners/admins see everyone.
+            initialEmployeeId={role === 'staff' ? userPersonId : null}
             initialData={initialData ?? undefined}
           />
         </div>

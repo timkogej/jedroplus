@@ -12,7 +12,7 @@ import {
   isSameDay,
   isToday,
   getDaysFull,
-  getMonthsFull,
+  getMonthsInDate,
   HOUR_HEIGHT,
   getTimePosition,
   getDurationHeight,
@@ -299,7 +299,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
     return (
       <div className="flex h-full flex-col items-center justify-center text-center">
         <p className="text-sm font-medium text-gray-400">{t('calendarView.dayView.notWorkingDay', { day: getDaysFull(locale)[currentDate.getDay()] })}</p>
-        <p className="text-xs text-gray-300 mt-1">{currentDate.getDate()}. {getMonthsFull(locale)[currentDate.getMonth()]} {currentDate.getFullYear()}</p>
+        <p className="text-xs text-gray-300 mt-1">{currentDate.getDate()}. {getMonthsInDate(locale)[currentDate.getMonth()]} {currentDate.getFullYear()}</p>
       </div>
     );
   }
@@ -331,7 +331,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
               {getDaysFull(locale)[currentDate.getDay()]}
             </p>
             <p className="text-xs text-gray-400">
-              {currentDate.getDate()}. {getMonthsFull(locale)[currentDate.getMonth()]} {currentDate.getFullYear()}
+              {currentDate.getDate()}. {getMonthsInDate(locale)[currentDate.getMonth()]} {currentDate.getFullYear()}
             </p>
           </div>
 

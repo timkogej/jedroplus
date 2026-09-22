@@ -13,7 +13,10 @@
     "importOther": "Import from another CRM",
     "exportCsv": "Export to CSV",
     "exportExcel": "Export to Excel",
-    "exportPdf": "Export to PDF"
+    "exportPdf": "Export to PDF",
+    "importButton": "Import clients",
+    "exportButton": "Export clients",
+    "comingSoon": "Coming soon"
   },
   "stats": {
     "total": "Total clients",

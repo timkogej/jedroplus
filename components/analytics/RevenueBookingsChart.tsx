@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useEffect } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import {
@@ -27,6 +28,7 @@ interface RevenueBookingsChartProps {
 }
 
 function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBookingsChartProps) {
+  const { money } = useFormat();
   const t = useTranslations('analytics');
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -95,7 +97,7 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
               yAxisId="left"
               tick={{ fontSize: 12 }}
               stroke="#9CA3AF"
-              tickFormatter={(value) => `€${value}`}
+              tickFormatter={(value) => money(Number(value), { whole: true })}
             />
             <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
             <Tooltip
@@ -107,7 +109,7 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
               }}
               formatter={(value, name) => {
                 const numValue = Number(value) || 0;
-                if (name === revenueLegend) return [`€${numValue.toFixed(2)}`, name];
+                if (name === revenueLegend) return [money(numValue), name];
                 return [numValue, name];
               }}
             />

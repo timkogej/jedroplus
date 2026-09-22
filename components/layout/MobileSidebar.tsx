@@ -61,7 +61,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     // Asistent+ - začasno skrito: { name: 'Asistent+', href: '/asistent', icon: Sparkle, group: 'ai' },
     // Komunikacija
     { name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell, group: 'communication' },
-    { name: 'Lost Leads', href: '/lost-leads', icon: TrendDown, group: 'communication' },
+    { name: t('sidebar.items.lostLeads'), href: '/lost-leads', icon: TrendDown, group: 'communication' },
     // Moduli
     { name: t('sidebar.items.appointments'), href: '/termini', icon: ClipboardText, group: 'modules' },
     { name: t('sidebar.items.clients'), href: '/clients', icon: Users, group: 'modules' },

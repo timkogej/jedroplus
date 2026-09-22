@@ -13,6 +13,7 @@ import {
   Warning,
   X,
   DownloadSimple,
+  ClockCounterClockwise,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
@@ -63,9 +64,10 @@ interface StatCardProps {
   value: number;
   label: string;
   delay?: number;
+  loading?: boolean;
 }
 
-function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
+function StatCard({ icon, value, label, delay = 0, loading = false }: StatCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -83,7 +85,7 @@ function StatCard({ icon, value, label, delay = 0 }: StatCardProps) {
             transition={{ delay: delay * 0.1 + 0.2 }}
             className="text-3xl text-gray-900 mb-1"
           >
-            {value}
+            {loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}
           </motion.p>
           <p className="text-sm font-medium text-gray-600">{label}</p>
         </div>
@@ -131,6 +133,10 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
     const dateTo = searchParams.get('dateTo') ?? '';
     return { ...DEFAULT_FILTERS, dateFrom, dateTo };
   });
+
+  // "Past, not closed yet" view — appointments whose time has passed but are
+  // still scheduled. Until they're completed, revenue and stats stay at 0.
+  const [showPastOpen, setShowPastOpen] = useState(() => searchParams.get('view') === 'past-open');
 
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
@@ -257,13 +263,15 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
     };
   }, [filters.dateFrom, loadedFrom, serverMode, t]);
 
-  // Auto-set employee filter when user is connected to a person
+  // Staff start on their own appointments. Owners and admins see everyone —
+  // the owner is usually also a staff member, and a silent filter on them
+  // made it look as if colleagues' appointments had disappeared.
   useEffect(() => {
-    if (userPersonId === undefined) return;
+    if (userPersonId === undefined || role !== 'staff') return;
     if (userPersonId) {
       setFilters((prev) => ({ ...prev, employeeId: userPersonId }));
     }
-  }, [userPersonId]);
+  }, [userPersonId, role]);
 
   // For staff: determine if appointments should be restricted to own only
   const staffViewOwnOnly =
@@ -288,9 +296,30 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
   const canCreateAppointment =
     role !== 'staff' || (permissions?.can_create_appointments ?? true);
 
+  const pastOpenIds = useMemo(() => {
+    // Days before today, like the dashboard count that links here.
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const ids = new Set<string>();
+    for (const apt of appointments) {
+      if (!apt.datum) continue;
+      if (apt.belezi_termin === false) continue;
+      if (staffViewOwnOnly && apt.zaposleni_id !== rolePersonId) continue;
+      const status = normalizeStatus(apt.status || 'scheduled');
+      if (status !== 'scheduled' && status !== 'confirmed' && status !== 'pending') continue;
+      if (String(apt.datum).slice(0, 10) < todayStr) ids.add(apt.id);
+    }
+    return ids;
+  }, [appointments, staffViewOwnOnly, rolePersonId]);
+
+  useEffect(() => {
+    if (!isLoading && showPastOpen && pastOpenIds.size === 0) setShowPastOpen(false);
+  }, [isLoading, showPastOpen, pastOpenIds]);
+
   // Filter appointments
   const filteredAppointments = useMemo(() => {
     return appointments.filter((apt) => {
+      if (showPastOpen && !pastOpenIds.has(apt.id)) return false;
       // Staff view restriction: only show own appointments when required
       if (staffViewOwnOnly && apt.zaposleni_id !== rolePersonId) return false;
       // Search filter
@@ -345,7 +374,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
       return true;
     });
-  }, [appointments, filters, staffViewOwnOnly, rolePersonId]);
+  }, [appointments, filters, staffViewOwnOnly, rolePersonId, showPastOpen, pastOpenIds]);
 
   // Handlers
   const handleView = (appointment: AppointmentWithDetails) => {
@@ -811,9 +840,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                 onClick={canCreateAppointment ? handleCreate : () => setShowDisabledCreateModal(true)}
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
-                           px-5 py-2.5 text-sm text-white shadow-lg shadow-cyan-500/25
-                           transition-shadow hover:shadow-xl hover:shadow-cyan-500/30"
+                className="flex items-center gap-2 rounded-xl bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
               >
                 <Plus className="h-4 w-4" weight="bold" />
                 <span>{t('page.newAppointment')}</span>
@@ -824,18 +851,21 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
           {/* Stats cards */}
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatCard
+              loading={isLoading}
               icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
               value={currentMonthCount}
               label={t('page.stats.thisMonth')}
               delay={0}
             />
             <StatCard
+              loading={isLoading}
               icon={<Clock className="h-6 w-6" weight="regular" />}
               value={todayCount}
               label={t('page.stats.today')}
               delay={1}
             />
             <StatCard
+              loading={isLoading}
               icon={<ArrowRight className="h-6 w-6" weight="regular" />}
               value={upcomingCount}
               label={t('page.stats.upcoming')}
@@ -871,6 +901,40 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Past appointments still open */}
+          {!isLoading && pastOpenIds.size > 0 && (
+            <div
+              className={`mb-4 flex flex-col gap-3 rounded-2xl p-4 ring-1 sm:flex-row sm:items-center sm:justify-between ${
+                showPastOpen ? 'bg-violet-50 ring-violet-200' : 'bg-amber-50 ring-amber-200'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <ClockCounterClockwise
+                  className={`mt-0.5 h-5 w-5 flex-shrink-0 ${showPastOpen ? 'text-violet-600' : 'text-amber-600'}`}
+                  weight="regular"
+                  aria-hidden="true"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {showPastOpen
+                      ? t('pastOpen.showingTitle', { count: pastOpenIds.size })
+                      : t('pastOpen.title', { count: pastOpenIds.size })}
+                  </p>
+                  <p className="mt-0.5 text-sm text-gray-600">
+                    {showPastOpen ? t('pastOpen.showingBody') : t('pastOpen.body')}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPastOpen((v) => !v)}
+                className="flex-shrink-0 rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+              >
+                {showPastOpen ? t('pastOpen.showAll') : t('pastOpen.show')}
+              </button>
+            </div>
+          )}
 
           {/* Filters */}
           <motion.div

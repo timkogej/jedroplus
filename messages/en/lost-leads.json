@@ -54,16 +54,16 @@
     "relaxed": "Relaxed"
   },
   "modal": {
-    "title": "Lost Leads settings",
+    "title": "Lost clients settings",
     "subtitle": "Tracking and re-engaging lost clients",
     "closeButton": "Close",
     "saveButton": "Save",
     "savingButton": "Saving...",
     "saveError": "Something went wrong while saving",
-    "enableTitle": "Enable Lost Leads tracking",
+    "enableTitle": "Enable lost client tracking",
     "enableDesc": "Automatic detection and outreach to inactive clients",
     "detection": {
-      "sectionTitle": "Lost Leads detection",
+      "sectionTitle": "Lost client detection",
       "sectionDesc": "When the system should detect inactive clients",
       "inactiveAfterLabel": "Inactive after",
       "inactiveAfterDesc": "After how many days without an appointment a client is marked as inactive",

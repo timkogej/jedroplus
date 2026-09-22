@@ -860,6 +860,18 @@ export default function RezervacijeClient({
                       <div className={cn("w-2.5 h-2.5 rounded-full", settings.sendOnlineConfirmation ? "bg-green-500" : "bg-gray-300")} />
                     </div>
                   </div>
+                  {settings.bookingOmogocen && !settings.sendOnlineConfirmation && (
+                    <div className="rounded-xl bg-amber-50 px-3 py-2.5 text-sm text-amber-900 ring-1 ring-amber-200">
+                      {t('settingsOverview.onlineConfirmOffHint')}{' '}
+                      <button
+                        type="button"
+                        onClick={() => setShowSettingsModal(true)}
+                        className="font-semibold underline underline-offset-2 hover:text-amber-700"
+                      >
+                        {t('settingsOverview.onlineConfirmOffCta')}
+                      </button>
+                    </div>
+                  )}
 
                   {/* Main Booking Link row */}
                   {(hasBookingLinksAvailable || hasMainBookingLink) && (

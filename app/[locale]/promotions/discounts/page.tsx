@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, PencilSimple, Trash, X, MagnifyingGlass, Tag } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -48,6 +49,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function DiscountsPage() {
+  const { money } = useFormat();
   const t = useTranslations('promotions');
   const tc = useTranslations('common');
   const { companyId } = useCompany();
@@ -270,7 +272,7 @@ export default function DiscountsPage() {
                         </span>
                       </td>
                       <td className="py-3.5 px-4 font-semibold text-gray-900">
-                        {popust.tip_popusta === 'percentage' ? `${popust.vrednost}%` : `${popust.vrednost} €`}
+                        {popust.tip_popusta === 'percentage' ? `${popust.vrednost}%` : money(popust.vrednost)}
                       </td>
                       <td className="py-3.5 px-4 text-gray-600">{formatDate(popust.datum_zacetek)}</td>
                       <td className="py-3.5 px-4 text-gray-600">{formatDate(popust.datum_konec)}</td>

@@ -2,6 +2,7 @@
 
 import { memo, useMemo, useRef, useLayoutEffect, useState, useCallback, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import { X, Plus } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import { formatTime, getGradientCSS } from '@/lib/utils/calendar';
@@ -183,6 +184,7 @@ function AppointmentCard({
   isDragging = false,
   hasResursi = false,
 }: AppointmentCardProps) {
+  const tGhost = useTranslations('appointments.ghost');
   const isCompleted = ['completed', 'Zaključen', 'zaključen', 'no_show', 'Ni prišel'].includes(appointment.status || '');
   const isNoShow = appointment.status === 'no_show' || appointment.status === 'Ni prišel';
   const isGhost = appointment.belezi_termin === false && !appointment.deleted_at;
@@ -347,7 +349,7 @@ function AppointmentCard({
         className="absolute top-1 left-1 text-white/90 pointer-events-none z-10 leading-none"
         style={{ fontSize: 12 }}
         aria-hidden
-        title="Ghost termin — ni zabeležen"
+        title={tGhost('badge')}
       >
         👻
       </div>

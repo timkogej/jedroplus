@@ -391,5 +391,19 @@
     },
     "saving": "Shranjujem...",
     "allEmployees": "Vsi zaposleni"
+  },
+  "ghost": {
+    "title": "Ne beleži termina",
+    "description": "Termin je viden v koledarju, ne šteje pa v analitiko.",
+    "warning": "Ta termin ne bo zabeležen v analitiki, zgodovini ali blagajni. Po zaključku se samodejno izbriše.",
+    "badge": "Nebeležen termin — ne šteje v analitiko"
+  },
+  "pastOpen": {
+    "title": "{count, plural, one {# pretekli termin še ni zaključen} two {# pretekla termina še nista zaključena} few {# pretekli termini še niso zaključeni} other {# preteklih terminov še ni zaključenih}}",
+    "body": "Zaključite jih (ali označite »Ni prišel«), da se prihodki in statistika ujemajo z dejanskim stanjem.",
+    "showingTitle": "Prikazani so pretekli nezaključeni termini ({count})",
+    "showingBody": "Pri vsakem izberite Zaključi, Ni prišel ali Odpovej. Seznam se sproti skrajša.",
+    "show": "Pokaži jih",
+    "showAll": "Pokaži vse termine"
   }
 }

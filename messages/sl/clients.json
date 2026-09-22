@@ -13,7 +13,10 @@
     "importOther": "Uvozi iz drugega CRM",
     "exportCsv": "Izvozi v CSV",
     "exportExcel": "Izvozi v Excel",
-    "exportPdf": "Izvozi v PDF"
+    "exportPdf": "Izvozi v PDF",
+    "importButton": "Uvozi stranke",
+    "exportButton": "Izvozi stranke",
+    "comingSoon": "Kmalu na voljo"
   },
   "stats": {
     "total": "Skupaj strank",

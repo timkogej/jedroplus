@@ -64,14 +64,30 @@
       "services": "Storitve",
       "staff": "Zaposleni",
       "reminders": "Opomniki",
-      "lostLeads": "Lost Leads",
+      "lostLeads": "Izgubljene stranke",
       "analytics": "Analitika",
       "asistent": "Asistent+",
       "chatbotPlus": "Chatbot+",
       "settings": "Nastavitve",
       "billing": "Paketi",
       "notifications": "Obvestila",
-      "reservations": "Rezervacije"
+      "reservations": "Rezervacije",
+      "resources": "Resursi",
+      "promotions": "Promocije",
+      "communication": "Komunikacija",
+      "receptionistPlus": "Receptionist+",
+      "qrCode": "QR koda",
+      "plans": "Paketi",
+      "addons": "Dodatki",
+      "team": "Ekipa in dostop",
+      "company": "Podjetje",
+      "general": "Splošno",
+      "messages": "Sporočila",
+      "history": "Zgodovina",
+      "discounts": "Popusti",
+      "happyHours": "Happy Hours",
+      "serviceAddOns": "Dodajanje storitev",
+      "requests": "Zahteve"
     }
   },
   "search": {
@@ -83,9 +99,16 @@
     "categories": {
       "pages": "Strani",
       "quickActions": "Hitri dostop",
-      "recent": "Nedavna iskanja"
+      "recent": "Nedavna iskanja",
+      "settings": "Nastavitve"
     },
-    "empty": "Ni rezultatov za \"{query}\""
+    "empty": "Ni rezultatov za \"{query}\"",
+    "items": {
+      "plans": "Paketi in plačila",
+      "addons": "Dodatki (SMS, prijave)",
+      "team": "Ekipa in dostop",
+      "company": "Podatki podjetja"
+    }
   },
   "fallbacks": {
     "companyName": "Moje Podjetje",

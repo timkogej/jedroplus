@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { motion } from 'motion/react';
 import { Tag, Clock, Plus } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
@@ -21,9 +22,6 @@ interface PromotionsAnalyticsProps {
 
 const TYPES = ['popust', 'happy_hour', 'add_on'] as const;
 
-const fmt = (val: number) =>
-  new Intl.NumberFormat('sl-SI', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
-
 function parseMoney(v: string | null | undefined): number {
   if (!v) return 0;
   return parseFloat(String(v)) || 0;
@@ -37,6 +35,7 @@ function computeSaving(row: PromoRow): number {
 }
 
 export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsProps) {
+  const { money } = useFormat();
   const t = useTranslations('analytics');
   const [rows, setRows] = useState<PromoRow[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -183,7 +182,7 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
               <p className="text-sm text-gray-500 mb-4">{t('promotions.appointmentCount')}</p>
               <div className="pt-3 border-t border-gray-100">
                 <p className="text-xs text-gray-400 mb-0.5">{t('promotions.totalSavings')}</p>
-                <p className="text-lg font-bold text-green-600">€{fmt(savings)}</p>
+                <p className="text-lg font-bold text-green-600">{money(savings)}</p>
               </div>
             </motion.div>
           );
@@ -307,7 +306,7 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div>
             <p className="text-white/70 text-sm mb-1">{t('promotions.totalSavingsLabel')}</p>
-            <p className="text-2xl font-bold">€{fmt(totalSavings)}</p>
+            <p className="text-2xl font-bold">{money(totalSavings)}</p>
           </div>
           <div>
             <p className="text-white/70 text-sm mb-1">{t('promotions.totalCountLabel')}</p>
@@ -315,7 +314,7 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
           </div>
           <div>
             <p className="text-white/70 text-sm mb-1">{t('promotions.avgSavingLabel')}</p>
-            <p className="text-2xl font-bold">€{fmt(avgSaving)}</p>
+            <p className="text-2xl font-bold">{money(avgSaving)}</p>
           </div>
         </div>
       </div>

@@ -35,7 +35,7 @@ export async function proxy(request: NextRequest) {
 
   // 3. Internal dev pages — English UI, not locale-routed
   // TODO(i18n-review): confirm if these dev pages should be removed or included in i18n
-  const devPaths = ['/app', '/calendar', '/bookings', '/settings', '/receptionist-plus'];
+  const devPaths = ['/app', '/calendar', '/bookings', '/settings'];
   if (devPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
     return NextResponse.next();
   }

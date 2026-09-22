@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -66,9 +67,10 @@ interface StatCardProps {
   label: string;
   iconColor?: IconColor;
   delay?: number;
+  loading?: boolean;
 }
 
-function StatCard({ icon, value, label, iconColor = 'black', delay = 0 }: StatCardProps) {
+function StatCard({ icon, value, label, iconColor = 'black', delay = 0, loading = false }: StatCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -91,7 +93,7 @@ function StatCard({ icon, value, label, iconColor = 'black', delay = 0 }: StatCa
             transition={{ delay: delay * 0.1 + 0.2 }}
             className="text-2xl font-normal text-[#1A1F36]"
           >
-            {value}
+            {loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}
           </motion.p>
           <p className="text-xs font-medium text-gray-500">{label}</p>
         </div>
@@ -208,6 +210,7 @@ function Toast({
 }
 
 export default function StoritvePage() {
+  const { money } = useFormat();
   const router = useRouter();
   const { companyId, companyUuid, companySettings, planCode, loading: companyLoading } = useCompany();
   const { user } = useAuth();
@@ -702,6 +705,7 @@ export default function StoritvePage() {
           {stats && (
             <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
+                loading={isLoading}
                 icon={<Briefcase className="h-6 w-6" weight="regular" />}
                 value={stats.total}
                 label={t('stats.total')}
@@ -709,6 +713,7 @@ export default function StoritvePage() {
                 delay={0}
               />
               <StatCard
+                loading={isLoading}
                 icon={<ChartLineUp className="h-6 w-6" weight="regular" />}
                 value={stats.active}
                 label={t('stats.active')}
@@ -716,6 +721,7 @@ export default function StoritvePage() {
                 delay={1}
               />
               <StatCard
+                loading={isLoading}
                 icon={<Clock className="h-6 w-6" weight="regular" />}
                 value={`${stats.averageDuration} min`}
                 label={t('stats.avgDuration')}
@@ -723,8 +729,9 @@ export default function StoritvePage() {
                 delay={2}
               />
               <StatCard
+                loading={isLoading}
                 icon={<CurrencyEur className="h-6 w-6" weight="regular" />}
-                value={stats.highestPrice > 0 ? `€${stats.highestPrice.toFixed(2)}` : '-'}
+                value={stats.highestPrice > 0 ? money(stats.highestPrice) : '-'}
                 label={t('stats.highestPrice')}
                 iconColor="slate"
                 delay={3}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { humanizeDates } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -209,7 +210,7 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
                 ? 'bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent'
                 : 'text-gray-900',
             ].join(' ')}>
-              {notification.title}
+              {humanizeDates(notification.title, locale)}
             </h3>
             <div className="flex items-center gap-2 flex-shrink-0">
               {isUnread && (
@@ -232,7 +233,7 @@ const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationC
 
           {/* Body */}
           <p className={`text-sm leading-relaxed ${isUnread ? 'text-gray-700' : 'text-gray-500'}`}>
-            {notification.body}
+            {humanizeDates(notification.body, locale)}
           </p>
 
           {/* Action row */}

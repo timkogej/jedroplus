@@ -34,7 +34,8 @@ export default function CustomerList({
 }: CustomerListProps) {
   const t = useTranslations('communication');
   const [search, setSearch] = useState('');
-  const [activeFilter, setActiveFilter] = useState('today');
+  // Start with everyone; 'today' often showed 0 clients and looked broken.
+  const [activeFilter, setActiveFilter] = useState('all');
   const [selectedService, setSelectedService] = useState('Vse storitve');
 
   // Filter customers based on search and active filter
@@ -229,7 +230,20 @@ export default function CustomerList({
         ) : (
           <div className="py-12 text-center">
             <p className="text-sm text-gray-400">{t('customerList.empty')}</p>
-            <p className="text-xs text-gray-300 mt-1">{t('customerList.emptyHint')}</p>
+            {activeFilter !== 'all' || search ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveFilter('all');
+                  setSearch('');
+                }}
+                className="mt-3 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+              >
+                {t('customerList.showAll')}
+              </button>
+            ) : (
+              <p className="text-xs text-gray-400 mt-1">{t('customerList.emptyNoClients')}</p>
+            )}
           </div>
         )}
       </div>

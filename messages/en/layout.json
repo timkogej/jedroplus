@@ -19,7 +19,7 @@
       "communication": "Communication",
       "reminders": "Reminders",
       "reservations": "Bookings",
-      "lostLeads": "Lost Leads",
+      "lostLeads": "Lost clients",
       "receptionistPlus": "ReceptionistPlus",
       "services": "Services",
       "resources": "Resources",
@@ -64,14 +64,30 @@
       "services": "Services",
       "staff": "Staff",
       "reminders": "Reminders",
-      "lostLeads": "Lost Leads",
+      "lostLeads": "Lost clients",
       "analytics": "Analytics",
       "asistent": "Asistent+",
       "chatbotPlus": "Chatbot+",
       "settings": "Settings",
       "billing": "Plans",
       "notifications": "Notifications",
-      "reservations": "Bookings"
+      "reservations": "Bookings",
+      "resources": "Resources",
+      "promotions": "Promotions",
+      "communication": "Communication",
+      "receptionistPlus": "Receptionist+",
+      "qrCode": "QR code",
+      "plans": "Plans",
+      "addons": "Add-ons",
+      "team": "Team & access",
+      "company": "Company",
+      "general": "General",
+      "messages": "Messages",
+      "history": "History",
+      "discounts": "Discounts",
+      "happyHours": "Happy Hours",
+      "serviceAddOns": "Service add-ons",
+      "requests": "Requests"
     }
   },
   "search": {
@@ -83,9 +99,16 @@
     "categories": {
       "pages": "Pages",
       "quickActions": "Quick actions",
-      "recent": "Recent searches"
+      "recent": "Recent searches",
+      "settings": "Settings"
     },
-    "empty": "No results for \"{query}\""
+    "empty": "No results for \"{query}\"",
+    "items": {
+      "plans": "Plans & billing",
+      "addons": "Add-ons (SMS, logins)",
+      "team": "Team & access",
+      "company": "Company details"
+    }
   },
   "fallbacks": {
     "companyName": "My Company",

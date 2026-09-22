@@ -12,11 +12,15 @@
   "metrics": {
     "appointmentsToday": "Termini danes",
     "appointmentsTodaySubtitle": "Načrtovanih terminov",
-    "activeAppointments": "Aktivni termini",
+    "activeAppointments": "Prihajajoči termini",
     "newClients": "Nove stranke",
     "thisMonth": "Ta mesec",
     "revenue": "Prihodki",
-    "trend": "vs prejšnji mesec"
+    "trend": "vs prejšnji mesec",
+    "activeSubtitle": "Načrtovani od danes naprej",
+    "pastOpen": "{count, plural, one {# pretekli termin še ni zaključen} two {# pretekla termina še nista zaključena} few {# pretekli termini še niso zaključeni} other {# preteklih terminov še ni zaključenih}}",
+    "pastOpenBody": "Prihodki štejejo samo zaključene termine.",
+    "pastOpenCta": "Zaključi v Terminih"
   },
   "nextAppointment": {
     "title": "Naslednji termin",

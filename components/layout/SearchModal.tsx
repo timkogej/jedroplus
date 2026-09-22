@@ -21,6 +21,11 @@ import {
   Sparkle,
   Command,
   Clock,
+  CalendarCheck,
+  CreditCard,
+  PuzzlePiece,
+  UsersThree,
+  Buildings,
 } from '@phosphor-icons/react';
 import { useSidebar } from './sidebar-context';
 
@@ -68,18 +73,23 @@ export function SearchModal() {
     { id: 'koledar', name: t('sidebar.items.calendar'), href: '/koledar', icon: CalendarBlank, category: t('search.categories.pages'), keywords: ['calendar', 'schedule', 'urnik'] },
     { id: 'termini', name: t('sidebar.items.appointments'), href: '/termini', icon: ClipboardText, category: t('search.categories.pages'), keywords: ['appointments', 'booking', 'rezervacije'] },
     { id: 'clients', name: t('sidebar.items.clients'), href: '/clients', icon: Users, category: t('search.categories.pages'), keywords: ['customers', 'clients', 'uporabniki'] },
-    { id: 'services', name: t('sidebar.items.services'), href: '/services', icon: Briefcase, category: t('search.categories.pages'), keywords: ['services', 'offerings'] },
+    { id: 'services', name: t('sidebar.items.services'), href: '/storitve', icon: Briefcase, category: t('search.categories.pages'), keywords: ['services', 'offerings'] },
     { id: 'staff', name: t('sidebar.items.staff'), href: '/staff', icon: UserCircle, category: t('search.categories.pages'), keywords: ['employees', 'team', 'zaposleni'] },
     { id: 'reminders', name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell, category: t('search.categories.pages'), keywords: ['notifications', 'alerts', 'obvestila'] },
-    { id: 'lost-leads', name: 'Lost Leads', href: '/lost-leads', icon: TrendDown, category: t('search.categories.pages'), keywords: ['leads', 'izgubljeni', 'lost leads'] },
+    { id: 'lost-leads', name: t('sidebar.items.lostLeads'), href: '/lost-leads', icon: TrendDown, category: t('search.categories.pages'), keywords: ['leads', 'izgubljeni', 'lost leads'] },
     { id: 'analytics', name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine, category: t('search.categories.pages'), keywords: ['reports', 'statistics', 'poročila'] },
     // Asistent+ - začasno skrito: { id: 'asistent', name: 'Asistent+', href: '/asistent', icon: Sparkle, category: t('search.categories.pages'), keywords: ['ai', 'assistant', 'help'] },
     { id: 'nastavitve', name: t('sidebar.items.settings'), href: '/nastavitve', icon: Gear, category: t('search.categories.pages'), keywords: ['settings', 'preferences', 'config'] },
+    { id: 'rezervacije', name: t('sidebar.items.reservations'), href: '/rezervacije', icon: CalendarCheck, category: t('search.categories.pages'), keywords: ['booking', 'online', 'spletno naročanje', 'povezava'] },
+    { id: 'paketi', name: t('search.items.plans'), href: '/nastavitve/paketi', icon: CreditCard, category: t('search.categories.settings'), keywords: ['plan', 'naročnina', 'subscription', 'plačilo', 'račun', 'billing', 'cena'] },
+    { id: 'addoni', name: t('search.items.addons'), href: '/nastavitve/addoni', icon: PuzzlePiece, category: t('search.categories.settings'), keywords: ['sms', 'dodatki', 'add-on', 'prijave', 'seats'] },
+    { id: 'clani', name: t('search.items.team'), href: '/nastavitve/clani', icon: UsersThree, category: t('search.categories.settings'), keywords: ['povabi', 'invite', 'ekipa', 'team', 'dostop', 'pravice', 'permissions'] },
+    { id: 'podjetje', name: t('search.items.company'), href: '/nastavitve/podjetje', icon: Buildings, category: t('search.categories.settings'), keywords: ['company', 'naslov', 'delovni čas', 'opening hours', 'logo'] },
 
     // Quick actions
     { id: 'new-booking', name: t('sidebar.items.newAppointment'), href: '/koledar?action=new', icon: CalendarBlank, category: t('search.categories.quickActions'), keywords: ['new', 'booking', 'nova rezervacija'] },
     { id: 'new-client', name: t('sidebar.items.newClient'), href: '/clients?action=new', icon: Users, category: t('search.categories.quickActions'), keywords: ['new', 'client', 'nov uporabnik'] },
-    { id: 'new-service', name: t('sidebar.items.newService'), href: '/services?action=new', icon: Briefcase, category: t('search.categories.quickActions'), keywords: ['new', 'service'] },
+    { id: 'new-service', name: t('sidebar.items.newService'), href: '/storitve?action=new', icon: Briefcase, category: t('search.categories.quickActions'), keywords: ['new', 'service'] },
   ], [t]);
 
   // -------------------------------------------------------------------------

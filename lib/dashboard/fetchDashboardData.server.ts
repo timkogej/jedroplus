@@ -14,7 +14,8 @@
 // its exported types are intentionally left untouched.
 
 import "server-only";
-import { format, startOfMonth, endOfMonth, addDays, subDays } from "date-fns";
+import { isOpenAppointmentStatus } from "@/lib/appointments/status";
+import { format, startOfMonth, endOfMonth, addDays, subDays, subMonths } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { pickFirst, detectBookingSchema } from "@/lib/dashboardHelpers";
 import { TABLES } from "@/lib/data";
@@ -28,6 +29,11 @@ import type {
   TopEmployee,
   RecentActivity,
 } from "./fetchDashboardData";
+
+/** Same window Termini loads by default (start of last month), so the count
+ * on the dashboard matches the list it links to. */
+const PAST_OPEN_FROM = () => format(startOfMonth(subMonths(new Date(), 1)), "yyyy-MM-dd");
+
 
 type Row = Record<string, unknown>;
 type ServerClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -214,6 +220,11 @@ type Maps = {
 
 // ── Aggregators (pure; operate on pre-fetched rows + maps) ───────────────────
 
+function isRecorded(row: Row): boolean {
+  const flag = pickFirst(row, ["belezi_termin", "Beleži termin"]);
+  return flag !== false && String(flag).toLowerCase() !== "false";
+}
+
 function buildStats(
   bookings: Row[],
   clients: Row[],
@@ -224,6 +235,7 @@ function buildStats(
 ): DashboardStats {
   let todayCount = 0;
   let activeCount = 0;
+  let pastOpenCount = 0;
   let revenueThisMonth = 0;
 
   for (const row of bookings) {
@@ -235,7 +247,13 @@ function buildStats(
     if (bookingDateStr === todayStr) todayCount++;
 
     const status = String(pickFirst(row, ["status", "Status", "stanje"]) ?? "").toLowerCase();
-    if (status === "scheduled") activeCount++;
+    if (isOpenAppointmentStatus(status) && !row["deleted_at"]) {
+      // Upcoming = still to happen; past ones that were never closed are
+      // counted separately so the owner can close them (revenue counts only
+      // completed appointments).
+      if (bookingDateStr >= todayStr) activeCount++;
+      else if (bookingDateStr >= PAST_OPEN_FROM() && isRecorded(row)) pastOpenCount++;
+    }
 
     const isCompletedStatus =
       status.includes("zaključen") ||
@@ -259,6 +277,7 @@ function buildStats(
   return {
     todayAppointments: todayCount,
     activeAppointments: activeCount,
+    pastOpenAppointments: pastOpenCount,
     newClientsThisMonth: newClientsCount,
     revenueThisMonth,
     isOwner: false,
@@ -613,9 +632,12 @@ function buildNextPersonAppointment(
 async function resolvePersonId(supabase: ServerClient, userId: string): Promise<string | null> {
   const { data } = await supabase
     .from("company_members")
-    .select("person_id")
+    .select("person_id, role")
     .eq("user_id", userId)
     .maybeSingle();
+  // Only staff get a personal dashboard. Owners/admins see the whole company
+  // even when their login is linked to a staff card.
+  if (data?.role !== "staff") return null;
   const personId = data?.person_id;
   if (!personId || personId === "") return null;
   return String(personId);

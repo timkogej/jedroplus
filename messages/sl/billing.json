@@ -15,9 +15,9 @@
     "quotaAvailable": "Na voljo"
   },
   "portal": {
-    "button": "Odpri Billing Portal",
+    "button": "Upravljaj plačila in račune",
     "opening": "Odpiranje portala...",
-    "note": "Upravljajte naročnino, plačilno metodo in račune prek Stripe portala."
+    "note": "Upravljajte naročnino, plačilno metodo in račune prek varnega Stripe portala."
   },
   "toggle": {
     "monthly": "Mesečno",
@@ -49,11 +49,11 @@
     },
     "jedroPro": {
       "description": "Za podjetja, ki želijo več zasedenosti in manj praznih terminov",
-      "tagline": "Vključuje AI pomočnike, Lost Leads in SMS opomnike.",
+      "tagline": "Vključuje AI pomočnike, vračanje izgubljenih strank in SMS opomnike.",
       "features": [
         "Vse iz Jedro Plus",
         "Chatbot+",
-        "Lost Leads sistem",
+        "Vračanje izgubljenih strank",
         "SMS pošiljanje",
         "Email pošiljanje",
         "Dodatni dizajni spletnega naročanja"
@@ -390,5 +390,73 @@
       },
       "cta": "Nadgradi na Jedro Plus"
     }
+  },
+  "addons": {
+    "back": "Nastavitve",
+    "title": "Dodatki in kvote",
+    "subtitle": "Dokupite SMS in e-poštna sporočila ali dodatne prijave v aplikacijo. Dodatki se zaračunajo mesečno skupaj s paketom.",
+    "loadError": "Podatkov ni bilo mogoče naložiti. Osvežite stran.",
+    "currentPlan": "Trenutni paket",
+    "noSubscription": "Brez aktivne naročnine",
+    "noSubscriptionBody": "Dodatke lahko aktivirate, ko je paket povezan s plačilnim profilom.",
+    "perMonth": "{price} / mesec",
+    "period": "Obračunsko obdobje: {start} do {end}",
+    "freeTitle": "Brezplačni paket",
+    "freeBody": "Dodatke je mogoče kupiti s paketom Jedro Plus ali Jedro Pro. Brezplačni paket vključuje enkraten preizkus: {sms} SMS in {email} e-poštnih opomnikov.",
+    "freeCta": "Primerjaj pakete",
+    "noStripe": "Vaša naročnina ni povezana s spletnim plačilom, zato dodatkov tukaj ni mogoče kupiti. Pišite nam na {email} in uredimo.",
+    "sms": {
+      "title": "SMS sporočila",
+      "unit": "SMS"
+    },
+    "email": {
+      "title": "E-poštna sporočila",
+      "unit": "e-poštnih sporočil"
+    },
+    "includedInPlan": "{count} v paketu",
+    "includedNone": "Paket ne vključuje sporočil – dodajte jih s paketom spodaj.",
+    "freeTrialIncluded": "{count} brezplačnih za preizkus (enkratno)",
+    "fromAddons": " + {count} iz dodatkov",
+    "used": "Porabljeno",
+    "available": "Na voljo",
+    "total": "Skupaj",
+    "renews": "Števec se ponastavi: {date}",
+    "cancelScheduled": "Preklicano – velja do konca obdobja",
+    "activeAddon": "Aktiven dodatek: +{count} {unit} · {price} / mesec",
+    "cancel": "Prekliči dodatek",
+    "cancelConfirm": "Res prekličem?",
+    "cancelKeep": "Ne",
+    "canceling": "Prekličujem …",
+    "extraQuota": "Dodatna sporočila vsak mesec",
+    "month": "/ mesec",
+    "activating": "Aktiviram …",
+    "alreadyActive": "Že aktiven",
+    "activate": "Aktiviraj +{count} {unit} za {price} / mesec",
+    "purchaseNote": "Znesek se sorazmerno doda k naslednjemu računu za paket. Preklic je mogoč kadarkoli in velja do konca obdobja.",
+    "freeLocked": "Na voljo s plačljivim paketom.",
+    "seats": {
+      "title": "Prijave v aplikacijo",
+      "body": "Koliko ljudi se lahko prijavi v aplikacijo. Zaposlene v koledarju lahko dodajate brez omejitev.",
+      "inPlan": "V paketu",
+      "extra": "Dodatne",
+      "total": "Skupaj",
+      "activeAddon": "+{count, plural, one {# dodatna prijava} two {# dodatni prijavi} few {# dodatne prijave} other {# dodatnih prijav}} · {price} / mesec",
+      "sliderLabel": "Dodatne prijave",
+      "summary": "Skupaj {total, plural, one {# prijava} two {# prijavi} few {# prijave} other {# prijav}} (v paketu {included} + {extra} {extra, plural, one {dodatna} two {dodatni} few {dodatne} other {dodatnih}})",
+      "cost": "{price} / mesec za {count, plural, one {# dodatno prijavo} two {# dodatni prijavi} few {# dodatne prijave} other {# dodatnih prijav}} ({unit} na prijavo)",
+      "removeNote": "Ob potrditvi bo dodatek preklican.",
+      "overTitle": "Pozor:",
+      "over": "V aplikacijo {count, plural, one {je prijavljena # oseba} two {sta prijavljeni # osebi} few {so prijavljene # osebe} other {je prijavljenih # oseb}} več, kot dovoljuje nova omejitev. Pred zmanjšanjem odstranite dostop tistim, ki ga ne potrebujejo (Ekipa in dostop).",
+      "updating": "Posodabljam …",
+      "update": "Shrani število prijav"
+    },
+    "toast": {
+      "noStripe": "Za nakup dodatkov potrebujete plačljiv paket s plačilno kartico.",
+      "purchaseError": "Nakup ni uspel. Poskusite znova.",
+      "purchased": "Dodatek je aktiviran. Nova sporočila so na voljo takoj.",
+      "cancelError": "Preklic ni uspel. Poskusite znova.",
+      "canceled": "Dodatek bo preklican ob koncu obračunskega obdobja."
+    },
+    "fromAddonsOnly": "{count} iz dodatkov (paket ne vključuje sporočil)"
   }
 }

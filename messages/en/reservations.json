@@ -71,7 +71,7 @@
   },
   "mainLink": {
     "title": "Main booking link",
-    "subtitle": "Used when sending clients a link to book an appointment.",
+    "subtitle": "Clients pick a service and a free slot themselves. Add it to your website, Instagram or Google; we also include it in messages. To collect client details without a booking, use the QR code in Settings → General.",
     "copy": "Copy",
     "copied": "Copied"
   },
@@ -94,7 +94,9 @@
     "colors": "Colors",
     "mgmtLinkLabel": "Rescheduling & cancellation link",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "onlineConfirmOffHint": "Clients who book online get no confirmation, so they can’t tell whether the booking went through.",
+    "onlineConfirmOffCta": "Turn on confirmation"
   },
   "modal": {
     "title": "Booking settings",
@@ -154,10 +156,10 @@
       "onlineDesc": "Confirmation when booking through the online system",
       "channelLabel": "Send confirmation via:",
       "smsUnavailable": "– not available",
-      "smsUpgradeNote": "SMS is available on higher plans.",
-      "smsUpgradeLink": "Upgrade plan",
-      "smsPlanNotePrefix": "To send SMS confirmations",
-      "smsPlanNoteLink": "upgrade your plan",
+      "smsUpgradeNote": "SMS needs SMS messages (an add-on or Jedro Pro).",
+      "smsUpgradeLink": "See options",
+      "smsPlanNotePrefix": "To send SMS confirmations,",
+      "smsPlanNoteLink": "get SMS messages",
       "smsSettings": "SMS message settings",
       "modeAI": "AI composes",
       "modeManual": "Custom template",

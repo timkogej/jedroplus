@@ -70,8 +70,8 @@
     "linkText": "Pišite nam na info@jedroplus.com"
   },
   "mainLink": {
-    "title": "Glavni booking link",
-    "subtitle": "Uporablja se pri pošiljanju strankam, kadar je potrebno deliti link za rezervacijo.",
+    "title": "Glavna povezava za naročanje",
+    "subtitle": "Stranka izbere storitev in prost termin sama. Dodajte jo na spletno stran, Instagram ali Google, pošljemo jo tudi v sporočilih. Za zbiranje podatkov strank brez termina je QR koda v Nastavitve → Splošno.",
     "copy": "Kopiraj",
     "copied": "Kopirano"
   },
@@ -94,7 +94,9 @@
     "colors": "Barve",
     "mgmtLinkLabel": "Link za prenaročanje in odpoved",
     "yes": "Da",
-    "no": "Ne"
+    "no": "Ne",
+    "onlineConfirmOffHint": "Stranke, ki rezervirajo prek spleta, ne dobijo potrdila in ne vedo, ali je termin zabeležen.",
+    "onlineConfirmOffCta": "Vklopi potrdilo"
   },
   "modal": {
     "title": "Nastavitve rezervacij",
@@ -154,10 +156,10 @@
       "onlineDesc": "Potrdilo ob rezervaciji preko spletnega sistema",
       "channelLabel": "Pošlji potrdilo preko:",
       "smsUnavailable": "– ni dostopno",
-      "smsUpgradeNote": "SMS je na voljo v višjih paketih.",
-      "smsUpgradeLink": "Nadgradi paket",
+      "smsUpgradeNote": "Za SMS potrebujete SMS sporočila (dodatek ali Jedro Pro).",
+      "smsUpgradeLink": "Poglej možnosti",
       "smsPlanNotePrefix": "Za pošiljanje SMS potrdil",
-      "smsPlanNoteLink": "nadgradite paket",
+      "smsPlanNoteLink": "dokupite SMS sporočila",
       "smsSettings": "Nastavitve SMS sporočila",
       "modeAI": "AI sestavi",
       "modeManual": "Lastna predloga",

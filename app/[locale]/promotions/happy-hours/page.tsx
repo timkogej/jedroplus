@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, PencilSimple, Trash, X, MagnifyingGlass, Clock } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -48,6 +49,7 @@ const DEFAULT_FORM: HHFormData = {
 };
 
 export default function HappyHoursPage() {
+  const { money } = useFormat();
   const t = useTranslations('promotions');
   const tc = useTranslations('common');
   const { companyId } = useCompany();
@@ -210,7 +212,7 @@ export default function HappyHoursPage() {
                       </div>
                     </td>
                     <td className="py-3.5 px-4 text-gray-600">{hh.cas_zacetek?.substring(0, 5)} – {hh.cas_konec?.substring(0, 5)}</td>
-                    <td className="py-3.5 px-4 font-semibold text-gray-900">{hh.tip_popusta === 'percentage' ? `${hh.vrednost}%` : `${hh.vrednost} €`}</td>
+                    <td className="py-3.5 px-4 font-semibold text-gray-900">{hh.tip_popusta === 'percentage' ? `${hh.vrednost}%` : money(hh.vrednost)}</td>
                     <td className="py-3.5 px-4">
                       {hh.vse_storitve
                         ? <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">{t('happyHours.servicesAll')}</span>

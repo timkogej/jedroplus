@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -12,7 +13,8 @@ import {
 } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';
 import { fetchBillingStatus } from '@/hooks/useBillingUsage';
-import { computeBillingUsage } from '@/lib/billing/usage';
+import { computeBillingUsage, FREE_TRIAL, type BillingUsage } from '@/lib/billing/usage';
+import { useFormat } from '@/hooks/useFormat';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -87,9 +89,8 @@ const RANGE_INPUT_CLASS = [
   '[&::-moz-range-thumb]:bg-[#6D5EF7] [&::-moz-range-thumb]:shadow-[0_4px_14px_rgba(109,94,247,0.35)]',
 ].join(' ');
 
-function formatCount(value: number) {
-  return value.toLocaleString('sl-SI');
-}
+const SEAT_PRICE_EUR = 6;
+const SUPPORT_EMAIL = 'timkogej@jedroplus.com';
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
@@ -132,47 +133,60 @@ function LoadingSkeleton() {
 
 // ─── CurrentPlanCard ──────────────────────────────────────────────────────────
 
-function CurrentPlanCard({ subscription }: { subscription: SubscriptionData | null }) {
-  if (!subscription) {
+function CurrentPlanCard({ subscription, isFree }: { subscription: SubscriptionData | null; isFree: boolean }) {
+  const t = useTranslations('billing.addons');
+  const f = useFormat();
+
+  if (!subscription || isFree) {
     return (
       <div className={`rounded-[22px] bg-gradient-to-r ${BRAND_GRADIENT} p-[2px] shadow-[0_18px_45px_rgba(15,23,42,0.06)]`}>
         <div className="rounded-[20px] bg-white p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Trenutni paket</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{t('currentPlan')}</p>
           <h2 className={`mt-2 text-2xl font-bold tracking-tight ${BRAND_TEXT_GRADIENT}`}>
-            Brez aktivne naročnine
+            {isFree ? t('freeTitle') : t('noSubscription')}
           </h2>
-          <p className="mt-3 text-sm text-gray-500">Dodatke lahko aktivirate, ko je paket povezan s plačilnim profilom.</p>
+          <p className="mt-3 max-w-prose text-sm leading-6 text-gray-600">
+            {isFree ? t('freeBody', { sms: FREE_TRIAL.sms, email: FREE_TRIAL.email }) : t('noSubscriptionBody')}
+          </p>
+          {isFree && (
+            <Link
+              href="/nastavitve/paketi#razpolozljivi-paketi"
+              className="mt-4 inline-flex rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
+            >
+              {t('freeCta')}
+            </Link>
+          )}
         </div>
       </div>
     );
   }
 
   const plan = subscription.plan;
-  const priceEur = plan.price_monthly_cents / 100;
-
-  const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('sl-SI', { day: 'numeric', month: 'numeric', year: 'numeric' });
 
   return (
     <div className={`rounded-[22px] bg-gradient-to-r ${BRAND_GRADIENT} p-[2px] shadow-[0_18px_45px_rgba(15,23,42,0.06)]`}>
       <div className="rounded-[20px] bg-white p-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">Trenutni paket</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{t('currentPlan')}</p>
             <h2 className={`mt-2 truncate text-3xl font-bold tracking-tight ${BRAND_TEXT_GRADIENT}`}>
               {plan.name}
             </h2>
-            <p className="mt-2 text-sm font-medium text-gray-700">{priceEur.toFixed(0)}€ / mesec</p>
+            <p className="mt-2 text-sm font-medium text-gray-700">
+              {t('perMonth', { price: f.money(plan.price_monthly_cents / 100, { whole: true }) })}
+            </p>
           </div>
-          {/* internal plan code intentionally not shown to users */}
         </div>
-        <div className="mt-5 border-t border-gray-100 pt-4">
-          <p className="text-xs text-gray-500">
-            Obračunsko obdobje: <span className="font-medium text-gray-700">{fmtDate(subscription.current_period_start)}</span>
-            {' '}do{' '}
-            <span className="font-medium text-gray-700">{fmtDate(subscription.current_period_end)}</span>
-          </p>
-        </div>
+        {subscription.current_period_start && subscription.current_period_end && (
+          <div className="mt-5 border-t border-gray-100 pt-4">
+            <p className="text-xs text-gray-500">
+              {t('period', {
+                start: f.dateShort(subscription.current_period_start),
+                end: f.dateShort(subscription.current_period_end),
+              })}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -182,8 +196,9 @@ function CurrentPlanCard({ subscription }: { subscription: SubscriptionData | nu
 
 type QuotaCardProps = {
   type: 'sms' | 'email';
-  title: string;
   includedInPlan: number;
+  /** Free plan: `includedInPlan` is the one-time trial, not a monthly amount. */
+  freeTrial: boolean;
   addonActive: number;
   addonStripeItemId: string | null;
   addonCancelAtPeriodEnd: boolean;
@@ -203,8 +218,8 @@ type QuotaCardProps = {
 
 function QuotaCard({
   type,
-  title,
   includedInPlan,
+  freeTrial,
   addonActive,
   addonStripeItemId,
   addonCancelAtPeriodEnd,
@@ -221,6 +236,10 @@ function QuotaCard({
   disabled,
   periodEnd,
 }: QuotaCardProps) {
+  const t = useTranslations('billing.addons');
+  const f = useFormat();
+  const [confirmCancel, setConfirmCancel] = useState(false);
+
   const barColor =
     usagePercent > 90
       ? 'bg-red-500'
@@ -230,17 +249,21 @@ function QuotaCard({
 
   const selectedPkg = packages.find((p) => p.key === selectedPackage);
   const activeQtyMatchesSelected =
-    selectedPackage !== null && addonActive > 0 &&
-    packages.find((p) => p.key === selectedPackage)?.quantity === addonActive;
+    selectedPackage !== null && addonActive > 0 && selectedPkg?.quantity === addonActive;
 
-  const fmtDate = (iso?: string) =>
-    iso ? new Date(iso).toLocaleDateString('sl-SI', { day: 'numeric', month: 'numeric', year: 'numeric' }) : '—';
-
-  const activePackageKey = addonActive > 0
-    ? packages.find((p) => p.quantity === addonActive)?.key ?? null
-    : null;
+  const activePackage = addonActive > 0 ? packages.find((p) => p.quantity === addonActive) ?? null : null;
   const remaining = Math.max(total - used, 0);
-  const unitLabel = type === 'sms' ? 'SMS' : 'emailov';
+  const unit = t(`${type}.unit`);
+
+  const includedLine = freeTrial
+    ? includedInPlan > 0
+      ? t('freeTrialIncluded', { count: f.count(includedInPlan) })
+      : t('freeLocked')
+    : includedInPlan > 0
+    ? t('includedInPlan', { count: f.count(includedInPlan) })
+    : addonActive > 0
+    ? t('fromAddonsOnly', { count: f.count(addonActive) })
+    : t('includedNone');
 
   return (
     <div className="overflow-hidden rounded-[22px] border border-gray-100 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
@@ -248,11 +271,11 @@ function QuotaCard({
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-base font-semibold tracking-tight text-gray-950">{title}</h3>
+            <h3 className="text-base font-semibold tracking-tight text-gray-950">{t(`${type}.title`)}</h3>
             <p className="mt-0.5 text-xs text-gray-500">
-              {formatCount(includedInPlan)} v paketu
-              {addonActive > 0 && (
-                <span className="font-medium text-[#6D5EF7]"> + {formatCount(addonActive)} iz dodatkov</span>
+              {includedLine}
+              {addonActive > 0 && includedInPlan > 0 && (
+                <span className="font-medium text-[#6D5EF7]">{t('fromAddons', { count: f.count(addonActive) })}</span>
               )}
             </p>
           </div>
@@ -272,21 +295,19 @@ function QuotaCard({
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">Porabljeno</p>
-            <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{formatCount(used)}</p>
-          </div>
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">Na voljo</p>
-            <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{formatCount(remaining)}</p>
-          </div>
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">Skupaj</p>
-            <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{formatCount(total)}</p>
-          </div>
+          {([
+            ['used', used],
+            ['available', remaining],
+            ['total', total],
+          ] as const).map(([label, value]) => (
+            <div key={label} className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{t(label)}</p>
+              <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{f.count(value)}</p>
+            </div>
+          ))}
         </div>
-        {periodEnd && (
-          <p className="mt-3 text-xs text-gray-400">Obdobje se obnovi: {fmtDate(periodEnd)}</p>
+        {periodEnd && !freeTrial && (
+          <p className="mt-3 text-xs text-gray-400">{t('renews', { date: f.dateShort(periodEnd) })}</p>
         )}
       </div>
 
@@ -296,24 +317,25 @@ function QuotaCard({
           {addonCancelAtPeriodEnd ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
               <Warning className="w-3 h-3" weight="bold" />
-              Preklic ob koncu obdobja
+              {t('cancelScheduled')}
             </span>
           ) : (
             <>
               <span className="inline-flex items-center gap-1 rounded-full bg-[#6D5EF7]/10 px-2.5 py-1 text-xs font-semibold text-[#6D5EF7]">
                 <Check className="w-3 h-3" weight="bold" />
-                Aktiven dodatek: +{formatCount(addonActive)} {unitLabel} | €{
-                  packages.find((p) => p.quantity === addonActive)?.priceMonthly ?? '?'
-                }/mesec
+                {t('activeAddon', {
+                  count: f.count(addonActive),
+                  unit,
+                  price: activePackage ? f.money(activePackage.priceMonthly, { whole: true }) : '—',
+                })}
               </span>
-              <button
-                type="button"
-                onClick={onCancel}
-                disabled={canceling || disabled}
-                className="text-xs font-medium text-red-500 transition-colors hover:text-red-700 disabled:opacity-50"
-              >
-                {canceling ? 'Prekličujem...' : 'Prekliči dodatek'}
-              </button>
+              <CancelButton
+                confirming={confirmCancel}
+                setConfirming={setConfirmCancel}
+                onCancel={onCancel}
+                canceling={canceling}
+                disabled={disabled}
+              />
             </>
           )}
         </div>
@@ -321,17 +343,21 @@ function QuotaCard({
 
       {/* Package selector */}
       <div className="border-t border-gray-100 p-5 pt-4">
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Dodatna kvota</p>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">{t('extraQuota')}</p>
+          {freeTrial && includedInPlan > 0 && <p className="text-xs text-gray-500">{t('freeLocked')}</p>}
+        </div>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {packages.map((pkg) => {
             const isSelected = selectedPackage === pkg.key;
-            const isActive = pkg.key === activePackageKey;
+            const isActive = pkg.key === activePackage?.key;
             const isEmphasized = isSelected || isActive;
             return (
               <button
                 key={pkg.key}
                 type="button"
                 disabled={disabled}
+                aria-pressed={isSelected}
                 onClick={() => onSelectPackage(pkg.key)}
                 className={`group relative min-h-[132px] rounded-[18px] p-[1.5px] text-left transition-all sm:aspect-[1.08/1] disabled:cursor-not-allowed disabled:opacity-40 ${
                   isEmphasized
@@ -342,17 +368,17 @@ function QuotaCard({
                 <span className="flex h-full min-h-[129px] flex-col justify-between rounded-[16px] bg-white px-4 py-3.5 transition-colors group-hover:bg-gray-50 sm:min-h-0">
                   <span>
                     <span className={`block text-2xl font-bold tracking-tight tabular-nums ${isEmphasized ? BRAND_TEXT_GRADIENT : 'text-gray-950'}`}>
-                      +{formatCount(pkg.quantity)}
+                      +{f.count(pkg.quantity)}
                     </span>
-                    <span className="mt-1 block text-xs font-medium text-gray-500">{unitLabel}</span>
+                    <span className="mt-1 block text-xs font-medium text-gray-500">{unit}</span>
                   </span>
                   <span className={`flex items-end justify-between gap-2 rounded-xl px-2.5 py-2 ${
                     isEmphasized
                       ? 'bg-gradient-to-r from-violet-50 via-blue-50 to-cyan-50'
                       : 'bg-gradient-to-r from-violet-50/70 via-blue-50/70 to-cyan-50/70'
                   }`}>
-                    <span className="text-sm font-semibold text-gray-950">€{pkg.priceMonthly}</span>
-                    <span className="text-[11px] font-medium text-gray-400">/mesec</span>
+                    <span className="text-sm font-semibold text-gray-950">{f.money(pkg.priceMonthly, { whole: true })}</span>
+                    <span className="text-[11px] font-medium text-gray-400">{t('month')}</span>
                   </span>
                 </span>
                 {pkg.badge && !isActive && (
@@ -372,26 +398,81 @@ function QuotaCard({
 
         {/* Purchase button */}
         {selectedPackage && (
-          <button
-            type="button"
-            onClick={onPurchase}
-            disabled={purchasing || activeQtyMatchesSelected || disabled}
-            className={`mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${BRAND_GRADIENT} px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(109,94,247,0.18)] transition-all hover:shadow-[0_16px_32px_rgba(109,94,247,0.24)] disabled:opacity-50`}
-          >
-            {purchasing ? (
-              <>
-                <SpinnerGap className="w-4 h-4 animate-spin" weight="bold" />
-                Aktiviram...
-              </>
-            ) : activeQtyMatchesSelected ? (
-              'Že aktiven'
-            ) : (
-              `Aktiviraj +${formatCount(selectedPkg?.quantity ?? 0)} ${unitLabel} za €${selectedPkg?.priceMonthly}/mesec`
-            )}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={onPurchase}
+              disabled={purchasing || activeQtyMatchesSelected || disabled}
+              className={`mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${BRAND_GRADIENT} px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(109,94,247,0.18)] transition-all hover:shadow-[0_16px_32px_rgba(109,94,247,0.24)] disabled:opacity-50`}
+            >
+              {purchasing ? (
+                <>
+                  <SpinnerGap className="w-4 h-4 animate-spin" weight="bold" />
+                  {t('activating')}
+                </>
+              ) : activeQtyMatchesSelected ? (
+                t('alreadyActive')
+              ) : (
+                t('activate', {
+                  count: f.count(selectedPkg?.quantity ?? 0),
+                  unit,
+                  price: f.money(selectedPkg?.priceMonthly ?? 0, { whole: true }),
+                })
+              )}
+            </button>
+            {!activeQtyMatchesSelected && <p className="mt-2 text-xs leading-5 text-gray-500">{t('purchaseNote')}</p>}
+          </>
         )}
       </div>
     </div>
+  );
+}
+
+/** Cancelling is a two-step action so a stray click can't drop an add-on. */
+function CancelButton({
+  confirming,
+  setConfirming,
+  onCancel,
+  canceling,
+  disabled,
+}: {
+  confirming: boolean;
+  setConfirming: (v: boolean) => void;
+  onCancel: () => void;
+  canceling: boolean;
+  disabled: boolean;
+}) {
+  const t = useTranslations('billing.addons');
+  if (canceling) return <span className="text-xs font-medium text-gray-500">{t('canceling')}</span>;
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        onClick={() => setConfirming(true)}
+        disabled={disabled}
+        className="text-xs font-medium text-red-500 transition-colors hover:text-red-700 disabled:opacity-50"
+      >
+        {t('cancel')}
+      </button>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-2 text-xs">
+      <span className="font-medium text-gray-700">{t('cancelConfirm')}</span>
+      <button
+        type="button"
+        onClick={() => {
+          setConfirming(false);
+          onCancel();
+        }}
+        className="rounded-md bg-red-600 px-2 py-1 font-semibold text-white hover:bg-red-700"
+      >
+        {t('cancel')}
+      </button>
+      <button type="button" onClick={() => setConfirming(false)} className="font-medium text-gray-500 hover:text-gray-800">
+        {t('cancelKeep')}
+      </button>
+    </span>
   );
 }
 
@@ -428,6 +509,10 @@ function EmployeesCard({
   canceling,
   disabled,
 }: EmployeesCardProps) {
+  const t = useTranslations('billing.addons.seats');
+  const tAddons = useTranslations('billing.addons');
+  const f = useFormat();
+  const [confirmCancel, setConfirmCancel] = useState(false);
   const noChange = extraEmployees === extraUsers;
   const projectedMax = includedInPlan + extraEmployees;
   const overQuota = activeCount > projectedMax;
@@ -439,8 +524,8 @@ function EmployeesCard({
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-base font-semibold tracking-tight text-gray-950">Prijave v aplikacijo</h3>
-            <p className="mt-0.5 text-xs text-gray-500">Koliko ljudi se lahko prijavi v aplikacijo. Zaposlene v koledarju lahko dodajate brez omejitev.</p>
+            <h3 className="text-base font-semibold tracking-tight text-gray-950">{t('title')}</h3>
+            <p className="mt-0.5 text-xs text-gray-500">{t('body')}</p>
           </div>
           <span className="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700">
             {activeCount} / {maxUsers}
@@ -449,17 +534,17 @@ function EmployeesCard({
 
         <div className="mt-5 grid grid-cols-3 gap-2">
           <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">V paketu</p>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{t('inPlan')}</p>
             <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{includedInPlan}</p>
           </div>
           <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">Dodatni</p>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{t('extra')}</p>
             <p className={`mt-1 text-sm font-semibold tabular-nums ${extraEmployees > 0 ? BRAND_TEXT_GRADIENT : 'text-gray-950'}`}>
               {extraEmployees}
             </p>
           </div>
           <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">Skupaj</p>
+            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{t('total')}</p>
             <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{projectedMax}</p>
           </div>
         </div>
@@ -471,22 +556,21 @@ function EmployeesCard({
           {cancelAtPeriodEnd ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
               <Warning className="w-3 h-3" weight="bold" />
-              Preklic ob koncu obdobja
+              {tAddons('cancelScheduled')}
             </span>
           ) : (
             <>
               <span className="inline-flex items-center gap-1 rounded-full bg-[#6D5EF7]/10 px-2.5 py-1 text-xs font-semibold text-[#6D5EF7]">
                 <Check className="w-3 h-3" weight="bold" />
-                +{extraUsers} dodatnih zaposlenih | €{extraUsers * 6}/mesec
+                {t('activeAddon', { count: extraUsers, price: f.money(extraUsers * SEAT_PRICE_EUR, { whole: true }) })}
               </span>
-              <button
-                type="button"
-                onClick={onCancel}
-                disabled={canceling || disabled}
-                className="text-xs font-medium text-red-500 transition-colors hover:text-red-700 disabled:opacity-50"
-              >
-                {canceling ? 'Prekličujem...' : 'Prekliči dodatek'}
-              </button>
+              <CancelButton
+                confirming={confirmCancel}
+                setConfirming={setConfirmCancel}
+                onCancel={onCancel}
+                canceling={canceling}
+                disabled={disabled}
+              />
             </>
           )}
         </div>
@@ -495,11 +579,12 @@ function EmployeesCard({
       {/* Slider */}
       <div className="border-t border-gray-100 p-5 pt-4">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">Dodatni zaposleni</p>
+          <label htmlFor="extra-seats" className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">{t('sliderLabel')}</label>
           <span className={`text-lg font-bold tabular-nums ${BRAND_TEXT_GRADIENT}`}>{extraEmployees}</span>
         </div>
         <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
           <input
+            id="extra-seats"
             type="range"
             min={0}
             max={20}
@@ -520,20 +605,21 @@ function EmployeesCard({
         </div>
 
         <p className="mt-3 text-xs text-gray-500">
-          Skupaj: <span className="font-medium text-gray-700">{projectedMax} zaposlenih</span>
-          {' '}(v paketu {includedInPlan} + dodatnih {extraEmployees})
+          {t('summary', { total: projectedMax, included: includedInPlan, extra: extraEmployees })}
         </p>
 
         {extraEmployees > 0 && (
           <p className="mt-1 text-xs font-semibold text-[#6D5EF7]">
-            €{extraEmployees * 6}/mesec za {extraEmployees} dodatnih zaposlenih
+            {t('cost', {
+              price: f.money(extraEmployees * SEAT_PRICE_EUR, { whole: true }),
+              count: extraEmployees,
+              unit: f.money(SEAT_PRICE_EUR, { whole: true }),
+            })}
           </p>
         )}
 
         {extraEmployees === 0 && stripeItemId && !cancelAtPeriodEnd && (
-          <p className="mt-1 text-xs text-amber-600">
-            Odstranitev dodatkov: ob potrditvi bo dodatek preklican.
-          </p>
+          <p className="mt-1 text-xs text-amber-600">{t('removeNote')}</p>
         )}
 
         {/* Over-quota warning */}
@@ -541,7 +627,7 @@ function EmployeesCard({
           <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3">
             <Warning className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" weight="bold" />
             <p className="text-xs text-amber-700">
-              <span className="font-semibold">Pozor:</span> Imate {activeCount - projectedMax} zaposlenih nad kvoto. Ob zmanjšanju bodo označeni kot neaktivni. Sami izberite, katere obdržite.
+              <span className="font-semibold">{t('overTitle')}</span> {t('over', { count: activeCount - projectedMax })}
             </p>
           </div>
         )}
@@ -556,10 +642,10 @@ function EmployeesCard({
           {purchasing ? (
             <>
               <SpinnerGap className="w-4 h-4 animate-spin" weight="bold" />
-              Posodabljam...
+              {t('updating')}
             </>
           ) : (
-            'Posodobi zaposlene'
+            t('update')
           )}
         </button>
       </div>
@@ -571,6 +657,7 @@ function EmployeesCard({
 
 export default function AddoniPage() {
   const { companyUuid } = useCompany();
+  const t = useTranslations('billing.addons');
 
   const [loading, setLoading] = useState(true);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
@@ -625,17 +712,18 @@ export default function AddoniPage() {
       setActiveEmployeeCount(data.memberCount ?? 0);
       setExtraEmployees(data.employeeLimits?.extra_users ?? 0);
     } catch {
-      showToast('Napaka pri nalaganju podatkov', 'error');
+      showToast(t('loadError'), 'error');
     } finally {
       setLoading(false);
     }
-  }, [companyUuid, showToast]);
+  }, [companyUuid, showToast, t]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const billingUsage = computeBillingUsage({ subscription, smsUsage, emailUsage, employeeLimits });
+  const billingUsage: BillingUsage = computeBillingUsage({ subscription, smsUsage, emailUsage, employeeLimits });
+  const isFree = billingUsage.isFree;
   const totalSmsQuota = billingUsage.sms.total;
   const totalEmailQuota = billingUsage.email.total;
   const smsUsed = billingUsage.sms.used;
@@ -652,7 +740,7 @@ export default function AddoniPage() {
     quantity?: number
   ) => {
     if (!hasStripeSubscription) {
-      showToast('Za nakup dodatkov potrebujete aktivno naročnino s plačilnim metodom', 'error');
+      showToast(t('toast.noStripe'), 'error');
       return;
     }
     startAction(addonType);
@@ -663,12 +751,12 @@ export default function AddoniPage() {
         body: JSON.stringify({ company_id: companyUuid, addon_type: addonType, package_key: packageKey, quantity }),
       });
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message ?? 'Napaka pri nakupu');
-      showToast('Addon uspešno aktiviran! Spremembe bodo vidne v trenutku.');
+      if (!res.ok || !data.success) throw new Error(data.message ?? t('toast.purchaseError'));
+      showToast(t('toast.purchased'));
       setSelectedSmsPackage(null);
       setSelectedEmailPackage(null);
     } catch (e: unknown) {
-      showToast((e instanceof Error ? e.message : null) ?? 'Napaka pri nakupu', 'error');
+      showToast((e instanceof Error ? e.message : null) || t('toast.purchaseError'), 'error');
     } finally {
       endAction(addonType);
     }
@@ -687,10 +775,10 @@ export default function AddoniPage() {
         body: JSON.stringify({ company_id: companyUuid, addon_type: addonType }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? 'Napaka pri preklicu');
-      showToast('Addon bo preklican ob koncu obračunskega obdobja');
+      if (!res.ok) throw new Error(data.message ?? t('toast.cancelError'));
+      showToast(t('toast.canceled'));
     } catch (e: unknown) {
-      showToast((e instanceof Error ? e.message : null) ?? 'Napaka pri preklicu', 'error');
+      showToast((e instanceof Error ? e.message : null) || t('toast.cancelError'), 'error');
     } finally {
       endAction(key);
     }
@@ -706,12 +794,12 @@ export default function AddoniPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-4"
       >
         <CaretLeft className="w-3.5 h-3.5" weight="regular" />
-        Nastavitve
+        {t('back')}
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">Dodatki in kvote</h1>
-        <p className="text-sm text-gray-500 mt-1">Upravljajte SMS, e-pošto in dodatne zaposlene.</p>
+        <h1 className="text-xl font-semibold text-gray-900">{t('title')}</h1>
+        <p className="mt-1 max-w-prose text-sm text-gray-500">{t('subtitle')}</p>
       </div>
 
       {loading ? (
@@ -724,11 +812,11 @@ export default function AddoniPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <CurrentPlanCard subscription={subscription} />
+            <CurrentPlanCard subscription={subscription} isFree={isFree} />
           </motion.div>
 
           {/* No Stripe warning */}
-          {!hasStripeSubscription && subscription && (
+          {!hasStripeSubscription && subscription && !isFree && (
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -738,7 +826,7 @@ export default function AddoniPage() {
               <div className="flex items-start gap-2">
                 <Warning className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" weight="bold" />
                 <p className="text-sm text-amber-800">
-                  Vaša naročnina ni upravljana prek Stripe — nakup addonov ni možen. Kontaktirajte podporo.
+                  {t('noStripe', { email: SUPPORT_EMAIL })}
                 </p>
               </div>
             </motion.div>
@@ -752,8 +840,8 @@ export default function AddoniPage() {
           >
             <QuotaCard
               type="sms"
-              title="SMS sporočila"
-              includedInPlan={subscription?.plan?.sms_quota_monthly ?? 0}
+              includedInPlan={billingUsage.sms.included}
+              freeTrial={isFree}
               addonActive={subscription?.sms_addon_monthly ?? 0}
               addonStripeItemId={subscription?.sms_addon_stripe_item_id ?? null}
               addonCancelAtPeriodEnd={subscription?.sms_addon_cancel_at_period_end ?? false}
@@ -780,8 +868,8 @@ export default function AddoniPage() {
           >
             <QuotaCard
               type="email"
-              title="E-pošta"
-              includedInPlan={subscription?.plan?.email_quota_monthly ?? 0}
+              includedInPlan={billingUsage.email.included}
+              freeTrial={isFree}
               addonActive={subscription?.email_addon_monthly ?? 0}
               addonStripeItemId={subscription?.email_addon_stripe_item_id ?? null}
               addonCancelAtPeriodEnd={subscription?.email_addon_cancel_at_period_end ?? false}

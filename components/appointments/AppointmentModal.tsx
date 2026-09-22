@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Clock, CalendarBlank, Plus, Minus, Envelope, Phone, Tag, Warning } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
@@ -146,6 +147,7 @@ function AppointmentModal({
   initialEmployeeId,
   lockEmployee = false,
 }: AppointmentModalProps) {
+  const { money } = useFormat();
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
@@ -1190,11 +1192,12 @@ function AppointmentModal({
                     </span>
                     <p className="min-w-0 flex-1 truncate font-medium text-[#1A1F36]">{formData.stranka_ime || '-'}</p>
                     <span
-                      className="flex-shrink-0 text-base leading-none"
-                      title={currentLanguageOption.label}
-                      aria-label={currentLanguageOption.label}
+                      className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600"
+                      title={`${t('modal.fields.communicationLanguage')}: ${currentLanguageOption.label}`}
                     >
-                      {currentLanguageOption.flag}
+                      <span className="text-sm leading-none" aria-hidden="true">{currentLanguageOption.flag}</span>
+                      <span className="sr-only">{t('modal.fields.communicationLanguage')}: </span>
+                      {currentLanguageOption.code}
                     </span>
                     <div className="flex-shrink-0">
                       <StatusBadge status={formData.status} variant="gradient" weight="normal" />
@@ -1354,7 +1357,7 @@ function AppointmentModal({
                           <span>{promotions.slot1.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
                           <span>{promotions.slot1.naziv || (promotions.slot1.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                           <span className="ml-auto font-semibold">
-                            {promotions.slot1.tip_popusta === 'percentage' ? `${promotions.slot1.vrednost}%` : `${promotions.slot1.vrednost} €`} {t('modal.promotions.discountSuffix')}
+                            {promotions.slot1.tip_popusta === 'percentage' ? `${promotions.slot1.vrednost}%` : money(promotions.slot1.vrednost)} {t('modal.promotions.discountSuffix')}
                           </span>
                         </motion.div>
                       )}
@@ -1410,7 +1413,7 @@ function AppointmentModal({
                             <span>{promotions.slot2.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
                             <span>{promotions.slot2.naziv || (promotions.slot2.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                             <span className="ml-auto font-semibold">
-                              {promotions.slot2.tip_popusta === 'percentage' ? `${promotions.slot2.vrednost}%` : `${promotions.slot2.vrednost} €`} {t('modal.promotions.discountSuffix')}
+                              {promotions.slot2.tip_popusta === 'percentage' ? `${promotions.slot2.vrednost}%` : money(promotions.slot2.vrednost)} {t('modal.promotions.discountSuffix')}
                             </span>
                           </motion.div>
                         )}
@@ -1467,7 +1470,7 @@ function AppointmentModal({
                             <span>{promotions.slot3.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
                             <span>{promotions.slot3.naziv || (promotions.slot3.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                             <span className="ml-auto font-semibold">
-                              {promotions.slot3.tip_popusta === 'percentage' ? `${promotions.slot3.vrednost}%` : `${promotions.slot3.vrednost} €`} {t('modal.promotions.discountSuffix')}
+                              {promotions.slot3.tip_popusta === 'percentage' ? `${promotions.slot3.vrednost}%` : money(promotions.slot3.vrednost)} {t('modal.promotions.discountSuffix')}
                             </span>
                           </motion.div>
                         )}
@@ -1522,8 +1525,8 @@ function AppointmentModal({
                               >
                                 <span className="text-sm font-medium text-gray-900">{ao.naziv}</span>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs text-gray-400 line-through">{ao.original_cena.toFixed(2)} €</span>
-                                  <span className="text-sm font-semibold text-gray-900">{ao.final_cena.toFixed(2)} €</span>
+                                  <span className="text-xs text-gray-400 line-through">{money(ao.original_cena)}</span>
+                                  <span className="text-sm font-semibold text-gray-900">{money(ao.final_cena)}</span>
                                   <span className="text-xs font-medium text-emerald-600">-{discount}</span>
                                 </div>
                               </motion.button>
@@ -1933,12 +1936,12 @@ function AppointmentModal({
                   <span className="text-sm font-medium text-gray-700">{t('modal.discount.final')}</span>
                   {formData.popust && formData.popust > 0 && (
                     <span className="text-xs text-gray-400 line-through">
-                      {(formData.cena ?? 0).toFixed(2)} €
+                      {money(formData.cena ?? 0)}
                     </span>
                   )}
                 </div>
                 <span className="bg-clip-text text-xl font-bold text-transparent" style={gradientTextStyle}>
-                  {calculateFinalPrice().toFixed(2)} €
+                  {money(calculateFinalPrice())}
                 </span>
               </div>
             )}
@@ -2041,11 +2044,14 @@ function AppointmentModal({
               <div className={`${sectionClass} space-y-2`}>
                 <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
                   <div>
-                    <div className="font-semibold text-gray-900">Ne beleži termina</div>
-                    <div className="text-sm text-gray-600">Ghost termin — termin se ne beleži v analitiko</div>
+                    <div id="ghost-termin-label" className="font-semibold text-gray-900">{t('ghost.title')}</div>
+                    <div className="text-sm text-gray-600">{t('ghost.description')}</div>
                   </div>
                   <button
                     type="button"
+                    role="switch"
+                    aria-checked={isGhostTermin}
+                    aria-labelledby="ghost-termin-label"
                     onClick={() => setIsGhostTermin(!isGhostTermin)}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                       isGhostTermin ? 'bg-gray-900' : 'bg-gray-300'
@@ -2062,7 +2068,7 @@ function AppointmentModal({
                   <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                     <Warning className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" weight="fill" />
                     <p className="text-xs text-amber-700">
-                      Ta termin ne bo zabeležen v analitiki, zgodovini ali blagajni. Po zaključku bo avtomatsko izbrisan.
+                      {t('ghost.warning')}
                     </p>
                   </div>
                 )}

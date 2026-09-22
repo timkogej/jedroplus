@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useEffect } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { TrendUp, CurrencyEur, Clock, CheckCircle } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import MetricCard from './MetricCard';
@@ -22,6 +23,7 @@ interface KeyMetricsCardsProps {
 }
 
 function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCardsProps) {
+  const { money } = useFormat();
   const t = useTranslations('analytics');
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +53,7 @@ function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCards
       {/* Revenue */}
       <MetricCard
         title={t('metrics.totalRevenue')}
-        value={`€${(metrics?.totalRevenue ?? 0).toFixed(2)}`}
+        value={money(metrics?.totalRevenue ?? 0)}
         icon={<TrendUp className="h-6 w-6" weight="bold" />}
         iconColor="black"
         change={metrics?.revenueGrowth}
@@ -62,7 +64,7 @@ function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCards
       {/* Average Booking Value */}
       <MetricCard
         title={t('metrics.averageValue')}
-        value={`€${(metrics?.averageBookingValue ?? 0).toFixed(2)}`}
+        value={money(metrics?.averageBookingValue ?? 0)}
         subtitle={t('metrics.perAppointment')}
         icon={<CurrencyEur className="h-6 w-6" weight="bold" />}
         iconColor="darkGray"

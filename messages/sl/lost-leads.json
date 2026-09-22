@@ -3,7 +3,7 @@
     "title": "Izgubljene stranke",
     "subtitle": "Pregled nastavitev in neaktivnih strank",
     "stats": {
-      "inactiveClients": "Neaktivne Stranke",
+      "inactiveClients": "Neaktivne stranke",
       "inactiveClientsDesc": "Skupaj označenih",
       "notifiedClients": "Obveščeni stranke",
       "notifiedClientsDesc": "Ta mesec",
@@ -11,7 +11,7 @@
       "inactivityDaysDesc": "Prag neaktivnosti"
     },
     "table": {
-      "title": "Neaktivne Stranke",
+      "title": "Neaktivne stranke",
       "subtitle": "{count} neaktivnih strank (več kot {days} dni brez interakcije)",
       "limitNote": "Prikazanih prvih 50 od {total} neaktivnih strank",
       "columns": {
@@ -38,7 +38,7 @@
       "noInstructions": "Ni navodil"
     },
     "info": {
-      "title": "O Izgubljenih strankah",
+      "title": "O izgubljenih strankah",
       "body": "Sistem <highlight>avtomatsko zazna stranke</highlight>, ki v določenem obdobju niso imele termina, in jim pošlje personalizirano sporočilo za povratno naročanje.\n\nAI <highlight>generira vsebino sporočila glede na vašo konfiguracijo</highlight> — besedilo se prilagodi vsaki stranki posebej, ob upoštevanju njene zgodovine in storitev. Tako vaše sporočilo nikoli ne zveni kot množična pošta, ampak kot osebno povabilo nazaj.\n\nZahvaljujoč temu sistemu <highlight>pridobite stranke, ki bi sicer odšle h konkurenci</highlight> — brez ročnega dela in brez pozabljenih kontaktov.\n\nV kolikor imate kakršnakoli vprašanja, nas kontaktirajte na help@jedroplus.com."
     }
   },
@@ -54,16 +54,16 @@
     "relaxed": "Sproščen"
   },
   "modal": {
-    "title": "Lost Leads nastavitve",
+    "title": "Nastavitve izgubljenih strank",
     "subtitle": "Sledenje in ponovno pridobivanje izgubljenih strank",
     "closeButton": "Zapri",
     "saveButton": "Shrani",
     "savingButton": "Shranjujem...",
     "saveError": "Prišlo je do napake pri shranjevanju",
-    "enableTitle": "Omogoči sledenje Lost Leads",
+    "enableTitle": "Omogoči sledenje izgubljenim strankam",
     "enableDesc": "Avtomatsko zaznavanje in kontaktiranje neaktivnih strank",
     "detection": {
-      "sectionTitle": "Zaznavanje Lost Leads",
+      "sectionTitle": "Zaznavanje izgubljenih strank",
       "sectionDesc": "Kdaj naj sistem zazna neaktivne stranke",
       "inactiveAfterLabel": "Neaktivna po",
       "inactiveAfterDesc": "Po koliko dneh brez termina je stranka označena kot neaktivna",

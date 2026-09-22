@@ -47,9 +47,9 @@
     },
     "langRegion": {
       "title": "Language & Region",
-      "subtitle": "Local settings (locked)",
+      "subtitle": "You can change the app language; the rest is set for Slovenia.",
       "languageLabel": "App language",
-      "languageNote": "Currently Slovenian only",
+      "languageNote": "Applies to your login on this device.",
       "languageValue": "Slovenian",
       "regionLabel": "Region",
       "regionNote": "Your geographical location",
@@ -77,10 +77,10 @@
       "disclaimer": "Share codes only with trusted people. Administrators have full system access; staff only have access to their own appointments."
     },
     "qr": {
-      "title": "QR code for client registration",
-      "subtitle": "Clients scan the code and register in your system",
+      "title": "QR code for client sign-up",
+      "subtitle": "For your front desk or door: clients scan it and add themselves to your client list. It does not book an appointment.",
       "noSlug": "Company slug not set.",
-      "caption": "Clients scan the code and register in your system."
+      "caption": "For online booking, use the link on the Bookings page."
     }
   },
   "company": {
@@ -184,7 +184,7 @@
         "can_manage_rezervacije": "Manage Reservations",
         "can_access_lost_leads": "Access to Lost Leads",
         "can_manage_lost_leads": "Manage Lost Leads",
-        "can_create_ghost_termin": "Can create ghost appointments"
+        "can_create_ghost_termin": "Can create unrecorded appointments (not counted in analytics)"
       }
     },
     "invite": {

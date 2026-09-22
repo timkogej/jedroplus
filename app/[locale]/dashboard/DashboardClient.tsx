@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useFormat } from '@/hooks/useFormat';
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
@@ -46,7 +47,7 @@ import {
 } from "@/lib/dashboard/fetchDashboardData";
 import { supabase } from "@/lib/supabaseClient";
 import { format } from "date-fns";
-import { sl } from "date-fns/locale";
+import { intlLocale } from "@/lib/format";
 import AppointmentModal, { type AppointmentFormData } from "@/components/appointments/AppointmentModal";
 import DeleteConfirmation from "@/components/appointments/DeleteConfirmation";
 import ClientModal from "@/components/clients/ClientModal";
@@ -123,6 +124,7 @@ function AppointmentDetailModal({
   onCancel?: (appointment: AppointmentWithDetails) => void;
   onDelete?: (appointment: AppointmentWithDetails) => void;
 }) {
+  const { money } = useFormat();
   const t = useTranslations('dashboard');
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
@@ -427,7 +429,7 @@ function AppointmentDetailModal({
                 <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
                   <span className="text-sm font-medium text-gray-700">{t('detailModal.fields.price')}</span>
                   <span className="bg-clip-text text-xl font-bold text-transparent" style={gradientTextStyle}>
-                    {Number(cena).toFixed(2)} €
+                    {money(Number(cena))}
                   </span>
                 </div>
               );
@@ -556,6 +558,7 @@ function AppointmentDetailModal({
 // on the fallback path (e.g. first load before the company cookie is set), where
 // the shell fetches on mount exactly as before.
 export default function DashboardClient({ initialData }: { initialData: DashboardData | null }) {
+  const { money, locale } = useFormat();
   const t = useTranslations('dashboard');
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading, reloadSettings } = useCompany();
@@ -707,7 +710,11 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       role === 'staff' &&
       (permissions?.can_view_only_own_appointments === true ||
         permissions?.can_view_all_appointments === false);
-    const effectivePersonId = staffViewOwnOnly ? (rolePersonId ?? userPersonId) : userPersonId;
+    // Owners and admins see the whole company. They are often also on the
+    // calendar (onboarding adds the owner as the first staff member), which
+    // used to narrow their stats and revenue to their own appointments.
+    const effectivePersonId =
+      role === 'staff' ? (staffViewOwnOnly ? (rolePersonId ?? userPersonId) : userPersonId) : null;
 
     setLoading(true);
     setError(null);
@@ -1060,7 +1067,10 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
   }, [user]);
 
-  const todayFormatted = format(new Date(), "EEEE, d. MMMM yyyy", { locale: sl });
+  const todayFormatted = (() => {
+    const text = new Date().toLocaleDateString(intlLocale(locale), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  })();
 
   // ── Greeting based on time of day ────────────────────────────────────────
   const welcomeGreeting = useMemo(() => {
@@ -1132,7 +1142,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                     {displayName}
                   </span>
                 </h1>
-                <p className="mt-1 text-gray-500 capitalize">{todayFormatted}</p>
+                <p className="mt-1 text-gray-500">{todayFormatted}</p>
               </div>
 
               {/* Quick Actions */}
@@ -1216,7 +1226,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               <MetricCard
                 title={t('metrics.activeAppointments')}
                 value={dashboardData?.stats.activeAppointments ?? 0}
-                subtitle={t('metrics.appointmentsTodaySubtitle')}
+                subtitle={t('metrics.activeSubtitle')}
                 icon={Clock}
                 iconColor="darkGray"
               />
@@ -1330,7 +1340,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               <MetricCard
                 title={t('metrics.activeAppointments')}
                 value={dashboardData?.stats.activeAppointments ?? 0}
-                subtitle={t('metrics.appointmentsTodaySubtitle')}
+                subtitle={t('metrics.activeSubtitle')}
                 icon={Clock}
                 iconColor="darkGray"
               />
@@ -1343,7 +1353,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               />
               <MetricCard
                 title={t('metrics.revenue')}
-                value={`${(dashboardData?.stats.revenueThisMonth ?? 0).toFixed(2)} €`}
+                value={money(dashboardData?.stats.revenueThisMonth ?? 0)}
                 subtitle={t('metrics.thisMonth')}
                 icon={CurrencyCircleDollar}
                 iconColor="slate"
@@ -1351,11 +1361,28 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
             </div>
           )}
 
+          {(dashboardData?.stats.pastOpenAppointments ?? 0) > 0 && (
+            <div className="-mt-4 mb-8 flex flex-col gap-2 rounded-2xl bg-amber-50 px-4 py-3 ring-1 ring-amber-200 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-amber-900">
+                <span className="font-semibold">
+                  {t('metrics.pastOpen', { count: dashboardData?.stats.pastOpenAppointments ?? 0 })}
+                </span>{' '}
+                {t('metrics.pastOpenBody')}
+              </p>
+              <Link
+                href="/termini?view=past-open"
+                className="flex-shrink-0 text-sm font-semibold text-amber-900 underline underline-offset-2 hover:text-amber-700"
+              >
+                {t('metrics.pastOpenCta')}
+              </Link>
+            </div>
+          )}
+
           {/* Today and Tomorrow Appointments */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <AppointmentListCard
               title={t('appointmentList.todayTitle')}
-              subtitle={format(new Date(), "d. MMMM", { locale: sl })}
+              subtitle={new Date().toLocaleDateString(intlLocale(locale), { day: "numeric", month: "long" })}
               appointments={dashboardData?.todayAppointments ?? []}
               emptyMessage={t('appointmentList.todayEmpty')}
               gradientOutline
@@ -1364,7 +1391,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
             />
             <AppointmentListCard
               title={t('appointmentList.tomorrowTitle')}
-              subtitle={format(new Date(Date.now() + 86400000), "d. MMMM", { locale: sl })}
+              subtitle={new Date(Date.now() + 86400000).toLocaleDateString(intlLocale(locale), { day: "numeric", month: "long" })}
               appointments={dashboardData?.tomorrowAppointments ?? []}
               emptyMessage={t('appointmentList.tomorrowEmpty')}
               viewAllHref={`/termini?dateFrom=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}&dateTo=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}`}
