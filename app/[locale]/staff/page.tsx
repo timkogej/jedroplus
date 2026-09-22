@@ -780,11 +780,15 @@ export default function OsebjePage() {
 
           {/* Results count */}
           <div className="mb-4">
-            <p className="text-sm text-gray-500">
-              {searchQuery
-                ? t('search.resultsWithQuery', { count: filteredEmployees.length, query: searchQuery })
-                : t('search.resultsCount', { count: filteredEmployees.length })}
-            </p>
+            {isLoading ? (
+              <span className="block h-4 w-28 animate-pulse rounded-md bg-gray-100" aria-hidden="true" />
+            ) : (
+              <p className="text-sm text-gray-500">
+                {searchQuery
+                  ? t('search.resultsWithQuery', { count: filteredEmployees.length, query: searchQuery })
+                  : t('search.resultsCount', { count: filteredEmployees.length })}
+              </p>
+            )}
           </div>
 
           {/* Employee Grid or empty state */}

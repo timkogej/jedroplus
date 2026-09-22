@@ -385,7 +385,9 @@ export function Sidebar() {
     requestAnimationFrame(() => {
       const activeEl = desktopNav.querySelector('[data-active="true"]') as HTMLElement | null;
       if (activeEl) {
-        activeEl.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+        // Center it so the scroll fades never cover the current page.
+        const top = activeEl.offsetTop - desktopNav.clientHeight / 2 + activeEl.clientHeight / 2;
+        if (top > 0 && desktopNav.scrollHeight > desktopNav.clientHeight) desktopNav.scrollTop = top;
       }
     });
   }, [pathnameWithoutLocale]);
