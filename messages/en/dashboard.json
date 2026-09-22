@@ -181,5 +181,11 @@
         "body": "If you don't work alone, add your team and their schedules."
       }
     }
+  },
+  "staffNotLinked": {
+    "title": "Your account isn't linked to your schedule yet",
+    "bodyCanLink": "That's why you don't see your appointments yet. Open Staff and click “Link my account to this person” next to your name.",
+    "bodyAskOwner": "That's why you don't see your appointments yet. Ask the owner to link you in Staff.",
+    "cta": "Open Staff"
   }
 }

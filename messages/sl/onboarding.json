@@ -168,6 +168,15 @@
       "success": "Pridružili ste se podjetju!",
       "invalidCode": "Koda podjetja ni pravilna",
       "companyNotFound": "Podjetje s tem ID-jem ne obstaja"
+    },
+    "invite": {
+      "eyebrow": "Povabilo",
+      "title": "Povabljeni ste v ekipo",
+      "titleWithName": "Povabljeni ste v {name}",
+      "body": "Ustvarite račun ali se prijavite. Nato vas samodejno pridružimo ekipi, brez prepisovanja kode.",
+      "signUp": "Ustvari račun",
+      "logIn": "Že imam račun — prijava",
+      "readyBody": "Koda je že vpisana. Kliknite Pridruži se."
     }
   }
 }

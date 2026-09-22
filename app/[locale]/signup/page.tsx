@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,10 +9,16 @@ import { Link } from '@/i18n/navigation';
 import { SpinnerGap } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import { inviteToMetadata, loadPendingInvite, type PendingInvite } from '@/lib/team/invite';
 
 export default function SignupPage() {
   const t = useTranslations('auth.signup');
   const tCommon = useTranslations('common');
+  // Set when the visitor came from a team invite link.
+  const [invite, setInvite] = useState<PendingInvite | null>(null);
+  useEffect(() => {
+    setInvite(loadPendingInvite());
+  }, []);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -67,7 +73,9 @@ export default function SignupPage() {
             password: formData.password,
             options: {
               data: {
-                full_name: formData.fullName
+                full_name: formData.fullName,
+                // Keeps the invite if the email is confirmed on another device.
+                ...inviteToMetadata(invite),
               }
             }
           });
@@ -133,6 +141,13 @@ export default function SignupPage() {
             Jedro+
           </h1>
           <p className="text-gray-600">{t('subtitle')}</p>
+          {invite && (
+            <p className="mt-4 rounded-xl bg-violet-50 px-4 py-3 text-sm text-violet-900">
+              {invite.companyName
+                ? t('inviteBannerWithName', { name: invite.companyName })
+                : t('inviteBanner')}
+            </p>
+          )}
         </div>
 
         {/* Form */}

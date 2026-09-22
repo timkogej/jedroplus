@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,14 @@ import { joinCompany, type JoinCompanyResult } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import { Link as LocaleLink } from '@/i18n/navigation';
+import {
+  clearPendingInvite,
+  loadPendingInvite,
+  readInviteFromUrl,
+  savePendingInvite,
+  type PendingInvite,
+} from '@/lib/team/invite';
 
 const STORAGE_KEY = "jedroplus_company_id";
 const STORAGE_KEY_UUID = "jedroplus_company_uuid";
@@ -73,6 +81,22 @@ export default function JoinCompanyPage() {
   const [selectedRole, setSelectedRole] = useState<JoinRole>(null);
   const [joinCode, setJoinCode] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Invite link (?code=…&p=…&c=…) or an invite remembered from before sign-up.
+  const [invite, setInvite] = useState<PendingInvite | null>(null);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const fromUrl = readInviteFromUrl(window.location.search);
+    const found = fromUrl ?? loadPendingInvite();
+    if (found) {
+      savePendingInvite(found);
+      setInvite(found);
+      setJoinCode(found.code);
+      setSelectedRole('employee');
+    }
+    supabase.auth.getUser().then(({ data: { user } }) => setSignedIn(Boolean(user)));
+  }, []);
 
   const handleJoin = async () => {
     if (!joinCode.trim()) {
@@ -186,6 +210,30 @@ export default function JoinCompanyPage() {
           return;
         }
 
+        // Invite for a specific staff card: link this login to it right away,
+        // so "my appointments" works on the first visit.
+        if (invite?.personId) {
+          try {
+            await fetch('https://n8n.jedroplus.com/webhook/connect-user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                user_id: user.id,
+                person_id: invite.personId,
+                company_id: companyPublicId,
+                company_uuid: companyUUID,
+              }),
+            });
+          } catch (connectError) {
+            // Not fatal: the owner can still link the card in Zaposleni.
+            console.warn('Join company: linking staff card failed', connectError);
+          }
+        }
+        clearPendingInvite();
+        supabase.auth
+          .updateUser({ data: { pending_join_code: null, pending_person_id: null, pending_company_name: null } })
+          .catch(() => {});
+
         // Store the 6-char public ID (used for filtering business tables)
         localStorage.setItem(STORAGE_KEY, companyPublicId);
         localStorage.setItem(STORAGE_KEY_UUID, companyUUID);
@@ -219,6 +267,39 @@ export default function JoinCompanyPage() {
       setLoading(false);
     }
   };
+
+  // Invite link opened while signed out: explain and send them to sign up.
+  if (invite && signedIn === false) {
+    return (
+      <div className="relative min-h-screen flex items-center justify-center bg-white p-4">
+        <PublicLanguageToggle className="absolute right-4 top-4" />
+        <div className="w-full max-w-md text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-600">{t('join.invite.eyebrow')}</p>
+          <h1 className="mt-3 text-3xl font-bold text-gray-900">
+            {invite.companyName
+              ? t('join.invite.titleWithName', { name: invite.companyName })
+              : t('join.invite.title')}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-gray-600">{t('join.invite.body')}</p>
+          <div className="mt-8 space-y-3">
+            <LocaleLink
+              href="/signup"
+              className="flex h-12 w-full items-center justify-center rounded-xl font-semibold text-white"
+              style={{ background: 'linear-gradient(to right, #8B5CF6, #06B6D4)' }}
+            >
+              {t('join.invite.signUp')}
+            </LocaleLink>
+            <LocaleLink
+              href="/login"
+              className="flex h-12 w-full items-center justify-center rounded-xl border-2 border-gray-200 font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              {t('join.invite.logIn')}
+            </LocaleLink>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Role selection view
   if (!selectedRole) {
@@ -319,10 +400,16 @@ export default function JoinCompanyPage() {
       <PublicLanguageToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-md">
         <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">
-          {isAdmin ? t('join.form.adminTitle') : t('join.form.employeeTitle')}
+          {invite
+            ? invite.companyName
+              ? t('join.invite.titleWithName', { name: invite.companyName })
+              : t('join.invite.title')
+            : isAdmin
+            ? t('join.form.adminTitle')
+            : t('join.form.employeeTitle')}
         </h1>
         <p className="text-center text-gray-500 mb-8 text-sm">
-          {isAdmin ? t('join.form.adminSubtitle') : t('join.form.employeeSubtitle')}
+          {invite ? t('join.invite.readyBody') : isAdmin ? t('join.form.adminSubtitle') : t('join.form.employeeSubtitle')}
         </p>
 
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 space-y-6">
@@ -340,9 +427,11 @@ export default function JoinCompanyPage() {
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
             />
-            <p className="text-xs text-gray-500 mt-2 text-center">
-              {isAdmin ? t('join.form.adminCodeHint') : t('join.form.employeeCodeHint')}
-            </p>
+            {!invite && (
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                {isAdmin ? t('join.form.adminCodeHint') : t('join.form.employeeCodeHint')}
+              </p>
+            )}
           </div>
 
           <button

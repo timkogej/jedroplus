@@ -23,7 +23,7 @@
       "receptionistPlus": "ReceptionistPlus",
       "services": "Storitve",
       "resources": "Resursi",
-      "staff": "Osebje",
+      "staff": "Zaposleni",
       "promotions": "Promocije",
       "analytics": "Analitika",
       "billing": "Paketi",
@@ -62,7 +62,7 @@
       "appointments": "Termini",
       "clients": "Stranke",
       "services": "Storitve",
-      "staff": "Osebje",
+      "staff": "Zaposleni",
       "reminders": "Opomniki",
       "lostLeads": "Lost Leads",
       "analytics": "Analitika",
@@ -126,8 +126,8 @@
           "body": "Kaj ponujate, koliko traja in koliko stane. Iz tega se izračuna trajanje in cena termina."
         },
         "staff": {
-          "title": "Osebje",
-          "body": "Ljudje, ki izvajajo storitve, in njihov urnik. Sodelavce v aplikacijo povabite s kodo v Nastavitve → Splošno."
+          "title": "Zaposleni",
+          "body": "Ljudje, ki izvajajo storitve, in njihov urnik. Sodelavce v aplikacijo povabite v Nastavitve → Ekipa in dostop."
         },
         "reminders": {
           "title": "Opomniki",
@@ -162,6 +162,32 @@
         "filters": {
           "title": "Filtri",
           "body": "Prikažite samo izbrane zaposlene ali storitve, ko je koledar poln."
+        }
+      },
+      "staff": {
+        "welcome": {
+          "title": "Dobrodošli v ekipi",
+          "body": "Na kratko vam pokažemo, kje najdete svoj urnik, termine in stranke."
+        },
+        "calendar": {
+          "title": "Vaš koledar",
+          "body": "Tukaj vidite svoje termine po dnevih in tednih. Klik na prosto polje odpre nov termin."
+        },
+        "newAppointment": {
+          "title": "Nov termin",
+          "body": "Stranka pokliče ali pride? Termin vpišete tukaj: stranka, storitev, čas."
+        },
+        "appointments": {
+          "title": "Termini",
+          "body": "Seznam vaših terminov. Ko je stranka bila pri vas, termin zaključite tukaj."
+        },
+        "clients": {
+          "title": "Stranke",
+          "body": "Kontakti in zgodovina obiskov strank. Novo stranko lahko dodate tudi med vpisom termina."
+        },
+        "userMenu": {
+          "title": "Vodič in jezik",
+          "body": "Ta vodič lahko kadarkoli ponovite tukaj."
         }
       }
     }

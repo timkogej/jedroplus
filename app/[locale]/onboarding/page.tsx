@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabaseClient';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import { inviteFromMetadata, joinPath, loadPendingInvite } from '@/lib/team/invite';
 
 const STORAGE_KEY = "jedroplus_company_id";
 
@@ -57,6 +58,14 @@ export default function OnboardingPage() {
             window.location.href = '/dashboard';
             return;
           }
+        }
+
+        // Invited (link opened before sign-up, possibly on another device):
+        // go straight to joining instead of the create/join choice.
+        const pending = loadPendingInvite() ?? inviteFromMetadata(user.user_metadata as Record<string, unknown>);
+        if (pending) {
+          router.replace(joinPath(pending));
+          return;
         }
 
         // User has no company - show onboarding options

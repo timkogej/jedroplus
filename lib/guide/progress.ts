@@ -4,7 +4,7 @@
 // finished, which key pages they have opened (used to tick "getting started"
 // items that can't be detected from data), and whether they hid the checklist.
 
-export type TourId = 'dashboard' | 'calendar';
+export type TourId = 'dashboard' | 'calendar' | 'staff';
 export type VisitKey = 'workingHours' | 'reminders' | 'team';
 
 interface GuideState {

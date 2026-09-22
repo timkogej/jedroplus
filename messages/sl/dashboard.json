@@ -181,5 +181,11 @@
         "body": "Če ne delate sami, dodajte ekipo in njihove urnike."
       }
     }
+  },
+  "staffNotLinked": {
+    "title": "Vaš račun še ni povezan z vašim urnikom",
+    "bodyCanLink": "Zato še ne vidite svojih terminov. Odprite Zaposleni in pri svojem imenu kliknite »Poveži moj račun s to osebo«.",
+    "bodyAskOwner": "Zato še ne vidite svojih terminov. Prosite lastnika, naj vas poveže v Zaposleni.",
+    "cta": "Odpri Zaposleni"
   }
 }

@@ -12,8 +12,8 @@
         "description": "Račun, jezik, obvestila in kode podjetja"
       },
       "members": {
-        "label": "Člani",
-        "description": "Ekipa, vloge in dovoljenja za zaposlene"
+        "label": "Ekipa in dostop",
+        "description": "Povabite sodelavce, vloge in dovoljenja"
       },
       "plans": {
         "label": "Paketi",
@@ -125,8 +125,8 @@
     }
   },
   "members": {
-    "title": "Člani",
-    "subtitle": "Ekipa, vloge in dovoljenja za zaposlene",
+    "title": "Ekipa in dostop",
+    "subtitle": "Kdo se lahko prijavi v aplikacijo, z vlogami in dovoljenji. Ljudi v koledarju urejate v Zaposleni.",
     "noAccess": {
       "title": "Dostop omejen",
       "message": "To stran lahko vidijo samo lastniki podjetja."
@@ -135,8 +135,8 @@
     "maxUsersLabel": "Največje število uporabnikov aplikacije",
     "currentTeamLabel": "Trenutno v ekipi",
     "list": {
-      "title": "Člani",
-      "subtitle": "Vsi uporabniki, ki so del tega podjetja",
+      "title": "Kdo se lahko prijavi",
+      "subtitle": "Uporabniki s prijavo v to podjetje",
       "empty": "Ni najdenih članov."
     },
     "permissions": {
@@ -151,7 +151,7 @@
         "termini": "Termini",
         "stranke": "Stranke",
         "storitve": "Storitve",
-        "osebje": "Osebje",
+        "osebje": "Zaposleni",
         "analitika": "Analitika",
         "moduli": "Moduli"
       },
@@ -186,6 +186,41 @@
         "can_manage_lost_leads": "Upravljanje Lost Leads",
         "can_create_ghost_termin": "Lahko ustvari ghost termine"
       }
+    },
+    "invite": {
+      "button": "Povabi v ekipo",
+      "title": "Povabi v ekipo",
+      "subtitle": "Pošljite osebno povezavo. Povabljeni ustvari račun in se samodejno pridruži, brez prepisovanja kode.",
+      "close": "Zapri",
+      "seats": "Prijav v aplikacijo: {used} od {total}",
+      "fullTitle": "Vsa mesta za prijavo so zasedena",
+      "fullBodyFree": "Brezplačni paket omogoča 1 prijavo. Z Jedro Plus se lahko prijavita 2 osebi, več mest pa lahko dokupite.",
+      "fullBodyPaid": "Za novega sodelavca dodajte mesto v Dodatki in kvote.",
+      "staffStillFree": "Zaposlene lahko v koledar dodajate brez omejitev (Zaposleni), mesto potrebujejo samo, če se prijavljajo v aplikacijo.",
+      "upgrade": "Primerjaj pakete",
+      "addSeats": "Dodaj mesta",
+      "roleLabel": "Vloga",
+      "roles": {
+        "staff": {
+          "title": "Zaposleni",
+          "body": "Vidi svoj urnik in termine. Kaj še lahko, nastavite spodaj v dovoljenjih."
+        },
+        "admin": {
+          "title": "Administrator",
+          "body": "Poln dostop do terminov, strank, storitev, osebja, analitike in nastavitev."
+        }
+      },
+      "personLabel": "Poveži z zaposlenim",
+      "personHint": "Izberite, kdo v koledarju je ta oseba. Po pridružitvi bo takoj videla svoje termine.",
+      "personNone": "Ne povezuj zdaj",
+      "linkLabel": "Povezava za povabilo",
+      "loading": "Pripravljam povezavo …",
+      "copy": "Kopiraj",
+      "copied": "Kopirano",
+      "viaEmail": "E-pošta",
+      "emailSubject": "Povabilo v ekipo {company}",
+      "message": "Pozdravljeni! Vabim vas v ekipo {company} v aplikaciji Jedro+. Odprite povezavo in ustvarite račun: {url}",
+      "privacyNote": "Povezava vsebuje kodo za pridružitev. Pošljite jo samo osebi, ki jo vabite."
     }
   },
   "messages": {

@@ -24,6 +24,7 @@ import { useAuth } from '@/app/auth-context';
 import { useCompany } from '@/app/company-context';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useOptionalTour } from '@/components/guide/TourProvider';
+import { useRolePermissions } from '@/app/role-permission-context';
 
 // ============================================================================
 // Types
@@ -65,6 +66,7 @@ function cn(...classes: (string | boolean | undefined | null)[]) {
 export function AppBar() {
   const pathname = usePathname();
   const tour = useOptionalTour();
+  const { role } = useRolePermissions();
   const t = useTranslations('layout');
   const { toggle, isMobile, isOpen, isCollapsed, openSearch, notificationCount } = useSidebar();
   const { user, signOut } = useAuth();
@@ -329,7 +331,7 @@ export function AppBar() {
                         type="button"
                         onClick={() => {
                           setIsProfileOpen(false);
-                          tour.startTour(pathname.includes('/koledar') ? 'calendar' : 'dashboard');
+                          tour.startTour(pathname.includes('/koledar') ? 'calendar' : role === 'staff' ? 'staff' : 'dashboard');
                         }}
                         className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
