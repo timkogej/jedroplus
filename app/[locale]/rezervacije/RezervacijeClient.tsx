@@ -16,11 +16,14 @@ import {
   Warning,
   ClipboardText,
   CaretRight,
+  Lock,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
+import NextLink from 'next/link';
+import { isJedroProPlan } from '@/lib/onlinePayments';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
@@ -250,7 +253,9 @@ export default function RezervacijeClient({
 }) {
   const t = useTranslations('reservations');
   const router = useRouter();
-  const { companyId, loading: companyLoading } = useCompany();
+  const { companyId, loading: companyLoading, planCode } = useCompany();
+  // Pro designs are part of Jedro Pro (and above). Other plans can look but not copy.
+  const proDesignsUnlocked = isJedroProPlan(planCode) || String(planCode ?? '').toUpperCase().includes('ENTERPRISE');
   const { role, permissions } = useRolePermissions();
   const canManageSettings = role !== 'staff' || (permissions?.can_manage_rezervacije ?? true);
 
@@ -333,8 +338,9 @@ export default function RezervacijeClient({
   const hasMainBookingLink = Boolean(settings.mainBookingLink.trim());
   const hasIncompleteSettings =
     !loading && settings.bookingOmogocen && hasBookingLinksAvailable && !hasMainBookingLink;
-  const renderDesignCard = (design: BookingDesign) => {
-    const designUrl = getDesignLink(design);
+  const renderDesignCard = (design: BookingDesign, locked = false) => {
+    // A locked card never exposes the link.
+    const designUrl = locked ? '' : getDesignLink(design);
     const isCopied = copiedDesignId === design.id;
     const designName = t(`designs.${design.designKey}.name`);
 
@@ -390,6 +396,17 @@ export default function RezervacijeClient({
           </div>
         </div>
 
+        {locked ? (
+          <div className="mt-4">
+            <NextLink
+              href="/nastavitve/paketi#razpolozljivi-paketi"
+              className="flex h-10 items-center justify-center gap-2 rounded-lg bg-gray-900 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+            >
+              <Lock className="h-4 w-4" weight="bold" aria-hidden="true" />
+              {t('premiumSection.upgrade')}
+            </NextLink>
+          </div>
+        ) : (
         <div className="mt-4 grid grid-cols-[1fr_40px] gap-2">
           <motion.button
             whileHover={designUrl ? { scale: 1.01 } : undefined}
@@ -422,6 +439,7 @@ export default function RezervacijeClient({
             <ArrowSquareOut className="h-4 w-4" weight="bold" />
           </motion.button>
         </div>
+        )}
       </motion.article>
     );
   };
@@ -593,10 +611,19 @@ export default function RezervacijeClient({
                         className="rounded-md px-2 py-0.5 text-xs font-semibold text-white"
                         style={{ background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)' }}
                       >
-                        Premium
+                        {t('premiumSection.badge')}
                       </span>
+                      {!proDesignsUnlocked && (
+                        <span className="inline-flex items-center gap-1 rounded-md border border-gray-200 px-2 py-0.5 text-xs font-medium text-gray-600">
+                          <Lock className="h-3 w-3" weight="bold" aria-hidden="true" />
+                          {t('premiumSection.lockedLabel')}
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-gray-500">{t('premiumSection.subtitle')}</p>
+                    {!proDesignsUnlocked && (
+                      <p className="mt-1 text-sm text-gray-600">{t('premiumSection.lockedNote')}</p>
+                    )}
                   </div>
                   <div className="flex gap-1.5">
                     {PREMIUM_DESIGNS.map((design) => (
@@ -609,7 +636,7 @@ export default function RezervacijeClient({
                   </div>
                 </div>
                 <div className="-mx-5 flex gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-3">
-                  {PREMIUM_DESIGNS.map((design) => renderDesignCard(design))}
+                  {PREMIUM_DESIGNS.map((design) => renderDesignCard(design, !proDesignsUnlocked))}
                 </div>
               </motion.div>
 

@@ -79,6 +79,31 @@ export interface BillingUsage {
 
 export const NEAR_LIMIT_PERCENT = 80;
 
+/**
+ * One-time free reminder trial (see migration 1790100000_free_reminder_trial).
+ * For FREE accounts the DB keeps *_quota_override = trial − earlier usage, so
+ * override − this period's sent = what's left of the whole trial.
+ */
+export const FREE_TRIAL = { sms: 20, email: 100 } as const;
+
+function freeTrialChannel(trial: number, override: number, sentThisPeriod: number): ChannelUsage {
+  const remaining = Math.max(override - sentThisPeriod, 0);
+  const used = trial - remaining;
+  const percent = Math.round((used / trial) * 100);
+  const exhausted = remaining === 0;
+  return {
+    included: trial,
+    addon: 0,
+    total: trial,
+    used,
+    remaining,
+    percent,
+    unavailable: false,
+    exhausted,
+    nearLimit: !exhausted && percent >= NEAR_LIMIT_PERCENT,
+  };
+}
+
 function channel(
   included: number,
   addon: number,
@@ -117,18 +142,24 @@ export function computeBillingUsage(data: AddonStatusResponse | null): BillingUs
     priceMonthlyEur: plan ? plan.price_monthly_cents / 100 : null,
     isFree,
     periodEnd: isFree ? null : sub?.current_period_end ?? null,
-    sms: channel(
-      plan?.sms_quota_monthly ?? 0,
-      sub?.sms_addon_monthly ?? 0,
-      sub?.sms_quota_override,
-      data?.smsUsage?.sent_count ?? 0
-    ),
-    email: channel(
-      plan?.email_quota_monthly ?? 0,
-      sub?.email_addon_monthly ?? 0,
-      sub?.email_quota_override,
-      data?.emailUsage?.sent_count ?? 0
-    ),
+    sms:
+      isFree && sub?.sms_quota_override != null
+        ? freeTrialChannel(FREE_TRIAL.sms, sub.sms_quota_override, data?.smsUsage?.sent_count ?? 0)
+        : channel(
+            plan?.sms_quota_monthly ?? 0,
+            sub?.sms_addon_monthly ?? 0,
+            sub?.sms_quota_override,
+            data?.smsUsage?.sent_count ?? 0
+          ),
+    email:
+      isFree && sub?.email_quota_override != null
+        ? freeTrialChannel(FREE_TRIAL.email, sub.email_quota_override, data?.emailUsage?.sent_count ?? 0)
+        : channel(
+            plan?.email_quota_monthly ?? 0,
+            sub?.email_addon_monthly ?? 0,
+            sub?.email_quota_override,
+            data?.emailUsage?.sent_count ?? 0
+          ),
     seats: {
       included: includedSeats,
       extra: extraSeats,

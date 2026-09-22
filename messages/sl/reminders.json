@@ -106,7 +106,24 @@
       },
       "renews": "Kvota se obnovi {date}.",
       "buySms": "Dokupi SMS",
-      "buyEmail": "Dokupi e-pošto"
+      "buyEmail": "Dokupi e-pošto",
+      "trial": {
+        "ok": {
+          "title": "{name} opomniki se pošiljajo",
+          "body": "Brezplačni preizkus: še {remaining} od {total}."
+        },
+        "nearLimit": {
+          "title": "Brezplačni {name} opomniki so skoraj porabljeni",
+          "body": "Ostalo še {remaining} od {total}. Nato se {name} opomniki ne pošiljajo več."
+        },
+        "exhausted": {
+          "title": "Brezplačni {name} opomniki so porabljeni",
+          "body": "Porabili ste vseh {total}. Stranke ne prejemajo več {name} opomnikov."
+        },
+        "upgrade": "Nadgradi na Jedro Plus",
+        "introTitle": "Preizkusite opomnike brezplačno",
+        "introBody": "Na voljo imate {sms} SMS in {email} e-poštnih opomnikov. To ni mesečna kvota, ampak enkraten preizkus. Ko jih porabite, nastavitve ostanejo, za nadaljnje pošiljanje pa potrebujete Jedro Plus."
+      }
     }
   },
   "status": {
@@ -239,7 +256,7 @@
       "timingValue": "Fiksno: Takoj po zaključenem terminu"
     },
     "smsAccess": {
-      "notIncluded": "Vaš paket ne vključuje SMS sporočil. Dokupite SMS paket ali nadgradite na Jedro Pro, ki vključuje 200 SMS na mesec.",
+      "notIncluded": "Vaš paket ne vključuje SMS sporočil. Dokupite SMS paket ali nadgradite na Jedro Pro, ki vključuje 250 SMS na mesec.",
       "notIncludedFree": "SMS opomniki so na voljo v plačljivih paketih.",
       "buySms": "Dokupi SMS",
       "comparePlans": "Primerjaj pakete",

@@ -21,8 +21,12 @@
     "subtitle": "Classic, Modern, and Elegant designs"
   },
   "premiumSection": {
-    "title": "Premium booking pages",
-    "subtitle": "Seasonal and Magazine designs"
+    "title": "Jedro Pro designs",
+    "subtitle": "Seasonal, Magazine and Casino. Included in Jedro Pro.",
+    "badge": "Pro",
+    "lockedNote": "These designs are locked on your plan. Preview them here and unlock them with Jedro Pro.",
+    "upgrade": "Unlock with Jedro Pro",
+    "lockedLabel": "Locked"
   },
   "designs": {
     "bookingLinkLabel": "Booking link",

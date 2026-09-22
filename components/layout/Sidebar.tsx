@@ -31,6 +31,7 @@ import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useCompanyPlan } from '@/hooks/useCompanyPlan';
 import { hasAccessToRoute } from '@/lib/planAccess';
+import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { useRolePermissions } from '@/app/role-permission-context';
 import type { StaffPermissions } from '@/types/roles';
 
@@ -280,7 +281,12 @@ export function Sidebar() {
   const isFree = planCode === 'FREE';
   const baseNavigationSections = isFree ? buildNavigationSectionsFree(t) : buildNavigationSectionsPaid(t);
 
-  const isLocked = (href: string) => !hasAccessToRoute(href, planCode);
+  // Free accounts with a one-time reminder quota can open Opomniki.
+  const { usage: billingUsage } = useBillingUsage();
+  const freeReminderTrial =
+    isFree && Boolean(billingUsage && (billingUsage.sms.total > 0 || billingUsage.email.total > 0));
+  const isLocked = (href: string) =>
+    !(hasAccessToRoute(href, planCode) || (href === '/reminders' && freeReminderTrial));
 
   // ── Incomplete settings alerts ─────────────────────────────────────────────
   const hasOpomnikiPlan = planCode === 'JEDRO_PLUS' || planCode === 'JEDRO_PRO' || planCode === 'JEDRO_PREMIUM';

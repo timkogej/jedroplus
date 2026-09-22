@@ -106,7 +106,24 @@
       },
       "renews": "The quota renews on {date}.",
       "buySms": "Buy SMS",
-      "buyEmail": "Buy email"
+      "buyEmail": "Buy email",
+      "trial": {
+        "ok": {
+          "title": "{name} reminders are being sent",
+          "body": "Free trial: {remaining} of {total} left."
+        },
+        "nearLimit": {
+          "title": "Free {name} reminders almost used up",
+          "body": "{remaining} of {total} left. After that, {name} reminders stop."
+        },
+        "exhausted": {
+          "title": "Free {name} reminders used up",
+          "body": "You've used all {total}. Clients no longer receive {name} reminders."
+        },
+        "upgrade": "Upgrade to Jedro Plus",
+        "introTitle": "Try reminders for free",
+        "introBody": "You have {sms} SMS and {email} email reminders. This is a one-time trial, not a monthly quota. When they're used up your settings stay, and sending continues with Jedro Plus."
+      }
     }
   },
   "status": {
@@ -239,7 +256,7 @@
       "timingValue": "Fixed: immediately after completed appointment"
     },
     "smsAccess": {
-      "notIncluded": "Your plan doesn't include SMS messages. Buy an SMS package or upgrade to Jedro Pro, which includes 200 SMS per month.",
+      "notIncluded": "Your plan doesn't include SMS messages. Buy an SMS package or upgrade to Jedro Pro, which includes 250 SMS per month.",
       "notIncludedFree": "SMS reminders are available on paid plans.",
       "buySms": "Buy SMS",
       "comparePlans": "Compare plans",

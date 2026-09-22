@@ -41,9 +41,10 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
   const { user } = useAuth();
   const router = useRouter();
   // SMS is usable whenever the plan or purchased add-ons provide any SMS
-  // (Plus has 0 included but can buy add-ons; Pro includes 200).
+  // (Free: the one-time trial quota; Plus: 0 included but add-ons can be
+  // bought; Pro includes 200).
   const { usage: billingUsage } = useBillingUsage();
-  const smsLockedForPlan = planCode === 'FREE' || (billingUsage?.sms.unavailable ?? false);
+  const smsLockedForPlan = billingUsage ? billingUsage.sms.unavailable : planCode === 'FREE';
 
   const smsAccessNote = () => {
     const goTo = (path: string) => { onClose(); router.push(path); };
@@ -78,9 +79,15 @@ export function ReminderSettingsModal({ isOpen, onClose }: ReminderSettingsModal
           }`}
         >
           <span>{t(sms.exhausted ? 'modal.smsAccess.exhausted' : 'modal.smsAccess.nearLimit', values)}</span>
-          <button type="button" onClick={() => goTo('/nastavitve/addoni')} className={linkClass}>
-            {t('modal.smsAccess.buySms')} <ArrowRight className="h-3 w-3" weight="bold" />
-          </button>
+          {billingUsage.isFree ? (
+            <button type="button" onClick={() => goTo('/nastavitve/paketi')} className={linkClass}>
+              {t('modal.smsAccess.comparePlans')} <ArrowRight className="h-3 w-3" weight="bold" />
+            </button>
+          ) : (
+            <button type="button" onClick={() => goTo('/nastavitve/addoni')} className={linkClass}>
+              {t('modal.smsAccess.buySms')} <ArrowRight className="h-3 w-3" weight="bold" />
+            </button>
+          )}
         </div>
       );
     }

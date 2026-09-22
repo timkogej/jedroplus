@@ -177,7 +177,57 @@
     "heading": "Ta funkcija zahteva paket {plan}",
     "subtitle": "Nadgradite svoj paket, da odklenete to funkcijo in izkoristite celoten potencial platforme Jedro+.",
     "upgradeButton": "Nadgradi paket",
-    "hint": "Oglejte si vse razpoložljive pakete in izberite tistega, ki vam ustreza."
+    "hint": "Oglejte si vse razpoložljive pakete in izberite tistega, ki vam ustreza.",
+    "badge": "Paket {plan}",
+    "includedIn": "Vključeno v paketu {plan}",
+    "price": "{monthly} € na mesec · {annual} € na mesec pri letnem plačilu",
+    "comparePlans": "Primerjaj pakete",
+    "back": "Nazaj na začetek",
+    "ownerOnly": "Paket lahko nadgradi lastnik računa v Nastavitve → Paketi.",
+    "features": {
+      "reminders": {
+        "title": "Opomniki, ki zmanjšajo neprihode",
+        "lead": "Stranke samodejno opomnimo na termin pred obiskom in se jim zahvalimo po njem. Brez klicanja in brez ročnega pošiljanja.",
+        "p1": "Opomnik po e-pošti ali SMS dan pred terminom",
+        "p2": "Sporočilo po terminu, po želji s popustom za naslednji obisk",
+        "p3": "Lastna predloga ali osebno sporočilo, ki ga sestavi AI"
+      },
+      "booking": {
+        "title": "Stranke se naročajo same",
+        "lead": "Delite povezavo ali QR kodo in stranke si termin izberejo same, tudi ob desetih zvečer. Vi dobite obvestilo in termin v koledarju.",
+        "p1": "Povezava za Instagram, spletno stran in e-poštni podpis",
+        "p2": "Več dizajnov strani za naročanje",
+        "p3": "Zahteve za termin lahko pred potrditvijo pregledate"
+      },
+      "communication": {
+        "title": "Sporočila strankam na enem mestu",
+        "lead": "Pošljite obvestilo ali ponudbo izbranim strankam: vsem, današnjim ali tistim z določeno storitvijo.",
+        "p1": "Izbira strank po terminih in filtrih",
+        "p2": "Pošiljanje po e-pošti iz enega okna",
+        "p3": "AI pomaga sestaviti besedilo"
+      },
+      "analytics": {
+        "title": "Vidite, kako posluje vaš salon",
+        "lead": "Prihodki, zasedenost, najbolj iskane storitve in uspešnost ekipe na enem pregledu.",
+        "p1": "Prihodki in število terminov po obdobjih",
+        "p2": "Najbolj priljubljene storitve in zaposleni",
+        "p3": "Rast baze strank"
+      },
+      "lostLeads": {
+        "title": "Pridobite nazaj stranke, ki niso prišle",
+        "lead": "Sistem sam zazna stranke, ki dolgo niso imele termina, in jim pošlje osebno povabilo nazaj.",
+        "p1": "Samodejno zaznavanje neaktivnih strank",
+        "p2": "Osebno sporočilo, ki ga sestavi AI",
+        "p3": "Brez ročnega iskanja in pošiljanja"
+      },
+      "ai": {
+        "title": "AI pomočniki",
+        "lead": "Pametni pomočniki za delo s strankami in termini.",
+        "p1": "Odgovarjanje na pogosta vprašanja",
+        "p2": "Pomoč pri terminih in strankah",
+        "p3": "Prilagojeno vašemu podjetju"
+      }
+    }
   },
   "roleAccessGate": {
     "title": "Dostop omejen",
@@ -244,6 +294,7 @@
           "Baza storitev in osebja",
           "Personalizirani opomniki pred in po terminu",
           "Email pošiljanje (500 email/mesec)",
+          "SMS opomniki z dokupljenimi SMS paketi (od 4 € za 50 SMS)",
           "Komunikacija",
           "Celotna analitika",
           "Spletno naročanje",
@@ -254,7 +305,7 @@
         "features": [
           "Vse iz Jedro Plus",
           "Obveščanje izgubljenih strank",
-          "SMS pošiljanje (200 sms/mesec)",
+          "SMS pošiljanje (250 sms/mesec)",
           "Email pošiljanje (2000 email/mesec)",
           "Dodatni dizajni spletnega naročanja"
         ]
@@ -271,7 +322,20 @@
     },
     "freeRenewal": "Brezplačno, brez obnove",
     "quotaNotIncluded": "Ni vključeno",
-    "quotaUnlimited": "Neomejeno"
+    "quotaUnlimited": "Neomejeno",
+    "perMonth": "/mesec",
+    "freeCard": {
+      "name": "Free",
+      "price": "0 €",
+      "priceNote": "Brezplačno za vedno",
+      "features": [
+        "Koledar, termini in stranke",
+        "Storitve in osebje brez omejitev",
+        "1 uporabnik aplikacije",
+        "Uvoz strank iz Excela"
+      ],
+      "trialFeature": "Preizkus opomnikov: {sms} SMS in {email} e-pošt"
+    }
   },
   "trialModal": {
     "badge": "Brezplačna preizkušnja",
@@ -289,7 +353,7 @@
       },
       "communication": {
         "title": "Komunikacija s strankami",
-        "desc": "SMS, e-pošta in opomniki na enem mestu."
+        "desc": "Obvestila in ponudbe izbranim strankam po e-pošti."
       },
       "analytics": {
         "title": "Celotna analitika",
@@ -314,6 +378,17 @@
     "dismiss": "Skrij za danes",
     "ctaSms": "Dokupi SMS",
     "ctaEmail": "Dokupi e-pošto",
-    "emailNameLoc": "e-pošti"
+    "emailNameLoc": "e-pošti",
+    "trial": {
+      "nearLimit": {
+        "title": "Brezplačni opomniki po {nameLoc}: ostalo še {remaining} od {total}.",
+        "body": "Po tem se opomniki po tem kanalu ne pošiljajo več."
+      },
+      "exhausted": {
+        "title": "Brezplačni opomniki po {nameLoc} so porabljeni.",
+        "body": "Stranke jih ne prejemajo več. Z Jedro Plus opomniki tečejo naprej."
+      },
+      "cta": "Nadgradi na Jedro Plus"
+    }
   }
 }

@@ -15,6 +15,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { StaffPermissions } from "@/types/roles";
 import FreeTrialModal, { wasShownRecently } from "@/components/FreeTrialModal";
 import QuotaBanner from "@/components/billing/QuotaBanner";
+import { useBillingUsage } from "@/hooks/useBillingUsage";
 import { TourProvider, useOptionalTour } from "@/components/guide/TourProvider";
 import { useTranslations } from "next-intl";
 
@@ -138,8 +139,20 @@ export default function ProtectedLayout({
   const { user, loading: authLoading } = useAuth();
   const { planCode, loading: planLoading } = useCompanyPlan();
   const { role, permissions, loading: roleLoading } = useRolePermissions();
+  const { usage: billingUsage, loading: billingLoading } = useBillingUsage();
 
-  const isLoading = companyLoading || authLoading || planLoading || roleLoading;
+  // Strip locale prefix so route checks work with or without /sl/, /en/ prefix
+  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(\/|$)/, '/').replace(/\/$/, '') || '/';
+
+  // Free accounts may use reminders while their one-time free quota lasts
+  // (plans.FREE sms/email quota > 0). The gate opens only when that quota exists.
+  const isRemindersPath = pathnameWithoutLocale === '/reminders' || pathnameWithoutLocale.startsWith('/reminders/');
+  const freeReminderTrial =
+    planCode === 'FREE' && Boolean(billingUsage && (billingUsage.sms.total > 0 || billingUsage.email.total > 0));
+
+  const isLoading =
+    companyLoading || authLoading || planLoading || roleLoading ||
+    (isRemindersPath && planCode === 'FREE' && billingLoading);
 
   useEffect(() => {
     if (companyLoading || authLoading) return;
@@ -178,11 +191,9 @@ export default function ProtectedLayout({
     );
   }
 
-  // Strip locale prefix so route checks work with or without /sl/, /en/ prefix
-  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(\/|$)/, '/').replace(/\/$/, '') || '/';
-
   // ── Plan-based access gate ──────────────────────────────────────────────
-  const accessAllowed = hasAccessToRoute(pathnameWithoutLocale, planCode);
+  const accessAllowed =
+    hasAccessToRoute(pathnameWithoutLocale, planCode) || (isRemindersPath && freeReminderTrial);
   const requiredPlan = getRequiredPlan(pathnameWithoutLocale);
 
   // ── Role-based access gate ──────────────────────────────────────────────
@@ -255,7 +266,7 @@ export default function ProtectedLayout({
       <LayoutContent>
         {/* Plan is checked FIRST — it always takes precedence over role */}
         {!accessAllowed
-          ? <UpgradePlanGate requiredPlan={requiredPlan as PlanCode} hideUpgradeButton={hideUpgradeButton} />
+          ? <UpgradePlanGate requiredPlan={requiredPlan as PlanCode} hideUpgradeButton={hideUpgradeButton} pathname={pathnameWithoutLocale} />
           : roleGate
           ? roleGate
           : children}
