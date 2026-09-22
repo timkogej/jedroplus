@@ -214,6 +214,23 @@ type Maps = {
 
 // ── Aggregators (pure; operate on pre-fetched rows + maps) ───────────────────
 
+function isOpenStatus(status: string): boolean {
+  return (
+    status === "" ||
+    status.includes("scheduled") ||
+    status.includes("načrtovan") ||
+    status.includes("nacrtovan") ||
+    status.includes("confirm") ||
+    status.includes("potrj") ||
+    status.includes("pending")
+  );
+}
+
+function isRecorded(row: Row): boolean {
+  const flag = pickFirst(row, ["belezi_termin", "Beleži termin"]);
+  return flag !== false && String(flag).toLowerCase() !== "false";
+}
+
 function buildStats(
   bookings: Row[],
   clients: Row[],
@@ -224,6 +241,7 @@ function buildStats(
 ): DashboardStats {
   let todayCount = 0;
   let activeCount = 0;
+  let pastOpenCount = 0;
   let revenueThisMonth = 0;
 
   for (const row of bookings) {
@@ -235,7 +253,13 @@ function buildStats(
     if (bookingDateStr === todayStr) todayCount++;
 
     const status = String(pickFirst(row, ["status", "Status", "stanje"]) ?? "").toLowerCase();
-    if (status === "scheduled") activeCount++;
+    if (isOpenStatus(status)) {
+      // Upcoming = still to happen; past ones that were never closed are
+      // counted separately so the owner can close them (revenue counts only
+      // completed appointments).
+      if (bookingDateStr >= todayStr) activeCount++;
+      else if (bookingDateStr && isRecorded(row)) pastOpenCount++;
+    }
 
     const isCompletedStatus =
       status.includes("zaključen") ||
@@ -259,6 +283,7 @@ function buildStats(
   return {
     todayAppointments: todayCount,
     activeAppointments: activeCount,
+    pastOpenAppointments: pastOpenCount,
     newClientsThisMonth: newClientsCount,
     revenueThisMonth,
     isOwner: false,

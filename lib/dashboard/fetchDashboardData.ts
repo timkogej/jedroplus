@@ -8,6 +8,8 @@ import { normalizeCommunicationLanguage, type CommunicationLanguageCode } from "
 export interface DashboardStats {
   todayAppointments: number;
   activeAppointments: number;
+  /** Past appointments still scheduled (never completed / no-show / cancelled). */
+  pastOpenAppointments?: number;
   newClientsThisMonth: number;
   revenueThisMonth: number;
   isOwner: boolean;
@@ -512,6 +514,7 @@ async function fetchStats(companyId: string, personId?: string | null): Promise<
     let todayCount = 0;
     // 2. AKTIVNI TERMINI - Count scheduled appointments
     let activeCount = 0;
+    let pastOpenCount = 0;
     // 4. PRIHODKI TA MESEC
     let revenueThisMonth = 0;
 
@@ -543,10 +546,14 @@ async function fetchStats(companyId: string, personId?: string | null): Promise<
         todayCount++;
       }
 
-      // Count active (scheduled) appointments
+      // Upcoming vs. past-but-never-closed (see fetchDashboardData.server.ts)
       const status = String(pickFirst(row, ['status', 'Status', 'stanje']) ?? '').toLowerCase();
-      if (status === 'scheduled') {
-        activeCount++;
+      const open =
+        status === '' ||
+        ['scheduled', 'načrtovan', 'nacrtovan', 'confirm', 'potrj', 'pending'].some((s) => status.includes(s));
+      if (open) {
+        if (bookingDateStr >= todayStr) activeCount++;
+        else if (bookingDateStr && row['belezi_termin'] !== false) pastOpenCount++;
       }
 
       // Calculate revenue for this month - completed appointments only
@@ -590,6 +597,7 @@ async function fetchStats(companyId: string, personId?: string | null): Promise<
     return {
       todayAppointments: todayCount,
       activeAppointments: activeCount,
+      pastOpenAppointments: pastOpenCount,
       newClientsThisMonth: newClientsCount,
       revenueThisMonth,
       isOwner: false,

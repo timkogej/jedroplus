@@ -136,7 +136,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
   // "Past, not closed yet" view — appointments whose time has passed but are
   // still scheduled. Until they're completed, revenue and stats stay at 0.
-  const [showPastOpen, setShowPastOpen] = useState(false);
+  const [showPastOpen, setShowPastOpen] = useState(() => searchParams.get('view') === 'past-open');
 
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
@@ -313,8 +313,8 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
   }, [appointments, staffViewOwnOnly, rolePersonId]);
 
   useEffect(() => {
-    if (showPastOpen && pastOpenIds.size === 0) setShowPastOpen(false);
-  }, [showPastOpen, pastOpenIds]);
+    if (!isLoading && showPastOpen && pastOpenIds.size === 0) setShowPastOpen(false);
+  }, [isLoading, showPastOpen, pastOpenIds]);
 
   // Filter appointments
   const filteredAppointments = useMemo(() => {

@@ -1219,7 +1219,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               <MetricCard
                 title={t('metrics.activeAppointments')}
                 value={dashboardData?.stats.activeAppointments ?? 0}
-                subtitle={t('metrics.appointmentsTodaySubtitle')}
+                subtitle={t('metrics.activeSubtitle')}
                 icon={Clock}
                 iconColor="darkGray"
               />
@@ -1333,7 +1333,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               <MetricCard
                 title={t('metrics.activeAppointments')}
                 value={dashboardData?.stats.activeAppointments ?? 0}
-                subtitle={t('metrics.appointmentsTodaySubtitle')}
+                subtitle={t('metrics.activeSubtitle')}
                 icon={Clock}
                 iconColor="darkGray"
               />
@@ -1351,6 +1351,23 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                 icon={CurrencyCircleDollar}
                 iconColor="slate"
               />
+            </div>
+          )}
+
+          {(dashboardData?.stats.pastOpenAppointments ?? 0) > 0 && (
+            <div className="-mt-4 mb-8 flex flex-col gap-2 rounded-2xl bg-amber-50 px-4 py-3 ring-1 ring-amber-200 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-amber-900">
+                <span className="font-semibold">
+                  {t('metrics.pastOpen', { count: dashboardData?.stats.pastOpenAppointments ?? 0 })}
+                </span>{' '}
+                {t('metrics.pastOpenBody')}
+              </p>
+              <Link
+                href="/termini?view=past-open"
+                className="flex-shrink-0 text-sm font-semibold text-amber-900 underline underline-offset-2 hover:text-amber-700"
+              >
+                {t('metrics.pastOpenCta')}
+              </Link>
             </div>
           )}
 

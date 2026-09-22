@@ -12,11 +12,15 @@
   "metrics": {
     "appointmentsToday": "Appointments Today",
     "appointmentsTodaySubtitle": "Scheduled appointments",
-    "activeAppointments": "Active Appointments",
+    "activeAppointments": "Upcoming appointments",
     "newClients": "New Clients",
     "thisMonth": "This month",
     "revenue": "Revenue",
-    "trend": "vs previous month"
+    "trend": "vs previous month",
+    "activeSubtitle": "Scheduled from today on",
+    "pastOpen": "{count, plural, one {# past appointment is not closed yet} other {# past appointments are not closed yet}}",
+    "pastOpenBody": "Revenue only counts completed appointments.",
+    "pastOpenCta": "Close them in Appointments"
   },
   "nextAppointment": {
     "title": "Next Appointment",
