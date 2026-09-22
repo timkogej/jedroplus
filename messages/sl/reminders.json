@@ -256,7 +256,7 @@
       "timingValue": "Fiksno: Takoj po zaključenem terminu"
     },
     "smsAccess": {
-      "notIncluded": "Vaš paket ne vključuje SMS sporočil. Dokupite SMS paket ali nadgradite na Jedro Pro, ki vključuje 200 SMS na mesec.",
+      "notIncluded": "Vaš paket ne vključuje SMS sporočil. Dokupite SMS paket ali nadgradite na Jedro Pro, ki vključuje 250 SMS na mesec.",
       "notIncludedFree": "SMS opomniki so na voljo v plačljivih paketih.",
       "buySms": "Dokupi SMS",
       "comparePlans": "Primerjaj pakete",

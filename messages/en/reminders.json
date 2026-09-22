@@ -256,7 +256,7 @@
       "timingValue": "Fixed: immediately after completed appointment"
     },
     "smsAccess": {
-      "notIncluded": "Your plan doesn't include SMS messages. Buy an SMS package or upgrade to Jedro Pro, which includes 200 SMS per month.",
+      "notIncluded": "Your plan doesn't include SMS messages. Buy an SMS package or upgrade to Jedro Pro, which includes 250 SMS per month.",
       "notIncludedFree": "SMS reminders are available on paid plans.",
       "buySms": "Buy SMS",
       "comparePlans": "Compare plans",
