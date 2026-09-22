@@ -16,8 +16,8 @@ import {
   PencilSimple,
   Trash,
 } from '@phosphor-icons/react';
-import { format } from 'date-fns';
-import { sl } from 'date-fns/locale';
+import { useLocale } from 'next-intl';
+import { formatDateLong, intlLocale } from '@/lib/format';
 import type { AppointmentWithDetails } from '@/types/appointments';
 import StatusBadge from './StatusBadge';
 import { formatCurrency, formatDiscount, computeAddOnOriginalPrice } from '@/lib/formatPromotion';
@@ -94,6 +94,7 @@ function AppointmentViewModal({
   onEdit,
   onDelete,
 }: AppointmentViewModalProps) {
+  const locale = useLocale();
   if (!isOpen || !appointment) return null;
 
   const apt = appointment as unknown as Record<string, unknown>;
@@ -166,7 +167,7 @@ function AppointmentViewModal({
 
   // Format date
   const formattedDate = appointment.datum
-    ? format(new Date(appointment.datum), "d. MMMM yyyy", { locale: sl })
+    ? formatDateLong(appointment.datum, locale)
     : '-';
 
   return (
@@ -318,7 +319,7 @@ function AppointmentViewModal({
                 const imaPopust = popustVrednost > 0;
 
                 const formatPrice = (val: number) =>
-                  new Intl.NumberFormat('sl-SI', { style: 'currency', currency: currencyCode }).format(val);
+                  new Intl.NumberFormat(intlLocale(locale), { style: 'currency', currency: currencyCode }).format(val);
 
                 const badgeBg = promocijaTip === 'happy_hour' ? '#F59E0B'
                   : promocijaTip === 'add_on' ? '#3B82F6' : '#6D5EF7';

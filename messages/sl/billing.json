@@ -440,13 +440,13 @@
       "inPlan": "V paketu",
       "extra": "Dodatne",
       "total": "Skupaj",
-      "activeAddon": "+{count} dodatnih prijav · {price} / mesec",
+      "activeAddon": "+{count, plural, one {# dodatna prijava} two {# dodatni prijavi} few {# dodatne prijave} other {# dodatnih prijav}} · {price} / mesec",
       "sliderLabel": "Dodatne prijave",
-      "summary": "Skupaj {total} prijav (v paketu {included} + dodatnih {extra})",
-      "cost": "{price} / mesec za {count} dodatnih prijav ({unit} na prijavo)",
+      "summary": "Skupaj {total, plural, one {# prijava} two {# prijavi} few {# prijave} other {# prijav}} (v paketu {included} + {extra} {extra, plural, one {dodatna} two {dodatni} few {dodatne} other {dodatnih}})",
+      "cost": "{price} / mesec za {count, plural, one {# dodatno prijavo} two {# dodatni prijavi} few {# dodatne prijave} other {# dodatnih prijav}} ({unit} na prijavo)",
       "removeNote": "Ob potrditvi bo dodatek preklican.",
       "overTitle": "Pozor:",
-      "over": "V aplikacijo je prijavljenih {count} oseb več, kot jih dovoljuje nova omejitev. Pred zmanjšanjem odstranite dostop tistim, ki ga ne potrebujejo (Ekipa in dostop).",
+      "over": "V aplikacijo {count, plural, one {je prijavljena # oseba} two {sta prijavljeni # osebi} few {so prijavljene # osebe} other {je prijavljenih # oseb}} več, kot dovoljuje nova omejitev. Pred zmanjšanjem odstranite dostop tistim, ki ga ne potrebujejo (Ekipa in dostop).",
       "updating": "Posodabljam …",
       "update": "Shrani število prijav"
     },
@@ -456,6 +456,7 @@
       "purchased": "Dodatek je aktiviran. Nova sporočila so na voljo takoj.",
       "cancelError": "Preklic ni uspel. Poskusite znova.",
       "canceled": "Dodatek bo preklican ob koncu obračunskega obdobja."
-    }
+    },
+    "fromAddonsOnly": "{count} iz dodatkov (paket ne vključuje sporočil)"
   }
 }

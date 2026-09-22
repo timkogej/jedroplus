@@ -440,13 +440,13 @@
       "inPlan": "In plan",
       "extra": "Extra",
       "total": "Total",
-      "activeAddon": "+{count} extra logins · {price} / month",
+      "activeAddon": "+{count, plural, one {# extra login} other {# extra logins}} · {price} / month",
       "sliderLabel": "Extra logins",
-      "summary": "{total} logins in total ({included} in plan + {extra} extra)",
-      "cost": "{price} / month for {count} extra logins ({unit} per login)",
+      "summary": "{total, plural, one {# login} other {# logins}} in total ({included} in plan + {extra} extra)",
+      "cost": "{price} / month for {count, plural, one {# extra login} other {# extra logins}} ({unit} per login)",
       "removeNote": "The add-on will be canceled when you confirm.",
       "overTitle": "Heads up:",
-      "over": "{count} more people are logged in than the new limit allows. Remove access for anyone who doesn't need it (Team & access) before lowering it.",
+      "over": "{count, plural, one {# more person is} other {# more people are}} logged in than the new limit allows. Remove access for anyone who doesn't need it (Team & access) before lowering it.",
       "updating": "Updating …",
       "update": "Save number of logins"
     },
@@ -456,6 +456,7 @@
       "purchased": "Add-on activated. The new messages are available right away.",
       "cancelError": "Cancellation failed. Please try again.",
       "canceled": "The add-on will be canceled at the end of the billing period."
-    }
+    },
+    "fromAddonsOnly": "{count} from add-ons (your plan includes none)"
   }
 }

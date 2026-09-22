@@ -262,7 +262,7 @@ function QuotaCard({
     : includedInPlan > 0
     ? t('includedInPlan', { count: f.count(includedInPlan) })
     : addonActive > 0
-    ? null
+    ? t('fromAddonsOnly', { count: f.count(addonActive) })
     : t('includedNone');
 
   return (
@@ -274,10 +274,8 @@ function QuotaCard({
             <h3 className="text-base font-semibold tracking-tight text-gray-950">{t(`${type}.title`)}</h3>
             <p className="mt-0.5 text-xs text-gray-500">
               {includedLine}
-              {addonActive > 0 && (
-                <span className="font-medium text-[#6D5EF7]">
-                  {includedLine ? t('fromAddons', { count: f.count(addonActive) }) : `+${f.count(addonActive)}`}
-                </span>
+              {addonActive > 0 && includedInPlan > 0 && (
+                <span className="font-medium text-[#6D5EF7]">{t('fromAddons', { count: f.count(addonActive) })}</span>
               )}
             </p>
           </div>

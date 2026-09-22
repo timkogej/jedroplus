@@ -47,7 +47,7 @@ import {
 } from "@/lib/dashboard/fetchDashboardData";
 import { supabase } from "@/lib/supabaseClient";
 import { format } from "date-fns";
-import { sl } from "date-fns/locale";
+import { intlLocale } from "@/lib/format";
 import AppointmentModal, { type AppointmentFormData } from "@/components/appointments/AppointmentModal";
 import DeleteConfirmation from "@/components/appointments/DeleteConfirmation";
 import ClientModal from "@/components/clients/ClientModal";
@@ -558,7 +558,7 @@ function AppointmentDetailModal({
 // on the fallback path (e.g. first load before the company cookie is set), where
 // the shell fetches on mount exactly as before.
 export default function DashboardClient({ initialData }: { initialData: DashboardData | null }) {
-  const { money } = useFormat();
+  const { money, locale } = useFormat();
   const t = useTranslations('dashboard');
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading, reloadSettings } = useCompany();
@@ -1063,7 +1063,10 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
   }, [user]);
 
-  const todayFormatted = format(new Date(), "EEEE, d. MMMM yyyy", { locale: sl });
+  const todayFormatted = (() => {
+    const text = new Date().toLocaleDateString(intlLocale(locale), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  })();
 
   // ── Greeting based on time of day ────────────────────────────────────────
   const welcomeGreeting = useMemo(() => {
@@ -1375,7 +1378,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <AppointmentListCard
               title={t('appointmentList.todayTitle')}
-              subtitle={format(new Date(), "d. MMMM", { locale: sl })}
+              subtitle={new Date().toLocaleDateString(intlLocale(locale), { day: "numeric", month: "long" })}
               appointments={dashboardData?.todayAppointments ?? []}
               emptyMessage={t('appointmentList.todayEmpty')}
               gradientOutline
@@ -1384,7 +1387,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
             />
             <AppointmentListCard
               title={t('appointmentList.tomorrowTitle')}
-              subtitle={format(new Date(Date.now() + 86400000), "d. MMMM", { locale: sl })}
+              subtitle={new Date(Date.now() + 86400000).toLocaleDateString(intlLocale(locale), { day: "numeric", month: "long" })}
               appointments={dashboardData?.tomorrowAppointments ?? []}
               emptyMessage={t('appointmentList.tomorrowEmpty')}
               viewAllHref={`/termini?dateFrom=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}&dateTo=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}`}
