@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useFormat } from '@/hooks/useFormat';
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
@@ -123,6 +124,7 @@ function AppointmentDetailModal({
   onCancel?: (appointment: AppointmentWithDetails) => void;
   onDelete?: (appointment: AppointmentWithDetails) => void;
 }) {
+  const { money } = useFormat();
   const t = useTranslations('dashboard');
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
@@ -427,7 +429,7 @@ function AppointmentDetailModal({
                 <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
                   <span className="text-sm font-medium text-gray-700">{t('detailModal.fields.price')}</span>
                   <span className="bg-clip-text text-xl font-bold text-transparent" style={gradientTextStyle}>
-                    {Number(cena).toFixed(2)} €
+                    {money(Number(cena))}
                   </span>
                 </div>
               );
@@ -556,6 +558,7 @@ function AppointmentDetailModal({
 // on the fallback path (e.g. first load before the company cookie is set), where
 // the shell fetches on mount exactly as before.
 export default function DashboardClient({ initialData }: { initialData: DashboardData | null }) {
+  const { money } = useFormat();
   const t = useTranslations('dashboard');
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading, reloadSettings } = useCompany();
@@ -1343,7 +1346,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
               />
               <MetricCard
                 title={t('metrics.revenue')}
-                value={`${(dashboardData?.stats.revenueThisMonth ?? 0).toFixed(2)} €`}
+                value={money(dashboardData?.stats.revenueThisMonth ?? 0)}
                 subtitle={t('metrics.thisMonth')}
                 icon={CurrencyCircleDollar}
                 iconColor="slate"

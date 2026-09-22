@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
@@ -177,6 +178,7 @@ function PlanCard({
   onCta: (plan: PlanDef) => void;
   t: ReturnType<typeof useTranslations<'billing'>>;
 }) {
+  const { money } = useFormat();
   if (loading) {
     return (
       <div className="bg-white border border-gray-100 rounded-2xl p-5 animate-pulse space-y-3">
@@ -229,7 +231,7 @@ function PlanCard({
                 transition={{ duration: 0.15 }}
                 className="text-3xl font-bold gradient-text tracking-tight"
               >
-                {plan.price[billingPeriod]}€
+                {money(plan.price[billingPeriod], { whole: true })}
               </motion.span>
             </AnimatePresence>
             <span className="text-sm text-gray-500 ml-1">{t('paketi.perMonth')}</span>

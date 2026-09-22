@@ -19,7 +19,7 @@
       "communication": "Communication",
       "reminders": "Reminders",
       "reservations": "Bookings",
-      "lostLeads": "Lost Leads",
+      "lostLeads": "Lost clients",
       "receptionistPlus": "ReceptionistPlus",
       "services": "Services",
       "resources": "Resources",
@@ -64,7 +64,7 @@
       "services": "Services",
       "staff": "Staff",
       "reminders": "Reminders",
-      "lostLeads": "Lost Leads",
+      "lostLeads": "Lost clients",
       "analytics": "Analytics",
       "asistent": "Asistent+",
       "chatbotPlus": "Chatbot+",
@@ -83,9 +83,16 @@
     "categories": {
       "pages": "Pages",
       "quickActions": "Quick actions",
-      "recent": "Recent searches"
+      "recent": "Recent searches",
+      "settings": "Settings"
     },
-    "empty": "No results for \"{query}\""
+    "empty": "No results for \"{query}\"",
+    "items": {
+      "plans": "Plans & billing",
+      "addons": "Add-ons (SMS, logins)",
+      "team": "Team & access",
+      "company": "Company details"
+    }
   },
   "fallbacks": {
     "companyName": "My Company",

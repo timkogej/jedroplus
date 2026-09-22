@@ -15,7 +15,7 @@
     "quotaAvailable": "Available"
   },
   "portal": {
-    "button": "Open Billing Portal",
+    "button": "Manage payments & invoices",
     "opening": "Opening portal...",
     "note": "Manage your subscription, payment method, and invoices via the Stripe portal."
   },
@@ -49,11 +49,11 @@
     },
     "jedroPro": {
       "description": "For businesses that want more bookings and fewer empty slots",
-      "tagline": "Includes AI assistants, Lost Leads, and SMS reminders.",
+      "tagline": "Includes AI assistants, win-back of lost clients and SMS reminders.",
       "features": [
         "Everything in Jedro Plus",
         "Chatbot+",
-        "Lost Leads system",
+        "Win back lost clients",
         "SMS sending",
         "Email sending",
         "Additional online booking designs"
@@ -389,6 +389,73 @@
         "body": "Clients no longer receive them. With Jedro Plus reminders keep going."
       },
       "cta": "Upgrade to Jedro Plus"
+    }
+  },
+  "addons": {
+    "back": "Settings",
+    "title": "Add-ons & limits",
+    "subtitle": "Buy extra SMS and email messages or extra app logins. Add-ons are billed monthly together with your plan.",
+    "loadError": "Couldn't load the data. Refresh the page.",
+    "currentPlan": "Current plan",
+    "noSubscription": "No active subscription",
+    "noSubscriptionBody": "You can activate add-ons once your plan is linked to a payment profile.",
+    "perMonth": "{price} / month",
+    "period": "Billing period: {start} to {end}",
+    "freeTitle": "Free plan",
+    "freeBody": "Add-ons are available with Jedro Plus or Jedro Pro. The free plan includes a one-time trial: {sms} SMS and {email} email reminders.",
+    "freeCta": "Compare plans",
+    "noStripe": "Your subscription isn't linked to online payment, so add-ons can't be bought here. Write to {email} and we'll sort it out.",
+    "sms": {
+      "title": "SMS messages",
+      "unit": "SMS"
+    },
+    "email": {
+      "title": "Email messages",
+      "unit": "emails"
+    },
+    "includedInPlan": "{count} included in plan",
+    "includedNone": "Your plan includes no messages – add a pack below.",
+    "freeTrialIncluded": "{count} free to try (one-time)",
+    "fromAddons": " + {count} from add-ons",
+    "used": "Used",
+    "available": "Available",
+    "total": "Total",
+    "renews": "Counter resets: {date}",
+    "cancelScheduled": "Canceled – active until period end",
+    "activeAddon": "Active add-on: +{count} {unit} · {price} / month",
+    "cancel": "Cancel add-on",
+    "cancelConfirm": "Really cancel?",
+    "cancelKeep": "No",
+    "canceling": "Canceling …",
+    "extraQuota": "Extra messages every month",
+    "month": "/ month",
+    "activating": "Activating …",
+    "alreadyActive": "Already active",
+    "activate": "Activate +{count} {unit} for {price} / month",
+    "purchaseNote": "A prorated amount is added to your next plan invoice. Cancel anytime; it stays active until the period ends.",
+    "freeLocked": "Available with a paid plan.",
+    "seats": {
+      "title": "App logins",
+      "body": "How many people can log in to the app. You can add unlimited staff to the calendar.",
+      "inPlan": "In plan",
+      "extra": "Extra",
+      "total": "Total",
+      "activeAddon": "+{count} extra logins · {price} / month",
+      "sliderLabel": "Extra logins",
+      "summary": "{total} logins in total ({included} in plan + {extra} extra)",
+      "cost": "{price} / month for {count} extra logins ({unit} per login)",
+      "removeNote": "The add-on will be canceled when you confirm.",
+      "overTitle": "Heads up:",
+      "over": "{count} more people are logged in than the new limit allows. Remove access for anyone who doesn't need it (Team & access) before lowering it.",
+      "updating": "Updating …",
+      "update": "Save number of logins"
+    },
+    "toast": {
+      "noStripe": "You need a paid plan with a payment card to buy add-ons.",
+      "purchaseError": "Purchase failed. Please try again.",
+      "purchased": "Add-on activated. The new messages are available right away.",
+      "cancelError": "Cancellation failed. Please try again.",
+      "canceled": "The add-on will be canceled at the end of the billing period."
     }
   }
 }

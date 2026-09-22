@@ -391,5 +391,11 @@
     },
     "saving": "Saving...",
     "allEmployees": "All employees"
+  },
+  "ghost": {
+    "title": "Don't record this appointment",
+    "description": "Shows in the calendar but is not counted in analytics.",
+    "warning": "This appointment will not be recorded in analytics, history or the till. It is deleted automatically once completed.",
+    "badge": "Unrecorded appointment — not counted in analytics"
   }
 }

@@ -64,7 +64,7 @@
       "services": "Storitve",
       "staff": "Zaposleni",
       "reminders": "Opomniki",
-      "lostLeads": "Lost Leads",
+      "lostLeads": "Izgubljene stranke",
       "analytics": "Analitika",
       "asistent": "Asistent+",
       "chatbotPlus": "Chatbot+",
@@ -83,9 +83,16 @@
     "categories": {
       "pages": "Strani",
       "quickActions": "Hitri dostop",
-      "recent": "Nedavna iskanja"
+      "recent": "Nedavna iskanja",
+      "settings": "Nastavitve"
     },
-    "empty": "Ni rezultatov za \"{query}\""
+    "empty": "Ni rezultatov za \"{query}\"",
+    "items": {
+      "plans": "Paketi in plačila",
+      "addons": "Dodatki (SMS, prijave)",
+      "team": "Ekipa in dostop",
+      "company": "Podatki podjetja"
+    }
   },
   "fallbacks": {
     "companyName": "Moje Podjetje",

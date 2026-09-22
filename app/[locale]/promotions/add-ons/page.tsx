@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, PencilSimple, Trash, X, MagnifyingGlass } from '@phosphor-icons/react';
 import { toast } from 'sonner';
@@ -37,6 +38,7 @@ const DEFAULT_FORM: AddOnFormData = {
 };
 
 export default function AddOnsPage() {
+  const { money } = useFormat();
   const t = useTranslations('promotions');
   const tc = useTranslations('common');
   const { companyId } = useCompany();
@@ -179,10 +181,10 @@ export default function AddOnsPage() {
                 {addOns.map((ao, i) => (
                   <motion.tr key={ao.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.04 }} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                     <td className="py-3.5 px-4 font-medium text-gray-900">{ao.naziv || getServiceName(ao.storitev_id)}</td>
-                    <td className="py-3.5 px-4 text-gray-600">{ao.original_cena?.toFixed(2) ?? '-'} €</td>
-                    <td className="py-3.5 px-4 font-semibold text-gray-900">{ao.tip_popusta === 'percentage' ? `${ao.vrednost_popusta}%` : `${ao.vrednost_popusta} €`}</td>
+                    <td className="py-3.5 px-4 text-gray-600">{ao.original_cena != null ? money(ao.original_cena) : '–'}</td>
+                    <td className="py-3.5 px-4 font-semibold text-gray-900">{ao.tip_popusta === 'percentage' ? `${ao.vrednost_popusta}%` : money(ao.vrednost_popusta)}</td>
                     <td className="py-3.5 px-4 font-semibold text-gray-900">
-                      {ao.final_cena?.toFixed(2) ?? '-'} €
+                      {ao.final_cena != null ? money(ao.final_cena) : '–'}
                     </td>
                     <td className="py-3.5 px-4">
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${ao.aktiven ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
@@ -241,7 +243,7 @@ export default function AddOnsPage() {
                         return (
                           <button key={svc.id} onClick={() => { setForm((p) => ({ ...p, storitev_id: svc.id })); setServiceSearch(''); }} className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${selected ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-50'}`}>
                             <span>{naziv}</span>
-                            <span className="text-xs text-gray-400">{svc.cena?.toFixed(2)} €</span>
+                            <span className="text-xs text-gray-400">{money(svc.cena)}</span>
                           </button>
                         );
                       })}
@@ -275,10 +277,10 @@ export default function AddOnsPage() {
                   <div className="rounded-2xl border border-gray-100 bg-white p-5">
                     <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-2">{t('addOns.modal.fields.previewTitle')}</p>
                     <div className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-500 line-through">{selectedServicePrice.toFixed(2)} €</span>
+                      <span className="text-gray-500 line-through">{money(selectedServicePrice)}</span>
                       <span className="text-gray-400">→</span>
                       <span className="text-lg font-bold text-gray-900">
-                        {previewFinal.toFixed(2)} €
+                        {money(previewFinal)}
                       </span>
                     </div>
                   </div>

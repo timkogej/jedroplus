@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useEffect, useId } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -23,6 +24,7 @@ function AppointmentsByServiceChart({
   timePeriod,
   customRange,
 }: AppointmentsByServiceChartProps) {
+  const { money } = useFormat();
   const t = useTranslations('analytics');
   const [chartData, setChartData] = useState<ServiceChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -142,7 +144,7 @@ function AppointmentsByServiceChart({
                   return [
                     <div key="tooltip" className="space-y-1">
                       <div className="font-semibold">{value} {tooltipLabel}</div>
-                      <div className="text-gray-500">€{entry?.revenue.toFixed(2) || 0}</div>
+                      <div className="text-gray-500">{money(entry?.revenue ?? 0)}</div>
                       <div className="text-gray-500">{entry?.percentage}%</div>
                     </div>,
                     String(name),

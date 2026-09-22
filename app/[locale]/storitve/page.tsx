@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useFormat } from '@/hooks/useFormat';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -208,6 +209,7 @@ function Toast({
 }
 
 export default function StoritvePage() {
+  const { money } = useFormat();
   const router = useRouter();
   const { companyId, companyUuid, companySettings, planCode, loading: companyLoading } = useCompany();
   const { user } = useAuth();
@@ -724,7 +726,7 @@ export default function StoritvePage() {
               />
               <StatCard
                 icon={<CurrencyEur className="h-6 w-6" weight="regular" />}
-                value={stats.highestPrice > 0 ? `€${stats.highestPrice.toFixed(2)}` : '-'}
+                value={stats.highestPrice > 0 ? money(stats.highestPrice) : '-'}
                 label={t('stats.highestPrice')}
                 iconColor="slate"
                 delay={3}

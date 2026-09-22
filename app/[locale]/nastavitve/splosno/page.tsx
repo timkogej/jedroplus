@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'motion/react';
 import { CaretLeft, Copy, Check, Lock } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 import { QRCodeCard } from '@/components/qr/QRCodeCard';
 import {
   SettingsSection,
@@ -211,12 +212,7 @@ export default function GeneralSettingsPage() {
         {/* Language & Region */}
         <SettingsSection title={t('general.langRegion.title')} description={t('general.langRegion.subtitle')}>
           <SettingRow label={t('general.langRegion.languageLabel')} description={t('general.langRegion.languageNote')}>
-            <div className="flex items-center gap-3">
-              <Input value={t('general.langRegion.languageValue')} disabled className="bg-gray-50 cursor-not-allowed" />
-              <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="w-3.5 h-3.5" weight="bold" />
-              </div>
-            </div>
+            <PublicLanguageToggle className="text-sm" />
           </SettingRow>
 
           <SettingRow label={t('general.langRegion.regionLabel')} description={t('general.langRegion.regionNote')}>
@@ -230,7 +226,7 @@ export default function GeneralSettingsPage() {
 
           <SettingRow label={t('general.langRegion.timezoneLabel')} description={t('general.langRegion.timezoneNote')}>
             <div className="flex items-center gap-3">
-              <Input value="MT+1" disabled className="bg-gray-50 cursor-not-allowed" />
+              <Input value="Europe/Ljubljana (CET/CEST)" disabled className="bg-gray-50 cursor-not-allowed" />
               <div className="flex items-center gap-1 text-gray-400">
                 <Lock className="w-3.5 h-3.5" weight="bold" />
               </div>

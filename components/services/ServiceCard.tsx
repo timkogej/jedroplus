@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl';
 import { SERVICE_CATEGORIES } from '@/types/services';
 import type { Service } from '@/types/services';
 import { isGradient, DEFAULT_SERVICE_GRADIENT, getGradientStartColor } from '@/lib/constants/serviceGradients';
-import { formatServicePrice } from '@/lib/utils/currency';
+import { useFormat } from '@/hooks/useFormat';
 
 interface ServiceCardProps {
   service: Service;
@@ -36,6 +36,7 @@ function ServiceCard({
   canEdit = true,
   canDelete = true,
 }: ServiceCardProps) {
+  const { money } = useFormat();
   const t = useTranslations('services');
 
   // Handle both gradient strings and legacy hex colors
@@ -97,7 +98,7 @@ function ServiceCard({
             <>
               <span className="text-gray-300">|</span>
               <span className="font-medium">
-                {formatServicePrice(service.cena, service.currency)}
+                {money(service.cena, { currency: service.currency })}
               </span>
             </>
           )}

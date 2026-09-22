@@ -47,9 +47,9 @@
     },
     "langRegion": {
       "title": "Language & Region",
-      "subtitle": "Local settings (locked)",
+      "subtitle": "You can change the app language; the rest is set for Slovenia.",
       "languageLabel": "App language",
-      "languageNote": "Currently Slovenian only",
+      "languageNote": "Applies to your login on this device.",
       "languageValue": "Slovenian",
       "regionLabel": "Region",
       "regionNote": "Your geographical location",
@@ -184,7 +184,7 @@
         "can_manage_rezervacije": "Manage Reservations",
         "can_access_lost_leads": "Access to Lost Leads",
         "can_manage_lost_leads": "Manage Lost Leads",
-        "can_create_ghost_termin": "Can create ghost appointments"
+        "can_create_ghost_termin": "Can create unrecorded appointments (not counted in analytics)"
       }
     },
     "invite": {

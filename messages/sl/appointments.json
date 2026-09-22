@@ -391,5 +391,11 @@
     },
     "saving": "Shranjujem...",
     "allEmployees": "Vsi zaposleni"
+  },
+  "ghost": {
+    "title": "Ne beleži termina",
+    "description": "Termin je viden v koledarju, ne šteje pa v analitiko.",
+    "warning": "Ta termin ne bo zabeležen v analitiki, zgodovini ali blagajni. Po zaključku se samodejno izbriše.",
+    "badge": "Nebeležen termin — ne šteje v analitiko"
   }
 }

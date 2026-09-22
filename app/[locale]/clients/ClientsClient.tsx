@@ -656,7 +656,7 @@ export default function ClientsClient({
                              hover:bg-gray-50 hover:shadow-md"
                 >
                   <DownloadSimple className="h-4 w-4" weight="regular" />
-                  <span className="hidden md:inline">Import CRM</span>
+                  <span className="hidden md:inline">{t('crm.importButton')}</span>
                   <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${importDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
                 </motion.button>
 
@@ -697,7 +697,7 @@ export default function ClientsClient({
                           {t('crm.importOther')}
                         </button>
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
-                          Kmalu na voljo
+                          {t('crm.comingSoon')}
                         </span>
                       </div>
                     </motion.div>
@@ -722,7 +722,7 @@ export default function ClientsClient({
                              hover:bg-gray-50 hover:shadow-md"
                 >
                   <UploadSimple className="h-4 w-4" weight="regular" />
-                  <span className="hidden md:inline">Export CRM</span>
+                  <span className="hidden md:inline">{t('crm.exportButton')}</span>
                   <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
                 </motion.button>
 
@@ -754,7 +754,7 @@ export default function ClientsClient({
                           {t('crm.exportCsv')}
                         </button>
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
-                          Kmalu na voljo
+                          {t('crm.comingSoon')}
                         </span>
                       </div>
                       <div className="relative group">
@@ -766,7 +766,7 @@ export default function ClientsClient({
                           {t('crm.exportPdf')}
                         </button>
                         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 hidden group-hover:block whitespace-nowrap rounded-lg bg-gray-800 px-2 py-1 text-xs text-white">
-                          Kmalu na voljo
+                          {t('crm.comingSoon')}
                         </span>
                       </div>
                     </motion.div>

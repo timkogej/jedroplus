@@ -47,9 +47,9 @@
     },
     "langRegion": {
       "title": "Jezik & Regija",
-      "subtitle": "Lokalne nastavitve (zaklenjene)",
+      "subtitle": "Jezik aplikacije lahko spremenite, ostalo je nastavljeno za Slovenijo.",
       "languageLabel": "Jezik aplikacije",
-      "languageNote": "Trenutno samo slovenščina",
+      "languageNote": "Velja za vašo prijavo na tej napravi.",
       "languageValue": "Slovenščina",
       "regionLabel": "Regija",
       "regionNote": "Vaša geografska lokacija",
@@ -182,9 +182,9 @@
         "can_manage_opomniki": "Upravljanje Opomnikov",
         "can_access_rezervacije": "Dostop do Rezervacije",
         "can_manage_rezervacije": "Upravljanje Rezervacij",
-        "can_access_lost_leads": "Dostop do Lost Leads",
-        "can_manage_lost_leads": "Upravljanje Lost Leads",
-        "can_create_ghost_termin": "Lahko ustvari ghost termine"
+        "can_access_lost_leads": "Dostop do izgubljenih strank",
+        "can_manage_lost_leads": "Upravljanje izgubljenih strank",
+        "can_create_ghost_termin": "Lahko ustvari nebeležene termine (ne štejejo v analitiko)"
       }
     },
     "invite": {
