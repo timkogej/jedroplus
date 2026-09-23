@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireCompanyAccess } from '@/lib/auth/apiAuth';
+import { computeBillingUsage, NEAR_LIMIT_PERCENT } from '@/lib/billing/usage';
+import { notifyOwnerInBackground } from '@/lib/email/notifyOwner';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -97,14 +99,46 @@ export async function GET(request: NextRequest) {
       .eq('ID podjetja', company_id)
       .eq('Status', 'active');
 
-    return NextResponse.json({
+    const payload = {
       subscription,
       smsUsage,
       emailUsage,
       employeeLimits,
       activeEmployeeCount: activeEmployeeCount ?? 0,
       memberCount: memberCount ?? 0,
-    });
+    };
+
+    // Warn the owner by email when a channel is nearly or fully used up. This
+    // route is the one place that already knows the real numbers; n8n drops
+    // repeats (one mail per threshold, channel and month).
+    const usage = computeBillingUsage(payload as Parameters<typeof computeBillingUsage>[0]);
+
+    // n8n addresses companies by their text business id ("7LHB28"); this route
+    // is called with the UUID.
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(company_id);
+    let textCompanyId = company_id;
+    if (isUuid) {
+      const { data: companyRow } = await admin
+        .from('companies')
+        .select('company_id')
+        .eq('id', company_id)
+        .maybeSingle();
+      textCompanyId = (companyRow?.company_id as string | undefined) ?? '';
+    }
+
+    for (const channel of ['sms', 'email'] as const) {
+      const c = usage[channel];
+      if (c.total <= 0) continue;
+      if (textCompanyId && (c.exhausted || c.percent >= NEAR_LIMIT_PERCENT)) {
+        notifyOwnerInBackground({
+          event: 'quota_reached',
+          companyId: textCompanyId,
+          data: { channel, used: c.used, total: c.total },
+        });
+      }
+    }
+
+    return NextResponse.json(payload);
   } catch (e) {
     console.error('[api/addons/status]', e);
     return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 });
