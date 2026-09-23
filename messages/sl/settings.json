@@ -122,6 +122,25 @@
       "saved": "Shranjeno ✓",
       "cancel": "Prekliči",
       "saveError": "Prišlo je do napake pri shranjevanju"
+    },
+    "logo": {
+      "title": "Logotip",
+      "subtitle": "Logotip vidijo stranke na strani za naročanje in v obrazcu za vpis strank.",
+      "emptyState": "Logotip ni naložen. Brez njega se prikaže ime podjetja, kar je povsem v redu.",
+      "upload": "Naloži logotip",
+      "replace": "Zamenjaj logotip",
+      "remove": "Odstrani",
+      "requirements": "PNG, SVG ali WEBP s prozornim ozadjem, do 1 MB.",
+      "previewAlt": "Predogled logotipa",
+      "previewNote": "Tako bo videti na svetlih in na temnih dizajnih strani za naročanje.",
+      "opaqueTitle": "Ta logotip nima prozornega ozadja.",
+      "opaqueBody": "Na temnih dizajnih bo okoli njega viden bel pravokotnik. Bolje je naložiti različico brez ozadja (PNG ali SVG) ali pustiti samo ime podjetja.",
+      "helpPrefix": "Za pomoč pri pripravi logotipa nam pišite na",
+      "errors": {
+        "tooLarge": "Datoteka je prevelika. Največ 1 MB.",
+        "unsupported": "Ta vrsta datoteke ni podprta. Uporabite PNG, SVG, WEBP ali JPG.",
+        "failed": "Nalaganje ni uspelo. Poskusite znova."
+      }
     }
   },
   "members": {
