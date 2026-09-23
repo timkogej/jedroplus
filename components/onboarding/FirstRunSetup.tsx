@@ -79,6 +79,8 @@ export default function FirstRunSetup({ onCreateAppointment, onSeeded }: FirstRu
         .then(() => {
           clearSeedPlan(companyUuid);
           markSetupReady(companyUuid);
+          // Welcome email — once per company, sent by n8n.
+          fetch('/api/email/welcome', { method: 'POST' }).catch(() => {});
           return true;
         })
         .catch((error) => {
