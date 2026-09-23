@@ -20,6 +20,7 @@ import { callN8nAction } from '@/src/lib/n8nClient';
 import type { WorkingHoursDay, TimeInterval } from '@/types/settings';
 import { defaultWorkingHoursDay } from '@/types/settings';
 import { useMarkVisited } from '@/hooks/useMarkVisited';
+import CompanyLogoSection from '@/components/settings/CompanyLogoSection';
 
 const DAYS_OF_WEEK = [
   'Ponedeljek',
@@ -45,6 +46,7 @@ const DAY_KEYS: Record<string, 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | '
 export default function CompanySettingsPage() {
   useMarkVisited('workingHours');
   const t = useTranslations('settings');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const tc = useTranslations('common');
   const { companyId } = useCompany();
   const { user } = useAuth();
@@ -130,6 +132,7 @@ export default function CompanySettingsPage() {
           setPhone(String(data['Kontaktni telefon'] ?? data['kontaktni_telefon'] ?? ''));
           setEmail(String(data['Kontaktni_email'] ?? data['kontaktni_email'] ?? ''));
           setWebsite(String(data['Spletna stran'] ?? data['spletna_stran'] ?? ''));
+          setLogoUrl(typeof data['logo_url'] === 'string' && data['logo_url'] ? String(data['logo_url']) : null);
 
           // Parse working hours - support both legacy and new interval format
           const urnikData = data['Urnik'] ?? data['urnik'];
@@ -323,6 +326,8 @@ export default function CompanySettingsPage() {
         </SettingsSection>
 
         {/* Contact Info */}
+        <CompanyLogoSection initialUrl={logoUrl} />
+
         <SettingsSection title={t('company.contact.title')} description={t('company.contact.subtitle')}>
           <SettingRow
             label={t('company.contact.addressLabel')}

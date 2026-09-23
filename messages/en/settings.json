@@ -122,6 +122,25 @@
       "saved": "Saved ✓",
       "cancel": "Cancel",
       "saveError": "An error occurred while saving"
+    },
+    "logo": {
+      "title": "Logo",
+      "subtitle": "Clients see your logo on the booking page and on the client sign-up form.",
+      "emptyState": "No logo uploaded. Without one we show the company name, which looks fine too.",
+      "upload": "Upload logo",
+      "replace": "Replace logo",
+      "remove": "Remove",
+      "requirements": "PNG, SVG or WEBP with a transparent background, up to 1 MB.",
+      "previewAlt": "Logo preview",
+      "previewNote": "This is how it looks on the light and dark booking designs.",
+      "opaqueTitle": "This logo has no transparent background.",
+      "opaqueBody": "On the dark designs it will show as a white rectangle. Better to upload a cut-out version (PNG or SVG), or keep just the company name.",
+      "helpPrefix": "For help preparing a logo, write to us at",
+      "errors": {
+        "tooLarge": "File is too large. Maximum 1 MB.",
+        "unsupported": "That file type isn't supported. Use PNG, SVG, WEBP or JPG.",
+        "failed": "Upload failed. Please try again."
+      }
     }
   },
   "members": {
