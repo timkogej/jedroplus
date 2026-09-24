@@ -84,6 +84,16 @@
       "subtitle": "Za pult ali vrata: stranka skenira kodo in se sama vpiše med vaše stranke. Termina s tem ne rezervira.",
       "noSlug": "Slug podjetja ni nastavljen.",
       "caption": "Za spletno naročanje na termin uporabite povezavo na strani Rezervacije."
+    },
+    "legal": {
+      "title": "Pravni dokumenti",
+      "subtitle": "Pogoji, pod katerimi uporabljate Jedro+, in kako obdelujemo podatke.",
+      "docs": {
+        "terms": "Splošni pogoji uporabe",
+        "privacy": "Politika zasebnosti",
+        "dpa": "Pogodba o obdelavi osebnih podatkov",
+        "subprocessors": "Podobdelovalci"
+      }
     }
   },
   "company": {

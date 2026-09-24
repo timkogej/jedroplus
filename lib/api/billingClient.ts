@@ -237,7 +237,6 @@ export interface BillingStatusResult {
     name: string;
     booking_url?: string;
     chatbot_url?: string;
-    twilio_phone_number?: string;
   };
   subscription?: BillingStatusSubscription;
   plan?: BillingStatusPlan;

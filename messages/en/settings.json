@@ -84,6 +84,16 @@
       "subtitle": "For your front desk or door: clients scan it and add themselves to your client list. It does not book an appointment.",
       "noSlug": "Company slug not set.",
       "caption": "For online booking, use the link on the Bookings page."
+    },
+    "legal": {
+      "title": "Legal documents",
+      "subtitle": "The terms under which you use Jedro+ and how we process data.",
+      "docs": {
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "dpa": "Data Processing Agreement",
+        "subprocessors": "Sub-processors"
+      }
     }
   },
   "company": {

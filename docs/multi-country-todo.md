@@ -11,6 +11,9 @@
       (jezik klicatelja, obvestilo o snemanju, varno dodajanje kreditov ob nakupu).
 - [ ] Zaženi `supabase/migrations/1790600000_company_vat_verification.sql`
       (vat_verified, vat_verified_at, vat_verified_name na "Podatki podjetij").
+- [ ] Zaženi `supabase/migrations/1790700000_retention_cleanup.sql` (nočno brisanje prepisov
+      klicev po 90 dneh in SMS dnevnika po 12 mesecih). Pred tem v Supabase vklopi
+      Database → Extensions → **pg_cron**.
 
 ## Vercel (neobvezno)
 - [ ] `UNSUBSCRIBE_SECRET` = naključen dolg niz (brez njega se ključ izpelje iz service role ključa).
@@ -51,17 +54,24 @@ Jedro+ **ni zavezanec za DDV** → cene so končne, DDV se ne obračuna.
       »DDV ni obračunan na podlagi 1. odstavka 94. člena ZDDV-1.«
 - [ ] Z računovodjo preveri **identifikacijo za DDV** (78. člen ZDDV-1): potrebna je, ko
       prodajaš storitve podjetjem v drugih državah EU ali kupuješ storitve iz tujine
-      (Stripe, Supabase, Vercel, Twilio …), čeprav nisi zavezanec. Takrat na račune tujim
+      (Stripe, Supabase, Vercel, Telnyx …), čeprav nisi zavezanec. Takrat na račune tujim
       podjetjem pride še »obrnjena davčna obveznost« in oddajaš rekapitulacijsko poročilo.
 - [ ] Ko preideš prag (v SI 60.000 € prometa na leto) in postaneš zavezanec: vklopi Stripe Tax
       + OSS, `STRIPE_AUTOMATIC_TAX=1`, v n8n checkout `automatic_tax` / `tax_id_collection`,
       in zamenjaj besedilo `billing.paketi.vatNote`. Preverjanje DDV številk (VIES) je že pripravljeno.
 - [ ] n8n `/billing/checkout/start`: `locale` iz zahteve → Stripe Checkout `locale`.
 
-## Pravni dokumenti
-- [ ] Splošni pogoji, politika zasebnosti, pogodba o obdelavi podatkov (DPA) in seznam
-      podobdelovalcev (Supabase, Stripe, BulkGate, Twilio, AI ponudnik, e-pošta) v
-      sl, en, de, hr, it. Ko so objavljeni, mi pošlji povezave – dodam jih v prijavo in nastavitve.
+## Pravni dokumenti (napisani: /legal/<jezik>/<dokument>)
+- [ ] Pravnik naj pregleda `lib/legal/content/sl.ts` (zavezujoča različica). Po pregledu v
+      `lib/legal/facts.ts` nastavi `LEGAL_REVIEWED = true` (izgine oznaka »Osnutek«).
+- [ ] Obstoječim lastnikom pošlji e-pošto s povezavami na nove dokumente (veljajo 30 dni po obvestilu).
+- [ ] Pri vsakem podobdelovalcu sprejmi njihov DPA (večinoma v nastavitvah računa):
+      Supabase, Vercel, Hetzner, Upstash, AWS, BulkGate, Stripe, Telnyx, Soniox, ElevenLabs,
+      Anthropic, OpenAI.
+- [ ] Nastavi hrambo posnetkov/podatkov na največ 90 dni (ali brez hrambe) pri Telnyx,
+      ElevenLabs in Soniox; pri OpenAI/Anthropic preveri, da API podatkov ne uporablja za učenje.
+- [ ] Brisanje podatkov 90 dni po koncu naročnine: zaenkrat ročno (ali n8n tok) – obljubljeno v dokumentih.
+- [ ] Sentry je odstranjen iz kode: v Vercel izbriši `SENTRY_*` spremenljivke in projekt v Sentry.
 
 ## Receptionist+ (glasovni del – kjerkoli teče: n8n / Vapi / …)
 - [ ] Beri `receptionist_settings.language` (`sl`/`en`/`de`/`hr`/`it`) in nastavi temu jeziku
@@ -74,7 +84,7 @@ Jedro+ **ni zavezanec za DDV** → cene so končne, DDV se ne obračuna.
 - [ ] Klicatelja poveži s stranko po številki v E.164 (normaliziraj `From` in `Stranke.telefon`).
 - [ ] Odštevanje kreditov za klice naj bo atomarno (`balance_credits = balance_credits - x`),
       ne »preberi → odštej → zapiši«.
-- [ ] Telefonske številke za tujino (Twilio): za DE/AT/IT/HR Twilio zahteva regulatorne
+- [ ] Telefonske številke za tujino (Telnyx): za DE/AT/IT/HR Telnyx zahteva regulatorne
       dokumente (naslov, dokazilo o podjetju) – pripravi jih pred prvim tujim salonom.
 
 ## Odločitve

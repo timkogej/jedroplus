@@ -23,6 +23,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { sendWebhook, WEBHOOK_EVENTS } from '@/components/utils/webhookUtils';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { COUNTRIES, CURRENCIES, listTimeZones, regionForCountry } from '@/lib/region';
+import { LEGAL_DOCS, legalPath } from '@/lib/legal/paths';
 import { saveCompanyRegion, useCompanyRegion, type RegionPatch } from '@/lib/hooks/useCompanyRegion';
 
 export default function GeneralSettingsPage() {
@@ -429,6 +430,24 @@ export default function GeneralSettingsPage() {
               {t('general.qr.caption')}
             </p>
           </div>
+        </SettingsSection>
+
+        {/* Legal documents */}
+        <SettingsSection title={t('general.legal.title')} description={t('general.legal.subtitle')}>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {LEGAL_DOCS.map((doc) => (
+              <li key={doc}>
+                <a
+                  href={legalPath(doc, locale)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-lg border border-gray-100 px-3 py-2.5 text-sm font-medium text-gray-700 hover:border-gray-200 hover:text-gray-900"
+                >
+                  {t(`general.legal.docs.${doc}`)}
+                </a>
+              </li>
+            ))}
+          </ul>
         </SettingsSection>
       </motion.div>
     </div>
