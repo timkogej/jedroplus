@@ -335,7 +335,8 @@
         "Uvoz strank iz Excela"
       ],
       "trialFeature": "Preizkus opomnikov: {sms} SMS in {email} e-pošt"
-    }
+    },
+    "vatNote": "Cene so končne. DDV ni obračunan, ker Jedro+ ni zavezanec za DDV."
   },
   "trialModal": {
     "badge": "Brezplačna preizkušnja",

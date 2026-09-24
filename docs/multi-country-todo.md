@@ -45,18 +45,18 @@
 - [ ] BulkGate: preveri, da je ime pošiljatelja (Sender ID) odobreno za HR, AT, DE, IT.
 
 ## Plačila in DDV (Stripe)
-- [ ] Stripe Dashboard → Tax: vklopi Stripe Tax, vpiši registracijo DDV v SI in **OSS**
-      (prodaja podjetjem brez DDV številke v drugih državah EU).
-- [ ] Vercel: `STRIPE_AUTOMATIC_TAX=1` šele, ko je Stripe Tax nastavljen (sicer nakup kreditov
-      Receptionist+ ne dela). Vklopi DDV, vnos DDV številke kupca, naslov in račun.
-- [ ] n8n `/billing/checkout/start` (naročnine):
-      - `locale` iz zahteve → Stripe Checkout `locale`;
-      - `automatic_tax: { enabled: true }`, `tax_id_collection: { enabled: true }`,
-        `billing_address_collection: 'required'`;
-      - Stripe stranki nastavi naslov (država iz `"Podatki podjetij".country_code`) in,
-        če je `vat_verified = true`, `tax_ids: [{ type: 'eu_vat', value: "Davčna številka" }]`.
-- [ ] Cene v Stripe: odloči, ali so z DDV ali brez (glej spodaj) in nastavi
-      `tax_behavior` (`inclusive` / `exclusive`) na vseh Price objektih.
+Jedro+ **ni zavezanec za DDV** → cene so končne, DDV se ne obračuna.
+- [ ] **Ne** vklapljaj Stripe Tax in **ne** nastavljaj `STRIPE_AUTOMATIC_TAX=1`, dokler ne postaneš zavezanec.
+- [ ] Stripe → Settings → Invoices: v nogo računa dodaj
+      »DDV ni obračunan na podlagi 1. odstavka 94. člena ZDDV-1.«
+- [ ] Z računovodjo preveri **identifikacijo za DDV** (78. člen ZDDV-1): potrebna je, ko
+      prodajaš storitve podjetjem v drugih državah EU ali kupuješ storitve iz tujine
+      (Stripe, Supabase, Vercel, Twilio …), čeprav nisi zavezanec. Takrat na račune tujim
+      podjetjem pride še »obrnjena davčna obveznost« in oddajaš rekapitulacijsko poročilo.
+- [ ] Ko preideš prag (v SI 60.000 € prometa na leto) in postaneš zavezanec: vklopi Stripe Tax
+      + OSS, `STRIPE_AUTOMATIC_TAX=1`, v n8n checkout `automatic_tax` / `tax_id_collection`,
+      in zamenjaj besedilo `billing.paketi.vatNote`. Preverjanje DDV številk (VIES) je že pripravljeno.
+- [ ] n8n `/billing/checkout/start`: `locale` iz zahteve → Stripe Checkout `locale`.
 
 ## Pravni dokumenti
 - [ ] Splošni pogoji, politika zasebnosti, pogodba o obdelavi podatkov (DPA) in seznam

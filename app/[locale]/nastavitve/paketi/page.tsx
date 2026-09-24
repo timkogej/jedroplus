@@ -863,6 +863,7 @@ export default function PaketiPage() {
             />
           ))}
         </div>
+        <p className="mt-2 text-xs text-gray-400">{t('paketi.vatNote')}</p>
       </div>
 
       {/* Enterprise modal */}

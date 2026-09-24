@@ -99,7 +99,7 @@
       "industryNote": "Your company's line of business",
       "industryPlaceholder": "e.g. Hairdressing, Cosmetics, Fitness...",
       "taxLabel": "VAT number",
-      "taxNote": "Company VAT number with the country prefix (e.g. DE123456789). Needed for the right VAT on invoices."
+      "taxNote": "Company VAT number, if you have one (with the country prefix, e.g. DE123456789)."
     },
     "contact": {
       "title": "Contact details",

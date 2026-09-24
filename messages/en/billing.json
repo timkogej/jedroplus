@@ -335,7 +335,8 @@
         "Import clients from Excel"
       ],
       "trialFeature": "Reminder trial: {sms} SMS and {email} emails"
-    }
+    },
+    "vatNote": "Prices are final. No VAT is charged — Jedro+ is not registered for VAT."
   },
   "trialModal": {
     "badge": "Free trial",
