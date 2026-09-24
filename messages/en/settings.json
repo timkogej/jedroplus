@@ -99,7 +99,7 @@
       "industryNote": "Your company's line of business",
       "industryPlaceholder": "e.g. Hairdressing, Cosmetics, Fitness...",
       "taxLabel": "VAT number",
-      "taxNote": "Company VAT number"
+      "taxNote": "Company VAT number with the country prefix (e.g. DE123456789). Needed for the right VAT on invoices."
     },
     "contact": {
       "title": "Contact details",
@@ -144,6 +144,15 @@
         "unsupported": "That file type isn't supported. Use PNG, SVG, WEBP or JPG.",
         "failed": "Upload failed. Please try again."
       }
+    },
+    "vat": {
+      "check": "Check in the EU register (VIES)",
+      "checking": "Checking…",
+      "valid": "Valid VAT number",
+      "validWithName": "Valid VAT number – {name}",
+      "invalid": "This number isn't in the EU VAT register.",
+      "badFormat": "That doesn't look like a VAT number (e.g. DE123456789).",
+      "unavailable": "The EU register isn't responding. Please try again later."
     }
   },
   "members": {

@@ -85,7 +85,22 @@ export async function POST(request: NextRequest) {
 
   const origin = request.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL ?? '';
 
+  // STRIPE_AUTOMATIC_TAX=1 once Stripe Tax is set up in the dashboard (it
+  // fails without it): VAT by the buyer's country, reverse charge for a valid
+  // EU VAT number the buyer enters, billing address, and an invoice.
+  const taxAndInvoice: Partial<Stripe.Checkout.SessionCreateParams> =
+    process.env.STRIPE_AUTOMATIC_TAX === '1'
+      ? {
+          automatic_tax: { enabled: true },
+          tax_id_collection: { enabled: true },
+          billing_address_collection: 'required',
+          customer_creation: 'always',
+          invoice_creation: { enabled: true },
+        }
+      : {};
+
   const session = await stripe.checkout.sessions.create({
+    ...taxAndInvoice,
     mode: 'payment',
     line_items: [{ price: packConfig.priceId, quantity: 1 }],
     locale: STRIPE_LOCALES[locale] ?? 'auto',

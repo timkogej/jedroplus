@@ -99,7 +99,7 @@
       "industryNote": "Dejavnost vašega podjetja",
       "industryPlaceholder": "npr. Frizerstvo, Kozmetika, Fitness...",
       "taxLabel": "Davčna številka",
-      "taxNote": "Davčna številka podjetja"
+      "taxNote": "DDV številka podjetja (z oznako države, npr. SI12345678). Potrebna za pravilen DDV na računih."
     },
     "contact": {
       "title": "Kontaktni podatki",
@@ -144,6 +144,15 @@
         "unsupported": "Ta vrsta datoteke ni podprta. Uporabite PNG, SVG, WEBP ali JPG.",
         "failed": "Nalaganje ni uspelo. Poskusite znova."
       }
+    },
+    "vat": {
+      "check": "Preveri v registru EU (VIES)",
+      "checking": "Preverjam…",
+      "valid": "Veljavna DDV številka",
+      "validWithName": "Veljavna DDV številka – {name}",
+      "invalid": "Številka ni vpisana v register DDV zavezancev EU.",
+      "badFormat": "Oblika ni prava za DDV številko (npr. SI12345678).",
+      "unavailable": "Register EU trenutno ne odgovarja. Poskusite znova pozneje."
     }
   },
   "members": {

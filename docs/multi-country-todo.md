@@ -9,6 +9,8 @@
       (države za SMS + funkcija `sms_allowed()`, tabela `sms_log`).
 - [ ] Zaženi `supabase/migrations/1790500000_receptionist_languages_and_credits.sql`
       (jezik klicatelja, obvestilo o snemanju, varno dodajanje kreditov ob nakupu).
+- [ ] Zaženi `supabase/migrations/1790600000_company_vat_verification.sql`
+      (vat_verified, vat_verified_at, vat_verified_name na "Podatki podjetij").
 
 ## Vercel (neobvezno)
 - [ ] `UNSUBSCRIBE_SECRET` = naključen dolg niz (brez njega se ključ izpelje iz service role ključa).
@@ -41,6 +43,25 @@
 - [ ] BulkGate portal: nastavi URL za poročila o dostavi (delivery report webhook) na nov n8n webhook,
       ki po `bulkgate_sms_id` posodobi `sms_log.status` na `delivered` ali `failed` (+ `error`, `updated_at = now()`).
 - [ ] BulkGate: preveri, da je ime pošiljatelja (Sender ID) odobreno za HR, AT, DE, IT.
+
+## Plačila in DDV (Stripe)
+- [ ] Stripe Dashboard → Tax: vklopi Stripe Tax, vpiši registracijo DDV v SI in **OSS**
+      (prodaja podjetjem brez DDV številke v drugih državah EU).
+- [ ] Vercel: `STRIPE_AUTOMATIC_TAX=1` šele, ko je Stripe Tax nastavljen (sicer nakup kreditov
+      Receptionist+ ne dela). Vklopi DDV, vnos DDV številke kupca, naslov in račun.
+- [ ] n8n `/billing/checkout/start` (naročnine):
+      - `locale` iz zahteve → Stripe Checkout `locale`;
+      - `automatic_tax: { enabled: true }`, `tax_id_collection: { enabled: true }`,
+        `billing_address_collection: 'required'`;
+      - Stripe stranki nastavi naslov (država iz `"Podatki podjetij".country_code`) in,
+        če je `vat_verified = true`, `tax_ids: [{ type: 'eu_vat', value: "Davčna številka" }]`.
+- [ ] Cene v Stripe: odloči, ali so z DDV ali brez (glej spodaj) in nastavi
+      `tax_behavior` (`inclusive` / `exclusive`) na vseh Price objektih.
+
+## Pravni dokumenti
+- [ ] Splošni pogoji, politika zasebnosti, pogodba o obdelavi podatkov (DPA) in seznam
+      podobdelovalcev (Supabase, Stripe, BulkGate, Twilio, AI ponudnik, e-pošta) v
+      sl, en, de, hr, it. Ko so objavljeni, mi pošlji povezave – dodam jih v prijavo in nastavitve.
 
 ## Receptionist+ (glasovni del – kjerkoli teče: n8n / Vapi / …)
 - [ ] Beri `receptionist_settings.language` (`sl`/`en`/`de`/`hr`/`it`) in nastavi temu jeziku

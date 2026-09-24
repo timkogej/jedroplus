@@ -313,6 +313,13 @@ function toAppUrl(pathOrUrl: string): string {
  * Body: { company_id, plan_code, success_url, cancel_url }
  * Response: { ok: true, checkout_url: "https://checkout.stripe.com/..." }
  */
+/** The app locale from the URL ("/en/…" → "en"); Slovenian by default. */
+function currentLocale(): string {
+  if (typeof window === 'undefined') return 'sl';
+  const match = window.location.pathname.match(/^\/([a-z]{2})(\/|$)/);
+  return match?.[1] ?? 'sl';
+}
+
 export async function startCheckout(
   companyUuid: string,
   planCode: string,
@@ -330,6 +337,8 @@ export async function startCheckout(
       company_id: companyUuid,
       plan_code: planCode,
       billing_period: billingPeriod,
+      // n8n passes it to Stripe Checkout so the owner pays in their language.
+      locale: currentLocale(),
       success_url: urls.successUrl ?? `${toAppUrl(urls.successPath ?? '/billing/success')}?${successQuery}`,
       cancel_url: urls.cancelUrl ?? `${toAppUrl(urls.cancelPath ?? '/billing/cancel')}${cancelQuery}`
     })

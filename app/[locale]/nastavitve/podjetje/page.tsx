@@ -21,6 +21,8 @@ import type { WorkingHoursDay, TimeInterval } from '@/types/settings';
 import { defaultWorkingHoursDay } from '@/types/settings';
 import { useMarkVisited } from '@/hooks/useMarkVisited';
 import CompanyLogoSection from '@/components/settings/CompanyLogoSection';
+import { VatVerify } from '@/components/settings/VatVerify';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
 
 const DAYS_OF_WEEK = [
   'Ponedeljek',
@@ -49,12 +51,14 @@ export default function CompanySettingsPage() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const tc = useTranslations('common');
   const { companyId } = useCompany();
+  const region = useCompanyRegion();
   const { user } = useAuth();
 
   // Company data from "Podatki podjetij" table
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState(''); // Panoga
   const [taxNumber, setTaxNumber] = useState('');
+  const [vatVerified, setVatVerified] = useState<boolean | null>(null);
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -128,6 +132,7 @@ export default function CompanySettingsPage() {
           setCompanyName(String(data['Naziv podjetja'] ?? data['naziv_podjetja'] ?? data['Naziv Podjetja'] ?? ''));
           setIndustry(String(data['Panoga'] ?? data['panoga'] ?? ''));
           setTaxNumber(String(data['Davčna številka'] ?? data['davcna_stevilka'] ?? ''));
+          setVatVerified(typeof data['vat_verified'] === 'boolean' ? data['vat_verified'] : null);
           setAddress(String(data['Naslov podjetja'] ?? data['naslov_podjetja'] ?? ''));
           setPhone(String(data['Kontaktni telefon'] ?? data['kontaktni_telefon'] ?? ''));
           setEmail(String(data['Kontaktni_email'] ?? data['kontaktni_email'] ?? ''));
@@ -320,8 +325,9 @@ export default function CompanySettingsPage() {
             <Input
               value={taxNumber}
               onChange={(e) => setTaxNumber(e.target.value)}
-              placeholder="SI12345678"
+              placeholder={`${region.countryCode === 'GR' ? 'EL' : region.countryCode}12345678`}
             />
+            {!isLoading && <VatVerify vat={taxNumber} initiallyVerified={vatVerified} />}
           </SettingRow>
         </SettingsSection>
 
