@@ -1,0 +1,162 @@
+{
+  "layout": {
+    "title": "Promocije",
+    "subtitle": "Upravljajte popustima, happy hourom i dodatnim uslugama",
+    "tabs": {
+      "discounts": "Popusti",
+      "happyHours": "Happy hour",
+      "addOns": "Dodatne usluge"
+    }
+  },
+  "shared": {
+    "discountType": {
+      "percentage": "Postotak (%)",
+      "fixed": "Fiksni iznos (€)"
+    },
+    "serviceSearch": "Pretraži usluge...",
+    "noServices": "Nema usluga",
+    "activeLabel": "Aktivan",
+    "saveButton": "Spremi",
+    "createButton": "Izradi",
+    "cancelButton": "Odustani",
+    "deleteButton": "Izbriši",
+    "cannotUndo": "Ova se radnja ne može poništiti.",
+    "valueUnit": {
+      "percentage": "(%)",
+      "fixed": "(€)"
+    }
+  },
+  "discounts": {
+    "search": "Pretraži popuste...",
+    "newButton": "Novi popust",
+    "table": {
+      "name": "Naziv",
+      "services": "Usluge",
+      "discount": "Popust",
+      "dateFrom": "Datum od",
+      "dateTo": "Datum do",
+      "status": "Status",
+      "actions": "Radnje"
+    },
+    "empty": "Nema popusta. Izradite prvi!",
+    "serviceCount": "{count, plural, one {# usluga} few {# usluge} other {# usluga}}",
+    "modal": {
+      "createTitle": "Novi popust",
+      "editTitle": "Uredi popust",
+      "fields": {
+        "name": "Naziv",
+        "namePlaceholder": "Npr. Ljetni popust",
+        "type": "Vrsta popusta",
+        "value": "Vrijednost {unit}",
+        "dateFrom": "Datum početka",
+        "dateTo": "Datum završetka",
+        "services": "Usluge (odabrano: {count})"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Izbrisati popust?"
+    },
+    "toasts": {
+      "created": "Popust je izrađen",
+      "updated": "Popust je ažuriran",
+      "deleted": "Popust je izbrisan",
+      "loadError": "Pogreška pri učitavanju popusta",
+      "saveError": "Pogreška pri spremanju",
+      "deleteError": "Pogreška pri brisanju",
+      "updateError": "Pogreška pri ažuriranju",
+      "nameRequired": "Naziv je obavezan",
+      "valueRequired": "Vrijednost mora biti veća od 0",
+      "percentMax": "Postotak ne smije biti veći od 100",
+      "dateOrder": "Datum završetka mora biti nakon datuma početka",
+      "serviceRequired": "Odaberite barem jednu uslugu"
+    }
+  },
+  "addOns": {
+    "count": "{count, plural, one {# dodatna usluga} few {# dodatne usluge} other {# dodatnih usluga}}",
+    "newButton": "Nova dodatna usluga",
+    "table": {
+      "service": "Usluga",
+      "originalPrice": "Izvorna cijena",
+      "discount": "Popust",
+      "finalPrice": "Cijena s popustom",
+      "status": "Status",
+      "actions": "Radnje"
+    },
+    "empty": "Nema dodatnih usluga. Izradite prvu!",
+    "modal": {
+      "createTitle": "Nova dodatna usluga",
+      "editTitle": "Uredi dodatnu uslugu",
+      "fields": {
+        "service": "Usluga",
+        "type": "Vrsta popusta",
+        "value": "Vrijednost",
+        "active": "Aktivno",
+        "previewTitle": "Pregled"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Izbrisati dodatnu uslugu?"
+    },
+    "toasts": {
+      "created": "Dodatna usluga je izrađena",
+      "updated": "Dodatna usluga je ažurirana",
+      "deleted": "Dodatna usluga je izbrisana",
+      "loadError": "Pogreška pri učitavanju",
+      "saveError": "Pogreška pri spremanju",
+      "deleteError": "Pogreška pri brisanju",
+      "genericError": "Pogreška",
+      "valueRequired": "Vrijednost mora biti veća od 0",
+      "percentMax": "Postotak ne smije biti veći od 100",
+      "serviceRequired": "Odaberite uslugu"
+    }
+  },
+  "happyHours": {
+    "count": "Happy hour: {count}",
+    "newButton": "Novi happy hour",
+    "table": {
+      "name": "Naziv",
+      "days": "Dani",
+      "time": "Vrijeme",
+      "discount": "Popust",
+      "services": "Usluge",
+      "status": "Status",
+      "actions": "Radnje"
+    },
+    "servicesAll": "Sve",
+    "empty": "Nema happy houra. Izradite prvi!",
+    "modal": {
+      "createTitle": "Novi happy hour",
+      "editTitle": "Uredi happy hour",
+      "fields": {
+        "name": "Naziv",
+        "namePlaceholder": "Npr. Poslijepodnevni happy hour",
+        "days": "Dani u tjednu",
+        "timeFrom": "Vrijeme od",
+        "timeTo": "Vrijeme do",
+        "type": "Vrsta popusta",
+        "value": "Vrijednost",
+        "services": "Usluge",
+        "allServices": "Sve usluge"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Izbrisati happy hour?"
+    },
+    "toasts": {
+      "created": "Happy hour je izrađen",
+      "updated": "Happy hour je ažuriran",
+      "deleted": "Happy hour je izbrisan",
+      "loadError": "Pogreška pri učitavanju",
+      "saveError": "Pogreška pri spremanju",
+      "deleteError": "Pogreška pri brisanju",
+      "genericError": "Pogreška",
+      "nameRequired": "Naziv je obavezan",
+      "dayRequired": "Odaberite barem jedan dan",
+      "timeRequired": "Vrijeme je obavezno",
+      "timeOrder": "Vrijeme završetka mora biti nakon vremena početka",
+      "valueRequired": "Vrijednost mora biti veća od 0",
+      "percentMax": "Postotak ne smije biti veći od 100",
+      "serviceRequired": "Odaberite barem jednu uslugu"
+    }
+  }
+}

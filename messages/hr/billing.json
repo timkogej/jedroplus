@@ -1,0 +1,463 @@
+{
+  "page": {
+    "pageTitle": "Paketi"
+  },
+  "currentPlan": {
+    "label": "Trenutačni paket",
+    "subscriptionDetails": "Pojedinosti pretplate",
+    "statusLabel": "Status",
+    "statusActive": "Aktivna",
+    "renewalLabel": "Sljedeća obnova",
+    "freeLabel": "Besplatni",
+    "smsQuota": "SMS kvota",
+    "emailQuota": "Kvota e-pošte",
+    "quotaUsed": "Potrošeno",
+    "quotaAvailable": "Dostupno"
+  },
+  "portal": {
+    "button": "Upravljaj plaćanjima i računima",
+    "opening": "Otvaranje portala...",
+    "note": "Upravljajte pretplatom, načinom plaćanja i računima putem sigurnog Stripe portala."
+  },
+  "toggle": {
+    "monthly": "Mjesečno",
+    "yearly": "Godišnje"
+  },
+  "plans": {
+    "mostPopular": "Najpopularniji",
+    "customPricing": "po dogovoru",
+    "perMonth": "/ mjesečno",
+    "contactUs": "Kontaktirajte nas",
+    "ctaLoading": "Učitavanje...",
+    "ctaCurrentPlan": "Trenutačni paket",
+    "ctaSendInquiry": "Pošalji upit",
+    "ctaTryFree": "Isprobaj besplatno",
+    "ctaSelectPlan": "Odaberi paket",
+    "jedroPlus": {
+      "description": "Za tvrtke koje žele uređen sustav i jasan pregled",
+      "tagline": "Kalendar, baze i podsjetnici koji bez komplikacija uređuju svakodnevicu.",
+      "features": [
+        "Baza klijenata i termina",
+        "Baza usluga i zaposlenika",
+        "Personalizirani podsjetnici prije i nakon termina",
+        "Slanje e-pošte",
+        "Cjelovita analitika",
+        "Online naručivanje",
+        "Različiti dizajni online naručivanja",
+        "Asistent+"
+      ]
+    },
+    "jedroPro": {
+      "description": "Za tvrtke koje žele veću popunjenost i manje praznih termina",
+      "tagline": "Uključuje AI pomoćnike, vraćanje izgubljenih klijenata i SMS podsjetnike.",
+      "features": [
+        "Sve iz paketa Jedro Plus",
+        "Chatbot+",
+        "Vraćanje izgubljenih klijenata",
+        "Slanje SMS-a",
+        "Slanje e-pošte",
+        "Dodatni dizajni online naručivanja"
+      ]
+    },
+    "jedroPremium": {
+      "description": "Za tvrtke koje žele maksimalnu automatizaciju",
+      "tagline": "Cjelovit skup AI funkcija za rast i komunikaciju.",
+      "features": [
+        "Sve iz paketa Jedro Pro",
+        "Receptionist+",
+        "Slanje SMS-a (viša kvota)",
+        "Slanje e-pošte (viša kvota)",
+        "Premium dizajn online naručivanja",
+        "Premium dizajn chatbota"
+      ]
+    },
+    "enterprise": {
+      "description": "Za tvrtke s posebnim zahtjevima i prilagodbama",
+      "tagline": "Prilagođene funkcije, AI i okruženje za rezervacije.",
+      "features": [
+        "AI funkcije prilagođene tvrtki",
+        "Premium stranica za rezervacije",
+        "Različite poveznice za rezervacije",
+        "Dodatni zahtjevi po mjeri"
+      ]
+    }
+  },
+  "footer": {
+    "questions": "Imate pitanja? Javite nam se na",
+    "quotaQuestion": "Želite veću kvotu ili više zaposlenika? Pišite nam na"
+  },
+  "enterpriseModal": {
+    "title": "Enterprise upit",
+    "subtitle": "Pošaljite nam svoje zahtjeve i javit ćemo vam se",
+    "successTitle": "Upit je poslan!",
+    "successMessage": "Javit ćemo vam se u najkraćem mogućem roku.",
+    "closeButton": "Zatvori",
+    "cancelButton": "Odustani",
+    "submitButton": "Pošalji upit",
+    "submittingButton": "Slanje...",
+    "fields": {
+      "fullName": "Ime i prezime",
+      "email": "E-pošta",
+      "phone": "Telefon",
+      "companyName": "Naziv tvrtke",
+      "employeeCount": "Broj zaposlenika",
+      "requirements": "Vaši zahtjevi i potrebe"
+    },
+    "placeholders": {
+      "fullName": "Ivan Horvat",
+      "email": "ivan@tvrtka.hr",
+      "phone": "+385 91 234 5678",
+      "companyName": "Tvrtka d.o.o.",
+      "employeeCount": "npr. 10–50",
+      "requirements": "Opišite svoje specifične potrebe, integracije, prilagodbe..."
+    }
+  },
+  "errors": {
+    "companyNotSet": "Tvrtka nije postavljena. Molimo prijavite se ponovno.",
+    "portalError": "Došlo je do pogreške pri otvaranju portala za plaćanja",
+    "serverError": "Došlo je do pogreške u vezi s poslužiteljem",
+    "invalidCheckoutUrl": "Nevaljan URL za plaćanje. Molimo pokušajte ponovno.",
+    "checkoutError": "Došlo je do pogreške pri pokretanju plaćanja",
+    "companyDataError": "Došlo je do pogreške pri dohvaćanju podataka o tvrtki",
+    "errorLabel": "Pogreška"
+  },
+  "success": {
+    "missingSession": {
+      "title": "Nedostaje ID sesije",
+      "message": "Došlo je do pogreške pri potvrdi plaćanja. Molimo provjerite e-poštu za potvrdu.",
+      "backButton": "Natrag na pakete"
+    },
+    "verifying": {
+      "title": "Potvrđujemo plaćanje...",
+      "message": "Aktiviramo vaš paket. Molimo pričekajte trenutak.",
+      "progressLabel": "Provjera...",
+      "timeRemaining": "Preostalo {seconds} s"
+    },
+    "complete": {
+      "title": "Plaćanje je uspjelo!",
+      "subtitle": "Hvala vam na pretplati.",
+      "yourPlan": "Vaš paket:",
+      "whatsNext": "Što slijedi?",
+      "emailConfirmation": "Potvrdu ćete primiti na e-poštu {email}",
+      "smsReset": "SMS kvota je ponovno postavljena",
+      "backToBilling": "Paketi",
+      "dashboard": "Nadzorna ploča"
+    },
+    "timeout": {
+      "title": "Obrada plaćanja",
+      "message": "Vaše se plaćanje još obrađuje. To može potrajati nekoliko trenutaka. Provjerite e-poštu za potvrdu ili pokušajte ponovno.",
+      "retryButton": "Pokušaj ponovno",
+      "backButton": "Natrag"
+    },
+    "error": {
+      "title": "Pogreška",
+      "message": "Došlo je do pogreške pri potvrdi plaćanja. Molimo kontaktirajte podršku.",
+      "backButton": "Natrag na pakete"
+    },
+    "loading": "Učitavanje..."
+  },
+  "cancel": {
+    "title": "Kupnja je otkazana",
+    "message": "Vaša je kupnja otkazana. Na vašem računu nije napravljena nikakva promjena.",
+    "backButton": "Natrag na naplatu",
+    "dashboardButton": "Nastavi na nadzornu ploču"
+  },
+  "featureGate": {
+    "upgradeRequired": "Nadogradite za pristup",
+    "requiresPlan": "Ova funkcija zahtijeva paket {plan} ili viši.",
+    "viewPlans": "Pogledaj pakete",
+    "planNames": {
+      "free": "Besplatno",
+      "basic": "Basic",
+      "pro": "Pro",
+      "premium": "Premium"
+    }
+  },
+  "upgradePlanGate": {
+    "heading": "Ova funkcija zahtijeva paket {plan}",
+    "subtitle": "Nadogradite svoj paket kako biste otključali ovu funkciju i iskoristili puni potencijal platforme Jedro+.",
+    "upgradeButton": "Nadogradi paket",
+    "hint": "Pogledajte sve dostupne pakete i odaberite onaj koji vam odgovara.",
+    "badge": "Paket {plan}",
+    "includedIn": "Uključeno u paket {plan}",
+    "price": "{monthly} € mjesečno · {annual} € mjesečno uz godišnje plaćanje",
+    "comparePlans": "Usporedi pakete",
+    "back": "Natrag na početak",
+    "ownerOnly": "Paket može nadograditi vlasnik računa u Postavke → Paketi.",
+    "features": {
+      "reminders": {
+        "title": "Podsjetnici koji smanjuju nedolaske",
+        "lead": "Klijente automatski podsjećamo na termin prije posjeta i zahvaljujemo im nakon njega. Bez telefoniranja i bez ručnog slanja.",
+        "p1": "Podsjetnik e-poštom ili SMS-om dan prije termina",
+        "p2": "Poruka nakon termina, po želji s popustom za sljedeći posjet",
+        "p3": "Vlastiti predložak ili osobna poruka koju sastavlja AI"
+      },
+      "booking": {
+        "title": "Klijenti se naručuju sami",
+        "lead": "Podijelite poveznicu ili QR kod i klijenti sami biraju termin, čak i u deset navečer. Vi dobivate obavijest i termin u kalendaru.",
+        "p1": "Poveznica za Instagram, web-stranicu i potpis e-pošte",
+        "p2": "Više dizajna stranice za naručivanje",
+        "p3": "Zahtjeve za termin možete pregledati prije potvrde"
+      },
+      "communication": {
+        "title": "Poruke klijentima na jednom mjestu",
+        "lead": "Pošaljite obavijest ili ponudu odabranim klijentima: svima, današnjima ili onima s određenom uslugom.",
+        "p1": "Odabir klijenata prema terminima i filtrima",
+        "p2": "Slanje e-poštom iz jednog prozora",
+        "p3": "AI pomaže sastaviti tekst"
+      },
+      "analytics": {
+        "title": "Pogledajte kako posluje vaš salon",
+        "lead": "Prihod, popunjenost, najtraženije usluge i uspješnost tima u jednom pregledu.",
+        "p1": "Prihod i broj termina po razdobljima",
+        "p2": "Najpopularnije usluge i zaposlenici",
+        "p3": "Rast baze klijenata"
+      },
+      "lostLeads": {
+        "title": "Vratite klijente koji nisu došli",
+        "lead": "Sustav sam prepoznaje klijente koji dugo nisu imali termin i šalje im osobni poziv da se vrate.",
+        "p1": "Automatsko prepoznavanje neaktivnih klijenata",
+        "p2": "Osobna poruka koju sastavlja AI",
+        "p3": "Bez ručnog traženja i slanja"
+      },
+      "ai": {
+        "title": "AI pomoćnici",
+        "lead": "Pametni pomoćnici za rad s klijentima i terminima.",
+        "p1": "Odgovaranje na česta pitanja",
+        "p2": "Pomoć s terminima i klijentima",
+        "p3": "Prilagođeno vašoj tvrtki"
+      }
+    }
+  },
+  "roleAccessGate": {
+    "title": "Pristup ograničen",
+    "defaultMessage": "Nemate pristup ovoj stranici. Obratite se vlasniku tvrtke.",
+    "billingOwnerOnly": "Stranica 'Paketi' dostupna je samo vlasniku tvrtke.",
+    "receptionistPlusOwnerOnly": "Stranica 'ReceptionistPlus' dostupna je samo vlasniku tvrtke.",
+    "staffRestricted": "Ova je funkcija za vaš račun onemogućena. Za pristup se obratite vlasniku tvrtke."
+  },
+  "paketi": {
+    "title": "Paketi",
+    "subtitle": "Pregled vašeg paketa i potrošnje",
+    "currentBadge": "Trenutačni",
+    "recommendedBadge": "Preporučeno",
+    "renewalLabel": "Sljedeća obnova",
+    "upgradeButton": "Nadogradi",
+    "maxUsersLabel": "Najveći broj korisnika aplikacije",
+    "currentTeamLabel": "Trenutačno u timu",
+    "usageTitle": "Potrošnja ovog mjeseca",
+    "availablePlans": "Dostupni paketi",
+    "customPricing": "Po dogovoru",
+    "billingPeriod": {
+      "monthly": "Mjesečno",
+      "yearly": "Godišnje",
+      "billedYearly": "Naplaćuje se godišnje"
+    },
+    "quotaLabels": {
+      "sms": "SMS poruke",
+      "email": "Poruke e-pošte",
+      "teamMembers": "Aktivni članovi tima",
+      "clients": "Klijenti",
+      "appointments": "Termini ovaj mjesec"
+    },
+    "planDescriptions": {
+      "jedroPlus": "Uključuje podsjetnike, e-poštu, online naručivanje i analitiku. SMS možete dokupiti.",
+      "jedroPro": "Uključuje SMS, izgubljene klijente i napredne funkcije.",
+      "enterprise": "Prilagođeni paket za posebne poslovne potrebe.",
+      "free": "Zauvijek besplatno: kalendar, termini, klijenti, usluge i zaposlenici."
+    },
+    "planButtons": {
+      "active": "Aktivan",
+      "sendInquiry": "Pošalji upit",
+      "upgrade": "Nadogradi"
+    },
+    "enterpriseModal": {
+      "title": "Upit za Enterprise",
+      "subtitle": "Opišite svoje potrebe i odgovorit ćemo vam u najkraćem mogućem roku.",
+      "submitButton": "Pošalji upit",
+      "submittingButton": "Slanje...",
+      "cancelButton": "Odustani",
+      "fields": {
+        "fullName": "Ime i prezime",
+        "email": "E-pošta",
+        "phone": "Telefon",
+        "message": "Poruka",
+        "messagePlaceholder": "Opišite što trebate..."
+      },
+      "sendFailed": "Slanje nije uspjelo. Pišite nam izravno na <email>timkogej@jedroplus.com</email>."
+    },
+    "inquiryToast": "Upit je poslan. Uskoro ćemo vam se javiti.",
+    "plans": {
+      "jedroPlus": {
+        "features": [
+          "Baza klijenata i termina",
+          "Baza usluga i zaposlenika",
+          "Personalizirani podsjetnici prije i nakon termina",
+          "Slanje e-pošte (500 poruka/mjesečno)",
+          "SMS podsjetnici uz dokupljene SMS pakete (od 4 € za 50 SMS-ova)",
+          "Komunikacija",
+          "Cjelovita analitika",
+          "Online naručivanje",
+          "Različiti dizajni online naručivanja"
+        ]
+      },
+      "jedroPro": {
+        "features": [
+          "Sve iz paketa Jedro Plus",
+          "Obavještavanje izgubljenih klijenata",
+          "Slanje SMS-a (250 SMS-ova/mjesečno)",
+          "Slanje e-pošte (2000 poruka/mjesečno)",
+          "Dodatni dizajni online naručivanja"
+        ]
+      },
+      "enterprise": {
+        "features": [
+          "AI funkcije po mjeri (chatbot, asistent, recepcionar i više)",
+          "Dizajni za rezervacije po mjeri s obradom slika i naprednim elementima",
+          "Automatizacija poslovnih procesa po mjeri",
+          "Neograničena kvota e-pošte i SMS-a",
+          "Posvećeni voditelj i prioritetna podrška"
+        ]
+      }
+    },
+    "freeRenewal": "Besplatno, bez obnove",
+    "quotaNotIncluded": "Nije uključeno",
+    "quotaUnlimited": "Neograničeno",
+    "perMonth": "/mjesečno",
+    "freeCard": {
+      "name": "Free",
+      "price": "0 €",
+      "priceNote": "Zauvijek besplatno",
+      "features": [
+        "Kalendar, termini i klijenti",
+        "Usluge i zaposlenici bez ograničenja",
+        "1 korisnik aplikacije",
+        "Uvoz klijenata iz Excela"
+      ],
+      "trialFeature": "Proba podsjetnika: {sms} SMS i {email} e-poruka"
+    },
+    "vatNote": "Cijene su konačne. PDV se ne obračunava jer Jedro+ nije obveznik PDV-a."
+  },
+  "trialModal": {
+    "badge": "Besplatna proba",
+    "title": "Iskoristite besplatnu probu paketa Jedro Plus",
+    "subtitle": "Sve što vam treba za uređeno poslovanje — bez rizika, bez obveza.",
+    "featuresTitle": "Što dobivate uz Jedro Plus",
+    "features": {
+      "reminders": {
+        "title": "Personalizirani podsjetnici",
+        "desc": "Automatski podsjetnici klijentima prije i nakon svakog termina — bez ručnog rada."
+      },
+      "booking": {
+        "title": "Online naručivanje i različiti dizajni",
+        "desc": "Poveznica za rezervacije s odabirom dizajna — klijenti se naručuju sami, bilo kada."
+      },
+      "communication": {
+        "title": "Komunikacija s klijentima",
+        "desc": "Obavijesti i ponude odabranim klijentima putem e-pošte."
+      },
+      "analytics": {
+        "title": "Cjelovita analitika",
+        "desc": "Pregled prihoda, popunjenosti, rasta broja klijenata i uspješnosti poslovanja."
+      }
+    },
+    "cta": "Isprobaj besplatno",
+    "later": "Možda kasnije",
+    "close": "Zatvori"
+  },
+  "quotaBanner": {
+    "emailName": "E-pošta",
+    "nearLimit": {
+      "title": "{name}: potrošeno {used} od {total}.",
+      "body": "Kada kvota ponestane, poruke i podsjetnici tim se kanalom više ne šalju."
+    },
+    "exhausted": {
+      "title": "{name}: podsjetnici i poruke se ne šalju.",
+      "body": "Potrošili ste svih {total} u ovom razdoblju ({used}/{total}), pa ih klijenti ne primaju."
+    },
+    "alsoOther": "I druga je kvota gotovo ili potpuno potrošena.",
+    "dismiss": "Sakrij za danas",
+    "ctaSms": "Dokupi SMS",
+    "ctaEmail": "Dokupi e-poštu",
+    "emailNameLoc": "e-pošta",
+    "trial": {
+      "nearLimit": {
+        "title": "Besplatni podsjetnici ({name}): preostalo je još {remaining} od {total}.",
+        "body": "Nakon toga se podsjetnici tim kanalom više ne šalju."
+      },
+      "exhausted": {
+        "title": "Besplatni podsjetnici ({name}) su potrošeni.",
+        "body": "Klijenti ih više ne primaju. Uz Jedro Plus podsjetnici se nastavljaju slati."
+      },
+      "cta": "Nadogradi na Jedro Plus"
+    }
+  },
+  "addons": {
+    "back": "Postavke",
+    "title": "Dodaci i kvote",
+    "subtitle": "Dokupite SMS poruke i poruke e-pošte ili dodatne prijave u aplikaciju. Dodaci se naplaćuju mjesečno zajedno s paketom.",
+    "loadError": "Podatke nije bilo moguće učitati. Osvježite stranicu.",
+    "currentPlan": "Trenutačni paket",
+    "noSubscription": "Nema aktivne pretplate",
+    "noSubscriptionBody": "Dodatke možete aktivirati kada je paket povezan s profilom za plaćanje.",
+    "perMonth": "{price} / mjesečno",
+    "period": "Obračunsko razdoblje: od {start} do {end}",
+    "freeTitle": "Besplatni paket",
+    "freeBody": "Dodatke je moguće kupiti uz paket Jedro Plus ili Jedro Pro. Besplatni paket uključuje jednokratnu probu: {sms} SMS i {email} podsjetnika e-poštom.",
+    "freeCta": "Usporedi pakete",
+    "noStripe": "Vaša pretplata nije povezana s online plaćanjem pa ovdje nije moguće kupiti dodatke. Pišite nam na {email} i riješit ćemo to.",
+    "sms": {
+      "title": "SMS poruke",
+      "unit": "SMS"
+    },
+    "email": {
+      "title": "Poruke e-pošte",
+      "unit": "e-poruka"
+    },
+    "includedInPlan": "{count} u paketu",
+    "includedNone": "Paket ne uključuje poruke – dodajte ih paketom u nastavku.",
+    "freeTrialIncluded": "{count} besplatno za probu (jednokratno)",
+    "fromAddons": " + {count} iz dodataka",
+    "used": "Potrošeno",
+    "available": "Dostupno",
+    "total": "Ukupno",
+    "renews": "Brojač se ponovno postavlja: {date}",
+    "cancelScheduled": "Otkazano – vrijedi do kraja razdoblja",
+    "activeAddon": "Aktivan dodatak: +{count} {unit} · {price} / mjesečno",
+    "cancel": "Otkaži dodatak",
+    "cancelConfirm": "Zaista otkazati?",
+    "cancelKeep": "Ne",
+    "canceling": "Otkazivanje …",
+    "extraQuota": "Dodatne poruke svaki mjesec",
+    "month": "/ mjesečno",
+    "activating": "Aktiviranje …",
+    "alreadyActive": "Već je aktivan",
+    "activate": "Aktiviraj +{count} {unit} za {price} / mjesečno",
+    "purchaseNote": "Iznos se razmjerno dodaje sljedećem računu za paket. Otkazati možete bilo kada, a otkaz vrijedi do kraja razdoblja.",
+    "freeLocked": "Dostupno uz plaćeni paket.",
+    "seats": {
+      "title": "Prijave u aplikaciju",
+      "body": "Koliko se osoba može prijaviti u aplikaciju. Zaposlenike u kalendaru možete dodavati bez ograničenja.",
+      "inPlan": "U paketu",
+      "extra": "Dodatne",
+      "total": "Ukupno",
+      "activeAddon": "+{count, plural, one {# dodatna prijava} few {# dodatne prijave} other {# dodatnih prijava}} · {price} / mjesečno",
+      "sliderLabel": "Dodatne prijave",
+      "summary": "Ukupno {total, plural, one {# prijava} few {# prijave} other {# prijava}} (u paketu {included} + {extra} {extra, plural, one {dodatna} few {dodatne} other {dodatnih}})",
+      "cost": "{price} / mjesečno za {count, plural, one {# dodatnu prijavu} few {# dodatne prijave} other {# dodatnih prijava}} ({unit} po prijavi)",
+      "removeNote": "Nakon potvrde dodatak će biti otkazan.",
+      "overTitle": "Pozor:",
+      "over": "U aplikaciji {count, plural, one {je prijavljena # osoba} few {su prijavljene # osobe} other {je prijavljeno # osoba}} više nego što dopušta novo ograničenje. Prije smanjenja uklonite pristup onima kojima nije potreban (Tim i pristup).",
+      "updating": "Ažuriranje …",
+      "update": "Spremi broj prijava"
+    },
+    "toast": {
+      "noStripe": "Za kupnju dodataka trebate plaćeni paket s platnom karticom.",
+      "purchaseError": "Kupnja nije uspjela. Pokušajte ponovno.",
+      "purchased": "Dodatak je aktiviran. Nove poruke dostupne su odmah.",
+      "cancelError": "Otkazivanje nije uspjelo. Pokušajte ponovno.",
+      "canceled": "Dodatak će biti otkazan na kraju obračunskog razdoblja."
+    },
+    "fromAddonsOnly": "{count} iz dodataka (paket ne uključuje poruke)"
+  }
+}

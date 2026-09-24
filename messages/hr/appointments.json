@@ -1,0 +1,484 @@
+{
+  "status": {
+    "scheduled": "Zakazan",
+    "confirmed": "Potvrđen",
+    "pending": "Na čekanju",
+    "completed": "Završen",
+    "cancelled": "Otkazan",
+    "noShow": "Nije došao/la"
+  },
+  "page": {
+    "title": "Termini",
+    "subtitle": "Upravljajte svim terminima na jednom mjestu",
+    "newAppointment": "Novi termin",
+    "stats": {
+      "thisMonth": "Termini ovaj mjesec",
+      "today": "Danas",
+      "upcoming": "Nadolazeći"
+    },
+    "disabledCreateMessage": "Vlasnik tvrtke onemogućio je izradu novih termina. Obratite mu se da vam to omogući."
+  },
+  "completeModal": {
+    "title": "Završetak termina",
+    "subtitle": "Potvrdite završetak termina",
+    "client": "Klijent",
+    "service": "Usluga",
+    "employee": "Osoba",
+    "date": "Datum",
+    "time": "Vrijeme",
+    "notesLabel": "Poruka klijentu ili upute nakon termina",
+    "notesPlaceholder": "Unesite poruku ili upute nakon završenog termina (neobavezno)...",
+    "cancel": "Odustani",
+    "completing": "Završavanje...",
+    "confirm": "Završi"
+  },
+  "deleteModal": {
+    "title": "Izbriši termin",
+    "message": "Jeste li sigurni da želite izbrisati ovaj termin?"
+  },
+  "deleteConfirmation": {
+    "areYouSure": "Jeste li sigurni?",
+    "unknownClient": "Nepoznat klijent",
+    "irreversible": "Ova je radnja nepovratna!",
+    "cancel": "Odustani",
+    "deleting": "Brisanje...",
+    "deleteButton": "Izbriši termin"
+  },
+  "toast": {
+    "noShow": "Termin je označen kao nedolazak",
+    "cancelled": "Termin je uspješno otkazan",
+    "completed": "Termin je uspješno završen"
+  },
+  "errors": {
+    "loadError": "Došlo je do pogreške pri učitavanju podataka.",
+    "saveError": "Došlo je do pogreške pri spremanju termina.",
+    "deleteError": "Došlo je do pogreške pri brisanju termina.",
+    "completeError": "Došlo je do pogreške pri završavanju termina.",
+    "noShowError": "Došlo je do pogreške pri označavanju nedolaska.",
+    "cancelError": "Došlo je do pogreške pri otkazivanju termina.",
+    "clientCreateError": "Došlo je do pogreške pri dodavanju klijenta"
+  },
+  "disabledModal": {
+    "title": "Radnja je onemogućena",
+    "defaultMessage": "Vlasnik tvrtke onemogućio je ovu radnju. Obratite mu se da vam je omogući.",
+    "button": "Razumijem"
+  },
+  "modal": {
+    "title": {
+      "create": "Novi termin",
+      "edit": "Uredi termin",
+      "view": "Pojedinosti termina"
+    },
+    "emptyState": {
+      "message": "Za dodavanje termina trebate barem jednu uslugu i jednog zaposlenika.",
+      "addService": "Dodaj uslugu",
+      "addEmployee": "Dodaj zaposlenika",
+      "close": "Zatvori"
+    },
+    "fields": {
+      "client": "Klijent",
+      "service": "Usluga",
+      "service2": "Usluga 2",
+      "service3": "Usluga 3",
+      "employee": "Zaposlenik",
+      "date": "Datum",
+      "startTime": "Vrijeme početka",
+      "endTime": "Vrijeme završetka",
+      "status": "Status",
+      "price": "Cijena",
+      "notes": "Bilješke",
+      "internalNotes": "Interne bilješke",
+      "communicationLanguage": "Jezik komunikacije",
+      "phone": "Telefon"
+    },
+    "placeholders": {
+      "service": "Odaberite uslugu",
+      "service2": "Odaberite drugu uslugu",
+      "service3": "Odaberite treću uslugu",
+      "employee": "Odaberite zaposlenika",
+      "status": "Odaberite status"
+    },
+    "totalDuration": "Ukupno trajanje:",
+    "remove": "Ukloni",
+    "addService": "Dodaj uslugu",
+    "appointmentDuration": "Trajanje termina",
+    "duration": "{mins, plural, one {# minuta} few {# minute} other {# minuta}}",
+    "promotions": {
+      "discountSuffix": "popust"
+    },
+    "price": {
+      "original": "Izvorna cijena",
+      "discount": "Popust",
+      "withDiscount": "Cijena s popustom",
+      "addOnLabel": "Dodatna usluga",
+      "addOnFallback": "Dodatna usluga"
+    },
+    "discount": {
+      "add": "Dodaj popust",
+      "lower": "Snizi cijenu termina",
+      "amount": "Iznos",
+      "type": "Vrsta",
+      "final": "Konačna cijena"
+    },
+    "notesPlaceholder": "Bilješke za klijenta...",
+    "notesHint": "Bilješke se koriste u podsjetnicima i porukama",
+    "internalNotesPlaceholder": "Interne bilješke (ne šalju se klijentu)...",
+    "addInternalNotes": "+ Interne bilješke",
+    "actions": {
+      "cancel": "Odustani",
+      "create": "Izradi",
+      "save": "Spremi"
+    },
+    "validation": {
+      "dateRequired": "Datum je obavezan",
+      "startTimeRequired": "Vrijeme početka je obavezno",
+      "endTimeRequired": "Vrijeme završetka je obavezno",
+      "endTimeAfterStart": "Vrijeme završetka mora biti nakon vremena početka",
+      "clientRequired": "Klijent je obavezan",
+      "serviceRequired": "Usluga je obavezna",
+      "employeeRequired": "Zaposlenik je obavezan"
+    },
+    "resourceConflict": {
+      "busyTitle": "Resurs je zauzet",
+      "unavailableTitle": "Resurs nije dostupan",
+      "checkTitle": "Provjerite dostupnost resursa",
+      "unavailableAt": "{name}: nije dostupno u to vrijeme",
+      "capacity": "{name}: zauzeto {used}/{max} mjesta",
+      "saveAnyway": "Termin ipak možete spremiti."
+    }
+  },
+  "table": {
+    "headers": {
+      "date": "Datum",
+      "time": "Vrijeme",
+      "client": "Klijent",
+      "service": "Usluga",
+      "employee": "Zaposlenik",
+      "status": "Status",
+      "actions": "Radnje"
+    },
+    "empty": {
+      "title": "Nema termina",
+      "message": "Trenutačno nema termina za prikaz. Dodajte novi termin ili promijenite filtre."
+    },
+    "actions": {
+      "complete": "Završi termin",
+      "view": "Pojedinosti",
+      "edit": "Uredi",
+      "moreOptions": "Više mogućnosti",
+      "cancel": "Otkaži",
+      "delete": "Izbriši"
+    },
+    "pagination": {
+      "of": "od"
+    }
+  },
+  "filters": {
+    "status": {
+      "all": "Svi statusi"
+    },
+    "searchPlaceholder": "Pretraži po imenu klijenta, usluzi...",
+    "button": "Filtri",
+    "clear": "Očisti",
+    "employeeLabel": "Zaposlenik",
+    "serviceLabel": "Usluga",
+    "dateFromLabel": "Datum od",
+    "dateToLabel": "Datum do",
+    "employeePlaceholder": "Zaposlenik",
+    "allEmployees": "Svi zaposlenici",
+    "allServices": "Sve usluge",
+    "activeStatus": "Status: {label}",
+    "activeEmployee": "Zaposlenik: {name}",
+    "activeService": "Usluga: {name}",
+    "activeFrom": "Od: {date}",
+    "activeTo": "Do: {date}"
+  },
+  "calendarView": {
+    "viewModes": {
+      "day": "Dan",
+      "week": "Tjedan",
+      "month": "Mjesec",
+      "threeDays": "3 dana"
+    },
+    "sidebar": {
+      "newEvent": "Događaj",
+      "newAbsence": "Odsutnost",
+      "searchPlaceholder": "Pretraži termine...",
+      "filters": "Filtri",
+      "displayDays": "Prikaz dana",
+      "showAllDays": "Prikaži sve dane",
+      "weekdaysOnly": "Samo radni dani",
+      "employeesSection": "Zaposlenici",
+      "servicesSection": "Usluge",
+      "legend": "Legenda usluga",
+      "noServices": "Nema usluga za prikaz",
+      "prevMonth": "Prethodni mjesec",
+      "nextMonth": "Sljedeći mjesec"
+    },
+    "eventModal": {
+      "titles": {
+        "create": "Novi događaj",
+        "edit": "Uredi događaj"
+      },
+      "subtitles": {
+        "create": "Dodajte novi događaj u kalendar",
+        "edit": "Ažurirajte podatke o događaju"
+      },
+      "fields": {
+        "title": "Naslov događaja *",
+        "titlePlaceholder": "npr. Sastanak s klijentom...",
+        "startDate": "Datum početka *",
+        "endDate": "Datum završetka",
+        "allDay": "Cjelodnevni događaj",
+        "startTime": "Vrijeme početka",
+        "endTime": "Vrijeme završetka",
+        "timePlaceholder": "Odaberite vrijeme",
+        "color": "Boja događaja",
+        "description": "Opis",
+        "descriptionPlaceholder": "Opći opis događaja...",
+        "notes": "Bilješke",
+        "notesPlaceholder": "Interne bilješke...",
+        "location": "Lokacija",
+        "locationPlaceholder": "npr. Salon, Zoom, Zagreb...",
+        "visibleInCalendar": "Vidljivo u kalendaru",
+        "allowBooking": "Omogući rezervaciju termina"
+      },
+      "validation": {
+        "titleRequired": "Naslov događaja je obavezan",
+        "startDateRequired": "Datum početka je obavezan",
+        "endDateBeforeStart": "Datum završetka ne smije biti prije datuma početka",
+        "endTimeAfterStart": "Vrijeme završetka mora biti nakon vremena početka",
+        "colorRequired": "Odaberite boju događaja"
+      },
+      "actions": {
+        "delete": "Izbriši",
+        "edit": "Uredi",
+        "cancel": "Odustani",
+        "save": "Spremi",
+        "confirmDelete": "Potvrditi brisanje?",
+        "confirmYes": "Da, izbriši",
+        "saving": "Spremanje...",
+        "update": "Ažuriraj"
+      }
+    },
+    "absenceModal": {
+      "title": "Dodaj odsutnost",
+      "subtitle": "Označite dane ili sate odsutnosti zaposlenika",
+      "absenceLabel": "Odsutnost",
+      "fields": {
+        "employee": "Zaposlenik",
+        "hoursOnly": "Samo sati",
+        "multipleDays": "Više dana",
+        "date": "Datum",
+        "dateFrom": "Od datuma",
+        "dateTo": "Do datuma",
+        "timeFrom": "Od",
+        "timeTo": "Do",
+        "timePlaceholder": "Odaberite vrijeme",
+        "reason": "Razlog (neobavezno)",
+        "reasonPlaceholder": "Razlog odsutnosti...",
+        "reasonExample": "npr. Bolovanje, godišnji odmor..."
+      },
+      "validation": {
+        "employeeRequired": "Odaberite zaposlenika",
+        "startDateRequired": "Odaberite datum početka",
+        "endDateRequired": "Odaberite datum završetka",
+        "endDateAfterStart": "Datum završetka mora biti nakon datuma početka",
+        "endTimeAfterStart": "Vrijeme završetka mora biti nakon vremena početka"
+      },
+      "actions": {
+        "cancel": "Odustani",
+        "saving": "Spremanje...",
+        "save": "Spremi odsutnost"
+      }
+    },
+    "absenceDetailModal": {
+      "subtitle": "Odsutnost",
+      "actions": {
+        "deleteAbsence": "Izbriši odsutnost",
+        "editAbsence": "Uredi odsutnost",
+        "saveChanges": "Spremi promjene",
+        "confirmYes": "Da",
+        "confirmNo": "Ne"
+      }
+    },
+    "appointmentModal": {
+      "subtitles": {
+        "create": "Izradite novi termin",
+        "viewEdit": "Pregled i uređivanje termina"
+      },
+      "sections": {
+        "appointmentData": "Podaci o terminu",
+        "clientData": "Podaci o klijentu"
+      },
+      "fields": {
+        "timePlaceholder": "Odaberite vrijeme",
+        "noData": "Nema podatka",
+        "clientSearch": "Pretraži klijente po imenu, e-pošti ili telefonu..."
+      },
+      "actions": {
+        "close": "Zatvori",
+        "cancel": "Odustani",
+        "saving": "Spremanje...",
+        "saveAppointment": "Spremi termin"
+      }
+    },
+    "detailModal": {
+      "fields": {
+        "duration": "Trajanje",
+        "price": "Cijena",
+        "copyTitle": "Kopiraj {label}",
+        "unknownClient": "Nepoznat klijent",
+        "time": "Vrijeme",
+        "originalPrice": "Izvorna cijena",
+        "discount": "Popust",
+        "priceWithDiscount": "Cijena s popustom",
+        "additionalService": "Dodatna usluga",
+        "deleteTitle": "Izbriši termin",
+        "deleteMessage": "Jeste li sigurni da želite izbrisati ovaj termin?"
+      },
+      "actions": {
+        "noShow": "Nije došao/la",
+        "cancel": "Otkaži",
+        "complete": "Završi",
+        "moreOptions": "Više mogućnosti"
+      }
+    },
+    "dayView": {
+      "notWorkingDay": "{day} nije radni dan",
+      "appointmentNoun": "{count, plural, one {termin} other {termina}}",
+      "noAppointmentsToday": "Za ovaj dan nema termina",
+      "allEmployees": "Svi zaposlenici"
+    },
+    "monthView": {
+      "moreEvents": "+{count, plural, one {# događaj} other {# događaja}}",
+      "moreAbsences": "+{count} odsutnosti",
+      "more": "+{count} više"
+    },
+    "weekView": {
+      "moreAbsences": "+{count} više",
+      "moreEvents": "+{count} više"
+    },
+    "rescheduleDialog": {
+      "title": "Premjestiti termin?",
+      "service": "Usluga",
+      "employee": "Osoba",
+      "newTime": "Novo vrijeme",
+      "saving": "Premještanje...",
+      "confirm": "Premjesti"
+    },
+    "completeDialog": {
+      "title": "Završi termin",
+      "subtitle": "Potvrdite završetak termina",
+      "notesLabel": "Poruka klijentu ili upute nakon termina",
+      "notesPlaceholder": "Unesite poruku ili upute nakon završenog termina (neobavezno)...",
+      "completing": "Završavanje...",
+      "complete": "Završi",
+      "cancel": "Odustani"
+    },
+    "navigation": {
+      "prev": "Natrag",
+      "next": "Dalje",
+      "filters": "Filtri",
+      "newAppointment": "Novi termin"
+    },
+    "toast": {
+      "eventCreated": "Događaj je izrađen",
+      "eventUpdated": "Događaj je ažuriran",
+      "eventDeleted": "Događaj je izbrisan",
+      "appointmentRescheduled": "Termin je uspješno premješten"
+    },
+    "errors": {
+      "loadAppointments": "Došlo je do pogreške pri učitavanju termina.",
+      "eventSave": "Došlo je do pogreške pri spremanju događaja.",
+      "eventDelete": "Došlo je do pogreške pri brisanju događaja.",
+      "absenceSave": "Došlo je do pogreške pri spremanju odsutnosti.",
+      "absenceDelete": "Došlo je do pogreške pri brisanju odsutnosti.",
+      "absenceEdit": "Došlo je do pogreške pri uređivanju odsutnosti.",
+      "reschedule": "Došlo je do pogreške pri premještanju termina.",
+      "companyNotSelected": "Tvrtka nije odabrana. Molimo osvježite stranicu."
+    },
+    "saving": "Spremanje...",
+    "allEmployees": "Svi zaposlenici"
+  },
+  "ghost": {
+    "title": "Ne bilježi termin",
+    "description": "Termin je vidljiv u kalendaru, ali ne ulazi u analitiku.",
+    "warning": "Ovaj termin neće biti zabilježen u analitici, povijesti ni blagajni. Nakon završetka automatski se briše.",
+    "badge": "Nezabilježen termin — ne ulazi u analitiku"
+  },
+  "pastOpen": {
+    "title": "{count, plural, one {# prošli termin još nije završen} few {# prošla termina još nisu završena} other {# prošlih termina još nije završeno}}",
+    "body": "Završite ih (ili označite »Nije došao/la«) kako bi se prihod i statistika podudarali sa stvarnim stanjem.",
+    "showingTitle": "Prikazani su prošli nezavršeni termini ({count})",
+    "showingBody": "Kod svakog odaberite Završi, Nije došao/la ili Otkaži. Popis se odmah skraćuje.",
+    "show": "Prikaži ih",
+    "showAll": "Prikaži sve termine"
+  },
+  "export": {
+    "title": "Izvezi termine",
+    "subtitle": "Odaberite razdoblje i mogućnosti izvoza",
+    "quickPick": "Brzi odabir",
+    "presets": {
+      "this_week": "Ovaj tjedan",
+      "this_month": "Ovaj mjesec",
+      "last_month": "Prošli mjesec",
+      "last_30": "Zadnjih 30 dana",
+      "this_year": "Ova godina",
+      "all": "Sve"
+    },
+    "period": "Razdoblje",
+    "dateFrom": "Datum od",
+    "dateTo": "Datum do",
+    "rangeInvalid": "Datum »od« ne smije biti kasniji od datuma »do«.",
+    "filters": "Filtri",
+    "onlyCompleted": "Uključi samo završene termine",
+    "excludeGhost": "Isključi nezabilježene termine",
+    "found": "Pronađeno termina za izvoz",
+    "cancel": "Odustani",
+    "exporting": "Izvoz...",
+    "submit": "Izvezi Excel",
+    "sheetName": "Termini",
+    "fileName": "termini",
+    "columns": {
+      "date": "Datum",
+      "day": "Dan",
+      "start": "Vrijeme početka",
+      "end": "Vrijeme završetka",
+      "client": "Klijent",
+      "email": "E-pošta",
+      "phone": "Telefon",
+      "service": "Usluga",
+      "staff": "Zaposlenik",
+      "status": "Status",
+      "price": "Cijena",
+      "discount": "Popust",
+      "finalPrice": "Konačna cijena",
+      "currency": "Valuta",
+      "notes": "Bilješke",
+      "id": "ID termina"
+    }
+  },
+  "clientSearch": {
+    "addNew": "Dodaj novog klijenta",
+    "searching": "Pretraživanje...",
+    "noContact": "Nema podataka",
+    "placeholder": "Pretraži po imenu, e-pošti ili telefonu..."
+  },
+  "actionErrors": {
+    "noClientLink": "Ovaj termin nije povezan ni s jednim klijentom.",
+    "clientLoadFailed": "Pojedinosti o klijentu nije bilo moguće učitati.",
+    "clientNotFound": "Klijent za ovaj termin nije pronađen u ovoj tvrtki."
+  },
+  "rescheduleNotify": {
+    "title": "Obavijestiti klijenta?",
+    "description": "Termin je premješten. Želite li klijentu poslati obavijest?",
+    "channel": {
+      "sms": "Obavijest će biti poslana SMS-om",
+      "email": "Obavijest će biti poslana e-poštom",
+      "both": "Obavijest će biti poslana SMS-om i e-poštom"
+    },
+    "skip": "Preskoči",
+    "send": "Pošalji obavijest"
+  }
+}

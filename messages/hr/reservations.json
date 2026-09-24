@@ -1,0 +1,207 @@
+{
+  "page": {
+    "title": "Rezervacije",
+    "subtitle": "Upravljanje online sustavom za rezervacije"
+  },
+  "incompleteBanner": {
+    "message": "U postavkama odaberite glavnu poveznicu za rezervacije kako bi sustav znao koju poveznicu slati klijentima.",
+    "openButton": "Otvori postavke →"
+  },
+  "newDesignsBanner": "Svaki mjesec novi dizajni stranica za rezervacije",
+  "requestsNav": {
+    "title": "Zahtjevi za termin",
+    "subtitle": "Pregledajte i potvrdite zahtjeve koje šalju klijenti"
+  },
+  "multiChannelBanner": {
+    "bold": "Svaku poveznicu za rezervacije možete koristiti na drugom kanalu.",
+    "body": "Na Instagram profilu jedan dizajn, na web-stranici drugi, u potpisu e-pošte treći – svaki kanal može imati svoj. Klijenti uvijek stižu na istu vašu stranicu, samo drugačijeg izgleda."
+  },
+  "standardSection": {
+    "title": "Standardne stranice za rezervacije",
+    "subtitle": "Klasični, Moderni i Elegantni dizajn"
+  },
+  "premiumSection": {
+    "title": "Dizajni Jedro Pro",
+    "subtitle": "Sezonski, Magazine i Casino. Uključeno u paket Jedro Pro.",
+    "badge": "Pro",
+    "lockedNote": "U vašem su paketu ovi dizajni zaključani. Pogledajte ih i otključajte uz Jedro Pro.",
+    "upgrade": "Otključaj uz Jedro Pro",
+    "lockedLabel": "Zaključano"
+  },
+  "designs": {
+    "bookingLinkLabel": "Poveznica za rezervacije",
+    "notAvailable": "Nije dostupno",
+    "comingSoon": "Uskoro dostupno",
+    "copy": "Kopiraj",
+    "copied": "Kopirano",
+    "classic": {
+      "name": "Klasični",
+      "subtitle": "Jednostavan i pregledan",
+      "description": "Klasični dizajn s elegantnim pozadinama u gradijentu. Idealan za isticanje boja vaše tvrtke i izgradnju prepoznatljive robne marke."
+    },
+    "modern": {
+      "name": "Moderni",
+      "subtitle": "Suvremen i dinamičan",
+      "description": "Suvremen dizajn s tamnom pozadinom i živim naglascima. Za najbolji vizualni dojam i premium osjećaj preporučujemo tamniju primarnu boju."
+    },
+    "elegant": {
+      "name": "Elegantni",
+      "subtitle": "Čist i jednostavan",
+      "description": "Luksuzan minimalistički dizajn u nježnim zemljanim tonovima. Savršen za elegantne salone, spa centre i ekskluzivne usluge."
+    },
+    "seasonal": {
+      "name": "Sezonski",
+      "subtitle": "Prilagodljiv i živahan",
+      "description": "Dinamičan dizajn koji se automatski prilagođava godišnjem dobu i blagdanima. Proljeće, ljeto, jesen, zima, Božić, Valentinovo, Noć vještica i još mnogo toga – vaša je stranica uvijek svježa i aktualna."
+    },
+    "magazine": {
+      "name": "Magazine",
+      "subtitle": "Elegantan i urednički",
+      "description": "Premium Magazine dizajn s uredničkom estetikom i vrhunskim vizualnim stilom. Idealan za ekskluzivne salone, kozmetičke studije i premium usluge."
+    },
+    "casino": {
+      "name": "Casino",
+      "subtitle": "Glamurozan i uzbudljiv",
+      "description": "Ekskluzivan dizajn u stilu kasina s glamuroznom atmosferom, blistavim akcentima i dinamičnim vizualnim elementima. Savršen za one koji žele rezervaciju termina pretvoriti u nezaboravno iskustvo."
+    }
+  },
+  "customCta": {
+    "text": "Želite sustav za rezervacije prilagođen upravo vašoj tvrtki?",
+    "linkText": "Pišite nam na info@jedroplus.com"
+  },
+  "mainLink": {
+    "title": "Glavna poveznica za naručivanje",
+    "subtitle": "Klijent sam odabire uslugu i slobodan termin. Dodajte je na web-stranicu, Instagram ili Google, a šaljemo je i u porukama. Za prikupljanje podataka klijenata bez termina upotrijebite QR kod u Postavke → Općenito.",
+    "copy": "Kopiraj",
+    "copied": "Kopirano"
+  },
+  "mgmtLink": {
+    "title": "Poveznica za promjenu i otkazivanje termina",
+    "subtitle": "Univerzalna poveznica za upravljanje terminima — klijenti je mogu koristiti za promjenu ili otkazivanje termina."
+  },
+  "settingsOverview": {
+    "title": "Postavke",
+    "bookingEnabled": "Online rezervacije",
+    "enabled": "Omogućeno",
+    "disabled": "Onemogućeno",
+    "timeSlots": "Vremenski intervali",
+    "timeSlotValue": "{minutes} min",
+    "clientConfirm": "Potvrda klijentu",
+    "onlineConfirm": "Potvrda nakon online rezervacije",
+    "mainLinkLabel": "Glavna poveznica za rezervacije",
+    "linkSet": "Postavljena",
+    "notConfigured": "Nije postavljena",
+    "colors": "Boje",
+    "mgmtLinkLabel": "Poveznica za promjenu i otkazivanje",
+    "yes": "Da",
+    "no": "Ne",
+    "onlineConfirmOffHint": "Klijenti koji rezerviraju online ne dobivaju potvrdu i ne znaju je li termin zabilježen.",
+    "onlineConfirmOffCta": "Uključi potvrdu"
+  },
+  "modal": {
+    "title": "Postavke rezervacija",
+    "subtitle": "Kako funkcioniraju online rezervacije",
+    "general": {
+      "sectionTitle": "Opće postavke",
+      "sectionDesc": "Osnovne postavke rezervacija",
+      "enableLabel": "Omogući online rezervacije",
+      "enableDesc": "Jesu li online rezervacije aktivne",
+      "intervalLabel": "Duljina vremenskog intervala",
+      "intervalDesc": "Intervali za rezervacije (15, 30 ili 60 minuta)",
+      "intervalPlaceholder": "Odaberite interval",
+      "interval15": "15 minuta",
+      "interval30": "30 minuta",
+      "interval60": "60 minuta (1 sat)"
+    },
+    "payments": {
+      "sectionTitle": "Online plaćanja",
+      "sectionDesc": "Postavke plaćanja pri online rezervaciji",
+      "enableLabel": "Omogući Stripe plaćanja",
+      "enableDesc": "Klijenti mogu platiti pri online rezervaciji ako usluga to zahtijeva.",
+      "lockedDesc": "Za uključivanje trebate paket Jedro Pro i fiskalnu blagajnu PRO ili PLUS.",
+      "checking": "Provjera uvjeta za online plaćanja...",
+      "requirementsTitle": "Za uključivanje mora biti omogućeno:",
+      "requirementPlan": "Paket Jedro Pro",
+      "requirementPos": "Fiskalna blagajna PRO ili PLUS",
+      "ok": "Omogućeno",
+      "missing": "Nedostaje",
+      "modeLabel": "Način plaćanja rezervacije",
+      "modeDesc": "Odaberite plaća li klijent cijeli iznos ili samo polog.",
+      "modePlaceholder": "Odaberite način plaćanja",
+      "modeFull": "Cijeli iznos",
+      "modeDeposit": "Polog",
+      "depositLabel": "Iznos pologa",
+      "depositDesc": "Postotak iznosa koji klijent plaća pri rezervaciji."
+    },
+    "mainLink": {
+      "sectionTitle": "Glavna poveznica za rezervacije",
+      "sectionDesc": "Poveznica koja se koristi pri slanju klijentima",
+      "selectLabel": "Odaberite glavnu poveznicu za rezervacije",
+      "selectDesc": "Ova će se poveznica koristiti pri slanju rezervacija klijentima",
+      "selectPlaceholder": "Odaberite poveznicu...",
+      "missingRequired": "Odaberite glavnu poveznicu za rezervacije.",
+      "noLinksAvailable": "Poveznice za rezervacije još nisu dostupne",
+      "classic": "Klasični",
+      "modern": "Moderni",
+      "minimal": "Minimalistički",
+      "seasonal": "Sezonski",
+      "magazine": "Magazine"
+    },
+    "confirmations": {
+      "sectionTitle": "Potvrde",
+      "sectionDesc": "Slanje potvrda klijentima",
+      "manualLabel": "Pošalji potvrdu pri rezervaciji termina",
+      "manualDesc": "Automatski pošalji potvrdu pri izradi termina",
+      "onlineLabel": "Pošalji potvrdu nakon online rezervacije",
+      "onlineDesc": "Potvrda pri rezervaciji putem online sustava",
+      "channelLabel": "Pošalji potvrdu putem:",
+      "smsUnavailable": "– nije dostupno",
+      "smsUpgradeNote": "Za SMS trebate SMS poruke (dodatak ili Jedro Pro).",
+      "smsUpgradeLink": "Pogledaj mogućnosti",
+      "smsPlanNotePrefix": "Za slanje SMS potvrda",
+      "smsPlanNoteLink": "kupite dodatne SMS poruke",
+      "smsSettings": "Postavke SMS poruke",
+      "modeAI": "AI sastavlja",
+      "modeManual": "Vlastiti predložak",
+      "templateHint": "Predložak SMS poruke (najviše 155 znakova)",
+      "templatePlaceholder": "Npr.: Vasa rezervacija je potvrdena za {{datum}} u {{cas}}. {{ime_podjetja}}.",
+      "noEmojiHint": "Bez emojija, dijakritičkih i posebnih znakova."
+    },
+    "policy": {
+      "sectionTitle": "Pravila otkazivanja i promjene termina",
+      "sectionDesc": "Koliko dana prije termina klijenti mogu otkazati ili promijeniti termin",
+      "cancelLabel": "Otkazivanje termina",
+      "cancelDesc": "Koliko dana prije termina klijent može otkazati",
+      "rescheduleLabel": "Promjena termina",
+      "rescheduleDesc": "Koliko dana prije termina klijent može promijeniti termin",
+      "selectPlaceholder": "Odaberite",
+      "sameDay": "Isti dan",
+      "day1": "1 dan prije",
+      "day2": "2 dana prije",
+      "day3": "3 dana prije",
+      "day5": "5 dana prije",
+      "day7": "7 dana prije",
+      "day14": "14 dana prije"
+    },
+    "colors": {
+      "sectionTitle": "Boje stranice za rezervacije",
+      "sectionDesc": "Prilagodite izgled svoje stranice za rezervacije",
+      "primaryLabel": "Primarna boja",
+      "primaryDesc": "Glavna boja za gumbe i naglaske",
+      "secondaryLabel": "Sekundarna boja",
+      "secondaryDesc": "Boja za dodatne elemente",
+      "bgFromLabel": "Gradijent pozadine (početak)",
+      "bgFromDesc": "Početna boja gradijenta pozadine",
+      "bgToLabel": "Gradijent pozadine (kraj)",
+      "bgToDesc": "Završna boja gradijenta pozadine",
+      "previewLabel": "Pregled pozadine:",
+      "previewButton": "Pregled gumba"
+    },
+    "footer": {
+      "close": "Zatvori",
+      "save": "Spremi",
+      "saving": "Spremanje...",
+      "saveError": "Došlo je do pogreške pri spremanju"
+    }
+  }
+}

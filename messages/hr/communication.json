@@ -1,0 +1,115 @@
+{
+  "page": {
+    "title": "Komunikacija",
+    "subtitle": "Šaljite poruke svojim klijentima brzo i jednostavno",
+    "emailQuotaLabel": "Kvota e-pošte",
+    "step1SectionTitle": "Odabir klijenata",
+    "step1ContinueDisabled": "Odaberite klijente za nastavak",
+    "step1Continue": "{count, plural, one {Dalje s # klijentom} other {Dalje s # klijenata}}",
+    "step2BackButton": "Natrag na odabir",
+    "step2SelectedBadge": "{count, plural, one {# klijent} few {# klijenta} other {# klijenata}}",
+    "step2SectionTitle": "Sastavite poruku"
+  },
+  "result": {
+    "title": "Poruke su poslane",
+    "requested": "Zatraženo",
+    "requestedDetail": "Klijenti: {clients} · poruke: {messages}",
+    "sent": "Poslano",
+    "skipped": "Preskočeno",
+    "skippedLabel": "Preskočeni:",
+    "newMessage": "Pošalji novu poruku",
+    "skippedUnsubscribed": "{name} – odjavljen od novosti i ponuda"
+  },
+  "customerList": {
+    "searchPlaceholder": "Pretraži klijente po imenu, e-pošti ili telefonu...",
+    "selectAll": "Odaberi sve",
+    "deselectAll": "Poništi odabir",
+    "selectedCount": "Odabrano: {count}",
+    "resultCount": "{count, plural, one {# klijent} few {# klijenta} other {# klijenata}}",
+    "empty": "Nema klijenata za prikaz",
+    "emptyHint": "Promijenite filtre ili pretraživanje",
+    "showAll": "Prikaži sve klijente",
+    "emptyNoClients": "Klijente dodajete u izborniku Klijenti ili se dodaju sami pri prvom terminu.",
+    "optedOut": "Odjavljen",
+    "optedOutHint": "Klijent se odjavio od novosti i ponuda. Podsjetnike za termine i dalje prima."
+  },
+  "filters": {
+    "sectionLabel": "Termini",
+    "all": "Svi klijenti",
+    "today": "Danas",
+    "tomorrow": "Sutra",
+    "thisWeek": "Ovaj tjedan",
+    "thisMonth": "Ovaj mjesec",
+    "advanced": "Napredni filtri",
+    "serviceLabel": "Usluga",
+    "allServices": "Sve usluge",
+    "dateRangeLabel": "Razdoblje termina"
+  },
+  "ai": {
+    "title": "Asistent+",
+    "subtitle": "Opišite što želite poručiti klijentima",
+    "toneLabel": "Ton poruke",
+    "toneFriendly": "Prijateljski",
+    "toneProfessional": "Profesionalan",
+    "promptPlaceholder": "Npr.: Obavijesti klijente da ovaj vikend imamo 20 % popusta na sve usluge.",
+    "generateButton": "Generiraj poruku",
+    "generatingButton": "Generiranje...",
+    "generateError": "Došlo je do pogreške pri generiranju poruke"
+  },
+  "composer": {
+    "subjectLabel": "Predmet",
+    "subjectPlaceholder": "Unesite predmet poruke...",
+    "messageLabel": "Poruka",
+    "messagePlaceholder": "Vaša poruka klijentima...",
+    "charCount": "{count, plural, one {# znak} few {# znaka} other {# znakova}}",
+    "variableHint": "Kliknite na varijablu da je dodate u tekst:",
+    "varClientFirstName": "Ime klijenta",
+    "varClientLastName": "Prezime klijenta",
+    "varCompanyName": "Naziv tvrtke",
+    "varCompanyAddress": "Adresa tvrtke",
+    "varCompanyPhone": "Telefon tvrtke",
+    "varCompanyEmail": "E-pošta tvrtke",
+    "varYear": "Godina",
+    "varRescheduleLink": "Poveznica za promjenu termina"
+  },
+  "preview": {
+    "toggleButton": "Pregled poruke",
+    "subjectLabel": "Predmet:",
+    "noSubject": "Bez predmeta",
+    "empty": "Pregled će se prikazati kada unesete poruku...",
+    "note": "Varijable su zamijenjene podacima klijenta"
+  },
+  "send": {
+    "recipientsLabel": "Primatelji",
+    "recipientCount": "{count, plural, one {# klijent} few {# klijenta} other {# klijenata}}",
+    "remainingQuotaLabel": "Preostala kvota",
+    "remainingEmails": "{count, plural, one {# e-poruka} few {# e-poruke} other {# e-poruka}}",
+    "warnNoSubject": "Unesite predmet poruke",
+    "warnNoMessage": "Unesite sadržaj poruke",
+    "warnQuotaExceeded": "Kvota e-pošte je premašena",
+    "sendButton": "Pošalji poruku",
+    "sendingButton": "Slanje...",
+    "sendNote": "Poruka će biti poslana na adrese e-pošte odabranih klijenata"
+  },
+  "sms": {
+    "quotaTitle": "SMS kvota",
+    "quotaDepleted": "Dosegnuli ste SMS ograničenje. Nadogradite paket za nastavak slanja.",
+    "quotaCritical": "Preostalo SMS poruka ovaj mjesec: {remaining}.",
+    "upgradeLink": "Nadogradite za više SMS poruka",
+    "blockedTitle": "Slanje SMS poruka je blokirano",
+    "blockedUpgrade": "Nadogradi paket",
+    "reasonQuota": "Dosegnuli ste mjesečno SMS ograničenje",
+    "reasonNoSubscription": "Nemate aktivnu pretplatu",
+    "reasonInactive": "Vaša pretplata nije aktivna",
+    "reasonDefault": "Slanje SMS poruka nije dostupno"
+  },
+  "toasts": {
+    "selectAtLeastOne": "Odaberite barem jednog klijenta",
+    "enterSubject": "Unesite predmet poruke",
+    "enterMessage": "Unesite sadržaj poruke",
+    "invalidId": "Klijent \"{name}\" nema valjani brojčani ID (Stranke.id)",
+    "someInvalidIds": "Neki klijenti nemaju valjani ID",
+    "sent": "Poslano poruka: {sent} / {requested}",
+    "sendError": "Došlo je do pogreške pri slanju poruke"
+  }
+}

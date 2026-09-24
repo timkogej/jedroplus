@@ -1,0 +1,184 @@
+{
+  "entry": {
+    "loading": "Provjera...",
+    "title": "Dobro došli u",
+    "subtitle": "Izradite novu tvrtku ili se pridružite postojećoj",
+    "create": {
+      "title": "Izradi novu tvrtku",
+      "description": "Započnite s novom tvrtkom i pozovite svoje zaposlenike",
+      "cta": "Započni"
+    },
+    "join": {
+      "title": "Pridruži se tvrtki",
+      "description": "Imate ID i kod tvrtke? Pridružite se postojećoj tvrtki",
+      "cta": "Pridruži se"
+    }
+  },
+  "create": {
+    "title": "Izradi tvrtku",
+    "steps": {
+      "localization": "Lokalizacija",
+      "companyName": "Naziv tvrtke",
+      "industry": "Djelatnost",
+      "schedule": "Radno vrijeme",
+      "services": "Vaše usluge"
+    },
+    "localization": {
+      "countryLabel": "Država",
+      "languageLabel": "Jezik"
+    },
+    "companyName": {
+      "label": "Naziv tvrtke",
+      "placeholder": "npr. Frizerski salon Ana",
+      "hint": "Ovaj naziv vaši klijenti vide u podsjetnicima i na stranici za rezervacije."
+    },
+    "industry": {
+      "label": "Djelatnost",
+      "customLabel": "Opišite svoju djelatnost",
+      "customPlaceholder": "npr. Moja specifična djelatnost…"
+    },
+    "schedule": {
+      "hint": "Radno vrijeme možete bilo kada promijeniti u postavkama tvrtke.",
+      "closed": "Zatvoreno"
+    },
+    "nav": {
+      "back": "Natrag",
+      "next": "Dalje",
+      "finish": "Izradi",
+      "creating": "Izrada..."
+    },
+    "success": {
+      "title": "Tvrtka je izrađena",
+      "subtitle": "Vaša je tvrtka spremna za korištenje",
+      "goToDashboard": "Idi na nadzornu ploču"
+    },
+    "toasts": {
+      "success": "Tvrtka je uspješno izrađena!",
+      "errorCreate": "Došlo je do pogreške pri izradi tvrtke",
+      "errorLoad": "Došlo je do pogreške pri učitavanju tvrtke. Molimo pokušajte ponovno."
+    },
+    "countries": {
+      "si": "Slovenija",
+      "hr": "Hrvatska",
+      "rs": "Srbija",
+      "ba": "Bosna i Hercegovina",
+      "me": "Crna Gora",
+      "mk": "Sjeverna Makedonija",
+      "at": "Austrija",
+      "de": "Njemačka",
+      "it": "Italija",
+      "hu": "Mađarska",
+      "cz": "Češka",
+      "sk": "Slovačka",
+      "pl": "Poljska",
+      "ro": "Rumunjska",
+      "bg": "Bugarska",
+      "fr": "Francuska",
+      "es": "Španjolska",
+      "pt": "Portugal",
+      "nl": "Nizozemska",
+      "be": "Belgija",
+      "ch": "Švicarska",
+      "gb": "Ujedinjeno Kraljevstvo",
+      "us": "Sjedinjene Američke Države",
+      "ca": "Kanada",
+      "au": "Australija",
+      "other": "Drugo"
+    },
+    "languages": {
+      "slo": "Slovenski",
+      "eng": "English",
+      "de": "Njemački",
+      "hr": "Hrvatski"
+    },
+    "industries": {
+      "hairSalons": "Frizerstvo",
+      "cosmeticsAndSkincare": "Kozmetika i njega",
+      "massageAndWellness": "Masaže i wellness",
+      "dentistry": "Stomatologija",
+      "medicineAndHealth": "Medicina i zdravstvo",
+      "physiotherapy": "Fizioterapija",
+      "psychologyAndCoaching": "Psihologija i coaching",
+      "veterinary": "Veterina",
+      "personalTrainingFitness": "Osobni trening / fitness",
+      "yogaAndPilates": "Joga i pilates",
+      "beautySalon": "Salon ljepote",
+      "manicureAndPedicure": "Manikura i pedikura",
+      "tattoosAndPiercings": "Tetovaže i piercing",
+      "architectureAndDesign": "Arhitektura i dizajn",
+      "photography": "Fotografija",
+      "lawAndConsulting": "Pravo i savjetovanje",
+      "accounting": "Računovodstvo",
+      "itServices": "IT usluge",
+      "educationAndTutoring": "Obrazovanje i poduke",
+      "carService": "Autoservis",
+      "cleaningAndMaintenance": "Čišćenje i održavanje",
+      "other": "Drugo"
+    },
+    "services": {
+      "hint": "Predložili smo nekoliko usluga za vašu djelatnost. Označite one koje nudite te prilagodite cijenu i trajanje. Sve možete kasnije urediti u izborniku Usluge.",
+      "nameLabel": "Naziv usluge",
+      "durationLabel": "Trajanje (min)",
+      "priceLabel": "Cijena (€)",
+      "addCustom": "Dodaj svoju uslugu",
+      "remove": "Ukloni",
+      "newServicePlaceholder": "npr. Konzultacije",
+      "ownerToggle": "I ja obavljam usluge",
+      "ownerToggleHint": "Dodat ćemo vas kao prvog zaposlenika kako biste odmah mogli upisati prvi termin. Suradnike možete dodati kasnije.",
+      "ownerNameLabel": "Vaše ime i prezime",
+      "noneSelected": "Bez usluga ćete prije prvog termina morati dodati barem jednu uslugu u izborniku Usluge."
+    }
+  },
+  "join": {
+    "title": "Pridruži se tvrtki",
+    "subtitle": "Odaberite način pridruživanja",
+    "admin": {
+      "title": "Pridruži se kao administrator",
+      "description": "Imate iste ovlasti kao vlasnik. Pristup svim podacima tvrtke, postavkama, zaposlenicima i analitici.",
+      "note": "Trebate administratorski kod od vlasnika tvrtke.",
+      "cta": "Nastavi"
+    },
+    "employee": {
+      "title": "Pridruži se kao zaposlenik",
+      "description": "Vidite samo svoje podatke, termine i klijente. Pristup je ograničen i administrator ga može dodatno prilagoditi.",
+      "note": "Trebate kod za zaposlenike od administratora.",
+      "cta": "Nastavi"
+    },
+    "back": "Natrag",
+    "form": {
+      "adminTitle": "Pridruži se kao administrator",
+      "employeeTitle": "Pridruži se kao zaposlenik",
+      "adminSubtitle": "Unesite administratorski kod koji ste dobili od vlasnika",
+      "employeeSubtitle": "Unesite kod za zaposlenike koji ste dobili od administratora",
+      "adminCodeLabel": "Administratorski kod",
+      "employeeCodeLabel": "Kod za zaposlenike",
+      "adminCodeHint": "Kod vam daje vlasnik tvrtke. Pronaći će ga u Postavke → Općenito.",
+      "employeeCodeHint": "Kod za zaposlenike daje vam vlasnik ili administrator. Pronaći će ga u Postavke → Općenito.",
+      "submit": "Pridruži se",
+      "submitting": "Pridruživanje..."
+    },
+    "toasts": {
+      "noCode": "Unesite administratorski kod",
+      "noCodeEmployee": "Unesite kod za zaposlenike",
+      "noFreeSlot": "Tvrtka više nema slobodnih korisničkih mjesta.",
+      "notLoggedIn": "Niste prijavljeni",
+      "profileNotLinked": "Tvrtka još nije povezana s profilom. Pokušajte ponovno za nekoliko sekundi.",
+      "errorJoin": "Došlo je do pogreške pri pridruživanju",
+      "errorProfile": "Došlo je do pogreške pri spremanju profila",
+      "errorLoad": "Došlo je do pogreške pri učitavanju tvrtke",
+      "successWithName": "Pridružili ste se tvrtki {name}!",
+      "success": "Pridružili ste se tvrtki!",
+      "invalidCode": "Kod tvrtke nije ispravan",
+      "companyNotFound": "Tvrtka s tim ID-om ne postoji"
+    },
+    "invite": {
+      "eyebrow": "Pozivnica",
+      "title": "Pozvani ste u tim",
+      "titleWithName": "Pozvani ste u {name}",
+      "body": "Izradite račun ili se prijavite. Zatim vas automatski pridružujemo timu, bez prepisivanja koda.",
+      "signUp": "Izradi račun",
+      "logIn": "Već imam račun — prijava",
+      "readyBody": "Kod je već upisan. Kliknite Pridruži se."
+    }
+  }
+}

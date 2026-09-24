@@ -1,0 +1,358 @@
+{
+  "page": {
+    "title": "Podsjetnici",
+    "subtitle": "Pregled postavki automatskih podsjetnika",
+    "kicker": "Komunikacija",
+    "incompleteBannerTitle": "Ispunite postavke označene s !",
+    "incompleteBannerDesc": "za besprijekoran rad i puni potencijal podsjetnika.",
+    "openSettings": "Otvori postavke →",
+    "settingsButton": "Postavke",
+    "flow": {
+      "eyebrow": "Tokovi",
+      "title": "Pregled slanja",
+      "beforeEyebrow": "Prije termina",
+      "afterEyebrow": "Nakon termina",
+      "rescheduleEyebrow": "Promjena termina",
+      "considers": "Uzima u obzir",
+      "disabledReminder": "Ovaj tok trenutačno ne šalje podsjetnike.",
+      "disabledReschedule": "Obavijesti o premještanju termina nisu aktivne.",
+      "detailsEyebrow": "Pojedinosti",
+      "settingsEyebrow": "Postavke",
+      "edit": "Uredi"
+    },
+    "stats": {
+      "sentToday": "Poslano danas",
+      "sentTodayDesc": "Podsjetnika prije termina",
+      "scheduledTomorrow": "Najavljeno za sutra",
+      "scheduledTomorrowDesc": "Termina s podsjetnicima",
+      "afterVisits": "Nakon posjeta danas",
+      "afterVisitsDesc": "Završenih termina"
+    },
+    "general": {
+      "sectionTitle": "Opće postavke",
+      "language": "Jezik slanja",
+      "tone": "Ton komunikacije",
+      "replyTo": "E-pošta za odgovor (reply-to)",
+      "fromName": "Ime pošiljatelja",
+      "fromNameDesc": "Ime koje se u e-pošti prikazuje kao pošiljatelj",
+      "senderId": "ID pošiljatelja SMS-a",
+      "senderIdDesc": "Koristi se pri slanju SMS-a",
+      "tips": "Savjeti prema usluzi",
+      "colors": "Boje e-pošte",
+      "customerAddressing": "Obraćanje klijentima",
+      "informalAddressing": "Neformalno (ti)",
+      "formalAddressing": "Persiranje (vi)",
+      "automaticTag": "Oznaka automatskog podsjetnika",
+      "staffInReminder": "Izvođač u podsjetniku",
+      "notSet": "Nije postavljeno",
+      "notSetTemplate": "Vlastiti predložak nije postavljen"
+    },
+    "before": {
+      "sectionTitle": "Podsjetnici prije termina",
+      "status": "Status",
+      "channel": "Način slanja",
+      "timeLabel": "Vrijeme slanja",
+      "timeValue": "1 dan prije termina",
+      "dayBefore": "1 dan prije termina",
+      "daysBefore": "{count} dana prije termina",
+      "instructions": "Upute",
+      "smsType": "Vrsta SMS poruke",
+      "aiMode": "AI sastavlja",
+      "aiConsiders": "AI uzima u obzir",
+      "manualMode": "Vlastiti predložak",
+      "includeService": "Uključi uslugu",
+      "noSpecialInstructions": "Nema posebnih uputa"
+    },
+    "after": {
+      "sectionTitle": "Podsjetnici nakon termina",
+      "status": "Status",
+      "channel": "Način slanja",
+      "timeLabel": "Vrijeme slanja",
+      "timeValue": "Odmah nakon završetka",
+      "instructions": "Upute",
+      "discount": "Popust",
+      "smsType": "Vrsta SMS poruke",
+      "aiMode": "AI sastavlja",
+      "aiConsiders": "AI uzima u obzir",
+      "manualMode": "Vlastiti predložak",
+      "includeService": "Uključi uslugu",
+      "noSpecialInstructions": "Nema posebnih uputa"
+    },
+    "reschedule": {
+      "sectionTitle": "Premještanje termina",
+      "channel": "Način slanja",
+      "smsTemplate": "SMS predložak",
+      "emailTemplate": "Predložak e-pošte"
+    },
+    "info": {
+      "title": "O podsjetnicima",
+      "body": "Podsjetnici se <highlight>šalju automatski</highlight> prema ovdje prikazanim postavkama — bez ručnog rada. Svaki klijent prima poruku prije i/ili nakon termina, ovisno o vašim postavkama.\n\nKada je AI uključen, <highlight>poruke nikad nisu iste</highlight> — AI pamti kontekst klijenta, spominje pravu uslugu i prilagođava sadržaj tako da zvuči prirodno i osobno. To znači više otvorenih poruka, poruke koje se pamte i klijente koji se osjećaju cijenjenima.\n\nZa jednostavnije upravljanje dostupna je i mogućnost <highlight>vlastitog predloška poruke</highlight>, kada želite potpunu kontrolu nad sadržajem.\n\nAko imate bilo kakvih pitanja, javite nam se na help@jedroplus.com."
+    },
+    "sendingStatus": {
+      "title": "Stanje slanja",
+      "ok": {
+        "title": "{name} podsjetnici se šalju",
+        "body": "U ovom razdoblju preostalo je još {remaining} od {total}."
+      },
+      "nearLimit": {
+        "title": "{name} kvota je gotovo potrošena",
+        "body": "Potrošeno {used} od {total}. Kada ponestane, {name} podsjetnici više se ne šalju."
+      },
+      "exhausted": {
+        "title": "{name} podsjetnici se ne šalju",
+        "body": "Potrošili ste svih {total} u ovom razdoblju ({used}/{total}). Klijenti ne primaju {name} podsjetnike."
+      },
+      "unavailable": {
+        "title": "{name} podsjetnici se ne šalju",
+        "body": "Vaš paket ne uključuje {name} poruke pa se podsjetnici tim kanalom ne šalju. Dokupite paket ili u postavkama odaberite drugi kanal."
+      },
+      "renews": "Kvota se obnavlja {date}.",
+      "buySms": "Dokupi SMS",
+      "buyEmail": "Dokupi e-poštu",
+      "trial": {
+        "ok": {
+          "title": "{name} podsjetnici se šalju",
+          "body": "Besplatna proba: još {remaining} od {total}."
+        },
+        "nearLimit": {
+          "title": "Besplatni {name} podsjetnici gotovo su potrošeni",
+          "body": "Preostalo je još {remaining} od {total}. Nakon toga {name} podsjetnici više se ne šalju."
+        },
+        "exhausted": {
+          "title": "Besplatni {name} podsjetnici su potrošeni",
+          "body": "Potrošili ste svih {total}. Klijenti više ne primaju {name} podsjetnike."
+        },
+        "upgrade": "Nadogradi na Jedro Plus",
+        "introTitle": "Isprobajte podsjetnike besplatno",
+        "introBody": "Na raspolaganju imate {sms} SMS i {email} podsjetnika e-poštom. To nije mjesečna kvota, nego jednokratna proba. Kada ih potrošite, postavke ostaju, a za daljnje slanje trebate Jedro Plus."
+      }
+    },
+    "smsLog": {
+      "title": "Posljednji SMS-ovi",
+      "countries": "SMS šaljemo na brojeve iz ovih država: {countries}. Klijenti s drugim brojevima primaju e-poštu.",
+      "empty": "Ovdje će se prikazati poslani SMS-ovi i jesu li stigli.",
+      "status": {
+        "sent": "Poslan",
+        "delivered": "Isporučen",
+        "failed": "Nije isporučen",
+        "blocked_country": "Država nije podržana"
+      },
+      "kind": {
+        "reminder_before": "Podsjetnik prije termina",
+        "reminder_after": "Poruka nakon termina",
+        "reschedule": "Premještanje termina",
+        "confirmation": "Potvrda termina",
+        "marketing": "Novosti i ponude",
+        "other": "SMS"
+      }
+    }
+  },
+  "status": {
+    "enabled": "Omogućeno",
+    "disabled": "Onemogućeno"
+  },
+  "tone": {
+    "professional": "Profesionalan",
+    "friendly": "Prijateljski",
+    "salesOriented": "Prodajno usmjeren",
+    "formal": "Formalan",
+    "relaxed": "Opušten"
+  },
+  "language": {
+    "sl": "Slovenščina",
+    "en": "English",
+    "it": "Italiano",
+    "de": "Deutsch"
+  },
+  "modal": {
+    "title": "Postavke podsjetnika",
+    "subtitle": "Kako i kada slati podsjetnike klijentima",
+    "closeButton": "Zatvori",
+    "saveButton": "Spremi",
+    "savingButton": "Spremanje...",
+    "saveError": "Došlo je do pogreške pri spremanju",
+    "general": {
+      "sectionTitle": "Opće postavke",
+      "sectionDesc": "Osnovne postavke podsjetnika",
+      "languageLabel": "Jezik slanja",
+      "languageDesc": "Jezik za slanje podsjetnika i poruka",
+      "languagePlaceholder": "Odaberite jezik",
+      "toneLabel": "Ton komunikacije",
+      "toneDesc": "Kako sustav treba komunicirati s klijentima",
+      "tonePlaceholder": "Odaberite ton",
+      "toneOptions": {
+        "formal": "Formalan",
+        "friendly": "Prijateljski",
+        "relaxed": "Opušten",
+        "professional": "Profesionalan"
+      },
+      "replyToLabel": "E-pošta za odgovor (reply-to)",
+      "replyToDesc": "Adresa e-pošte na koju klijenti mogu odgovoriti",
+      "replyToPlaceholder": "info@vasatvrtka.hr",
+      "fromNameLabel": "Ime pošiljatelja",
+      "fromNameDesc": "Ime koje se u e-pošti prikazuje kao pošiljatelj",
+      "fromNamePlaceholder": "Salon ljepote",
+      "fromEmailLabel": "Adresa e-pošte pošiljatelja",
+      "fromEmailDesc": "Ova je adresa e-pošte fiksna i ne može se mijenjati",
+      "locked": "Zaključano",
+      "senderIdLabel": "ID pošiljatelja SMS-a",
+      "senderIdDesc": "Ime pošiljatelja koje se prikazuje u SMS porukama",
+      "notSet": "Nije postavljeno",
+      "tipsLabel": "Savjeti prema usluzi",
+      "tipsDesc": "Trebaju li podsjetnici sadržavati savjete prilagođene usluzi",
+      "tipsYes": "Da",
+      "tipsNo": "Ne",
+      "tipsAuto": "AI odlučuje",
+      "colorsTitle": "Boje za predloške e-pošte",
+      "colorPrimary": "Primarna boja",
+      "colorSecondary": "Sekundarna boja",
+      "addressingLabel": "Obraćanje klijentima",
+      "addressingDesc": "Treba li se klijentima u podsjetnicima obraćati s »vi« ili s »ti«.",
+      "addressingFormal": "Persiranje (vi)",
+      "addressingInformal": "Neformalno (ti)",
+      "autoTagLabel": "Označi poruke kao automatski podsjetnik",
+      "autoTagDesc": "Na početak poruke dodaje se oznaka da je riječ o automatskom podsjetniku.",
+      "staffLabel": "Uključi izvođača u podsjetnik",
+      "staffDesc": "Ako je uključeno, podsjetnik može spomenuti zaposlenika koji će obaviti uslugu.",
+      "daysBeforeLabel": "Pošalji podsjetnik (dana prije termina)",
+      "daysBeforeDesc": "Koliko dana prije termina treba poslati podsjetnik.",
+      "select": "Odaberite"
+    },
+    "before": {
+      "sectionTitle": "Podsjetnici prije termina",
+      "sectionDesc": "Podsjetnici koje klijenti primaju prije termina",
+      "enableLabel": "Pošalji podsjetnik prije termina",
+      "enableDesc": "Automatsko slanje podsjetnika 1 dan prije termina",
+      "channelLabel": "Način slanja",
+      "channelDesc": "E-pošta ili SMS",
+      "channelPlaceholder": "Odaberite način",
+      "smsNotAvailable": "– nije dostupno",
+      "smsUpgradeHint": "SMS je dostupan u višim paketima.",
+      "upgradeButton": "Nadogradi paket",
+      "smsSettings": "Postavke SMS poruke",
+      "modeAI": "AI sastavlja",
+      "modeManual": "Vlastiti predložak",
+      "aiDataHint": "AI će sastaviti SMS na temelju odabranih podataka:",
+      "includeService": "Uključi uslugu",
+      "includeServiceDesc": "Spomeni uslugu termina u podsjetniku.",
+      "includeNotes": "Uključi bilješke o terminu",
+      "includeNotesDesc": "Uključi bilješke termina i eventualne bilješke o klijentu.",
+      "includeInstructions": "Uključi upute za podsjetnike",
+      "includeInstructionsDesc": "Niže upišite upute koje AI uzima u obzir pri sastavljanju podsjetnika.",
+      "instructionsHint": "Navedite poslovne navike, posebne savjete prije određenih usluga, što AI treba spomenuti ili istaknuti, kakav odnos prema klijentu želite i sl.",
+      "instructionsPlaceholder": "Npr.: Klijentima se uvijek obraćaj imenom. Prije masaže podsjeti ih da dođu odmorni i ne odmah nakon jela. Za uslugu 'gel lak' podsjeti ih da barem dan prije ne namaču nokte. Ton neka bude topao i profesionalan.",
+      "templateHint": "Predložak SMS poruke (najviše 155 znakova)",
+      "templatePlaceholder": "Npr.: Podsjetnik na vas termin sutra u {{cas}}. {{ime_podjetja}}. Za otkazivanje nazovite {{telefon_podjetja}}.",
+      "noEmojiHint": "Bez emojija, dijakritičkih i posebnih znakova.",
+      "emailInstructionsTitle": "Upute za podsjetnik prije termina",
+      "emailInstructionsDesc": "Dodatne upute ili informacije za podsjetnik prije termina",
+      "emailPlaceholder": "Npr.: Molimo dođite 5 minuta prije termina. Parkiralište je sa stražnje strane zgrade.",
+      "timingTitle": "Vrijeme slanja podsjetnika",
+      "timingValue": "Fiksno: 1 dan prije termina",
+      "timingDays": "{count, plural, one {# dan} other {# dana}} prije termina"
+    },
+    "after": {
+      "sectionTitle": "Podsjetnici nakon termina",
+      "sectionDesc": "Poruke nakon završenog termina (follow-up)",
+      "enableLabel": "Pošalji poruku nakon termina",
+      "enableDesc": "Follow-up odmah nakon završenog termina",
+      "channelLabel": "Način slanja",
+      "channelDesc": "E-pošta ili SMS",
+      "channelPlaceholder": "Odaberite način",
+      "smsNotAvailable": "– nije dostupno",
+      "smsUpgradeHint": "SMS je dostupan u višim paketima.",
+      "upgradeButton": "Nadogradi paket",
+      "smsSettings": "Postavke SMS poruke",
+      "modeAI": "AI sastavlja",
+      "modeManual": "Vlastiti predložak",
+      "aiDataHint": "AI će sastaviti SMS na temelju odabranih podataka:",
+      "includeService": "Uključi uslugu",
+      "includeServiceDesc": "Spomeni uslugu termina u poruci nakon posjeta.",
+      "includeNotes": "Uključi bilješke nakon termina",
+      "includeNotesDesc": "Uključi bilješke koje napišete pri završetku termina.",
+      "includeInstructions": "Uključi upute za podsjetnike",
+      "includeInstructionsDesc": "Niže upišite upute koje AI uzima u obzir pri sastavljanju poruke nakon termina.",
+      "instructionsHint": "Navedite poslovne navike, posebne savjete nakon određenih usluga, što AI treba spomenuti ili preporučiti te kakav odnos prema klijentu želite nakon posjeta.",
+      "instructionsPlaceholder": "Npr.: Nakon masaže preporuči klijentu da pije puno vode. Za uslugu 'bojanje kose' podsjeti ga da barem 24 sata ne moči kosu. Poželi klijentu lijep dan i pozovi ga da ponovno dođe.",
+      "templateHint": "Predložak SMS poruke (najviše 155 znakova)",
+      "templatePlaceholder": "Npr.: Hvala na posjetu! Za sljedeci termin javite nam se na {{telefon_podjetja}}.",
+      "noEmojiHint": "Bez emojija, dijakritičkih i posebnih znakova.",
+      "emailInstructionsTitle": "Upute za poruku nakon termina",
+      "emailInstructionsDesc": "Dodatne upute ili informacije za follow-up nakon termina",
+      "emailPlaceholder": "Npr.: Hvala na posjetu! Za najbolje rezultate preporučujemo naš poseban šampon.",
+      "discountTitle": "Uključi popust u poruku",
+      "discountDesc": "Ponudite popust za sljedeći posjet",
+      "discountLabel": "Popust / akcija",
+      "discountFieldDesc": "Opis popusta koji se uključuje u poruku",
+      "discountPlaceholder": "10 % popusta na sljedeći posjet",
+      "timingTitle": "Vrijeme slanja",
+      "timingValue": "Fiksno: odmah nakon završenog termina"
+    },
+    "smsAccess": {
+      "notIncluded": "Vaš paket ne uključuje SMS poruke. Dokupite SMS paket ili nadogradite na Jedro Pro, koji uključuje 250 SMS poruka mjesečno.",
+      "notIncludedFree": "SMS podsjetnici dostupni su u plaćenim paketima.",
+      "buySms": "Dokupi SMS",
+      "comparePlans": "Usporedi pakete",
+      "remaining": "U ovom razdoblju preostalo je još {remaining} od {total} SMS poruka.",
+      "nearLimit": "Potrošeno {used} od {total} SMS poruka. Kada ih ponestane, SMS poruke se ne šalju.",
+      "exhausted": "Potrošili ste sve SMS poruke u ovom razdoblju ({used}/{total}). SMS poruke se ne šalju dok ne dokupite paket ili dok se razdoblje ne obnovi."
+    },
+    "englishVariant": {
+      "add": "Dodaj englesku verziju (za klijente iz inozemstva)",
+      "title": "Engleska verzija",
+      "remove": "Ukloni",
+      "hint": "Klijenti koji ne govore jezik vaše tvrtke primit će ovu verziju. Ako je prazna, primaju glavni predložak.",
+      "placeholder": "Hi {{ime}}, a reminder of your appointment on {{datum}} at {{cas}}. {{ime_podjetja}}",
+      "saveError": "Postavke su spremljene, ali engleska verzija nije. Pokušajte ponovno."
+    },
+    "reschedule": {
+      "title": "Obavijest o premještanju termina",
+      "desc": "Klijent prima obavijest kada mu premjestite termin.",
+      "enableLabel": "Omogući obavijest o premještanju",
+      "enableDesc": "Kada premjestite termin, sustav vam predlaže slanje obavijesti klijentu.",
+      "channelLabel": "Način slanja",
+      "channelDesc": "Odaberite kanal za obavijest o premještanju termina.",
+      "smsTemplate": "SMS predložak",
+      "emailTemplate": "Predložak e-pošte",
+      "smsPlaceholder": "Pozdrav {{ime}}, vas termin je premjesten na {{datum}} u {{cas}}. {{ime_podjetja}}",
+      "emailPlaceholder": "Poštovani {{ime}}, vaš je termin premješten na {{datum}} u {{cas}}. Lijep pozdrav, {{ime_podjetja}}",
+      "smsHint": "Možete koristiti iste varijable kao u podsjetnicima prije i nakon termina.",
+      "emailHint": "Predložak e-pošte nema ograničenje znakova i podržava dijakritičke znakove."
+    }
+  },
+  "preview": {
+    "label": "Ovako će vidjeti klijent",
+    "stats": "{length} znakova · {parts, plural, one {# SMS} other {# SMS-a}}",
+    "gsmHint": "Bez dijakritičkih znakova i emojija: tako jedan SMS ima do 160 znakova.",
+    "unicodeWarning": "Poruka sadrži znakove koji nisu u standardnoj SMS abecedi ({chars}). Prema SMS standardu takva poruka ima najviše 70 znakova po SMS-u, pa se prije dijeli na više SMS-ova i skuplja je. Umjesto č, ć, đ, š, ž upotrijebite c, c, d, s, z.",
+    "sample": {
+      "firstName": "Ana",
+      "lastName": "Horvat",
+      "service": "Manikura",
+      "staff": "Maja",
+      "company": "Salon Ana",
+      "address": "Glavna ulica 1"
+    },
+    "unknownVars": "Nepoznata varijabla: {tokens}. Klijent će taj tekst vidjeti doslovno. Zamijenite je varijablom s popisa iznad (npr. Telefon tvrtke)."
+  },
+  "templateEditor": {
+    "vars": {
+      "firstName": "Ime klijenta",
+      "lastName": "Prezime klijenta",
+      "date": "Datum termina",
+      "time": "Vrijeme termina",
+      "service": "Usluga termina",
+      "staff": "Ime izvođača",
+      "company": "Naziv tvrtke",
+      "address": "Adresa tvrtke",
+      "companyPhone": "Telefon tvrtke",
+      "companyEmail": "E-pošta tvrtke",
+      "year": "Godina",
+      "rebookLink": "Poveznica za ponovno naručivanje"
+    },
+    "clickToInsert": "Kliknite na varijablu da je dodate u tekst:",
+    "estimatedLength": "Procijenjeni broj znakova (varijable se broje prema stvarnoj vrijednosti)",
+    "tooLong": "Poruka je predugačka!",
+    "tooLongBody": "Predložak premašuje {max} znakova. Skratite dio teksta."
+  }
+}

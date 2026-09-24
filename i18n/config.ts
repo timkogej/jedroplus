@@ -1,11 +1,12 @@
-export const locales = ['sl', 'en', 'de'] as const;
-// Next: 'hr', 'it' (messages/<locale>/*.json must be complete first).
+export const locales = ['sl', 'en', 'de', 'hr'] as const;
+// Next: 'it' (messages/<locale>/*.json must be complete first).
 
 /** Names in their own language, for the language switchers. */
 export const LOCALE_NAMES: Record<(typeof locales)[number], string> = {
   sl: 'Slovenščina',
   en: 'English',
   de: 'Deutsch',
+  hr: 'Hrvatski',
 };
 
 /** "/de/koledar" → "/koledar"; paths without a locale prefix are returned as is. */

@@ -1,0 +1,108 @@
+{
+  "buttons": {
+    "save": "Spremi",
+    "cancel": "Odustani",
+    "edit": "Uredi",
+    "delete": "Izbriši",
+    "close": "Zatvori",
+    "back": "Natrag",
+    "next": "Dalje",
+    "confirm": "Potvrdi",
+    "discard": "Odbaci",
+    "submit": "Pošalji",
+    "tryAgain": "Pokušajte ponovno",
+    "viewAll": "Prikaži sve",
+    "add": "Dodaj",
+    "create": "Izradi",
+    "update": "Ažuriraj",
+    "search": "Pretraživanje",
+    "filter": "Filtar",
+    "export": "Izvezi",
+    "import": "Uvezi",
+    "copy": "Kopiraj",
+    "share": "Podijeli"
+  },
+  "status": {
+    "active": "Aktivan",
+    "inactive": "Neaktivan",
+    "expired": "Isteklo",
+    "confirmed": "Potvrđeno",
+    "cancelled": "Otkazano",
+    "pending": "U obradi",
+    "completed": "Završeno",
+    "loading": "Učitavanje...",
+    "saving": "Spremanje..."
+  },
+  "confirm": {
+    "title": "Jeste li sigurni?",
+    "cannotUndo": "Ova se radnja ne može poništiti.",
+    "yes": "Da",
+    "no": "Ne"
+  },
+  "roles": {
+    "owner": "Vlasnik",
+    "admin": "Administrator",
+    "staff": "Zaposlenik",
+    "receptionist": "Recepcija"
+  },
+  "errors": {
+    "generic": "Došlo je do pogreške. Pokušajte ponovno.",
+    "loadFailed": "Pogreška pri učitavanju",
+    "noResults": "Nema rezultata",
+    "networkError": "Problem s vezom",
+    "unauthorized": "Nemate dopuštenje za ovu radnju",
+    "fillAllFields": "Ispunite sva polja"
+  },
+  "time": {
+    "today": "Danas",
+    "yesterday": "Jučer",
+    "tomorrow": "Sutra",
+    "now": "Sada"
+  },
+  "daysShort": {
+    "mon": "Pon",
+    "tue": "Uto",
+    "wed": "Sri",
+    "thu": "Čet",
+    "fri": "Pet",
+    "sat": "Sub",
+    "sun": "Ned"
+  },
+  "daysLong": {
+    "mon": "Ponedjeljak",
+    "tue": "Utorak",
+    "wed": "Srijeda",
+    "thu": "Četvrtak",
+    "fri": "Petak",
+    "sat": "Subota",
+    "sun": "Nedjelja"
+  },
+  "search": {
+    "placeholder": "Pretraži...",
+    "noResults": "Nema pogodaka"
+  },
+  "divider": {
+    "or": "ili"
+  },
+  "pagination": {
+    "previous": "Prethodna",
+    "next": "Sljedeća"
+  },
+  "dayLetters": {
+    "sun": "N",
+    "mon": "P",
+    "tue": "U",
+    "wed": "S",
+    "thu": "Č",
+    "fri": "P",
+    "sat": "S"
+  },
+  "placeholders": {
+    "email": "ivan@tvrtka.hr",
+    "contactEmail": "ana@tvrtka.hr",
+    "infoEmail": "info@tvrtka.hr",
+    "mobile": "+385 91 234 5678",
+    "landline": "+385 1 234 5678",
+    "website": "https://www.tvrtka.hr"
+  }
+}

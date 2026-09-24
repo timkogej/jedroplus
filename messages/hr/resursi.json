@@ -1,0 +1,104 @@
+{
+  "page": {
+    "title": "Resursi",
+    "subtitle": "Upravljajte fizičkim resursima koje trebaju vaše usluge",
+    "newButton": "Dodaj resurs",
+    "searchPlaceholder": "Pretraži resurse...",
+    "showAll": "Prikaži sve",
+    "showActiveOnly": "Samo aktivni",
+    "resultsCount": "{current} od {total} resursa",
+    "loadError": "Pogreška pri učitavanju resursa.",
+    "retry": "Pokušaj ponovno"
+  },
+  "stats": {
+    "total": "Ukupno resursa",
+    "active": "Aktivnih",
+    "totalCapacity": "Ukupni kapacitet",
+    "linkedServices": "Povezanih usluga"
+  },
+  "card": {
+    "inactive": "Neaktivan",
+    "units": "{count, plural, one {# jedinica} few {# jedinice} other {# jedinica}}",
+    "unit": "{count} jedinica",
+    "perUnit": "{count} os./jedinica",
+    "totalCapacity": "Ukupno: {count} mjesta",
+    "alwaysAvailable": "Uvijek dostupno",
+    "scheduleSet": "Raspored postavljen",
+    "noServices": "Nema povezanih usluga",
+    "toggleActive": "Aktivan",
+    "toggleInactive": "Neaktivan"
+  },
+  "modal": {
+    "createTitle": "Dodaj resurs",
+    "createSubtitle": "Izradite novi fizički resurs za svoju tvrtku",
+    "editTitle": "Uredi resurs",
+    "editSubtitle": "Ažurirajte podatke o resursu",
+    "nameLabel": "Naziv resursa",
+    "namePlaceholder": "npr. Stol za masažu, Kabina 1...",
+    "bookingNameLabel": "Naziv za rezervacije",
+    "bookingNamePlaceholder": "Zadano: {naziv}",
+    "bookingNameHint": "Naziv koji klijenti vide pri online rezervaciji",
+    "descriptionLabel": "Opis",
+    "descriptionPlaceholder": "Kratak opis resursa (neobavezno)...",
+    "colorLabel": "Boja",
+    "colorSelected": "Odabrana boja",
+    "colorCustom": "Prilagođena",
+    "colorHint": "Boja pomaže prepoznati resurs u prikazu",
+    "quantityLabel": "Broj jedinica",
+    "quantityHelp": "Koliko fizičkih jedinica ovog resursa imate? (npr. 3 stola za masažu)",
+    "capacityLabel": "Kapacitet po jedinici",
+    "capacityHelp": "Koliko klijenata istodobno može koristiti jednu jedinicu?",
+    "totalCapacityLabel": "Ukupni kapacitet",
+    "totalCapacityValue": "Ukupno {value} mjesta",
+    "showInBookingLabel": "Prikaži klijentu pri online rezervaciji",
+    "scheduleLabel": "Dostupnost",
+    "alwaysAvailable": "Uvijek dostupno",
+    "customSchedule": "Postavi raspored",
+    "scheduleHint": "Postavite radni raspored resursa",
+    "addInterval": "Dodaj interval",
+    "servicesLabel": "Usluge kojima je potreban ovaj resurs",
+    "servicesHelp": "Rezervacije tih usluga zauzet će ovaj resurs",
+    "noServicesAvailable": "Nema aktivnih usluga",
+    "save": "Spremi",
+    "saving": "Spremanje...",
+    "validationNameRequired": "Naziv je obavezan.",
+    "validationNameMinLength": "Naziv mora imati najmanje 2 znaka.",
+    "validationNameMaxLength": "Naziv ne smije biti dulji od 100 znakova.",
+    "validationColorInvalid": "Odaberite valjanu boju."
+  },
+  "deleteModal": {
+    "title": "Izbriši resurs",
+    "confirmPrefix": "Želite li zaista izbrisati resurs",
+    "confirmSuffix": "Ova se radnja ne može poništiti.",
+    "delete": "Izbriši",
+    "deleting": "Brisanje...",
+    "cancel": "Odustani"
+  },
+  "emptyState": {
+    "title": "Nema resursa",
+    "subtitle": "Dodajte resurse koje trebaju vaše usluge — stolove za masažu, kabine, opremu...",
+    "addFirst": "Dodaj prvi resurs"
+  },
+  "searchEmpty": {
+    "title": "Nema rezultata za \"{term}\"",
+    "subtitle": "Pokušajte s drugim ključnim riječima.",
+    "clear": "Očisti pretraživanje"
+  },
+  "toasts": {
+    "created": "Resurs je uspješno dodan.",
+    "updated": "Resurs je uspješno ažuriran.",
+    "deleted": "Resurs je uspješno izbrisan.",
+    "errorSave": "Pogreška pri spremanju resursa.",
+    "errorDelete": "Pogreška pri brisanju resursa.",
+    "errorStatus": "Pogreška pri promjeni statusa."
+  },
+  "days": {
+    "Ponedeljek": "Pon",
+    "Torek": "Uto",
+    "Sreda": "Sri",
+    "Četrtek": "Čet",
+    "Petek": "Pet",
+    "Sobota": "Sub",
+    "Nedelja": "Ned"
+  }
+}

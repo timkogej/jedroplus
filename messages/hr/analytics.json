@@ -1,0 +1,132 @@
+{
+  "page": {
+    "title": "Analitika",
+    "subtitle": "Pregled poslovanja i ključnih pokazatelja"
+  },
+  "periods": {
+    "danes": "Danas",
+    "ta_teden": "Ovaj tjedan",
+    "ta_mesec": "Ovaj mjesec",
+    "zadnjih_30": "Zadnjih 30 dana",
+    "ta_leto": "Ova godina",
+    "custom": "Prilagođeno razdoblje"
+  },
+  "customRange": {
+    "fromLabel": "Od:",
+    "toLabel": "Do:",
+    "applyButton": "Primijeni"
+  },
+  "metrics": {
+    "totalRevenue": "Ukupni prihod",
+    "averageValue": "Prosječna vrijednost",
+    "perAppointment": "Po terminu",
+    "occupancyRate": "Popunjenost",
+    "workingTime": "Radnog vremena",
+    "completionRate": "Udio završenih",
+    "appointments": "Termina",
+    "vsPrevious": "u odnosu na prethodno razdoblje"
+  },
+  "revenueChart": {
+    "title": "Prihod i termini kroz vrijeme",
+    "subtitle": "Dnevni pregled završenih termina i prihoda",
+    "noData": "Nema podataka za odabrano razdoblje",
+    "revenueLegend": "Prihod (€)",
+    "appointmentsLegend": "Završeni termini"
+  },
+  "serviceChart": {
+    "title": "Termini po uslugama",
+    "subtitle": "Raspodjela termina po uslugama",
+    "noData": "Nema podataka za odabrano razdoblje",
+    "tooltipAppointments": "termina",
+    "moreServices": "+{count, plural, one {# druga usluga} few {# druge usluge} other {# drugih usluga}}"
+  },
+  "employeeChart": {
+    "title": "Termini po zaposlenicima",
+    "subtitle": "Završeni termini po zaposlenicima",
+    "noData": "Nema podataka za odabrano razdoblje",
+    "tooltipAppointments": "termina",
+    "moreEmployees": "+{count, plural, one {# drugi zaposlenik} few {# druga zaposlenika} other {# drugih zaposlenika}}"
+  },
+  "heatmap": {
+    "title": "Popunjenost po satima",
+    "subtitle": "Udio ukupnog vremena termina po danima i satima",
+    "lessOccupied": "Manje popunjeno",
+    "moreOccupied": "Više popunjeno",
+    "note": "% prikazuje udio ukupnog vremena termina u pojedinom satu",
+    "cellTooltip": "{day} {hour}:00–{hourEnd}:00 · {pct}% popunjenosti"
+  },
+  "clientGrowth": {
+    "title": "Rast broja klijenata",
+    "subtitle": "Novi klijenti kroz vrijeme",
+    "newClientsCount": "novih klijenata",
+    "noData": "Nema podataka za odabrano razdoblje",
+    "totalLabel": "Ukupno klijenata",
+    "newLabel": "Novi klijenti"
+  },
+  "topPerformers": {
+    "title": "Najuspješniji",
+    "services": "Usluge",
+    "staff": "Zaposlenici",
+    "noData": "Nema podataka za odabrano razdoblje",
+    "appointmentCount": "{count, plural, one {# termin} other {# termina}}"
+  },
+  "retention": {
+    "distributionTitle": "Raspodjela klijenata po broju termina",
+    "oneAppointment": "Klijenti s 1 terminom",
+    "threeAppointments": "Klijenti s 3 termina",
+    "fivePlusAppointments": "Klijenti s 5+ termina",
+    "statusTitle": "Analiza statusa",
+    "noData": "Nema podataka za odabrano razdoblje",
+    "statusNames": {
+      "zakljuceni": "Završeni",
+      "nacrtovani": "Zakazani",
+      "odpovedani": "Otkazani",
+      "niPrisel": "Nedolazak"
+    }
+  },
+  "promotions": {
+    "title": "Promocije",
+    "subtitle": "Analitika popusta, happy houra i dodataka",
+    "types": {
+      "popust": "Popusti",
+      "happy_hour": "Happy hour",
+      "add_on": "Dodaci"
+    },
+    "appointmentCount": "termina",
+    "totalSavings": "Ukupna ušteda",
+    "topPromos": "Najčešće korišteni popusti",
+    "monthlyTrend": "Korištenje promocija po mjesecima",
+    "totalSavingsLabel": "Ukupna ušteda klijenata s promocijama",
+    "totalCountLabel": "Broj termina s promocijom",
+    "avgSavingLabel": "Prosječni popust po terminu",
+    "legend": {
+      "discount": "Popust",
+      "happyHour": "Happy hour",
+      "addOn": "Dodatak"
+    },
+    "empty": {
+      "title": "Još nema termina s promocijama",
+      "description": "Izradite popust ili happy hour i počnite pratiti uštede klijenata."
+    }
+  },
+  "csvExport": {
+    "metric": "Pokazatelj",
+    "value": "Vrijednost",
+    "totalRevenue": "Ukupni prihod",
+    "averageBookingValue": "Prosječna vrijednost termina",
+    "occupancyRate": "Popunjenost",
+    "completionRate": "Udio završenih",
+    "totalAppointments": "Ukupno termina",
+    "completedAppointments": "Završeni termini",
+    "cancelledAppointments": "Otkazani termini",
+    "revenueGrowth": "Rast prihoda",
+    "bookingGrowth": "Rast broja termina",
+    "service": "Usluga",
+    "staff": "Zaposlenik",
+    "appointmentCount": "Broj termina",
+    "revenue": "Prihod",
+    "fileMetrics": "analitika-pokazatelji",
+    "fileServices": "analitika-usluge",
+    "fileStaff": "analitika-zaposlenici"
+  }
+}

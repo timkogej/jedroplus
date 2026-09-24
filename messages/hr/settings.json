@@ -1,0 +1,390 @@
+{
+  "hub": {
+    "title": "Postavke",
+    "subtitle": "Sve postavke, organizirane po cjelinama.",
+    "menu": {
+      "company": {
+        "label": "Tvrtka",
+        "description": "Naziv, adresa, radno vrijeme i kontaktni podaci"
+      },
+      "general": {
+        "label": "Općenito",
+        "description": "Račun, jezik, obavijesti i kodovi tvrtke"
+      },
+      "members": {
+        "label": "Tim i pristup",
+        "description": "Pozovite suradnike, uloge i dopuštenja"
+      },
+      "plans": {
+        "label": "Paketi",
+        "description": "Pregled vašeg paketa i mjesečne potrošnje"
+      },
+      "messages": {
+        "label": "Poruke",
+        "description": "Povijest poslanih poruka i podsjetnika"
+      },
+      "addons": {
+        "label": "Dodaci i kvote",
+        "description": "Kupnja dodataka za SMS, e-poštu i zaposlenike"
+      },
+      "history": {
+        "label": "Povijest",
+        "description": "Revizijski trag svih promjena i radnji u sustavu"
+      }
+    }
+  },
+  "back": "Postavke",
+  "general": {
+    "title": "Općenito",
+    "subtitle": "Osnovne postavke aplikacije i vašeg računa",
+    "account": {
+      "title": "Račun i profil",
+      "subtitle": "Vaši osobni podaci",
+      "nameLabel": "Korisničko ime",
+      "nameNote": "Ime se ne može mijenjati",
+      "emailLabel": "E-pošta",
+      "emailNote": "E-pošta se ne može mijenjati"
+    },
+    "langRegion": {
+      "title": "Jezik i regija",
+      "subtitle": "Jezik aplikacije vrijedi za vašu prijavu. Država, vremenska zona i valuta vrijede za cijelu tvrtku.",
+      "languageLabel": "Jezik aplikacije",
+      "languageNote": "Vrijedi za vašu prijavu na ovom uređaju.",
+      "languageValue": "Hrvatski",
+      "regionLabel": "Država",
+      "regionNote": "Gdje tvrtka posluje. Pri promjeni se postavljaju i vremenska zona i valuta.",
+      "timezoneLabel": "Vremenska zona",
+      "timezoneNote": "Prema ovom se vremenu prikazuju termini i šalju podsjetnici.",
+      "dateFormatLabel": "Format datuma",
+      "dateFormatNote": "Kako se prikazuju datumi",
+      "currencyLabel": "Valuta",
+      "currencyNote": "Zadana valuta za nove usluge i cijene.",
+      "saveError": "Postavke regije nije bilo moguće spremiti. Pokušajte ponovno."
+    },
+    "notifications": {
+      "title": "Obavijesti",
+      "subtitle": "Postavke obavijesti",
+      "emailLabel": "Obavijesti e-poštom",
+      "emailNote": "Primajte obavijesti na e-poštu"
+    },
+    "companyData": {
+      "title": "Podaci o tvrtki",
+      "subtitle": "ID tvrtke i kodovi za dodavanje korisnika",
+      "companyIdLabel": "ID tvrtke",
+      "adminCodeLabel": "Administratorski kod",
+      "adminCodeNote": "Za dodavanje administratora u vašu tvrtku. Administrator ima potpuni pristup: vidi i uređuje sve termine, klijente, usluge, zaposlenike, analitiku, postavke i pakete.",
+      "employeeCodeLabel": "Kod za zaposlenike",
+      "employeeCodeNote": "Za dodavanje zaposlenika u vašu tvrtku. Zaposlenik vidi samo svoj raspored i termine koji su mu dodijeljeni. Nema pristup postavkama, analitici ni podacima o drugim zaposlenicima.",
+      "slugLabel": "Slug tvrtke",
+      "slugNote": "Nastavak koji se koristi u poveznicama za rezervacije i u chatbotu na web-stranici",
+      "disclaimer": "Kodove dijelite samo s osobama od povjerenja. Administrator ima potpuni pristup sustavu, a zaposlenik samo svojim terminima."
+    },
+    "qr": {
+      "title": "QR kod za registraciju klijenata",
+      "subtitle": "Za pult ili vrata: klijent skenira kod i sam se upisuje među vaše klijente. Time ne rezervira termin.",
+      "noSlug": "Slug tvrtke nije postavljen.",
+      "caption": "Za online naručivanje termina upotrijebite poveznicu na stranici Rezervacije."
+    },
+    "legal": {
+      "title": "Pravni dokumenti",
+      "subtitle": "Uvjeti pod kojima koristite Jedro+ i kako obrađujemo podatke.",
+      "docs": {
+        "terms": "Opći uvjeti korištenja",
+        "privacy": "Politika privatnosti",
+        "dpa": "Ugovor o obradi osobnih podataka",
+        "subprocessors": "Podizvršitelji obrade"
+      }
+    }
+  },
+  "company": {
+    "title": "Tvrtka",
+    "subtitle": "Osnovni podaci i postavke vaše tvrtke",
+    "basicInfo": {
+      "title": "Osnovni podaci",
+      "subtitle": "Pravni i identifikacijski podaci",
+      "nameLabel": "Naziv tvrtke",
+      "nameNote": "Puni naziv vaše tvrtke",
+      "namePlaceholder": "Unesite naziv tvrtke",
+      "industryLabel": "Djelatnost",
+      "industryNote": "Djelatnost vaše tvrtke",
+      "industryPlaceholder": "npr. Frizerstvo, Kozmetika, Fitness...",
+      "taxLabel": "PDV broj",
+      "taxNote": "PDV identifikacijski broj tvrtke, ako ga imate (s oznakom države, npr. HR12345678901)."
+    },
+    "contact": {
+      "title": "Kontaktni podaci",
+      "subtitle": "Adresa i kontaktne informacije",
+      "addressLabel": "Adresa",
+      "addressNote": "Ulica i kućni broj",
+      "phoneLabel": "Telefon",
+      "phoneNote": "Glavni kontaktni broj",
+      "emailLabel": "E-pošta",
+      "emailNote": "Kontaktna e-pošta",
+      "websiteLabel": "Web-stranica",
+      "websiteNote": "URL vaše web-stranice"
+    },
+    "workingHours": {
+      "title": "Radno vrijeme",
+      "subtitle": "Kada je vaša tvrtka otvorena (podržano je više intervala dnevno)",
+      "closed": "Zatvoreno",
+      "addInterval": "Interval"
+    },
+    "actions": {
+      "save": "Spremi promjene",
+      "saving": "Spremanje...",
+      "saved": "Spremljeno ✓",
+      "cancel": "Odustani",
+      "saveError": "Došlo je do pogreške pri spremanju"
+    },
+    "logo": {
+      "title": "Logotip",
+      "subtitle": "Logotip klijenti vide na stranici za naručivanje i u obrascu za upis klijenata.",
+      "emptyState": "Logotip nije učitan. Bez njega se prikazuje naziv tvrtke, što je sasvim u redu.",
+      "upload": "Učitaj logotip",
+      "replace": "Zamijeni logotip",
+      "remove": "Ukloni",
+      "requirements": "PNG, SVG ili WEBP s prozirnom pozadinom, do 1 MB.",
+      "previewAlt": "Pregled logotipa",
+      "previewNote": "Ovako će izgledati na svijetlim i tamnim dizajnima stranice za naručivanje.",
+      "opaqueTitle": "Ovaj logotip nema prozirnu pozadinu.",
+      "opaqueBody": "Na tamnim dizajnima oko njega će se vidjeti bijeli pravokutnik. Bolje je učitati verziju bez pozadine (PNG ili SVG) ili ostaviti samo naziv tvrtke.",
+      "helpPrefix": "Za pomoć pri pripremi logotipa pišite nam na",
+      "errors": {
+        "tooLarge": "Datoteka je prevelika. Najviše 1 MB.",
+        "unsupported": "Ova vrsta datoteke nije podržana. Upotrijebite PNG, SVG, WEBP ili JPG.",
+        "failed": "Učitavanje nije uspjelo. Pokušajte ponovno."
+      }
+    },
+    "vat": {
+      "check": "Provjeri u registru EU-a (VIES)",
+      "checking": "Provjera…",
+      "valid": "Valjan PDV broj",
+      "validWithName": "Valjan PDV broj – {name}",
+      "invalid": "Broj nije upisan u registar obveznika PDV-a EU-a.",
+      "badFormat": "Oblik nije ispravan za PDV broj (npr. HR12345678901).",
+      "unavailable": "Registar EU-a trenutačno ne odgovara. Pokušajte ponovno kasnije."
+    }
+  },
+  "members": {
+    "title": "Tim i pristup",
+    "subtitle": "Tko se može prijaviti u aplikaciju, s ulogama i dopuštenjima. Osobe u kalendaru uređujete u izborniku Zaposlenici.",
+    "noAccess": {
+      "title": "Pristup ograničen",
+      "message": "Ovu stranicu mogu vidjeti samo vlasnici tvrtke."
+    },
+    "loadError": "Došlo je do pogreške pri učitavanju podataka.",
+    "maxUsersLabel": "Najveći broj korisnika aplikacije",
+    "currentTeamLabel": "Trenutačno u timu",
+    "list": {
+      "title": "Tko se može prijaviti",
+      "subtitle": "Korisnici s prijavom u ovu tvrtku",
+      "empty": "Nije pronađen nijedan član."
+    },
+    "permissions": {
+      "title": "Dopuštenja za zaposlenike",
+      "subtitle": "Postavite što zaposlenici mogu vidjeti i uređivati",
+      "notConfigured": "Dopuštenja za ovu tvrtku još nisu postavljena.",
+      "saved": "Postavke su spremljene.",
+      "saveError": "Došlo je do pogreške pri spremanju.",
+      "saveButton": "Spremi",
+      "saving": "Spremanje…",
+      "sections": {
+        "termini": "Termini",
+        "stranke": "Klijenti",
+        "storitve": "Usluge",
+        "osebje": "Zaposlenici",
+        "analitika": "Analitika",
+        "moduli": "Moduli"
+      },
+      "labels": {
+        "can_view_all_appointments": "Vidi sve termine tvrtke",
+        "can_view_only_own_appointments": "Vidi samo svoje termine",
+        "can_edit_all_appointments": "Uređuje sve termine tvrtke",
+        "can_edit_only_own_appointments": "Uređuje samo svoje termine",
+        "can_create_appointments": "Izrađuje nove termine",
+        "can_delete_appointments": "Briše termine",
+        "can_view_clients": "Vidi klijente",
+        "can_edit_clients": "Uređuje klijente",
+        "can_create_clients": "Dodaje nove klijente",
+        "can_delete_clients": "Briše klijente",
+        "can_view_services": "Vidi usluge",
+        "can_edit_services": "Uređuje usluge",
+        "can_create_services": "Dodaje usluge",
+        "can_delete_services": "Briše usluge",
+        "can_view_staff": "Vidi popis zaposlenika",
+        "can_edit_staff": "Uređuje zaposlenike",
+        "can_view_analytics": "Vidi analitiku",
+        "can_view_zgodovina": "Vidi povijest (revizijski trag)",
+        "can_access_asistent_plus": "Pristup Asistentu+",
+        "can_access_komunikacija": "Pristup Komunikaciji",
+        "can_access_chatbot_plus": "Pristup Chatbotu+",
+        "can_manage_chatbot_plus_settings": "Uređivanje postavki Chatbota+",
+        "can_access_opomniki": "Pristup Podsjetnicima",
+        "can_manage_opomniki": "Upravljanje Podsjetnicima",
+        "can_access_rezervacije": "Pristup Rezervacijama",
+        "can_manage_rezervacije": "Upravljanje Rezervacijama",
+        "can_access_lost_leads": "Pristup izgubljenim klijentima",
+        "can_manage_lost_leads": "Upravljanje izgubljenim klijentima",
+        "can_create_ghost_termin": "Može izraditi nezabilježene termine (ne ulaze u analitiku)"
+      }
+    },
+    "invite": {
+      "button": "Pozovi u tim",
+      "title": "Pozovi u tim",
+      "subtitle": "Pošaljite osobnu poveznicu. Pozvana osoba izradi račun i automatski se pridruži, bez prepisivanja koda.",
+      "close": "Zatvori",
+      "seats": "Prijava u aplikaciju: {used} od {total}",
+      "fullTitle": "Sva mjesta za prijavu su popunjena",
+      "fullBodyFree": "Besplatni paket omogućuje 1 prijavu. Uz Jedro Plus mogu se prijaviti 2 osobe, a dodatna mjesta možete dokupiti.",
+      "fullBodyPaid": "Za novog suradnika dodajte mjesto u izborniku Dodaci i kvote.",
+      "staffStillFree": "Zaposlenike u kalendar možete dodavati bez ograničenja (Zaposlenici), a mjesto im treba samo ako se prijavljuju u aplikaciju.",
+      "upgrade": "Usporedi pakete",
+      "addSeats": "Dodaj mjesta",
+      "roleLabel": "Uloga",
+      "roles": {
+        "staff": {
+          "title": "Zaposlenik",
+          "body": "Vidi svoj raspored i termine. Što još može, postavljate niže u dopuštenjima."
+        },
+        "admin": {
+          "title": "Administrator",
+          "body": "Potpuni pristup terminima, klijentima, uslugama, zaposlenicima, analitici i postavkama."
+        }
+      },
+      "personLabel": "Poveži sa zaposlenikom",
+      "personHint": "Odaberite tko je ta osoba u kalendaru. Nakon pridruživanja odmah će vidjeti svoje termine.",
+      "personNone": "Ne povezuj sada",
+      "linkLabel": "Poveznica za pozivnicu",
+      "loading": "Pripremamo poveznicu …",
+      "copy": "Kopiraj",
+      "copied": "Kopirano",
+      "viaEmail": "E-pošta",
+      "emailSubject": "Pozivnica u tim {company}",
+      "message": "Pozdrav! Pozivam vas u tim {company} u aplikaciji Jedro+. Otvorite poveznicu i izradite račun: {url}",
+      "privacyNote": "Poveznica sadrži kod za pridruživanje. Pošaljite je samo osobi koju pozivate."
+    }
+  },
+  "messages": {
+    "title": "Poruke",
+    "subtitle": "Prikazana je samo povijest posljednjih 14 dana",
+    "messageCount": "{count, plural, one {# poruka} few {# poruke} other {# poruka}}",
+    "filters": {
+      "all": "Sve poruke",
+      "appointment_reminder": "Podsjetnici prije",
+      "appointment_post": "Podsjetnici nakon",
+      "appointment_confirmation": "Potvrde termina",
+      "lost_leads": "Izgubljeni klijenti",
+      "communication_message": "Komunikacija"
+    },
+    "entityLabels": {
+      "appointment_reminder": "Podsjetnik prije termina",
+      "appointment_post": "Podsjetnik nakon termina",
+      "appointment_confirmation": "Potvrda termina",
+      "lost_leads": "Izgubljeni klijenti",
+      "communication_message": "Komunikacija"
+    },
+    "status": {
+      "sent": "Poslano",
+      "queued": "U redu čekanja",
+      "failed": "Pogreška"
+    },
+    "expand": "Prikaži",
+    "collapse": "Zatvori",
+    "subjectLabel": "Predmet",
+    "bodyLabel": "Sadržaj poruke",
+    "noBody": "Nema sadržaja",
+    "empty": {
+      "title": "Nema poslanih poruka",
+      "all": "U posljednjih 14 dana nije poslana nijedna poruka.",
+      "filtered": "Za odabrani filtar nema poruka u posljednjih 14 dana."
+    }
+  },
+  "zgodovina": {
+    "title": "Povijest",
+    "subtitle": "Revizijski trag svih promjena i radnji u sustavu",
+    "noAccess": {
+      "title": "Pristup ograničen",
+      "message": "Nemate dopuštenje za pregled povijesti radnji."
+    },
+    "loadError": "Došlo je do pogreške pri učitavanju povijesti.",
+    "empty": {
+      "title": "Nema zapisa",
+      "description": "Za odabrane filtre nije pronađen nijedan zapis u povijesti."
+    },
+    "filters": {
+      "tip": "Vrsta",
+      "vsi": "Sve",
+      "termini": "Termini",
+      "stranke": "Klijenti",
+      "akcija": "Radnja",
+      "vseAkcije": "Sve radnje",
+      "datumOd": "Od",
+      "datumDo": "Do",
+      "search": "Pretraži po ID-u klijenta / termina",
+      "resetFilters": "Poništi"
+    },
+    "columns": {
+      "datum": "Datum i vrijeme",
+      "akcija": "Radnja",
+      "entiteta": "Entitet",
+      "kdo": "Tko",
+      "podrobnosti": "Pojedinosti"
+    },
+    "akcije": {
+      "ustvarjen": "Izrađen",
+      "spremenjen": "Izmijenjen",
+      "prestavljen": "Premješten",
+      "zakljucen": "Završen",
+      "izbrisan": "Izbrisan",
+      "odpovedan": "Otkazan",
+      "online_rezervacija": "Online rezervacija",
+      "stranka_dodana": "Klijent dodan",
+      "stranka_posodobljena": "Klijent ažuriran"
+    },
+    "tipEntitete": {
+      "termin": "Termin",
+      "stranka": "Klijent"
+    },
+    "izvedel_tip": {
+      "owner": "Vlasnik",
+      "admin": "Administrator",
+      "staff": "Zaposlenik",
+      "stranka": "Klijent",
+      "sistem": "Sustav"
+    },
+    "expand": "Pojedinosti",
+    "collapse": "Zatvori",
+    "idTermina": "ID termina",
+    "idStranke": "ID klijenta",
+    "spremembe": {
+      "title": "Promjene",
+      "prej": "Prije",
+      "potem": "Poslije",
+      "noChanges": "Nema zabilježenih promjena."
+    },
+    "pagination": {
+      "previous": "Natrag",
+      "next": "Dalje",
+      "of": "od"
+    }
+  },
+  "saveIndicator": {
+    "saving": "Spremanje...",
+    "saved": "Spremljeno {relative}",
+    "justNow": "upravo sada",
+    "secondsAgo": "prije {seconds} s",
+    "minutesAgo": "prije {minutes} min",
+    "hoursAgo": "prije {hours} h"
+  },
+  "qrPage": {
+    "title": "QR kod za registraciju klijenata",
+    "subtitle": "Klijenti skeniraju ovaj kod i ispune svoje podatke.",
+    "noSlug": "Slug tvrtke nije postavljen."
+  },
+  "qrCard": {
+    "download": "Preuzmi PNG",
+    "copy": "Kopiraj poveznicu",
+    "copied": "Kopirano ✓",
+    "info": "Ovaj QR kod možete ispisati i postaviti u svoj salon ili ordinaciju. Klijenti ga skeniraju telefonom i za manje od minute unesu svoje podatke."
+  }
+}

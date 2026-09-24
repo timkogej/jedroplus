@@ -64,6 +64,24 @@ const MONTHS_SHORT_DE = [
   'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
 ];
 
+// Day and month names in Croatian
+const DAYS_FULL_HR = ['Nedjelja', 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'];
+const DAYS_SHORT_HR = ['Ned', 'Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub'];
+const DAYS_ABBR_HR = ['Ne', 'Po', 'Ut', 'Sr', 'Če', 'Pe', 'Su'];
+const MONTHS_FULL_HR = [
+  'Siječanj', 'Veljača', 'Ožujak', 'Travanj', 'Svibanj', 'Lipanj',
+  'Srpanj', 'Kolovoz', 'Rujan', 'Listopad', 'Studeni', 'Prosinac'
+];
+const MONTHS_SHORT_HR = [
+  'Sij', 'Velj', 'Ožu', 'Tra', 'Svi', 'Lip',
+  'Srp', 'Kol', 'Ruj', 'Lis', 'Stu', 'Pro'
+];
+// Croatian dates use the genitive in lowercase: "2. veljače 2026".
+const MONTHS_IN_DATE_HR = [
+  'siječnja', 'veljače', 'ožujka', 'travnja', 'svibnja', 'lipnja',
+  'srpnja', 'kolovoza', 'rujna', 'listopada', 'studenoga', 'prosinca'
+];
+
 type Names = { daysFull: string[]; daysShort: string[]; daysAbbr: string[]; monthsFull: string[]; monthsShort: string[]; monthsInDate: string[] };
 
 const NAMES: Record<string, Names> = {
@@ -71,6 +89,7 @@ const NAMES: Record<string, Names> = {
   en: { daysFull: DAYS_FULL_EN, daysShort: DAYS_SHORT_EN, daysAbbr: DAYS_ABBR_EN, monthsFull: MONTHS_FULL_EN, monthsShort: MONTHS_SHORT_EN, monthsInDate: MONTHS_FULL_EN },
   // German capitalises months inside dates too ("2. Februar").
   de: { daysFull: DAYS_FULL_DE, daysShort: DAYS_SHORT_DE, daysAbbr: DAYS_SHORT_DE, monthsFull: MONTHS_FULL_DE, monthsShort: MONTHS_SHORT_DE, monthsInDate: MONTHS_FULL_DE },
+  hr: { daysFull: DAYS_FULL_HR, daysShort: DAYS_SHORT_HR, daysAbbr: DAYS_ABBR_HR, monthsFull: MONTHS_FULL_HR, monthsShort: MONTHS_SHORT_HR, monthsInDate: MONTHS_IN_DATE_HR },
 };
 
 const names = (locale: string): Names => NAMES[locale] ?? NAMES.en;

@@ -1,0 +1,98 @@
+{
+  "page": {
+    "title": "Izgubljeni klijenti",
+    "subtitle": "Pregled postavki i neaktivnih klijenata",
+    "stats": {
+      "inactiveClients": "Neaktivni klijenti",
+      "inactiveClientsDesc": "Ukupno označenih",
+      "notifiedClients": "Obaviješteni klijenti",
+      "notifiedClientsDesc": "Ovaj mjesec",
+      "inactivityDays": "Dani neaktivnosti",
+      "inactivityDaysDesc": "Prag neaktivnosti"
+    },
+    "table": {
+      "title": "Neaktivni klijenti",
+      "subtitle": "{count, plural, one {# neaktivan klijent} few {# neaktivna klijenta} other {# neaktivnih klijenata}} (više od {days} dana bez interakcije)",
+      "limitNote": "Prikazano je prvih 50 od {total} neaktivnih klijenata",
+      "columns": {
+        "client": "Klijent",
+        "email": "E-pošta",
+        "phone": "Telefon",
+        "daysInactive": "Dana neaktivnosti",
+        "notified": "Obaviješten"
+      },
+      "daysValue": "{days, plural, one {# dan} other {# dana}}",
+      "notifiedYes": "Da",
+      "notifiedNo": "Ne",
+      "empty": "Trenutačno nema neaktivnih klijenata.",
+      "emptyDesc": "Svi su klijenti imali interakciju u posljednjih {days} dana."
+    },
+    "settings": {
+      "title": "Postavke",
+      "statusLabel": "Status",
+      "inactivityThreshold": "Prag neaktivnosti",
+      "tone": "Ton komunikacije",
+      "discount": "Popust za povratak",
+      "aiInstructions": "Upute za AI",
+      "notSet": "Nije postavljeno",
+      "noInstructions": "Nema uputa"
+    },
+    "info": {
+      "title": "O izgubljenim klijentima",
+      "body": "Sustav <highlight>automatski prepoznaje klijente</highlight> koji u određenom razdoblju nisu imali termin i šalje im personaliziranu poruku da se ponovno naruče.\n\nAI <highlight>sastavlja sadržaj poruke prema vašim postavkama</highlight> — tekst se prilagođava svakom klijentu posebno, uzimajući u obzir njegovu povijest i usluge. Tako vaša poruka nikad ne zvuči kao masovna pošta, nego kao osobni poziv natrag.\n\nZahvaljujući tom sustavu <highlight>zadržavate klijente koji bi inače otišli konkurenciji</highlight> — bez ručnog rada i bez zaboravljenih kontakata.\n\nAko imate bilo kakvih pitanja, javite nam se na help@jedroplus.com."
+    }
+  },
+  "status": {
+    "enabled": "Omogućeno",
+    "disabled": "Onemogućeno"
+  },
+  "tone": {
+    "professional": "Profesionalan",
+    "friendly": "Prijateljski",
+    "salesOriented": "Prodajno usmjeren",
+    "formal": "Formalan",
+    "relaxed": "Opušten"
+  },
+  "modal": {
+    "title": "Postavke izgubljenih klijenata",
+    "subtitle": "Praćenje i ponovno pridobivanje izgubljenih klijenata",
+    "closeButton": "Zatvori",
+    "saveButton": "Spremi",
+    "savingButton": "Spremanje...",
+    "saveError": "Došlo je do pogreške pri spremanju",
+    "enableTitle": "Omogući praćenje izgubljenih klijenata",
+    "enableDesc": "Automatsko prepoznavanje i kontaktiranje neaktivnih klijenata",
+    "detection": {
+      "sectionTitle": "Prepoznavanje izgubljenih klijenata",
+      "sectionDesc": "Kada sustav treba prepoznati neaktivne klijente",
+      "inactiveAfterLabel": "Neaktivan nakon",
+      "inactiveAfterDesc": "Nakon koliko dana bez termina se klijent označava kao neaktivan",
+      "daysLabel": "dana",
+      "inactiveDaysHint": "Klijenti će biti označeni kao neaktivni nakon {count} dana bez interakcije"
+    },
+    "communication": {
+      "sectionTitle": "Upute za komunikaciju",
+      "sectionDesc": "Upute AI-ju za komunikaciju s neaktivnim klijentima",
+      "toneLabel": "Ton komunikacije",
+      "toneDesc": "Kako AI treba komunicirati s neaktivnim klijentima",
+      "tonePlaceholder": "Odaberite ton",
+      "toneOptions": {
+        "formal": "Formalan",
+        "friendly": "Prijateljski",
+        "relaxed": "Opušten",
+        "professional": "Profesionalan"
+      },
+      "instructionsLabel": "Upute",
+      "instructionsDesc": "Ove se upute koriste za sastavljanje personalizirane poruke za svakog neaktivnog klijenta",
+      "instructionsPlaceholder": "Npr.: Budi ljubazan i osoban. Spomeni koliko je vremena prošlo od zadnjeg posjeta. Ponudi mogućnost rezervacije novog termina. Ako postoji popust, spomeni ga kao posebnu ponudu za vjerne klijente."
+    },
+    "discount": {
+      "sectionTitle": "Popust za povratak",
+      "sectionDesc": "Neobavezni popust ili posebna ponuda za ponovno aktiviranje klijenata",
+      "label": "Popust",
+      "fieldDesc": "Opis popusta ili posebne ponude (ostavite prazno ako ne nudite popust)",
+      "placeholder": "Npr.: 15 % popusta na sljedeći posjet",
+      "aiHint": "AI će ovaj opis uključiti u poruke neaktivnim klijentima"
+    }
+  }
+}
