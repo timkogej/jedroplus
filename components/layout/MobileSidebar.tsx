@@ -1,5 +1,6 @@
 'use client';
 
+import { stripLocalePrefix } from '@/i18n/config';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { usePathname, useRouter } from 'next/navigation';
@@ -47,7 +48,7 @@ function cn(...classes: (string | boolean | undefined)[]) {
 
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const pathname = usePathname();
-  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(?=\/|$)/, '') || '/';
+  const pathnameWithoutLocale = stripLocalePrefix(pathname);
   const router = useRouter();
   const t = useTranslations('layout');
   const { companyId, companySettings } = useCompany();

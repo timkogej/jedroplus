@@ -1,5 +1,6 @@
 'use client';
 
+import { intlLocale } from '@/lib/format';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react';
@@ -29,7 +30,7 @@ export function SendingStatus({ channels, sms, email, periodEnd, canBuy, isFree 
   if (channels.length === 0 && !isFree) return null;
 
   const renewal = periodEnd
-    ? new Date(periodEnd).toLocaleDateString(locale === 'sl' ? 'sl-SI' : locale, { day: 'numeric', month: 'numeric', year: 'numeric' })
+    ? new Date(periodEnd).toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'numeric', year: 'numeric' })
     : null;
 
   return (

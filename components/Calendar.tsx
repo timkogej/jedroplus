@@ -1,5 +1,6 @@
 'use client';
 
+import { intlLocale } from '@/lib/format';
 import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -218,7 +219,7 @@ function AppointmentDetailModal({
 
   const formatModalDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString(locale === 'sl' ? 'sl-SI' : 'en-US', {
+    return date.toLocaleDateString(intlLocale(locale), {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -506,7 +507,7 @@ function AppointmentDetailModal({
             const badge = getBadge();
 
             const fmt = (val: number) =>
-              new Intl.NumberFormat(locale === 'sl' ? 'sl-SI' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
+              new Intl.NumberFormat(intlLocale(locale), { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
             if (originalCena === 0 && !imaPopust && !hasAddOnPrice) return null;
 
@@ -3079,7 +3080,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                   <div>
                     <p className="text-xs text-gray-500">{t('modal.fields.date')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
-                      {new Date(completeTarget.datum).toLocaleDateString(locale === 'sl' ? 'sl-SI' : 'en-US', {
+                      {new Date(completeTarget.datum).toLocaleDateString(intlLocale(locale), {
                         weekday: 'long',
                         day: 'numeric',
                         month: 'long',

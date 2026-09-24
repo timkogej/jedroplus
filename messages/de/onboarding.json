@@ -1,0 +1,183 @@
+{
+  "entry": {
+    "loading": "Wird geprüft...",
+    "title": "Willkommen bei",
+    "subtitle": "Legen Sie ein Unternehmen an oder treten Sie einem bei",
+    "create": {
+      "title": "Neues Unternehmen anlegen",
+      "description": "Starten Sie mit einem neuen Unternehmen und laden Sie Ihr Team ein",
+      "cta": "Loslegen"
+    },
+    "join": {
+      "title": "Einem Unternehmen beitreten",
+      "description": "Sie haben eine Unternehmens-ID und einen Code? Treten Sie einem bestehenden Unternehmen bei",
+      "cta": "Beitreten"
+    }
+  },
+  "create": {
+    "title": "Unternehmen anlegen",
+    "steps": {
+      "localization": "Land & Sprache",
+      "companyName": "Name des Unternehmens",
+      "industry": "Branche",
+      "schedule": "Öffnungszeiten",
+      "services": "Ihre Leistungen"
+    },
+    "localization": {
+      "countryLabel": "Land",
+      "languageLabel": "Sprache"
+    },
+    "companyName": {
+      "label": "Name des Unternehmens",
+      "placeholder": "z. B. Haarstudio Anna",
+      "hint": "Diesen Namen sehen Ihre Kunden in Erinnerungen und auf Ihrer Buchungsseite."
+    },
+    "industry": {
+      "label": "Branche / Tätigkeit",
+      "customLabel": "Beschreiben Sie Ihre Tätigkeit",
+      "customPlaceholder": "z. B. Meine besondere Tätigkeit…"
+    },
+    "schedule": {
+      "hint": "Die Öffnungszeiten können Sie jederzeit in den Unternehmenseinstellungen ändern.",
+      "closed": "Geschlossen"
+    },
+    "nav": {
+      "back": "Zurück",
+      "next": "Weiter",
+      "finish": "Anlegen",
+      "creating": "Wird angelegt..."
+    },
+    "success": {
+      "title": "Unternehmen angelegt",
+      "subtitle": "Ihr Unternehmen ist startklar",
+      "goToDashboard": "Zur Übersicht"
+    },
+    "toasts": {
+      "success": "Unternehmen erfolgreich angelegt!",
+      "errorCreate": "Das Unternehmen konnte nicht angelegt werden",
+      "errorLoad": "Das Unternehmen konnte nicht geladen werden. Bitte versuchen Sie es erneut."
+    },
+    "countries": {
+      "si": "Slowenien",
+      "hr": "Kroatien",
+      "rs": "Serbien",
+      "ba": "Bosnien und Herzegowina",
+      "me": "Montenegro",
+      "mk": "Nordmazedonien",
+      "at": "Österreich",
+      "de": "Deutschland",
+      "it": "Italien",
+      "hu": "Ungarn",
+      "cz": "Tschechien",
+      "sk": "Slowakei",
+      "pl": "Polen",
+      "ro": "Rumänien",
+      "bg": "Bulgarien",
+      "fr": "Frankreich",
+      "es": "Spanien",
+      "pt": "Portugal",
+      "nl": "Niederlande",
+      "be": "Belgien",
+      "ch": "Schweiz",
+      "gb": "Vereinigtes Königreich",
+      "us": "Vereinigte Staaten",
+      "ca": "Kanada",
+      "au": "Australien",
+      "other": "Anderes Land"
+    },
+    "languages": {
+      "slo": "Slowenisch",
+      "eng": "Englisch",
+      "de": "Deutsch"
+    },
+    "industries": {
+      "hairSalons": "Friseursalons",
+      "cosmeticsAndSkincare": "Kosmetik & Hautpflege",
+      "massageAndWellness": "Massage & Wellness",
+      "dentistry": "Zahnmedizin",
+      "medicineAndHealth": "Medizin & Gesundheit",
+      "physiotherapy": "Physiotherapie",
+      "psychologyAndCoaching": "Psychologie & Coaching",
+      "veterinary": "Tiermedizin",
+      "personalTrainingFitness": "Personal Training / Fitness",
+      "yogaAndPilates": "Yoga & Pilates",
+      "beautySalon": "Kosmetikstudio",
+      "manicureAndPedicure": "Maniküre & Pediküre",
+      "tattoosAndPiercings": "Tattoos & Piercings",
+      "architectureAndDesign": "Architektur & Design",
+      "photography": "Fotografie",
+      "lawAndConsulting": "Recht & Beratung",
+      "accounting": "Buchhaltung",
+      "itServices": "IT-Dienstleistungen",
+      "educationAndTutoring": "Bildung & Nachhilfe",
+      "carService": "Autowerkstatt",
+      "cleaningAndMaintenance": "Reinigung & Instandhaltung",
+      "other": "Sonstiges"
+    },
+    "services": {
+      "hint": "Wir haben einige Leistungen für Ihre Branche vorgeschlagen. Haken Sie an, was Sie anbieten, und passen Sie Preis und Dauer an. Alles lässt sich später unter „Leistungen“ ändern.",
+      "nameLabel": "Name der Leistung",
+      "durationLabel": "Dauer (Min.)",
+      "priceLabel": "Preis (€)",
+      "addCustom": "Eigene Leistung hinzufügen",
+      "remove": "Entfernen",
+      "newServicePlaceholder": "z. B. Beratung",
+      "ownerToggle": "Ich führe selbst Leistungen aus",
+      "ownerToggleHint": "Wir legen Sie als ersten Mitarbeiter an, damit Sie sofort Ihren ersten Termin eintragen können. Kolleginnen und Kollegen können Sie später hinzufügen.",
+      "ownerNameLabel": "Ihr Vor- und Nachname",
+      "noneSelected": "Ohne Leistungen müssen Sie vor dem ersten Termin mindestens eine unter „Leistungen“ anlegen."
+    }
+  },
+  "join": {
+    "title": "Einem Unternehmen beitreten",
+    "subtitle": "Wählen Sie, wie Sie beitreten möchten",
+    "admin": {
+      "title": "Als Administrator beitreten",
+      "description": "Sie erhalten dieselben Rechte wie der Inhaber: vollen Zugriff auf Unternehmensdaten, Einstellungen, Team und Auswertungen.",
+      "note": "Sie benötigen einen Administrator-Code vom Inhaber.",
+      "cta": "Weiter"
+    },
+    "employee": {
+      "title": "Als Mitarbeiter beitreten",
+      "description": "Sie sehen nur Ihre eigenen Daten, Termine und Kunden. Der Zugriff ist eingeschränkt und kann von einem Administrator weiter angepasst werden.",
+      "note": "Sie benötigen einen Mitarbeiter-Code von einem Administrator.",
+      "cta": "Weiter"
+    },
+    "back": "Zurück",
+    "form": {
+      "adminTitle": "Als Administrator beitreten",
+      "employeeTitle": "Als Mitarbeiter beitreten",
+      "adminSubtitle": "Geben Sie den Administrator-Code ein, den Sie vom Inhaber erhalten haben",
+      "employeeSubtitle": "Geben Sie den Mitarbeiter-Code ein, den Sie von einem Administrator erhalten haben",
+      "adminCodeLabel": "Administrator-Code",
+      "employeeCodeLabel": "Mitarbeiter-Code",
+      "adminCodeHint": "Diesen Code erhalten Sie vom Inhaber. Er findet ihn unter Einstellungen → Allgemein.",
+      "employeeCodeHint": "Diesen Code erhalten Sie vom Inhaber oder einem Administrator. Er findet ihn unter Einstellungen → Allgemein.",
+      "submit": "Beitreten",
+      "submitting": "Beitritt läuft..."
+    },
+    "toasts": {
+      "noCode": "Bitte geben Sie den Administrator-Code ein",
+      "noCodeEmployee": "Bitte geben Sie den Mitarbeiter-Code ein",
+      "noFreeSlot": "In diesem Unternehmen sind keine Benutzerplätze mehr frei.",
+      "notLoggedIn": "Sie sind nicht angemeldet",
+      "profileNotLinked": "Das Unternehmen ist noch nicht mit Ihrem Profil verknüpft. Bitte versuchen Sie es in einigen Sekunden erneut.",
+      "errorJoin": "Beitritt fehlgeschlagen",
+      "errorProfile": "Profil konnte nicht gespeichert werden",
+      "errorLoad": "Unternehmen konnte nicht geladen werden",
+      "successWithName": "Sie sind {name} beigetreten!",
+      "success": "Sie sind dem Unternehmen beigetreten!",
+      "invalidCode": "Ungültiger Unternehmenscode",
+      "companyNotFound": "Kein Unternehmen mit dieser ID gefunden"
+    },
+    "invite": {
+      "eyebrow": "Einladung",
+      "title": "Sie wurden ins Team eingeladen",
+      "titleWithName": "Sie wurden zu {name} eingeladen",
+      "body": "Erstellen Sie ein Konto oder melden Sie sich an. Wir fügen Sie automatisch dem Team hinzu – ohne Code.",
+      "signUp": "Konto erstellen",
+      "logIn": "Ich habe ein Konto – anmelden",
+      "readyBody": "Der Code ist bereits eingetragen. Klicken Sie auf „Beitreten“."
+    }
+  }
+}

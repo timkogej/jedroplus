@@ -1,0 +1,379 @@
+{
+  "hub": {
+    "title": "Einstellungen",
+    "subtitle": "Alle Einstellungen, nach Bereichen geordnet.",
+    "menu": {
+      "company": {
+        "label": "Unternehmen",
+        "description": "Name, Adresse, Öffnungszeiten und Kontaktdaten"
+      },
+      "general": {
+        "label": "Allgemein",
+        "description": "Konto, Sprache, Benachrichtigungen und Unternehmenscodes"
+      },
+      "members": {
+        "label": "Team & Zugriff",
+        "description": "Kollegen einladen, Rollen und Berechtigungen"
+      },
+      "plans": {
+        "label": "Pakete",
+        "description": "Überblick über Ihr Paket und den monatlichen Verbrauch"
+      },
+      "messages": {
+        "label": "Nachrichten",
+        "description": "Verlauf gesendeter Nachrichten und Erinnerungen"
+      },
+      "addons": {
+        "label": "Add-ons & Kontingente",
+        "description": "SMS, E-Mails und zusätzliche Logins hinzubuchen"
+      },
+      "history": {
+        "label": "Verlauf",
+        "description": "Protokoll aller Änderungen und Aktionen im System"
+      }
+    }
+  },
+  "back": "Einstellungen",
+  "general": {
+    "title": "Allgemein",
+    "subtitle": "Grundeinstellungen der App und Ihr Konto",
+    "account": {
+      "title": "Konto & Profil",
+      "subtitle": "Ihre persönlichen Daten",
+      "nameLabel": "Benutzername",
+      "nameNote": "Der Name kann nicht geändert werden",
+      "emailLabel": "E-Mail",
+      "emailNote": "Die E-Mail-Adresse kann nicht geändert werden"
+    },
+    "langRegion": {
+      "title": "Sprache & Region",
+      "subtitle": "Die Sprache der App gilt für Ihr Login. Land, Zeitzone und Währung gelten für das ganze Unternehmen.",
+      "languageLabel": "Sprache der App",
+      "languageNote": "Gilt für Ihr Login auf diesem Gerät.",
+      "languageValue": "Deutsch",
+      "regionLabel": "Land",
+      "regionNote": "Wo das Unternehmen tätig ist. Beim Wechsel werden auch Zeitzone und Währung angepasst.",
+      "timezoneLabel": "Zeitzone",
+      "timezoneNote": "In dieser Zeitzone werden Termine angezeigt und Erinnerungen gesendet.",
+      "dateFormatLabel": "Datumsformat",
+      "dateFormatNote": "So werden Datumsangaben angezeigt",
+      "currencyLabel": "Währung",
+      "currencyNote": "Standardwährung für neue Leistungen und Preise.",
+      "saveError": "Die Regionseinstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "subtitle": "Einstellungen für Benachrichtigungen",
+      "emailLabel": "E-Mail-Benachrichtigungen",
+      "emailNote": "Benachrichtigungen per E-Mail erhalten"
+    },
+    "companyData": {
+      "title": "Unternehmensdaten",
+      "subtitle": "Unternehmens-ID und Codes zum Hinzufügen von Benutzern",
+      "companyIdLabel": "Unternehmens-ID",
+      "adminCodeLabel": "Administrator-Code",
+      "adminCodeNote": "Zum Hinzufügen von Administratoren. Administratoren haben vollen Zugriff: Sie können alle Termine, Kunden, Leistungen, Mitarbeiter, Auswertungen, Einstellungen und Pakete sehen und bearbeiten.",
+      "employeeCodeLabel": "Mitarbeiter-Code",
+      "employeeCodeNote": "Zum Hinzufügen von Mitarbeitern. Mitarbeiter sehen nur ihre eigenen Arbeitszeiten und zugewiesenen Termine – ohne Zugriff auf Einstellungen, Auswertungen oder Daten anderer Mitarbeiter.",
+      "slugLabel": "Kurzname des Unternehmens",
+      "slugNote": "Die Endung in Buchungslinks und für den Chatbot auf Ihrer Website",
+      "disclaimer": "Geben Sie Codes nur an vertrauenswürdige Personen weiter. Administratoren haben vollen Zugriff; Mitarbeiter sehen nur ihre eigenen Termine."
+    },
+    "qr": {
+      "title": "QR-Code zur Kundenregistrierung",
+      "subtitle": "Für Empfang oder Tür: Kunden scannen ihn und tragen sich selbst in Ihre Kundenliste ein. Ein Termin wird dabei nicht gebucht.",
+      "noSlug": "Kurzname des Unternehmens nicht festgelegt.",
+      "caption": "Für Online-Buchungen verwenden Sie den Link auf der Seite „Buchungen“."
+    },
+    "legal": {
+      "title": "Rechtliche Dokumente",
+      "subtitle": "Die Bedingungen, unter denen Sie Jedro+ nutzen, und wie wir Daten verarbeiten.",
+      "docs": {
+        "terms": "Nutzungsbedingungen",
+        "privacy": "Datenschutzerklärung",
+        "dpa": "Auftragsverarbeitungsvertrag",
+        "subprocessors": "Unterauftragsverarbeiter"
+      }
+    }
+  },
+  "company": {
+    "title": "Unternehmen",
+    "subtitle": "Grundlegende Angaben und Einstellungen Ihres Unternehmens",
+    "basicInfo": {
+      "title": "Grundangaben",
+      "subtitle": "Rechtliche und Identifikationsdaten",
+      "nameLabel": "Name des Unternehmens",
+      "nameNote": "Vollständiger rechtlicher Name Ihres Unternehmens",
+      "namePlaceholder": "Name des Unternehmens eingeben",
+      "industryLabel": "Branche",
+      "industryNote": "Tätigkeitsbereich Ihres Unternehmens",
+      "industryPlaceholder": "z. B. Friseur, Kosmetik, Fitness...",
+      "taxLabel": "USt-IdNr.",
+      "taxNote": "Umsatzsteuer-Identifikationsnummer, falls vorhanden (mit Länderkennung, z. B. DE123456789)."
+    },
+    "contact": {
+      "title": "Kontaktdaten",
+      "subtitle": "Adresse und Kontaktinformationen",
+      "addressLabel": "Adresse",
+      "addressNote": "Straße und Hausnummer",
+      "phoneLabel": "Telefon",
+      "phoneNote": "Haupttelefonnummer",
+      "emailLabel": "E-Mail",
+      "emailNote": "Kontakt-E-Mail",
+      "websiteLabel": "Website",
+      "websiteNote": "Adresse Ihrer Website"
+    },
+    "workingHours": {
+      "title": "Öffnungszeiten",
+      "subtitle": "Wann Ihr Unternehmen geöffnet hat (mehrere Zeiträume pro Tag möglich)",
+      "closed": "Geschlossen",
+      "addInterval": "Zeitraum"
+    },
+    "actions": {
+      "save": "Änderungen speichern",
+      "saving": "Wird gespeichert...",
+      "saved": "Gespeichert ✓",
+      "cancel": "Abbrechen",
+      "saveError": "Beim Speichern ist ein Fehler aufgetreten"
+    },
+    "logo": {
+      "title": "Logo",
+      "subtitle": "Kunden sehen Ihr Logo auf der Buchungsseite und im Registrierungsformular.",
+      "emptyState": "Kein Logo hochgeladen. Ohne Logo zeigen wir den Namen des Unternehmens – das sieht auch gut aus.",
+      "upload": "Logo hochladen",
+      "replace": "Logo ersetzen",
+      "remove": "Entfernen",
+      "requirements": "PNG, SVG oder WEBP mit transparentem Hintergrund, bis 1 MB.",
+      "previewAlt": "Vorschau des Logos",
+      "previewNote": "So sieht es auf hellen und dunklen Buchungsdesigns aus.",
+      "opaqueTitle": "Dieses Logo hat keinen transparenten Hintergrund.",
+      "opaqueBody": "Auf dunklen Designs erscheint es als weißes Rechteck. Laden Sie besser eine freigestellte Version hoch (PNG oder SVG) oder verwenden Sie nur den Namen.",
+      "helpPrefix": "Hilfe bei der Vorbereitung des Logos erhalten Sie unter",
+      "errors": {
+        "tooLarge": "Die Datei ist zu groß. Maximal 1 MB.",
+        "unsupported": "Dieser Dateityp wird nicht unterstützt. Verwenden Sie PNG, SVG, WEBP oder JPG.",
+        "failed": "Hochladen fehlgeschlagen. Bitte versuchen Sie es erneut."
+      }
+    },
+    "vat": {
+      "check": "Im EU-Register prüfen (VIES)",
+      "checking": "Wird geprüft…",
+      "valid": "Gültige USt-IdNr.",
+      "validWithName": "Gültige USt-IdNr. – {name}",
+      "invalid": "Diese Nummer ist nicht im EU-Umsatzsteuerregister eingetragen.",
+      "badFormat": "Das sieht nicht nach einer USt-IdNr. aus (z. B. DE123456789).",
+      "unavailable": "Das EU-Register antwortet gerade nicht. Bitte versuchen Sie es später erneut."
+    }
+  },
+  "members": {
+    "title": "Team & Zugriff",
+    "subtitle": "Wer sich in der App anmelden kann, mit Rollen und Berechtigungen. Personen im Kalender verwalten Sie unter „Team“.",
+    "noAccess": {
+      "title": "Zugriff eingeschränkt",
+      "message": "Diese Seite ist nur für Inhaber sichtbar."
+    },
+    "loadError": "Beim Laden der Daten ist ein Fehler aufgetreten.",
+    "maxUsersLabel": "Maximale Anzahl App-Benutzer",
+    "currentTeamLabel": "Derzeit im Team",
+    "list": {
+      "title": "Wer sich anmelden kann",
+      "subtitle": "Benutzer mit Login für dieses Unternehmen",
+      "empty": "Keine Mitglieder gefunden."
+    },
+    "permissions": {
+      "title": "Berechtigungen der Mitarbeiter",
+      "subtitle": "Legen Sie fest, was Mitarbeiter sehen und bearbeiten dürfen",
+      "notConfigured": "Für dieses Unternehmen sind noch keine Berechtigungen eingerichtet.",
+      "saved": "Einstellungen gespeichert.",
+      "saveError": "Beim Speichern ist ein Fehler aufgetreten.",
+      "saveButton": "Speichern",
+      "saving": "Wird gespeichert…",
+      "sections": {
+        "termini": "Termine",
+        "stranke": "Kunden",
+        "storitve": "Leistungen",
+        "osebje": "Team",
+        "analitika": "Auswertungen",
+        "moduli": "Module"
+      },
+      "labels": {
+        "can_view_all_appointments": "Alle Termine des Unternehmens sehen",
+        "can_view_only_own_appointments": "Nur eigene Termine sehen",
+        "can_edit_all_appointments": "Alle Termine des Unternehmens bearbeiten",
+        "can_edit_only_own_appointments": "Nur eigene Termine bearbeiten",
+        "can_create_appointments": "Neue Termine anlegen",
+        "can_delete_appointments": "Termine löschen",
+        "can_view_clients": "Kunden sehen",
+        "can_edit_clients": "Kunden bearbeiten",
+        "can_create_clients": "Neue Kunden anlegen",
+        "can_delete_clients": "Kunden löschen",
+        "can_view_services": "Leistungen sehen",
+        "can_edit_services": "Leistungen bearbeiten",
+        "can_create_services": "Leistungen hinzufügen",
+        "can_delete_services": "Leistungen löschen",
+        "can_view_staff": "Mitarbeiterliste sehen",
+        "can_edit_staff": "Mitarbeiter bearbeiten",
+        "can_view_analytics": "Auswertungen sehen",
+        "can_view_zgodovina": "Verlauf (Änderungsprotokoll) sehen",
+        "can_access_asistent_plus": "Zugriff auf Asistent+",
+        "can_access_komunikacija": "Zugriff auf Kommunikation",
+        "can_access_chatbot_plus": "Zugriff auf Chatbot+",
+        "can_manage_chatbot_plus_settings": "Einstellungen von Chatbot+ bearbeiten",
+        "can_access_opomniki": "Zugriff auf Erinnerungen",
+        "can_manage_opomniki": "Erinnerungen verwalten",
+        "can_access_rezervacije": "Zugriff auf Buchungen",
+        "can_manage_rezervacije": "Buchungen verwalten",
+        "can_access_lost_leads": "Zugriff auf verlorene Kunden",
+        "can_manage_lost_leads": "Verlorene Kunden verwalten",
+        "can_create_ghost_termin": "Darf nicht erfasste Termine anlegen (zählen nicht in den Auswertungen)"
+      }
+    },
+    "invite": {
+      "button": "Ins Team einladen",
+      "title": "Ins Team einladen",
+      "subtitle": "Senden Sie einen persönlichen Link. Die eingeladene Person erstellt ein Konto und tritt automatisch bei – ohne Code.",
+      "close": "Schließen",
+      "seats": "App-Logins: {used} von {total}",
+      "fullTitle": "Alle Logins sind vergeben",
+      "fullBodyFree": "Das kostenlose Paket erlaubt 1 Login. Mit Jedro Plus können sich 2 Personen anmelden, und Sie können weitere Logins hinzubuchen.",
+      "fullBodyPaid": "Buchen Sie unter „Add-ons & Kontingente“ ein Login für die neue Kollegin oder den neuen Kollegen hinzu.",
+      "staffStillFree": "Im Kalender (Team) können Sie beliebig viele Mitarbeiter anlegen; ein Login wird nur für die Anmeldung in der App benötigt.",
+      "upgrade": "Pakete vergleichen",
+      "addSeats": "Logins hinzubuchen",
+      "roleLabel": "Rolle",
+      "roles": {
+        "staff": {
+          "title": "Mitarbeiter",
+          "body": "Sieht die eigenen Arbeitszeiten und Termine. Was darüber hinaus erlaubt ist, legen Sie unten in den Berechtigungen fest."
+        },
+        "admin": {
+          "title": "Administrator",
+          "body": "Voller Zugriff auf Termine, Kunden, Leistungen, Team, Auswertungen und Einstellungen."
+        }
+      },
+      "personLabel": "Mit Mitarbeiter verknüpfen",
+      "personHint": "Wählen Sie, wer diese Person im Kalender ist. Nach dem Beitritt sieht sie sofort ihre eigenen Termine.",
+      "personNone": "Jetzt nicht verknüpfen",
+      "linkLabel": "Einladungslink",
+      "loading": "Link wird vorbereitet …",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "viaEmail": "E-Mail",
+      "emailSubject": "Einladung zu {company}",
+      "message": "Hallo! Ich lade dich zu {company} bei Jedro+ ein. Öffne den Link und erstelle ein Konto: {url}",
+      "privacyNote": "Der Link enthält den Beitrittscode. Senden Sie ihn nur an die Person, die Sie einladen."
+    }
+  },
+  "messages": {
+    "title": "Nachrichten",
+    "subtitle": "Es wird nur der Verlauf der letzten 14 Tage angezeigt",
+    "messageCount": "{count, plural, =1 {1 Nachricht} other {{count} Nachrichten}}",
+    "filters": {
+      "all": "Alle Nachrichten",
+      "appointment_reminder": "Erinnerungen vor dem Termin",
+      "appointment_post": "Nachrichten nach dem Termin",
+      "appointment_confirmation": "Terminbestätigungen",
+      "lost_leads": "Verlorene Kunden",
+      "communication_message": "Kommunikation"
+    },
+    "entityLabels": {
+      "appointment_reminder": "Erinnerung vor dem Termin",
+      "appointment_post": "Nachricht nach dem Termin",
+      "appointment_confirmation": "Terminbestätigung",
+      "lost_leads": "Verlorene Kunden",
+      "communication_message": "Kommunikation"
+    },
+    "status": {
+      "sent": "Gesendet",
+      "queued": "In Warteschlange",
+      "failed": "Fehler"
+    },
+    "expand": "Anzeigen",
+    "collapse": "Schließen",
+    "subjectLabel": "Betreff",
+    "bodyLabel": "Inhalt",
+    "noBody": "Kein Inhalt",
+    "empty": {
+      "title": "Keine gesendeten Nachrichten",
+      "all": "In den letzten 14 Tagen wurden keine Nachrichten gesendet.",
+      "filtered": "Für den gewählten Filter gibt es in den letzten 14 Tagen keine Nachrichten."
+    }
+  },
+  "zgodovina": {
+    "title": "Verlauf",
+    "subtitle": "Protokoll aller Änderungen und Aktionen im System",
+    "noAccess": {
+      "title": "Zugriff eingeschränkt",
+      "message": "Sie haben keine Berechtigung, den Verlauf anzusehen."
+    },
+    "loadError": "Beim Laden des Verlaufs ist ein Fehler aufgetreten.",
+    "empty": {
+      "title": "Keine Einträge",
+      "description": "Für die gewählten Filter wurden keine Einträge gefunden."
+    },
+    "filters": {
+      "tip": "Typ",
+      "vsi": "Alle",
+      "termini": "Termine",
+      "stranke": "Kunden",
+      "akcija": "Aktion",
+      "vseAkcije": "Alle Aktionen",
+      "datumOd": "Von",
+      "datumDo": "Bis",
+      "search": "Nach Kunden- / Termin-ID suchen",
+      "resetFilters": "Zurücksetzen"
+    },
+    "columns": {
+      "datum": "Datum & Uhrzeit",
+      "akcija": "Aktion",
+      "entiteta": "Objekt",
+      "kdo": "Von",
+      "podrobnosti": "Details"
+    },
+    "akcije": {
+      "ustvarjen": "Angelegt",
+      "spremenjen": "Geändert",
+      "prestavljen": "Verschoben",
+      "zakljucen": "Abgeschlossen",
+      "izbrisan": "Gelöscht",
+      "odpovedan": "Storniert",
+      "online_rezervacija": "Online-Buchung",
+      "stranka_dodana": "Kunde angelegt",
+      "stranka_posodobljena": "Kunde aktualisiert"
+    },
+    "tipEntitete": {
+      "termin": "Termin",
+      "stranka": "Kunde"
+    },
+    "izvedel_tip": {
+      "owner": "Inhaber",
+      "admin": "Administrator",
+      "staff": "Mitarbeiter",
+      "stranka": "Kunde",
+      "sistem": "System"
+    },
+    "expand": "Details",
+    "collapse": "Schließen",
+    "idTermina": "Termin-ID",
+    "idStranke": "Kunden-ID",
+    "spremembe": {
+      "title": "Änderungen",
+      "prej": "Vorher",
+      "potem": "Nachher",
+      "noChanges": "Keine Änderungen erfasst."
+    },
+    "pagination": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "of": "von"
+    }
+  },
+  "saveIndicator": {
+    "saving": "Wird gespeichert...",
+    "saved": "Gespeichert {relative}",
+    "justNow": "gerade eben",
+    "secondsAgo": "vor {seconds} Sek.",
+    "minutesAgo": "vor {minutes} Min.",
+    "hoursAgo": "vor {hours} Std."
+  }
+}

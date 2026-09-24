@@ -1,0 +1,115 @@
+{
+  "page": {
+    "title": "Kommunikation",
+    "subtitle": "Senden Sie Ihren Kunden schnell und einfach Nachrichten",
+    "emailQuotaLabel": "E-Mail-Kontingent",
+    "step1SectionTitle": "Kunden auswählen",
+    "step1ContinueDisabled": "Wählen Sie Kunden aus, um fortzufahren",
+    "step1Continue": "{count, plural, =1 {Weiter mit 1 Kunden} other {Weiter mit {count} Kunden}}",
+    "step2BackButton": "Zurück zur Auswahl",
+    "step2SelectedBadge": "{count, plural, =1 {1 Kunde} other {{count} Kunden}}",
+    "step2SectionTitle": "Nachricht verfassen"
+  },
+  "result": {
+    "title": "Nachrichten gesendet",
+    "requested": "Angefordert",
+    "requestedDetail": "{clients} Kunden · {messages} Nachrichten",
+    "sent": "Gesendet",
+    "skipped": "Übersprungen",
+    "skippedLabel": "Übersprungen:",
+    "newMessage": "Neue Nachricht senden",
+    "skippedUnsubscribed": "{name} – von Neuigkeiten und Angeboten abgemeldet"
+  },
+  "customerList": {
+    "searchPlaceholder": "Nach Name, E-Mail oder Telefon suchen...",
+    "selectAll": "Alle auswählen",
+    "deselectAll": "Auswahl aufheben",
+    "selectedCount": "Ausgewählt: {count}",
+    "resultCount": "{count, plural, =1 {1 Kunde} other {{count} Kunden}}",
+    "empty": "Keine Kunden vorhanden",
+    "emptyHint": "Ändern Sie die Filter oder die Suche",
+    "showAll": "Alle Kunden anzeigen",
+    "emptyNoClients": "Legen Sie Kunden unter „Kunden“ an – oder sie werden mit ihrem ersten Termin automatisch angelegt.",
+    "optedOut": "Abgemeldet",
+    "optedOutHint": "Dieser Kunde hat sich von Neuigkeiten und Angeboten abgemeldet. Terminerinnerungen erhält er weiterhin."
+  },
+  "filters": {
+    "sectionLabel": "Termine",
+    "all": "Alle Kunden",
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "thisWeek": "Diese Woche",
+    "thisMonth": "Dieser Monat",
+    "advanced": "Erweiterte Filter",
+    "serviceLabel": "Leistung",
+    "allServices": "Alle Leistungen",
+    "dateRangeLabel": "Terminzeitraum"
+  },
+  "ai": {
+    "title": "Asistent+",
+    "subtitle": "Beschreiben Sie, was Sie Ihren Kunden mitteilen möchten",
+    "toneLabel": "Tonalität",
+    "toneFriendly": "Freundlich",
+    "toneProfessional": "Professionell",
+    "promptPlaceholder": "z. B.: Informiere die Kunden, dass es an diesem Wochenende 20 % Rabatt auf alle Leistungen gibt.",
+    "generateButton": "Nachricht erstellen",
+    "generatingButton": "Wird erstellt...",
+    "generateError": "Beim Erstellen der Nachricht ist ein Fehler aufgetreten"
+  },
+  "composer": {
+    "subjectLabel": "Betreff",
+    "subjectPlaceholder": "Betreff eingeben...",
+    "messageLabel": "Nachricht",
+    "messagePlaceholder": "Ihre Nachricht an die Kunden...",
+    "charCount": "{count} Zeichen",
+    "variableHint": "Klicken Sie auf eine Variable, um sie einzufügen:",
+    "varClientFirstName": "Vorname des Kunden",
+    "varClientLastName": "Nachname des Kunden",
+    "varCompanyName": "Name des Unternehmens",
+    "varCompanyAddress": "Adresse des Unternehmens",
+    "varCompanyPhone": "Telefon des Unternehmens",
+    "varCompanyEmail": "E-Mail des Unternehmens",
+    "varYear": "Jahr",
+    "varRescheduleLink": "Link zum Umbuchen"
+  },
+  "preview": {
+    "toggleButton": "Vorschau der Nachricht",
+    "subjectLabel": "Betreff:",
+    "noSubject": "Kein Betreff",
+    "empty": "Die Vorschau erscheint, sobald Sie eine Nachricht eingeben...",
+    "note": "Variablen werden durch die Daten des Kunden ersetzt"
+  },
+  "send": {
+    "recipientsLabel": "Empfänger",
+    "recipientCount": "{count, plural, =1 {1 Kunde} other {{count} Kunden}}",
+    "remainingQuotaLabel": "Verbleibendes Kontingent",
+    "remainingEmails": "{count} E-Mails",
+    "warnNoSubject": "Bitte Betreff eingeben",
+    "warnNoMessage": "Bitte Nachricht eingeben",
+    "warnQuotaExceeded": "E-Mail-Kontingent überschritten",
+    "sendButton": "Nachricht senden",
+    "sendingButton": "Wird gesendet...",
+    "sendNote": "Die Nachricht wird an die E-Mail-Adressen der ausgewählten Kunden gesendet"
+  },
+  "sms": {
+    "quotaTitle": "SMS-Kontingent",
+    "quotaDepleted": "Sie haben Ihr SMS-Limit erreicht. Wechseln Sie in ein höheres Paket, um weiter zu senden.",
+    "quotaCritical": "Sie haben diesen Monat nur noch {remaining} SMS.",
+    "upgradeLink": "Mehr SMS mit einem Upgrade",
+    "blockedTitle": "SMS-Versand gesperrt",
+    "blockedUpgrade": "Paket upgraden",
+    "reasonQuota": "Sie haben Ihr monatliches SMS-Limit erreicht",
+    "reasonNoSubscription": "Sie haben kein aktives Abonnement",
+    "reasonInactive": "Ihr Abonnement ist nicht aktiv",
+    "reasonDefault": "SMS-Versand ist nicht verfügbar"
+  },
+  "toasts": {
+    "selectAtLeastOne": "Wählen Sie mindestens einen Kunden aus",
+    "enterSubject": "Bitte Betreff eingeben",
+    "enterMessage": "Bitte Nachricht eingeben",
+    "invalidId": "Kunde „{name}“ hat keine gültige numerische ID (Clients.id)",
+    "someInvalidIds": "Einige Kunden haben keine gültige ID",
+    "sent": "{sent} / {requested} Nachrichten gesendet",
+    "sendError": "Beim Senden der Nachricht ist ein Fehler aufgetreten"
+  }
+}

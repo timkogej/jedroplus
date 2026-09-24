@@ -1,0 +1,218 @@
+{
+  "sidebar": {
+    "sections": {
+      "main": "Allgemein",
+      "ai": "KI",
+      "communication": "Kommunikation",
+      "modules": "Module",
+      "promotions": "Aktionen",
+      "analytics": "Auswertungen",
+      "account": "Konto",
+      "billing": "Pakete",
+      "settings": "Einstellungen"
+    },
+    "items": {
+      "dashboard": "Übersicht",
+      "calendar": "Kalender",
+      "appointments": "Termine",
+      "clients": "Kunden",
+      "communication": "Kommunikation",
+      "reminders": "Erinnerungen",
+      "reservations": "Buchungen",
+      "lostLeads": "Verlorene Kunden",
+      "receptionistPlus": "ReceptionistPlus",
+      "services": "Leistungen",
+      "resources": "Ressourcen",
+      "staff": "Team",
+      "promotions": "Aktionen",
+      "analytics": "Auswertungen",
+      "billing": "Pakete",
+      "plans": "Pakete",
+      "settings": "Einstellungen",
+      "signOut": "Abmelden",
+      "new": "Neu",
+      "newAppointment": "Neuer Termin",
+      "newClient": "Neuer Kunde",
+      "newService": "Neue Leistung"
+    },
+    "tooltips": {
+      "expand": "Ausklappen",
+      "collapse": "Einklappen"
+    },
+    "stats": {
+      "today": "Heute",
+      "week": "Woche",
+      "month": "Monat"
+    }
+  },
+  "appbar": {
+    "home": "Startseite",
+    "search": "Suchen...",
+    "profile": "Mein Profil",
+    "plans": "Pakete",
+    "signOut": "Abmelden",
+    "aria": {
+      "openMenu": "Menü öffnen",
+      "closeMenu": "Menü schließen",
+      "search": "Suchen"
+    },
+    "breadcrumbs": {
+      "dashboard": "Übersicht",
+      "calendar": "Kalender",
+      "appointments": "Termine",
+      "clients": "Kunden",
+      "services": "Leistungen",
+      "staff": "Team",
+      "reminders": "Erinnerungen",
+      "lostLeads": "Verlorene Kunden",
+      "analytics": "Auswertungen",
+      "asistent": "Asistent+",
+      "chatbotPlus": "Chatbot+",
+      "settings": "Einstellungen",
+      "billing": "Pakete",
+      "notifications": "Benachrichtigungen",
+      "reservations": "Buchungen",
+      "resources": "Ressourcen",
+      "promotions": "Aktionen",
+      "communication": "Kommunikation",
+      "receptionistPlus": "Receptionist+",
+      "qrCode": "QR-Code",
+      "plans": "Pakete",
+      "addons": "Add-ons",
+      "team": "Team & Zugriff",
+      "company": "Unternehmen",
+      "general": "Allgemein",
+      "messages": "Nachrichten",
+      "history": "Verlauf",
+      "discounts": "Rabatte",
+      "happyHours": "Happy Hours",
+      "serviceAddOns": "Leistungs-Add-ons",
+      "requests": "Anfragen"
+    }
+  },
+  "search": {
+    "placeholder": "Seiten, Aktionen suchen...",
+    "escHint": "schließen",
+    "navHint": "navigieren",
+    "openHint": "öffnen",
+    "shortcutHint": "K zum Suchen",
+    "categories": {
+      "pages": "Seiten",
+      "quickActions": "Schnellaktionen",
+      "recent": "Letzte Suchen",
+      "settings": "Einstellungen"
+    },
+    "empty": "Keine Ergebnisse für „{query}“",
+    "items": {
+      "plans": "Pakete & Abrechnung",
+      "addons": "Add-ons (SMS, Logins)",
+      "team": "Team & Zugriff",
+      "company": "Unternehmensdaten"
+    }
+  },
+  "fallbacks": {
+    "companyName": "Mein Unternehmen",
+    "userName": "Benutzer"
+  },
+  "guide": {
+    "stepOf": "Schritt {current} von {total}",
+    "close": "Rundgang schließen",
+    "skip": "Überspringen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "finish": "Fertig",
+    "menuItem": "Rundgang durch die App",
+    "tours": {
+      "dashboard": {
+        "welcome": {
+          "title": "Willkommen bei Jedro+",
+          "body": "In einer Minute zeigen wir Ihnen, wo Sie was finden. Sie können den Rundgang jederzeit über das Profilmenü oben rechts erneut starten."
+        },
+        "newAppointment": {
+          "title": "Neuer Termin",
+          "body": "Der schnellste Weg zur Buchung: Kunde, Leistung und Uhrzeit wählen. Einen neuen Kunden können Sie direkt dabei anlegen."
+        },
+        "calendar": {
+          "title": "Kalender",
+          "body": "Ihr Tag, Ihre Woche oder Ihr Monat auf einen Blick. Klicken Sie auf einen freien Platz, und ein neuer Termin öffnet sich zu diesem Tag und dieser Uhrzeit."
+        },
+        "appointments": {
+          "title": "Termine",
+          "body": "Alle Termine mit Suche und Filtern. Hier markieren Sie Termine auch als abgeschlossen."
+        },
+        "clients": {
+          "title": "Kunden",
+          "body": "Ihr Kundenstamm mit Besuchsverlauf und Kontaktdaten."
+        },
+        "services": {
+          "title": "Leistungen",
+          "body": "Was Sie anbieten, wie lange es dauert und was es kostet. Dauer und Preis der Termine kommen von hier."
+        },
+        "staff": {
+          "title": "Team",
+          "body": "Die Personen, die Leistungen ausführen, und ihre Arbeitszeiten. Kolleginnen und Kollegen laden Sie unter Einstellungen → Team & Zugriff in die App ein."
+        },
+        "reminders": {
+          "title": "Erinnerungen",
+          "body": "Automatische Nachrichten an Kunden vor und nach dem Termin. Weniger versäumte Termine, kein manueller Aufwand."
+        },
+        "settings": {
+          "title": "Einstellungen",
+          "body": "Unternehmensdaten, Öffnungszeiten, Team, Pakete und Add-ons."
+        },
+        "gettingStarted": {
+          "title": "Ihre ersten Schritte",
+          "body": "Diese Liste führt Sie durch den Einstieg. Jeder Schritt wird automatisch abgehakt, sobald Sie ihn erledigt haben."
+        },
+        "userMenu": {
+          "title": "Rundgang und Sprache",
+          "body": "Hier starten Sie den Rundgang erneut oder ändern die Sprache der App."
+        }
+      },
+      "calendar": {
+        "grid": {
+          "title": "Auf einen freien Platz klicken",
+          "body": "Ein neuer Termin öffnet sich zu diesem Tag und dieser Uhrzeit. Schraffierte Bereiche liegen außerhalb Ihrer Arbeitszeit."
+        },
+        "newAppointment": {
+          "title": "Oder die Schaltfläche nutzen",
+          "body": "Hier können Sie ebenfalls einen neuen Termin anlegen – zur nächsten freien Zeit."
+        },
+        "views": {
+          "title": "Tag, Woche oder Monat",
+          "body": "Wählen Sie die Ansicht, die Ihnen am besten passt."
+        },
+        "filters": {
+          "title": "Filter",
+          "body": "Zeigen Sie nur ausgewählte Mitarbeiter oder Leistungen an, wenn der Kalender voll wird."
+        }
+      },
+      "staff": {
+        "welcome": {
+          "title": "Willkommen im Team",
+          "body": "Ein kurzer Überblick, wo Sie Ihre Arbeitszeiten, Termine und Kunden finden."
+        },
+        "calendar": {
+          "title": "Ihr Kalender",
+          "body": "Ihre Termine nach Tag und Woche. Klicken Sie auf einen freien Platz, um einen neuen einzutragen."
+        },
+        "newAppointment": {
+          "title": "Neuer Termin",
+          "body": "Ein Kunde ruft an oder kommt vorbei? Hier tragen Sie ihn ein: Kunde, Leistung, Uhrzeit."
+        },
+        "appointments": {
+          "title": "Termine",
+          "body": "Ihre Terminliste. Nach dem Besuch markieren Sie den Termin hier als abgeschlossen."
+        },
+        "clients": {
+          "title": "Kunden",
+          "body": "Kontaktdaten und Besuchsverlauf der Kunden. Einen Kunden können Sie auch direkt beim Buchen anlegen."
+        },
+        "userMenu": {
+          "title": "Rundgang und Sprache",
+          "body": "Hier können Sie den Rundgang jederzeit erneut starten."
+        }
+      }
+    }
+  }
+}

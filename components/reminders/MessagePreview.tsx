@@ -1,5 +1,6 @@
 'use client';
 
+import { intlLocale } from '@/lib/format';
 import { useLocale, useTranslations } from 'next-intl';
 import { migrateTemplate } from './TemplateEditor';
 
@@ -43,7 +44,7 @@ export function MessagePreview({ template, companyName, sms = true }: MessagePre
   const sample: Record<string, string> = {
     '{{ime}}': t('sample.firstName'),
     '{{priimek}}': t('sample.lastName'),
-    '{{datum}}': tomorrow.toLocaleDateString(locale === 'sl' ? 'sl-SI' : locale, { day: 'numeric', month: 'numeric' }),
+    '{{datum}}': tomorrow.toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'numeric' }),
     '{{cas}}': '10:00',
     '{{storitev}}': t('sample.service'),
     '{{ime_izvajalca}}': t('sample.staff'),

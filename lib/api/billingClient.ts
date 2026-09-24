@@ -11,6 +11,7 @@
  * The client sends the Supabase access token which gets forwarded to n8n.
  */
 
+import { locales } from '@/i18n/config';
 import { supabase } from '@/lib/supabaseClient';
 
 interface ApiResponse<T = unknown> {
@@ -285,7 +286,7 @@ function getAppOrigin(): string {
 
 function getLocalePrefix(): string {
   if (typeof window === 'undefined') return '';
-  const match = window.location.pathname.match(/^\/(sl|en)(?=\/|$)/);
+  const match = window.location.pathname.match(new RegExp(`^/(${locales.join('|')})(?=/|$)`));
   return match?.[0] ?? '';
 }
 
@@ -315,8 +316,8 @@ function toAppUrl(pathOrUrl: string): string {
 /** The app locale from the URL ("/en/…" → "en"); Slovenian by default. */
 function currentLocale(): string {
   if (typeof window === 'undefined') return 'sl';
-  const match = window.location.pathname.match(/^\/([a-z]{2})(\/|$)/);
-  return match?.[1] ?? 'sl';
+  const prefix = getLocalePrefix();
+  return prefix ? prefix.slice(1) : 'sl';
 }
 
 export async function startCheckout(

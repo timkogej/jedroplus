@@ -5,11 +5,9 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { useTransition } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useCompany } from '@/app/company-context';
+import { LOCALE_NAMES, locales, type Locale } from '@/i18n/config';
 
-const LANGUAGES = [
-  { code: 'sl', label: 'Slovenščina' },
-  { code: 'en', label: 'English' },
-] as const;
+const LANGUAGES = locales.map((code) => ({ code, label: LOCALE_NAMES[code] }));
 
 export function LanguageSwitcher() {
   const locale = useLocale();
@@ -23,7 +21,7 @@ export function LanguageSwitcher() {
 
     startTransition(async () => {
       // 1. Update URL with new locale
-      router.replace(pathname, { locale: newLocale as 'sl' | 'en' });
+      router.replace(pathname, { locale: newLocale as Locale });
 
       // 2. Set cookie for anonymous future visits
       document.cookie = `NEXT_LOCALE=${newLocale};path=/;max-age=${60 * 60 * 24 * 365}`;
@@ -46,7 +44,7 @@ export function LanguageSwitcher() {
   return (
     <div className="px-3 py-2">
       <div className="text-xs font-medium text-gray-400 mb-1 uppercase tracking-wide">
-        Jezik / Language
+        Jezik / Language / Sprache
       </div>
       <div className="flex flex-col gap-0.5">
         {LANGUAGES.map((lang) => (

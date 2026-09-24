@@ -1,0 +1,98 @@
+{
+  "page": {
+    "title": "Verlorene Kunden",
+    "subtitle": "Übersicht über Einstellungen und inaktive Kunden",
+    "stats": {
+      "inactiveClients": "Inaktive Kunden",
+      "inactiveClientsDesc": "Insgesamt markiert",
+      "notifiedClients": "Benachrichtigte Kunden",
+      "notifiedClientsDesc": "Diesen Monat",
+      "inactivityDays": "Tage bis inaktiv",
+      "inactivityDaysDesc": "Schwelle für Inaktivität"
+    },
+    "table": {
+      "title": "Inaktive Kunden",
+      "subtitle": "{count} inaktive Kunden (seit mehr als {days} Tagen ohne Kontakt)",
+      "limitNote": "Die ersten 50 von {total} inaktiven Kunden werden angezeigt",
+      "columns": {
+        "client": "Kunde",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "daysInactive": "Tage inaktiv",
+        "notified": "Benachrichtigt"
+      },
+      "daysValue": "{days} Tage",
+      "notifiedYes": "Ja",
+      "notifiedNo": "Nein",
+      "empty": "Derzeit keine inaktiven Kunden.",
+      "emptyDesc": "Alle Kunden hatten in den letzten {days} Tagen einen Termin oder Kontakt."
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "statusLabel": "Status",
+      "inactivityThreshold": "Schwelle für Inaktivität",
+      "tone": "Tonalität",
+      "discount": "Rabatt für die Rückkehr",
+      "aiInstructions": "Anweisungen für die KI",
+      "notSet": "Nicht festgelegt",
+      "noInstructions": "Keine Anweisungen"
+    },
+    "info": {
+      "title": "Über verlorene Kunden",
+      "body": "Das System <highlight>erkennt automatisch Kunden</highlight>, die in einem festgelegten Zeitraum keinen Termin hatten, und schickt ihnen eine persönliche Einladung, wieder zu buchen.\n\nDie KI <highlight>erstellt den Text anhand Ihrer Einstellungen</highlight> – individuell für jeden Kunden, unter Berücksichtigung seiner bisherigen Termine und Leistungen. So wirkt Ihre Nachricht nie wie ein Massenversand, sondern wie eine persönliche Einladung zur Rückkehr.\n\nSo <highlight>gewinnen Sie Kunden zurück, die sonst zur Konkurrenz gehen würden</highlight> – ohne manuellen Aufwand und ohne vergessene Kontakte.\n\nBei Fragen erreichen Sie uns unter help@jedroplus.com."
+    }
+  },
+  "status": {
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert"
+  },
+  "tone": {
+    "professional": "Professionell",
+    "friendly": "Freundlich",
+    "salesOriented": "Verkaufsorientiert",
+    "formal": "Förmlich",
+    "relaxed": "Locker"
+  },
+  "modal": {
+    "title": "Einstellungen: verlorene Kunden",
+    "subtitle": "Inaktive Kunden erkennen und zurückgewinnen",
+    "closeButton": "Schließen",
+    "saveButton": "Speichern",
+    "savingButton": "Wird gespeichert...",
+    "saveError": "Beim Speichern ist ein Fehler aufgetreten",
+    "enableTitle": "Verlorene Kunden verfolgen",
+    "enableDesc": "Inaktive Kunden automatisch erkennen und kontaktieren",
+    "detection": {
+      "sectionTitle": "Erkennung verlorener Kunden",
+      "sectionDesc": "Wann das System Kunden als inaktiv erkennen soll",
+      "inactiveAfterLabel": "Inaktiv nach",
+      "inactiveAfterDesc": "Nach wie vielen Tagen ohne Termin ein Kunde als inaktiv gilt",
+      "daysLabel": "Tagen",
+      "inactiveDaysHint": "Kunden gelten nach {count} Tagen ohne Kontakt als inaktiv"
+    },
+    "communication": {
+      "sectionTitle": "Anweisungen für die Kommunikation",
+      "sectionDesc": "Anweisungen für die KI beim Anschreiben inaktiver Kunden",
+      "toneLabel": "Tonalität",
+      "toneDesc": "Wie die KI inaktive Kunden ansprechen soll",
+      "tonePlaceholder": "Tonalität wählen",
+      "toneOptions": {
+        "formal": "Förmlich",
+        "friendly": "Freundlich",
+        "relaxed": "Locker",
+        "professional": "Professionell"
+      },
+      "instructionsLabel": "Anweisungen",
+      "instructionsDesc": "Mit diesen Anweisungen wird für jeden inaktiven Kunden eine persönliche Nachricht erstellt",
+      "instructionsPlaceholder": "z. B.: Sei freundlich und persönlich. Erwähne, wie lange der letzte Besuch her ist. Biete an, einen neuen Termin zu buchen. Wenn es einen Rabatt gibt, nenne ihn als besonderes Angebot für treue Kunden."
+    },
+    "discount": {
+      "sectionTitle": "Rabatt für die Rückkehr",
+      "sectionDesc": "Optionaler Rabatt oder Sonderangebot, um Kunden zurückzugewinnen",
+      "label": "Rabatt",
+      "fieldDesc": "Beschreibung des Rabatts oder Angebots (leer lassen, wenn es keinen Rabatt gibt)",
+      "placeholder": "z. B.: 15 % Rabatt auf den nächsten Besuch",
+      "aiHint": "Die KI nimmt diese Beschreibung in die Nachrichten an inaktive Kunden auf"
+    }
+  }
+}

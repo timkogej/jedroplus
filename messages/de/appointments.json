@@ -1,0 +1,409 @@
+{
+  "status": {
+    "scheduled": "Geplant",
+    "confirmed": "Bestätigt",
+    "pending": "Ausstehend",
+    "completed": "Abgeschlossen",
+    "cancelled": "Storniert",
+    "noShow": "Nicht erschienen"
+  },
+  "page": {
+    "title": "Termine",
+    "subtitle": "Alle Termine an einem Ort verwalten",
+    "newAppointment": "Neuer Termin",
+    "stats": {
+      "thisMonth": "Termine diesen Monat",
+      "today": "Heute",
+      "upcoming": "Anstehend"
+    },
+    "disabledCreateMessage": "Der Inhaber hat das Anlegen neuer Termine deaktiviert. Wenden Sie sich an ihn, um es zu aktivieren."
+  },
+  "completeModal": {
+    "title": "Termin abschließen",
+    "subtitle": "Abschluss des Termins bestätigen",
+    "client": "Kunde",
+    "service": "Leistung",
+    "employee": "Mitarbeiter",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "notesLabel": "Nachricht an den Kunden oder Hinweise nach dem Termin",
+    "notesPlaceholder": "Nachricht oder Hinweise nach dem Termin eingeben (optional)...",
+    "cancel": "Abbrechen",
+    "completing": "Wird abgeschlossen...",
+    "confirm": "Abschließen"
+  },
+  "deleteModal": {
+    "title": "Termin löschen",
+    "message": "Möchten Sie diesen Termin wirklich löschen?"
+  },
+  "deleteConfirmation": {
+    "areYouSure": "Sind Sie sicher?",
+    "unknownClient": "Unbekannter Kunde",
+    "irreversible": "Diese Aktion kann nicht rückgängig gemacht werden!",
+    "cancel": "Abbrechen",
+    "deleting": "Wird gelöscht...",
+    "deleteButton": "Termin löschen"
+  },
+  "toast": {
+    "noShow": "Termin als „Nicht erschienen“ markiert",
+    "cancelled": "Termin storniert",
+    "completed": "Termin abgeschlossen"
+  },
+  "errors": {
+    "loadError": "Beim Laden der Daten ist ein Fehler aufgetreten.",
+    "saveError": "Beim Speichern des Termins ist ein Fehler aufgetreten.",
+    "deleteError": "Beim Löschen des Termins ist ein Fehler aufgetreten.",
+    "completeError": "Beim Abschließen des Termins ist ein Fehler aufgetreten.",
+    "noShowError": "Beim Markieren als „Nicht erschienen“ ist ein Fehler aufgetreten.",
+    "cancelError": "Beim Stornieren des Termins ist ein Fehler aufgetreten.",
+    "clientCreateError": "Beim Anlegen des Kunden ist ein Fehler aufgetreten"
+  },
+  "disabledModal": {
+    "title": "Aktion deaktiviert",
+    "defaultMessage": "Der Inhaber hat diese Aktion deaktiviert. Wenden Sie sich an ihn, um sie zu aktivieren.",
+    "button": "Verstanden"
+  },
+  "modal": {
+    "title": {
+      "create": "Neuer Termin",
+      "edit": "Termin bearbeiten",
+      "view": "Termindetails"
+    },
+    "emptyState": {
+      "message": "Um einen Termin anzulegen, benötigen Sie mindestens eine Leistung und einen Mitarbeiter.",
+      "addService": "Leistung hinzufügen",
+      "addEmployee": "Mitarbeiter hinzufügen",
+      "close": "Schließen"
+    },
+    "fields": {
+      "client": "Kunde",
+      "service": "Leistung",
+      "service2": "Leistung 2",
+      "service3": "Leistung 3",
+      "employee": "Mitarbeiter",
+      "date": "Datum",
+      "startTime": "Beginn",
+      "endTime": "Ende",
+      "status": "Status",
+      "price": "Preis",
+      "notes": "Notizen",
+      "internalNotes": "Interne Notizen",
+      "communicationLanguage": "Sprache für Nachrichten",
+      "phone": "Telefon"
+    },
+    "placeholders": {
+      "service": "Leistung wählen",
+      "service2": "Zweite Leistung wählen",
+      "service3": "Dritte Leistung wählen",
+      "employee": "Mitarbeiter wählen",
+      "status": "Status wählen"
+    },
+    "totalDuration": "Gesamtdauer:",
+    "remove": "Entfernen",
+    "addService": "Leistung hinzufügen",
+    "appointmentDuration": "Termindauer",
+    "duration": "{mins, plural, =1 {1 Minute} other {{mins} Minuten}}",
+    "promotions": {
+      "discountSuffix": "Rabatt"
+    },
+    "price": {
+      "original": "Ursprünglicher Preis",
+      "discount": "Rabatt",
+      "withDiscount": "Preis mit Rabatt",
+      "addOnLabel": "Zusatzleistung",
+      "addOnFallback": "Zusatzleistung"
+    },
+    "discount": {
+      "add": "Rabatt hinzufügen",
+      "lower": "Terminpreis senken",
+      "amount": "Betrag",
+      "type": "Art",
+      "final": "Endpreis"
+    },
+    "notesPlaceholder": "Notizen für den Kunden...",
+    "notesHint": "Notizen werden in Erinnerungen und Nachrichten verwendet",
+    "internalNotesPlaceholder": "Interne Notizen (werden nicht an den Kunden gesendet)...",
+    "addInternalNotes": "+ Interne Notizen",
+    "actions": {
+      "cancel": "Abbrechen",
+      "create": "Anlegen",
+      "save": "Speichern"
+    },
+    "validation": {
+      "dateRequired": "Bitte wählen Sie ein Datum",
+      "startTimeRequired": "Bitte wählen Sie eine Anfangszeit",
+      "endTimeRequired": "Bitte wählen Sie eine Endzeit",
+      "endTimeAfterStart": "Die Endzeit muss nach der Anfangszeit liegen",
+      "clientRequired": "Bitte wählen Sie einen Kunden",
+      "serviceRequired": "Bitte wählen Sie eine Leistung",
+      "employeeRequired": "Bitte wählen Sie einen Mitarbeiter"
+    }
+  },
+  "table": {
+    "headers": {
+      "date": "Datum",
+      "time": "Uhrzeit",
+      "client": "Kunde",
+      "service": "Leistung",
+      "employee": "Mitarbeiter",
+      "status": "Status",
+      "actions": "Aktionen"
+    },
+    "empty": {
+      "title": "Keine Termine",
+      "message": "Derzeit gibt es keine Termine. Legen Sie einen neuen Termin an oder ändern Sie die Filter."
+    },
+    "actions": {
+      "complete": "Termin abschließen",
+      "view": "Details",
+      "edit": "Bearbeiten",
+      "moreOptions": "Weitere Optionen",
+      "cancel": "Stornieren",
+      "delete": "Löschen"
+    },
+    "pagination": {
+      "of": "von"
+    }
+  },
+  "filters": {
+    "status": {
+      "all": "Alle Status"
+    },
+    "searchPlaceholder": "Nach Kunde, Leistung suchen...",
+    "button": "Filter",
+    "clear": "Zurücksetzen",
+    "employeeLabel": "Mitarbeiter",
+    "serviceLabel": "Leistung",
+    "dateFromLabel": "Datum von",
+    "dateToLabel": "Datum bis",
+    "employeePlaceholder": "Mitarbeiter",
+    "allEmployees": "Alle Mitarbeiter",
+    "allServices": "Alle Leistungen",
+    "activeStatus": "Status: {label}",
+    "activeEmployee": "Mitarbeiter: {name}",
+    "activeService": "Leistung: {name}",
+    "activeFrom": "Von: {date}",
+    "activeTo": "Bis: {date}"
+  },
+  "calendarView": {
+    "viewModes": {
+      "day": "Tag",
+      "week": "Woche",
+      "month": "Monat",
+      "threeDays": "3 Tage"
+    },
+    "sidebar": {
+      "newEvent": "Ereignis",
+      "newAbsence": "Abwesenheit",
+      "searchPlaceholder": "Termine suchen...",
+      "filters": "Filter",
+      "displayDays": "Angezeigte Tage",
+      "showAllDays": "Alle Tage anzeigen",
+      "weekdaysOnly": "Nur Werktage",
+      "employeesSection": "Mitarbeiter",
+      "servicesSection": "Leistungen",
+      "legend": "Legende der Leistungen",
+      "noServices": "Keine Leistungen vorhanden",
+      "prevMonth": "Vorheriger Monat",
+      "nextMonth": "Nächster Monat"
+    },
+    "eventModal": {
+      "titles": {
+        "create": "Neues Ereignis",
+        "edit": "Ereignis bearbeiten"
+      },
+      "subtitles": {
+        "create": "Neues Ereignis zum Kalender hinzufügen",
+        "edit": "Angaben zum Ereignis ändern"
+      },
+      "fields": {
+        "title": "Titel des Ereignisses *",
+        "titlePlaceholder": "z. B. Besprechung mit Kunden...",
+        "startDate": "Startdatum *",
+        "endDate": "Enddatum",
+        "allDay": "Ganztägiges Ereignis",
+        "startTime": "Beginn",
+        "endTime": "Ende",
+        "timePlaceholder": "Uhrzeit wählen",
+        "color": "Farbe des Ereignisses",
+        "description": "Beschreibung",
+        "descriptionPlaceholder": "Allgemeine Beschreibung des Ereignisses...",
+        "notes": "Notizen",
+        "notesPlaceholder": "Interne Notizen...",
+        "location": "Ort",
+        "locationPlaceholder": "z. B. Salon, Zoom, Wien...",
+        "visibleInCalendar": "Im Kalender sichtbar",
+        "allowBooking": "Buchung von Terminen erlauben"
+      },
+      "validation": {
+        "titleRequired": "Bitte geben Sie einen Titel ein",
+        "startDateRequired": "Bitte wählen Sie ein Startdatum",
+        "endDateBeforeStart": "Das Enddatum darf nicht vor dem Startdatum liegen",
+        "endTimeAfterStart": "Die Endzeit muss nach der Anfangszeit liegen",
+        "colorRequired": "Bitte wählen Sie eine Farbe"
+      },
+      "actions": {
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "cancel": "Abbrechen",
+        "save": "Speichern",
+        "confirmDelete": "Löschen bestätigen?",
+        "confirmYes": "Ja, löschen",
+        "saving": "Wird gespeichert...",
+        "update": "Aktualisieren"
+      }
+    },
+    "absenceModal": {
+      "title": "Abwesenheit hinzufügen",
+      "subtitle": "Tage oder Stunden markieren, an denen ein Mitarbeiter abwesend ist",
+      "absenceLabel": "Abwesenheit",
+      "fields": {
+        "employee": "Mitarbeiter",
+        "hoursOnly": "Nur Stunden",
+        "multipleDays": "Mehrere Tage",
+        "date": "Datum",
+        "dateFrom": "Von Datum",
+        "dateTo": "Bis Datum",
+        "timeFrom": "Von Uhrzeit",
+        "timeTo": "Bis Uhrzeit",
+        "timePlaceholder": "Uhrzeit wählen",
+        "reason": "Grund (optional)",
+        "reasonPlaceholder": "Grund der Abwesenheit..."
+      },
+      "validation": {
+        "employeeRequired": "Bitte wählen Sie einen Mitarbeiter",
+        "startDateRequired": "Bitte wählen Sie ein Startdatum",
+        "endDateRequired": "Bitte wählen Sie ein Enddatum",
+        "endDateAfterStart": "Das Enddatum muss nach dem Startdatum liegen",
+        "endTimeAfterStart": "Die Endzeit muss nach der Anfangszeit liegen"
+      },
+      "actions": {
+        "cancel": "Abbrechen",
+        "saving": "Wird gespeichert...",
+        "save": "Abwesenheit speichern"
+      }
+    },
+    "absenceDetailModal": {
+      "subtitle": "Abwesenheit",
+      "actions": {
+        "deleteAbsence": "Abwesenheit löschen",
+        "editAbsence": "Abwesenheit bearbeiten",
+        "saveChanges": "Änderungen speichern",
+        "confirmYes": "Ja",
+        "confirmNo": "Nein"
+      }
+    },
+    "appointmentModal": {
+      "subtitles": {
+        "create": "Neuen Termin anlegen",
+        "viewEdit": "Termin ansehen und bearbeiten"
+      },
+      "sections": {
+        "appointmentData": "Termindaten",
+        "clientData": "Kundendaten"
+      },
+      "fields": {
+        "timePlaceholder": "Uhrzeit wählen",
+        "noData": "Keine Angaben",
+        "clientSearch": "Kunden nach Name, E-Mail oder Telefon suchen..."
+      },
+      "actions": {
+        "close": "Schließen",
+        "cancel": "Abbrechen",
+        "saving": "Wird gespeichert...",
+        "saveAppointment": "Termin speichern"
+      }
+    },
+    "detailModal": {
+      "fields": {
+        "duration": "Dauer",
+        "price": "Preis",
+        "copyTitle": "{label} kopieren",
+        "unknownClient": "Unbekannter Kunde",
+        "time": "Uhrzeit",
+        "originalPrice": "Ursprünglicher Preis",
+        "discount": "Rabatt",
+        "priceWithDiscount": "Preis mit Rabatt",
+        "additionalService": "Zusatzleistung",
+        "deleteTitle": "Termin löschen",
+        "deleteMessage": "Möchten Sie diesen Termin wirklich löschen?"
+      },
+      "actions": {
+        "noShow": "Nicht erschienen",
+        "cancel": "Stornieren",
+        "complete": "Abschließen",
+        "moreOptions": "Weitere Optionen"
+      }
+    },
+    "dayView": {
+      "notWorkingDay": "{day} ist kein Arbeitstag",
+      "appointmentNoun": "{count, plural, =1 {Termin} other {Termine}}",
+      "noAppointmentsToday": "Heute keine Termine",
+      "allEmployees": "Alle Mitarbeiter"
+    },
+    "monthView": {
+      "moreEvents": "+{count} Ereignisse",
+      "moreAbsences": "+{count} Abwesenheiten",
+      "more": "+{count} weitere"
+    },
+    "weekView": {
+      "moreAbsences": "+{count} weitere",
+      "moreEvents": "+{count} weitere"
+    },
+    "rescheduleDialog": {
+      "title": "Termin verschieben?",
+      "service": "Leistung",
+      "employee": "Mitarbeiter",
+      "newTime": "Neue Uhrzeit",
+      "saving": "Wird verschoben...",
+      "confirm": "Verschieben"
+    },
+    "completeDialog": {
+      "title": "Termin abschließen",
+      "subtitle": "Abschluss des Termins bestätigen",
+      "notesLabel": "Nachricht an den Kunden oder Hinweise nach dem Termin",
+      "notesPlaceholder": "Nachricht oder Hinweise nach dem Termin eingeben (optional)...",
+      "completing": "Wird abgeschlossen...",
+      "complete": "Abschließen",
+      "cancel": "Abbrechen"
+    },
+    "navigation": {
+      "prev": "Zurück",
+      "next": "Weiter",
+      "filters": "Filter",
+      "newAppointment": "Neuer Termin"
+    },
+    "toast": {
+      "eventCreated": "Ereignis angelegt",
+      "eventUpdated": "Ereignis aktualisiert",
+      "eventDeleted": "Ereignis gelöscht",
+      "appointmentRescheduled": "Termin verschoben"
+    },
+    "errors": {
+      "loadAppointments": "Beim Laden der Termine ist ein Fehler aufgetreten.",
+      "eventSave": "Beim Speichern des Ereignisses ist ein Fehler aufgetreten.",
+      "eventDelete": "Beim Löschen des Ereignisses ist ein Fehler aufgetreten.",
+      "absenceSave": "Beim Speichern der Abwesenheit ist ein Fehler aufgetreten.",
+      "absenceDelete": "Beim Löschen der Abwesenheit ist ein Fehler aufgetreten.",
+      "absenceEdit": "Beim Bearbeiten der Abwesenheit ist ein Fehler aufgetreten.",
+      "reschedule": "Beim Verschieben des Termins ist ein Fehler aufgetreten.",
+      "companyNotSelected": "Kein Unternehmen ausgewählt. Bitte laden Sie die Seite neu."
+    },
+    "saving": "Wird gespeichert...",
+    "allEmployees": "Alle Mitarbeiter"
+  },
+  "ghost": {
+    "title": "Diesen Termin nicht erfassen",
+    "description": "Wird im Kalender angezeigt, aber nicht in den Auswertungen gezählt.",
+    "warning": "Dieser Termin wird weder in Auswertungen noch im Verlauf oder in der Kasse erfasst. Nach dem Abschluss wird er automatisch gelöscht.",
+    "badge": "Nicht erfasster Termin – zählt nicht in den Auswertungen"
+  },
+  "pastOpen": {
+    "title": "{count, plural, one {# vergangener Termin ist noch nicht abgeschlossen} other {# vergangene Termine sind noch nicht abgeschlossen}}",
+    "body": "Schließen Sie sie ab (oder markieren Sie „Nicht erschienen“), damit Umsatz und Statistik der Wirklichkeit entsprechen.",
+    "showingTitle": "Vergangene, nicht abgeschlossene Termine ({count})",
+    "showingBody": "Wählen Sie bei jedem „Abschließen“, „Nicht erschienen“ oder „Stornieren“. Die Liste wird dabei kürzer.",
+    "show": "Anzeigen",
+    "showAll": "Alle Termine anzeigen"
+  }
+}

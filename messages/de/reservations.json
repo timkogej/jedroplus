@@ -1,0 +1,207 @@
+{
+  "page": {
+    "title": "Buchungen",
+    "subtitle": "Verwalten Sie Ihre Online-Buchungsseite"
+  },
+  "incompleteBanner": {
+    "message": "Wählen Sie in den Einstellungen einen Haupt-Buchungslink, damit das System weiß, welchen Link es Kunden senden soll.",
+    "openButton": "Einstellungen öffnen →"
+  },
+  "newDesignsBanner": "Jeden Monat neue Designs für die Buchungsseite",
+  "requestsNav": {
+    "title": "Terminanfragen",
+    "subtitle": "Anfragen Ihrer Kunden prüfen und bestätigen"
+  },
+  "multiChannelBanner": {
+    "bold": "Nutzen Sie für jeden Kanal einen eigenen Buchungslink.",
+    "body": "Ein Design im Instagram-Profil, ein anderes auf Ihrer Website, ein drittes in der E-Mail-Signatur – jeder Kanal kann sein eigenes haben. Kunden landen immer auf Ihrer Seite, nur in anderem Look."
+  },
+  "standardSection": {
+    "title": "Standard-Buchungsseiten",
+    "subtitle": "Designs Classic, Modern und Elegant"
+  },
+  "premiumSection": {
+    "title": "Designs für Jedro Pro",
+    "subtitle": "Seasonal, Magazine und Casino. Im Paket Jedro Pro enthalten.",
+    "badge": "Pro",
+    "lockedNote": "Diese Designs sind in Ihrem Paket gesperrt. Sehen Sie sie sich hier an und schalten Sie sie mit Jedro Pro frei.",
+    "upgrade": "Mit Jedro Pro freischalten",
+    "lockedLabel": "Gesperrt"
+  },
+  "designs": {
+    "bookingLinkLabel": "Buchungslink",
+    "notAvailable": "Nicht verfügbar",
+    "comingSoon": "Demnächst",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "classic": {
+      "name": "Classic",
+      "subtitle": "Schlicht und klar",
+      "description": "Klassisches Design mit eleganten Farbverläufen im Hintergrund. Ideal, um Ihre Markenfarben zu zeigen und einen Wiedererkennungswert aufzubauen."
+    },
+    "modern": {
+      "name": "Modern",
+      "subtitle": "Zeitgemäß und dynamisch",
+      "description": "Zeitgemäßes Design mit dunklem Hintergrund und lebendigen Akzenten. Für den besten Effekt und eine hochwertige Wirkung empfehlen wir eine dunklere Hauptfarbe."
+    },
+    "elegant": {
+      "name": "Elegant",
+      "subtitle": "Klar und minimalistisch",
+      "description": "Luxuriöses, minimalistisches Design in sanften Erdtönen. Perfekt für gehobene Salons, Spas und exklusive Leistungen."
+    },
+    "seasonal": {
+      "name": "Seasonal",
+      "subtitle": "Wandelbar und lebendig",
+      "description": "Dynamisches Design, das sich automatisch an Jahreszeit und Feiertage anpasst. Frühling, Sommer, Herbst, Winter, Weihnachten, Valentinstag, Halloween und mehr – Ihre Seite wirkt immer frisch und aktuell."
+    },
+    "magazine": {
+      "name": "Magazine",
+      "subtitle": "Elegant und redaktionell",
+      "description": "Premium-Design im Magazinstil mit redaktioneller Ästhetik und hochwertiger Optik. Ideal für exklusive Salons, Beauty-Studios und Premium-Leistungen."
+    },
+    "casino": {
+      "name": "Casino",
+      "subtitle": "Glamourös und aufregend",
+      "description": "Exklusives Casino-Design mit glamouröser Atmosphäre, funkelnden Akzenten und dynamischen Elementen. Perfekt für alle, die aus der Terminbuchung ein unvergessliches Erlebnis machen möchten."
+    }
+  },
+  "customCta": {
+    "text": "Sie möchten ein Buchungssystem, das genau auf Ihr Unternehmen zugeschnitten ist?",
+    "linkText": "Schreiben Sie uns an info@jedroplus.com"
+  },
+  "mainLink": {
+    "title": "Haupt-Buchungslink",
+    "subtitle": "Kunden wählen selbst eine Leistung und einen freien Termin. Fügen Sie den Link auf Ihrer Website, bei Instagram oder Google ein; wir verwenden ihn auch in Nachrichten. Um Kundendaten ohne Buchung zu erfassen, nutzen Sie den QR-Code unter Einstellungen → Allgemein.",
+    "copy": "Kopieren",
+    "copied": "Kopiert"
+  },
+  "mgmtLink": {
+    "title": "Link zum Umbuchen & Stornieren",
+    "subtitle": "Universeller Link zur Terminverwaltung – damit können Kunden ihren Termin umbuchen oder stornieren."
+  },
+  "settingsOverview": {
+    "title": "Einstellungen",
+    "bookingEnabled": "Online-Buchungen",
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert",
+    "timeSlots": "Zeitfenster",
+    "timeSlotValue": "{minutes} Min.",
+    "clientConfirm": "Bestätigung an Kunden",
+    "onlineConfirm": "Bestätigung bei Online-Buchung",
+    "mainLinkLabel": "Haupt-Buchungslink",
+    "linkSet": "Eingerichtet",
+    "notConfigured": "Nicht eingerichtet",
+    "colors": "Farben",
+    "mgmtLinkLabel": "Link zum Umbuchen & Stornieren",
+    "yes": "Ja",
+    "no": "Nein",
+    "onlineConfirmOffHint": "Kunden, die online buchen, erhalten keine Bestätigung und wissen daher nicht, ob die Buchung geklappt hat.",
+    "onlineConfirmOffCta": "Bestätigung aktivieren"
+  },
+  "modal": {
+    "title": "Buchungseinstellungen",
+    "subtitle": "So funktionieren Online-Buchungen",
+    "general": {
+      "sectionTitle": "Allgemeine Einstellungen",
+      "sectionDesc": "Grundeinstellungen für Buchungen",
+      "enableLabel": "Online-Buchungen aktivieren",
+      "enableDesc": "Ob Online-Buchungen möglich sind",
+      "intervalLabel": "Länge der Zeitfenster",
+      "intervalDesc": "Abstand der buchbaren Zeiten (15, 30 oder 60 Minuten)",
+      "intervalPlaceholder": "Intervall wählen",
+      "interval15": "15 Minuten",
+      "interval30": "30 Minuten",
+      "interval60": "60 Minuten (1 Stunde)"
+    },
+    "payments": {
+      "sectionTitle": "Online-Zahlungen",
+      "sectionDesc": "Zahlungseinstellungen für Online-Buchungen",
+      "enableLabel": "Zahlungen über Stripe aktivieren",
+      "enableDesc": "Kunden können bei der Online-Buchung bezahlen, wenn eine Leistung das erfordert.",
+      "lockedDesc": "Dafür benötigen Sie das Paket Jedro Pro und ein POS-Abonnement PRO oder PLUS.",
+      "checking": "Voraussetzungen für Online-Zahlungen werden geprüft...",
+      "requirementsTitle": "Dafür benötigen Sie:",
+      "requirementPlan": "Paket Jedro Pro",
+      "requirementPos": "POS-Abonnement PRO oder PLUS",
+      "ok": "Aktiviert",
+      "missing": "Fehlt",
+      "modeLabel": "Zahlungsart bei der Buchung",
+      "modeDesc": "Wählen Sie, ob der Kunde den vollen Betrag oder nur eine Anzahlung zahlt.",
+      "modePlaceholder": "Zahlungsart wählen",
+      "modeFull": "Voller Betrag",
+      "modeDeposit": "Anzahlung",
+      "depositLabel": "Höhe der Anzahlung",
+      "depositDesc": "Prozentsatz des Betrags, den der Kunde bei der Buchung zahlt."
+    },
+    "mainLink": {
+      "sectionTitle": "Haupt-Buchungslink",
+      "sectionDesc": "Der Link, der Kunden für Buchungen gesendet wird",
+      "selectLabel": "Haupt-Buchungslink wählen",
+      "selectDesc": "Dieser Link wird in Buchungsbestätigungen an Kunden verwendet",
+      "selectPlaceholder": "Link wählen...",
+      "missingRequired": "Bitte wählen Sie einen Haupt-Buchungslink.",
+      "noLinksAvailable": "Buchungslinks sind noch nicht verfügbar",
+      "classic": "Classic",
+      "modern": "Modern",
+      "minimal": "Minimal",
+      "seasonal": "Seasonal",
+      "magazine": "Magazine"
+    },
+    "confirmations": {
+      "sectionTitle": "Bestätigungen",
+      "sectionDesc": "Bestätigungen an Kunden senden",
+      "manualLabel": "Bestätigung beim Anlegen eines Termins senden",
+      "manualDesc": "Automatisch eine Bestätigung senden, wenn ein Termin angelegt wird",
+      "onlineLabel": "Bestätigung nach Online-Buchung senden",
+      "onlineDesc": "Bestätigung bei Buchung über das Online-System",
+      "channelLabel": "Bestätigung senden per:",
+      "smsUnavailable": "– nicht verfügbar",
+      "smsUpgradeNote": "Für SMS benötigen Sie SMS-Nachrichten (Add-on oder Jedro Pro).",
+      "smsUpgradeLink": "Optionen ansehen",
+      "smsPlanNotePrefix": "Um Bestätigungen per SMS zu senden,",
+      "smsPlanNoteLink": "SMS-Nachrichten hinzubuchen",
+      "smsSettings": "Einstellungen für SMS-Nachrichten",
+      "modeAI": "KI schreibt",
+      "modeManual": "Eigene Vorlage",
+      "templateHint": "Vorlage für die SMS (max. 155 Zeichen)",
+      "templatePlaceholder": "z. B.: Ihre Buchung am {{datum}} um {{cas}} ist bestätigt. {{ime_podjetja}}.",
+      "noEmojiHint": "Keine Emojis und keine Sonderzeichen."
+    },
+    "policy": {
+      "sectionTitle": "Storno- und Umbuchungsregeln",
+      "sectionDesc": "Wie viele Tage vor dem Termin Kunden stornieren oder umbuchen können",
+      "cancelLabel": "Termin stornieren",
+      "cancelDesc": "Wie viele Tage vor dem Termin ein Kunde stornieren kann",
+      "rescheduleLabel": "Termin umbuchen",
+      "rescheduleDesc": "Wie viele Tage vor dem Termin ein Kunde umbuchen kann",
+      "selectPlaceholder": "Auswählen",
+      "sameDay": "Am selben Tag",
+      "day1": "1 Tag vorher",
+      "day2": "2 Tage vorher",
+      "day3": "3 Tage vorher",
+      "day5": "5 Tage vorher",
+      "day7": "7 Tage vorher",
+      "day14": "14 Tage vorher"
+    },
+    "colors": {
+      "sectionTitle": "Farben der Buchungsseite",
+      "sectionDesc": "Passen Sie das Aussehen Ihrer Buchungsseite an",
+      "primaryLabel": "Hauptfarbe",
+      "primaryDesc": "Hauptfarbe für Schaltflächen und Akzente",
+      "secondaryLabel": "Zweitfarbe",
+      "secondaryDesc": "Farbe für weitere Elemente",
+      "bgFromLabel": "Hintergrundverlauf (Anfang)",
+      "bgFromDesc": "Anfangsfarbe des Hintergrundverlaufs",
+      "bgToLabel": "Hintergrundverlauf (Ende)",
+      "bgToDesc": "Endfarbe des Hintergrundverlaufs",
+      "previewLabel": "Vorschau des Hintergrunds:",
+      "previewButton": "Vorschau der Schaltfläche"
+    },
+    "footer": {
+      "close": "Schließen",
+      "save": "Speichern",
+      "saving": "Wird gespeichert...",
+      "saveError": "Beim Speichern ist ein Fehler aufgetreten"
+    }
+  }
+}

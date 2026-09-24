@@ -4,7 +4,7 @@
 // sl → "60,00 €", "22. sep. 2026"; en → "€60.00", "22 Sept 2026".
 // Use these instead of `toFixed(2) + ' €'` so every screen agrees.
 
-const INTL_LOCALE: Record<string, string> = { sl: 'sl-SI', en: 'en-GB' };
+const INTL_LOCALE: Record<string, string> = { sl: 'sl-SI', en: 'en-GB', de: 'de-DE', hr: 'hr-HR', it: 'it-IT' };
 
 export function intlLocale(locale: string | undefined): string {
   return INTL_LOCALE[locale ?? 'sl'] ?? locale ?? 'sl-SI';

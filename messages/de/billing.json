@@ -1,0 +1,463 @@
+{
+  "page": {
+    "pageTitle": "Pakete"
+  },
+  "currentPlan": {
+    "label": "Aktuelles Paket",
+    "subscriptionDetails": "Details zum Abonnement",
+    "statusLabel": "Status",
+    "statusActive": "Aktiv",
+    "renewalLabel": "Nächste Verlängerung",
+    "freeLabel": "Kostenlos",
+    "smsQuota": "SMS-Kontingent",
+    "emailQuota": "E-Mail-Kontingent",
+    "quotaUsed": "Verbraucht",
+    "quotaAvailable": "Verfügbar"
+  },
+  "portal": {
+    "button": "Zahlungen & Rechnungen verwalten",
+    "opening": "Portal wird geöffnet...",
+    "note": "Verwalten Sie Abonnement, Zahlungsmethode und Rechnungen im Stripe-Portal."
+  },
+  "toggle": {
+    "monthly": "Monatlich",
+    "yearly": "Jährlich"
+  },
+  "plans": {
+    "mostPopular": "Am beliebtesten",
+    "customPricing": "individueller Preis",
+    "perMonth": "/ Monat",
+    "contactUs": "Kontakt aufnehmen",
+    "ctaLoading": "Wird geladen...",
+    "ctaCurrentPlan": "Aktuelles Paket",
+    "ctaSendInquiry": "Anfrage senden",
+    "ctaTryFree": "Kostenlos testen",
+    "ctaSelectPlan": "Paket wählen",
+    "jedroPlus": {
+      "description": "Für Unternehmen, die ein geordnetes System und klaren Überblick wollen",
+      "tagline": "Kalender, Datenbanken und Erinnerungen, die Ihren Alltag erleichtern.",
+      "features": [
+        "Kunden- und Termindatenbank",
+        "Leistungs- und Mitarbeiterdatenbank",
+        "Persönliche Erinnerungen vor und nach Terminen",
+        "E-Mail-Versand",
+        "Vollständige Auswertungen",
+        "Online-Buchung",
+        "Mehrere Designs für die Online-Buchung",
+        "Asistent+"
+      ]
+    },
+    "jedroPro": {
+      "description": "Für Unternehmen, die mehr Buchungen und weniger Leerlauf wollen",
+      "tagline": "Mit KI-Assistenten, Rückgewinnung verlorener Kunden und SMS-Erinnerungen.",
+      "features": [
+        "Alles aus Jedro Plus",
+        "Chatbot+",
+        "Verlorene Kunden zurückgewinnen",
+        "SMS-Versand",
+        "E-Mail-Versand",
+        "Weitere Designs für die Online-Buchung"
+      ]
+    },
+    "jedroPremium": {
+      "description": "Für Unternehmen, die maximal automatisieren möchten",
+      "tagline": "Alle KI-Funktionen für Wachstum und Kommunikation.",
+      "features": [
+        "Alles aus Jedro Pro",
+        "Receptionist+",
+        "SMS-Versand (höheres Kontingent)",
+        "E-Mail-Versand (höheres Kontingent)",
+        "Premium-Design für die Online-Buchung",
+        "Premium-Design für den Chatbot"
+      ]
+    },
+    "enterprise": {
+      "description": "Für Unternehmen mit besonderen Anforderungen und Anpassungen",
+      "tagline": "Eigene Funktionen, KI und Buchungsumgebung – auf Sie zugeschnitten.",
+      "features": [
+        "Eigene KI-Funktionen, zugeschnitten auf Ihr Unternehmen",
+        "Premium-Buchungsseite",
+        "Mehrere Buchungslinks",
+        "Weitere individuelle Anforderungen"
+      ]
+    }
+  },
+  "footer": {
+    "questions": "Fragen? Schreiben Sie uns an",
+    "quotaQuestion": "Sie brauchen ein höheres Kontingent oder mehr Mitarbeiter? Schreiben Sie uns an"
+  },
+  "enterpriseModal": {
+    "title": "Enterprise-Anfrage",
+    "subtitle": "Senden Sie uns Ihre Anforderungen, wir melden uns bei Ihnen",
+    "successTitle": "Anfrage gesendet!",
+    "successMessage": "Wir melden uns so bald wie möglich.",
+    "closeButton": "Schließen",
+    "cancelButton": "Abbrechen",
+    "submitButton": "Anfrage senden",
+    "submittingButton": "Wird gesendet...",
+    "fields": {
+      "fullName": "Vollständiger Name",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "companyName": "Name des Unternehmens",
+      "employeeCount": "Anzahl der Mitarbeiter",
+      "requirements": "Ihre Anforderungen und Wünsche"
+    },
+    "placeholders": {
+      "fullName": "Max Mustermann",
+      "email": "max@unternehmen.de",
+      "phone": "+49 151 23456789",
+      "companyName": "Unternehmen GmbH",
+      "employeeCount": "z. B. 10–50",
+      "requirements": "Beschreiben Sie Ihre Anforderungen, Integrationen, Anpassungen..."
+    }
+  },
+  "errors": {
+    "companyNotSet": "Kein Unternehmen eingerichtet. Bitte melden Sie sich erneut an.",
+    "portalError": "Beim Öffnen des Abrechnungsportals ist ein Fehler aufgetreten",
+    "serverError": "Bei der Verbindung zum Server ist ein Fehler aufgetreten",
+    "invalidCheckoutUrl": "Ungültige Checkout-Adresse. Bitte versuchen Sie es erneut.",
+    "checkoutError": "Beim Erstellen der Zahlung ist ein Fehler aufgetreten",
+    "companyDataError": "Beim Abrufen der Unternehmensdaten ist ein Fehler aufgetreten",
+    "errorLabel": "Fehler"
+  },
+  "success": {
+    "missingSession": {
+      "title": "Sitzungs-ID fehlt",
+      "message": "Bei der Bestätigung Ihrer Zahlung ist ein Fehler aufgetreten. Die Bestätigung finden Sie in Ihren E-Mails.",
+      "backButton": "Zurück zu den Paketen"
+    },
+    "verifying": {
+      "title": "Zahlung wird bestätigt...",
+      "message": "Ihr Paket wird aktiviert. Bitte warten Sie einen Moment.",
+      "progressLabel": "Wird geprüft...",
+      "timeRemaining": "noch {seconds} Sek."
+    },
+    "complete": {
+      "title": "Zahlung erfolgreich!",
+      "subtitle": "Vielen Dank für Ihr Abonnement.",
+      "yourPlan": "Ihr Paket:",
+      "whatsNext": "Wie geht es weiter?",
+      "emailConfirmation": "Sie erhalten eine Bestätigung an {email}",
+      "smsReset": "Das SMS-Kontingent wurde zurückgesetzt",
+      "backToBilling": "Pakete",
+      "dashboard": "Übersicht"
+    },
+    "timeout": {
+      "title": "Zahlung wird verarbeitet",
+      "message": "Ihre Zahlung wird noch verarbeitet. Das kann einen Moment dauern. Prüfen Sie Ihre E-Mails oder versuchen Sie es erneut.",
+      "retryButton": "Erneut versuchen",
+      "backButton": "Zurück"
+    },
+    "error": {
+      "title": "Fehler",
+      "message": "Bei der Bestätigung Ihrer Zahlung ist ein Fehler aufgetreten. Bitte wenden Sie sich an den Support.",
+      "backButton": "Zurück zu den Paketen"
+    },
+    "loading": "Wird geladen..."
+  },
+  "cancel": {
+    "title": "Kauf abgebrochen",
+    "message": "Ihr Kauf wurde abgebrochen. An Ihrem Konto wurde nichts geändert.",
+    "backButton": "Zurück zur Abrechnung",
+    "dashboardButton": "Weiter zur Übersicht"
+  },
+  "featureGate": {
+    "upgradeRequired": "Upgrade für Zugriff",
+    "requiresPlan": "Diese Funktion erfordert das Paket {plan} oder höher.",
+    "viewPlans": "Pakete ansehen",
+    "planNames": {
+      "free": "Kostenlos",
+      "basic": "Basic",
+      "pro": "Pro",
+      "premium": "Premium"
+    }
+  },
+  "upgradePlanGate": {
+    "heading": "Diese Funktion erfordert das Paket {plan}",
+    "subtitle": "Wechseln Sie in ein höheres Paket, um diese Funktion freizuschalten und das volle Potenzial von Jedro+ zu nutzen.",
+    "upgradeButton": "Paket upgraden",
+    "hint": "Sehen Sie sich alle Pakete an und wählen Sie das passende.",
+    "badge": "Paket {plan}",
+    "includedIn": "Enthalten in {plan}",
+    "price": "{monthly} €/Monat · {annual} €/Monat bei jährlicher Zahlung",
+    "comparePlans": "Pakete vergleichen",
+    "back": "Zurück zur Übersicht",
+    "ownerOnly": "Der Inhaber des Kontos kann unter Einstellungen → Pakete upgraden.",
+    "features": {
+      "reminders": {
+        "title": "Erinnerungen, die Ausfälle verringern",
+        "lead": "Kunden werden vor dem Termin erinnert und danach bedankt – ohne Anrufe, ohne manuelle Nachrichten.",
+        "p1": "Erinnerung per E-Mail oder SMS am Vortag",
+        "p2": "Nachricht nach dem Besuch, auf Wunsch mit Rabatt",
+        "p3": "Eigene Vorlage oder persönliche Nachricht von der KI"
+      },
+      "booking": {
+        "title": "Kunden buchen selbst",
+        "lead": "Teilen Sie einen Link oder QR-Code, und Kunden wählen selbst eine Zeit – auch um 22 Uhr. Sie erhalten eine Benachrichtigung und den Termin im Kalender.",
+        "p1": "Ein Link für Instagram, Website und E-Mail-Signatur",
+        "p2": "Mehrere Designs für die Buchungsseite",
+        "p3": "Terminanfragen vor der Bestätigung prüfen"
+      },
+      "communication": {
+        "title": "Kunden an einem Ort anschreiben",
+        "lead": "Senden Sie eine Mitteilung oder ein Angebot an ausgewählte Kunden: alle, die heutigen, die mit einer bestimmten Leistung.",
+        "p1": "Kunden nach Terminen und Filtern auswählen",
+        "p2": "Versand per E-Mail aus einem Fenster",
+        "p3": "Die KI hilft beim Schreiben"
+      },
+      "analytics": {
+        "title": "Sehen Sie, wie Ihr Geschäft läuft",
+        "lead": "Umsatz, Auslastung, Top-Leistungen und Teamleistung auf einen Blick.",
+        "p1": "Umsatz und Termine im Zeitverlauf",
+        "p2": "Beliebteste Leistungen und Mitarbeiter",
+        "p3": "Wachstum des Kundenstamms"
+      },
+      "lostLeads": {
+        "title": "Kunden zurückgewinnen, die nicht mehr kommen",
+        "lead": "Das System erkennt Kunden, die länger nicht gebucht haben, und schickt ihnen eine persönliche Einladung zurück.",
+        "p1": "Automatische Erkennung inaktiver Kunden",
+        "p2": "Persönliche Nachricht von der KI",
+        "p3": "Kein manuelles Suchen oder Senden"
+      },
+      "ai": {
+        "title": "KI-Assistenten",
+        "lead": "Intelligente Assistenten für die Arbeit mit Kunden und Terminen.",
+        "p1": "Antworten auf häufige Fragen",
+        "p2": "Hilfe bei Terminen und Kunden",
+        "p3": "Auf Ihr Unternehmen zugeschnitten"
+      }
+    }
+  },
+  "roleAccessGate": {
+    "title": "Zugriff eingeschränkt",
+    "defaultMessage": "Sie haben keinen Zugriff auf diese Seite. Wenden Sie sich an den Inhaber.",
+    "billingOwnerOnly": "Die Seite „Pakete“ ist nur für den Inhaber zugänglich.",
+    "receptionistPlusOwnerOnly": "Die Seite „ReceptionistPlus“ ist nur für den Inhaber zugänglich.",
+    "staffRestricted": "Diese Funktion ist für Ihr Konto deaktiviert. Wenden Sie sich an den Inhaber."
+  },
+  "paketi": {
+    "title": "Pakete",
+    "subtitle": "Überblick über Ihr Paket und den Verbrauch",
+    "currentBadge": "Aktuell",
+    "recommendedBadge": "Empfohlen",
+    "renewalLabel": "Nächste Verlängerung",
+    "upgradeButton": "Upgraden",
+    "maxUsersLabel": "Maximale Anzahl App-Benutzer",
+    "currentTeamLabel": "Derzeit im Team",
+    "usageTitle": "Verbrauch in diesem Monat",
+    "availablePlans": "Verfügbare Pakete",
+    "customPricing": "Individueller Preis",
+    "billingPeriod": {
+      "monthly": "Monatlich",
+      "yearly": "Jährlich",
+      "billedYearly": "Jährliche Abrechnung"
+    },
+    "quotaLabels": {
+      "sms": "SMS-Nachrichten",
+      "email": "E-Mail-Nachrichten",
+      "teamMembers": "Aktive Teammitglieder",
+      "clients": "Kunden",
+      "appointments": "Termine diesen Monat"
+    },
+    "planDescriptions": {
+      "jedroPlus": "Mit Erinnerungen, E-Mails, Online-Buchung und Auswertungen. SMS können hinzugebucht werden.",
+      "jedroPro": "Mit SMS, verlorenen Kunden und erweiterten Funktionen.",
+      "enterprise": "Individuelles Paket für besondere Anforderungen.",
+      "free": "Dauerhaft kostenlos: Kalender, Termine, Kunden, Leistungen und Team."
+    },
+    "planButtons": {
+      "active": "Aktiv",
+      "sendInquiry": "Anfrage senden",
+      "upgrade": "Upgraden"
+    },
+    "enterpriseModal": {
+      "title": "Enterprise-Anfrage",
+      "subtitle": "Beschreiben Sie Ihren Bedarf, wir melden uns so bald wie möglich.",
+      "submitButton": "Anfrage senden",
+      "submittingButton": "Wird gesendet...",
+      "cancelButton": "Abbrechen",
+      "fields": {
+        "fullName": "Vollständiger Name",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "message": "Nachricht",
+        "messagePlaceholder": "Beschreiben Sie, was Sie benötigen..."
+      },
+      "sendFailed": "Ihre Anfrage konnte nicht gesendet werden. Bitte schreiben Sie uns direkt an <email>timkogej@jedroplus.com</email>."
+    },
+    "inquiryToast": "Anfrage gesendet. Wir melden uns in Kürze.",
+    "plans": {
+      "jedroPlus": {
+        "features": [
+          "Kunden- und Termindatenbank",
+          "Leistungs- und Mitarbeiterdatenbank",
+          "Persönliche Erinnerungen vor und nach Terminen",
+          "E-Mail-Versand (500 E-Mails/Monat)",
+          "SMS-Erinnerungen mit SMS-Paketen (ab 4 € für 50 SMS)",
+          "Kommunikation",
+          "Vollständige Auswertungen",
+          "Online-Buchung",
+          "Mehrere Designs für die Online-Buchung"
+        ]
+      },
+      "jedroPro": {
+        "features": [
+          "Alles aus Jedro Plus",
+          "Benachrichtigungen an verlorene Kunden",
+          "SMS-Versand (250 SMS/Monat)",
+          "E-Mail-Versand (2000 E-Mails/Monat)",
+          "Weitere Designs für die Online-Buchung"
+        ]
+      },
+      "enterprise": {
+        "features": [
+          "Eigene KI-Funktionen (Chatbot, Assistent, Rezeptionistin u. v. m.)",
+          "Eigene Buchungsdesigns mit Bildbearbeitung und erweiterten Elementen",
+          "Automatisierung von Geschäftsprozessen nach Maß",
+          "Unbegrenztes E-Mail- und SMS-Kontingent",
+          "Persönlicher Ansprechpartner und bevorzugter Support"
+        ]
+      }
+    },
+    "freeRenewal": "Kostenlos, keine Verlängerung",
+    "quotaNotIncluded": "Nicht enthalten",
+    "quotaUnlimited": "Unbegrenzt",
+    "perMonth": "/Monat",
+    "freeCard": {
+      "name": "Kostenlos",
+      "price": "0 €",
+      "priceNote": "Dauerhaft kostenlos",
+      "features": [
+        "Kalender, Termine und Kunden",
+        "Unbegrenzt Leistungen und Mitarbeiter",
+        "1 App-Benutzer",
+        "Kunden aus Excel importieren"
+      ],
+      "trialFeature": "Erinnerungen testen: {sms} SMS und {email} E-Mails"
+    },
+    "vatNote": "Die Preise sind Endpreise. Es wird keine Umsatzsteuer berechnet – Jedro+ ist nicht umsatzsteuerpflichtig."
+  },
+  "trialModal": {
+    "badge": "Kostenloser Test",
+    "title": "Jedro Plus kostenlos testen",
+    "subtitle": "Alles, was Sie für einen reibungslosen Betrieb brauchen – ohne Risiko, ohne Verpflichtung.",
+    "featuresTitle": "Das bietet Jedro Plus",
+    "features": {
+      "reminders": {
+        "title": "Persönliche Erinnerungen",
+        "desc": "Automatische Erinnerungen an Kunden vor und nach jedem Termin – ohne manuellen Aufwand."
+      },
+      "booking": {
+        "title": "Online-Buchung mit mehreren Designs",
+        "desc": "Ein Buchungslink mit verschiedenen Seitendesigns – Kunden buchen selbst, jederzeit."
+      },
+      "communication": {
+        "title": "Kommunikation mit Kunden",
+        "desc": "Mitteilungen und Angebote per E-Mail an ausgewählte Kunden."
+      },
+      "analytics": {
+        "title": "Vollständige Auswertungen",
+        "desc": "Umsatz, Auslastung, Kundenwachstum und Geschäftsentwicklung auf einen Blick."
+      }
+    },
+    "cta": "Kostenlos testen",
+    "later": "Vielleicht später",
+    "close": "Schließen"
+  },
+  "quotaBanner": {
+    "emailName": "E-Mail",
+    "nearLimit": {
+      "title": "{name}: {used} von {total} verbraucht.",
+      "body": "Ist das Kontingent aufgebraucht, werden über diesen Kanal keine Nachrichten und Erinnerungen mehr gesendet."
+    },
+    "exhausted": {
+      "title": "{name}-Erinnerungen und -Nachrichten werden nicht gesendet.",
+      "body": "Sie haben alle {total} dieses Zeitraums verbraucht ({used}/{total}), daher erhalten Kunden sie nicht."
+    },
+    "alsoOther": "Ein weiteres Kontingent ist ebenfalls fast oder ganz aufgebraucht.",
+    "dismiss": "Für heute ausblenden",
+    "ctaSms": "SMS kaufen",
+    "ctaEmail": "E-Mails kaufen",
+    "emailNameLoc": "E-Mail",
+    "trial": {
+      "nearLimit": {
+        "title": "Kostenlose {name}-Erinnerungen: noch {remaining} von {total}.",
+        "body": "Danach werden über diesen Kanal keine Erinnerungen mehr gesendet."
+      },
+      "exhausted": {
+        "title": "Kostenlose {name}-Erinnerungen sind aufgebraucht.",
+        "body": "Kunden erhalten sie nicht mehr. Mit Jedro Plus geht es weiter."
+      },
+      "cta": "Auf Jedro Plus upgraden"
+    }
+  },
+  "addons": {
+    "back": "Einstellungen",
+    "title": "Add-ons & Kontingente",
+    "subtitle": "Buchen Sie zusätzliche SMS- und E-Mail-Nachrichten oder weitere App-Logins hinzu. Add-ons werden monatlich zusammen mit Ihrem Paket abgerechnet.",
+    "loadError": "Die Daten konnten nicht geladen werden. Laden Sie die Seite neu.",
+    "currentPlan": "Aktuelles Paket",
+    "noSubscription": "Kein aktives Abonnement",
+    "noSubscriptionBody": "Add-ons können Sie aktivieren, sobald Ihr Paket mit einem Zahlungsprofil verknüpft ist.",
+    "perMonth": "{price} / Monat",
+    "period": "Abrechnungszeitraum: {start} bis {end}",
+    "freeTitle": "Kostenloses Paket",
+    "freeBody": "Add-ons gibt es mit Jedro Plus oder Jedro Pro. Das kostenlose Paket enthält einen einmaligen Test: {sms} SMS- und {email} E-Mail-Erinnerungen.",
+    "freeCta": "Pakete vergleichen",
+    "noStripe": "Ihr Abonnement ist nicht mit der Online-Zahlung verknüpft, daher können Add-ons hier nicht gekauft werden. Schreiben Sie an {email}, wir klären das.",
+    "sms": {
+      "title": "SMS-Nachrichten",
+      "unit": "SMS"
+    },
+    "email": {
+      "title": "E-Mail-Nachrichten",
+      "unit": "E-Mails"
+    },
+    "includedInPlan": "{count} im Paket enthalten",
+    "includedNone": "Ihr Paket enthält keine Nachrichten – buchen Sie unten ein Paket hinzu.",
+    "freeTrialIncluded": "{count} kostenlos zum Testen (einmalig)",
+    "fromAddons": " + {count} aus Add-ons",
+    "used": "Verbraucht",
+    "available": "Verfügbar",
+    "total": "Gesamt",
+    "renews": "Zähler wird zurückgesetzt am: {date}",
+    "cancelScheduled": "Gekündigt – aktiv bis zum Ende des Zeitraums",
+    "activeAddon": "Aktives Add-on: +{count} {unit} · {price} / Monat",
+    "cancel": "Add-on kündigen",
+    "cancelConfirm": "Wirklich kündigen?",
+    "cancelKeep": "Nein",
+    "canceling": "Wird gekündigt …",
+    "extraQuota": "Zusätzliche Nachrichten jeden Monat",
+    "month": "/ Monat",
+    "activating": "Wird aktiviert …",
+    "alreadyActive": "Bereits aktiv",
+    "activate": "+{count} {unit} für {price} / Monat aktivieren",
+    "purchaseNote": "Ein anteiliger Betrag wird Ihrer nächsten Paketrechnung hinzugefügt. Jederzeit kündbar; bleibt bis zum Ende des Zeitraums aktiv.",
+    "freeLocked": "Mit einem kostenpflichtigen Paket verfügbar.",
+    "seats": {
+      "title": "App-Logins",
+      "body": "Wie viele Personen sich in der App anmelden können. Im Kalender können Sie beliebig viele Mitarbeiter anlegen.",
+      "inPlan": "Im Paket",
+      "extra": "Zusätzlich",
+      "total": "Gesamt",
+      "activeAddon": "+{count, plural, one {# zusätzliches Login} other {# zusätzliche Logins}} · {price} / Monat",
+      "sliderLabel": "Zusätzliche Logins",
+      "summary": "{total, plural, one {# Login} other {# Logins}} insgesamt ({included} im Paket + {extra} zusätzlich)",
+      "cost": "{price} / Monat für {count, plural, one {# zusätzliches Login} other {# zusätzliche Logins}} ({unit} pro Login)",
+      "removeNote": "Das Add-on wird mit Ihrer Bestätigung gekündigt.",
+      "overTitle": "Achtung:",
+      "over": "{count, plural, one {# Person mehr ist} other {# Personen mehr sind}} angemeldet, als das neue Limit erlaubt. Entfernen Sie zuerst den Zugriff für Personen, die ihn nicht brauchen (Team & Zugriff).",
+      "updating": "Wird aktualisiert …",
+      "update": "Anzahl der Logins speichern"
+    },
+    "toast": {
+      "noStripe": "Für Add-ons benötigen Sie ein kostenpflichtiges Paket mit Zahlungskarte.",
+      "purchaseError": "Der Kauf ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "purchased": "Add-on aktiviert. Die neuen Nachrichten sind sofort verfügbar.",
+      "cancelError": "Die Kündigung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "canceled": "Das Add-on wird zum Ende des Abrechnungszeitraums gekündigt."
+    },
+    "fromAddonsOnly": "{count} aus Add-ons (Ihr Paket enthält keine)"
+  }
+}

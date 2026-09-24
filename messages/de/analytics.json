@@ -1,0 +1,112 @@
+{
+  "page": {
+    "title": "Auswertungen",
+    "subtitle": "Überblick über Ihr Geschäft und die wichtigsten Kennzahlen"
+  },
+  "periods": {
+    "danes": "Heute",
+    "ta_teden": "Diese Woche",
+    "ta_mesec": "Dieser Monat",
+    "zadnjih_30": "Letzte 30 Tage",
+    "ta_leto": "Dieses Jahr",
+    "custom": "Eigener Zeitraum"
+  },
+  "customRange": {
+    "fromLabel": "Von:",
+    "toLabel": "Bis:",
+    "applyButton": "Anwenden"
+  },
+  "metrics": {
+    "totalRevenue": "Gesamtumsatz",
+    "averageValue": "Durchschnittswert",
+    "perAppointment": "Pro Termin",
+    "occupancyRate": "Auslastung",
+    "workingTime": "Der Arbeitszeit",
+    "completionRate": "Abschlussquote",
+    "appointments": "Termine",
+    "vsPrevious": "ggü. Vorperiode"
+  },
+  "revenueChart": {
+    "title": "Umsatz & Termine im Zeitverlauf",
+    "subtitle": "Tägliche Übersicht über abgeschlossene Termine und Umsatz",
+    "noData": "Keine Daten im gewählten Zeitraum",
+    "revenueLegend": "Umsatz (€)",
+    "appointmentsLegend": "Abgeschlossene Termine"
+  },
+  "serviceChart": {
+    "title": "Termine nach Leistung",
+    "subtitle": "Verteilung der Termine nach Leistung",
+    "noData": "Keine Daten im gewählten Zeitraum",
+    "tooltipAppointments": "Termine",
+    "moreServices": "+{count} weitere Leistungen"
+  },
+  "employeeChart": {
+    "title": "Termine nach Mitarbeiter",
+    "subtitle": "Abgeschlossene Termine pro Mitarbeiter",
+    "noData": "Keine Daten im gewählten Zeitraum",
+    "tooltipAppointments": "Termine",
+    "moreEmployees": "+{count} weitere Mitarbeiter"
+  },
+  "heatmap": {
+    "title": "Auslastung nach Uhrzeit",
+    "subtitle": "Anteil an der gesamten Terminzeit nach Tag und Stunde",
+    "lessOccupied": "Weniger ausgelastet",
+    "moreOccupied": "Stärker ausgelastet",
+    "note": "% zeigt den Anteil an der gesamten Terminzeit pro Stunde",
+    "cellTooltip": "{day} {hour}:00–{hourEnd}:00 · {pct} % Auslastung"
+  },
+  "clientGrowth": {
+    "title": "Kundenwachstum",
+    "subtitle": "Neue Kunden im Zeitverlauf",
+    "newClientsCount": "neue Kunden",
+    "noData": "Keine Daten im gewählten Zeitraum",
+    "totalLabel": "Kunden gesamt",
+    "newLabel": "Neue Kunden"
+  },
+  "topPerformers": {
+    "title": "Spitzenreiter",
+    "services": "Leistungen",
+    "staff": "Mitarbeiter",
+    "noData": "Keine Daten im gewählten Zeitraum",
+    "appointmentCount": "{count} Termine"
+  },
+  "retention": {
+    "distributionTitle": "Termine pro Kunde",
+    "oneAppointment": "Kunden mit 1 Termin",
+    "threeAppointments": "Kunden mit 3 Terminen",
+    "fivePlusAppointments": "Kunden mit 5+ Terminen",
+    "statusTitle": "Statusanalyse",
+    "noData": "Keine Daten im gewählten Zeitraum",
+    "statusNames": {
+      "zakljuceni": "Abgeschlossen",
+      "nacrtovani": "Geplant",
+      "odpovedani": "Storniert",
+      "niPrisel": "Nicht erschienen"
+    }
+  },
+  "promotions": {
+    "title": "Aktionen",
+    "subtitle": "Auswertung von Rabatten, Happy Hours und Add-ons",
+    "types": {
+      "popust": "Rabatte",
+      "happy_hour": "Happy Hours",
+      "add_on": "Add-ons"
+    },
+    "appointmentCount": "Termine",
+    "totalSavings": "Gesamtersparnis",
+    "topPromos": "Meistgenutzte Aktionen",
+    "monthlyTrend": "Nutzung von Aktionen nach Monat",
+    "totalSavingsLabel": "Gesamtersparnis der Kunden durch Aktionen",
+    "totalCountLabel": "Termine mit Aktion",
+    "avgSavingLabel": "Durchschnittlicher Rabatt pro Termin",
+    "legend": {
+      "discount": "Rabatt",
+      "happyHour": "Happy Hour",
+      "addOn": "Add-on"
+    },
+    "empty": {
+      "title": "Noch keine Termine mit Aktion",
+      "description": "Erstellen Sie einen Rabatt oder eine Happy Hour und verfolgen Sie die Ersparnis Ihrer Kunden."
+    }
+  }
+}

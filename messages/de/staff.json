@@ -1,0 +1,142 @@
+{
+  "page": {
+    "title": "Team",
+    "subtitle": "Verwalten Sie Ihre Mitarbeiter und deren Termine",
+    "newButton": "Mitarbeiter hinzufügen"
+  },
+  "stats": {
+    "total": "Mitarbeiter gesamt",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "today": "Termine heute"
+  },
+  "search": {
+    "placeholder": "Mitarbeiter suchen...",
+    "filterAll": "Alle",
+    "filterActive": "Aktiv",
+    "filterInactive": "Inaktiv",
+    "resultsCount": "{count, plural, =1 {1 Mitarbeiter} other {{count} Mitarbeiter}}",
+    "resultsWithQuery": "{count, plural, =1 {1 Mitarbeiter für „{query}“} other {{count} Mitarbeiter für „{query}“}}"
+  },
+  "emptyState": {
+    "title": "Noch keine Mitarbeiter",
+    "subtitle": "Fügen Sie Ihren ersten Mitarbeiter hinzu, um Termine zu verwalten.",
+    "addFirst": "Ersten Mitarbeiter hinzufügen"
+  },
+  "card": {
+    "inactive": "Inaktiv",
+    "toggleActive": "Aktiv",
+    "toggleInactive": "Inaktiv",
+    "connectButton": "Mein Konto mit dieser Person verknüpfen",
+    "statsToday": "Heute",
+    "statsWeek": "Woche",
+    "statsMonth": "Monat",
+    "tooltipSettings": "Arbeitszeiten und Leistungen",
+    "tooltipEdit": "Angaben bearbeiten",
+    "tooltipDelete": "Löschen"
+  },
+  "modal": {
+    "createTitle": "Neuer Mitarbeiter",
+    "editTitle": "Mitarbeiter bearbeiten",
+    "createSubtitle": "Neues Teammitglied hinzufügen",
+    "editSubtitle": "Angaben zum Teammitglied ändern",
+    "firstNameLabel": "Vorname *",
+    "firstNamePlaceholder": "Anna",
+    "lastNameLabel": "Nachname *",
+    "lastNamePlaceholder": "Müller",
+    "emailLabel": "E-Mail *",
+    "emailPlaceholder": "anna.mueller@email.de",
+    "phoneLabel": "Telefon",
+    "phonePlaceholder": "+49 151 23456789",
+    "positionLabel": "Position/Rolle",
+    "positionPlaceholder": "z. B. Friseurin, Kosmetikerin, Masseur...",
+    "avatarColorLabel": "Avatarfarbe *",
+    "notesLabel": "Notizen",
+    "notesPlaceholder": "Weitere Informationen zum Mitarbeiter...",
+    "saving": "Wird gespeichert...",
+    "save": "Speichern",
+    "validationFirstNameRequired": "Bitte geben Sie einen Vornamen ein",
+    "validationFirstNameMinLength": "Der Vorname muss mindestens 2 Zeichen lang sein",
+    "validationLastNameRequired": "Bitte geben Sie einen Nachnamen ein",
+    "validationLastNameMinLength": "Der Nachname muss mindestens 2 Zeichen lang sein",
+    "validationEmailRequired": "Bitte geben Sie eine E-Mail-Adresse ein",
+    "validationEmailInvalid": "Ungültige E-Mail-Adresse",
+    "validationEmailExists": "Diese E-Mail-Adresse wird bereits verwendet",
+    "validationPhoneInvalid": "Ungültige Telefonnummer",
+    "validationAvatarColorRequired": "Bitte wählen Sie eine Avatarfarbe",
+    "validationNotesMaxLength": "Notizen dürfen höchstens 500 Zeichen lang sein"
+  },
+  "deleteModal": {
+    "title": "Mitarbeiter löschen",
+    "confirmMessage": "Möchten Sie wirklich löschen:",
+    "warning": "Diese Aktion ist endgültig und kann nicht rückgängig gemacht werden.",
+    "deleting": "Wird gelöscht...",
+    "delete": "Löschen"
+  },
+  "settings": {
+    "title": "Mitarbeitereinstellungen",
+    "tabSchedule": "Arbeitszeiten",
+    "tabServices": "Leistungen",
+    "companyScheduleTitle": "Öffnungszeiten des Unternehmens",
+    "companyScheduleSubtitle": "Die allgemeinen Öffnungszeiten des Unternehmens verwenden",
+    "usingCompanySchedule": "Dieser Mitarbeiter arbeitet zu den Öffnungszeiten des Unternehmens. Für eigene Arbeitszeiten schalten Sie den Schalter oben um.",
+    "customScheduleTitle": "Eigene Arbeitszeiten",
+    "customScheduleDesc": "Legen Sie eigene Arbeitszeiten für diesen Mitarbeiter fest. Jeder Tag kann mehrere Zeiträume haben (z. B. 08:00–13:00, 14:00–17:00).",
+    "dayOff": "Frei",
+    "addInterval": "Zeitraum hinzufügen",
+    "allServicesTitle": "Führt alle Leistungen aus",
+    "allServicesSubtitle": "Dieser Mitarbeiter kann alle Leistungen des Unternehmens ausführen",
+    "selectServicesHint": "Wählen Sie die Leistungen, die dieser Mitarbeiter ausführen kann.",
+    "selectAll": "Alle auswählen",
+    "clearAll": "Leeren",
+    "noServices": "Keine Leistungen zur Auswahl",
+    "saving": "Wird gespeichert...",
+    "save": "Einstellungen speichern"
+  },
+  "connect": {
+    "title": "Konto verknüpfen",
+    "subtitle": "mit einem Mitarbeiter des Unternehmens",
+    "whatItMeans": "Was bedeutet diese Verknüpfung?",
+    "calendarBulletBefore": "Der",
+    "calendarLabel": "Kalender",
+    "calendarBulletMid": "und die",
+    "dashboardLabel": "Übersicht",
+    "calendarBulletAfter": "zeigen standardmäßig die Termine dieses Mitarbeiters.",
+    "accountBulletBefore": "Ihr Konto wird verknüpft mit",
+    "accountBulletAfter": "im Unternehmen.",
+    "agreementPrefix": "Ich stimme zu, mein Konto mit dem Mitarbeiter",
+    "agreementSuffix": "zu verknüpfen, und verstehe, dass Kalender und Übersicht standardmäßig seine Termine anzeigen.",
+    "connecting": "Wird verknüpft...",
+    "connect": "Konto verknüpfen"
+  },
+  "days": {
+    "Ponedeljek": "Montag",
+    "Torek": "Dienstag",
+    "Sreda": "Mittwoch",
+    "Četrtek": "Donnerstag",
+    "Petek": "Freitag",
+    "Sobota": "Samstag",
+    "Nedelja": "Sonntag"
+  },
+  "toasts": {
+    "created": "Mitarbeiter angelegt",
+    "updated": "Mitarbeiter aktualisiert",
+    "deleted": "Mitarbeiter gelöscht",
+    "settingsSaved": "Einstellungen gespeichert",
+    "connected": "Konto mit Mitarbeiter verknüpft",
+    "activated": "Mitarbeiter aktiviert",
+    "deactivated": "Mitarbeiter deaktiviert",
+    "missingId": "Die Mitarbeiter-ID fehlt",
+    "errorLoad": "Mitarbeiter konnten nicht geladen werden",
+    "errorCreate": "Mitarbeiter konnte nicht angelegt werden",
+    "errorUpdate": "Mitarbeiter konnte nicht aktualisiert werden",
+    "errorDelete": "Mitarbeiter konnte nicht gelöscht werden",
+    "errorSave": "Speichern fehlgeschlagen",
+    "errorSettings": "Einstellungen konnten nicht gespeichert werden",
+    "errorStatus": "Status konnte nicht geändert werden",
+    "errorConnect": "Konto konnte nicht verknüpft werden"
+  },
+  "gradientSelector": {
+    "description": "Diese Farbe wird für die Initialen im Kalender und in Profilen verwendet"
+  }
+}

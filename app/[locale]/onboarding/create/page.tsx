@@ -73,10 +73,12 @@ const PANOGE_DATA = [
   { value: 'Drugo', key: 'other' },
 ];
 
+// Communication-language codes; each maps to an app locale.
 const LANGUAGES = [
-  { value: 'slo' },
-  { value: 'eng' },
-];
+  { value: 'slo', locale: 'sl' },
+  { value: 'eng', locale: 'en' },
+  { value: 'de', locale: 'de' },
+] as const;
 
 // SL day names are DB keys for urnik — do not change
 const DAYS = ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja'];
@@ -211,11 +213,13 @@ export default function CreateCompanyPage() {
     const fromQuery = new URLSearchParams(window.location.search).get('country');
     if (fromQuery && COUNTRIES_DATA.some((c) => c.value === fromQuery)) setCountry(fromQuery);
   }, []);
-  const [language, setLanguage] = useState(locale === 'en' ? 'eng' : 'slo');
+  const [language, setLanguage] = useState<string>(
+    LANGUAGES.find((l) => l.locale === locale)?.value ?? 'slo'
+  );
 
   const chooseLanguage = (value: string) => {
     setLanguage(value);
-    const nextLocale = value === 'eng' ? 'en' : 'sl';
+    const nextLocale = LANGUAGES.find((l) => l.value === value)?.locale ?? 'sl';
     if (nextLocale === locale) return;
     document.cookie = `NEXT_LOCALE=${nextLocale};path=/;max-age=${60 * 60 * 24 * 365}`;
     localeRouter.replace(
@@ -250,7 +254,7 @@ export default function CreateCompanyPage() {
   // the step, so the owner's edits survive going back and forth).
   useEffect(() => {
     if (step !== 4 || servicesForIndustry === industryKey) return;
-    const lang = locale === 'en' ? 'en' : 'sl';
+    const lang = locale === 'en' || locale === 'de' ? locale : 'sl';
     setDraftServices(
       getServiceSuggestions(industryKey).map((sug, i) => ({
         key: `${industryKey}-${i}`,

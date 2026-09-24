@@ -1,0 +1,100 @@
+{
+  "buttons": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "confirm": "Bestätigen",
+    "discard": "Rückgängig",
+    "submit": "Senden",
+    "tryAgain": "Erneut versuchen",
+    "viewAll": "Alle anzeigen",
+    "add": "Hinzufügen",
+    "create": "Erstellen",
+    "update": "Aktualisieren",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "copy": "Kopieren",
+    "share": "Teilen"
+  },
+  "status": {
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "expired": "Abgelaufen",
+    "confirmed": "Bestätigt",
+    "cancelled": "Storniert",
+    "pending": "Ausstehend",
+    "completed": "Abgeschlossen",
+    "loading": "Wird geladen...",
+    "saving": "Wird gespeichert..."
+  },
+  "confirm": {
+    "title": "Sind Sie sicher?",
+    "cannotUndo": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "roles": {
+    "owner": "Inhaber",
+    "admin": "Administrator",
+    "staff": "Mitarbeiter",
+    "receptionist": "Empfang"
+  },
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "loadFailed": "Laden fehlgeschlagen",
+    "noResults": "Keine Ergebnisse",
+    "networkError": "Verbindungsproblem",
+    "unauthorized": "Sie haben keine Berechtigung für diese Aktion",
+    "fillAllFields": "Bitte füllen Sie alle Felder aus"
+  },
+  "time": {
+    "today": "Heute",
+    "yesterday": "Gestern",
+    "tomorrow": "Morgen",
+    "now": "Jetzt"
+  },
+  "daysShort": {
+    "mon": "Mo",
+    "tue": "Di",
+    "wed": "Mi",
+    "thu": "Do",
+    "fri": "Fr",
+    "sat": "Sa",
+    "sun": "So"
+  },
+  "daysLong": {
+    "mon": "Montag",
+    "tue": "Dienstag",
+    "wed": "Mittwoch",
+    "thu": "Donnerstag",
+    "fri": "Freitag",
+    "sat": "Samstag",
+    "sun": "Sonntag"
+  },
+  "search": {
+    "placeholder": "Suchen...",
+    "noResults": "Keine Treffer"
+  },
+  "divider": {
+    "or": "oder"
+  },
+  "pagination": {
+    "previous": "Zurück",
+    "next": "Weiter"
+  },
+  "dayLetters": {
+    "sun": "S",
+    "mon": "M",
+    "tue": "D",
+    "wed": "M",
+    "thu": "D",
+    "fri": "F",
+    "sat": "S"
+  }
+}

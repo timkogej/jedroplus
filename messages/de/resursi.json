@@ -1,0 +1,104 @@
+{
+  "page": {
+    "title": "Ressourcen",
+    "subtitle": "Verwalten Sie die Räume und Geräte, die Ihre Leistungen benötigen",
+    "newButton": "Ressource hinzufügen",
+    "searchPlaceholder": "Ressourcen suchen...",
+    "showAll": "Alle anzeigen",
+    "showActiveOnly": "Nur aktive",
+    "resultsCount": "{current} von {total} Ressourcen",
+    "loadError": "Fehler beim Laden der Ressourcen.",
+    "retry": "Erneut versuchen"
+  },
+  "stats": {
+    "total": "Ressourcen gesamt",
+    "active": "Aktiv",
+    "totalCapacity": "Gesamtkapazität",
+    "linkedServices": "Verknüpfte Leistungen"
+  },
+  "card": {
+    "inactive": "Inaktiv",
+    "units": "{count} Einheiten",
+    "unit": "{count} Einheit",
+    "perUnit": "{count} Pers./Einheit",
+    "totalCapacity": "Gesamt: {count} Plätze",
+    "alwaysAvailable": "Immer verfügbar",
+    "scheduleSet": "Zeitplan festgelegt",
+    "noServices": "Keine verknüpften Leistungen",
+    "toggleActive": "Aktiv",
+    "toggleInactive": "Inaktiv"
+  },
+  "modal": {
+    "createTitle": "Ressource hinzufügen",
+    "createSubtitle": "Legen Sie eine neue Ressource für Ihr Unternehmen an",
+    "editTitle": "Ressource bearbeiten",
+    "editSubtitle": "Angaben zur Ressource ändern",
+    "nameLabel": "Name der Ressource",
+    "namePlaceholder": "z. B. Massageliege, Kabine 1...",
+    "bookingNameLabel": "Name bei der Buchung",
+    "bookingNamePlaceholder": "Standard: {naziv}",
+    "bookingNameHint": "Dieser Name wird Kunden bei der Online-Buchung angezeigt",
+    "descriptionLabel": "Beschreibung",
+    "descriptionPlaceholder": "Kurze Beschreibung (optional)...",
+    "colorLabel": "Farbe",
+    "colorSelected": "Gewählte Farbe",
+    "colorCustom": "Eigene",
+    "colorHint": "Die Farbe hilft, die Ressource in der Ansicht zu erkennen",
+    "quantityLabel": "Anzahl Einheiten",
+    "quantityHelp": "Wie viele Einheiten dieser Ressource haben Sie? (z. B. 3 Massageliegen)",
+    "capacityLabel": "Kapazität pro Einheit",
+    "capacityHelp": "Wie viele Kunden können eine Einheit gleichzeitig nutzen?",
+    "totalCapacityLabel": "Gesamtkapazität",
+    "totalCapacityValue": "{value} Plätze gesamt",
+    "showInBookingLabel": "Kunden bei der Online-Buchung anzeigen",
+    "scheduleLabel": "Verfügbarkeit",
+    "alwaysAvailable": "Immer verfügbar",
+    "customSchedule": "Zeitplan festlegen",
+    "scheduleHint": "Legen Sie die Verfügbarkeitszeiten dieser Ressource fest",
+    "addInterval": "Zeitraum hinzufügen",
+    "servicesLabel": "Leistungen, die diese Ressource benötigen",
+    "servicesHelp": "Buchungen dieser Leistungen belegen diese Ressource",
+    "noServicesAvailable": "Keine aktiven Leistungen",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "validationNameRequired": "Bitte geben Sie einen Namen ein.",
+    "validationNameMinLength": "Der Name muss mindestens 2 Zeichen lang sein.",
+    "validationNameMaxLength": "Der Name darf höchstens 100 Zeichen lang sein.",
+    "validationColorInvalid": "Bitte wählen Sie eine gültige Farbe."
+  },
+  "deleteModal": {
+    "title": "Ressource löschen",
+    "confirmPrefix": "Möchten Sie die Ressource wirklich löschen:",
+    "confirmSuffix": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "delete": "Löschen",
+    "deleting": "Wird gelöscht...",
+    "cancel": "Abbrechen"
+  },
+  "emptyState": {
+    "title": "Keine Ressourcen",
+    "subtitle": "Fügen Sie Ressourcen hinzu, die Ihre Leistungen benötigen – Massageliegen, Kabinen, Geräte...",
+    "addFirst": "Erste Ressource hinzufügen"
+  },
+  "searchEmpty": {
+    "title": "Keine Ergebnisse für „{term}“",
+    "subtitle": "Versuchen Sie andere Suchbegriffe.",
+    "clear": "Suche zurücksetzen"
+  },
+  "toasts": {
+    "created": "Ressource hinzugefügt.",
+    "updated": "Ressource aktualisiert.",
+    "deleted": "Ressource gelöscht.",
+    "errorSave": "Fehler beim Speichern der Ressource.",
+    "errorDelete": "Fehler beim Löschen der Ressource.",
+    "errorStatus": "Fehler beim Ändern des Status."
+  },
+  "days": {
+    "Ponedeljek": "Mo",
+    "Torek": "Di",
+    "Sreda": "Mi",
+    "Četrtek": "Do",
+    "Petek": "Fr",
+    "Sobota": "Sa",
+    "Nedelja": "So"
+  }
+}

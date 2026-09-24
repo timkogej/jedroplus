@@ -1,0 +1,195 @@
+{
+  "greeting": {
+    "morning": "Guten Morgen,",
+    "day": "Guten Tag,",
+    "afternoon": "Guten Tag,",
+    "evening": "Guten Abend,"
+  },
+  "quickActions": {
+    "newAppointment": "Neuer Termin",
+    "newClient": "Neuer Kunde"
+  },
+  "metrics": {
+    "appointmentsToday": "Termine heute",
+    "appointmentsTodaySubtitle": "Geplante Termine",
+    "activeAppointments": "Anstehende Termine",
+    "newClients": "Neue Kunden",
+    "thisMonth": "Diesen Monat",
+    "revenue": "Umsatz",
+    "trend": "ggü. Vormonat",
+    "activeSubtitle": "Geplant ab heute",
+    "pastOpen": "{count, plural, one {# vergangener Termin ist noch nicht abgeschlossen} other {# vergangene Termine sind noch nicht abgeschlossen}}",
+    "pastOpenBody": "Im Umsatz zählen nur abgeschlossene Termine.",
+    "pastOpenCta": "Unter „Termine“ abschließen"
+  },
+  "nextAppointment": {
+    "title": "Nächster Termin",
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "empty": "Keine anstehenden Termine"
+  },
+  "appointmentList": {
+    "todayTitle": "Termine heute",
+    "todayEmpty": "Heute keine Termine",
+    "tomorrowTitle": "Termine morgen",
+    "tomorrowEmpty": "Morgen keine Termine",
+    "defaultEmpty": "Keine Termine",
+    "viewAll": "Alle Termine anzeigen"
+  },
+  "footer": {
+    "heading": "Mehr Details gewünscht?",
+    "body": "Im Kalender oder in den Auswertungen sehen Sie mehr",
+    "openCalendar": "Kalender öffnen",
+    "openAnalytics": "Auswertungen öffnen"
+  },
+  "detailModal": {
+    "status": {
+      "scheduled": "Geplant",
+      "confirmed": "Bestätigt",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "pending": "Ausstehend",
+      "noShow": "Nicht erschienen"
+    },
+    "fields": {
+      "status": "Status",
+      "client": "Kunde",
+      "service": "Leistung",
+      "employee": "Mitarbeiter",
+      "date": "Datum",
+      "time": "Uhrzeit",
+      "duration": "Dauer",
+      "price": "Preis",
+      "additionalService": "Zusatzleistung",
+      "notes": "Notizen",
+      "internalNotes": "Interne Notizen",
+      "phone": "Telefon"
+    },
+    "actions": {
+      "complete": "Abschließen",
+      "edit": "Bearbeiten",
+      "moreOptions": "Weitere Optionen",
+      "noShow": "Nicht erschienen",
+      "cancel": "Stornieren",
+      "delete": "Löschen",
+      "close": "Schließen"
+    },
+    "openInAppointments": "Unter „Termine“ öffnen"
+  },
+  "completeModal": {
+    "title": "Termin abschließen",
+    "subtitle": "Abschluss des Termins bestätigen",
+    "client": "Kunde",
+    "service": "Leistung",
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "messageLabel": "Nachricht an den Kunden oder Hinweise nach dem Termin",
+    "messagePlaceholder": "Nachricht oder Hinweise nach dem Termin eingeben (optional)...",
+    "cancel": "Abbrechen",
+    "completing": "Wird abgeschlossen...",
+    "confirm": "Abschließen"
+  },
+  "deleteModal": {
+    "title": "Termin löschen",
+    "message": "Möchten Sie diesen Termin wirklich löschen?"
+  },
+  "toast": {
+    "appointmentAdded": "Termin hinzugefügt",
+    "appointmentUpdated": "Termin aktualisiert",
+    "appointmentCompleted": "Termin abgeschlossen",
+    "appointmentNoShow": "Termin als „Nicht erschienen“ markiert",
+    "appointmentCancelled": "Termin storniert",
+    "clientAdded": "Kunde angelegt",
+    "loadError": "Beim Laden der Daten ist ein Fehler aufgetreten.",
+    "saveError": "Beim Speichern ist ein Fehler aufgetreten.",
+    "completeError": "Beim Abschließen des Termins ist ein Fehler aufgetreten.",
+    "noShowError": "Beim Markieren als „Nicht erschienen“ ist ein Fehler aufgetreten.",
+    "cancelError": "Beim Stornieren des Termins ist ein Fehler aufgetreten.",
+    "deleteError": "Beim Löschen ist ein Fehler aufgetreten.",
+    "clientSaveError": "Beim Speichern des Kunden ist ein Fehler aufgetreten."
+  },
+  "errorState": {
+    "title": "Ein Fehler ist aufgetreten",
+    "retry": "Erneut versuchen"
+  },
+  "defaultUser": "Benutzer",
+  "copyButton": "{label} kopieren",
+  "topServices": {
+    "title": "Top-Leistungen",
+    "subtitle": "Diesen Monat",
+    "empty": "Keine Daten"
+  },
+  "topEmployees": {
+    "title": "Top-Mitarbeiter",
+    "subtitle": "Nach abgeschlossenen Terminen",
+    "empty": "Keine Daten",
+    "appointmentCount": "{count, plural, =1 {1 Termin} other {{count} Termine}}"
+  },
+  "recentActivity": {
+    "title": "Letzte Aktivitäten",
+    "subtitle": "Zuletzt abgeschlossene Termine",
+    "empty": "Keine Aktivitäten",
+    "unknownClient": "Unbekannter Kunde",
+    "serviceLabel": "Leistung"
+  },
+  "weeklyChart": {
+    "title": "Termine – 7 Tage",
+    "subtitle": "Überblick über die letzten 7 Tage",
+    "tooltipValue": "{value, plural, =1 {1 Termin} other {{value} Termine}}",
+    "tooltipLabel": "Anzahl Termine"
+  },
+  "firstRun": {
+    "preparingTitle": "Ihr Konto wird eingerichtet",
+    "steps": {
+      "services": "Ihre Leistungen werden angelegt",
+      "owner": "Sie werden als Mitarbeiter hinzugefügt",
+      "connect": "Ihr Login wird mit Ihrem Kalender verknüpft",
+      "done": "Fertig"
+    },
+    "doneTitle": "Alles ist bereit für Ihren ersten Termin",
+    "doneBody": "Ihre Leistungen und Arbeitszeiten sind eingerichtet. Tragen Sie Ihren ersten Termin ein und sehen Sie, wie er im Kalender aussieht.",
+    "cta": "Ersten Termin eintragen",
+    "errorTitle": "Die Einrichtung konnte nicht abgeschlossen werden",
+    "errorBody": "Bei der Verbindung zum Server ist ein Fehler aufgetreten. Bereits Angelegtes bleibt erhalten – versuchen Sie es erneut oder fügen Sie Leistungen unter „Leistungen“ hinzu.",
+    "retry": "Erneut versuchen",
+    "openServices": "Leistungen öffnen",
+    "dismiss": "Schließen"
+  },
+  "gettingStarted": {
+    "title": "Erste Schritte mit Jedro+",
+    "subtitle": "{done} von {total} erledigt",
+    "hide": "Liste ausblenden",
+    "items": {
+      "tour": {
+        "title": "Rundgang machen (1 Min.)",
+        "body": "Wir zeigen Ihnen, wo Sie was finden."
+      },
+      "appointment": {
+        "title": "Ersten Termin eintragen",
+        "body": "Kunde, Leistung und Uhrzeit wählen."
+      },
+      "client": {
+        "title": "Ersten Kunden anlegen",
+        "body": "Oder bestehende Kunden aus Excel importieren."
+      },
+      "hours": {
+        "title": "Öffnungszeiten prüfen",
+        "body": "Kalender und Online-Buchung richten sich danach."
+      },
+      "reminders": {
+        "title": "Erinnerungen kennenlernen",
+        "body": "Kunden werden automatisch an ihre Termine erinnert."
+      },
+      "team": {
+        "title": "Kolleginnen und Kollegen hinzufügen",
+        "body": "Wenn Sie nicht allein arbeiten, fügen Sie Ihr Team und dessen Arbeitszeiten hinzu."
+      }
+    }
+  },
+  "staffNotLinked": {
+    "title": "Ihr Konto ist noch nicht mit Ihrem Kalender verknüpft",
+    "bodyCanLink": "Deshalb sehen Sie Ihre Termine noch nicht. Öffnen Sie „Team“ und klicken Sie neben Ihrem Namen auf „Mein Konto mit dieser Person verknüpfen“.",
+    "bodyAskOwner": "Deshalb sehen Sie Ihre Termine noch nicht. Bitten Sie den Inhaber, Sie unter „Team“ zu verknüpfen.",
+    "cta": "Team öffnen"
+  }
+}

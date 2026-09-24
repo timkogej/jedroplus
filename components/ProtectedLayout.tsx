@@ -1,5 +1,6 @@
 "use client";
 
+import { stripLocalePrefix } from '@/i18n/config';
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -142,7 +143,7 @@ export default function ProtectedLayout({
   const { usage: billingUsage, loading: billingLoading } = useBillingUsage();
 
   // Strip locale prefix so route checks work with or without /sl/, /en/ prefix
-  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(\/|$)/, '/').replace(/\/$/, '') || '/';
+  const pathnameWithoutLocale = stripLocalePrefix(pathname).replace(/\/$/, '') || '/';
 
   // Free accounts may use reminders while their one-time free quota lasts
   // (plans.FREE sms/email quota > 0). The gate opens only when that quota exists.

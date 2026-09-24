@@ -1,0 +1,313 @@
+{
+  "page": {
+    "title": "Erinnerungen",
+    "subtitle": "Übersicht der automatischen Erinnerungen",
+    "kicker": "Kommunikation",
+    "incompleteBannerTitle": "Ergänzen Sie die mit ! markierten Einstellungen",
+    "incompleteBannerDesc": "damit alles reibungslos läuft und Sie das volle Potenzial der Erinnerungen nutzen.",
+    "openSettings": "Einstellungen öffnen →",
+    "settingsButton": "Einstellungen",
+    "flow": {
+      "eyebrow": "Abläufe",
+      "title": "Versandübersicht",
+      "beforeEyebrow": "Vor dem Termin",
+      "afterEyebrow": "Nach dem Termin",
+      "rescheduleEyebrow": "Terminänderung",
+      "considers": "Berücksichtigt",
+      "disabledReminder": "Dieser Ablauf sendet derzeit keine Erinnerungen.",
+      "disabledReschedule": "Benachrichtigungen bei Terminverschiebung sind nicht aktiv.",
+      "detailsEyebrow": "Details",
+      "settingsEyebrow": "Einstellungen",
+      "edit": "Bearbeiten"
+    },
+    "stats": {
+      "sentToday": "Heute gesendet",
+      "sentTodayDesc": "Erinnerungen vor dem Termin",
+      "scheduledTomorrow": "Für morgen geplant",
+      "scheduledTomorrowDesc": "Termine mit Erinnerung",
+      "afterVisits": "Nach Besuchen heute",
+      "afterVisitsDesc": "Abgeschlossene Termine"
+    },
+    "general": {
+      "sectionTitle": "Allgemeine Einstellungen",
+      "language": "Sprache der Nachrichten",
+      "tone": "Tonalität",
+      "replyTo": "Antwort-E-Mail",
+      "fromName": "Absendername",
+      "fromNameDesc": "Name, der in E-Mails als Absender erscheint",
+      "senderId": "SMS-Absenderkennung",
+      "senderIdDesc": "Wird beim SMS-Versand verwendet",
+      "tips": "Tipps passend zur Leistung",
+      "colors": "Farben der E-Mails",
+      "customerAddressing": "Anrede der Kunden",
+      "informalAddressing": "Du",
+      "formalAddressing": "Sie",
+      "automaticTag": "Automatische Erinnerung",
+      "staffInReminder": "Mitarbeiter in der Erinnerung",
+      "notSet": "Nicht festgelegt",
+      "notSetTemplate": "Keine eigene Vorlage festgelegt"
+    },
+    "before": {
+      "sectionTitle": "Erinnerungen vor dem Termin",
+      "status": "Status",
+      "channel": "Versandart",
+      "timeLabel": "Versandzeitpunkt",
+      "timeValue": "1 Tag vor dem Termin",
+      "dayBefore": "1 Tag vor dem Termin",
+      "daysBefore": "{count} Tage vor dem Termin",
+      "instructions": "Anweisungen",
+      "smsType": "Art der SMS",
+      "aiMode": "KI schreibt",
+      "aiConsiders": "KI berücksichtigt",
+      "manualMode": "Eigene Vorlage",
+      "includeService": "Leistung nennen",
+      "noSpecialInstructions": "Keine besonderen Anweisungen"
+    },
+    "after": {
+      "sectionTitle": "Nachrichten nach dem Termin",
+      "status": "Status",
+      "channel": "Versandart",
+      "timeLabel": "Versandzeitpunkt",
+      "timeValue": "Direkt nach Abschluss",
+      "instructions": "Anweisungen",
+      "discount": "Rabatt",
+      "smsType": "Art der SMS",
+      "aiMode": "KI schreibt",
+      "aiConsiders": "KI berücksichtigt",
+      "manualMode": "Eigene Vorlage",
+      "includeService": "Leistung nennen",
+      "noSpecialInstructions": "Keine besonderen Anweisungen"
+    },
+    "reschedule": {
+      "sectionTitle": "Verschobener Termin",
+      "channel": "Versandart",
+      "smsTemplate": "SMS-Vorlage",
+      "emailTemplate": "E-Mail-Vorlage"
+    },
+    "info": {
+      "title": "Über Erinnerungen",
+      "body": "Erinnerungen werden anhand der hier gezeigten Einstellungen <highlight>automatisch versendet</highlight> – ganz ohne manuellen Aufwand. Jeder Kunde erhält je nach Einstellung eine Nachricht vor und/oder nach seinem Termin.\n\nMit aktivierter KI <highlight>ist keine Nachricht wie die andere</highlight> – die KI kennt den Kontext des Kunden, nennt die richtige Leistung und formuliert natürlich und persönlich. Das bedeutet mehr geöffnete Nachrichten, besser in Erinnerung bleibende Texte und Kunden, die sich wertgeschätzt fühlen.\n\nWenn Sie den Inhalt ganz selbst bestimmen möchten, steht Ihnen auch eine <highlight>eigene Nachrichtenvorlage</highlight> zur Verfügung.\n\nBei Fragen erreichen Sie uns unter help@jedroplus.com."
+    },
+    "sendingStatus": {
+      "title": "Versandstatus",
+      "ok": {
+        "title": "{name}-Erinnerungen werden gesendet",
+        "body": "Noch {remaining} von {total} in diesem Zeitraum."
+      },
+      "nearLimit": {
+        "title": "{name}-Kontingent fast aufgebraucht",
+        "body": "{used} von {total} verbraucht. Ist es aufgebraucht, werden keine {name}-Erinnerungen mehr gesendet."
+      },
+      "exhausted": {
+        "title": "{name}-Erinnerungen werden nicht gesendet",
+        "body": "Sie haben alle {total} dieses Zeitraums verbraucht ({used}/{total}). Kunden erhalten keine {name}-Erinnerungen."
+      },
+      "unavailable": {
+        "title": "{name}-Erinnerungen werden nicht gesendet",
+        "body": "Ihr Paket enthält keine {name}-Nachrichten, daher werden über diesen Kanal keine Erinnerungen gesendet. Buchen Sie ein Paket hinzu oder wählen Sie in den Einstellungen einen anderen Kanal."
+      },
+      "renews": "Das Kontingent erneuert sich am {date}.",
+      "buySms": "SMS kaufen",
+      "buyEmail": "E-Mails kaufen",
+      "trial": {
+        "ok": {
+          "title": "{name}-Erinnerungen werden gesendet",
+          "body": "Kostenloser Test: noch {remaining} von {total}."
+        },
+        "nearLimit": {
+          "title": "Kostenlose {name}-Erinnerungen fast aufgebraucht",
+          "body": "Noch {remaining} von {total}. Danach werden keine {name}-Erinnerungen mehr gesendet."
+        },
+        "exhausted": {
+          "title": "Kostenlose {name}-Erinnerungen aufgebraucht",
+          "body": "Sie haben alle {total} verbraucht. Kunden erhalten keine {name}-Erinnerungen mehr."
+        },
+        "upgrade": "Auf Jedro Plus upgraden",
+        "introTitle": "Erinnerungen kostenlos testen",
+        "introBody": "Sie haben {sms} SMS- und {email} E-Mail-Erinnerungen. Das ist ein einmaliger Test, kein monatliches Kontingent. Sind sie aufgebraucht, bleiben Ihre Einstellungen erhalten, und mit Jedro Plus geht der Versand weiter."
+      }
+    },
+    "smsLog": {
+      "title": "Letzte SMS",
+      "countries": "SMS senden wir an Nummern aus diesen Ländern: {countries}. Kunden mit anderen Nummern erhalten E-Mails.",
+      "empty": "Hier erscheinen gesendete SMS und ob sie angekommen sind.",
+      "status": {
+        "sent": "Gesendet",
+        "delivered": "Zugestellt",
+        "failed": "Nicht zugestellt",
+        "blocked_country": "Land nicht unterstützt"
+      },
+      "kind": {
+        "reminder_before": "Erinnerung vor dem Termin",
+        "reminder_after": "Nachricht nach dem Termin",
+        "reschedule": "Termin verschoben",
+        "confirmation": "Terminbestätigung",
+        "marketing": "Neuigkeiten und Angebote",
+        "other": "SMS"
+      }
+    }
+  },
+  "status": {
+    "enabled": "Aktiviert",
+    "disabled": "Deaktiviert"
+  },
+  "tone": {
+    "professional": "Professionell",
+    "friendly": "Freundlich",
+    "salesOriented": "Verkaufsorientiert",
+    "formal": "Förmlich",
+    "relaxed": "Locker"
+  },
+  "language": {
+    "sl": "Slowenisch",
+    "en": "Englisch",
+    "it": "Italienisch",
+    "de": "Deutsch"
+  },
+  "modal": {
+    "title": "Einstellungen für Erinnerungen",
+    "subtitle": "Wie und wann Kunden erinnert werden",
+    "closeButton": "Schließen",
+    "saveButton": "Speichern",
+    "savingButton": "Wird gespeichert...",
+    "saveError": "Beim Speichern ist ein Fehler aufgetreten",
+    "general": {
+      "sectionTitle": "Allgemeine Einstellungen",
+      "sectionDesc": "Grundeinstellungen für Erinnerungen",
+      "languageLabel": "Sprache der Nachrichten",
+      "languageDesc": "Sprache für Erinnerungen und Nachrichten",
+      "languagePlaceholder": "Sprache wählen",
+      "toneLabel": "Tonalität",
+      "toneDesc": "Wie das System mit Kunden kommunizieren soll",
+      "tonePlaceholder": "Tonalität wählen",
+      "toneOptions": {
+        "formal": "Förmlich",
+        "friendly": "Freundlich",
+        "relaxed": "Locker",
+        "professional": "Professionell"
+      },
+      "replyToLabel": "Antwort-E-Mail",
+      "replyToDesc": "E-Mail-Adresse, an die Kunden antworten können",
+      "replyToPlaceholder": "info@ihrunternehmen.de",
+      "fromNameLabel": "Absendername",
+      "fromNameDesc": "Name, der in E-Mails als Absender erscheint",
+      "fromNamePlaceholder": "Kosmetikstudio",
+      "fromEmailLabel": "Absender-E-Mail-Adresse",
+      "fromEmailDesc": "Diese E-Mail-Adresse ist fest vorgegeben und kann nicht geändert werden",
+      "locked": "Gesperrt",
+      "senderIdLabel": "SMS-Absenderkennung",
+      "senderIdDesc": "Name, der in SMS als Absender erscheint",
+      "notSet": "Nicht festgelegt",
+      "tipsLabel": "Tipps passend zur Leistung",
+      "tipsDesc": "Ob Erinnerungen Tipps zur jeweiligen Leistung enthalten sollen",
+      "tipsYes": "Ja",
+      "tipsNo": "Nein",
+      "tipsAuto": "KI entscheidet",
+      "colorsTitle": "Farben der E-Mail-Vorlage",
+      "colorPrimary": "Hauptfarbe",
+      "colorSecondary": "Zweitfarbe"
+    },
+    "before": {
+      "sectionTitle": "Erinnerungen vor dem Termin",
+      "sectionDesc": "Erinnerungen, die Kunden vor ihrem Termin erhalten",
+      "enableLabel": "Erinnerung vor dem Termin senden",
+      "enableDesc": "Automatisch 1 Tag vor dem Termin erinnern",
+      "channelLabel": "Versandart",
+      "channelDesc": "E-Mail oder SMS",
+      "channelPlaceholder": "Versandart wählen",
+      "smsNotAvailable": "– nicht verfügbar",
+      "smsUpgradeHint": "SMS sind in höheren Paketen verfügbar.",
+      "upgradeButton": "Paket upgraden",
+      "smsSettings": "Einstellungen für SMS-Nachrichten",
+      "modeAI": "KI schreibt",
+      "modeManual": "Eigene Vorlage",
+      "aiDataHint": "Die KI schreibt die SMS anhand der gewählten Angaben:",
+      "includeService": "Leistung nennen",
+      "includeServiceDesc": "Die gebuchte Leistung in der Erinnerung erwähnen.",
+      "includeNotes": "Notizen zum Termin einbeziehen",
+      "includeNotesDesc": "Notizen zum Termin und ggf. zum Kunden einbeziehen.",
+      "includeInstructions": "Anweisungen für die Erinnerung einbeziehen",
+      "includeInstructionsDesc": "Geben Sie unten Anweisungen ein, an die sich die KI beim Schreiben der Erinnerung hält.",
+      "instructionsHint": "Beschreiben Sie Gepflogenheiten Ihres Unternehmens, besondere Hinweise vor bestimmten Leistungen, was die KI erwähnen oder hervorheben soll und welchen Ton Sie gegenüber Kunden wünschen.",
+      "instructionsPlaceholder": "z. B.: Sprich Kunden immer mit Namen an. Vor einer Massage erinnere daran, ausgeruht und nicht direkt nach dem Essen zu kommen. Bei „Gelnägeln“ erinnere daran, die Nägel mindestens einen Tag vorher nicht lange einzuweichen. Der Ton soll herzlich und professionell sein.",
+      "templateHint": "Vorlage für die SMS (max. 155 Zeichen)",
+      "templatePlaceholder": "z. B.: Erinnerung an Ihren Termin morgen um {{cas}}. {{ime_podjetja}}. Zum Absagen rufen Sie {{telefon_podjetja}} an.",
+      "noEmojiHint": "Keine Emojis und keine Sonderzeichen.",
+      "emailInstructionsTitle": "Anweisungen für die Erinnerung vor dem Termin",
+      "emailInstructionsDesc": "Zusätzliche Hinweise oder Informationen für die Erinnerung vor dem Termin",
+      "emailPlaceholder": "z. B.: Bitte kommen Sie 5 Minuten vor Ihrem Termin. Parkplätze finden Sie hinter dem Gebäude.",
+      "timingTitle": "Versandzeitpunkt der Erinnerung",
+      "timingValue": "Fest: 1 Tag vor dem Termin",
+      "timingDays": "{count, plural, one {# Tag} other {# Tage}} vor dem Termin"
+    },
+    "after": {
+      "sectionTitle": "Nachrichten nach dem Termin",
+      "sectionDesc": "Nachrichten nach einem abgeschlossenen Termin",
+      "enableLabel": "Nachricht nach dem Termin senden",
+      "enableDesc": "Nachricht direkt nach einem abgeschlossenen Termin",
+      "channelLabel": "Versandart",
+      "channelDesc": "E-Mail oder SMS",
+      "channelPlaceholder": "Versandart wählen",
+      "smsNotAvailable": "– nicht verfügbar",
+      "smsUpgradeHint": "SMS sind in höheren Paketen verfügbar.",
+      "upgradeButton": "Paket upgraden",
+      "smsSettings": "Einstellungen für SMS-Nachrichten",
+      "modeAI": "KI schreibt",
+      "modeManual": "Eigene Vorlage",
+      "aiDataHint": "Die KI schreibt die SMS anhand der gewählten Angaben:",
+      "includeService": "Leistung nennen",
+      "includeServiceDesc": "Die Leistung in der Nachricht nach dem Besuch erwähnen.",
+      "includeNotes": "Notizen nach dem Besuch einbeziehen",
+      "includeNotesDesc": "Notizen einbeziehen, die Sie beim Abschluss des Termins schreiben.",
+      "includeInstructions": "Anweisungen für die Nachricht einbeziehen",
+      "includeInstructionsDesc": "Geben Sie unten Anweisungen ein, an die sich die KI beim Schreiben der Nachricht nach dem Termin hält.",
+      "instructionsHint": "Beschreiben Sie Gepflogenheiten Ihres Unternehmens, besondere Hinweise nach bestimmten Leistungen, was die KI erwähnen oder empfehlen soll und welchen Ton Sie nach dem Besuch wünschen.",
+      "instructionsPlaceholder": "z. B.: Empfiehl nach einer Massage, viel Wasser zu trinken. Beim „Haarefärben“ erinnere daran, die Haare mindestens 24 Stunden nicht zu waschen. Wünsche einen schönen Tag und lade zum Wiederkommen ein.",
+      "templateHint": "Vorlage für die SMS (max. 155 Zeichen)",
+      "templatePlaceholder": "z. B.: Danke für Ihren Besuch! Ihren nächsten Termin buchen Sie unter {{telefon_podjetja}}.",
+      "noEmojiHint": "Keine Emojis und keine Sonderzeichen.",
+      "emailInstructionsTitle": "Anweisungen für die Nachricht nach dem Termin",
+      "emailInstructionsDesc": "Zusätzliche Hinweise oder Informationen für die Nachricht nach dem Termin",
+      "emailPlaceholder": "z. B.: Danke für Ihren Besuch! Für das beste Ergebnis empfehlen wir unser spezielles Shampoo.",
+      "discountTitle": "Rabatt in die Nachricht aufnehmen",
+      "discountDesc": "Rabatt für den nächsten Besuch anbieten",
+      "discountLabel": "Rabatt / Angebot",
+      "discountFieldDesc": "Beschreibung des Rabatts für die Nachricht",
+      "discountPlaceholder": "10 % Rabatt auf den nächsten Besuch",
+      "timingTitle": "Versandzeitpunkt",
+      "timingValue": "Fest: direkt nach dem abgeschlossenen Termin"
+    },
+    "smsAccess": {
+      "notIncluded": "Ihr Paket enthält keine SMS. Buchen Sie ein SMS-Paket hinzu oder wechseln Sie zu Jedro Pro mit 250 SMS pro Monat.",
+      "notIncludedFree": "SMS-Erinnerungen sind in den kostenpflichtigen Paketen verfügbar.",
+      "buySms": "SMS kaufen",
+      "comparePlans": "Pakete vergleichen",
+      "remaining": "Noch {remaining} von {total} SMS in diesem Zeitraum.",
+      "nearLimit": "{used} von {total} SMS verbraucht. Sind sie aufgebraucht, werden keine SMS mehr gesendet.",
+      "exhausted": "Sie haben alle SMS dieses Zeitraums verbraucht ({used}/{total}). Bis zum Kauf eines Pakets oder zur Erneuerung werden keine SMS gesendet."
+    },
+    "englishVariant": {
+      "add": "Englische Version hinzufügen (für Kunden aus dem Ausland)",
+      "title": "Englische Version",
+      "remove": "Entfernen",
+      "hint": "Kunden, die die Sprache Ihres Unternehmens nicht sprechen, erhalten diese Version. Ist sie leer, erhalten sie die Hauptvorlage.",
+      "placeholder": "Hi {{ime}}, a reminder of your appointment on {{datum}} at {{cas}}. {{ime_podjetja}}",
+      "saveError": "Die Einstellungen wurden gespeichert, die englische Version aber nicht. Bitte versuchen Sie es erneut."
+    }
+  },
+  "preview": {
+    "label": "Das sieht der Kunde",
+    "stats": "{length} Zeichen · {parts, plural, one {# SMS} other {# SMS}}",
+    "gsmHint": "Ohne Sonderzeichen und Emojis passen bis zu 160 Zeichen in eine SMS.",
+    "unicodeWarning": "Die Nachricht enthält Zeichen außerhalb des Standard-SMS-Alphabets ({chars}). Nach SMS-Standard passen dann nur 70 Zeichen in eine SMS – die Nachricht wird auf mehrere SMS aufgeteilt und kostet mehr. Verwenden Sie einfache Buchstaben (Umlaute und ß sind erlaubt) und keine Emojis.",
+    "sample": {
+      "firstName": "Anna",
+      "lastName": "Müller",
+      "service": "Maniküre",
+      "staff": "Julia",
+      "company": "Salon Anna",
+      "address": "Hauptstraße 1"
+    },
+    "unknownVars": "Unbekannte Variable: {tokens}. Der Kunde sieht diesen Text unverändert. Ersetzen Sie ihn durch eine aus der Liste oben (z. B. Telefon des Unternehmens)."
+  }
+}

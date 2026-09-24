@@ -1,5 +1,6 @@
 'use client';
 
+import { locales, type Locale } from '@/i18n/config';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -68,7 +69,8 @@ export default function LoginPage() {
               .eq('ID Podjetja', company.company_id)
               .maybeSingle();
 
-            const preferred = (companyData?.preferred_language ?? 'sl') as 'sl' | 'en';
+            const stored = String(companyData?.preferred_language ?? 'sl');
+            const preferred = (locales as readonly string[]).includes(stored) ? (stored as Locale) : 'sl';
 
             setTimeout(() => {
               if (preferred !== locale) {

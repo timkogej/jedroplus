@@ -1,0 +1,174 @@
+{
+  "page": {
+    "title": "Kunden",
+    "subtitle": "Ihre vollständige Kundendatenbank",
+    "newClient": "Neuer Kunde",
+    "searchPlaceholder": "Kunden nach Name, E-Mail oder Telefon suchen...",
+    "showingCount": "{shown} von {total} Kunden",
+    "disabledCreateMessage": "Der Inhaber hat das Anlegen neuer Kunden deaktiviert. Wenden Sie sich an ihn, um es zu aktivieren."
+  },
+  "crm": {
+    "importCsv": "Aus CSV importieren",
+    "importExcel": "Aus Excel importieren",
+    "importOther": "Aus einem anderen CRM importieren",
+    "exportCsv": "Als CSV exportieren",
+    "exportExcel": "Als Excel exportieren",
+    "exportPdf": "Als PDF exportieren",
+    "importButton": "Kunden importieren",
+    "exportButton": "Kunden exportieren",
+    "comingSoon": "Demnächst verfügbar"
+  },
+  "stats": {
+    "total": "Kunden gesamt",
+    "withAppointments": "Mit Terminen",
+    "newThisMonth": "Neu diesen Monat"
+  },
+  "emptyState": {
+    "noClients": "Noch keine Kunden",
+    "noClientsSubtitle": "Legen Sie Ihren ersten Kunden an, um Termine und Kontakte zu verwalten.",
+    "addFirst": "Ersten Kunden anlegen",
+    "noResults": "Keine Ergebnisse für „{term}“",
+    "noResultsSubtitle": "Versuchen Sie eine andere Suche oder setzen Sie den Filter zurück",
+    "clearSearch": "Suche zurücksetzen"
+  },
+  "errors": {
+    "loadError": "Beim Laden der Daten ist ein Fehler aufgetreten",
+    "saveError": "Beim Speichern des Kunden ist ein Fehler aufgetreten",
+    "deleteError": "Beim Löschen des Kunden ist ein Fehler aufgetreten",
+    "retry": "Erneut versuchen"
+  },
+  "toast": {
+    "created": "Kunde angelegt",
+    "updated": "Kunde aktualisiert",
+    "deleted": "Kunde gelöscht"
+  },
+  "modal": {
+    "title": {
+      "create": "Neuer Kunde",
+      "edit": "Kunde bearbeiten"
+    },
+    "subtitle": {
+      "create": "Neuen Kunden anlegen",
+      "edit": "Angaben zum Kunden ändern"
+    },
+    "fields": {
+      "firstNameRequired": "Vorname *",
+      "lastNameRequired": "Nachname *",
+      "genderRequired": "Geschlecht *",
+      "clientType": "Kundentyp",
+      "emailHint": "(mindestens E-Mail oder Telefon)",
+      "phone": "Telefon",
+      "notes": "Notizen",
+      "notesPlaceholder": "Notizen zu diesem Kunden...",
+      "notesHint": "Notizen werden in Erinnerungen und Nachrichten verwendet",
+      "communicationLanguage": "Sprache für Nachrichten",
+      "internalNotes": "Interne Notizen",
+      "internalNotesPlaceholder": "Interne Notizen (werden nicht an den Kunden gesendet)..."
+    },
+    "gender": {
+      "placeholder": "Geschlecht wählen",
+      "male": "Männlich",
+      "female": "Weiblich",
+      "other": "Divers"
+    },
+    "clientType": {
+      "placeholder": "Kundentyp wählen",
+      "nova": "Neu",
+      "redna": "Stammkunde",
+      "vip": "VIP",
+      "none": "/",
+      "change": "Ändern"
+    },
+    "language": {
+      "change": "Ändern"
+    },
+    "addInternalNotes": "+ Interne Notizen",
+    "warning": {
+      "missingEmail": "E-Mail-Adresse fehlt",
+      "missingPhone": "Telefonnummer fehlt",
+      "missingEmailDesc": "Ohne E-Mail-Adresse können Sie diesem Kunden keine E-Mails, Rechnungen oder automatischen Benachrichtigungen senden. Das betrifft die automatische Kommunikation und E-Mail-Erinnerungen.",
+      "missingPhoneDesc": "Ohne Telefonnummer können Sie diesem Kunden keine Nachrichten oder automatischen Benachrichtigungen senden. Das betrifft die automatische Kommunikation und SMS-Erinnerungen."
+    },
+    "actions": {
+      "cancel": "Abbrechen",
+      "saveAnyway": "Trotzdem speichern",
+      "save": "Kunde speichern",
+      "saving": "Wird gespeichert..."
+    },
+    "validation": {
+      "firstNameRequired": "Bitte geben Sie einen Vornamen ein",
+      "firstNameMinLength": "Der Vorname muss mindestens 2 Zeichen lang sein",
+      "lastNameRequired": "Bitte geben Sie einen Nachnamen ein",
+      "lastNameMinLength": "Der Nachname muss mindestens 2 Zeichen lang sein",
+      "genderRequired": "Bitte wählen Sie ein Geschlecht",
+      "emailInvalid": "Ungültige E-Mail-Adresse",
+      "phoneInvalid": "Ungültige Telefonnummer",
+      "notesMaxLength": "Notizen dürfen höchstens 500 Zeichen lang sein",
+      "internalNotesMaxLength": "Interne Notizen dürfen höchstens 500 Zeichen lang sein",
+      "emailExists": "Diese E-Mail-Adresse wird bereits verwendet",
+      "contactRequired": "Mindestens E-Mail oder Telefonnummer ist erforderlich"
+    },
+    "smsCountryNotSupported": "An Nummern aus diesem Land senden wir noch keine SMS – Erinnerungen gehen per E-Mail."
+  },
+  "details": {
+    "added": "Angelegt:",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "contactInfo": "Kontaktdaten",
+    "gender": "Geschlecht",
+    "clientType": "Kundentyp",
+    "genderMale": "Männlich",
+    "genderFemale": "Weiblich",
+    "genderOther": "Divers",
+    "genderUnknown": "Keine Angabe",
+    "notes": "Notizen",
+    "internalNotes": "Interne Notizen",
+    "stats": "Statistik",
+    "statTotal": "Gesamt",
+    "statNoShow": "Nicht erschienen",
+    "statCancelled": "Storniert",
+    "appointmentHistory": "Terminverlauf",
+    "newAppointment": "Neuer Termin",
+    "noAppointments": "Keine Termine",
+    "addFirstAppointment": "Ersten Termin anlegen",
+    "showingLast": "Die letzten 10 von {total} Terminen",
+    "aptNotes": "Notizen",
+    "aptInternalNotes": "Interne Notizen",
+    "aptCompletionNotes": "Notizen nach Abschluss",
+    "finalPrice": "Endpreis"
+  },
+  "deleteModal": {
+    "title": "Kunde löschen",
+    "areYouSure": "Sind Sie sicher?",
+    "warningPrefix": "Das Löschen von",
+    "warningSuffix": "ist endgültig und kann nicht rückgängig gemacht werden.",
+    "appointmentWarningPrefix": "Dieser Kunde hat",
+    "appointmentCount": "{count, plural, =1 {1 Termin} other {{count} Termine}}",
+    "appointmentWarningSuffix": "Die Termine bleiben im System, aber ohne Verknüpfung zum Kunden.",
+    "cancel": "Abbrechen",
+    "deleting": "Wird gelöscht...",
+    "deleteButton": "Kunde löschen"
+  },
+  "table": {
+    "headers": {
+      "client": "Kunde",
+      "clientType": "Typ",
+      "phone": "Telefon",
+      "appointments": "Termine",
+      "lastInteraction": "Letzter Kontakt",
+      "actions": "Aktionen"
+    },
+    "empty": {
+      "title": "Keine Ergebnisse",
+      "message": "Keine Kunden gefunden, die Ihrer Suche entsprechen"
+    },
+    "actions": {
+      "view": "Details",
+      "edit": "Bearbeiten",
+      "delete": "Löschen"
+    },
+    "pagination": {
+      "of": "von"
+    }
+  }
+}
