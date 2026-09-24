@@ -768,7 +768,9 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const [seed] = useState<CalendarInitialData | null>(() => {
     if (!initialData) return null;
     if (initialData.companyId !== companyId) return null;
-    if (initialData.seededForDate !== new Date().toISOString().split('T')[0]) return null;
+    // The server seeds for the company's local date; the calendar shows the
+    // browser's local "today".
+    if (initialData.seededForDate !== getLocalDateKey(new Date())) return null;
     return initialData;
   });
 

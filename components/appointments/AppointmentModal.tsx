@@ -12,6 +12,7 @@ import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appoin
 import type { Client } from '@/lib/supabase/clients';
 import type { ClientFormData } from '@/types/clients';
 import { useCompany } from '@/app/company-context';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
 import { useAuth } from '@/app/auth-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { useModalScrollLock } from '@/hooks/useModalScrollLock';
@@ -151,6 +152,7 @@ function AppointmentModal({
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
+  const { currency: defaultCurrency } = useCompanyRegion();
   const { user } = useAuth();
   const { personId, role, permissions } = useRolePermissions();
   useModalScrollLock(isOpen);
@@ -179,7 +181,7 @@ function AppointmentModal({
     popust: undefined,
     popust_tip: '€',
     koncna_cena: undefined,
-    valuta: 'EUR',
+    valuta: defaultCurrency,
   });
 
   // Track how many service selectors to show (1-3)
@@ -354,7 +356,7 @@ function AppointmentModal({
         opombe: '',
         internal_opombe: '',
         popust_tip: '€',
-        valuta: 'EUR',
+        valuta: defaultCurrency,
       });
       setSelectedClient(null);
       setServiceCount(1);
@@ -379,7 +381,7 @@ function AppointmentModal({
     } else {
       setIsGhostTermin(false);
     }
-  }, [appointment, mode, employees, initialDate, initialStartTime, initialEmployeeId, personId, defaultLanguage]);
+  }, [appointment, mode, employees, initialDate, initialStartTime, initialEmployeeId, personId, defaultLanguage, defaultCurrency]);
 
   // Track if end time was manually set by user
   const [endTimeManuallySet, setEndTimeManuallySet] = useState(false);

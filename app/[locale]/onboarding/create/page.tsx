@@ -9,6 +9,8 @@ import { saveSeedPlan, type SeedService } from '@/lib/onboarding/firstRunSeed';
 import { markTrialOfferShownNow } from '@/components/FreeTrialModal';
 import { Input } from '@/components/ui/input';
 import { createCompany, type UrnikDay } from '@/lib/api/billingClient';
+import { findCountry, regionForCountry } from '@/lib/region';
+import { saveCompanyRegion } from '@/lib/hooks/useCompanyRegion';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 
@@ -397,6 +399,25 @@ export default function CreateCompanyPage() {
                 });
             }
           });
+
+          // Country → time zone + currency. n8n only stores the country name;
+          // the "Podatki podjetij" row can appear a moment later, so retry.
+          const chosenCountry = findCountry(country);
+          if (chosenCountry) {
+            const d = regionForCountry(chosenCountry.code);
+            void (async () => {
+              for (let attempt = 0; attempt < 4; attempt++) {
+                if (attempt > 0) await new Promise(r => setTimeout(r, attempt * 1500));
+                const error = await saveCompanyRegion({
+                  country_code: d.countryCode,
+                  timezone: d.timezone,
+                  currency: d.currency,
+                });
+                if (!error) return;
+              }
+              console.warn('[CreateCompany] Saving region failed; falling back to country name');
+            })();
+          }
 
           // The dashboard creates these through the normal n8n flows once the
           // company is loaded (see components/onboarding/FirstRunSetup).

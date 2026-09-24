@@ -2,6 +2,8 @@
 
 import { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
+import { formatPhone } from '@/lib/phone';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -149,6 +151,7 @@ function ClientDetailsPanel({
   onNewAppointment,
 }: ClientDetailsPanelProps) {
   const t = useTranslations('clients');
+  const region = useCompanyRegion();
   const tAppt = useTranslations('appointments');
   const [clientData, setClientData] = useState<ClientWithAppointments | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -337,7 +340,7 @@ function ClientDetailsPanel({
                       />
                       <div className="flex-1">
                         <div className="text-xs text-gray-500">Telefon</div>
-                        <div className="text-sm font-medium text-gray-900">{client.telefon || '-'}</div>
+                        <div className="text-sm font-medium text-gray-900">{formatPhone(client.telefon, region.countryCode) || '-'}</div>
                       </div>
                     </div>
                     {client.telefon && (

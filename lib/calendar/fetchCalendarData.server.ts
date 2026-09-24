@@ -21,6 +21,8 @@
 import "server-only";
 import { normalizeAppointmentStatus } from "@/lib/appointments/status";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
+import { fetchCompanyRegionServer } from "@/lib/region.server";
+import { todayInTimeZone, zonedNow } from "@/lib/timezone";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
 import { normalizeCommunicationLanguage } from "@/lib/communicationLanguage";
 import { TABLES } from "@/lib/data";
@@ -621,10 +623,13 @@ export async function fetchCalendarDataServer(companyId: string): Promise<Calend
   const { ownOnly, personId } = await resolveViewScope(supabase, user.id);
   const ownOnlyPersonId = ownOnly && personId ? personId : null;
 
-  const now = new Date();
+  // The company's wall clock, not the server's (UTC on Vercel) — toISOString()
+  // here used to give yesterday's date between midnight and 2:00.
+  const region = await fetchCompanyRegionServer(supabase, companyId);
+  const now = zonedNow(region.timezone);
   const year = now.getFullYear();
   const month = now.getMonth();
-  const todayStr = now.toISOString().split("T")[0];
+  const todayStr = todayInTimeZone(region.timezone);
   const monthStart = `${year}-${String(month + 1).padStart(2, "0")}-01`;
   const nextMonthDate = new Date(year, month + 1, 1);
   const nextMonthStart = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}-01`;

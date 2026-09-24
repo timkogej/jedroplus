@@ -22,6 +22,7 @@ import {
 import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
 import { useAuth } from '@/app/auth-context';
 import type { Service, ServiceFormData, ServiceStats } from '@/types/services';
 import {
@@ -254,17 +255,8 @@ export default function StoritvePage() {
     () => getPodatkiPodjetja(companySettings ?? undefined),
     [companySettings]
   );
-  const defaultCurrency = useMemo(() => {
-    const value =
-      companySettings?.default_currency ??
-      companySettings?.currency ??
-      companySettings?.valuta ??
-      companySettings?.Valuta;
-
-    return typeof value === 'string' && value.trim()
-      ? value.trim().toUpperCase()
-      : 'EUR';
-  }, [companySettings]);
+  // Company's currency ("Podatki podjetij".valuta, else its country's).
+  const { currency: defaultCurrency } = useCompanyRegion();
   const hasProPlan = useMemo(() => isJedroProPlan(planCode), [planCode]);
   const stripeEnabled = useMemo(
     () => parseSettingBool(companySettings?.stripe_enabled ?? companySettings?.Stripe_enabled, false),

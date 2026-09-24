@@ -2,6 +2,8 @@
 
 import { memo, useState, useMemo, useId } from 'react';
 import { useTranslations } from 'next-intl';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
+import { formatPhone } from '@/lib/phone';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Eye,
@@ -138,6 +140,7 @@ function ClientTable({
   canDeleteClient = true,
 }: ClientTableProps) {
   const t = useTranslations('clients');
+  const region = useCompanyRegion();
   const [sortField, setSortField] = useState<ClientSortField>('priimek');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -344,7 +347,7 @@ function ClientTable({
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
-                      <span>{client.telefon || '-'}</span>
+                      <span>{formatPhone(client.telefon, region.countryCode) || '-'}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">

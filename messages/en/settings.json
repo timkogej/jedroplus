@@ -47,16 +47,19 @@
     },
     "langRegion": {
       "title": "Language & Region",
-      "subtitle": "You can change the app language; the rest is set for Slovenia.",
+      "subtitle": "The app language applies to your login. Country, time zone and currency apply to the whole company.",
       "languageLabel": "App language",
       "languageNote": "Applies to your login on this device.",
       "languageValue": "Slovenian",
-      "regionLabel": "Region",
-      "regionNote": "Your geographical location",
+      "regionLabel": "Country",
+      "regionNote": "Where the business operates. Changing it also sets the time zone and currency.",
       "timezoneLabel": "Time zone",
-      "timezoneNote": "Your local time zone",
+      "timezoneNote": "Appointments are shown and reminders sent in this time zone.",
       "dateFormatLabel": "Date format",
-      "dateFormatNote": "How dates are displayed"
+      "dateFormatNote": "How dates are displayed",
+      "currencyLabel": "Currency",
+      "currencyNote": "Default currency for new services and prices.",
+      "saveError": "Couldn't save the region settings. Please try again."
     },
     "notifications": {
       "title": "Notifications",

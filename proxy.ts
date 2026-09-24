@@ -5,6 +5,10 @@ import { routing } from './i18n/routing';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
+// "/sl/…", "/en/…" — built from the configured locales so adding one is a
+// config change only.
+const LOCALE_PREFIX = new RegExp(`^/(${routing.locales.join('|')})(/|$)`);
+
 // Paths that don't require a company to be set up (without locale prefix)
 const PUBLIC_PATHS = [
   '/login',
@@ -58,8 +62,8 @@ export async function proxy(request: NextRequest) {
   }
 
   // 6. Determine locale and strip it for public-path matching
-  const localeMatch = pathname.match(/^\/(sl|en)(\/|$)/);
-  const locale = localeMatch?.[1] ?? 'sl';
+  const localeMatch = pathname.match(LOCALE_PREFIX);
+  const locale = localeMatch?.[1] ?? routing.defaultLocale;
   const pathnameWithoutLocale = localeMatch
     ? pathname.slice(locale.length + 1) || '/'
     : pathname;
