@@ -126,6 +126,25 @@
         "introTitle": "Preizkusite opomnike brezplačno",
         "introBody": "Na voljo imate {sms} SMS in {email} e-poštnih opomnikov. To ni mesečna kvota, ampak enkraten preizkus. Ko jih porabite, nastavitve ostanejo, za nadaljnje pošiljanje pa potrebujete Jedro Plus."
       }
+    },
+    "smsLog": {
+      "title": "Zadnji SMS-i",
+      "countries": "SMS pošiljamo na številke iz teh držav: {countries}. Stranke z drugimi številkami prejmejo e-pošto.",
+      "empty": "Tukaj se bodo pokazali poslani SMS-i in ali so prispeli.",
+      "status": {
+        "sent": "Poslan",
+        "delivered": "Dostavljen",
+        "failed": "Ni dostavljen",
+        "blocked_country": "Država ni podprta"
+      },
+      "kind": {
+        "reminder_before": "Opomnik pred terminom",
+        "reminder_after": "Sporočilo po terminu",
+        "reschedule": "Prestavitev termina",
+        "confirmation": "Potrditev termina",
+        "marketing": "Novice in ponudbe",
+        "other": "SMS"
+      }
     }
   },
   "status": {

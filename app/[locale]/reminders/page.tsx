@@ -20,6 +20,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
 import { SendingStatus } from '@/components/reminders/SendingStatus';
+import { SmsLog } from '@/components/reminders/SmsLog';
 import { MessagePreview } from '@/components/reminders/MessagePreview';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
@@ -739,6 +740,12 @@ export default function RemindersPage() {
                     </div>
                   </SectionPanel>
                 </motion.div>
+
+                {canManageSettings && (
+                  <div className="mt-6">
+                    <SmsLog />
+                  </div>
+                )}
               </motion.div>
 
               <motion.aside

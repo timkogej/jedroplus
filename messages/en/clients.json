@@ -107,7 +107,8 @@
       "internalNotesMaxLength": "Internal notes can contain a maximum of 500 characters",
       "emailExists": "This email address is already in use",
       "contactRequired": "At least an email or phone number is required"
-    }
+    },
+    "smsCountryNotSupported": "We don't send SMS to numbers from this country yet – reminders will go by email."
   },
   "details": {
     "added": "Added:",

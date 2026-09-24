@@ -25,6 +25,7 @@ import {
 import CommunicationLanguageControl from '@/components/shared/CommunicationLanguageControl';
 import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
 import { languageFromPhone, normalizePhone, phonePlaceholder } from '@/lib/phone';
+import { smsAllowedFor } from '@/lib/sms';
 
 type ModalMode = 'create' | 'edit';
 
@@ -544,6 +545,9 @@ function ClientModal({
                       <Warning className="h-3 w-3" weight="fill" />
                       {errors.telefon}
                     </p>
+                  )}
+                  {!errors.telefon && !smsAllowedFor(formData.telefon, region.countryCode) && (
+                    <p className="mt-1 text-xs text-amber-600">{t('modal.smsCountryNotSupported')}</p>
                   )}
                 </div>
 

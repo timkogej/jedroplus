@@ -126,6 +126,25 @@
         "introTitle": "Try reminders for free",
         "introBody": "You have {sms} SMS and {email} email reminders. This is a one-time trial, not a monthly quota. When they're used up your settings stay, and sending continues with Jedro Plus."
       }
+    },
+    "smsLog": {
+      "title": "Latest SMS",
+      "countries": "SMS go to numbers from these countries: {countries}. Clients with other numbers get email.",
+      "empty": "Sent SMS and whether they arrived will show up here.",
+      "status": {
+        "sent": "Sent",
+        "delivered": "Delivered",
+        "failed": "Not delivered",
+        "blocked_country": "Country not supported"
+      },
+      "kind": {
+        "reminder_before": "Reminder before appointment",
+        "reminder_after": "Message after appointment",
+        "reschedule": "Appointment moved",
+        "confirmation": "Appointment confirmation",
+        "marketing": "News and offers",
+        "other": "SMS"
+      }
     }
   },
   "status": {

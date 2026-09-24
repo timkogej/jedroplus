@@ -107,7 +107,8 @@
       "internalNotesMaxLength": "Interne opombe lahko vsebujejo največ 500 znakov",
       "emailExists": "Ta email naslov je že v uporabi",
       "contactRequired": "Vnesti je treba vsaj email ali telefonsko številko"
-    }
+    },
+    "smsCountryNotSupported": "SMS na številke iz te države še ne pošiljamo – opomniki bodo šli po e-pošti."
   },
   "details": {
     "added": "Dodano:",
