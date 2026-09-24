@@ -5,44 +5,8 @@
 // service-role client, same as the logo route.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { requireOwnerOrAdmin } from '@/lib/auth/ownerAccess';
 import { findCountry, isValidCurrency, isValidTimeZone } from '@/lib/region';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-function adminClient() {
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-}
-
-/** Owner/admin of a company, or a ready-to-return error response. */
-async function requireOwnerOrAdmin(request: NextRequest) {
-  const auth = await authenticateRequest(request);
-  if ('response' in auth) return auth;
-
-  const { uuid: companyUuid, textId } = await resolveUserCompany(auth.user.id);
-  if (!companyUuid || !textId) {
-    return { response: NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 }) };
-  }
-
-  const admin = adminClient();
-  const { data: member } = await admin
-    .from('company_members')
-    .select('role')
-    .eq('user_id', auth.user.id)
-    .eq('company_id', companyUuid)
-    .maybeSingle();
-
-  const role = (member?.role as string | undefined) ?? null;
-  if (role !== 'owner' && role !== 'admin') {
-    return { response: NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 }) };
-  }
-
-  return { textId, admin };
-}
 
 type RegionBody = {
   country_code?: unknown;

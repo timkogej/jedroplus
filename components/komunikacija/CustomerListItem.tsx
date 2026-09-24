@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 
 interface Customer {
   id: string;
@@ -11,6 +12,7 @@ interface Customer {
   lastVisit: string;
   tags: string[];
   appointmentDates?: string[];
+  optedOut?: boolean;
 }
 
 interface CustomerListItemProps {
@@ -26,6 +28,7 @@ export default function CustomerListItem({
   onToggle,
   index,
 }: CustomerListItemProps) {
+  const t = useTranslations('communication');
   const initials = customer.name
     .split(/\s+/)
     .filter(Boolean)
@@ -40,10 +43,14 @@ export default function CustomerListItem({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03, duration: 0.2 }}
       onClick={() => onToggle(customer.id)}
-      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
-        selected
+      aria-disabled={customer.optedOut || undefined}
+      title={customer.optedOut ? t('customerList.optedOutHint') : undefined}
+      className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-200 ${
+        customer.optedOut
+          ? 'bg-gray-50 border-gray-100 opacity-60 cursor-not-allowed'
+          : selected
           ? 'bg-violet-50/50 border-violet-200 shadow-sm'
-          : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200'
+          : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200 cursor-pointer'
       }`}
     >
       {/* Checkbox */}
@@ -94,6 +101,12 @@ export default function CustomerListItem({
         <p className="text-sm font-medium text-[#1A1F36] truncate">{customer.name}</p>
         <p className="text-xs text-gray-400 truncate">{customer.email}</p>
       </div>
+
+      {customer.optedOut && (
+        <span className="flex-shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500">
+          {t('customerList.optedOut')}
+        </span>
+      )}
     </motion.div>
   );
 }

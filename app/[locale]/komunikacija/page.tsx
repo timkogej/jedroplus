@@ -14,6 +14,7 @@ import {
 import ProtectedLayout from '@/components/ProtectedLayout';
 import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import CustomerList from '@/components/komunikacija/CustomerList';
+import { canReceiveMarketing } from '@/lib/marketingConsent';
 import AIMessageGenerator from '@/components/komunikacija/AIMessageGenerator';
 import MessageComposer from '@/components/komunikacija/MessageComposer';
 import MessagePreview from '@/components/komunikacija/MessagePreview';
@@ -41,6 +42,8 @@ interface KomunikacijaCustomer {
   tags: string[];
   /** Date-only strings (YYYY-MM-DD) of all appointments — used for Danes/Jutri/etc. filters */
   appointmentDates: string[];
+  /** Declined or unsubscribed from marketing — shown, but can't be selected. */
+  optedOut: boolean;
 }
 
 interface SendTotals {
@@ -134,12 +137,16 @@ function Toast({
 function SendResultPanel({
   result,
   onReset,
+  customers,
 }: {
   result: SendResult;
   onReset: () => void;
+  customers: KomunikacijaCustomer[];
 }) {
   const t = useTranslations('communication');
   const skippedItems = result.skipped ?? [];
+  const nameFor = (clientId: unknown) =>
+    customers.find((c) => c.numericId !== null && c.numericId === Number(clientId))?.name ?? String(clientId ?? '');
 
   return (
     <motion.div
@@ -178,7 +185,9 @@ function SendResultPanel({
             {skippedItems.map((item, i) => (
               <li key={i} className="text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-100">
                 {typeof item === 'object' && item !== null
-                  ? (item as Record<string, unknown>).reason
+                  ? (item as Record<string, unknown>).reason === 'unsubscribed'
+                    ? t('result.skippedUnsubscribed', { name: nameFor((item as Record<string, unknown>).client_id) })
+                    : (item as Record<string, unknown>).reason
                     ? String((item as Record<string, unknown>).reason)
                     : JSON.stringify(item)
                   : String(item)}
@@ -377,6 +386,7 @@ export default function KomunikacijaPage() {
               lastVisit: '',
               tags: [],
               appointmentDates,
+              optedOut: !canReceiveMarketing(row),
             });
           }
         }
@@ -467,10 +477,11 @@ export default function KomunikacijaPage() {
       const result = await response.json();
 
       if (result.ok !== false) {
+        const skippedCount = Array.isArray(result.skipped) ? result.skipped.length : 0;
         const totals: SendTotals = result.totals ?? {
           requested: clientIds.length,
-          sent: clientIds.length,
-          skipped: 0,
+          sent: clientIds.length - skippedCount,
+          skipped: skippedCount,
         };
         setSendResult({
           totals,
@@ -640,6 +651,7 @@ export default function KomunikacijaPage() {
                       key="result"
                       result={sendResult}
                       onReset={handleReset}
+                      customers={customers}
                     />
                   ) : (
                     <motion.div key="send" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>

@@ -266,6 +266,14 @@
       "remaining": "Na voljo še {remaining} od {total} SMS v tem obdobju.",
       "nearLimit": "Porabljenih {used} od {total} SMS. Ko jih zmanjka, se SMS sporočila ne pošiljajo.",
       "exhausted": "Porabili ste vse SMS-e v tem obdobju ({used}/{total}). SMS sporočila se ne pošiljajo, dokler ne dokupite paketa ali se obdobje ne obnovi."
+    },
+    "englishVariant": {
+      "add": "Dodaj angleško različico (za stranke iz tujine)",
+      "title": "Angleška različica",
+      "remove": "Odstrani",
+      "hint": "Stranke, ki ne govorijo jezika vašega podjetja, bodo prejele to različico. Če je prazna, prejmejo glavno predlogo.",
+      "placeholder": "Hi {{ime}}, a reminder of your appointment on {{datum}} at {{cas}}. {{ime_podjetja}}",
+      "saveError": "Nastavitve so shranjene, angleške različice pa ne. Poskusite znova."
     }
   },
   "preview": {

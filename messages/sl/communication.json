@@ -17,7 +17,8 @@
     "sent": "Poslano",
     "skipped": "Preskočeno",
     "skippedLabel": "Preskočeni:",
-    "newMessage": "Pošlji novo sporočilo"
+    "newMessage": "Pošlji novo sporočilo",
+    "skippedUnsubscribed": "{name} – odjavljen od novic in ponudb"
   },
   "customerList": {
     "searchPlaceholder": "Išči stranko po imenu, emailu ali telefonu...",
@@ -28,7 +29,9 @@
     "empty": "Ni strank za prikaz",
     "emptyHint": "Spremenite filtre ali iskanje",
     "showAll": "Pokaži vse stranke",
-    "emptyNoClients": "Stranke dodate v meniju Stranke ali pa se dodajo same ob prvem terminu."
+    "emptyNoClients": "Stranke dodate v meniju Stranke ali pa se dodajo same ob prvem terminu.",
+    "optedOut": "Odjavljen",
+    "optedOutHint": "Stranka se je odjavila od novic in ponudb. Opomnike za termine še vedno prejema."
   },
   "filters": {
     "sectionLabel": "Termini",

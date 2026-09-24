@@ -266,6 +266,14 @@
       "remaining": "{remaining} of {total} SMS left this period.",
       "nearLimit": "{used} of {total} SMS used. When they run out, SMS messages are not sent.",
       "exhausted": "You've used all SMS for this period ({used}/{total}). SMS messages are not sent until you buy a package or the period renews."
+    },
+    "englishVariant": {
+      "add": "Add an English version (for clients from abroad)",
+      "title": "English version",
+      "remove": "Remove",
+      "hint": "Clients who don't speak your company's language get this version. If it's empty, they get the main template.",
+      "placeholder": "Hi {{ime}}, a reminder of your appointment on {{datum}} at {{cas}}. {{ime_podjetja}}",
+      "saveError": "Settings were saved, but the English version wasn't. Please try again."
     }
   },
   "preview": {

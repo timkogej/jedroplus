@@ -37,6 +37,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // 2b. Marketing unsubscribe link — public, in the client's language
+  if (/^\/unsubscribe\/[^/]+/.test(pathname)) {
+    return NextResponse.next();
+  }
+
   // 3. Internal dev pages — English UI, not locale-routed
   // TODO(i18n-review): confirm if these dev pages should be removed or included in i18n
   const devPaths = ['/app', '/calendar', '/bookings', '/settings'];

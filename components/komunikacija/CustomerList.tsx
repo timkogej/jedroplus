@@ -6,6 +6,7 @@ import { MagnifyingGlass, X, CheckSquare, MinusSquare } from '@phosphor-icons/re
 import { useTranslations } from 'next-intl';
 import CustomerFilters from './CustomerFilters';
 import CustomerListItem from './CustomerListItem';
+import { getLocalDateKey } from '@/lib/utils/calendar';
 
 interface Customer {
   id: string;
@@ -17,6 +18,8 @@ interface Customer {
   tags: string[];
   /** ISO date-only strings (YYYY-MM-DD) of all appointments for date-based filtering */
   appointmentDates?: string[];
+  /** Unsubscribed from marketing: listed, never selectable. */
+  optedOut?: boolean;
 }
 
 interface CustomerListProps {
@@ -55,23 +58,23 @@ export default function CustomerList({
 
     // Quick filters — use appointmentDates (date-only strings) when available
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
+    const todayStr = getLocalDateKey(now);
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    const tomorrowStr = getLocalDateKey(tomorrow);
 
     // Start of this week (Monday) and end (Sunday)
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    const weekStartStr = weekStart.toISOString().split('T')[0];
+    const weekStartStr = getLocalDateKey(weekStart);
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
-    const weekEndStr = weekEnd.toISOString().split('T')[0];
+    const weekEndStr = getLocalDateKey(weekEnd);
 
     // Start and end of this month
     const monthStartStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const monthEndStr = monthEnd.toISOString().split('T')[0];
+    const monthEndStr = getLocalDateKey(monthEnd);
 
     switch (activeFilter) {
       case 'today':
@@ -116,6 +119,7 @@ export default function CustomerList({
 
   const toggleCustomer = useCallback(
     (id: string) => {
+      if (customers.find((c) => c.id === id)?.optedOut) return;
       const next = new Set(selectedIds);
       if (next.has(id)) {
         next.delete(id);
@@ -124,11 +128,11 @@ export default function CustomerList({
       }
       onSelectionChange(next);
     },
-    [selectedIds, onSelectionChange]
+    [selectedIds, onSelectionChange, customers]
   );
 
   const selectAll = useCallback(() => {
-    const allIds = new Set(filteredCustomers.map((c) => c.id));
+    const allIds = new Set(filteredCustomers.filter((c) => !c.optedOut).map((c) => c.id));
     onSelectionChange(allIds);
   }, [filteredCustomers, onSelectionChange]);
 
@@ -136,8 +140,9 @@ export default function CustomerList({
     onSelectionChange(new Set());
   }, [onSelectionChange]);
 
-  const selectedInFiltered = filteredCustomers.filter((c) => selectedIds.has(c.id)).length;
-  const allSelected = filteredCustomers.length > 0 && selectedInFiltered === filteredCustomers.length;
+  const selectable = filteredCustomers.filter((c) => !c.optedOut);
+  const selectedInFiltered = selectable.filter((c) => selectedIds.has(c.id)).length;
+  const allSelected = selectable.length > 0 && selectedInFiltered === selectable.length;
 
   return (
     <div className="space-y-4">

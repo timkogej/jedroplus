@@ -17,7 +17,8 @@
     "sent": "Sent",
     "skipped": "Skipped",
     "skippedLabel": "Skipped:",
-    "newMessage": "Send new message"
+    "newMessage": "Send new message",
+    "skippedUnsubscribed": "{name} – unsubscribed from news and offers"
   },
   "customerList": {
     "searchPlaceholder": "Search by name, email or phone...",
@@ -28,7 +29,9 @@
     "empty": "No clients to display",
     "emptyHint": "Change filters or search",
     "showAll": "Show all clients",
-    "emptyNoClients": "Add clients under Clients, or they are added automatically with their first appointment."
+    "emptyNoClients": "Add clients under Clients, or they are added automatically with their first appointment.",
+    "optedOut": "Unsubscribed",
+    "optedOutHint": "This client unsubscribed from news and offers. They still get appointment reminders."
   },
   "filters": {
     "sectionLabel": "Appointments",

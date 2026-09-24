@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, FloppyDisk, Lock, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
@@ -23,6 +23,8 @@ import { callN8nAction } from '@/src/lib/n8nClient';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { EnglishVariant } from './EnglishVariant';
 
 const SENDING_LANGUAGES = [
   { value: 'sl', label: 'Slovenščina' },
@@ -30,6 +32,20 @@ const SENDING_LANGUAGES = [
   { value: 'it', label: 'Italiano' },
   { value: 'de', label: 'Deutsch' },
 ];
+
+type EnglishTemplates = {
+  lastna_predloga_pred_en: string;
+  lastna_predloga_po_en: string;
+  obvestilo_prestavitev_template_sms_en: string;
+  obvestilo_prestavitev_template_email_en: string;
+};
+
+const EMPTY_ENGLISH: EnglishTemplates = {
+  lastna_predloga_pred_en: '',
+  lastna_predloga_po_en: '',
+  obvestilo_prestavitev_template_sms_en: '',
+  obvestilo_prestavitev_template_email_en: '',
+};
 
 interface ReminderSettingsModalProps {
   isOpen: boolean;
@@ -152,6 +168,13 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   const [smsIncludeNotesPo, setSmsIncludeNotesPo] = useState(false);
   const [smsTipPo, setSmsTipPo] = useState(false);
   const [smsTemplatePo, setSmsTemplatePo] = useState('');
+
+  // English variants of the custom templates, for clients who don't read the
+  // company's language. Saved separately (/api/company/message-templates).
+  const [englishTemplates, setEnglishTemplates] = useState<EnglishTemplates>(EMPTY_ENGLISH);
+  const loadedEnglishRef = useRef<EnglishTemplates>(EMPTY_ENGLISH);
+  const setEnglish = (key: keyof EnglishTemplates) => (value: string) =>
+    setEnglishTemplates((prev) => ({ ...prev, [key]: value }));
 
   // SMS sender ID (read-only from Supabase)
   const [smsSenderId, setSmsSenderId] = useState('');
@@ -312,6 +335,15 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
           setObvestiloPrestavitevChannel(rescheduleChannel === 'sms' ? 'sms' : 'email');
           setObvestiloPrestavitevTemplateSms(String(data['obvestilo_prestavitev_template_sms'] ?? ''));
           setObvestiloPrestavitevTemplateEmail(String(data['obvestilo_prestavitev_template_email'] ?? ''));
+
+          const english: EnglishTemplates = {
+            lastna_predloga_pred_en: sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_pred_en'] ?? ''))),
+            lastna_predloga_po_en: sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_po_en'] ?? ''))),
+            obvestilo_prestavitev_template_sms_en: String(data['obvestilo_prestavitev_template_sms_en'] ?? ''),
+            obvestilo_prestavitev_template_email_en: String(data['obvestilo_prestavitev_template_email_en'] ?? ''),
+          };
+          setEnglishTemplates(english);
+          loadedEnglishRef.current = english;
         }
       } catch (error) {
         console.error('Error loading reminder settings:', error);
@@ -428,6 +460,22 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
       if (!result.ok) {
         throw new Error(t('modal.saveError'));
+      }
+
+      const englishChanged = (Object.keys(englishTemplates) as (keyof EnglishTemplates)[]).some(
+        (key) => englishTemplates[key].trim() !== loadedEnglishRef.current[key].trim()
+      );
+      if (englishChanged) {
+        const res = await fetch('/api/company/message-templates', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(englishTemplates),
+        }).catch(() => null);
+        if (!res?.ok) {
+          toast.error(t('modal.englishVariant.saveError'));
+          return;
+        }
+        loadedEnglishRef.current = englishTemplates;
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -881,6 +929,15 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   varLengths={smsVarLengths}
                                 />
                                 <MessagePreview template={smsTemplatePred} companyName={previewCompanyName} />
+                                {sendingLanguage !== 'en' && (
+                                  <EnglishVariant
+                                    value={englishTemplates.lastna_predloga_pred_en}
+                                    onChange={setEnglish('lastna_predloga_pred_en')}
+                                    maxLength={155}
+                                    varLengths={smsVarLengths}
+                                    companyName={previewCompanyName}
+                                  />
+                                )}
                               </div>
                             )}
                           </div>
@@ -1038,6 +1095,15 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   varLengths={smsVarLengths}
                                 />
                                 <MessagePreview template={smsTemplatePo} companyName={previewCompanyName} />
+                                {sendingLanguage !== 'en' && (
+                                  <EnglishVariant
+                                    value={englishTemplates.lastna_predloga_po_en}
+                                    onChange={setEnglish('lastna_predloga_po_en')}
+                                    maxLength={155}
+                                    varLengths={smsVarLengths}
+                                    companyName={previewCompanyName}
+                                  />
+                                )}
                               </div>
                             )}
                           </div>
@@ -1173,6 +1239,16 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                               Uporabite lahko enake spremenljivke kot pri opomnikih pred in po terminu.
                             </p>
                             <MessagePreview template={obvestiloPrestavitevTemplateSms} companyName={previewCompanyName} />
+                            {sendingLanguage !== 'en' && (
+                              <EnglishVariant
+                                value={englishTemplates.obvestilo_prestavitev_template_sms_en}
+                                onChange={setEnglish('obvestilo_prestavitev_template_sms_en')}
+                                maxLength={155}
+                                varLengths={smsVarLengths}
+                                companyName={previewCompanyName}
+                                placeholder="Hi {{ime}}, your appointment has been moved to {{datum}} at {{cas}}. {{ime_podjetja}}"
+                              />
+                            )}
                           </div>
                         )}
 
@@ -1190,6 +1266,16 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                               Email predloga nima omejitve znakov in podpira šumnike.
                             </p>
                             <MessagePreview template={obvestiloPrestavitevTemplateEmail} companyName={previewCompanyName} sms={false} />
+                            {sendingLanguage !== 'en' && (
+                              <EnglishVariant
+                                value={englishTemplates.obvestilo_prestavitev_template_email_en}
+                                onChange={setEnglish('obvestilo_prestavitev_template_email_en')}
+                                maxLength={0}
+                                sms={false}
+                                companyName={previewCompanyName}
+                                placeholder="Dear {{ime}}, your appointment has been moved to {{datum}} at {{cas}}. Kind regards, {{ime_podjetja}}"
+                              />
+                            )}
                           </div>
                         )}
                       </>
