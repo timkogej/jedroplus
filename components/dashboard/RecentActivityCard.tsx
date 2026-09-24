@@ -18,6 +18,15 @@ interface RecentActivityCardProps {
 
 export function RecentActivityCard({ activities }: RecentActivityCardProps) {
   const t = useTranslations('dashboard');
+  const formatTimeAgo = (value: RecentActivity["timestamp"]) => {
+    const diffMs = Date.now() - new Date(value).getTime();
+    const minutes = Math.floor(diffMs / 60000);
+    if (minutes < 1) return t('recentActivity.timeAgo.justNow');
+    if (minutes < 60) return t('recentActivity.timeAgo.minutes', { count: minutes });
+    const hours = Math.floor(diffMs / 3600000);
+    if (hours < 24) return t('recentActivity.timeAgo.hours', { count: hours });
+    return t('recentActivity.timeAgo.days', { count: Math.floor(diffMs / 86400000) });
+  };
   const getActivityIcon = (type: RecentActivity["type"]) => {
     switch (type) {
       case "completed":
@@ -117,8 +126,8 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
                   </div>
 
                   {/* Time ago */}
-                  <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0">
-                    {activity.timeAgo}
+                  <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0" suppressHydrationWarning>
+                    {formatTimeAgo(activity.timestamp)}
                   </span>
                 </motion.div>
               );
@@ -148,8 +157,8 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
                 </div>
 
                 {/* Time ago */}
-                <span className="text-xs text-gray-400 whitespace-nowrap">
-                  {activity.timeAgo}
+                <span className="text-xs text-gray-400 whitespace-nowrap" suppressHydrationWarning>
+                  {formatTimeAgo(activity.timestamp)}
                 </span>
               </motion.div>
             );

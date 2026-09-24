@@ -5,6 +5,7 @@ import QRCode from 'react-qr-code';
 import { toPng } from 'html-to-image';
 import { DownloadSimple, Copy, Check, Info } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 
 interface QRCodeCardProps {
   slug: string;
@@ -14,6 +15,7 @@ interface QRCodeCardProps {
 }
 
 export function QRCodeCard({ slug, size = 280, showInfo = false, compact = false }: QRCodeCardProps) {
+  const t = useTranslations('settings.qrCard');
   const qrRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const url = `https://client.jedroplus.com/${slug}`;
@@ -71,7 +73,7 @@ export function QRCodeCard({ slug, size = 280, showInfo = false, compact = false
           className={`${btnBase} bg-gray-900 text-white hover:bg-gray-700`}
         >
           <DownloadSimple className={iconSize} weight="bold" />
-          Prenesi PNG
+          {t('download')}
         </motion.button>
 
         <motion.button
@@ -85,17 +87,14 @@ export function QRCodeCard({ slug, size = 280, showInfo = false, compact = false
           ) : (
             <Copy className={iconSize} weight="regular" />
           )}
-          {copied ? 'Kopirano ✓' : 'Kopiraj povezavo'}
+          {copied ? t('copied') : t('copy')}
         </motion.button>
       </div>
 
       {showInfo && (
         <div className="mt-2 flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 max-w-sm text-sm text-blue-700">
           <Info className="w-5 h-5 flex-shrink-0 mt-0.5" weight="fill" />
-          <p>
-            To QR kodo lahko natisnete in jo postavite v vaš salon ali ordinacijo.
-            Stranke jo skenirajo s telefonom in v manj kot minuti vnesejo svoje podatke.
-          </p>
+          <p>{t('info')}</p>
         </div>
       )}
     </div>

@@ -398,6 +398,7 @@ function buildWeeklyChart(bookings: Row[], personId: string | null, today: Date)
     const dateStr = format(date, "yyyy-MM-dd");
     weekData.push({
       day: dayNames[date.getDay()],
+      weekday: date.getDay(),
       date: format(date, "dd.MM"),
       termini: countsByDate[dateStr] || 0,
     });

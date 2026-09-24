@@ -137,6 +137,14 @@
       "clientRequired": "Client is required",
       "serviceRequired": "Service is required",
       "employeeRequired": "Employee is required"
+    },
+    "resourceConflict": {
+      "busyTitle": "Resource busy",
+      "unavailableTitle": "Resource unavailable",
+      "checkTitle": "Check resource availability",
+      "unavailableAt": "{name}: not available at this time",
+      "capacity": "{name}: {used}/{max} places taken",
+      "saveAnyway": "You can still save the appointment."
     }
   },
   "table": {
@@ -268,7 +276,8 @@
         "timeTo": "To time",
         "timePlaceholder": "Select time",
         "reason": "Reason (optional)",
-        "reasonPlaceholder": "Reason for absence..."
+        "reasonPlaceholder": "Reason for absence...",
+        "reasonExample": "e.g. Sick leave, holiday..."
       },
       "validation": {
         "employeeRequired": "Select an employee",
@@ -405,5 +414,71 @@
     "showingBody": "For each one choose Complete, No show or Cancel. The list shrinks as you go.",
     "show": "Show them",
     "showAll": "Show all appointments"
+  },
+  "export": {
+    "title": "Export appointments",
+    "subtitle": "Choose the period and export options",
+    "quickPick": "Quick pick",
+    "presets": {
+      "this_week": "This week",
+      "this_month": "This month",
+      "last_month": "Last month",
+      "last_30": "Last 30 days",
+      "this_year": "This year",
+      "all": "All"
+    },
+    "period": "Period",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "rangeInvalid": "The start date can't be after the end date.",
+    "filters": "Filters",
+    "onlyCompleted": "Only completed appointments",
+    "excludeGhost": "Leave out unrecorded appointments",
+    "found": "Appointments to export",
+    "cancel": "Cancel",
+    "exporting": "Exporting...",
+    "submit": "Export to Excel",
+    "sheetName": "Appointments",
+    "fileName": "appointments",
+    "columns": {
+      "date": "Date",
+      "day": "Day",
+      "start": "Start",
+      "end": "End",
+      "client": "Client",
+      "email": "Email",
+      "phone": "Phone",
+      "service": "Service",
+      "staff": "Staff",
+      "status": "Status",
+      "price": "Price",
+      "discount": "Discount",
+      "finalPrice": "Final price",
+      "currency": "Currency",
+      "notes": "Notes",
+      "id": "Appointment ID"
+    }
+  },
+  "clientSearch": {
+    "addNew": "Add new client",
+    "searching": "Searching...",
+    "noContact": "No details",
+    "placeholder": "Search by name, email or phone..."
+  },
+  "actionErrors": {
+    "noClientLink": "This appointment is not linked to a client.",
+    "clientLoadFailed": "Client details could not be loaded.",
+    "clientNotFound": "The client for this appointment was not found in this business."
+  },
+  "rescheduleNotify": {
+    "title": "Notify the client?",
+    "description": "The appointment was moved. Would you like to notify the client?",
+    "channel": {
+      "sms": "The notification will be sent by SMS",
+      "email": "The notification will be sent by email",
+      "both": "The notification will be sent by SMS and email"
+    },
+    "skip": "Skip",
+    "send": "Send notification"
   }
 }

@@ -130,7 +130,13 @@
     "subtitle": "Zuletzt abgeschlossene Termine",
     "empty": "Keine Aktivitäten",
     "unknownClient": "Unbekannter Kunde",
-    "serviceLabel": "Leistung"
+    "serviceLabel": "Leistung",
+    "timeAgo": {
+      "justNow": "Gerade eben",
+      "minutes": "Vor {count} Min.",
+      "hours": "Vor {count} Std.",
+      "days": "Vor {count} T."
+    }
   },
   "weeklyChart": {
     "title": "Termine – 7 Tage",

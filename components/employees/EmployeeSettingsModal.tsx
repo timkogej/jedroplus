@@ -594,8 +594,8 @@ function EmployeeSettingsModal({
                       <div className={sectionClass}>
                         <div className="flex items-center justify-between gap-4">
                         <div>
-                          <div className="font-semibold text-[#1A1F36]">Izmenični urnik</div>
-                          <div className="text-sm text-gray-500">Urnik se menjava po tednih v ciklu</div>
+                          <div className="font-semibold text-[#1A1F36]">{t('settings.rotatingTitle')}</div>
+                          <div className="text-sm text-gray-500">{t('settings.rotatingDesc')}</div>
                         </div>
                         <button
                           type="button"
@@ -636,7 +636,7 @@ function EmployeeSettingsModal({
                           <div className={`${sectionClass} space-y-4`}>
                             <div>
                               <label className={labelClass}>
-                                Število tednov v ciklu
+                                {t('settings.cycleWeeks')}
                               </label>
                               <div className="flex gap-2">
                                 {([2, 3, 4] as const).map((n) => (
@@ -657,9 +657,9 @@ function EmployeeSettingsModal({
                             </div>
                             <div>
                               <label className={labelClass}>
-                                Datum začetka cikla
+                                {t('settings.cycleStart')}
                               </label>
-                              <p className="text-xs text-gray-500 mb-2">Izberi ponedeljek kot začetek cikla</p>
+                              <p className="text-xs text-gray-500 mb-2">{t('settings.cycleStartHint')}</p>
                               <input
                                 type="date"
                                 value={zacetekCikla}
@@ -694,7 +694,7 @@ function EmployeeSettingsModal({
                                       onClick={() => copyFromTedanA(weekKey)}
                                       className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
                                     >
-                                      Kopiraj iz Tedna A
+                                      {t('settings.copyFromWeekA')}
                                     </button>
                                   )}
                                 </div>

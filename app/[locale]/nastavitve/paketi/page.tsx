@@ -314,6 +314,7 @@ function EnterpriseModal({
   t: ReturnType<typeof useTranslations<'billing'>>;
 }) {
   const { companyId } = useCompany();
+  const tCommon = useTranslations('common');
   const [form, setForm] = useState<InquiryForm>({
     name: '',
     email: defaultEmail,
@@ -400,7 +401,7 @@ function EnterpriseModal({
               type="email"
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              placeholder="jana@podjetje.si"
+              placeholder={tCommon('placeholders.contactEmail')}
               required
             />
           </div>
@@ -412,7 +413,7 @@ function EnterpriseModal({
               type="tel"
               value={form.phone}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-              placeholder="+386 40 123 456"
+              placeholder={tCommon('placeholders.mobile')}
             />
           </div>
           <div>

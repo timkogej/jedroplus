@@ -91,7 +91,13 @@
     "clearAll": "Počisti",
     "noServices": "Ni storitev za izbiranje",
     "saving": "Shranjujem...",
-    "save": "Shrani nastavitve"
+    "save": "Shrani nastavitve",
+    "rotatingTitle": "Izmenični urnik",
+    "rotatingDesc": "Urnik se menjava po tednih v ciklu",
+    "cycleStart": "Datum začetka cikla",
+    "cycleStartHint": "Izberi ponedeljek kot začetek cikla",
+    "cycleWeeks": "Število tednov v ciklu",
+    "copyFromWeekA": "Kopiraj iz Tedna A"
   },
   "connect": {
     "title": "Poveži račun",

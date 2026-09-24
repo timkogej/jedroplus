@@ -375,5 +375,16 @@
     "secondsAgo": "pred {seconds}s",
     "minutesAgo": "pred {minutes}min",
     "hoursAgo": "pred {hours}h"
+  },
+  "qrPage": {
+    "title": "QR koda za registracijo strank",
+    "subtitle": "Stranke skenirajo to kodo in izpolnijo svoje podatke.",
+    "noSlug": "Slug podjetja ni nastavljen."
+  },
+  "qrCard": {
+    "download": "Prenesi PNG",
+    "copy": "Kopiraj povezavo",
+    "copied": "Kopirano ✓",
+    "info": "To QR kodo lahko natisnete in jo postavite v vaš salon ali ordinacijo. Stranke jo skenirajo s telefonom in v manj kot minuti vnesejo svoje podatke."
   }
 }

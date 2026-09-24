@@ -184,7 +184,7 @@ export default function SignupPage() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
-              placeholder="janez@podjetje.si"
+              placeholder={tCommon('placeholders.email')}
               disabled={loading}
               autoComplete="email"
             />
@@ -196,7 +196,7 @@ export default function SignupPage() {
               type="email"
               value={formData.confirmEmail}
               onChange={(e) => setFormData({...formData, confirmEmail: e.target.value})}
-              placeholder="janez@podjetje.si"
+              placeholder={tCommon('placeholders.email')}
               disabled={loading}
               autoComplete="email"
             />

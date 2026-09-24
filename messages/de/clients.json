@@ -170,5 +170,66 @@
     "pagination": {
       "of": "von"
     }
+  },
+  "import": {
+    "title": "Kunden importieren",
+    "steps": {
+      "1": "Datei für den Import wählen",
+      "2": "Daten prüfen und Spalten zuordnen",
+      "3": "Kunden werden importiert...",
+      "4": "Import abgeschlossen"
+    },
+    "drop": "Datei hierher ziehen oder klicken, um sie auszuwählen",
+    "supported": "Unterstützt: .csv, .xlsx, .xls",
+    "preview": "Vorschau (erste 5 Zeilen)",
+    "matchColumns": "Spalten zuordnen",
+    "required": "(Pflichtfeld)",
+    "skip": "— überspringen —",
+    "fields": {
+      "Ime": "Vorname",
+      "Priimek ali celotno ime": "Nachname oder vollständiger Name",
+      "Email": "E-Mail",
+      "Telefon": "Telefon",
+      "Spol": "Geschlecht",
+      "Opombe": "Notizen",
+      "Datum vpisa": "Angelegt am"
+    },
+    "importing": "Kunden werden importiert...",
+    "mayTakeSeconds": "Das kann einige Sekunden dauern.",
+    "done": "Import abgeschlossen",
+    "newClients": "Neue Kunden importiert",
+    "updatedClients": "Kunden aktualisiert",
+    "skippedClients": "Kunden übersprungen (Duplikate)",
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "submit": "Importieren",
+    "close": "Schließen",
+    "errors": {
+      "empty": "Die Datei ist leer oder enthält keine gültigen Daten.",
+      "read": "Die Datei konnte nicht gelesen werden.",
+      "noRows": "Keine Zeilen zum Importieren. Gehen Sie zurück und laden Sie die Datei erneut hoch.",
+      "unmapped": "Ordnen Sie noch die Pflichtfelder zu: {fields}.",
+      "failed": "Der Import ist fehlgeschlagen.",
+      "tryAgain": "{message} Bitte versuchen Sie es erneut."
+    }
+  },
+  "exportSuccess": "Export abgeschlossen",
+  "exporting": "Wird exportiert...",
+  "exportError": "Export fehlgeschlagen",
+  "exportFile": {
+    "sheet": "Kunden",
+    "name": "kunden",
+    "columns": {
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "type": "Kundentyp",
+      "language": "Sprache für Nachrichten",
+      "gender": "Geschlecht",
+      "notes": "Notizen",
+      "added": "Angelegt am"
+    }
   }
 }

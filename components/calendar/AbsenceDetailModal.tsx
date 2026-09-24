@@ -317,7 +317,7 @@ function AbsenceDetailModal({
                       value={editReason}
                       onChange={(e) => setEditReason(e.target.value)}
                       rows={2}
-                      placeholder="npr. Bolniška, dopust..."
+                      placeholder={t('calendarView.absenceModal.fields.reasonExample')}
                       className="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-amber-900 placeholder-amber-400 resize-none focus:outline-none focus:ring-2 focus:ring-amber-300"
                     />
                   </div>

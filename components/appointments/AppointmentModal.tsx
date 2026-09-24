@@ -235,10 +235,10 @@ function AppointmentModal({
   const [ownResursIds, setOwnResursIds] = useState<Set<number>>(new Set());
   const resourceConflictTitle = useMemo(() => {
     if (resourceConflicts.length === 0) return '';
-    if (resourceConflicts.every((c) => c.tip === 'zaseden')) return 'Resurs zaseden';
-    if (resourceConflicts.every((c) => c.tip === 'urnik')) return 'Resurs ni na voljo';
-    return 'Preveri razpoložljivost resursa';
-  }, [resourceConflicts]);
+    if (resourceConflicts.every((c) => c.tip === 'zaseden')) return t('modal.resourceConflict.busyTitle');
+    if (resourceConflicts.every((c) => c.tip === 'urnik')) return t('modal.resourceConflict.unavailableTitle');
+    return t('modal.resourceConflict.checkTitle');
+  }, [resourceConflicts, t]);
 
   // Initialize form data when appointment changes
   useEffect(() => {
@@ -1504,7 +1504,7 @@ function AppointmentModal({
                         className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50"
                       >
                         <div className="border-b border-gray-100 bg-white px-3 py-2">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Dodaj storitev</p>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{t('modal.addService')}</p>
                         </div>
                         <div className="p-2 space-y-1.5">
                           {availableAddOns.map((ao) => {
@@ -1726,11 +1726,7 @@ function AppointmentModal({
                   };
                   const badge = getBadge();
 
-                  const fmt = (val: number) =>
-                    new Intl.NumberFormat('sl-SI', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    }).format(val);
+                  const fmt = (val: number) => money(val, { currency: formData.valuta });
 
                   return (
                     <div className="space-y-3">
@@ -1751,30 +1747,30 @@ function AppointmentModal({
                           )}
                           <div className="rounded-xl bg-gray-50 border border-gray-100 p-4 space-y-2.5">
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Originalna cena</span>
+                              <span className="text-gray-500">{t('modal.price.original')}</span>
                               <span className="text-gray-400 line-through">
-                                {fmt(orig)} EUR
+                                {fmt(orig)}
                               </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-500">Popust</span>
+                              <span className="text-gray-500">{t('modal.price.discount')}</span>
                               <span className="font-medium text-red-500">
                                 − {popustTip === 'percent'
                                   ? `${popust}%`
-                                  : `${fmt(popust)} EUR`}
+                                  : `${fmt(popust)}`}
                               </span>
                             </div>
                             <div className="border-t border-gray-200 pt-2.5 flex justify-between items-center">
-                              <span className="font-semibold text-gray-900">Cena z popustom</span>
+                              <span className="font-semibold text-gray-900">{t('modal.price.withDiscount')}</span>
                               <span className="text-xl font-bold text-green-600">
-                                {fmt(final)} EUR
+                                {fmt(final)}
                               </span>
                             </div>
                           </div>
                         </motion.div>
                       ) : (
                         <p className="text-2xl font-bold text-gray-900">
-                          {orig > 0 ? `${fmt(orig)} EUR` : '-'}
+                          {orig > 0 ? `${fmt(orig)}` : '-'}
                         </p>
                       )}
 
@@ -1787,10 +1783,10 @@ function AppointmentModal({
                         >
                           <div className="flex items-center gap-2 text-blue-600 font-semibold text-sm">
                             <Plus size={14} weight="bold" />
-                            <span>Dodatna storitev</span>
+                            <span>{t('modal.price.addOnLabel')}</span>
                           </div>
                           <p className="text-sm font-medium text-gray-800">
-                            {storitevDva?.naziv ?? 'Add-on storitev'}
+                            {storitevDva?.naziv ?? t('modal.price.addOnFallback')}
                           </p>
                         </motion.div>
                       )}
@@ -2089,13 +2085,13 @@ function AppointmentModal({
                     {resourceConflicts.map((c) => (
                       <p key={c.resursId} className="mt-0.5 text-xs text-amber-700">
                         {c.tip === 'urnik'
-                          ? `${c.naziv}: ni na voljo ob tem času`
-                          : `${c.naziv}: ${c.trenutnoZasedeno}/${c.maxKapaciteta} mest zasedenih`
+                          ? t('modal.resourceConflict.unavailableAt', { name: c.naziv })
+                          : t('modal.resourceConflict.capacity', { name: c.naziv, used: c.trenutnoZasedeno, max: c.maxKapaciteta })
                         }
                       </p>
                     ))}
                     <p className="mt-1 text-xs text-amber-600">
-                      Termin lahko vseeno shranite.
+                      {t('modal.resourceConflict.saveAnyway')}
                     </p>
                   </div>
                 </div>

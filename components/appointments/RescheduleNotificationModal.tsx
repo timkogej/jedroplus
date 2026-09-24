@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { Info } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { AppointmentWithDetails } from '@/types/appointments';
 
 interface RescheduleNotificationModalProps {
@@ -14,12 +15,6 @@ interface RescheduleNotificationModalProps {
   channel: 'sms' | 'email' | 'both';
 }
 
-const CHANNEL_LABEL: Record<'sms' | 'email' | 'both', string> = {
-  sms: 'Obvestilo bo poslano preko SMS',
-  email: 'Obvestilo bo poslano preko Email',
-  both: 'Obvestilo bo poslano preko SMS in Email',
-};
-
 export function RescheduleNotificationModal({
   isOpen,
   onClose,
@@ -29,6 +24,7 @@ export function RescheduleNotificationModal({
   newTime,
   channel,
 }: RescheduleNotificationModalProps) {
+  const t = useTranslations('appointments.rescheduleNotify');
   const formattedDate = newDate.split('-').reverse().join('.');
   const clientName = [appointment.stranka_ime, appointment.stranka_priimek].filter(Boolean).join(' ');
 
@@ -52,9 +48,9 @@ export function RescheduleNotificationModal({
           >
             {/* Header */}
             <div className="px-6 py-5 border-b border-gray-100">
-              <h3 className="text-base font-semibold text-[#1A1F36]">Obvestiti stranko?</h3>
+              <h3 className="text-base font-semibold text-[#1A1F36]">{t('title')}</h3>
               <p className="text-sm text-gray-500 mt-1">
-                Termin je bil prestavljen. Ali želite stranki poslati obvestilo?
+                {t('description')}
               </p>
             </div>
 
@@ -69,7 +65,7 @@ export function RescheduleNotificationModal({
               {/* Channel info */}
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Info className="h-4 w-4 flex-shrink-0 text-violet-400" weight="fill" />
-                <span>{CHANNEL_LABEL[channel]}</span>
+                <span>{t(`channel.${channel}`)}</span>
               </div>
             </div>
 
@@ -80,7 +76,7 @@ export function RescheduleNotificationModal({
                 onClick={onClose}
                 className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
               >
-                Preskoči
+                {t('skip')}
               </button>
               <button
                 type="button"
@@ -88,7 +84,7 @@ export function RescheduleNotificationModal({
                 className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white"
                 style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
               >
-                Pošlji obvestilo
+                {t('send')}
               </button>
             </div>
           </motion.div>

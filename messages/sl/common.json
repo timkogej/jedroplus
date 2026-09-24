@@ -96,5 +96,13 @@
     "thu": "Č",
     "fri": "P",
     "sat": "S"
+  },
+  "placeholders": {
+    "email": "janez@podjetje.si",
+    "contactEmail": "jana@podjetje.si",
+    "infoEmail": "info@podjetje.si",
+    "mobile": "+386 40 123 456",
+    "landline": "+386 1 234 5678",
+    "website": "https://www.podjetje.si"
   }
 }

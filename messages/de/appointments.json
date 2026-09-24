@@ -137,6 +137,14 @@
       "clientRequired": "Bitte wählen Sie einen Kunden",
       "serviceRequired": "Bitte wählen Sie eine Leistung",
       "employeeRequired": "Bitte wählen Sie einen Mitarbeiter"
+    },
+    "resourceConflict": {
+      "busyTitle": "Ressource belegt",
+      "unavailableTitle": "Ressource nicht verfügbar",
+      "checkTitle": "Verfügbarkeit der Ressource prüfen",
+      "unavailableAt": "{name}: zu dieser Zeit nicht verfügbar",
+      "capacity": "{name}: {used}/{max} Plätze belegt",
+      "saveAnyway": "Sie können den Termin trotzdem speichern."
     }
   },
   "table": {
@@ -268,7 +276,8 @@
         "timeTo": "Bis Uhrzeit",
         "timePlaceholder": "Uhrzeit wählen",
         "reason": "Grund (optional)",
-        "reasonPlaceholder": "Grund der Abwesenheit..."
+        "reasonPlaceholder": "Grund der Abwesenheit...",
+        "reasonExample": "z. B. Krankheit, Urlaub..."
       },
       "validation": {
         "employeeRequired": "Bitte wählen Sie einen Mitarbeiter",
@@ -405,5 +414,71 @@
     "showingBody": "Wählen Sie bei jedem „Abschließen“, „Nicht erschienen“ oder „Stornieren“. Die Liste wird dabei kürzer.",
     "show": "Anzeigen",
     "showAll": "Alle Termine anzeigen"
+  },
+  "export": {
+    "title": "Termine exportieren",
+    "subtitle": "Zeitraum und Exportoptionen wählen",
+    "quickPick": "Schnellauswahl",
+    "presets": {
+      "this_week": "Diese Woche",
+      "this_month": "Dieser Monat",
+      "last_month": "Letzter Monat",
+      "last_30": "Letzte 30 Tage",
+      "this_year": "Dieses Jahr",
+      "all": "Alle"
+    },
+    "period": "Zeitraum",
+    "dateFrom": "Von",
+    "dateTo": "Bis",
+    "rangeInvalid": "Das Startdatum darf nicht nach dem Enddatum liegen.",
+    "filters": "Filter",
+    "onlyCompleted": "Nur abgeschlossene Termine",
+    "excludeGhost": "Nicht erfasste Termine ausschließen",
+    "found": "Termine für den Export",
+    "cancel": "Abbrechen",
+    "exporting": "Wird exportiert...",
+    "submit": "Als Excel exportieren",
+    "sheetName": "Termine",
+    "fileName": "termine",
+    "columns": {
+      "date": "Datum",
+      "day": "Tag",
+      "start": "Beginn",
+      "end": "Ende",
+      "client": "Kunde",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "service": "Leistung",
+      "staff": "Mitarbeiter",
+      "status": "Status",
+      "price": "Preis",
+      "discount": "Rabatt",
+      "finalPrice": "Endpreis",
+      "currency": "Währung",
+      "notes": "Notizen",
+      "id": "Termin-ID"
+    }
+  },
+  "clientSearch": {
+    "addNew": "Neuen Kunden anlegen",
+    "searching": "Wird gesucht...",
+    "noContact": "Keine Angaben",
+    "placeholder": "Nach Name, E-Mail oder Telefon suchen..."
+  },
+  "actionErrors": {
+    "noClientLink": "Dieser Termin ist mit keinem Kunden verknüpft.",
+    "clientLoadFailed": "Die Kundendetails konnten nicht geladen werden.",
+    "clientNotFound": "Der Kunde zu diesem Termin wurde in diesem Unternehmen nicht gefunden."
+  },
+  "rescheduleNotify": {
+    "title": "Kunden benachrichtigen?",
+    "description": "Der Termin wurde verschoben. Möchten Sie den Kunden benachrichtigen?",
+    "channel": {
+      "sms": "Die Benachrichtigung wird per SMS gesendet",
+      "email": "Die Benachrichtigung wird per E-Mail gesendet",
+      "both": "Die Benachrichtigung wird per SMS und E-Mail gesendet"
+    },
+    "skip": "Überspringen",
+    "send": "Benachrichtigung senden"
   }
 }

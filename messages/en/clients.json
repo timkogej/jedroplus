@@ -170,5 +170,66 @@
     "pagination": {
       "of": "of"
     }
+  },
+  "import": {
+    "title": "Import clients",
+    "steps": {
+      "1": "Choose a file to import",
+      "2": "Check the data and match the columns",
+      "3": "Importing clients...",
+      "4": "Import finished"
+    },
+    "drop": "Drag a file here or click to choose one",
+    "supported": "Supported: .csv, .xlsx, .xls",
+    "preview": "Preview (first 5 rows)",
+    "matchColumns": "Match columns",
+    "required": "(required)",
+    "skip": "— skip —",
+    "fields": {
+      "Ime": "First name",
+      "Priimek ali celotno ime": "Last name or full name",
+      "Email": "Email",
+      "Telefon": "Phone",
+      "Spol": "Gender",
+      "Opombe": "Notes",
+      "Datum vpisa": "Date added"
+    },
+    "importing": "Importing clients...",
+    "mayTakeSeconds": "This can take a few seconds.",
+    "done": "Import finished",
+    "newClients": "New clients imported",
+    "updatedClients": "Clients updated",
+    "skippedClients": "Clients skipped (duplicates)",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Import",
+    "close": "Close",
+    "errors": {
+      "empty": "The file is empty or has no valid data.",
+      "read": "Couldn't read the file.",
+      "noRows": "No rows to import. Go back and upload the file again.",
+      "unmapped": "Match the required fields too: {fields}.",
+      "failed": "The import failed.",
+      "tryAgain": "{message} Please try again."
+    }
+  },
+  "exportSuccess": "Export complete",
+  "exporting": "Exporting...",
+  "exportError": "Export failed",
+  "exportFile": {
+    "sheet": "Clients",
+    "name": "clients",
+    "columns": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "type": "Client type",
+      "language": "Communication language",
+      "gender": "Gender",
+      "notes": "Notes",
+      "added": "Date added"
+    }
   }
 }

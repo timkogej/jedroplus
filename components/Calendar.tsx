@@ -1489,7 +1489,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     const clientId = String(appointment.stranka_id ?? '').trim();
 
     if (!clientId) {
-      setActionError('Ta termin nima povezave na stranko.');
+      setActionError(t('actionErrors.noClientLink'));
       return;
     }
 
@@ -1498,18 +1498,18 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     const result = await getClientById(companyId, clientId);
 
     if (result.error) {
-      setActionError('Podrobnosti stranke ni bilo mogoče naložiti.');
+      setActionError(t('actionErrors.clientLoadFailed'));
       return;
     }
 
     if (!result.data) {
-      setActionError('Stranka za ta termin ni bila najdena v tem podjetju.');
+      setActionError(t('actionErrors.clientNotFound'));
       return;
     }
 
     setDetailsClient(result.data);
     setClientDetailsOpen(true);
-  }, [companyId]);
+  }, [companyId, t]);
 
   const handleEditFromDetail = useCallback((appointment: AppointmentWithDetails) => {
     setEditingAppointment(appointment);

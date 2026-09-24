@@ -354,7 +354,7 @@ export default function CompanySettingsPage() {
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+386 1 234 5678"
+              placeholder={tc('placeholders.landline')}
             />
           </SettingRow>
 
@@ -366,7 +366,7 @@ export default function CompanySettingsPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="info@podjetje.si"
+              placeholder={tc('placeholders.infoEmail')}
             />
           </SettingRow>
 
@@ -377,7 +377,7 @@ export default function CompanySettingsPage() {
             <Input
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
-              placeholder="https://www.podjetje.si"
+              placeholder={tc('placeholders.website')}
             />
           </SettingRow>
         </SettingsSection>

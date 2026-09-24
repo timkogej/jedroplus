@@ -7,8 +7,10 @@ import { useCompany } from '@/app/company-context';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { QRCodeCard } from '@/components/qr/QRCodeCard';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import { useTranslations } from 'next-intl';
 
 export default function QrKodaPage() {
+  const t = useTranslations('settings.qrPage');
   const { companyId } = useCompany();
   const [slug, setSlug] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,10 +54,10 @@ export default function QrKodaPage() {
           className="mb-8"
         >
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            QR koda za registracijo strank
+            {t('title')}
           </h1>
           <p className="text-sm text-gray-500 mt-1">
-            Stranke skenirajo to kodo in izpolnijo svoje podatke.
+            {t('subtitle')}
           </p>
         </motion.div>
 
@@ -69,7 +71,7 @@ export default function QrKodaPage() {
             {slug ? (
               <QRCodeCard slug={slug} size={280} showInfo />
             ) : (
-              <p className="text-sm text-gray-400 py-8">Slug podjetja ni nastavljen.</p>
+              <p className="text-sm text-gray-400 py-8">{t('noSlug')}</p>
             )}
           </div>
         </motion.div>

@@ -1095,7 +1095,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                             <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.add_on_naziv}</p>
                             <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
                               <Plus className="h-2.5 w-2.5" weight="bold" />
-                              Dodatna storitev
+                              {t('modal.price.addOnLabel')}
                             </span>
                           </div>
                         )}

@@ -16,6 +16,7 @@ import {
 } from '@phosphor-icons/react';
 import * as XLSX from 'xlsx';
 import type { Client } from '@/types/clients';
+import { useTranslations } from 'next-intl';
 
 interface ParsedRow {
   [key: string]: string;
@@ -60,8 +61,8 @@ const OPTIONAL_FIELDS = ['Opombe', 'Datum vpisa'];
 
 function normalizeSpol(raw: string): string {
   const v = (raw || '').toLowerCase().trim();
-  if (v === 'm' || v === 'male' || v === 'moški' || v === 'moski') return 'Moški';
-  if (v === 'f' || v === 'female' || v === 'ženska' || v === 'zenska' || v === 'ženski') return 'Ženski';
+  if (v === 'm' || v === 'male' || v === 'moški' || v === 'moski' || v === 'männlich' || v === 'maennlich' || v === 'herr' || v === 'muški') return 'Moški';
+  if (v === 'f' || v === 'w' || v === 'female' || v === 'ženska' || v === 'zenska' || v === 'ženski' || v === 'weiblich' || v === 'frau') return 'Ženski';
   return raw || '';
 }
 
@@ -73,6 +74,7 @@ export default function CrmImportModal({
   existingClients,
   onImportComplete,
 }: CrmImportModalProps) {
+  const t = useTranslations('clients.import');
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -116,7 +118,7 @@ export default function CrmImportModal({
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json<ParsedRow>(ws, { defval: '', raw: false });
         if (rows.length === 0) {
-          setParseError('Datoteka je prazna ali nima veljavnih podatkov.');
+          setParseError(t('errors.empty'));
           return;
         }
         const cols = Object.keys(rows[0]);
@@ -125,12 +127,12 @@ export default function CrmImportModal({
         setPreviewRows(rows.slice(0, 5));
         autoMap(cols);
       } catch {
-        setParseError('Napaka pri branju datoteke.');
+        setParseError(t('errors.read'));
       }
     };
-    reader.onerror = () => setParseError('Napaka pri branju datoteke.');
+    reader.onerror = () => setParseError(t('errors.read'));
     reader.readAsArrayBuffer(f);
-  }, []);
+  }, [t]);
 
   const autoMap = (cols: string[]) => {
     const map: Record<string, string> = {};
@@ -144,13 +146,13 @@ export default function CrmImportModal({
       return '';
     };
 
-    map['Ime'] = tryMatch(['ime', 'first name', 'firstname', 'name']);
-    map['Priimek ali celotno ime'] = tryMatch(['priimek', 'last name', 'lastname', 'surname', 'ime in priimek', 'full name', 'fullname']);
-    map['Email'] = tryMatch(['email', 'e-mail', 'elektronska pošta', 'elektronska posta']);
-    map['Telefon'] = tryMatch(['telefon', 'phone', 'tel', 'mobile', 'gsm']);
-    map['Spol'] = tryMatch(['spol', 'gender', 'sex']);
-    map['Opombe'] = tryMatch(['opombe', 'notes', 'opomba', 'comment', 'comments']);
-    map['Datum vpisa'] = tryMatch(['datum vpisa', 'created_at', 'created at', 'datum', 'date']);
+    map['Ime'] = tryMatch(['ime', 'first name', 'firstname', 'name', 'vorname', 'nome']);
+    map['Priimek ali celotno ime'] = tryMatch(['priimek', 'last name', 'lastname', 'surname', 'ime in priimek', 'full name', 'fullname', 'nachname', 'familienname', 'prezime', 'cognome']);
+    map['Email'] = tryMatch(['email', 'e-mail', 'elektronska pošta', 'elektronska posta', 'e-mail-adresse', 'mail']);
+    map['Telefon'] = tryMatch(['telefon', 'phone', 'tel', 'mobile', 'gsm', 'handy', 'telefonnummer', 'mobitel', 'telefono', 'cellulare']);
+    map['Spol'] = tryMatch(['spol', 'gender', 'sex', 'geschlecht', 'sesso']);
+    map['Opombe'] = tryMatch(['opombe', 'notes', 'opomba', 'comment', 'comments', 'notizen', 'anmerkungen', 'bemerkung', 'napomena', 'note']);
+    map['Datum vpisa'] = tryMatch(['datum vpisa', 'created_at', 'created at', 'datum', 'date', 'angelegt am', 'date added']);
 
     setMapping(map);
   };
@@ -176,14 +178,14 @@ export default function CrmImportModal({
 
     if (!allRows.length) {
       console.log('[CrmImport] blocked: no rows parsed from file');
-      setParseError('Ni vrstic za uvoz. Vrnite se na prejšnji korak in ponovno naložite datoteko.');
+      setParseError(t('errors.noRows'));
       return;
     }
 
     const unmappedRequired = REQUIRED_FIELDS.filter((f) => !mapping[f]);
     console.log('[CrmImport] required-field mapping check', { unmappedRequired });
     if (unmappedRequired.length > 0) {
-      setParseError(`Povežite še zahtevana polja: ${unmappedRequired.join(', ')}.`);
+      setParseError(t('errors.unmapped', { fields: unmappedRequired.map((f) => t(`fields.${f}`)).join(', ') }));
       return;
     }
 
@@ -268,7 +270,7 @@ export default function CrmImportModal({
       }
       if (!response.ok || serverResult?.ok === false) {
         throw new Error(
-          typeof serverResult?.error === 'string' ? serverResult.error : 'Napaka pri uvozu'
+          typeof serverResult?.error === 'string' ? serverResult.error : t('errors.failed')
         );
       }
 
@@ -282,13 +284,13 @@ export default function CrmImportModal({
       setStep(4);
     } catch (err) {
       console.log('[CrmImport] import failed', err);
-      const message = err instanceof Error && err.message ? err.message : 'Napaka pri pošiljanju podatkov.';
-      setParseError(`${message} Poskusite znova.`);
+      const message = err instanceof Error && err.message ? err.message : t('errors.failed');
+      setParseError(t('errors.tryAgain', { message }));
       setStep(2);
     } finally {
       setIsProcessing(false);
     }
-  }, [step, allRows, mapping, existingClients, companyId]);
+  }, [step, allRows, mapping, existingClients, companyId, t]);
 
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
@@ -333,13 +335,13 @@ export default function CrmImportModal({
                     className="text-xl font-semibold text-transparent bg-clip-text"
                     style={{ backgroundImage: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
                   >
-                    Uvozi stranke
+                    {t('title')}
                   </h2>
                   <p className="mt-0.5 text-sm text-gray-500">
-                    {step === 1 && 'Izberite datoteko za uvoz'}
-                    {step === 2 && 'Preglejte podatke in povežite stolpce'}
-                    {step === 3 && 'Uvažam stranke...'}
-                    {step === 4 && 'Uvoz zaključen'}
+                    {step === 1 && t('steps.1')}
+                    {step === 2 && t('steps.2')}
+                    {step === 3 && t('steps.3')}
+                    {step === 4 && t('steps.4')}
                   </p>
                 </div>
                 <motion.button
@@ -388,9 +390,9 @@ export default function CrmImportModal({
                       weight="duotone"
                     />
                     <p className="text-sm font-medium text-gray-700">
-                      Povlecite datoteko sem ali kliknite za izbiro
+                      {t('drop')}
                     </p>
-                    <p className="mt-1 text-xs text-gray-400">Podprte vrste: .csv, .xlsx, .xls</p>
+                    <p className="mt-1 text-xs text-gray-400">{t('supported')}</p>
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -435,7 +437,7 @@ export default function CrmImportModal({
                   {/* Preview table */}
                   <div>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Predogled (prvih 5 vrstic)
+                      {t('preview')}
                     </p>
                     <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white">
                       <table className="w-full text-xs">
@@ -466,7 +468,7 @@ export default function CrmImportModal({
                   {/* Column mapping */}
                   <div>
                     <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                      Povežite stolpce
+                      {t('matchColumns')}
                     </p>
                     <div className="rounded-xl border border-gray-100 bg-white divide-y divide-gray-50">
                       {[...REQUIRED_FIELDS, ...OPTIONAL_FIELDS].map((field) => {
@@ -474,15 +476,15 @@ export default function CrmImportModal({
                         return (
                           <div key={field} className="flex items-center gap-3 px-4 py-3">
                             <span className="w-40 flex-shrink-0 text-sm text-gray-700">
-                              {field}
-                              {isRequired && <span className="ml-1 text-xs text-gray-400">(zahtevano)</span>}
+                              {t(`fields.${field}`)}
+                              {isRequired && <span className="ml-1 text-xs text-gray-400">{t('required')}</span>}
                             </span>
                             <select
                               value={mapping[field] ?? ''}
                               onChange={(e) => setMapping((prev) => ({ ...prev, [field]: e.target.value }))}
                               className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400/30"
                             >
-                              <option value="">— preskoči —</option>
+                              <option value="">{t('skip')}</option>
                               {headers.map((h) => (
                                 <option key={h} value={h}>{h}</option>
                               ))}
@@ -510,8 +512,8 @@ export default function CrmImportModal({
               {step === 3 && (
                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                   <SpinnerGap className="h-10 w-10 animate-spin text-violet-500" weight="bold" />
-                  <p className="text-sm font-medium text-gray-700">Uvažam stranke...</p>
-                  <p className="text-xs text-gray-400">To lahko traja nekaj sekund.</p>
+                  <p className="text-sm font-medium text-gray-700">{t('importing')}</p>
+                  <p className="text-xs text-gray-400">{t('mayTakeSeconds')}</p>
                 </div>
               )}
 
@@ -520,23 +522,23 @@ export default function CrmImportModal({
                 <div className="space-y-3">
                   <div className="flex flex-col items-center pb-2">
                     <CheckCircle className="mb-3 h-12 w-12 text-emerald-500" weight="duotone" />
-                    <p className="text-lg font-semibold text-gray-800">Uvoz zaključen</p>
+                    <p className="text-lg font-semibold text-gray-800">{t('done')}</p>
                   </div>
 
                   <div className="rounded-xl border border-gray-100 bg-white divide-y divide-gray-50">
                     <div className="flex items-center gap-3 px-4 py-3">
                       <CheckCircle className="h-5 w-5 flex-shrink-0 text-emerald-500" weight="fill" />
-                      <span className="flex-1 text-sm text-gray-700">Novih strank uvoženih</span>
+                      <span className="flex-1 text-sm text-gray-700">{t('newClients')}</span>
                       <span className="text-sm font-semibold text-gray-900">{counts?.nove ?? result.nove.length}</span>
                     </div>
                     <div className="flex items-center gap-3 px-4 py-3">
                       <ArrowsClockwise className="h-5 w-5 flex-shrink-0 text-blue-500" weight="fill" />
-                      <span className="flex-1 text-sm text-gray-700">Strank posodobljenih</span>
+                      <span className="flex-1 text-sm text-gray-700">{t('updatedClients')}</span>
                       <span className="text-sm font-semibold text-gray-900">{counts?.posodobi ?? result.posodobi.length}</span>
                     </div>
                     <div className="flex items-center gap-3 px-4 py-3">
                       <SkipForward className="h-5 w-5 flex-shrink-0 text-gray-400" weight="fill" />
-                      <span className="flex-1 text-sm text-gray-700">Strank preskočenih (duplikati)</span>
+                      <span className="flex-1 text-sm text-gray-700">{t('skippedClients')}</span>
                       <span className="text-sm font-semibold text-gray-900">{counts?.preskoci ?? result.preskoci.length}</span>
                     </div>
                   </div>
@@ -555,7 +557,7 @@ export default function CrmImportModal({
                   whileTap={{ scale: 0.98 }}
                   className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
                 >
-                  Prekliči
+                  {t('cancel')}
                 </motion.button>
               )}
               {step === 2 && (
@@ -567,7 +569,7 @@ export default function CrmImportModal({
                   className="flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
                 >
                   <ArrowLeft className="h-4 w-4" weight="bold" />
-                  Nazaj
+                  {t('back')}
                 </motion.button>
               )}
               {(step === 3 || step === 4) && <div />}
@@ -583,7 +585,7 @@ export default function CrmImportModal({
                   className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                   style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
                 >
-                  Naprej
+                  {t('next')}
                   <ArrowRight className="h-4 w-4" weight="bold" />
                 </motion.button>
               )}
@@ -598,7 +600,7 @@ export default function CrmImportModal({
                   style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
                 >
                   <UploadSimple className="h-4 w-4" weight="bold" />
-                  Uvozi
+                  {t('submit')}
                 </motion.button>
               )}
               {step === 4 && (
@@ -611,7 +613,7 @@ export default function CrmImportModal({
                   style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
                 >
                   <CheckCircle className="h-4 w-4" weight="bold" />
-                  Zapri
+                  {t('close')}
                 </motion.button>
               )}
             </div>

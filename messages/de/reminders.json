@@ -205,7 +205,18 @@
       "tipsAuto": "KI entscheidet",
       "colorsTitle": "Farben der E-Mail-Vorlage",
       "colorPrimary": "Hauptfarbe",
-      "colorSecondary": "Zweitfarbe"
+      "colorSecondary": "Zweitfarbe",
+      "addressingLabel": "Anrede der Kunden",
+      "addressingDesc": "Ob Erinnerungen Kunden mit „Sie“ oder „du“ ansprechen.",
+      "addressingFormal": "Sie",
+      "addressingInformal": "Du",
+      "autoTagLabel": "Nachrichten als automatische Erinnerung kennzeichnen",
+      "autoTagDesc": "Am Anfang der Nachricht steht ein Hinweis, dass es sich um eine automatische Erinnerung handelt.",
+      "staffLabel": "Mitarbeiter in der Erinnerung nennen",
+      "staffDesc": "Wenn aktiviert, kann die Erinnerung nennen, wer die Leistung ausführt.",
+      "daysBeforeLabel": "Erinnerung senden (Tage vorher)",
+      "daysBeforeDesc": "Wie viele Tage vor dem Termin die Erinnerung gesendet wird.",
+      "select": "Auswählen"
     },
     "before": {
       "sectionTitle": "Erinnerungen vor dem Termin",
@@ -293,6 +304,20 @@
       "hint": "Kunden, die die Sprache Ihres Unternehmens nicht sprechen, erhalten diese Version. Ist sie leer, erhalten sie die Hauptvorlage.",
       "placeholder": "Hi {{ime}}, a reminder of your appointment on {{datum}} at {{cas}}. {{ime_podjetja}}",
       "saveError": "Die Einstellungen wurden gespeichert, die englische Version aber nicht. Bitte versuchen Sie es erneut."
+    },
+    "reschedule": {
+      "title": "Benachrichtigung bei Terminverschiebung",
+      "desc": "Der Kunde wird benachrichtigt, wenn Sie seinen Termin verschieben.",
+      "enableLabel": "Benachrichtigung aktivieren",
+      "enableDesc": "Wenn Sie einen Termin verschieben, schlägt das System vor, den Kunden zu benachrichtigen.",
+      "channelLabel": "Versandart",
+      "channelDesc": "Wählen Sie den Kanal für die Benachrichtigung.",
+      "smsTemplate": "SMS-Vorlage",
+      "emailTemplate": "E-Mail-Vorlage",
+      "smsPlaceholder": "Hallo {{ime}}, Ihr Termin wurde auf {{datum}} um {{cas}} verschoben. {{ime_podjetja}}",
+      "emailPlaceholder": "Guten Tag {{ime}}, Ihr Termin wurde auf {{datum}} um {{cas}} verschoben. Freundliche Grüße, {{ime_podjetja}}",
+      "smsHint": "Sie können dieselben Variablen wie in den Erinnerungen vor und nach dem Termin verwenden.",
+      "emailHint": "E-Mail-Vorlagen haben keine Zeichenbegrenzung und unterstützen Sonderzeichen."
     }
   },
   "preview": {
@@ -309,5 +334,25 @@
       "address": "Hauptstraße 1"
     },
     "unknownVars": "Unbekannte Variable: {tokens}. Der Kunde sieht diesen Text unverändert. Ersetzen Sie ihn durch eine aus der Liste oben (z. B. Telefon des Unternehmens)."
+  },
+  "templateEditor": {
+    "vars": {
+      "firstName": "Vorname des Kunden",
+      "lastName": "Nachname des Kunden",
+      "date": "Datum des Termins",
+      "time": "Uhrzeit des Termins",
+      "service": "Leistung",
+      "staff": "Name des Mitarbeiters",
+      "company": "Name des Unternehmens",
+      "address": "Adresse des Unternehmens",
+      "companyPhone": "Telefon des Unternehmens",
+      "companyEmail": "E-Mail des Unternehmens",
+      "year": "Jahr",
+      "rebookLink": "Link zum Umbuchen"
+    },
+    "clickToInsert": "Klicken Sie auf eine Variable, um sie einzufügen:",
+    "estimatedLength": "Geschätzte Länge (Variablen zählen mit ihrem tatsächlichen Wert)",
+    "tooLong": "Die Nachricht ist zu lang!",
+    "tooLongBody": "Die Vorlage überschreitet {max} Zeichen. Kürzen Sie den Text."
   }
 }

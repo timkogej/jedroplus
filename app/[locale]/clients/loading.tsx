@@ -4,9 +4,12 @@
 // A lightweight skeleton mirroring the page's rough layout (header, stat cards,
 // search bar, client table) so the route paints immediately instead of blank.
 
+import { useTranslations } from 'next-intl';
+
 export default function ClientsLoading() {
+  const t = useTranslations('common');
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8 animate-pulse" aria-busy="true" aria-label="Nalaganje">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 animate-pulse" aria-busy="true" aria-label={t('status.loading')}>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

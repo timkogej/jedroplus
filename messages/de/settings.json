@@ -375,5 +375,16 @@
     "secondsAgo": "vor {seconds} Sek.",
     "minutesAgo": "vor {minutes} Min.",
     "hoursAgo": "vor {hours} Std."
+  },
+  "qrPage": {
+    "title": "QR-Code zur Kundenregistrierung",
+    "subtitle": "Kunden scannen diesen Code und tragen ihre Daten ein.",
+    "noSlug": "Der Kurzname des Unternehmens ist nicht festgelegt."
+  },
+  "qrCard": {
+    "download": "PNG herunterladen",
+    "copy": "Link kopieren",
+    "copied": "Kopiert ✓",
+    "info": "Drucken Sie diesen QR-Code aus und stellen Sie ihn in Ihrem Salon oder Ihrer Praxis auf. Kunden scannen ihn mit dem Handy und tragen ihre Daten in weniger als einer Minute ein."
   }
 }

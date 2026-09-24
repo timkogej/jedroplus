@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl';
 
 export default function ForgotPasswordPage() {
   const t = useTranslations('auth.forgotPassword');
+  const tCommon = useTranslations('common');
 
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -125,7 +126,7 @@ export default function ForgotPasswordPage() {
                       setEmail(e.target.value);
                       setError('');
                     }}
-                    placeholder="janez@podjetje.si"
+                    placeholder={tCommon('placeholders.email')}
                     disabled={loading}
                     autoComplete="email"
                     className="pl-9"

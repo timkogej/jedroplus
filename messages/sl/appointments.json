@@ -137,6 +137,14 @@
       "clientRequired": "Stranka je obvezna",
       "serviceRequired": "Storitev je obvezna",
       "employeeRequired": "Zaposleni je obvezen"
+    },
+    "resourceConflict": {
+      "busyTitle": "Resurs zaseden",
+      "unavailableTitle": "Resurs ni na voljo",
+      "checkTitle": "Preveri razpoložljivost resursa",
+      "unavailableAt": "{name}: ni na voljo ob tem času",
+      "capacity": "{name}: {used}/{max} mest zasedenih",
+      "saveAnyway": "Termin lahko vseeno shranite."
     }
   },
   "table": {
@@ -268,7 +276,8 @@
         "timeTo": "Do ure",
         "timePlaceholder": "Izberi uro",
         "reason": "Razlog (neobvezno)",
-        "reasonPlaceholder": "Razlog za odsotnost..."
+        "reasonPlaceholder": "Razlog za odsotnost...",
+        "reasonExample": "npr. Bolniška, dopust..."
       },
       "validation": {
         "employeeRequired": "Izberite zaposlenega",
@@ -405,5 +414,71 @@
     "showingBody": "Pri vsakem izberite Zaključi, Ni prišel ali Odpovej. Seznam se sproti skrajša.",
     "show": "Pokaži jih",
     "showAll": "Pokaži vse termine"
+  },
+  "export": {
+    "title": "Izvozi termine",
+    "subtitle": "Izberite obdobje in možnosti izvoza",
+    "quickPick": "Hitri izbor",
+    "presets": {
+      "this_week": "Ta teden",
+      "this_month": "Ta mesec",
+      "last_month": "Prejšnji mesec",
+      "last_30": "Zadnjih 30 dni",
+      "this_year": "Letos",
+      "all": "Vse"
+    },
+    "period": "Obdobje",
+    "dateFrom": "Datum od",
+    "dateTo": "Datum do",
+    "rangeInvalid": "Datum »od« ne sme biti poznejši od »do«.",
+    "filters": "Filtri",
+    "onlyCompleted": "Vključi samo zaključene termine",
+    "excludeGhost": "Izključi nebeležene termine",
+    "found": "Najdenih terminov za izvoz",
+    "cancel": "Prekliči",
+    "exporting": "Izvažam...",
+    "submit": "Izvozi Excel",
+    "sheetName": "Termini",
+    "fileName": "termini",
+    "columns": {
+      "date": "Datum",
+      "day": "Dan",
+      "start": "Čas začetka",
+      "end": "Čas konca",
+      "client": "Stranka",
+      "email": "Email",
+      "phone": "Telefon",
+      "service": "Storitev",
+      "staff": "Zaposleni",
+      "status": "Status",
+      "price": "Cena",
+      "discount": "Popust",
+      "finalPrice": "Končna cena",
+      "currency": "Valuta",
+      "notes": "Opombe",
+      "id": "ID termina"
+    }
+  },
+  "clientSearch": {
+    "addNew": "Dodaj novo stranko",
+    "searching": "Iščem...",
+    "noContact": "Ni podatkov",
+    "placeholder": "Išči po imenu, emailu ali telefonu..."
+  },
+  "actionErrors": {
+    "noClientLink": "Ta termin nima povezave na stranko.",
+    "clientLoadFailed": "Podrobnosti stranke ni bilo mogoče naložiti.",
+    "clientNotFound": "Stranka za ta termin ni bila najdena v tem podjetju."
+  },
+  "rescheduleNotify": {
+    "title": "Obvestiti stranko?",
+    "description": "Termin je bil prestavljen. Ali želite stranki poslati obvestilo?",
+    "channel": {
+      "sms": "Obvestilo bo poslano preko SMS",
+      "email": "Obvestilo bo poslano preko Email",
+      "both": "Obvestilo bo poslano preko SMS in Email"
+    },
+    "skip": "Preskoči",
+    "send": "Pošlji obvestilo"
   }
 }

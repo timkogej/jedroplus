@@ -214,5 +214,8 @@
         }
       }
     }
+  },
+  "meta": {
+    "description": "Jedro+ – sistem za upravljanje terminov"
   }
 }

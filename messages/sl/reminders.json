@@ -205,7 +205,18 @@
       "tipsAuto": "AI določi",
       "colorsTitle": "Barve za email predloge",
       "colorPrimary": "Primarna barva",
-      "colorSecondary": "Sekundarna barva"
+      "colorSecondary": "Sekundarna barva",
+      "addressingLabel": "Nagovor strank",
+      "addressingDesc": "Ali naj se stranke v opomnikih vika ali tika.",
+      "addressingFormal": "Vikanje",
+      "addressingInformal": "Tikanje",
+      "autoTagLabel": "Označi sporočila kot samodejni opomnik",
+      "autoTagDesc": "Na začetku sporočila se doda oznaka, da gre za samodejni opomnik.",
+      "staffLabel": "Vključi izvajalca v opomnik",
+      "staffDesc": "Če je vklopljeno, lahko opomnik omeni zaposlenega, ki bo izvedel storitev.",
+      "daysBeforeLabel": "Pošlji opomnik (dni pred terminom)",
+      "daysBeforeDesc": "Koliko dni pred terminom naj se pošlje opomnik.",
+      "select": "Izberi"
     },
     "before": {
       "sectionTitle": "Opomniki pred terminom",
@@ -293,6 +304,20 @@
       "hint": "Stranke, ki ne govorijo jezika vašega podjetja, bodo prejele to različico. Če je prazna, prejmejo glavno predlogo.",
       "placeholder": "Hi {{ime}}, a reminder of your appointment on {{datum}} at {{cas}}. {{ime_podjetja}}",
       "saveError": "Nastavitve so shranjene, angleške različice pa ne. Poskusite znova."
+    },
+    "reschedule": {
+      "title": "Obvestilo ob prestavitvi termina",
+      "desc": "Stranka prejme obvestilo, ko ji prestavite termin.",
+      "enableLabel": "Omogoči obvestilo ob prestavitvi",
+      "enableDesc": "Ko prestavite termin, vam sistem predlaga pošiljanje obvestila stranki.",
+      "channelLabel": "Način pošiljanja",
+      "channelDesc": "Izberite kanal za obvestilo ob prestavitvi termina.",
+      "smsTemplate": "SMS predloga",
+      "emailTemplate": "Email predloga",
+      "smsPlaceholder": "Pozdravljeni {{ime}}, vas termin je prestavljen na {{datum}} ob {{cas}}. {{ime_podjetja}}",
+      "emailPlaceholder": "Spoštovani {{ime}}, vaš termin je bil prestavljen na {{datum}} ob {{cas}}. Lep pozdrav, {{ime_podjetja}}",
+      "smsHint": "Uporabite lahko enake spremenljivke kot pri opomnikih pred in po terminu.",
+      "emailHint": "Email predloga nima omejitve znakov in podpira šumnike."
     }
   },
   "preview": {
@@ -309,5 +334,25 @@
       "address": "Glavna ulica 1"
     },
     "unknownVars": "Neznana spremenljivka: {tokens}. Stranka bo videla to besedilo dobesedno. Zamenjajte jo s spremenljivko s seznama zgoraj (npr. Telefon podjetja)."
+  },
+  "templateEditor": {
+    "vars": {
+      "firstName": "Ime stranke",
+      "lastName": "Priimek stranke",
+      "date": "Datum termina",
+      "time": "Čas termina",
+      "service": "Storitev termina",
+      "staff": "Ime izvajalca",
+      "company": "Ime podjetja",
+      "address": "Naslov podjetja",
+      "companyPhone": "Telefon podjetja",
+      "companyEmail": "Email podjetja",
+      "year": "Leto",
+      "rebookLink": "Povezava za prenaročanje"
+    },
+    "clickToInsert": "Kliknite na spremenljivko, da jo dodate v besedilo:",
+    "estimatedLength": "Ocenjeno število znakov (spremenljivke se štejejo glede na dejansko vrednost)",
+    "tooLong": "Sporočilo je predolgo!",
+    "tooLongBody": "Predloga presega {max} znakov. Skrajšajte del besedila."
   }
 }

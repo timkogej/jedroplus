@@ -91,7 +91,13 @@
     "clearAll": "Clear",
     "noServices": "No services to select",
     "saving": "Saving...",
-    "save": "Save settings"
+    "save": "Save settings",
+    "rotatingTitle": "Rotating schedule",
+    "rotatingDesc": "The schedule alternates week by week in a cycle",
+    "cycleStart": "Cycle start date",
+    "cycleStartHint": "Pick a Monday as the start of the cycle",
+    "cycleWeeks": "Number of weeks in the cycle",
+    "copyFromWeekA": "Copy from week A"
   },
   "connect": {
     "title": "Connect account",

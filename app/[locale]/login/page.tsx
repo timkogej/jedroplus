@@ -143,7 +143,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="janez@podjetje.si"
+              placeholder={tCommon('placeholders.email')}
               disabled={loading}
               autoComplete="email"
             />

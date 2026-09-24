@@ -264,10 +264,11 @@ export default function ProtectedLayout({
 }
 
 function AppShellSkeleton() {
+  const t = useTranslations('common');
   const bar = 'animate-pulse rounded-md bg-gray-100';
   return (
     <div className="min-h-screen bg-gray-50/30" aria-busy="true" aria-live="polite">
-      <span className="sr-only">Nalaganje …</span>
+      <span className="sr-only">{t('status.loading')}</span>
       <aside className="fixed inset-y-0 left-0 hidden w-[240px] flex-col border-r border-gray-100 bg-white p-5 md:flex" aria-hidden="true">
         <div className={`h-7 w-28 ${bar}`} />
         <div className="mt-8 flex items-center gap-3">

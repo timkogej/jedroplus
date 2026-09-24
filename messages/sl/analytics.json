@@ -108,5 +108,25 @@
       "title": "Še ni terminov s promocijami",
       "description": "Ustvarite popust ali happy hour in začnite slediti prihrankom strank."
     }
+  },
+  "csvExport": {
+    "metric": "Metrika",
+    "value": "Vrednost",
+    "totalRevenue": "Skupaj Prihodki",
+    "averageBookingValue": "Povprečna Vrednost Termina",
+    "occupancyRate": "Stopnja Zasedenosti",
+    "completionRate": "Stopnja Zaključenih",
+    "totalAppointments": "Skupaj Terminov",
+    "completedAppointments": "Zaključenih Terminov",
+    "cancelledAppointments": "Odpovedanih Terminov",
+    "revenueGrowth": "Rast Prihodkov",
+    "bookingGrowth": "Rast Terminov",
+    "service": "Storitev",
+    "staff": "Osebje",
+    "appointmentCount": "Število Terminov",
+    "revenue": "Prihodki",
+    "fileMetrics": "analitika-metrike",
+    "fileServices": "analitika-storitve",
+    "fileStaff": "analitika-osebje"
   }
 }

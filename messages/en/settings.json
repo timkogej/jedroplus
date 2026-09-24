@@ -375,5 +375,16 @@
     "secondsAgo": "{seconds}s ago",
     "minutesAgo": "{minutes}min ago",
     "hoursAgo": "{hours}h ago"
+  },
+  "qrPage": {
+    "title": "QR code for client sign-up",
+    "subtitle": "Clients scan this code and fill in their details.",
+    "noSlug": "The company slug isn't set."
+  },
+  "qrCard": {
+    "download": "Download PNG",
+    "copy": "Copy link",
+    "copied": "Copied ✓",
+    "info": "Print this QR code and put it up in your salon or practice. Clients scan it with their phone and enter their details in under a minute."
   }
 }

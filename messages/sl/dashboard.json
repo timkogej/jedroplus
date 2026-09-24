@@ -130,7 +130,13 @@
     "subtitle": "Zadnji zaključeni termini",
     "empty": "Ni nedavne aktivnosti",
     "unknownClient": "Neznana stranka",
-    "serviceLabel": "Storitev"
+    "serviceLabel": "Storitev",
+    "timeAgo": {
+      "justNow": "Pravkar",
+      "minutes": "Pred {count} min",
+      "hours": "Pred {count} h",
+      "days": "Pred {count} d"
+    }
   },
   "weeklyChart": {
     "title": "Termini - 7 Dni",

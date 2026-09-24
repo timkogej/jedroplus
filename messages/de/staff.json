@@ -91,7 +91,13 @@
     "clearAll": "Leeren",
     "noServices": "Keine Leistungen zur Auswahl",
     "saving": "Wird gespeichert...",
-    "save": "Einstellungen speichern"
+    "save": "Einstellungen speichern",
+    "rotatingTitle": "Wechselnder Dienstplan",
+    "rotatingDesc": "Der Dienstplan wechselt wöchentlich in einem Zyklus",
+    "cycleStart": "Beginn des Zyklus",
+    "cycleStartHint": "Wählen Sie einen Montag als Beginn des Zyklus",
+    "cycleWeeks": "Anzahl der Wochen im Zyklus",
+    "copyFromWeekA": "Aus Woche A kopieren"
   },
   "connect": {
     "title": "Konto verknüpfen",

@@ -205,7 +205,18 @@
       "tipsAuto": "AI decides",
       "colorsTitle": "Email template colors",
       "colorPrimary": "Primary color",
-      "colorSecondary": "Secondary color"
+      "colorSecondary": "Secondary color",
+      "addressingLabel": "Addressing clients",
+      "addressingDesc": "Whether reminders address clients formally or informally.",
+      "addressingFormal": "Formal",
+      "addressingInformal": "Informal",
+      "autoTagLabel": "Mark messages as automatic reminders",
+      "autoTagDesc": "A note at the start of the message says it is an automatic reminder.",
+      "staffLabel": "Mention the staff member",
+      "staffDesc": "When on, the reminder can mention who will perform the service.",
+      "daysBeforeLabel": "Send reminder (days before)",
+      "daysBeforeDesc": "How many days before the appointment the reminder is sent.",
+      "select": "Select"
     },
     "before": {
       "sectionTitle": "Pre-appointment reminders",
@@ -293,6 +304,20 @@
       "hint": "Clients who don't speak your company's language get this version. If it's empty, they get the main template.",
       "placeholder": "Hi {{ime}}, a reminder of your appointment on {{datum}} at {{cas}}. {{ime_podjetja}}",
       "saveError": "Settings were saved, but the English version wasn't. Please try again."
+    },
+    "reschedule": {
+      "title": "Notice when an appointment is moved",
+      "desc": "The client is notified when you move their appointment.",
+      "enableLabel": "Enable the notice",
+      "enableDesc": "When you move an appointment, you'll be offered to notify the client.",
+      "channelLabel": "Sending method",
+      "channelDesc": "Choose the channel for the notice.",
+      "smsTemplate": "SMS template",
+      "emailTemplate": "Email template",
+      "smsPlaceholder": "Hi {{ime}}, your appointment has been moved to {{datum}} at {{cas}}. {{ime_podjetja}}",
+      "emailPlaceholder": "Dear {{ime}}, your appointment has been moved to {{datum}} at {{cas}}. Kind regards, {{ime_podjetja}}",
+      "smsHint": "You can use the same variables as in reminders before and after the appointment.",
+      "emailHint": "Email templates have no character limit and support special letters."
     }
   },
   "preview": {
@@ -309,5 +334,25 @@
       "address": "Main Street 1"
     },
     "unknownVars": "Unknown variable: {tokens}. The client will see this text as is. Replace it with one from the list above (e.g. Company phone)."
+  },
+  "templateEditor": {
+    "vars": {
+      "firstName": "Client first name",
+      "lastName": "Client last name",
+      "date": "Appointment date",
+      "time": "Appointment time",
+      "service": "Service",
+      "staff": "Staff member",
+      "company": "Company name",
+      "address": "Company address",
+      "companyPhone": "Company phone",
+      "companyEmail": "Company email",
+      "year": "Year",
+      "rebookLink": "Rebooking link"
+    },
+    "clickToInsert": "Click a variable to add it to the text:",
+    "estimatedLength": "Estimated length (variables count as their real value)",
+    "tooLong": "The message is too long!",
+    "tooLongBody": "The template exceeds {max} characters. Shorten the text."
   }
 }

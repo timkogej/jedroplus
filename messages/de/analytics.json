@@ -108,5 +108,25 @@
       "title": "Noch keine Termine mit Aktion",
       "description": "Erstellen Sie einen Rabatt oder eine Happy Hour und verfolgen Sie die Ersparnis Ihrer Kunden."
     }
+  },
+  "csvExport": {
+    "metric": "Kennzahl",
+    "value": "Wert",
+    "totalRevenue": "Gesamtumsatz",
+    "averageBookingValue": "Durchschnittlicher Terminwert",
+    "occupancyRate": "Auslastung",
+    "completionRate": "Abschlussquote",
+    "totalAppointments": "Termine gesamt",
+    "completedAppointments": "Abgeschlossene Termine",
+    "cancelledAppointments": "Stornierte Termine",
+    "revenueGrowth": "Umsatzwachstum",
+    "bookingGrowth": "Terminwachstum",
+    "service": "Leistung",
+    "staff": "Mitarbeiter",
+    "appointmentCount": "Anzahl Termine",
+    "revenue": "Umsatz",
+    "fileMetrics": "analyse-kennzahlen",
+    "fileServices": "analyse-leistungen",
+    "fileStaff": "analyse-mitarbeiter"
   }
 }

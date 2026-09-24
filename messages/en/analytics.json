@@ -108,5 +108,25 @@
       "title": "No promotional appointments yet",
       "description": "Create a discount or happy hour and start tracking client savings."
     }
+  },
+  "csvExport": {
+    "metric": "Metric",
+    "value": "Value",
+    "totalRevenue": "Total revenue",
+    "averageBookingValue": "Average appointment value",
+    "occupancyRate": "Occupancy rate",
+    "completionRate": "Completion rate",
+    "totalAppointments": "Total appointments",
+    "completedAppointments": "Completed appointments",
+    "cancelledAppointments": "Cancelled appointments",
+    "revenueGrowth": "Revenue growth",
+    "bookingGrowth": "Appointment growth",
+    "service": "Service",
+    "staff": "Staff",
+    "appointmentCount": "Number of appointments",
+    "revenue": "Revenue",
+    "fileMetrics": "analytics-metrics",
+    "fileServices": "analytics-services",
+    "fileStaff": "analytics-staff"
   }
 }

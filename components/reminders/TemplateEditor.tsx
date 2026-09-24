@@ -1,25 +1,24 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
+// Tokens are what n8n replaces (Slovenian names, keep as is); labels come
+// from messages (reminders.templateEditor.vars).
 export const TEMPLATE_VARS = [
-  { token: '{{ime}}', label: 'Ime stranke' },
-  { token: '{{priimek}}', label: 'Priimek stranke' },
-  { token: '{{datum}}', label: 'Datum termina' },
-  { token: '{{cas}}', label: 'Čas termina' },
-  { token: '{{storitev}}', label: 'Storitev termina' },
-  { token: '{{ime_izvajalca}}', label: 'Ime izvajalca' },
-  { token: '{{ime_podjetja}}', label: 'Ime podjetja' },
-  { token: '{{naslov}}', label: 'Naslov podjetja' },
-  { token: '{{telefon_podjetja}}', label: 'Telefon podjetja' },
-  { token: '{{email_podjetja}}', label: 'Email podjetja' },
-  { token: '{{leto}}', label: 'Leto' },
-  { token: '{{povezava_prenarocanje}}', label: 'Povezava za prenaročanje' },
+  { token: '{{ime}}', key: 'firstName' },
+  { token: '{{priimek}}', key: 'lastName' },
+  { token: '{{datum}}', key: 'date' },
+  { token: '{{cas}}', key: 'time' },
+  { token: '{{storitev}}', key: 'service' },
+  { token: '{{ime_izvajalca}}', key: 'staff' },
+  { token: '{{ime_podjetja}}', key: 'company' },
+  { token: '{{naslov}}', key: 'address' },
+  { token: '{{telefon_podjetja}}', key: 'companyPhone' },
+  { token: '{{email_podjetja}}', key: 'companyEmail' },
+  { token: '{{leto}}', key: 'year' },
+  { token: '{{povezava_prenarocanje}}', key: 'rebookLink' },
 ] as const;
-
-export const VAR_LABEL_MAP: Record<string, string> = Object.fromEntries(
-  TEMPLATE_VARS.map(v => [v.token, v.label])
-);
 
 // Migrate old token names when loading from DB
 export function migrateTemplate(template: string): string {
@@ -98,12 +97,12 @@ const TOKEN_INNER = [
 ].join(';');
 
 // Build HTML string for contentEditable from raw template
-function buildHTML(template: string): string {
+function buildHTML(template: string, labels: Record<string, string>): string {
   const segments = parseTemplate(migrateTemplate(template));
   return segments
     .map(seg => {
       if (seg.type === 'token') {
-        const label = VAR_LABEL_MAP[seg.value] || seg.value;
+        const label = (labels[seg.value] || seg.value).replace(/&/g, '&amp;').replace(/</g, '&lt;');
         const safeToken = seg.value.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         return `<span data-token="${safeToken}" contenteditable="false" style="${TOKEN_OUTER}"><span style="${TOKEN_INNER}">${label}</span></span>`;
       }
@@ -167,6 +166,11 @@ export function TemplateEditor({
   rows = 4,
   varLengths = {},
 }: TemplateEditorProps) {
+  const t = useTranslations('reminders.templateEditor');
+  const labels = useMemo<Record<string, string>>(
+    () => Object.fromEntries(TEMPLATE_VARS.map((v) => [v.token, t(`vars.${v.key}`)])),
+    [t]
+  );
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalRef = useRef(false);
   const lastRawRef = useRef(value);
@@ -174,7 +178,7 @@ export function TemplateEditor({
   // Initialize DOM on mount
   useEffect(() => {
     if (!editorRef.current) return;
-    editorRef.current.innerHTML = buildHTML(value);
+    editorRef.current.innerHTML = buildHTML(value, labels);
     lastRawRef.current = value;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -188,8 +192,8 @@ export function TemplateEditor({
     }
     if (lastRawRef.current === value) return;
     lastRawRef.current = value;
-    editorRef.current.innerHTML = buildHTML(value);
-  }, [value]);
+    editorRef.current.innerHTML = buildHTML(value, labels);
+  }, [value, labels]);
 
   const handleInput = useCallback(() => {
     if (!editorRef.current) return;
@@ -197,7 +201,7 @@ export function TemplateEditor({
     const sanitized = sanitizeTemplateText(raw);
     if (sanitized !== raw) {
       // Rebuild the DOM to strip emoji/newlines that slipped in (e.g. via IME or drag-drop)
-      editorRef.current.innerHTML = buildHTML(sanitized);
+      editorRef.current.innerHTML = buildHTML(sanitized, labels);
       isInternalRef.current = true;
       lastRawRef.current = sanitized;
       onChange(sanitized);
@@ -215,7 +219,7 @@ export function TemplateEditor({
     isInternalRef.current = true;
     lastRawRef.current = raw;
     onChange(raw);
-  }, [onChange]);
+  }, [onChange, labels]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -286,7 +290,7 @@ export function TemplateEditor({
         if (currentEffective + tokenEffectiveLen > maxLength) return;
       }
 
-      const label = VAR_LABEL_MAP[token] || token;
+      const label = labels[token] || token;
 
       const span = document.createElement('span');
       span.setAttribute('data-token', token);
@@ -319,7 +323,7 @@ export function TemplateEditor({
 
       handleInput();
     },
-    [handleInput, maxLength, varLengths]
+    [handleInput, maxLength, varLengths, labels]
   );
 
   const currentLength = computeEffectiveLength(value, varLengths);
@@ -330,7 +334,7 @@ export function TemplateEditor({
       {/* Variable chip buttons */}
       <div>
         <p className="text-xs text-gray-400 mb-2">
-          Kliknite na spremenljivko da jo dodate v besedilo:
+          {t('clickToInsert')}
         </p>
         <div className="flex flex-wrap gap-1.5">
           {TEMPLATE_VARS.map(v => (
@@ -355,7 +359,7 @@ export function TemplateEditor({
                   backgroundClip: 'text',
                 }}
               >
-                {v.label}
+                {labels[v.token]}
               </span>
             </button>
           ))}
@@ -393,7 +397,7 @@ export function TemplateEditor({
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center">
             <span className="text-xs text-gray-400">
-              Ocenjeno število znakov (spremenljivke se štejejo glede na dejansko vrednost)
+              {t('estimatedLength')}
             </span>
             <span
               className={`text-xs font-semibold ${
@@ -405,8 +409,8 @@ export function TemplateEditor({
           </div>
           {isOverLimit && (
             <div className="flex items-center gap-1.5 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-              <span className="font-semibold">Sporočilo je predolgo!</span>
-              <span>Predloga presega {maxLength} znakov. Skrajšajte del besedila.</span>
+              <span className="font-semibold">{t('tooLong')}</span>
+              <span>{t('tooLongBody', { max: maxLength })}</span>
             </div>
           )}
         </div>

@@ -96,5 +96,13 @@
     "thu": "D",
     "fri": "F",
     "sat": "S"
+  },
+  "placeholders": {
+    "email": "max@firma.de",
+    "contactEmail": "anna@firma.de",
+    "infoEmail": "info@firma.de",
+    "mobile": "+49 151 23456789",
+    "landline": "+49 30 1234567",
+    "website": "https://www.firma.de"
   }
 }

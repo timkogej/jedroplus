@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -207,6 +208,7 @@ export default function ClientsClient({
 }) {
   const router = useRouter();
   const t = useTranslations('clients');
+  const locale = useLocale();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
   const { role, permissions } = useRolePermissions();
@@ -571,37 +573,38 @@ export default function ClientsClient({
       const XLSX = await import('xlsx');
       const res = await fetchClientsWithCount(companyId);
       if (res.error) throw res.error;
-      const rows = (res.data ?? []).map((c) => ({
-        'Ime': c.ime ?? '',
-        'Priimek': c.priimek ?? '',
-        'Email': c.email ?? '',
-        'Telefon': c.telefon ?? '',
-        'Tip stranke': c.tip_stranke ?? '',
-        'Jezik komunikacije': c.language ?? '',
-        'Spol': c.spol ?? '',
-        'Opombe': c.opombe ?? '',
-        'Datum vpisa': c.created_at
-          ? new Date(c.created_at).toLocaleDateString('sl-SI')
+      const col = (key: string) => t(`exportFile.columns.${key}`);
+      const rows: Record<string, string>[] = (res.data ?? []).map((c) => ({
+        [col('firstName')]: c.ime ?? '',
+        [col('lastName')]: c.priimek ?? '',
+        [col('email')]: c.email ?? '',
+        [col('phone')]: c.telefon ?? '',
+        [col('type')]: c.tip_stranke ?? '',
+        [col('language')]: c.language ?? '',
+        [col('gender')]: c.spol ?? '',
+        [col('notes')]: c.opombe ?? '',
+        [col('added')]: c.created_at
+          ? new Date(c.created_at).toLocaleDateString(intlLocale(locale))
           : '',
       }));
 
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Stranke');
+      XLSX.utils.book_append_sheet(wb, ws, t('exportFile.sheet'));
 
       const colWidths = Object.keys(rows[0] ?? {}).map((key) => ({
-        wch: Math.max(key.length, ...rows.map((r) => String(r[key as keyof typeof r] ?? '').length)),
+        wch: Math.max(key.length, ...rows.map((r) => String(r[key] ?? '').length)),
       }));
       ws['!cols'] = colWidths;
 
-      XLSX.writeFile(wb, `stranke_${new Date().toISOString().split('T')[0]}.xlsx`);
-      showToast('Izvoz uspešen', 'success');
+      XLSX.writeFile(wb, `${t('exportFile.name')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+      showToast(t('exportSuccess'), 'success');
     } catch {
-      showToast('Napaka pri izvozu', 'error');
+      showToast(t('exportError'), 'error');
     } finally {
       setIsExporting(false);
     }
-  }, [companyId, isExporting, showToast]);
+  }, [companyId, isExporting, showToast, t, locale]);
 
   // Loading state - white background with simple black spinner
   if (companyLoading || !companyId) {
@@ -742,7 +745,7 @@ export default function ClientsClient({
                         disabled={isExporting}
                         className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-60"
                       >
-                        {isExporting ? 'Izvažam...' : t('crm.exportExcel')}
+                        {isExporting ? t('exporting') : t('crm.exportExcel')}
                       </button>
                       <div className="relative group">
                         <button

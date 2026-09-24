@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google';
 import '../globals.css';
 import { Providers } from '../providers';
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, setRequestLocale } from 'next-intl/server';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
@@ -30,10 +30,15 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export const metadata: Metadata = {
-  title: 'Jedro+',
-  description: 'Jedro+ - Sistem za upravljanje terminov',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'layout' });
+  return { title: 'Jedro+', description: t('meta.description') };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

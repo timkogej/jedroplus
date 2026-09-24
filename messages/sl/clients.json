@@ -170,5 +170,66 @@
     "pagination": {
       "of": "od"
     }
+  },
+  "import": {
+    "title": "Uvozi stranke",
+    "steps": {
+      "1": "Izberite datoteko za uvoz",
+      "2": "Preglejte podatke in povežite stolpce",
+      "3": "Uvažam stranke...",
+      "4": "Uvoz zaključen"
+    },
+    "drop": "Povlecite datoteko sem ali kliknite za izbiro",
+    "supported": "Podprte vrste: .csv, .xlsx, .xls",
+    "preview": "Predogled (prvih 5 vrstic)",
+    "matchColumns": "Povežite stolpce",
+    "required": "(zahtevano)",
+    "skip": "— preskoči —",
+    "fields": {
+      "Ime": "Ime",
+      "Priimek ali celotno ime": "Priimek ali celotno ime",
+      "Email": "Email",
+      "Telefon": "Telefon",
+      "Spol": "Spol",
+      "Opombe": "Opombe",
+      "Datum vpisa": "Datum vpisa"
+    },
+    "importing": "Uvažam stranke...",
+    "mayTakeSeconds": "To lahko traja nekaj sekund.",
+    "done": "Uvoz zaključen",
+    "newClients": "Novih strank uvoženih",
+    "updatedClients": "Strank posodobljenih",
+    "skippedClients": "Strank preskočenih (duplikati)",
+    "cancel": "Prekliči",
+    "back": "Nazaj",
+    "next": "Naprej",
+    "submit": "Uvozi",
+    "close": "Zapri",
+    "errors": {
+      "empty": "Datoteka je prazna ali nima veljavnih podatkov.",
+      "read": "Napaka pri branju datoteke.",
+      "noRows": "Ni vrstic za uvoz. Vrnite se na prejšnji korak in ponovno naložite datoteko.",
+      "unmapped": "Povežite še zahtevana polja: {fields}.",
+      "failed": "Napaka pri uvozu.",
+      "tryAgain": "{message} Poskusite znova."
+    }
+  },
+  "exportSuccess": "Izvoz uspešen",
+  "exporting": "Izvažam...",
+  "exportError": "Napaka pri izvozu",
+  "exportFile": {
+    "sheet": "Stranke",
+    "name": "stranke",
+    "columns": {
+      "firstName": "Ime",
+      "lastName": "Priimek",
+      "email": "Email",
+      "phone": "Telefon",
+      "type": "Tip stranke",
+      "language": "Jezik komunikacije",
+      "gender": "Spol",
+      "notes": "Opombe",
+      "added": "Datum vpisa"
+    }
   }
 }
