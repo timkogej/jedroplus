@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireCompanyAccess, resolveUserCompany } from '@/lib/auth/apiAuth';
 import { stripe, RECEPTIONISTPLUS_PACKS, ReceptionistPlusPackKey } from '@/lib/receptionistPlusStripe';
+import { routing } from '@/i18n/routing';
+import type Stripe from 'stripe';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -15,6 +17,17 @@ const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 type CheckoutBody = {
   company_id: string;
   pack: ReceptionistPlusPackKey;
+  /** App locale, so the owner comes back to the same language. */
+  locale?: string;
+};
+
+// App locales that Stripe Checkout also speaks.
+const STRIPE_LOCALES: Record<string, Stripe.Checkout.SessionCreateParams.Locale> = {
+  sl: 'sl',
+  en: 'en',
+  de: 'de',
+  hr: 'hr',
+  it: 'it',
 };
 
 export async function POST(request: NextRequest) {
@@ -30,6 +43,9 @@ export async function POST(request: NextRequest) {
   }
 
   const { company_id, pack } = body;
+  const locale = (routing.locales as readonly string[]).includes(body.locale ?? '')
+    ? (body.locale as string)
+    : routing.defaultLocale;
 
   if (!company_id || !pack || !(pack in RECEPTIONISTPLUS_PACKS)) {
     return NextResponse.json({ ok: false, error: 'company_id and a valid pack are required' }, { status: 400 });
@@ -72,8 +88,9 @@ export async function POST(request: NextRequest) {
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: [{ price: packConfig.priceId, quantity: 1 }],
-    success_url: `${origin}/receptionist-plus?tab=krediti&checkout=success`,
-    cancel_url: `${origin}/receptionist-plus?tab=krediti&checkout=canceled`,
+    locale: STRIPE_LOCALES[locale] ?? 'auto',
+    success_url: `${origin}/${locale}/receptionist-plus?tab=krediti&checkout=success`,
+    cancel_url: `${origin}/${locale}/receptionist-plus?tab=krediti&checkout=canceled`,
     metadata: {
       product: 'receptionistplus_credits',
       company_slug: companySlug,

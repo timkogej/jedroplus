@@ -7,6 +7,8 @@
       (angleške različice predlog; marketing_consent + marketing_opt_out_at na "Stranke").
 - [ ] Zaženi `supabase/migrations/1790400000_sms_countries_and_log.sql`
       (države za SMS + funkcija `sms_allowed()`, tabela `sms_log`).
+- [ ] Zaženi `supabase/migrations/1790500000_receptionist_languages_and_credits.sql`
+      (jezik klicatelja, obvestilo o snemanju, varno dodajanje kreditov ob nakupu).
 
 ## Vercel (neobvezno)
 - [ ] `UNSUBSCRIBE_SECRET` = naključen dolg niz (brez njega se ključ izpelje iz service role ključa).
@@ -39,6 +41,20 @@
 - [ ] BulkGate portal: nastavi URL za poročila o dostavi (delivery report webhook) na nov n8n webhook,
       ki po `bulkgate_sms_id` posodobi `sms_log.status` na `delivered` ali `failed` (+ `error`, `updated_at = now()`).
 - [ ] BulkGate: preveri, da je ime pošiljatelja (Sender ID) odobreno za HR, AT, DE, IT.
+
+## Receptionist+ (glasovni del – kjerkoli teče: n8n / Vapi / …)
+- [ ] Beri `receptionist_settings.language` (`sl`/`en`/`de`/`hr`/`it`) in nastavi temu jeziku
+      prepoznavo govora, glas in pozdrav. Prazen `greeting_text` → privzeti pozdrav za jezik
+      (`DEFAULT_GREETING` v `lib/receptionist.ts`).
+- [ ] `detect_caller_language = true`: če klicatelj govori drug od teh 5 jezikov, preklopi nanj.
+- [ ] `announce_recording = true` (privzeto): **pred** pozdravom povej `recording_notice_text`
+      ali privzeto besedilo za jezik (`DEFAULT_RECORDING_NOTICE`). Brez obvestila ne snemaj/prepisuj.
+- [ ] Ure in datumi v pogovoru in pri ustvarjanju termina: po `"Podatki podjetij".timezone`.
+- [ ] Klicatelja poveži s stranko po številki v E.164 (normaliziraj `From` in `Stranke.telefon`).
+- [ ] Odštevanje kreditov za klice naj bo atomarno (`balance_credits = balance_credits - x`),
+      ne »preberi → odštej → zapiši«.
+- [ ] Telefonske številke za tujino (Twilio): za DE/AT/IT/HR Twilio zahteva regulatorne
+      dokumente (naslov, dokazilo o podjetju) – pripravi jih pred prvim tujim salonom.
 
 ## Odločitve
 - Obstoječe stranke so vse slovenske: kjer jezik ni nastavljen, ostane slovenščina

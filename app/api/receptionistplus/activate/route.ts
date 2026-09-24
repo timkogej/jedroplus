@@ -10,6 +10,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { getCompanyCommunicationLanguage, toIsoLanguage } from '@/lib/communicationLanguage';
+import { isReceptionistLanguage } from '@/lib/receptionist';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -27,7 +29,7 @@ export async function POST(request: NextRequest) {
   if ('response' in authResult) return authResult.response;
 
   const { user } = authResult;
-  const { uuid: companyUuid } = await resolveUserCompany(user.id);
+  const { uuid: companyUuid, textId } = await resolveUserCompany(user.id);
   if (!companyUuid) {
     return NextResponse.json({ ok: false, error: 'Company ni najdena' }, { status: 400 });
   }
@@ -63,11 +65,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, trialGranted: false });
   }
 
+  // Start in the language the company talks to its clients in.
+  let language = 'sl';
+  if (textId) {
+    const { data: companyRow } = await admin
+      .from('Podatki podjetij')
+      .select('*')
+      .eq('ID Podjetja', textId)
+      .maybeSingle();
+    const iso = toIsoLanguage(getCompanyCommunicationLanguage(companyRow as Record<string, unknown> | null));
+    if (isReceptionistLanguage(iso)) language = iso;
+  }
+
   const { error: insertSettingsError } = await admin.from('receptionist_settings').insert({
     company_slug: companySlug,
     enabled: true,
     low_balance_threshold: 60,
-    language: 'sl',
+    language,
   });
 
   if (insertSettingsError) {

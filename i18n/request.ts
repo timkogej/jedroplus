@@ -12,7 +12,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     clients, services, staff, analytics, communication,
     notifications, reminders, lostLeads, reservations,
     promotions, billing, settings, layout, resursi,
-    zahteveTermini,
+    zahteveTermini, receptionist,
   ] = await Promise.all([
     import(`../messages/${locale}/common.json`).then(m => m.default),
     import(`../messages/${locale}/auth.json`).then(m => m.default),
@@ -34,6 +34,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     import(`../messages/${locale}/layout.json`).then(m => m.default),
     import(`../messages/${locale}/resursi.json`).then(m => m.default),
     import(`../messages/${locale}/zahteve-termini.json`).then(m => m.default),
+    import(`../messages/${locale}/receptionist.json`).then(m => m.default),
   ]);
 
   return {
@@ -44,6 +45,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       notifications, reminders, 'lost-leads': lostLeads, reservations,
       promotions, billing, settings, layout, resursi,
       'zahteve-termini': zahteveTermini,
+      receptionist,
     },
   };
 });

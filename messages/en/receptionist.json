@@ -1,0 +1,91 @@
+{
+  "title": "ReceptionistPlus",
+  "subtitle": "Your AI phone assistant",
+  "loadError": "Couldn't load the page.",
+  "tabs": {
+    "settings": "Settings",
+    "calls": "Call log",
+    "credits": "Credits"
+  },
+  "settings": {
+    "generalTitle": "General",
+    "enabledLabel": "Enable ReceptionistPlus",
+    "enabledDesc": "When on, the AI receptionist answers calls on behalf of your business.",
+    "languageLabel": "Language",
+    "languageDesc": "The receptionist greets and talks to callers in this language.",
+    "detectLabel": "Answer in the caller's language",
+    "detectDesc": "If the caller speaks another language (English, German, Croatian, Italian), the receptionist switches to it.",
+    "thresholdLabel": "Low credit threshold",
+    "thresholdDesc": "You'll be notified when your balance drops below this amount.",
+    "creditsSuffix": "credits",
+    "greetingTitle": "Greeting",
+    "greetingDesc": "Optional. If left empty, the default greeting in the chosen language is used.",
+    "greetingLabel": "Greeting on answer",
+    "recordingTitle": "Recording notice",
+    "recordingDesc": "Callers must be told the call is recorded and transcribed. The receptionist says this before the greeting.",
+    "recordingLabel": "Say the recording notice",
+    "recordingTextLabel": "Notice text",
+    "recordingOffWarning": "Without a notice you may not record or transcribe calls (GDPR; in Germany and Italy it's a criminal offence).",
+    "saveError": "Couldn't save. Please try again."
+  },
+  "languages": {
+    "sl": "Slovenian",
+    "en": "English",
+    "de": "German",
+    "hr": "Croatian",
+    "it": "Italian"
+  },
+  "calls": {
+    "loadError": "Couldn't load the call log.",
+    "empty": "No calls yet",
+    "emptyHint": "Calls will appear here once the AI receptionist answers them.",
+    "noTranscript": "No transcript.",
+    "transcript": "Transcript",
+    "collapse": "Collapse",
+    "appointment": "Appointment #{id}",
+    "credits": "{amount} credits",
+    "durationMinSec": "{m} min {s} s",
+    "durationSec": "{s} s",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "{page} of {total}",
+    "outcome": {
+      "booked": "Booked",
+      "info_only": "Information only",
+      "message_taken": "Message taken",
+      "abandoned": "Hung up",
+      "no_credits": "No credits"
+    }
+  },
+  "credits": {
+    "loadError": "Couldn't load credits.",
+    "balance": "Current balance",
+    "amount": "{amount} credits",
+    "buyTitle": "Buy credits",
+    "loading": "Loading…",
+    "checkoutError": "Couldn't start the payment. Please try again.",
+    "transactionsTitle": "Recent transactions",
+    "noTransactions": "No transactions yet.",
+    "packs": {
+      "zagon": "Starter",
+      "standard": "Standard",
+      "profi": "Pro"
+    },
+    "tx": {
+      "purchase": "Purchase {sign}{amount} credits",
+      "deduction": "Call {sign}{amount} credits",
+      "trial_grant": "Free trial {sign}{amount} credits",
+      "adjustment": "Adjustment {sign}{amount} credits",
+      "other": "{type} {sign}{amount} credits"
+    },
+    "checkoutSuccess": "Payment successful. Credits will be added in a moment.",
+    "checkoutCanceled": "Payment was cancelled."
+  },
+  "notActivated": {
+    "title": "ReceptionistPlus is not activated",
+    "body": "Turn on the AI receptionist for your business and get 30 free trial credits.",
+    "button": "Activate ReceptionistPlus",
+    "activating": "Activating…",
+    "error": "Activation failed. Please try again."
+  }
+}

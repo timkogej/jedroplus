@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   Gear,
   ClockCounterClockwise,
@@ -28,6 +29,16 @@ import {
   Textarea,
   SaveIndicator,
 } from '@/components/settings';
+import { formatMoney, intlLocale } from '@/lib/format';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
+import type { IsoLanguageCode } from '@/lib/communicationLanguage';
+import {
+  DEFAULT_GREETING,
+  DEFAULT_RECORDING_NOTICE,
+  GREETING_MAX_LENGTH,
+  RECEPTIONIST_LANGUAGES,
+  isReceptionistLanguage,
+} from '@/lib/receptionist';
 
 // ─── Brand glow background ─────────────────────────────────────────────────
 // Ambient bottom-anchored glow using the Jedro+ brand gradient
@@ -42,10 +53,10 @@ function BrandGlow() {
 
 type TabKey = 'nastavitve' | 'dnevnik' | 'krediti';
 
-const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: 'nastavitve', label: 'Nastavitve', icon: Gear },
-  { key: 'dnevnik', label: 'Klicni dnevnik', icon: ClockCounterClockwise },
-  { key: 'krediti', label: 'Krediti', icon: Coins },
+const TABS: { key: TabKey; labelKey: string; icon: React.ElementType }[] = [
+  { key: 'nastavitve', labelKey: 'tabs.settings', icon: Gear },
+  { key: 'dnevnik', labelKey: 'tabs.calls', icon: ClockCounterClockwise },
+  { key: 'krediti', labelKey: 'tabs.credits', icon: Coins },
 ];
 
 // ─── Settings tab ───────────────────────────────────────────────────────────
@@ -55,11 +66,16 @@ interface ReceptionistSettings {
   low_balance_threshold: number;
   greeting_text: string | null;
   language: string;
+  /** Switch to the caller's language when it differs. */
+  detect_caller_language?: boolean;
+  /** Say the recording notice before the greeting. */
+  announce_recording?: boolean;
+  recording_notice_text?: string | null;
 }
 
-const DEFAULT_GREETING = 'Pozdravljeni, dobrodošli! Kako vam lahko pomagam?';
-
-const LANGUAGE_OPTIONS = [{ value: 'sl', label: 'Slovenščina' }];
+function voiceLanguage(value: string): IsoLanguageCode {
+  return isReceptionistLanguage(value) ? value : 'sl';
+}
 
 function NastavitveTab({
   settings,
@@ -68,19 +84,26 @@ function NastavitveTab({
   settings: ReceptionistSettings;
   onSave: (patch: Partial<ReceptionistSettings>) => Promise<void>;
 }) {
+  const t = useTranslations('receptionist');
   const [local, setLocal] = useState(settings);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const language = voiceLanguage(local.language);
+  const announce = local.announce_recording ?? true;
 
   const save = useCallback(async (patch: Partial<ReceptionistSettings>) => {
     setSaving(true);
     try {
       await onSave(patch);
       setLastSaved(new Date());
+    } catch {
+      toast.error(t('settings.saveError'));
     } finally {
       setSaving(false);
     }
-  }, [onSave]);
+  }, [onSave, t]);
+
+  const languageOptions = RECEPTIONIST_LANGUAGES.map((value) => ({ value, label: t(`languages.${value}`) }));
 
   return (
     <div>
@@ -88,11 +111,8 @@ function NastavitveTab({
         <SaveIndicator saving={saving} lastSaved={lastSaved} />
       </div>
 
-      <SettingsSection title="Splošno">
-        <SettingRow
-          label="Omogoči ReceptionistPlus"
-          description="Ko je vklopljeno, AI recepcionistka odgovarja na klice v imenu vašega podjetja."
-        >
+      <SettingsSection title={t('settings.generalTitle')}>
+        <SettingRow label={t('settings.enabledLabel')} description={t('settings.enabledDesc')}>
           <div className="flex justify-end sm:justify-start">
             <Switch
               checked={local.enabled}
@@ -105,30 +125,36 @@ function NastavitveTab({
           </div>
         </SettingRow>
 
-        <SettingRow
-          label="Jezik"
-          description="Jezik, v katerem AI recepcionistka odgovarja na klice."
-        >
+        <SettingRow label={t('settings.languageLabel')} description={t('settings.languageDesc')}>
           <Select
-            value={local.language}
+            value={language}
             onChange={(value) => {
               setLocal((s) => ({ ...s, language: value }));
               save({ language: value });
             }}
-            options={LANGUAGE_OPTIONS}
-            disabled={LANGUAGE_OPTIONS.length <= 1}
+            options={languageOptions}
           />
         </SettingRow>
 
-        <SettingRow
-          label="Prag za nizko stanje kreditov"
-          description="Ko stanje pade pod to vrednost, boste obveščeni o nizkem stanju kreditov."
-        >
+        <SettingRow label={t('settings.detectLabel')} description={t('settings.detectDesc')}>
+          <div className="flex justify-end sm:justify-start">
+            <Switch
+              checked={local.detect_caller_language ?? false}
+              onChange={(checked) => {
+                setLocal((s) => ({ ...s, detect_caller_language: checked }));
+                save({ detect_caller_language: checked });
+              }}
+              variant="brand"
+            />
+          </div>
+        </SettingRow>
+
+        <SettingRow label={t('settings.thresholdLabel')} description={t('settings.thresholdDesc')}>
           <Input
             type="number"
             min={0}
             step={1}
-            suffix="kreditov"
+            suffix={t('settings.creditsSuffix')}
             value={local.low_balance_threshold}
             onChange={(e) => setLocal((s) => ({ ...s, low_balance_threshold: Number(e.target.value) }))}
             onBlur={(e) => save({ low_balance_threshold: Number(e.target.value) })}
@@ -136,19 +162,49 @@ function NastavitveTab({
         </SettingRow>
       </SettingsSection>
 
-      <SettingsSection
-        title="Pozdravno besedilo"
-        description="Poljubno. Če pustite prazno, bo uporabljeno privzeto pozdravno besedilo."
-      >
-        <SettingRow label="Pozdrav ob klicu" fullWidth>
+      <SettingsSection title={t('settings.greetingTitle')} description={t('settings.greetingDesc')}>
+        <SettingRow label={t('settings.greetingLabel')} fullWidth>
           <Textarea
             rows={3}
-            placeholder={DEFAULT_GREETING}
+            maxLength={GREETING_MAX_LENGTH}
+            placeholder={DEFAULT_GREETING[language]}
             value={local.greeting_text ?? ''}
             onChange={(e) => setLocal((s) => ({ ...s, greeting_text: e.target.value }))}
             onBlur={(e) => save({ greeting_text: e.target.value })}
           />
         </SettingRow>
+      </SettingsSection>
+
+      <SettingsSection title={t('settings.recordingTitle')} description={t('settings.recordingDesc')}>
+        <SettingRow label={t('settings.recordingLabel')}>
+          <div className="flex justify-end sm:justify-start">
+            <Switch
+              checked={announce}
+              onChange={(checked) => {
+                setLocal((s) => ({ ...s, announce_recording: checked }));
+                save({ announce_recording: checked });
+              }}
+              variant="brand"
+            />
+          </div>
+        </SettingRow>
+        {announce ? (
+          <SettingRow label={t('settings.recordingTextLabel')} fullWidth>
+            <Textarea
+              rows={2}
+              maxLength={GREETING_MAX_LENGTH}
+              placeholder={DEFAULT_RECORDING_NOTICE[language]}
+              value={local.recording_notice_text ?? ''}
+              onChange={(e) => setLocal((s) => ({ ...s, recording_notice_text: e.target.value }))}
+              onBlur={(e) => save({ recording_notice_text: e.target.value })}
+            />
+          </SettingRow>
+        ) : (
+          <p className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <Warning className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" weight="fill" />
+            {t('settings.recordingOffWarning')}
+          </p>
+        )}
       </SettingsSection>
     </div>
   );
@@ -173,13 +229,7 @@ interface ReceptionistCall {
   created_termin_id: string | null;
 }
 
-const OUTCOME_LABELS: Record<string, string> = {
-  booked: 'Rezervirano',
-  info_only: 'Samo informacije',
-  message_taken: 'Sporočilo prevzeto',
-  abandoned: 'Prekinjeno',
-  no_credits: 'Ni kreditov',
-};
+const OUTCOMES = ['booked', 'info_only', 'message_taken', 'abandoned', 'no_credits'];
 
 const OUTCOME_COLORS: Record<string, string> = {
   booked: 'bg-emerald-50 text-emerald-700',
@@ -189,26 +239,32 @@ const OUTCOME_COLORS: Record<string, string> = {
   no_credits: 'bg-red-50 text-red-700',
 };
 
-function formatDuration(sec: number | null): string {
-  if (!sec && sec !== 0) return '—';
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return m > 0 ? `${m} min ${s} s` : `${s} s`;
+/** Date and time in the company's time zone, written the reader's way. */
+function useFormatDateTime() {
+  const locale = useLocale();
+  const { timezone } = useCompanyRegion();
+  return useCallback(
+    (iso: string) =>
+      new Date(iso).toLocaleString(intlLocale(locale), {
+        timeZone: timezone,
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    [locale, timezone]
+  );
 }
 
-function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('sl-SI', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+function formatCredits(value: number, locale: string): string {
+  return value.toLocaleString(intlLocale(locale), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function CallTranscript({ messages }: { messages: TranscriptMessage[] }) {
+  const t = useTranslations('receptionist.calls');
   if (messages.length === 0) {
-    return <p className="text-xs text-gray-400 italic">Ni zapisa pogovora.</p>;
+    return <p className="text-xs text-gray-400 italic">{t('noTranscript')}</p>;
   }
   return (
     <div className="space-y-2">
@@ -233,10 +289,21 @@ function CallTranscript({ messages }: { messages: TranscriptMessage[] }) {
 }
 
 function CallRow({ call }: { call: ReceptionistCall }) {
+  const t = useTranslations('receptionist.calls');
+  const locale = useLocale();
+  const formatDateTime = useFormatDateTime();
   const [expanded, setExpanded] = useState(false);
-  const outcomeLabel = OUTCOME_LABELS[call.outcome] ?? call.outcome;
+  const outcomeLabel = OUTCOMES.includes(call.outcome) ? t(`outcome.${call.outcome}`) : call.outcome;
   const outcomeColor = OUTCOME_COLORS[call.outcome] ?? 'bg-gray-100 text-gray-600';
   const hasTranscript = (call.transcript?.length ?? 0) > 0;
+
+  const duration = (() => {
+    const sec = call.duration_sec;
+    if (!sec && sec !== 0) return '—';
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m > 0 ? t('durationMinSec', { m, s }) : t('durationSec', { s });
+  })();
 
   return (
     <div className="border border-gray-100 rounded-2xl overflow-hidden bg-white">
@@ -249,16 +316,16 @@ function CallRow({ call }: { call: ReceptionistCall }) {
             {call.created_termin_id && (
               <span className="inline-flex items-center gap-1 text-xs text-emerald-700">
                 <CalendarCheck className="w-3.5 h-3.5" weight="fill" />
-                Termin #{call.created_termin_id.slice(0, 8)}
+                {t('appointment', { id: call.created_termin_id.slice(0, 8) })}
               </span>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
             <span>{formatDateTime(call.started_at)}</span>
             <span>·</span>
-            <span>{formatDuration(call.duration_sec)}</span>
+            <span>{duration}</span>
             <span>·</span>
-            <span>{(call.billed_credits ?? 0).toFixed(2)} kreditov</span>
+            <span>{t('credits', { amount: formatCredits(call.billed_credits ?? 0, locale) })}</span>
           </div>
         </div>
 
@@ -269,7 +336,7 @@ function CallRow({ call }: { call: ReceptionistCall }) {
             className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors"
           >
             {expanded ? <CaretUp className="w-3.5 h-3.5" /> : <CaretDown className="w-3.5 h-3.5" />}
-            {expanded ? 'Skrči' : 'Prepis'}
+            {expanded ? t('collapse') : t('transcript')}
           </button>
         )}
       </div>
@@ -284,6 +351,7 @@ function CallRow({ call }: { call: ReceptionistCall }) {
 }
 
 function DnevnikTab() {
+  const t = useTranslations('receptionist.calls');
   const [calls, setCalls] = useState<ReceptionistCall[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(0);
@@ -297,7 +365,7 @@ function DnevnikTab() {
     try {
       const res = await fetch(`/api/receptionistplus/calls?page=${p}`);
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      if (!data.ok) throw new Error(data.error ?? 'load_failed');
       setCalls(data.calls);
       setTotalCount(data.totalCount);
     } catch (e) {
@@ -326,7 +394,7 @@ function DnevnikTab() {
     return (
       <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
         <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
-        <p className="text-sm text-red-700">Napaka pri nalaganju klicnega dnevnika.</p>
+        <p className="text-sm text-red-700">{t('loadError')}</p>
       </div>
     );
   }
@@ -334,8 +402,8 @@ function DnevnikTab() {
   if (calls.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 px-6 py-14 text-center">
-        <p className="text-sm font-medium text-gray-500">Ni še nobenega klica</p>
-        <p className="text-xs text-gray-400 mt-1">Klici bodo prikazani tukaj, ko jih AI recepcionistka sprejme.</p>
+        <p className="text-sm font-medium text-gray-500">{t('empty')}</p>
+        <p className="text-xs text-gray-400 mt-1">{t('emptyHint')}</p>
       </div>
     );
   }
@@ -355,10 +423,10 @@ function DnevnikTab() {
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:pointer-events-none"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Prejšnja
+            {t('prev')}
           </button>
           <span className="text-xs text-gray-500">
-            {page + 1} od {totalPages}
+            {t('pageOf', { page: page + 1, total: totalPages })}
           </span>
           <button
             type="button"
@@ -366,7 +434,7 @@ function DnevnikTab() {
             disabled={page >= totalPages - 1}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:pointer-events-none"
           >
-            Naslednja
+            {t('next')}
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -386,30 +454,19 @@ interface CreditTransaction {
   created_at: string;
 }
 
-const PACKS: { key: 'zagon' | 'standard' | 'profi'; label: string; credits: number; price: string }[] = [
-  { key: 'zagon', label: 'Zagon', credits: 100, price: '15 €' },
-  { key: 'standard', label: 'Standard', credits: 300, price: '39 €' },
-  { key: 'profi', label: 'Profi', credits: 750, price: '89 €' },
+// Keep in sync with lib/receptionistPlusStripe.ts and the Stripe prices (EUR).
+const PACKS: { key: 'zagon' | 'standard' | 'profi'; credits: number; priceEur: number }[] = [
+  { key: 'zagon', credits: 100, priceEur: 15 },
+  { key: 'standard', credits: 300, priceEur: 39 },
+  { key: 'profi', credits: 750, priceEur: 89 },
 ];
 
-function transactionLabel(tx: CreditTransaction): string {
-  const amount = Math.abs(tx.delta_credits).toFixed(2).replace(/\.00$/, '');
-  const sign = tx.delta_credits >= 0 ? '+' : '-';
-  switch (tx.type) {
-    case 'purchase':
-      return `Nakup ${sign}${amount} kreditov`;
-    case 'deduction':
-      return `Klic ${sign}${amount} kreditov`;
-    case 'trial_grant':
-      return `Brezplačna preizkusna doba ${sign}${amount} kreditov`;
-    case 'adjustment':
-      return `Prilagoditev ${sign}${amount} kreditov`;
-    default:
-      return `${tx.type} ${sign}${amount} kreditov`;
-  }
-}
+const TX_TYPES = ['purchase', 'deduction', 'trial_grant', 'adjustment'];
 
 function KreditiTab() {
+  const t = useTranslations('receptionist.credits');
+  const locale = useLocale();
+  const formatDateTime = useFormatDateTime();
   const { companyUuid } = useCompany();
   const [balance, setBalance] = useState<number | null>(null);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
@@ -423,7 +480,7 @@ function KreditiTab() {
     try {
       const res = await fetch('/api/receptionistplus/credits');
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      if (!data.ok) throw new Error(data.error ?? 'load_failed');
       setBalance(data.balance);
       setTransactions(data.transactions);
     } catch (e) {
@@ -445,16 +502,25 @@ function KreditiTab() {
       const res = await fetch('/api/receptionistplus/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ company_id: companyUuid, pack }),
+        body: JSON.stringify({ company_id: companyUuid, pack, locale }),
       });
       const data = await res.json();
-      if (!data.ok || !data.checkout_url) throw new Error(data.error ?? 'Napaka pri ustvarjanju Checkout seje');
+      if (!data.ok || !data.checkout_url) throw new Error(data.error ?? 'checkout_failed');
       window.location.href = data.checkout_url;
     } catch (e) {
       console.error('[ReceptionistPlus] checkout error:', e);
+      toast.error(t('checkoutError'));
       setBuyingPack(null);
     }
-  }, [companyUuid]);
+  }, [companyUuid, locale, t]);
+
+  const transactionLabel = (tx: CreditTransaction) => {
+    const amount = Math.abs(tx.delta_credits).toFixed(2).replace(/\.00$/, '');
+    const sign = tx.delta_credits >= 0 ? '+' : '-';
+    return TX_TYPES.includes(tx.type)
+      ? t(`tx.${tx.type}`, { sign, amount })
+      : t('tx.other', { type: tx.type, sign, amount });
+  };
 
   if (isLoading) {
     return (
@@ -468,7 +534,7 @@ function KreditiTab() {
     return (
       <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
         <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
-        <p className="text-sm text-red-700">Napaka pri nalaganju kreditov.</p>
+        <p className="text-sm text-red-700">{t('loadError')}</p>
       </div>
     );
   }
@@ -484,12 +550,12 @@ function KreditiTab() {
           background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 55%, #2AD4C5 100%)',
         }}
       >
-        <p className="text-white/70 text-sm font-medium mb-1">Trenutno stanje</p>
-        <p className="text-4xl font-bold text-white">{(balance ?? 0).toFixed(2)} kreditov</p>
+        <p className="text-white/70 text-sm font-medium mb-1">{t('balance')}</p>
+        <p className="text-4xl font-bold text-white">{t('amount', { amount: formatCredits(balance ?? 0, locale) })}</p>
       </motion.div>
 
       {/* Packs */}
-      <SettingsSection title="Kupi kredite">
+      <SettingsSection title={t('buyTitle')}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {PACKS.map((pack) => (
             <button
@@ -499,10 +565,10 @@ function KreditiTab() {
               disabled={!companyUuid || buyingPack !== null}
               className="flex flex-col items-start gap-1 rounded-xl border border-gray-200 px-4 py-3.5 text-left hover:border-[#6D5EF7] hover:bg-[#6D5EF7]/5 transition-colors disabled:opacity-50"
             >
-              <span className="font-semibold text-gray-900">{pack.label}</span>
-              <span className="text-sm text-gray-500">{pack.credits} kreditov</span>
+              <span className="font-semibold text-gray-900">{t(`packs.${pack.key}`)}</span>
+              <span className="text-sm text-gray-500">{t('amount', { amount: pack.credits })}</span>
               <span className="text-sm font-medium text-gray-900 mt-1">
-                {buyingPack === pack.key ? 'Nalaganje…' : pack.price}
+                {buyingPack === pack.key ? t('loading') : formatMoney(pack.priceEur, locale, { whole: true })}
               </span>
             </button>
           ))}
@@ -510,9 +576,9 @@ function KreditiTab() {
       </SettingsSection>
 
       {/* Recent transactions */}
-      <SettingsSection title="Nedavne transakcije">
+      <SettingsSection title={t('transactionsTitle')}>
         {transactions.length === 0 ? (
-          <p className="text-sm text-gray-400">Ni še transakcij.</p>
+          <p className="text-sm text-gray-400">{t('noTransactions')}</p>
         ) : (
           <div className="space-y-1">
             {transactions.map((tx) => (
@@ -523,7 +589,7 @@ function KreditiTab() {
                 </div>
                 <span className={`text-sm font-medium ${tx.delta_credits >= 0 ? 'text-emerald-600' : 'text-gray-500'}`}>
                   {tx.delta_credits >= 0 ? '+' : ''}
-                  {tx.delta_credits.toFixed(2)}
+                  {formatCredits(tx.delta_credits, locale)}
                 </span>
               </div>
             ))}
@@ -539,6 +605,7 @@ function KreditiTab() {
 // the company's first-ever activation, also seeds a 30-credit free trial).
 
 function NotActivated({ onActivated }: { onActivated: () => void }) {
+  const t = useTranslations('receptionist.notActivated');
   const [activating, setActivating] = useState(false);
 
   const activate = useCallback(async () => {
@@ -546,15 +613,15 @@ function NotActivated({ onActivated }: { onActivated: () => void }) {
     try {
       const res = await fetch('/api/receptionistplus/activate', { method: 'POST' });
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      if (!data.ok) throw new Error(data.error ?? 'activation_failed');
       onActivated();
     } catch (e) {
       console.error('[ReceptionistPlus] activate error:', e);
-      toast.error('Aktivacija ni uspela. Poskusite znova.');
+      toast.error(t('error'));
     } finally {
       setActivating(false);
     }
-  }, [onActivated]);
+  }, [onActivated, t]);
 
   return (
     <motion.div
@@ -565,10 +632,8 @@ function NotActivated({ onActivated }: { onActivated: () => void }) {
       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
         <Phone className="w-7 h-7 text-gray-400" weight="regular" />
       </div>
-      <h2 className="text-lg font-semibold text-gray-900 mb-1">ReceptionistPlus ni aktiviran</h2>
-      <p className="text-sm text-gray-500 max-w-sm mx-auto mb-5">
-        Omogočite AI recepcionistko za vaše podjetje in prejmite 30 brezplačnih preizkusnih kreditov.
-      </p>
+      <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('title')}</h2>
+      <p className="text-sm text-gray-500 max-w-sm mx-auto mb-5">{t('body')}</p>
       <button
         type="button"
         onClick={activate}
@@ -576,7 +641,7 @@ function NotActivated({ onActivated }: { onActivated: () => void }) {
         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white transition-opacity disabled:opacity-60"
         style={{ background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 55%, #2AD4C5 100%)' }}
       >
-        {activating ? 'Aktiviram…' : 'Aktiviraj ReceptionistPlus'}
+        {activating ? t('activating') : t('button')}
       </button>
     </motion.div>
   );
@@ -585,6 +650,7 @@ function NotActivated({ onActivated }: { onActivated: () => void }) {
 // ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function ReceptionistPlusPage() {
+  const t = useTranslations('receptionist');
   const [tab, setTab] = useState<TabKey>('nastavitve');
   const [provisioned, setProvisioned] = useState<boolean | null>(null);
   const [settings, setSettings] = useState<ReceptionistSettings | null>(null);
@@ -595,7 +661,7 @@ export default function ReceptionistPlusPage() {
     try {
       const res = await fetch('/api/receptionistplus/settings');
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      if (!data.ok) throw new Error(data.error ?? 'load_failed');
       setProvisioned(Boolean(data.provisioned));
       setSettings(data.settings);
     } catch (e) {
@@ -609,10 +675,12 @@ export default function ReceptionistPlusPage() {
   }, [load]);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('tab') === 'krediti') {
-      setTab('krediti');
-    }
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'krediti') setTab('krediti');
+    const checkout = params.get('checkout');
+    if (checkout === 'success') toast.success(t('credits.checkoutSuccess'));
+    else if (checkout === 'canceled') toast(t('credits.checkoutCanceled'));
+  }, [t]);
 
   const saveSettings = useCallback(async (patch: Partial<ReceptionistSettings>) => {
     const res = await fetch('/api/receptionistplus/settings', {
@@ -621,7 +689,7 @@ export default function ReceptionistPlusPage() {
       body: JSON.stringify(patch),
     });
     const data = await res.json();
-    if (!data.ok) throw new Error(data.error ?? 'Napaka');
+    if (!data.ok) throw new Error(data.error ?? 'save_failed');
     setSettings((s) => (s ? { ...s, ...patch } : s));
   }, []);
 
@@ -645,9 +713,9 @@ export default function ReceptionistPlusPage() {
                 backgroundClip: 'text',
               }}
             >
-              ReceptionistPlus
+              {t('title')}
             </h1>
-            <p className="mt-1 text-sm text-gray-500">Vaša AI telefonska asistentka</p>
+            <p className="mt-1 text-sm text-gray-500">{t('subtitle')}</p>
           </motion.div>
 
           {provisioned === null && !error ? (
@@ -657,7 +725,7 @@ export default function ReceptionistPlusPage() {
           ) : error && provisioned === null ? (
             <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
               <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
-              <p className="text-sm text-red-700">Napaka pri nalaganju strani.</p>
+              <p className="text-sm text-red-700">{t('loadError')}</p>
             </div>
           ) : !provisioned ? (
             <NotActivated onActivated={load} />
@@ -665,7 +733,7 @@ export default function ReceptionistPlusPage() {
             <>
               {/* Tabs */}
               <div className="flex items-center gap-1 bg-white/70 backdrop-blur-sm border border-gray-100 rounded-xl p-1 mb-6 w-fit">
-                {TABS.map(({ key, label, icon: Icon }) => (
+                {TABS.map(({ key, labelKey, icon: Icon }) => (
                   <button
                     key={key}
                     type="button"
@@ -677,7 +745,7 @@ export default function ReceptionistPlusPage() {
                     }`}
                   >
                     <Icon className="w-4 h-4" weight={tab === key ? 'fill' : 'regular'} />
-                    {label}
+                    {t(labelKey)}
                   </button>
                 ))}
               </div>
