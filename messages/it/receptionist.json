@@ -1,0 +1,91 @@
+{
+  "title": "ReceptionistPlus",
+  "subtitle": "La tua assistente telefonica con IA",
+  "loadError": "Errore durante il caricamento della pagina.",
+  "tabs": {
+    "settings": "Impostazioni",
+    "calls": "Registro chiamate",
+    "credits": "Crediti"
+  },
+  "settings": {
+    "generalTitle": "Generale",
+    "enabledLabel": "Attiva ReceptionistPlus",
+    "enabledDesc": "Quando è attiva, la receptionist IA risponde alle chiamate per conto della tua attività.",
+    "languageLabel": "Lingua",
+    "languageDesc": "La lingua in cui la receptionist saluta e conversa.",
+    "detectLabel": "Rispondi nella lingua di chi chiama",
+    "detectDesc": "Se chi chiama parla un'altra lingua (inglese, tedesco, sloveno, croato), la receptionist passa a quella lingua.",
+    "thresholdLabel": "Soglia di crediti bassi",
+    "thresholdDesc": "Quando il saldo scende sotto questo valore, riceverai un avviso di crediti in esaurimento.",
+    "creditsSuffix": "crediti",
+    "greetingTitle": "Testo di benvenuto",
+    "greetingDesc": "Facoltativo. Se lo lasci vuoto, verrà usato il saluto predefinito nella lingua scelta.",
+    "greetingLabel": "Saluto alla risposta",
+    "recordingTitle": "Avviso di registrazione",
+    "recordingDesc": "Chi chiama deve essere informato che la chiamata viene registrata e trascritta. La receptionist lo comunica prima del saluto.",
+    "recordingLabel": "Pronuncia l'avviso di registrazione",
+    "recordingTextLabel": "Testo dell'avviso",
+    "recordingOffWarning": "Senza avviso non puoi registrare né trascrivere le chiamate (GDPR; in Germania e in Italia è un reato).",
+    "saveError": "Salvataggio non riuscito. Riprova."
+  },
+  "languages": {
+    "sl": "Sloveno",
+    "en": "Inglese",
+    "de": "Tedesco",
+    "hr": "Croato",
+    "it": "Italiano"
+  },
+  "calls": {
+    "loadError": "Errore durante il caricamento del registro chiamate.",
+    "empty": "Ancora nessuna chiamata",
+    "emptyHint": "Le chiamate compariranno qui quando la receptionist IA inizierà a rispondere.",
+    "noTranscript": "Nessuna trascrizione della conversazione.",
+    "transcript": "Trascrizione",
+    "collapse": "Comprimi",
+    "appointment": "Appuntamento #{id}",
+    "credits": "{amount} crediti",
+    "durationMinSec": "{m} min {s} s",
+    "durationSec": "{s} s",
+    "prev": "Precedente",
+    "next": "Successiva",
+    "pageOf": "{page} di {total}",
+    "outcome": {
+      "booked": "Prenotato",
+      "info_only": "Solo informazioni",
+      "message_taken": "Messaggio preso",
+      "abandoned": "Interrotta",
+      "no_credits": "Crediti esauriti"
+    }
+  },
+  "credits": {
+    "loadError": "Errore durante il caricamento dei crediti.",
+    "balance": "Saldo attuale",
+    "amount": "{amount} crediti",
+    "buyTitle": "Acquista crediti",
+    "loading": "Caricamento…",
+    "checkoutError": "Impossibile avviare il pagamento. Riprova.",
+    "transactionsTitle": "Transazioni recenti",
+    "noTransactions": "Ancora nessuna transazione.",
+    "packs": {
+      "zagon": "Starter",
+      "standard": "Standard",
+      "profi": "Pro"
+    },
+    "tx": {
+      "purchase": "Acquisto {sign}{amount} crediti",
+      "deduction": "Chiamata {sign}{amount} crediti",
+      "trial_grant": "Prova gratuita {sign}{amount} crediti",
+      "adjustment": "Rettifica {sign}{amount} crediti",
+      "other": "{type} {sign}{amount} crediti"
+    },
+    "checkoutSuccess": "Pagamento riuscito. I crediti saranno aggiunti tra pochi istanti.",
+    "checkoutCanceled": "Il pagamento è stato annullato."
+  },
+  "notActivated": {
+    "title": "ReceptionistPlus non è attivo",
+    "body": "Attiva la receptionist IA per la tua attività e ricevi 30 crediti di prova gratuiti.",
+    "button": "Attiva ReceptionistPlus",
+    "activating": "Attivazione…",
+    "error": "Attivazione non riuscita. Riprova."
+  }
+}

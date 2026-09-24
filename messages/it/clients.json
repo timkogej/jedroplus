@@ -1,0 +1,235 @@
+{
+  "page": {
+    "title": "Clienti",
+    "subtitle": "L'archivio completo dei tuoi clienti",
+    "newClient": "Nuovo cliente",
+    "searchPlaceholder": "Cerca clienti per nome, email o telefono...",
+    "showingCount": "{shown} di {total} clienti",
+    "disabledCreateMessage": "Il titolare dell'attività ha disattivato l'aggiunta di nuovi clienti. Contattalo per abilitarla."
+  },
+  "crm": {
+    "importCsv": "Importa da CSV",
+    "importExcel": "Importa da Excel",
+    "importOther": "Importa da un altro CRM",
+    "exportCsv": "Esporta in CSV",
+    "exportExcel": "Esporta in Excel",
+    "exportPdf": "Esporta in PDF",
+    "importButton": "Importa clienti",
+    "exportButton": "Esporta clienti",
+    "comingSoon": "Presto disponibile"
+  },
+  "stats": {
+    "total": "Clienti totali",
+    "withAppointments": "Con appuntamenti",
+    "newThisMonth": "Nuovi questo mese"
+  },
+  "emptyState": {
+    "noClients": "Non hai ancora clienti",
+    "noClientsSubtitle": "Per gestire appuntamenti e contatti, inizia aggiungendo il tuo primo cliente.",
+    "addFirst": "Aggiungi il primo cliente",
+    "noResults": "Nessun risultato per \"{term}\"",
+    "noResultsSubtitle": "Prova con un'altra ricerca o cancella il filtro",
+    "clearSearch": "Cancella ricerca"
+  },
+  "errors": {
+    "loadError": "Si è verificato un errore durante il caricamento dei dati",
+    "saveError": "Si è verificato un errore durante il salvataggio del cliente",
+    "deleteError": "Si è verificato un errore durante l'eliminazione del cliente",
+    "retry": "Riprova"
+  },
+  "toast": {
+    "created": "Cliente aggiunto",
+    "updated": "Cliente aggiornato",
+    "deleted": "Cliente eliminato"
+  },
+  "modal": {
+    "title": {
+      "create": "Nuovo cliente",
+      "edit": "Modifica cliente"
+    },
+    "subtitle": {
+      "create": "Aggiungi un nuovo cliente",
+      "edit": "Modifica i dati del cliente"
+    },
+    "fields": {
+      "firstNameRequired": "Nome *",
+      "lastNameRequired": "Cognome *",
+      "genderRequired": "Sesso *",
+      "clientType": "Tipo di cliente",
+      "emailHint": "(almeno email o telefono)",
+      "phone": "Telefono",
+      "notes": "Note",
+      "notesPlaceholder": "Note sul cliente...",
+      "notesHint": "Le note vengono usate nei promemoria e nei messaggi",
+      "communicationLanguage": "Lingua di comunicazione",
+      "internalNotes": "Note interne",
+      "internalNotesPlaceholder": "Note interne (non vengono inviate al cliente)..."
+    },
+    "gender": {
+      "placeholder": "Seleziona il sesso",
+      "male": "Uomo",
+      "female": "Donna",
+      "other": "Altro"
+    },
+    "clientType": {
+      "placeholder": "Seleziona il tipo di cliente",
+      "nova": "Nuovo",
+      "redna": "Abituale",
+      "vip": "VIP",
+      "none": "/",
+      "change": "Cambia"
+    },
+    "language": {
+      "change": "Cambia"
+    },
+    "addInternalNotes": "+ Note interne",
+    "warning": {
+      "missingEmail": "Indirizzo email mancante",
+      "missingPhone": "Numero di telefono mancante",
+      "missingEmailDesc": "Senza un indirizzo email non sarà possibile inviare al cliente email, fatture e notifiche automatiche. Questo può influire sulla comunicazione automatica e sui promemoria via email.",
+      "missingPhoneDesc": "Senza un numero di telefono non sarà possibile inviare al cliente messaggi e notifiche automatiche. Questo può influire sulla comunicazione automatica e sui promemoria via SMS."
+    },
+    "actions": {
+      "cancel": "Annulla",
+      "saveAnyway": "Salva comunque",
+      "save": "Salva cliente",
+      "saving": "Salvataggio..."
+    },
+    "validation": {
+      "firstNameRequired": "Il nome è obbligatorio",
+      "firstNameMinLength": "Il nome deve contenere almeno 2 caratteri",
+      "lastNameRequired": "Il cognome è obbligatorio",
+      "lastNameMinLength": "Il cognome deve contenere almeno 2 caratteri",
+      "genderRequired": "Il sesso è obbligatorio",
+      "emailInvalid": "Indirizzo email non valido",
+      "phoneInvalid": "Numero di telefono non valido",
+      "notesMaxLength": "Le note possono contenere al massimo 500 caratteri",
+      "internalNotesMaxLength": "Le note interne possono contenere al massimo 500 caratteri",
+      "emailExists": "Questo indirizzo email è già in uso",
+      "contactRequired": "Inserisci almeno un'email o un numero di telefono"
+    },
+    "smsCountryNotSupported": "Non inviamo ancora SMS ai numeri di questo Paese: i promemoria verranno inviati via email."
+  },
+  "details": {
+    "added": "Aggiunto il:",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "contactInfo": "Contatti",
+    "gender": "Sesso",
+    "clientType": "Tipo di cliente",
+    "genderMale": "Uomo",
+    "genderFemale": "Donna",
+    "genderOther": "Altro",
+    "genderUnknown": "Non indicato",
+    "notes": "Note",
+    "internalNotes": "Note interne",
+    "stats": "Statistiche",
+    "statTotal": "Totale",
+    "statNoShow": "Non presentato",
+    "statCancelled": "Annullati",
+    "appointmentHistory": "Storico appuntamenti",
+    "newAppointment": "Nuovo appuntamento",
+    "noAppointments": "Nessun appuntamento",
+    "addFirstAppointment": "Aggiungi il primo appuntamento",
+    "showingLast": "Vengono mostrati gli ultimi 10 di {total} appuntamenti",
+    "aptNotes": "Note",
+    "aptInternalNotes": "Note interne",
+    "aptCompletionNotes": "Note di chiusura",
+    "finalPrice": "Prezzo finale"
+  },
+  "deleteModal": {
+    "title": "Eliminazione cliente",
+    "areYouSure": "Sei sicuro?",
+    "warningPrefix": "L'eliminazione del cliente",
+    "warningSuffix": "sarà definitiva. Questa azione non può essere annullata.",
+    "appointmentWarningPrefix": "Questo cliente ha",
+    "appointmentCount": "{count, plural, one {# appuntamento} other {# appuntamenti}}",
+    "appointmentWarningSuffix": "Gli appuntamenti resteranno nel sistema, ma senza collegamento al cliente.",
+    "cancel": "Annulla",
+    "deleting": "Eliminazione...",
+    "deleteButton": "Elimina cliente"
+  },
+  "table": {
+    "headers": {
+      "client": "Cliente",
+      "clientType": "Tipo",
+      "phone": "Telefono",
+      "appointments": "Appuntamenti",
+      "lastInteraction": "Ultima interazione",
+      "actions": "Azioni"
+    },
+    "empty": {
+      "title": "Nessun risultato",
+      "message": "Nessun cliente corrisponde alla ricerca"
+    },
+    "actions": {
+      "view": "Dettagli",
+      "edit": "Modifica",
+      "delete": "Elimina"
+    },
+    "pagination": {
+      "of": "di"
+    }
+  },
+  "import": {
+    "title": "Importa clienti",
+    "steps": {
+      "1": "Seleziona il file da importare",
+      "2": "Controlla i dati e abbina le colonne",
+      "3": "Importazione dei clienti...",
+      "4": "Importazione completata"
+    },
+    "drop": "Trascina qui il file o clicca per selezionarlo",
+    "supported": "Formati supportati: .csv, .xlsx, .xls",
+    "preview": "Anteprima (prime 5 righe)",
+    "matchColumns": "Abbina le colonne",
+    "required": "(obbligatorio)",
+    "skip": "— salta —",
+    "fields": {
+      "Ime": "Nome",
+      "Priimek ali celotno ime": "Cognome o nome completo",
+      "Email": "Email",
+      "Telefon": "Telefono",
+      "Spol": "Sesso",
+      "Opombe": "Note",
+      "Datum vpisa": "Data di registrazione"
+    },
+    "importing": "Importazione dei clienti...",
+    "mayTakeSeconds": "Potrebbe richiedere qualche secondo.",
+    "done": "Importazione completata",
+    "newClients": "Nuovi clienti importati",
+    "updatedClients": "Clienti aggiornati",
+    "skippedClients": "Clienti saltati (duplicati)",
+    "cancel": "Annulla",
+    "back": "Indietro",
+    "next": "Avanti",
+    "submit": "Importa",
+    "close": "Chiudi",
+    "errors": {
+      "empty": "Il file è vuoto o non contiene dati validi.",
+      "read": "Errore durante la lettura del file.",
+      "noRows": "Nessuna riga da importare. Torna al passo precedente e carica di nuovo il file.",
+      "unmapped": "Abbina ancora i campi obbligatori: {fields}.",
+      "failed": "Errore durante l'importazione.",
+      "tryAgain": "{message} Riprova."
+    }
+  },
+  "exportSuccess": "Esportazione completata",
+  "exporting": "Esportazione...",
+  "exportError": "Errore durante l'esportazione",
+  "exportFile": {
+    "sheet": "Clienti",
+    "name": "clienti",
+    "columns": {
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Email",
+      "phone": "Telefono",
+      "type": "Tipo di cliente",
+      "language": "Lingua di comunicazione",
+      "gender": "Sesso",
+      "notes": "Note",
+      "added": "Data di registrazione"
+    }
+  }
+}

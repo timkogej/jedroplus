@@ -1,0 +1,162 @@
+{
+  "layout": {
+    "title": "Promozioni",
+    "subtitle": "Gestisci sconti, happy hour e servizi aggiuntivi",
+    "tabs": {
+      "discounts": "Sconti",
+      "happyHours": "Happy hour",
+      "addOns": "Servizi aggiuntivi"
+    }
+  },
+  "shared": {
+    "discountType": {
+      "percentage": "Percentuale (%)",
+      "fixed": "Importo fisso (€)"
+    },
+    "serviceSearch": "Cerca servizi...",
+    "noServices": "Nessun servizio",
+    "activeLabel": "Attivo",
+    "saveButton": "Salva",
+    "createButton": "Crea",
+    "cancelButton": "Annulla",
+    "deleteButton": "Elimina",
+    "cannotUndo": "Questa azione non può essere annullata.",
+    "valueUnit": {
+      "percentage": "(%)",
+      "fixed": "(€)"
+    }
+  },
+  "discounts": {
+    "search": "Cerca sconti...",
+    "newButton": "Nuovo sconto",
+    "table": {
+      "name": "Nome",
+      "services": "Servizi",
+      "discount": "Sconto",
+      "dateFrom": "Dal",
+      "dateTo": "Al",
+      "status": "Stato",
+      "actions": "Azioni"
+    },
+    "empty": "Nessuno sconto. Crea il primo!",
+    "serviceCount": "{count, plural, one {# servizio} other {# servizi}}",
+    "modal": {
+      "createTitle": "Nuovo sconto",
+      "editTitle": "Modifica sconto",
+      "fields": {
+        "name": "Nome",
+        "namePlaceholder": "Es. Sconto estivo",
+        "type": "Tipo di sconto",
+        "value": "Valore {unit}",
+        "dateFrom": "Data di inizio",
+        "dateTo": "Data di fine",
+        "services": "Servizi (selezionati: {count})"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Eliminare lo sconto?"
+    },
+    "toasts": {
+      "created": "Sconto creato",
+      "updated": "Sconto aggiornato",
+      "deleted": "Sconto eliminato",
+      "loadError": "Errore durante il caricamento degli sconti",
+      "saveError": "Errore durante il salvataggio",
+      "deleteError": "Errore durante l'eliminazione",
+      "updateError": "Errore durante l'aggiornamento",
+      "nameRequired": "Il nome è obbligatorio",
+      "valueRequired": "Il valore deve essere maggiore di 0",
+      "percentMax": "La percentuale non può superare 100",
+      "dateOrder": "La data di fine deve essere successiva alla data di inizio",
+      "serviceRequired": "Seleziona almeno un servizio"
+    }
+  },
+  "addOns": {
+    "count": "{count, plural, one {# servizio aggiuntivo} other {# servizi aggiuntivi}}",
+    "newButton": "Nuovo servizio aggiuntivo",
+    "table": {
+      "service": "Servizio",
+      "originalPrice": "Prezzo originale",
+      "discount": "Sconto",
+      "finalPrice": "Prezzo scontato",
+      "status": "Stato",
+      "actions": "Azioni"
+    },
+    "empty": "Nessun servizio aggiuntivo. Crea il primo!",
+    "modal": {
+      "createTitle": "Nuovo servizio aggiuntivo",
+      "editTitle": "Modifica servizio aggiuntivo",
+      "fields": {
+        "service": "Servizio",
+        "type": "Tipo di sconto",
+        "value": "Valore",
+        "active": "Attivo",
+        "previewTitle": "Anteprima"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Eliminare il servizio aggiuntivo?"
+    },
+    "toasts": {
+      "created": "Servizio aggiuntivo creato",
+      "updated": "Servizio aggiuntivo aggiornato",
+      "deleted": "Servizio aggiuntivo eliminato",
+      "loadError": "Errore durante il caricamento",
+      "saveError": "Errore durante il salvataggio",
+      "deleteError": "Errore durante l'eliminazione",
+      "genericError": "Errore",
+      "valueRequired": "Il valore deve essere maggiore di 0",
+      "percentMax": "La percentuale non può superare 100",
+      "serviceRequired": "Seleziona un servizio"
+    }
+  },
+  "happyHours": {
+    "count": "Happy hour: {count}",
+    "newButton": "Nuovo happy hour",
+    "table": {
+      "name": "Nome",
+      "days": "Giorni",
+      "time": "Orario",
+      "discount": "Sconto",
+      "services": "Servizi",
+      "status": "Stato",
+      "actions": "Azioni"
+    },
+    "servicesAll": "Tutti",
+    "empty": "Nessun happy hour. Crea il primo!",
+    "modal": {
+      "createTitle": "Nuovo happy hour",
+      "editTitle": "Modifica happy hour",
+      "fields": {
+        "name": "Nome",
+        "namePlaceholder": "Es. Happy hour pomeridiano",
+        "days": "Giorni della settimana",
+        "timeFrom": "Dalle",
+        "timeTo": "Alle",
+        "type": "Tipo di sconto",
+        "value": "Valore",
+        "services": "Servizi",
+        "allServices": "Tutti i servizi"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Eliminare l'happy hour?"
+    },
+    "toasts": {
+      "created": "Happy hour creato",
+      "updated": "Happy hour aggiornato",
+      "deleted": "Happy hour eliminato",
+      "loadError": "Errore durante il caricamento",
+      "saveError": "Errore durante il salvataggio",
+      "deleteError": "Errore durante l'eliminazione",
+      "genericError": "Errore",
+      "nameRequired": "Il nome è obbligatorio",
+      "dayRequired": "Seleziona almeno un giorno",
+      "timeRequired": "L'orario è obbligatorio",
+      "timeOrder": "L'orario di fine deve essere successivo a quello di inizio",
+      "valueRequired": "Il valore deve essere maggiore di 0",
+      "percentMax": "La percentuale non può superare 100",
+      "serviceRequired": "Seleziona almeno un servizio"
+    }
+  }
+}

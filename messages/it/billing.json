@@ -1,0 +1,463 @@
+{
+  "page": {
+    "pageTitle": "Piani"
+  },
+  "currentPlan": {
+    "label": "Piano attuale",
+    "subscriptionDetails": "Dettagli dell'abbonamento",
+    "statusLabel": "Stato",
+    "statusActive": "Attivo",
+    "renewalLabel": "Prossimo rinnovo",
+    "freeLabel": "Gratuito",
+    "smsQuota": "Quota SMS",
+    "emailQuota": "Quota email",
+    "quotaUsed": "Utilizzati",
+    "quotaAvailable": "Disponibili"
+  },
+  "portal": {
+    "button": "Gestisci pagamenti e fatture",
+    "opening": "Apertura del portale...",
+    "note": "Gestisci abbonamento, metodo di pagamento e fatture tramite il portale sicuro di Stripe."
+  },
+  "toggle": {
+    "monthly": "Mensile",
+    "yearly": "Annuale"
+  },
+  "plans": {
+    "mostPopular": "Il più scelto",
+    "customPricing": "su richiesta",
+    "perMonth": "/ mese",
+    "contactUs": "Contattaci",
+    "ctaLoading": "Caricamento...",
+    "ctaCurrentPlan": "Piano attuale",
+    "ctaSendInquiry": "Invia richiesta",
+    "ctaTryFree": "Prova gratis",
+    "ctaSelectPlan": "Scegli il piano",
+    "jedroPlus": {
+      "description": "Per attività che vogliono un sistema ordinato e una visione chiara",
+      "tagline": "Calendario, archivi e promemoria che semplificano la giornata.",
+      "features": [
+        "Archivio clienti e appuntamenti",
+        "Archivio servizi e collaboratori",
+        "Promemoria personalizzati prima e dopo l'appuntamento",
+        "Invio di email",
+        "Analisi complete",
+        "Prenotazioni online",
+        "Diversi design per le prenotazioni online",
+        "Asistent+"
+      ]
+    },
+    "jedroPro": {
+      "description": "Per attività che vogliono più occupazione e meno buchi in agenda",
+      "tagline": "Include assistenti IA, recupero dei clienti persi e promemoria SMS.",
+      "features": [
+        "Tutto di Jedro Plus",
+        "Chatbot+",
+        "Recupero dei clienti persi",
+        "Invio di SMS",
+        "Invio di email",
+        "Design aggiuntivi per le prenotazioni online"
+      ]
+    },
+    "jedroPremium": {
+      "description": "Per attività che vogliono la massima automazione",
+      "tagline": "L'intera gamma di funzioni IA per crescita e comunicazione.",
+      "features": [
+        "Tutto di Jedro Pro",
+        "Receptionist+",
+        "Invio di SMS (quota superiore)",
+        "Invio di email (quota superiore)",
+        "Design premium per le prenotazioni online",
+        "Design premium del chatbot"
+      ]
+    },
+    "enterprise": {
+      "description": "Per attività con esigenze e personalizzazioni particolari",
+      "tagline": "Funzioni, IA e ambiente di prenotazione su misura.",
+      "features": [
+        "Funzioni IA su misura per l'attività",
+        "Pagina di prenotazione premium",
+        "Diversi link di prenotazione",
+        "Richieste aggiuntive su misura"
+      ]
+    }
+  },
+  "footer": {
+    "questions": "Hai domande? Scrivici a",
+    "quotaQuestion": "Vuoi una quota maggiore o più collaboratori? Scrivici a"
+  },
+  "enterpriseModal": {
+    "title": "Richiesta Enterprise",
+    "subtitle": "Inviaci le tue esigenze e ti ricontatteremo",
+    "successTitle": "Richiesta inviata!",
+    "successMessage": "Ti contatteremo il prima possibile.",
+    "closeButton": "Chiudi",
+    "cancelButton": "Annulla",
+    "submitButton": "Invia richiesta",
+    "submittingButton": "Invio in corso...",
+    "fields": {
+      "fullName": "Nome e cognome",
+      "email": "Email",
+      "phone": "Telefono",
+      "companyName": "Nome dell'attività",
+      "employeeCount": "Numero di collaboratori",
+      "requirements": "Le tue esigenze"
+    },
+    "placeholders": {
+      "fullName": "Mario Rossi",
+      "email": "mario@azienda.it",
+      "phone": "+39 333 123 4567",
+      "companyName": "Azienda S.r.l.",
+      "employeeCount": "es. 10–50",
+      "requirements": "Descrivi le tue esigenze specifiche, integrazioni, personalizzazioni..."
+    }
+  },
+  "errors": {
+    "companyNotSet": "Attività non impostata. Accedi di nuovo.",
+    "portalError": "Si è verificato un errore durante l'apertura del portale di pagamento",
+    "serverError": "Si è verificato un errore di connessione al server",
+    "invalidCheckoutUrl": "URL di pagamento non valido. Riprova.",
+    "checkoutError": "Si è verificato un errore durante l'avvio del pagamento",
+    "companyDataError": "Si è verificato un errore durante il recupero dei dati dell'attività",
+    "errorLabel": "Errore"
+  },
+  "success": {
+    "missingSession": {
+      "title": "ID sessione mancante",
+      "message": "Si è verificato un errore nella conferma del pagamento. Controlla la tua email per la conferma.",
+      "backButton": "Torna ai piani"
+    },
+    "verifying": {
+      "title": "Conferma del pagamento...",
+      "message": "Stiamo attivando il tuo piano. Attendi un momento.",
+      "progressLabel": "Verifica...",
+      "timeRemaining": "{seconds} s rimanenti"
+    },
+    "complete": {
+      "title": "Pagamento riuscito!",
+      "subtitle": "Grazie per l'abbonamento.",
+      "yourPlan": "Il tuo piano:",
+      "whatsNext": "E adesso?",
+      "emailConfirmation": "Riceverai una conferma all'indirizzo {email}",
+      "smsReset": "La quota SMS è stata reimpostata",
+      "backToBilling": "Piani",
+      "dashboard": "Dashboard"
+    },
+    "timeout": {
+      "title": "Elaborazione del pagamento",
+      "message": "Il pagamento è ancora in elaborazione. Potrebbe richiedere qualche istante. Controlla la tua email per la conferma o riprova.",
+      "retryButton": "Riprova",
+      "backButton": "Indietro"
+    },
+    "error": {
+      "title": "Errore",
+      "message": "Si è verificato un errore nella conferma del pagamento. Contatta l'assistenza.",
+      "backButton": "Torna ai piani"
+    },
+    "loading": "Caricamento..."
+  },
+  "cancel": {
+    "title": "Acquisto annullato",
+    "message": "Il tuo acquisto è stato annullato. Sul tuo account non è stata apportata alcuna modifica.",
+    "backButton": "Torna alla fatturazione",
+    "dashboardButton": "Vai alla dashboard"
+  },
+  "featureGate": {
+    "upgradeRequired": "Cambia piano per accedere",
+    "requiresPlan": "Questa funzione richiede il piano {plan} o superiore.",
+    "viewPlans": "Vedi i piani",
+    "planNames": {
+      "free": "Gratuito",
+      "basic": "Basic",
+      "pro": "Pro",
+      "premium": "Premium"
+    }
+  },
+  "upgradePlanGate": {
+    "heading": "Questa funzione richiede il piano {plan}",
+    "subtitle": "Cambia piano per sbloccare questa funzione e sfruttare tutto il potenziale di Jedro+.",
+    "upgradeButton": "Cambia piano",
+    "hint": "Guarda tutti i piani disponibili e scegli quello più adatto a te.",
+    "badge": "Piano {plan}",
+    "includedIn": "Incluso nel piano {plan}",
+    "price": "{monthly} € al mese · {annual} € al mese con pagamento annuale",
+    "comparePlans": "Confronta i piani",
+    "back": "Torna all'inizio",
+    "ownerOnly": "Il piano può essere cambiato dal titolare dell'account in Impostazioni → Piani.",
+    "features": {
+      "reminders": {
+        "title": "Promemoria che riducono le assenze",
+        "lead": "Ricordiamo automaticamente l'appuntamento ai clienti prima della visita e li ringraziamo dopo. Senza telefonate e senza invii manuali.",
+        "p1": "Promemoria via email o SMS il giorno prima dell'appuntamento",
+        "p2": "Messaggio dopo l'appuntamento, se vuoi con uno sconto per la prossima visita",
+        "p3": "Modello personalizzato o messaggio personale scritto dall'IA"
+      },
+      "booking": {
+        "title": "I clienti prenotano da soli",
+        "lead": "Condividi un link o un codice QR e i clienti scelgono da soli l'appuntamento, anche alle dieci di sera. Tu ricevi una notifica e l'appuntamento nel calendario.",
+        "p1": "Link per Instagram, sito web e firma email",
+        "p2": "Diversi design della pagina di prenotazione",
+        "p3": "Puoi esaminare le richieste di appuntamento prima di confermarle"
+      },
+      "communication": {
+        "title": "Messaggi ai clienti in un unico posto",
+        "lead": "Invia un avviso o un'offerta ai clienti selezionati: a tutti, a quelli di oggi o a chi ha un determinato servizio.",
+        "p1": "Selezione dei clienti per appuntamenti e filtri",
+        "p2": "Invio via email da un'unica finestra",
+        "p3": "L'IA ti aiuta a scrivere il testo"
+      },
+      "analytics": {
+        "title": "Scopri come va il tuo salone",
+        "lead": "Ricavi, occupazione, servizi più richiesti e rendimento del team in un'unica panoramica.",
+        "p1": "Ricavi e numero di appuntamenti per periodo",
+        "p2": "Servizi e collaboratori più richiesti",
+        "p3": "Crescita dell'archivio clienti"
+      },
+      "lostLeads": {
+        "title": "Recupera i clienti che non sono tornati",
+        "lead": "Il sistema individua da solo i clienti che da tempo non prenotano e invia loro un invito personale a tornare.",
+        "p1": "Rilevamento automatico dei clienti inattivi",
+        "p2": "Messaggio personale scritto dall'IA",
+        "p3": "Senza ricerche e invii manuali"
+      },
+      "ai": {
+        "title": "Assistenti IA",
+        "lead": "Assistenti intelligenti per lavorare con clienti e appuntamenti.",
+        "p1": "Risposte alle domande frequenti",
+        "p2": "Aiuto con appuntamenti e clienti",
+        "p3": "Su misura per la tua attività"
+      }
+    }
+  },
+  "roleAccessGate": {
+    "title": "Accesso limitato",
+    "defaultMessage": "Non hai accesso a questa pagina. Rivolgiti al titolare dell'attività.",
+    "billingOwnerOnly": "La pagina 'Piani' è accessibile solo al titolare dell'attività.",
+    "receptionistPlusOwnerOnly": "La pagina 'ReceptionistPlus' è accessibile solo al titolare dell'attività.",
+    "staffRestricted": "Questa funzione è disattivata per il tuo account. Per l'accesso contatta il titolare dell'attività."
+  },
+  "paketi": {
+    "title": "Piani",
+    "subtitle": "Il tuo piano e i tuoi consumi",
+    "currentBadge": "Attuale",
+    "recommendedBadge": "Consigliato",
+    "renewalLabel": "Prossimo rinnovo",
+    "upgradeButton": "Passa a questo piano",
+    "maxUsersLabel": "Numero massimo di utenti dell'app",
+    "currentTeamLabel": "Attualmente nel team",
+    "usageTitle": "Consumi di questo mese",
+    "availablePlans": "Piani disponibili",
+    "customPricing": "Su richiesta",
+    "billingPeriod": {
+      "monthly": "Mensile",
+      "yearly": "Annuale",
+      "billedYearly": "Fatturato annualmente"
+    },
+    "quotaLabels": {
+      "sms": "Messaggi SMS",
+      "email": "Messaggi email",
+      "teamMembers": "Membri del team attivi",
+      "clients": "Clienti",
+      "appointments": "Appuntamenti questo mese"
+    },
+    "planDescriptions": {
+      "jedroPlus": "Include promemoria, email, prenotazioni online e analisi. Gli SMS si possono acquistare a parte.",
+      "jedroPro": "Include SMS, clienti persi e funzioni avanzate.",
+      "enterprise": "Piano su misura per esigenze aziendali particolari.",
+      "free": "Gratis per sempre: calendario, appuntamenti, clienti, servizi e collaboratori."
+    },
+    "planButtons": {
+      "active": "Attivo",
+      "sendInquiry": "Invia richiesta",
+      "upgrade": "Passa a questo piano"
+    },
+    "enterpriseModal": {
+      "title": "Richiesta Enterprise",
+      "subtitle": "Descrivi le tue esigenze e ti risponderemo il prima possibile.",
+      "submitButton": "Invia richiesta",
+      "submittingButton": "Invio in corso...",
+      "cancelButton": "Annulla",
+      "fields": {
+        "fullName": "Nome e cognome",
+        "email": "Email",
+        "phone": "Telefono",
+        "message": "Messaggio",
+        "messagePlaceholder": "Descrivi di cosa hai bisogno..."
+      },
+      "sendFailed": "Invio non riuscito. Scrivici direttamente a <email>timkogej@jedroplus.com</email>."
+    },
+    "inquiryToast": "Richiesta inviata. Ti contatteremo a breve.",
+    "plans": {
+      "jedroPlus": {
+        "features": [
+          "Archivio clienti e appuntamenti",
+          "Archivio servizi e collaboratori",
+          "Promemoria personalizzati prima e dopo l'appuntamento",
+          "Invio di email (500 email/mese)",
+          "Promemoria SMS con pacchetti SMS aggiuntivi (da 4 € per 50 SMS)",
+          "Comunicazione",
+          "Analisi complete",
+          "Prenotazioni online",
+          "Diversi design per le prenotazioni online"
+        ]
+      },
+      "jedroPro": {
+        "features": [
+          "Tutto di Jedro Plus",
+          "Contatto dei clienti persi",
+          "Invio di SMS (250 SMS/mese)",
+          "Invio di email (2000 email/mese)",
+          "Design aggiuntivi per le prenotazioni online"
+        ]
+      },
+      "enterprise": {
+        "features": [
+          "Funzioni IA su misura (chatbot, assistente, receptionist e altro)",
+          "Design di prenotazione su misura con elaborazione immagini ed elementi avanzati",
+          "Automazione dei processi aziendali su misura",
+          "Quota email e SMS illimitata",
+          "Account manager dedicato e assistenza prioritaria"
+        ]
+      }
+    },
+    "freeRenewal": "Gratuito, senza rinnovo",
+    "quotaNotIncluded": "Non incluso",
+    "quotaUnlimited": "Illimitato",
+    "perMonth": "/mese",
+    "freeCard": {
+      "name": "Free",
+      "price": "0 €",
+      "priceNote": "Gratis per sempre",
+      "features": [
+        "Calendario, appuntamenti e clienti",
+        "Servizi e collaboratori senza limiti",
+        "1 utente dell'app",
+        "Importazione clienti da Excel"
+      ],
+      "trialFeature": "Prova dei promemoria: {sms} SMS e {email} email"
+    },
+    "vatNote": "I prezzi sono finali. L'IVA non viene applicata perché Jedro+ non è soggetto IVA."
+  },
+  "trialModal": {
+    "badge": "Prova gratuita",
+    "title": "Approfitta della prova gratuita di Jedro Plus",
+    "subtitle": "Tutto ciò che ti serve per un'attività organizzata: senza rischi, senza impegno.",
+    "featuresTitle": "Cosa ottieni con Jedro Plus",
+    "features": {
+      "reminders": {
+        "title": "Promemoria personalizzati",
+        "desc": "Promemoria automatici ai clienti prima e dopo ogni appuntamento, senza lavoro manuale."
+      },
+      "booking": {
+        "title": "Prenotazioni online e diversi design",
+        "desc": "Link di prenotazione con scelta del design: i clienti prenotano da soli, in qualsiasi momento."
+      },
+      "communication": {
+        "title": "Comunicazione con i clienti",
+        "desc": "Avvisi e offerte ai clienti selezionati via email."
+      },
+      "analytics": {
+        "title": "Analisi complete",
+        "desc": "Panoramica di ricavi, occupazione, crescita dei clienti e andamento dell'attività."
+      }
+    },
+    "cta": "Prova gratis",
+    "later": "Forse più tardi",
+    "close": "Chiudi"
+  },
+  "quotaBanner": {
+    "emailName": "Email",
+    "nearLimit": {
+      "title": "{name}: utilizzati {used} di {total}.",
+      "body": "Quando la quota si esaurisce, messaggi e promemoria su questo canale non vengono più inviati."
+    },
+    "exhausted": {
+      "title": "{name}: promemoria e messaggi non vengono inviati.",
+      "body": "Hai utilizzato tutti i {total} di questo periodo ({used}/{total}), quindi i clienti non li ricevono."
+    },
+    "alsoOther": "Anche l'altra quota è quasi o del tutto esaurita.",
+    "dismiss": "Nascondi per oggi",
+    "ctaSms": "Acquista SMS",
+    "ctaEmail": "Acquista email",
+    "emailNameLoc": "email",
+    "trial": {
+      "nearLimit": {
+        "title": "Promemoria gratuiti ({name}): ne restano {remaining} di {total}.",
+        "body": "Dopo, i promemoria su questo canale non verranno più inviati."
+      },
+      "exhausted": {
+        "title": "I promemoria gratuiti ({name}) sono esauriti.",
+        "body": "I clienti non li ricevono più. Con Jedro Plus i promemoria continuano."
+      },
+      "cta": "Passa a Jedro Plus"
+    }
+  },
+  "addons": {
+    "back": "Impostazioni",
+    "title": "Componenti aggiuntivi e quote",
+    "subtitle": "Acquista messaggi SMS ed email o accessi aggiuntivi all'app. I componenti aggiuntivi vengono addebitati mensilmente insieme al piano.",
+    "loadError": "Impossibile caricare i dati. Ricarica la pagina.",
+    "currentPlan": "Piano attuale",
+    "noSubscription": "Nessun abbonamento attivo",
+    "noSubscriptionBody": "Puoi attivare i componenti aggiuntivi quando il piano è collegato a un profilo di pagamento.",
+    "perMonth": "{price} / mese",
+    "period": "Periodo di fatturazione: dal {start} al {end}",
+    "freeTitle": "Piano gratuito",
+    "freeBody": "I componenti aggiuntivi si possono acquistare con il piano Jedro Plus o Jedro Pro. Il piano gratuito include una prova una tantum: {sms} promemoria SMS e {email} via email.",
+    "freeCta": "Confronta i piani",
+    "noStripe": "Il tuo abbonamento non è collegato al pagamento online, quindi qui non è possibile acquistare componenti aggiuntivi. Scrivici a {email} e sistemiamo tutto.",
+    "sms": {
+      "title": "Messaggi SMS",
+      "unit": "SMS"
+    },
+    "email": {
+      "title": "Messaggi email",
+      "unit": "email"
+    },
+    "includedInPlan": "{count} inclusi nel piano",
+    "includedNone": "Il piano non include messaggi: aggiungili con un pacchetto qui sotto.",
+    "freeTrialIncluded": "{count} gratuiti di prova (una tantum)",
+    "fromAddons": " + {count} dai componenti aggiuntivi",
+    "used": "Utilizzati",
+    "available": "Disponibili",
+    "total": "Totale",
+    "renews": "Il contatore si azzera il: {date}",
+    "cancelScheduled": "Annullato – valido fino alla fine del periodo",
+    "activeAddon": "Componente aggiuntivo attivo: +{count} {unit} · {price} / mese",
+    "cancel": "Annulla componente aggiuntivo",
+    "cancelConfirm": "Annullare davvero?",
+    "cancelKeep": "No",
+    "canceling": "Annullamento …",
+    "extraQuota": "Messaggi aggiuntivi ogni mese",
+    "month": "/ mese",
+    "activating": "Attivazione …",
+    "alreadyActive": "Già attivo",
+    "activate": "Attiva +{count} {unit} a {price} / mese",
+    "purchaseNote": "L'importo viene aggiunto in proporzione alla prossima fattura del piano. Puoi annullare in qualsiasi momento; l'annullamento vale fino alla fine del periodo.",
+    "freeLocked": "Disponibile con un piano a pagamento.",
+    "seats": {
+      "title": "Accessi all'app",
+      "body": "Quante persone possono accedere all'app. Puoi aggiungere collaboratori al calendario senza limiti.",
+      "inPlan": "Nel piano",
+      "extra": "Aggiuntivi",
+      "total": "Totale",
+      "activeAddon": "+{count, plural, one {# accesso aggiuntivo} other {# accessi aggiuntivi}} · {price} / mese",
+      "sliderLabel": "Accessi aggiuntivi",
+      "summary": "Totale {total, plural, one {# accesso} other {# accessi}} ({included} nel piano + {extra} {extra, plural, one {aggiuntivo} other {aggiuntivi}})",
+      "cost": "{price} / mese per {count, plural, one {# accesso aggiuntivo} other {# accessi aggiuntivi}} ({unit} per accesso)",
+      "removeNote": "Alla conferma il componente aggiuntivo verrà annullato.",
+      "overTitle": "Attenzione:",
+      "over": "{count, plural, one {C'è # persona con accesso all'app} other {Ci sono # persone con accesso all'app}} in più rispetto al nuovo limite. Prima di ridurre, rimuovi l'accesso a chi non ne ha bisogno (Team e accessi).",
+      "updating": "Aggiornamento …",
+      "update": "Salva il numero di accessi"
+    },
+    "toast": {
+      "noStripe": "Per acquistare componenti aggiuntivi serve un piano a pagamento con carta di pagamento.",
+      "purchaseError": "Acquisto non riuscito. Riprova.",
+      "purchased": "Componente aggiuntivo attivato. I nuovi messaggi sono subito disponibili.",
+      "cancelError": "Annullamento non riuscito. Riprova.",
+      "canceled": "Il componente aggiuntivo verrà annullato alla fine del periodo di fatturazione."
+    },
+    "fromAddonsOnly": "{count} dai componenti aggiuntivi (il piano non include messaggi)"
+  }
+}

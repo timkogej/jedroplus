@@ -44,7 +44,7 @@ export function LanguageSwitcher() {
   return (
     <div className="px-3 py-2">
       <div className="text-xs font-medium text-gray-400 mb-1 uppercase tracking-wide">
-        Jezik / Language / Sprache
+        Jezik / Language / Sprache / Lingua
       </div>
       <div className="flex flex-col gap-0.5">
         {LANGUAGES.map((lang) => (

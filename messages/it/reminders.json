@@ -1,0 +1,358 @@
+{
+  "page": {
+    "title": "Promemoria",
+    "subtitle": "Panoramica delle impostazioni dei promemoria automatici",
+    "kicker": "Comunicazione",
+    "incompleteBannerTitle": "Completa le impostazioni contrassegnate con !",
+    "incompleteBannerDesc": "per un funzionamento impeccabile e per sfruttare tutto il potenziale dei promemoria.",
+    "openSettings": "Apri impostazioni →",
+    "settingsButton": "Impostazioni",
+    "flow": {
+      "eyebrow": "Flussi",
+      "title": "Panoramica degli invii",
+      "beforeEyebrow": "Prima dell'appuntamento",
+      "afterEyebrow": "Dopo l'appuntamento",
+      "rescheduleEyebrow": "Modifica dell'appuntamento",
+      "considers": "Tiene conto di",
+      "disabledReminder": "Questo flusso al momento non invia promemoria.",
+      "disabledReschedule": "Gli avvisi di spostamento dell'appuntamento non sono attivi.",
+      "detailsEyebrow": "Dettagli",
+      "settingsEyebrow": "Impostazioni",
+      "edit": "Modifica"
+    },
+    "stats": {
+      "sentToday": "Inviati oggi",
+      "sentTodayDesc": "Promemoria prima dell'appuntamento",
+      "scheduledTomorrow": "Previsti domani",
+      "scheduledTomorrowDesc": "Appuntamenti con promemoria",
+      "afterVisits": "Dopo le visite di oggi",
+      "afterVisitsDesc": "Appuntamenti completati"
+    },
+    "general": {
+      "sectionTitle": "Impostazioni generali",
+      "language": "Lingua di invio",
+      "tone": "Tono della comunicazione",
+      "replyTo": "Email di risposta (reply-to)",
+      "fromName": "Nome del mittente",
+      "fromNameDesc": "Il nome che compare come mittente nelle email",
+      "senderId": "ID mittente SMS",
+      "senderIdDesc": "Usato per l'invio degli SMS",
+      "tips": "Consigli in base al servizio",
+      "colors": "Colori dell'email",
+      "customerAddressing": "Come rivolgersi ai clienti",
+      "informalAddressing": "Del tu",
+      "formalAddressing": "Del Lei",
+      "automaticTag": "Etichetta promemoria automatico",
+      "staffInReminder": "Operatore nel promemoria",
+      "notSet": "Non impostato",
+      "notSetTemplate": "Modello personalizzato non impostato"
+    },
+    "before": {
+      "sectionTitle": "Promemoria prima dell'appuntamento",
+      "status": "Stato",
+      "channel": "Modalità di invio",
+      "timeLabel": "Orario di invio",
+      "timeValue": "1 giorno prima dell'appuntamento",
+      "dayBefore": "1 giorno prima dell'appuntamento",
+      "daysBefore": "{count} giorni prima dell'appuntamento",
+      "instructions": "Istruzioni",
+      "smsType": "Tipo di messaggio SMS",
+      "aiMode": "Scrive l'IA",
+      "aiConsiders": "L'IA tiene conto di",
+      "manualMode": "Modello personalizzato",
+      "includeService": "Includi il servizio",
+      "noSpecialInstructions": "Nessuna istruzione particolare"
+    },
+    "after": {
+      "sectionTitle": "Messaggi dopo l'appuntamento",
+      "status": "Stato",
+      "channel": "Modalità di invio",
+      "timeLabel": "Orario di invio",
+      "timeValue": "Subito dopo il completamento",
+      "instructions": "Istruzioni",
+      "discount": "Sconto",
+      "smsType": "Tipo di messaggio SMS",
+      "aiMode": "Scrive l'IA",
+      "aiConsiders": "L'IA tiene conto di",
+      "manualMode": "Modello personalizzato",
+      "includeService": "Includi il servizio",
+      "noSpecialInstructions": "Nessuna istruzione particolare"
+    },
+    "reschedule": {
+      "sectionTitle": "Spostamento dell'appuntamento",
+      "channel": "Modalità di invio",
+      "smsTemplate": "Modello SMS",
+      "emailTemplate": "Modello email"
+    },
+    "info": {
+      "title": "Informazioni sui promemoria",
+      "body": "I promemoria vengono <highlight>inviati automaticamente</highlight> in base alle impostazioni mostrate qui, senza lavoro manuale. Ogni cliente riceve un messaggio prima e/o dopo l'appuntamento, secondo la tua configurazione.\n\nQuando l'IA è attiva, <highlight>i messaggi non sono mai uguali</highlight>: l'IA ricorda il contesto del cliente, cita il servizio giusto e adatta il contenuto perché suoni naturale e personale. Questo significa più messaggi aperti, messaggi che restano impressi e clienti che si sentono apprezzati.\n\nPer una gestione più semplice puoi anche usare un <highlight>modello di messaggio personalizzato</highlight>, quando vuoi il pieno controllo sul contenuto.\n\nPer qualsiasi domanda, scrivici a help@jedroplus.com."
+    },
+    "sendingStatus": {
+      "title": "Stato degli invii",
+      "ok": {
+        "title": "I promemoria {name} vengono inviati",
+        "body": "Ancora disponibili {remaining} di {total} in questo periodo."
+      },
+      "nearLimit": {
+        "title": "Quota {name} quasi esaurita",
+        "body": "Utilizzati {used} di {total}. Quando si esaurisce, i promemoria {name} non vengono più inviati."
+      },
+      "exhausted": {
+        "title": "I promemoria {name} non vengono inviati",
+        "body": "Hai utilizzato tutti i {total} di questo periodo ({used}/{total}). I clienti non ricevono i promemoria {name}."
+      },
+      "unavailable": {
+        "title": "I promemoria {name} non vengono inviati",
+        "body": "Il tuo piano non include i messaggi {name}, quindi i promemoria su questo canale non vengono inviati. Acquista un pacchetto o scegli un altro canale nelle impostazioni."
+      },
+      "renews": "La quota si rinnova il {date}.",
+      "buySms": "Acquista SMS",
+      "buyEmail": "Acquista email",
+      "trial": {
+        "ok": {
+          "title": "I promemoria {name} vengono inviati",
+          "body": "Prova gratuita: ancora {remaining} di {total}."
+        },
+        "nearLimit": {
+          "title": "I promemoria {name} gratuiti stanno per esaurirsi",
+          "body": "Ne restano {remaining} di {total}. Dopo, i promemoria {name} non verranno più inviati."
+        },
+        "exhausted": {
+          "title": "I promemoria {name} gratuiti sono esauriti",
+          "body": "Hai utilizzato tutti i {total}. I clienti non ricevono più i promemoria {name}."
+        },
+        "upgrade": "Passa a Jedro Plus",
+        "introTitle": "Prova i promemoria gratuitamente",
+        "introBody": "Hai a disposizione {sms} promemoria SMS e {email} promemoria via email. Non è una quota mensile, ma una prova una tantum. Una volta esauriti, le impostazioni restano, ma per continuare a inviare serve Jedro Plus."
+      }
+    },
+    "smsLog": {
+      "title": "Ultimi SMS",
+      "countries": "Inviamo SMS ai numeri di questi Paesi: {countries}. I clienti con altri numeri ricevono un'email.",
+      "empty": "Qui compariranno gli SMS inviati e se sono stati recapitati.",
+      "status": {
+        "sent": "Inviato",
+        "delivered": "Recapitato",
+        "failed": "Non recapitato",
+        "blocked_country": "Paese non supportato"
+      },
+      "kind": {
+        "reminder_before": "Promemoria prima dell'appuntamento",
+        "reminder_after": "Messaggio dopo l'appuntamento",
+        "reschedule": "Spostamento dell'appuntamento",
+        "confirmation": "Conferma dell'appuntamento",
+        "marketing": "Novità e offerte",
+        "other": "SMS"
+      }
+    }
+  },
+  "status": {
+    "enabled": "Attivo",
+    "disabled": "Disattivato"
+  },
+  "tone": {
+    "professional": "Professionale",
+    "friendly": "Cordiale",
+    "salesOriented": "Orientato alla vendita",
+    "formal": "Formale",
+    "relaxed": "Informale"
+  },
+  "language": {
+    "sl": "Slovenščina",
+    "en": "English",
+    "it": "Italiano",
+    "de": "Deutsch"
+  },
+  "modal": {
+    "title": "Impostazioni promemoria",
+    "subtitle": "Come e quando inviare i promemoria ai clienti",
+    "closeButton": "Chiudi",
+    "saveButton": "Salva",
+    "savingButton": "Salvataggio...",
+    "saveError": "Si è verificato un errore durante il salvataggio",
+    "general": {
+      "sectionTitle": "Impostazioni generali",
+      "sectionDesc": "Impostazioni di base dei promemoria",
+      "languageLabel": "Lingua di invio",
+      "languageDesc": "La lingua in cui vengono inviati promemoria e messaggi",
+      "languagePlaceholder": "Scegli la lingua",
+      "toneLabel": "Tono della comunicazione",
+      "toneDesc": "Come il sistema deve comunicare con i clienti",
+      "tonePlaceholder": "Scegli il tono",
+      "toneOptions": {
+        "formal": "Formale",
+        "friendly": "Cordiale",
+        "relaxed": "Informale",
+        "professional": "Professionale"
+      },
+      "replyToLabel": "Email di risposta (reply-to)",
+      "replyToDesc": "L'indirizzo email a cui i clienti possono rispondere",
+      "replyToPlaceholder": "info@latuaattivita.it",
+      "fromNameLabel": "Nome del mittente",
+      "fromNameDesc": "Il nome che compare come mittente nelle email",
+      "fromNamePlaceholder": "Centro Estetico Bellezza",
+      "fromEmailLabel": "Indirizzo email del mittente",
+      "fromEmailDesc": "Questo indirizzo email è fisso e non può essere modificato",
+      "locked": "Bloccato",
+      "senderIdLabel": "ID mittente SMS",
+      "senderIdDesc": "Il nome del mittente che compare nei messaggi SMS",
+      "notSet": "Non impostato",
+      "tipsLabel": "Consigli in base al servizio",
+      "tipsDesc": "Se i promemoria devono contenere consigli specifici per il servizio",
+      "tipsYes": "Sì",
+      "tipsNo": "No",
+      "tipsAuto": "Decide l'IA",
+      "colorsTitle": "Colori dei modelli email",
+      "colorPrimary": "Colore primario",
+      "colorSecondary": "Colore secondario",
+      "addressingLabel": "Come rivolgersi ai clienti",
+      "addressingDesc": "Se nei promemoria ci si rivolge ai clienti dando del Lei o del tu.",
+      "addressingFormal": "Del Lei",
+      "addressingInformal": "Del tu",
+      "autoTagLabel": "Contrassegna i messaggi come promemoria automatico",
+      "autoTagDesc": "All'inizio del messaggio viene aggiunta un'etichetta che indica che si tratta di un promemoria automatico.",
+      "staffLabel": "Includi l'operatore nel promemoria",
+      "staffDesc": "Se attivo, il promemoria può citare il collaboratore che eseguirà il servizio.",
+      "daysBeforeLabel": "Invia il promemoria (giorni prima dell'appuntamento)",
+      "daysBeforeDesc": "Quanti giorni prima dell'appuntamento inviare il promemoria.",
+      "select": "Scegli"
+    },
+    "before": {
+      "sectionTitle": "Promemoria prima dell'appuntamento",
+      "sectionDesc": "I promemoria che i clienti ricevono prima dell'appuntamento",
+      "enableLabel": "Invia promemoria prima dell'appuntamento",
+      "enableDesc": "Invio automatico del promemoria 1 giorno prima dell'appuntamento",
+      "channelLabel": "Modalità di invio",
+      "channelDesc": "Email o SMS",
+      "channelPlaceholder": "Scegli la modalità",
+      "smsNotAvailable": "– non disponibile",
+      "smsUpgradeHint": "Gli SMS sono disponibili nei piani superiori.",
+      "upgradeButton": "Cambia piano",
+      "smsSettings": "Impostazioni del messaggio SMS",
+      "modeAI": "Scrive l'IA",
+      "modeManual": "Modello personalizzato",
+      "aiDataHint": "L'IA scriverà l'SMS in base ai dati selezionati:",
+      "includeService": "Includi il servizio",
+      "includeServiceDesc": "Cita il servizio dell'appuntamento nel promemoria.",
+      "includeNotes": "Includi le note sull'appuntamento",
+      "includeNotesDesc": "Includi le note dell'appuntamento ed eventuali note sul cliente.",
+      "includeInstructions": "Includi le istruzioni per i promemoria",
+      "includeInstructionsDesc": "Scrivi qui sotto le istruzioni che l'IA segue nello scrivere il promemoria.",
+      "instructionsHint": "Indica le abitudini della tua attività, consigli specifici prima di determinati servizi, cosa l'IA deve citare o evidenziare, che tipo di rapporto con il cliente desideri e così via.",
+      "instructionsPlaceholder": "Es.: Chiama sempre i clienti per nome. Prima di un massaggio ricorda di arrivare riposati e non subito dopo i pasti. Per il servizio 'semipermanente' ricorda di non tenere le unghie in acqua almeno il giorno prima. Il tono deve essere caldo e professionale.",
+      "templateHint": "Modello del messaggio SMS (max 155 caratteri)",
+      "templatePlaceholder": "Es.: Ti ricordiamo l'appuntamento di domani alle {{cas}}. {{ime_podjetja}}. Per disdire chiama il {{telefon_podjetja}}.",
+      "noEmojiHint": "Senza emoji e caratteri speciali.",
+      "emailInstructionsTitle": "Istruzioni per il promemoria prima dell'appuntamento",
+      "emailInstructionsDesc": "Istruzioni o informazioni aggiuntive per il promemoria prima dell'appuntamento",
+      "emailPlaceholder": "Es.: Ti chiediamo di arrivare 5 minuti prima dell'appuntamento. Il parcheggio si trova sul retro dell'edificio.",
+      "timingTitle": "Orario di invio del promemoria",
+      "timingValue": "Fisso: 1 giorno prima dell'appuntamento",
+      "timingDays": "{count, plural, one {# giorno} other {# giorni}} prima dell'appuntamento"
+    },
+    "after": {
+      "sectionTitle": "Messaggi dopo l'appuntamento",
+      "sectionDesc": "Messaggi di follow-up dopo l'appuntamento completato",
+      "enableLabel": "Invia un messaggio dopo l'appuntamento",
+      "enableDesc": "Follow-up subito dopo il completamento dell'appuntamento",
+      "channelLabel": "Modalità di invio",
+      "channelDesc": "Email o SMS",
+      "channelPlaceholder": "Scegli la modalità",
+      "smsNotAvailable": "– non disponibile",
+      "smsUpgradeHint": "Gli SMS sono disponibili nei piani superiori.",
+      "upgradeButton": "Cambia piano",
+      "smsSettings": "Impostazioni del messaggio SMS",
+      "modeAI": "Scrive l'IA",
+      "modeManual": "Modello personalizzato",
+      "aiDataHint": "L'IA scriverà l'SMS in base ai dati selezionati:",
+      "includeService": "Includi il servizio",
+      "includeServiceDesc": "Cita il servizio dell'appuntamento nel messaggio dopo la visita.",
+      "includeNotes": "Includi le note dopo l'appuntamento",
+      "includeNotesDesc": "Includi le note che scrivi al completamento dell'appuntamento.",
+      "includeInstructions": "Includi le istruzioni per i promemoria",
+      "includeInstructionsDesc": "Scrivi qui sotto le istruzioni che l'IA segue nello scrivere il messaggio dopo l'appuntamento.",
+      "instructionsHint": "Indica le abitudini della tua attività, consigli specifici dopo determinati servizi, cosa l'IA deve citare o consigliare e che tipo di rapporto con il cliente desideri dopo la visita.",
+      "instructionsPlaceholder": "Es.: Dopo un massaggio consiglia al cliente di bere molta acqua. Per il servizio 'colore' ricorda di non bagnare i capelli per almeno 24 ore. Augura una buona giornata e invita a tornare.",
+      "templateHint": "Modello del messaggio SMS (max 155 caratteri)",
+      "templatePlaceholder": "Es.: Grazie per la visita! Per il prossimo appuntamento contattaci al {{telefon_podjetja}}.",
+      "noEmojiHint": "Senza emoji e caratteri speciali.",
+      "emailInstructionsTitle": "Istruzioni per il messaggio dopo l'appuntamento",
+      "emailInstructionsDesc": "Istruzioni o informazioni aggiuntive per il follow-up dopo l'appuntamento",
+      "emailPlaceholder": "Es.: Grazie per la visita! Per risultati ottimali ti consigliamo il nostro shampoo specifico.",
+      "discountTitle": "Includi uno sconto nel messaggio",
+      "discountDesc": "Offri uno sconto per la prossima visita",
+      "discountLabel": "Sconto / promozione",
+      "discountFieldDesc": "Descrizione dello sconto da includere nel messaggio",
+      "discountPlaceholder": "10% di sconto sulla prossima visita",
+      "timingTitle": "Orario di invio",
+      "timingValue": "Fisso: subito dopo il completamento dell'appuntamento"
+    },
+    "smsAccess": {
+      "notIncluded": "Il tuo piano non include i messaggi SMS. Acquista un pacchetto SMS o passa a Jedro Pro, che include 250 SMS al mese.",
+      "notIncludedFree": "I promemoria SMS sono disponibili nei piani a pagamento.",
+      "buySms": "Acquista SMS",
+      "comparePlans": "Confronta i piani",
+      "remaining": "Ancora disponibili {remaining} di {total} SMS in questo periodo.",
+      "nearLimit": "Utilizzati {used} di {total} SMS. Quando finiscono, gli SMS non vengono più inviati.",
+      "exhausted": "Hai utilizzato tutti gli SMS di questo periodo ({used}/{total}). Gli SMS non verranno inviati finché non acquisti un pacchetto o il periodo non si rinnova."
+    },
+    "englishVariant": {
+      "add": "Aggiungi la versione inglese (per clienti dall'estero)",
+      "title": "Versione inglese",
+      "remove": "Rimuovi",
+      "hint": "I clienti che non parlano la lingua della tua attività riceveranno questa versione. Se è vuota, ricevono il modello principale.",
+      "placeholder": "Hi {{ime}}, a reminder of your appointment on {{datum}} at {{cas}}. {{ime_podjetja}}",
+      "saveError": "Le impostazioni sono state salvate, ma la versione inglese no. Riprova."
+    },
+    "reschedule": {
+      "title": "Avviso di spostamento dell'appuntamento",
+      "desc": "Il cliente riceve un avviso quando sposti il suo appuntamento.",
+      "enableLabel": "Attiva l'avviso di spostamento",
+      "enableDesc": "Quando sposti un appuntamento, il sistema ti propone di inviare un avviso al cliente.",
+      "channelLabel": "Modalità di invio",
+      "channelDesc": "Scegli il canale per l'avviso di spostamento.",
+      "smsTemplate": "Modello SMS",
+      "emailTemplate": "Modello email",
+      "smsPlaceholder": "Ciao {{ime}}, il tuo appuntamento è stato spostato al {{datum}} alle {{cas}}. {{ime_podjetja}}",
+      "emailPlaceholder": "Gentile {{ime}}, il tuo appuntamento è stato spostato al {{datum}} alle {{cas}}. Cordiali saluti, {{ime_podjetja}}",
+      "smsHint": "Puoi usare le stesse variabili dei promemoria prima e dopo l'appuntamento.",
+      "emailHint": "Il modello email non ha limiti di caratteri e supporta tutti i caratteri speciali."
+    }
+  },
+  "preview": {
+    "label": "Ecco cosa vedrà il cliente",
+    "stats": "{length} caratteri · {parts, plural, one {# SMS} other {# SMS}}",
+    "gsmHint": "Senza emoji e caratteri speciali: così un SMS contiene fino a 160 caratteri. Le vocali accentate (à, è, é, ì, ò, ù) vanno bene.",
+    "unicodeWarning": "Il messaggio contiene caratteri che non fanno parte dell'alfabeto SMS standard ({chars}). Secondo lo standard SMS, un messaggio così ha al massimo 70 caratteri per SMS, quindi viene diviso prima in più SMS e costa di più. Sostituiscili con lettere semplici o rimuovili.",
+    "sample": {
+      "firstName": "Anna",
+      "lastName": "Rossi",
+      "service": "Manicure",
+      "staff": "Giulia",
+      "company": "Salone Anna",
+      "address": "Via Roma 1"
+    },
+    "unknownVars": "Variabile sconosciuta: {tokens}. Il cliente vedrà questo testo così com'è. Sostituiscila con una variabile dell'elenco qui sopra (es. Telefono dell'attività)."
+  },
+  "templateEditor": {
+    "vars": {
+      "firstName": "Nome del cliente",
+      "lastName": "Cognome del cliente",
+      "date": "Data dell'appuntamento",
+      "time": "Ora dell'appuntamento",
+      "service": "Servizio dell'appuntamento",
+      "staff": "Nome dell'operatore",
+      "company": "Nome dell'attività",
+      "address": "Indirizzo dell'attività",
+      "companyPhone": "Telefono dell'attività",
+      "companyEmail": "Email dell'attività",
+      "year": "Anno",
+      "rebookLink": "Link per riprenotare"
+    },
+    "clickToInsert": "Clicca su una variabile per inserirla nel testo:",
+    "estimatedLength": "Numero stimato di caratteri (le variabili vengono conteggiate in base al valore reale)",
+    "tooLong": "Il messaggio è troppo lungo!",
+    "tooLongBody": "Il modello supera i {max} caratteri. Accorcia una parte del testo."
+  }
+}

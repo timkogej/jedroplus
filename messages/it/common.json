@@ -1,0 +1,108 @@
+{
+  "buttons": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "next": "Avanti",
+    "confirm": "Conferma",
+    "discard": "Scarta",
+    "submit": "Invia",
+    "tryAgain": "Riprova",
+    "viewAll": "Mostra tutto",
+    "add": "Aggiungi",
+    "create": "Crea",
+    "update": "Aggiorna",
+    "search": "Cerca",
+    "filter": "Filtro",
+    "export": "Esporta",
+    "import": "Importa",
+    "copy": "Copia",
+    "share": "Condividi"
+  },
+  "status": {
+    "active": "Attivo",
+    "inactive": "Inattivo",
+    "expired": "Scaduto",
+    "confirmed": "Confermato",
+    "cancelled": "Annullato",
+    "pending": "In elaborazione",
+    "completed": "Completato",
+    "loading": "Caricamento...",
+    "saving": "Salvataggio..."
+  },
+  "confirm": {
+    "title": "Sei sicuro?",
+    "cannotUndo": "Questa azione non può essere annullata.",
+    "yes": "Sì",
+    "no": "No"
+  },
+  "roles": {
+    "owner": "Titolare",
+    "admin": "Amministratore",
+    "staff": "Collaboratore",
+    "receptionist": "Reception"
+  },
+  "errors": {
+    "generic": "Si è verificato un errore. Riprova.",
+    "loadFailed": "Errore durante il caricamento",
+    "noResults": "Nessun risultato",
+    "networkError": "Problemi di connessione",
+    "unauthorized": "Non hai l'autorizzazione per questa azione",
+    "fillAllFields": "Compila tutti i campi"
+  },
+  "time": {
+    "today": "Oggi",
+    "yesterday": "Ieri",
+    "tomorrow": "Domani",
+    "now": "Ora"
+  },
+  "daysShort": {
+    "mon": "Lun",
+    "tue": "Mar",
+    "wed": "Mer",
+    "thu": "Gio",
+    "fri": "Ven",
+    "sat": "Sab",
+    "sun": "Dom"
+  },
+  "daysLong": {
+    "mon": "Lunedì",
+    "tue": "Martedì",
+    "wed": "Mercoledì",
+    "thu": "Giovedì",
+    "fri": "Venerdì",
+    "sat": "Sabato",
+    "sun": "Domenica"
+  },
+  "search": {
+    "placeholder": "Cerca...",
+    "noResults": "Nessun risultato"
+  },
+  "divider": {
+    "or": "oppure"
+  },
+  "pagination": {
+    "previous": "Precedente",
+    "next": "Successiva"
+  },
+  "dayLetters": {
+    "sun": "D",
+    "mon": "L",
+    "tue": "M",
+    "wed": "M",
+    "thu": "G",
+    "fri": "V",
+    "sat": "S"
+  },
+  "placeholders": {
+    "email": "mario@azienda.it",
+    "contactEmail": "giulia@azienda.it",
+    "infoEmail": "info@azienda.it",
+    "mobile": "+39 333 123 4567",
+    "landline": "+39 02 1234 5678",
+    "website": "https://www.azienda.it"
+  }
+}

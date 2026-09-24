@@ -1,0 +1,207 @@
+{
+  "page": {
+    "title": "Prenotazioni",
+    "subtitle": "Gestione del sistema di prenotazione online"
+  },
+  "incompleteBanner": {
+    "message": "Scegli nelle impostazioni il link di prenotazione principale, così il sistema sa quale link inviare ai clienti.",
+    "openButton": "Apri impostazioni →"
+  },
+  "newDesignsBanner": "Ogni mese nuovi design per le pagine di prenotazione",
+  "requestsNav": {
+    "title": "Richieste di appuntamento",
+    "subtitle": "Esamina e conferma le richieste inviate dai clienti"
+  },
+  "multiChannelBanner": {
+    "bold": "Puoi usare ogni link di prenotazione su un canale diverso.",
+    "body": "Un design sul profilo Instagram, un altro sul sito web, un terzo nella firma email: ogni canale può avere il suo. I clienti arrivano sempre alla stessa pagina, solo con un aspetto diverso."
+  },
+  "standardSection": {
+    "title": "Pagine di prenotazione standard",
+    "subtitle": "Design Classico, Moderno ed Elegante"
+  },
+  "premiumSection": {
+    "title": "Design Jedro Pro",
+    "subtitle": "Stagionale, Magazine e Casino. Inclusi nel piano Jedro Pro.",
+    "badge": "Pro",
+    "lockedNote": "Con il tuo piano questi design sono bloccati. Guardali e sbloccali con Jedro Pro.",
+    "upgrade": "Sblocca con Jedro Pro",
+    "lockedLabel": "Bloccato"
+  },
+  "designs": {
+    "bookingLinkLabel": "Link di prenotazione",
+    "notAvailable": "Non disponibile",
+    "comingSoon": "Presto disponibile",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "classic": {
+      "name": "Classico",
+      "subtitle": "Semplice e chiaro",
+      "description": "Design classico con eleganti sfondi sfumati. Ideale per valorizzare i colori della tua attività e creare un marchio riconoscibile."
+    },
+    "modern": {
+      "name": "Moderno",
+      "subtitle": "Contemporaneo e dinamico",
+      "description": "Design contemporaneo con sfondo scuro e accenti vivaci. Per il miglior effetto visivo e un tocco premium consigliamo un colore primario scuro."
+    },
+    "elegant": {
+      "name": "Elegante",
+      "subtitle": "Pulito e semplice",
+      "description": "Design minimalista di lusso con delicati toni terrosi. Perfetto per saloni eleganti, spa e servizi esclusivi."
+    },
+    "seasonal": {
+      "name": "Stagionale",
+      "subtitle": "Adattivo e vivace",
+      "description": "Design dinamico che si adatta automaticamente alle stagioni e alle festività. Primavera, estate, autunno, inverno, Natale, San Valentino, Halloween e altro: la tua pagina è sempre fresca e attuale."
+    },
+    "magazine": {
+      "name": "Magazine",
+      "subtitle": "Elegante ed editoriale",
+      "description": "Design Magazine premium con estetica editoriale e uno stile visivo di alta qualità. Ideale per saloni esclusivi, studi estetici e servizi premium."
+    },
+    "casino": {
+      "name": "Casino",
+      "subtitle": "Glamour ed emozionante",
+      "description": "Esclusivo design in stile casinò con atmosfera glamour, accenti scintillanti ed elementi visivi dinamici. Perfetto per chi vuole trasformare la prenotazione in un'esperienza indimenticabile."
+    }
+  },
+  "customCta": {
+    "text": "Vuoi un sistema di prenotazione su misura per la tua attività?",
+    "linkText": "Scrivici a info@jedroplus.com"
+  },
+  "mainLink": {
+    "title": "Link principale per le prenotazioni",
+    "subtitle": "Il cliente sceglie da solo il servizio e l'orario libero. Aggiungilo al sito web, a Instagram o a Google; lo inviamo anche nei messaggi. Per raccogliere i dati dei clienti senza appuntamento c'è il codice QR in Impostazioni → Generale.",
+    "copy": "Copia",
+    "copied": "Copiato"
+  },
+  "mgmtLink": {
+    "title": "Link per spostare o annullare gli appuntamenti",
+    "subtitle": "Link universale per gestire gli appuntamenti: i clienti possono usarlo per spostarli o annullarli."
+  },
+  "settingsOverview": {
+    "title": "Impostazioni",
+    "bookingEnabled": "Prenotazioni online",
+    "enabled": "Attive",
+    "disabled": "Disattivate",
+    "timeSlots": "Intervalli di tempo",
+    "timeSlotValue": "{minutes} min",
+    "clientConfirm": "Conferma al cliente",
+    "onlineConfirm": "Conferma dopo la prenotazione online",
+    "mainLinkLabel": "Link di prenotazione principale",
+    "linkSet": "Impostato",
+    "notConfigured": "Non impostato",
+    "colors": "Colori",
+    "mgmtLinkLabel": "Link per spostare e annullare",
+    "yes": "Sì",
+    "no": "No",
+    "onlineConfirmOffHint": "I clienti che prenotano online non ricevono una conferma e non sanno se l'appuntamento è stato registrato.",
+    "onlineConfirmOffCta": "Attiva la conferma"
+  },
+  "modal": {
+    "title": "Impostazioni prenotazioni",
+    "subtitle": "Come funzionano le prenotazioni online",
+    "general": {
+      "sectionTitle": "Impostazioni generali",
+      "sectionDesc": "Impostazioni di base delle prenotazioni",
+      "enableLabel": "Attiva le prenotazioni online",
+      "enableDesc": "Se le prenotazioni online sono attive",
+      "intervalLabel": "Durata dell'intervallo",
+      "intervalDesc": "Intervalli per le prenotazioni (15, 30 o 60 minuti)",
+      "intervalPlaceholder": "Scegli l'intervallo",
+      "interval15": "15 minuti",
+      "interval30": "30 minuti",
+      "interval60": "60 minuti (1 ora)"
+    },
+    "payments": {
+      "sectionTitle": "Pagamenti online",
+      "sectionDesc": "Impostazioni di pagamento nella prenotazione online",
+      "enableLabel": "Attiva i pagamenti Stripe",
+      "enableDesc": "I clienti possono pagare durante la prenotazione online, se il servizio lo richiede.",
+      "lockedDesc": "Per attivarlo servono il piano Jedro Pro e la cassa fiscale PRO o PLUS.",
+      "checking": "Verifica dei requisiti per i pagamenti online...",
+      "requirementsTitle": "Per attivarlo deve essere abilitato:",
+      "requirementPlan": "Piano Jedro Pro",
+      "requirementPos": "Cassa fiscale PRO o PLUS",
+      "ok": "Abilitato",
+      "missing": "Mancante",
+      "modeLabel": "Tipo di pagamento della prenotazione",
+      "modeDesc": "Scegli se il cliente paga l'intero importo o solo un acconto.",
+      "modePlaceholder": "Scegli il tipo di pagamento",
+      "modeFull": "Pagamento completo",
+      "modeDeposit": "Acconto",
+      "depositLabel": "Importo dell'acconto",
+      "depositDesc": "Percentuale dell'importo che il cliente paga al momento della prenotazione."
+    },
+    "mainLink": {
+      "sectionTitle": "Link di prenotazione principale",
+      "sectionDesc": "Il link usato negli invii ai clienti",
+      "selectLabel": "Scegli il link di prenotazione principale",
+      "selectDesc": "Questo link verrà usato quando si inviano le prenotazioni ai clienti",
+      "selectPlaceholder": "Scegli un link...",
+      "missingRequired": "Scegli il link di prenotazione principale.",
+      "noLinksAvailable": "I link di prenotazione non sono ancora disponibili",
+      "classic": "Classico",
+      "modern": "Moderno",
+      "minimal": "Minimal",
+      "seasonal": "Stagionale",
+      "magazine": "Magazine"
+    },
+    "confirmations": {
+      "sectionTitle": "Conferme",
+      "sectionDesc": "Invio delle conferme ai clienti",
+      "manualLabel": "Invia conferma alla prenotazione dell'appuntamento",
+      "manualDesc": "Invia automaticamente una conferma alla creazione dell'appuntamento",
+      "onlineLabel": "Invia conferma dopo la prenotazione online",
+      "onlineDesc": "Conferma per le prenotazioni effettuate tramite il sistema online",
+      "channelLabel": "Invia conferma tramite:",
+      "smsUnavailable": "– non disponibile",
+      "smsUpgradeNote": "Per gli SMS servono messaggi SMS (componente aggiuntivo o Jedro Pro).",
+      "smsUpgradeLink": "Vedi le opzioni",
+      "smsPlanNotePrefix": "Per inviare conferme via SMS",
+      "smsPlanNoteLink": "acquista messaggi SMS",
+      "smsSettings": "Impostazioni del messaggio SMS",
+      "modeAI": "Scrive l'IA",
+      "modeManual": "Modello personalizzato",
+      "templateHint": "Modello del messaggio SMS (max 155 caratteri)",
+      "templatePlaceholder": "Es.: La tua prenotazione è confermata per il {{datum}} alle {{cas}}. {{ime_podjetja}}.",
+      "noEmojiHint": "Senza emoji e caratteri speciali."
+    },
+    "policy": {
+      "sectionTitle": "Regole di annullamento e spostamento",
+      "sectionDesc": "Quanti giorni prima dell'appuntamento i clienti possono annullare o spostare",
+      "cancelLabel": "Annullamento dell'appuntamento",
+      "cancelDesc": "Quanti giorni prima il cliente può annullare",
+      "rescheduleLabel": "Spostamento dell'appuntamento",
+      "rescheduleDesc": "Quanti giorni prima il cliente può spostare",
+      "selectPlaceholder": "Scegli",
+      "sameDay": "Lo stesso giorno",
+      "day1": "1 giorno prima",
+      "day2": "2 giorni prima",
+      "day3": "3 giorni prima",
+      "day5": "5 giorni prima",
+      "day7": "7 giorni prima",
+      "day14": "14 giorni prima"
+    },
+    "colors": {
+      "sectionTitle": "Colori della pagina di prenotazione",
+      "sectionDesc": "Personalizza l'aspetto della tua pagina di prenotazione",
+      "primaryLabel": "Colore primario",
+      "primaryDesc": "Colore principale per pulsanti e accenti",
+      "secondaryLabel": "Colore secondario",
+      "secondaryDesc": "Colore per gli elementi aggiuntivi",
+      "bgFromLabel": "Sfondo sfumato (inizio)",
+      "bgFromDesc": "Colore iniziale dello sfondo sfumato",
+      "bgToLabel": "Sfondo sfumato (fine)",
+      "bgToDesc": "Colore finale dello sfondo sfumato",
+      "previewLabel": "Anteprima dello sfondo:",
+      "previewButton": "Anteprima pulsante"
+    },
+    "footer": {
+      "close": "Chiudi",
+      "save": "Salva",
+      "saving": "Salvataggio...",
+      "saveError": "Si è verificato un errore durante il salvataggio"
+    }
+  }
+}

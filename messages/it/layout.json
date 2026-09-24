@@ -1,0 +1,221 @@
+{
+  "sidebar": {
+    "sections": {
+      "main": "Principale",
+      "ai": "IA",
+      "communication": "Comunicazione",
+      "modules": "Moduli",
+      "promotions": "Promozioni",
+      "analytics": "Analisi",
+      "account": "Account",
+      "billing": "Piani",
+      "settings": "Impostazioni"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "calendar": "Calendario",
+      "appointments": "Appuntamenti",
+      "clients": "Clienti",
+      "communication": "Comunicazione",
+      "reminders": "Promemoria",
+      "reservations": "Prenotazioni",
+      "lostLeads": "Clienti persi",
+      "receptionistPlus": "ReceptionistPlus",
+      "services": "Servizi",
+      "resources": "Risorse",
+      "staff": "Collaboratori",
+      "promotions": "Promozioni",
+      "analytics": "Analisi",
+      "billing": "Piani",
+      "plans": "Piani",
+      "settings": "Impostazioni",
+      "signOut": "Esci",
+      "new": "Nuovo",
+      "newAppointment": "Nuovo appuntamento",
+      "newClient": "Nuovo cliente",
+      "newService": "Nuovo servizio"
+    },
+    "tooltips": {
+      "expand": "Espandi",
+      "collapse": "Comprimi"
+    },
+    "stats": {
+      "today": "Oggi",
+      "week": "Settimana",
+      "month": "Mese"
+    }
+  },
+  "appbar": {
+    "home": "Home",
+    "search": "Cerca...",
+    "profile": "Il mio profilo",
+    "plans": "Piani",
+    "signOut": "Esci",
+    "aria": {
+      "openMenu": "Apri menu",
+      "closeMenu": "Chiudi menu",
+      "search": "Cerca"
+    },
+    "breadcrumbs": {
+      "dashboard": "Dashboard",
+      "calendar": "Calendario",
+      "appointments": "Appuntamenti",
+      "clients": "Clienti",
+      "services": "Servizi",
+      "staff": "Collaboratori",
+      "reminders": "Promemoria",
+      "lostLeads": "Clienti persi",
+      "analytics": "Analisi",
+      "asistent": "Asistent+",
+      "chatbotPlus": "Chatbot+",
+      "settings": "Impostazioni",
+      "billing": "Piani",
+      "notifications": "Notifiche",
+      "reservations": "Prenotazioni",
+      "resources": "Risorse",
+      "promotions": "Promozioni",
+      "communication": "Comunicazione",
+      "receptionistPlus": "Receptionist+",
+      "qrCode": "Codice QR",
+      "plans": "Piani",
+      "addons": "Componenti aggiuntivi",
+      "team": "Team e accessi",
+      "company": "Attività",
+      "general": "Generale",
+      "messages": "Messaggi",
+      "history": "Cronologia",
+      "discounts": "Sconti",
+      "happyHours": "Happy hour",
+      "serviceAddOns": "Servizi aggiuntivi",
+      "requests": "Richieste"
+    }
+  },
+  "search": {
+    "placeholder": "Cerca pagine, azioni...",
+    "escHint": "chiudi",
+    "navHint": "naviga",
+    "openHint": "apri",
+    "shortcutHint": "K per cercare",
+    "categories": {
+      "pages": "Pagine",
+      "quickActions": "Accesso rapido",
+      "recent": "Ricerche recenti",
+      "settings": "Impostazioni"
+    },
+    "empty": "Nessun risultato per \"{query}\"",
+    "items": {
+      "plans": "Piani e pagamenti",
+      "addons": "Componenti aggiuntivi (SMS, accessi)",
+      "team": "Team e accessi",
+      "company": "Dati dell'attività"
+    }
+  },
+  "fallbacks": {
+    "companyName": "La mia attività",
+    "userName": "Utente"
+  },
+  "guide": {
+    "stepOf": "Passo {current} di {total}",
+    "close": "Chiudi guida",
+    "skip": "Salta",
+    "back": "Indietro",
+    "next": "Avanti",
+    "finish": "Fine",
+    "menuItem": "Guida all'app",
+    "tours": {
+      "dashboard": {
+        "welcome": {
+          "title": "Benvenuto in Jedro+",
+          "body": "In un minuto ti mostriamo dove trovare le cose. Puoi ripetere la guida quando vuoi dal menu del profilo in alto a destra."
+        },
+        "newAppointment": {
+          "title": "Nuovo appuntamento",
+          "body": "Il modo più veloce per un nuovo appuntamento: scegli cliente, servizio e orario. Puoi aggiungere il cliente al momento."
+        },
+        "calendar": {
+          "title": "Calendario",
+          "body": "Il tuo giorno, la tua settimana o il tuo mese in un unico posto. Clicca su uno spazio libero e l'appuntamento si apre per quel giorno e quell'ora."
+        },
+        "appointments": {
+          "title": "Appuntamenti",
+          "body": "L'elenco di tutti gli appuntamenti con ricerca e filtri. Qui completi anche gli appuntamenti quando il cliente è passato da te."
+        },
+        "clients": {
+          "title": "Clienti",
+          "body": "Il tuo archivio clienti con storico delle visite e contatti."
+        },
+        "services": {
+          "title": "Servizi",
+          "body": "Cosa offri, quanto dura e quanto costa. Da qui si calcolano durata e prezzo dell'appuntamento."
+        },
+        "staff": {
+          "title": "Collaboratori",
+          "body": "Le persone che eseguono i servizi e i loro orari. Invita i colleghi nell'app da Impostazioni → Team e accessi."
+        },
+        "reminders": {
+          "title": "Promemoria",
+          "body": "Messaggi automatici ai clienti prima e dopo l'appuntamento. Meno appuntamenti dimenticati, senza lavoro manuale."
+        },
+        "settings": {
+          "title": "Impostazioni",
+          "body": "Dati dell'attività, orari di apertura, team, piani e componenti aggiuntivi."
+        },
+        "gettingStarted": {
+          "title": "I tuoi primi passi",
+          "body": "Questo elenco ti accompagna all'inizio. Quando completi un passo, si spunta da solo."
+        },
+        "userMenu": {
+          "title": "Guida e lingua",
+          "body": "Qui puoi ripetere questa guida quando vuoi e cambiare la lingua dell'app."
+        }
+      },
+      "calendar": {
+        "grid": {
+          "title": "Clicca su uno spazio libero",
+          "body": "L'appuntamento si apre con il giorno e l'ora scelti. Le parti tratteggiate sono fuori dal tuo orario di lavoro."
+        },
+        "newAppointment": {
+          "title": "Oppure usa il pulsante",
+          "body": "Puoi aprire un nuovo appuntamento anche da qui, per il prossimo orario libero."
+        },
+        "views": {
+          "title": "Giorno, settimana o mese",
+          "body": "Scegli la vista che preferisci."
+        },
+        "filters": {
+          "title": "Filtri",
+          "body": "Quando il calendario è pieno, mostra solo i collaboratori o i servizi selezionati."
+        }
+      },
+      "staff": {
+        "welcome": {
+          "title": "Benvenuto nel team",
+          "body": "Ti mostriamo in breve dove trovare il tuo orario, gli appuntamenti e i clienti."
+        },
+        "calendar": {
+          "title": "Il tuo calendario",
+          "body": "Qui vedi i tuoi appuntamenti per giorno e per settimana. Un clic su uno spazio libero apre un nuovo appuntamento."
+        },
+        "newAppointment": {
+          "title": "Nuovo appuntamento",
+          "body": "Un cliente chiama o passa di persona? Inserisci qui l'appuntamento: cliente, servizio, orario."
+        },
+        "appointments": {
+          "title": "Appuntamenti",
+          "body": "L'elenco dei tuoi appuntamenti. Quando il cliente è passato da te, completa qui l'appuntamento."
+        },
+        "clients": {
+          "title": "Clienti",
+          "body": "Contatti e storico delle visite dei clienti. Puoi aggiungere un nuovo cliente anche mentre inserisci un appuntamento."
+        },
+        "userMenu": {
+          "title": "Guida e lingua",
+          "body": "Puoi ripetere questa guida quando vuoi da qui."
+        }
+      }
+    }
+  },
+  "meta": {
+    "description": "Jedro+ – gestionale per appuntamenti"
+  }
+}

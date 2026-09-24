@@ -1,0 +1,104 @@
+{
+  "page": {
+    "title": "Risorse",
+    "subtitle": "Gestisci le risorse fisiche di cui hanno bisogno i tuoi servizi",
+    "newButton": "Aggiungi risorsa",
+    "searchPlaceholder": "Cerca risorse...",
+    "showAll": "Mostra tutte",
+    "showActiveOnly": "Solo attive",
+    "resultsCount": "{current} di {total} risorse",
+    "loadError": "Errore durante il caricamento delle risorse.",
+    "retry": "Riprova"
+  },
+  "stats": {
+    "total": "Risorse totali",
+    "active": "Attive",
+    "totalCapacity": "Capacità totale",
+    "linkedServices": "Servizi collegati"
+  },
+  "card": {
+    "inactive": "Inattiva",
+    "units": "{count, plural, one {# unità} other {# unità}}",
+    "unit": "{count} unità",
+    "perUnit": "{count} pers./unità",
+    "totalCapacity": "Totale: {count} posti",
+    "alwaysAvailable": "Sempre disponibile",
+    "scheduleSet": "Orario impostato",
+    "noServices": "Nessun servizio collegato",
+    "toggleActive": "Attiva",
+    "toggleInactive": "Inattiva"
+  },
+  "modal": {
+    "createTitle": "Aggiungi risorsa",
+    "createSubtitle": "Crea una nuova risorsa fisica per la tua attività",
+    "editTitle": "Modifica risorsa",
+    "editSubtitle": "Aggiorna i dati della risorsa",
+    "nameLabel": "Nome della risorsa",
+    "namePlaceholder": "es. Lettino da massaggio, Cabina 1...",
+    "bookingNameLabel": "Nome per le prenotazioni",
+    "bookingNamePlaceholder": "Predefinito: {naziv}",
+    "bookingNameHint": "Il nome che i clienti vedono nella prenotazione online",
+    "descriptionLabel": "Descrizione",
+    "descriptionPlaceholder": "Breve descrizione della risorsa (facoltativa)...",
+    "colorLabel": "Colore",
+    "colorSelected": "Colore selezionato",
+    "colorCustom": "Personalizzato",
+    "colorHint": "Il colore aiuta a riconoscere la risorsa nella vista",
+    "quantityLabel": "Numero di unità",
+    "quantityHelp": "Quante unità fisiche di questa risorsa hai? (es. 3 lettini da massaggio)",
+    "capacityLabel": "Capacità per unità",
+    "capacityHelp": "Quanti clienti possono usare contemporaneamente una unità?",
+    "totalCapacityLabel": "Capacità totale",
+    "totalCapacityValue": "{value} posti in totale",
+    "showInBookingLabel": "Mostra al cliente nella prenotazione online",
+    "scheduleLabel": "Disponibilità",
+    "alwaysAvailable": "Sempre disponibile",
+    "customSchedule": "Imposta orario",
+    "scheduleHint": "Imposta l'orario di disponibilità della risorsa",
+    "addInterval": "Aggiungi fascia",
+    "servicesLabel": "Servizi che richiedono questa risorsa",
+    "servicesHelp": "Le prenotazioni di questi servizi occuperanno questa risorsa",
+    "noServicesAvailable": "Nessun servizio attivo",
+    "save": "Salva",
+    "saving": "Salvataggio...",
+    "validationNameRequired": "Il nome è obbligatorio.",
+    "validationNameMinLength": "Il nome deve contenere almeno 2 caratteri.",
+    "validationNameMaxLength": "Il nome non può superare i 100 caratteri.",
+    "validationColorInvalid": "Seleziona un colore valido."
+  },
+  "deleteModal": {
+    "title": "Elimina risorsa",
+    "confirmPrefix": "Vuoi davvero eliminare la risorsa",
+    "confirmSuffix": "Questa azione non può essere annullata.",
+    "delete": "Elimina",
+    "deleting": "Eliminazione...",
+    "cancel": "Annulla"
+  },
+  "emptyState": {
+    "title": "Nessuna risorsa",
+    "subtitle": "Aggiungi le risorse di cui hanno bisogno i tuoi servizi — lettini, cabine, attrezzature...",
+    "addFirst": "Aggiungi la prima risorsa"
+  },
+  "searchEmpty": {
+    "title": "Nessun risultato per \"{term}\"",
+    "subtitle": "Prova con altre parole chiave.",
+    "clear": "Cancella ricerca"
+  },
+  "toasts": {
+    "created": "Risorsa aggiunta.",
+    "updated": "Risorsa aggiornata.",
+    "deleted": "Risorsa eliminata.",
+    "errorSave": "Errore durante il salvataggio della risorsa.",
+    "errorDelete": "Errore durante l'eliminazione della risorsa.",
+    "errorStatus": "Errore durante la modifica dello stato."
+  },
+  "days": {
+    "Ponedeljek": "Lun",
+    "Torek": "Mar",
+    "Sreda": "Mer",
+    "Četrtek": "Gio",
+    "Petek": "Ven",
+    "Sobota": "Sab",
+    "Nedelja": "Dom"
+  }
+}

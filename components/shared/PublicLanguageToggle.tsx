@@ -27,7 +27,7 @@ export default function PublicLanguageToggle({ className = '' }: { className?: s
   return (
     <div
       role="group"
-      aria-label="Jezik / Language / Sprache"
+      aria-label="Jezik / Language / Sprache / Lingua"
       className={`inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-xs font-semibold ${className}`}
     >
       {LANGUAGES.map((lang) => (

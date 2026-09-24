@@ -82,6 +82,19 @@ const MONTHS_IN_DATE_HR = [
   'srpnja', 'kolovoza', 'rujna', 'listopada', 'studenoga', 'prosinca'
 ];
 
+// Day and month names in Italian (months are lowercase inside dates: "2 febbraio 2026")
+const DAYS_FULL_IT = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+const DAYS_SHORT_IT = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+const DAYS_ABBR_IT = ['Do', 'Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa'];
+const MONTHS_FULL_IT = [
+  'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+  'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+];
+const MONTHS_SHORT_IT = [
+  'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
+  'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'
+];
+
 type Names = { daysFull: string[]; daysShort: string[]; daysAbbr: string[]; monthsFull: string[]; monthsShort: string[]; monthsInDate: string[] };
 
 const NAMES: Record<string, Names> = {
@@ -90,6 +103,7 @@ const NAMES: Record<string, Names> = {
   // German capitalises months inside dates too ("2. Februar").
   de: { daysFull: DAYS_FULL_DE, daysShort: DAYS_SHORT_DE, daysAbbr: DAYS_SHORT_DE, monthsFull: MONTHS_FULL_DE, monthsShort: MONTHS_SHORT_DE, monthsInDate: MONTHS_FULL_DE },
   hr: { daysFull: DAYS_FULL_HR, daysShort: DAYS_SHORT_HR, daysAbbr: DAYS_ABBR_HR, monthsFull: MONTHS_FULL_HR, monthsShort: MONTHS_SHORT_HR, monthsInDate: MONTHS_IN_DATE_HR },
+  it: { daysFull: DAYS_FULL_IT, daysShort: DAYS_SHORT_IT, daysAbbr: DAYS_ABBR_IT, monthsFull: MONTHS_FULL_IT, monthsShort: MONTHS_SHORT_IT, monthsInDate: MONTHS_FULL_IT.map((m) => m.toLowerCase()) },
 };
 
 const names = (locale: string): Names => NAMES[locale] ?? NAMES.en;

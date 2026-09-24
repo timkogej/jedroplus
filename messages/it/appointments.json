@@ -1,0 +1,484 @@
+{
+  "status": {
+    "scheduled": "Programmato",
+    "confirmed": "Confermato",
+    "pending": "In attesa",
+    "completed": "Completato",
+    "cancelled": "Annullato",
+    "noShow": "Non presentato"
+  },
+  "page": {
+    "title": "Appuntamenti",
+    "subtitle": "Gestisci tutti gli appuntamenti in un unico posto",
+    "newAppointment": "Nuovo appuntamento",
+    "stats": {
+      "thisMonth": "Appuntamenti questo mese",
+      "today": "Oggi",
+      "upcoming": "In arrivo"
+    },
+    "disabledCreateMessage": "Il titolare dell'attività ha disattivato la creazione di nuovi appuntamenti. Contattalo per abilitarla."
+  },
+  "completeModal": {
+    "title": "Completamento appuntamento",
+    "subtitle": "Conferma il completamento dell'appuntamento",
+    "client": "Cliente",
+    "service": "Servizio",
+    "employee": "Persona",
+    "date": "Data",
+    "time": "Ora",
+    "notesLabel": "Messaggio al cliente o indicazioni dopo l'appuntamento",
+    "notesPlaceholder": "Inserisci un messaggio o delle indicazioni dopo l'appuntamento (facoltativo)...",
+    "cancel": "Annulla",
+    "completing": "Completamento...",
+    "confirm": "Completa"
+  },
+  "deleteModal": {
+    "title": "Elimina appuntamento",
+    "message": "Sei sicuro di voler eliminare questo appuntamento?"
+  },
+  "deleteConfirmation": {
+    "areYouSure": "Sei sicuro?",
+    "unknownClient": "Cliente sconosciuto",
+    "irreversible": "Questa azione è irreversibile!",
+    "cancel": "Annulla",
+    "deleting": "Eliminazione...",
+    "deleteButton": "Elimina appuntamento"
+  },
+  "toast": {
+    "noShow": "Appuntamento segnato come mancata presentazione",
+    "cancelled": "Appuntamento annullato",
+    "completed": "Appuntamento completato"
+  },
+  "errors": {
+    "loadError": "Si è verificato un errore durante il caricamento dei dati.",
+    "saveError": "Si è verificato un errore durante il salvataggio dell'appuntamento.",
+    "deleteError": "Si è verificato un errore durante l'eliminazione dell'appuntamento.",
+    "completeError": "Si è verificato un errore durante il completamento dell'appuntamento.",
+    "noShowError": "Si è verificato un errore durante la segnalazione della mancata presentazione.",
+    "cancelError": "Si è verificato un errore durante l'annullamento dell'appuntamento.",
+    "clientCreateError": "Si è verificato un errore durante la creazione del cliente"
+  },
+  "disabledModal": {
+    "title": "Azione disattivata",
+    "defaultMessage": "Il titolare dell'attività ha disattivato questa azione. Contattalo per abilitarla.",
+    "button": "Ho capito"
+  },
+  "modal": {
+    "title": {
+      "create": "Nuovo appuntamento",
+      "edit": "Modifica appuntamento",
+      "view": "Dettagli appuntamento"
+    },
+    "emptyState": {
+      "message": "Per aggiungere un appuntamento servono almeno un servizio e un collaboratore.",
+      "addService": "Aggiungi servizio",
+      "addEmployee": "Aggiungi collaboratore",
+      "close": "Chiudi"
+    },
+    "fields": {
+      "client": "Cliente",
+      "service": "Servizio",
+      "service2": "Servizio 2",
+      "service3": "Servizio 3",
+      "employee": "Collaboratore",
+      "date": "Data",
+      "startTime": "Ora di inizio",
+      "endTime": "Ora di fine",
+      "status": "Stato",
+      "price": "Prezzo",
+      "notes": "Note",
+      "internalNotes": "Note interne",
+      "communicationLanguage": "Lingua di comunicazione",
+      "phone": "Telefono"
+    },
+    "placeholders": {
+      "service": "Seleziona un servizio",
+      "service2": "Seleziona un secondo servizio",
+      "service3": "Seleziona un terzo servizio",
+      "employee": "Seleziona un collaboratore",
+      "status": "Seleziona lo stato"
+    },
+    "totalDuration": "Durata totale:",
+    "remove": "Rimuovi",
+    "addService": "Aggiungi servizio",
+    "appointmentDuration": "Durata dell'appuntamento",
+    "duration": "{mins, plural, one {# minuto} other {# minuti}}",
+    "promotions": {
+      "discountSuffix": "sconto"
+    },
+    "price": {
+      "original": "Prezzo originale",
+      "discount": "Sconto",
+      "withDiscount": "Prezzo scontato",
+      "addOnLabel": "Servizio aggiuntivo",
+      "addOnFallback": "Servizio aggiuntivo"
+    },
+    "discount": {
+      "add": "Aggiungi sconto",
+      "lower": "Riduci il prezzo dell'appuntamento",
+      "amount": "Importo",
+      "type": "Tipo",
+      "final": "Prezzo finale"
+    },
+    "notesPlaceholder": "Note per il cliente...",
+    "notesHint": "Le note vengono usate nei promemoria e nei messaggi",
+    "internalNotesPlaceholder": "Note interne (non vengono inviate al cliente)...",
+    "addInternalNotes": "+ Note interne",
+    "actions": {
+      "cancel": "Annulla",
+      "create": "Crea",
+      "save": "Salva"
+    },
+    "validation": {
+      "dateRequired": "La data è obbligatoria",
+      "startTimeRequired": "L'ora di inizio è obbligatoria",
+      "endTimeRequired": "L'ora di fine è obbligatoria",
+      "endTimeAfterStart": "L'ora di fine deve essere successiva all'ora di inizio",
+      "clientRequired": "Il cliente è obbligatorio",
+      "serviceRequired": "Il servizio è obbligatorio",
+      "employeeRequired": "Il collaboratore è obbligatorio"
+    },
+    "resourceConflict": {
+      "busyTitle": "Risorsa occupata",
+      "unavailableTitle": "Risorsa non disponibile",
+      "checkTitle": "Verifica la disponibilità della risorsa",
+      "unavailableAt": "{name}: non disponibile in questo orario",
+      "capacity": "{name}: {used}/{max} posti occupati",
+      "saveAnyway": "Puoi comunque salvare l'appuntamento."
+    }
+  },
+  "table": {
+    "headers": {
+      "date": "Data",
+      "time": "Ora",
+      "client": "Cliente",
+      "service": "Servizio",
+      "employee": "Collaboratore",
+      "status": "Stato",
+      "actions": "Azioni"
+    },
+    "empty": {
+      "title": "Nessun appuntamento",
+      "message": "Al momento non ci sono appuntamenti da mostrare. Aggiungi un nuovo appuntamento o modifica i filtri."
+    },
+    "actions": {
+      "complete": "Completa appuntamento",
+      "view": "Dettagli",
+      "edit": "Modifica",
+      "moreOptions": "Altre opzioni",
+      "cancel": "Annulla appuntamento",
+      "delete": "Elimina"
+    },
+    "pagination": {
+      "of": "di"
+    }
+  },
+  "filters": {
+    "status": {
+      "all": "Tutti gli stati"
+    },
+    "searchPlaceholder": "Cerca per nome cliente, servizio...",
+    "button": "Filtri",
+    "clear": "Cancella",
+    "employeeLabel": "Collaboratore",
+    "serviceLabel": "Servizio",
+    "dateFromLabel": "Dal",
+    "dateToLabel": "Al",
+    "employeePlaceholder": "Collaboratore",
+    "allEmployees": "Tutti i collaboratori",
+    "allServices": "Tutti i servizi",
+    "activeStatus": "Stato: {label}",
+    "activeEmployee": "Collaboratore: {name}",
+    "activeService": "Servizio: {name}",
+    "activeFrom": "Dal: {date}",
+    "activeTo": "Al: {date}"
+  },
+  "calendarView": {
+    "viewModes": {
+      "day": "Giorno",
+      "week": "Settimana",
+      "month": "Mese",
+      "threeDays": "3 giorni"
+    },
+    "sidebar": {
+      "newEvent": "Evento",
+      "newAbsence": "Assenza",
+      "searchPlaceholder": "Cerca appuntamenti...",
+      "filters": "Filtri",
+      "displayDays": "Giorni visualizzati",
+      "showAllDays": "Mostra tutti i giorni",
+      "weekdaysOnly": "Solo giorni feriali",
+      "employeesSection": "Collaboratori",
+      "servicesSection": "Servizi",
+      "legend": "Legenda servizi",
+      "noServices": "Nessun servizio da mostrare",
+      "prevMonth": "Mese precedente",
+      "nextMonth": "Mese successivo"
+    },
+    "eventModal": {
+      "titles": {
+        "create": "Nuovo evento",
+        "edit": "Modifica evento"
+      },
+      "subtitles": {
+        "create": "Aggiungi un nuovo evento al calendario",
+        "edit": "Aggiorna i dati dell'evento"
+      },
+      "fields": {
+        "title": "Titolo dell'evento *",
+        "titlePlaceholder": "es. Incontro con un cliente...",
+        "startDate": "Data di inizio *",
+        "endDate": "Data di fine",
+        "allDay": "Evento di un'intera giornata",
+        "startTime": "Ora di inizio",
+        "endTime": "Ora di fine",
+        "timePlaceholder": "Seleziona l'ora",
+        "color": "Colore dell'evento",
+        "description": "Descrizione",
+        "descriptionPlaceholder": "Descrizione generale dell'evento...",
+        "notes": "Note",
+        "notesPlaceholder": "Note interne...",
+        "location": "Luogo",
+        "locationPlaceholder": "es. Salone, Zoom, Milano...",
+        "visibleInCalendar": "Visibile nel calendario",
+        "allowBooking": "Consenti la prenotazione di appuntamenti"
+      },
+      "validation": {
+        "titleRequired": "Il titolo dell'evento è obbligatorio",
+        "startDateRequired": "La data di inizio è obbligatoria",
+        "endDateBeforeStart": "La data di fine non può essere precedente alla data di inizio",
+        "endTimeAfterStart": "L'ora di fine deve essere successiva all'ora di inizio",
+        "colorRequired": "Seleziona il colore dell'evento"
+      },
+      "actions": {
+        "delete": "Elimina",
+        "edit": "Modifica",
+        "cancel": "Annulla",
+        "save": "Salva",
+        "confirmDelete": "Confermi l'eliminazione?",
+        "confirmYes": "Sì, elimina",
+        "saving": "Salvataggio...",
+        "update": "Aggiorna"
+      }
+    },
+    "absenceModal": {
+      "title": "Aggiungi assenza",
+      "subtitle": "Segna i giorni o le ore di assenza del collaboratore",
+      "absenceLabel": "Assenza",
+      "fields": {
+        "employee": "Collaboratore",
+        "hoursOnly": "Solo ore",
+        "multipleDays": "Più giorni",
+        "date": "Data",
+        "dateFrom": "Dalla data",
+        "dateTo": "Alla data",
+        "timeFrom": "Dalle",
+        "timeTo": "Alle",
+        "timePlaceholder": "Seleziona l'ora",
+        "reason": "Motivo (facoltativo)",
+        "reasonPlaceholder": "Motivo dell'assenza...",
+        "reasonExample": "es. Malattia, ferie..."
+      },
+      "validation": {
+        "employeeRequired": "Seleziona un collaboratore",
+        "startDateRequired": "Seleziona la data di inizio",
+        "endDateRequired": "Seleziona la data di fine",
+        "endDateAfterStart": "La data di fine deve essere successiva alla data di inizio",
+        "endTimeAfterStart": "L'ora di fine deve essere successiva all'ora di inizio"
+      },
+      "actions": {
+        "cancel": "Annulla",
+        "saving": "Salvataggio...",
+        "save": "Salva assenza"
+      }
+    },
+    "absenceDetailModal": {
+      "subtitle": "Assenza",
+      "actions": {
+        "deleteAbsence": "Elimina assenza",
+        "editAbsence": "Modifica assenza",
+        "saveChanges": "Salva modifiche",
+        "confirmYes": "Sì",
+        "confirmNo": "No"
+      }
+    },
+    "appointmentModal": {
+      "subtitles": {
+        "create": "Crea un nuovo appuntamento",
+        "viewEdit": "Visualizza e modifica l'appuntamento"
+      },
+      "sections": {
+        "appointmentData": "Dati dell'appuntamento",
+        "clientData": "Dati del cliente"
+      },
+      "fields": {
+        "timePlaceholder": "Seleziona l'ora",
+        "noData": "Nessun dato",
+        "clientSearch": "Cerca un cliente per nome, email o telefono..."
+      },
+      "actions": {
+        "close": "Chiudi",
+        "cancel": "Annulla",
+        "saving": "Salvataggio...",
+        "saveAppointment": "Salva appuntamento"
+      }
+    },
+    "detailModal": {
+      "fields": {
+        "duration": "Durata",
+        "price": "Prezzo",
+        "copyTitle": "Copia {label}",
+        "unknownClient": "Cliente sconosciuto",
+        "time": "Ora",
+        "originalPrice": "Prezzo originale",
+        "discount": "Sconto",
+        "priceWithDiscount": "Prezzo scontato",
+        "additionalService": "Servizio aggiuntivo",
+        "deleteTitle": "Elimina appuntamento",
+        "deleteMessage": "Sei sicuro di voler eliminare questo appuntamento?"
+      },
+      "actions": {
+        "noShow": "Non presentato",
+        "cancel": "Annulla appuntamento",
+        "complete": "Completa",
+        "moreOptions": "Altre opzioni"
+      }
+    },
+    "dayView": {
+      "notWorkingDay": "{day} non è un giorno lavorativo",
+      "appointmentNoun": "{count, plural, one {appuntamento} other {appuntamenti}}",
+      "noAppointmentsToday": "Nessun appuntamento per questo giorno",
+      "allEmployees": "Tutti i collaboratori"
+    },
+    "monthView": {
+      "moreEvents": "+{count, plural, one {# evento} other {# eventi}}",
+      "moreAbsences": "+{count, plural, one {# assenza} other {# assenze}}",
+      "more": "+{count} altri"
+    },
+    "weekView": {
+      "moreAbsences": "+{count} altri",
+      "moreEvents": "+{count} altri"
+    },
+    "rescheduleDialog": {
+      "title": "Spostare l'appuntamento?",
+      "service": "Servizio",
+      "employee": "Persona",
+      "newTime": "Nuovo orario",
+      "saving": "Spostamento...",
+      "confirm": "Sposta"
+    },
+    "completeDialog": {
+      "title": "Completa appuntamento",
+      "subtitle": "Conferma il completamento dell'appuntamento",
+      "notesLabel": "Messaggio al cliente o indicazioni dopo l'appuntamento",
+      "notesPlaceholder": "Inserisci un messaggio o delle indicazioni dopo l'appuntamento (facoltativo)...",
+      "completing": "Completamento...",
+      "complete": "Completa",
+      "cancel": "Annulla"
+    },
+    "navigation": {
+      "prev": "Indietro",
+      "next": "Avanti",
+      "filters": "Filtri",
+      "newAppointment": "Nuovo appuntamento"
+    },
+    "toast": {
+      "eventCreated": "Evento creato",
+      "eventUpdated": "Evento aggiornato",
+      "eventDeleted": "Evento eliminato",
+      "appointmentRescheduled": "Appuntamento spostato"
+    },
+    "errors": {
+      "loadAppointments": "Si è verificato un errore durante il caricamento degli appuntamenti.",
+      "eventSave": "Si è verificato un errore durante il salvataggio dell'evento.",
+      "eventDelete": "Si è verificato un errore durante l'eliminazione dell'evento.",
+      "absenceSave": "Si è verificato un errore durante il salvataggio dell'assenza.",
+      "absenceDelete": "Si è verificato un errore durante l'eliminazione dell'assenza.",
+      "absenceEdit": "Si è verificato un errore durante la modifica dell'assenza.",
+      "reschedule": "Si è verificato un errore durante lo spostamento dell'appuntamento.",
+      "companyNotSelected": "Nessuna attività selezionata. Ricarica la pagina."
+    },
+    "saving": "Salvataggio...",
+    "allEmployees": "Tutti i collaboratori"
+  },
+  "ghost": {
+    "title": "Non registrare l'appuntamento",
+    "description": "L'appuntamento è visibile nel calendario, ma non viene conteggiato nelle analisi.",
+    "warning": "Questo appuntamento non verrà registrato nelle analisi, nella cronologia né in cassa. Dopo il completamento viene eliminato automaticamente.",
+    "badge": "Appuntamento non registrato — escluso dalle analisi"
+  },
+  "pastOpen": {
+    "title": "{count, plural, one {# appuntamento passato non è ancora completato} other {# appuntamenti passati non sono ancora completati}}",
+    "body": "Completali (o segnali come «Non presentato») così ricavi e statistiche corrispondono alla realtà.",
+    "showingTitle": "Vengono mostrati gli appuntamenti passati non completati ({count})",
+    "showingBody": "Per ciascuno scegli Completa, Non presentato o Annulla. L'elenco si accorcia man mano.",
+    "show": "Mostrali",
+    "showAll": "Mostra tutti gli appuntamenti"
+  },
+  "export": {
+    "title": "Esporta appuntamenti",
+    "subtitle": "Scegli il periodo e le opzioni di esportazione",
+    "quickPick": "Selezione rapida",
+    "presets": {
+      "this_week": "Questa settimana",
+      "this_month": "Questo mese",
+      "last_month": "Mese scorso",
+      "last_30": "Ultimi 30 giorni",
+      "this_year": "Quest'anno",
+      "all": "Tutto"
+    },
+    "period": "Periodo",
+    "dateFrom": "Dal",
+    "dateTo": "Al",
+    "rangeInvalid": "La data «dal» non può essere successiva alla data «al».",
+    "filters": "Filtri",
+    "onlyCompleted": "Includi solo gli appuntamenti completati",
+    "excludeGhost": "Escludi gli appuntamenti non registrati",
+    "found": "Appuntamenti trovati da esportare",
+    "cancel": "Annulla",
+    "exporting": "Esportazione...",
+    "submit": "Esporta in Excel",
+    "sheetName": "Appuntamenti",
+    "fileName": "appuntamenti",
+    "columns": {
+      "date": "Data",
+      "day": "Giorno",
+      "start": "Ora di inizio",
+      "end": "Ora di fine",
+      "client": "Cliente",
+      "email": "Email",
+      "phone": "Telefono",
+      "service": "Servizio",
+      "staff": "Collaboratore",
+      "status": "Stato",
+      "price": "Prezzo",
+      "discount": "Sconto",
+      "finalPrice": "Prezzo finale",
+      "currency": "Valuta",
+      "notes": "Note",
+      "id": "ID appuntamento"
+    }
+  },
+  "clientSearch": {
+    "addNew": "Aggiungi nuovo cliente",
+    "searching": "Ricerca...",
+    "noContact": "Nessun dato",
+    "placeholder": "Cerca per nome, email o telefono..."
+  },
+  "actionErrors": {
+    "noClientLink": "Questo appuntamento non è collegato a nessun cliente.",
+    "clientLoadFailed": "Impossibile caricare i dettagli del cliente.",
+    "clientNotFound": "Il cliente di questo appuntamento non è stato trovato in questa attività."
+  },
+  "rescheduleNotify": {
+    "title": "Avvisare il cliente?",
+    "description": "L'appuntamento è stato spostato. Vuoi inviare un avviso al cliente?",
+    "channel": {
+      "sms": "L'avviso verrà inviato via SMS",
+      "email": "L'avviso verrà inviato via email",
+      "both": "L'avviso verrà inviato via SMS ed email"
+    },
+    "skip": "Salta",
+    "send": "Invia avviso"
+  }
+}

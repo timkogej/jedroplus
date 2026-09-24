@@ -1,0 +1,185 @@
+{
+  "entry": {
+    "loading": "Verifica in corso...",
+    "title": "Benvenuto in",
+    "subtitle": "Crea una nuova attività o unisciti a una esistente",
+    "create": {
+      "title": "Crea una nuova attività",
+      "description": "Inizia con una nuova attività e invita i tuoi collaboratori",
+      "cta": "Inizia"
+    },
+    "join": {
+      "title": "Unisciti a un'attività",
+      "description": "Hai l'ID e il codice dell'attività? Unisciti a un'attività esistente",
+      "cta": "Unisciti"
+    }
+  },
+  "create": {
+    "title": "Crea attività",
+    "steps": {
+      "localization": "Localizzazione",
+      "companyName": "Nome dell'attività",
+      "industry": "Settore",
+      "schedule": "Orario di lavoro",
+      "services": "I tuoi servizi"
+    },
+    "localization": {
+      "countryLabel": "Paese",
+      "languageLabel": "Lingua"
+    },
+    "companyName": {
+      "label": "Nome dell'attività",
+      "placeholder": "es. Salone Anna",
+      "hint": "I tuoi clienti vedono questo nome nei promemoria e nella pagina di prenotazione."
+    },
+    "industry": {
+      "label": "Settore / attività",
+      "customLabel": "Descrivi la tua attività",
+      "customPlaceholder": "es. La mia attività specifica…"
+    },
+    "schedule": {
+      "hint": "Puoi modificare l'orario di lavoro in qualsiasi momento nelle impostazioni dell'attività.",
+      "closed": "Chiuso"
+    },
+    "nav": {
+      "back": "Indietro",
+      "next": "Avanti",
+      "finish": "Crea",
+      "creating": "Creazione..."
+    },
+    "success": {
+      "title": "Attività creata",
+      "subtitle": "La tua attività è pronta",
+      "goToDashboard": "Vai alla dashboard"
+    },
+    "toasts": {
+      "success": "Attività creata!",
+      "errorCreate": "Si è verificato un errore durante la creazione dell'attività",
+      "errorLoad": "Si è verificato un errore durante il caricamento dell'attività. Riprova."
+    },
+    "countries": {
+      "si": "Slovenia",
+      "hr": "Croazia",
+      "rs": "Serbia",
+      "ba": "Bosnia ed Erzegovina",
+      "me": "Montenegro",
+      "mk": "Macedonia del Nord",
+      "at": "Austria",
+      "de": "Germania",
+      "it": "Italia",
+      "hu": "Ungheria",
+      "cz": "Repubblica Ceca",
+      "sk": "Slovacchia",
+      "pl": "Polonia",
+      "ro": "Romania",
+      "bg": "Bulgaria",
+      "fr": "Francia",
+      "es": "Spagna",
+      "pt": "Portogallo",
+      "nl": "Paesi Bassi",
+      "be": "Belgio",
+      "ch": "Svizzera",
+      "gb": "Regno Unito",
+      "us": "Stati Uniti",
+      "ca": "Canada",
+      "au": "Australia",
+      "other": "Altro"
+    },
+    "languages": {
+      "slo": "Sloveno",
+      "eng": "English",
+      "de": "Tedesco",
+      "hr": "Croato",
+      "it": "Italiano"
+    },
+    "industries": {
+      "hairSalons": "Parrucchieri",
+      "cosmeticsAndSkincare": "Estetica e cura della pelle",
+      "massageAndWellness": "Massaggi e benessere",
+      "dentistry": "Odontoiatria",
+      "medicineAndHealth": "Medicina e salute",
+      "physiotherapy": "Fisioterapia",
+      "psychologyAndCoaching": "Psicologia e coaching",
+      "veterinary": "Veterinaria",
+      "personalTrainingFitness": "Personal training / fitness",
+      "yogaAndPilates": "Yoga e pilates",
+      "beautySalon": "Centro estetico",
+      "manicureAndPedicure": "Manicure e pedicure",
+      "tattoosAndPiercings": "Tatuaggi e piercing",
+      "architectureAndDesign": "Architettura e design",
+      "photography": "Fotografia",
+      "lawAndConsulting": "Legale e consulenza",
+      "accounting": "Contabilità",
+      "itServices": "Servizi IT",
+      "educationAndTutoring": "Formazione e ripetizioni",
+      "carService": "Autofficina",
+      "cleaningAndMaintenance": "Pulizie e manutenzione",
+      "other": "Altro"
+    },
+    "services": {
+      "hint": "Ti abbiamo suggerito alcuni servizi per il tuo settore. Seleziona quelli che offri e correggi prezzo e durata. Potrai modificare tutto in seguito in Servizi.",
+      "nameLabel": "Nome del servizio",
+      "durationLabel": "Durata (min)",
+      "priceLabel": "Prezzo (€)",
+      "addCustom": "Aggiungi un tuo servizio",
+      "remove": "Rimuovi",
+      "newServicePlaceholder": "es. Consulenza",
+      "ownerToggle": "Anch'io eseguo i servizi",
+      "ownerToggleHint": "Ti aggiungiamo come primo collaboratore, così puoi inserire subito il primo appuntamento. Potrai aggiungere i colleghi in seguito.",
+      "ownerNameLabel": "Il tuo nome e cognome",
+      "noneSelected": "Senza servizi, prima del primo appuntamento dovrai aggiungere almeno un servizio in Servizi."
+    }
+  },
+  "join": {
+    "title": "Unisciti a un'attività",
+    "subtitle": "Scegli come unirti",
+    "admin": {
+      "title": "Unisciti come amministratore",
+      "description": "Hai gli stessi privilegi del titolare. Accesso a tutti i dati dell'attività, impostazioni, collaboratori e analisi.",
+      "note": "Ti serve il codice amministratore dal titolare dell'attività.",
+      "cta": "Continua"
+    },
+    "employee": {
+      "title": "Unisciti come collaboratore",
+      "description": "Vedi solo i tuoi dati, appuntamenti e clienti. L'accesso è limitato e l'amministratore può configurarlo ulteriormente.",
+      "note": "Ti serve il codice collaboratore dall'amministratore.",
+      "cta": "Continua"
+    },
+    "back": "Indietro",
+    "form": {
+      "adminTitle": "Unisciti come amministratore",
+      "employeeTitle": "Unisciti come collaboratore",
+      "adminSubtitle": "Inserisci il codice amministratore ricevuto dal titolare",
+      "employeeSubtitle": "Inserisci il codice collaboratore ricevuto dall'amministratore",
+      "adminCodeLabel": "Codice amministratore",
+      "employeeCodeLabel": "Codice collaboratore",
+      "adminCodeHint": "Il codice te lo fornisce il titolare dell'attività. Lo trova in Impostazioni → Generale.",
+      "employeeCodeHint": "Il codice collaboratore te lo fornisce il titolare o l'amministratore. Lo trova in Impostazioni → Generale.",
+      "submit": "Unisciti",
+      "submitting": "Accesso in corso..."
+    },
+    "toasts": {
+      "noCode": "Inserisci il codice amministratore",
+      "noCodeEmployee": "Inserisci il codice collaboratore",
+      "noFreeSlot": "L'attività non ha più posti utente liberi.",
+      "notLoggedIn": "Non hai effettuato l'accesso",
+      "profileNotLinked": "L'attività non è ancora collegata al profilo. Riprova tra qualche secondo.",
+      "errorJoin": "Si è verificato un errore durante l'adesione",
+      "errorProfile": "Si è verificato un errore durante il salvataggio del profilo",
+      "errorLoad": "Si è verificato un errore durante il caricamento dell'attività",
+      "successWithName": "Ti sei unito a {name}!",
+      "success": "Ti sei unito all'attività!",
+      "invalidCode": "Il codice dell'attività non è corretto",
+      "companyNotFound": "Non esiste un'attività con questo ID"
+    },
+    "invite": {
+      "eyebrow": "Invito",
+      "title": "Sei stato invitato nel team",
+      "titleWithName": "Sei stato invitato in {name}",
+      "body": "Crea un account o accedi. Poi ti aggiungiamo automaticamente al team, senza dover copiare codici.",
+      "signUp": "Crea account",
+      "logIn": "Ho già un account — accedi",
+      "readyBody": "Il codice è già inserito. Clicca su Unisciti."
+    }
+  }
+}

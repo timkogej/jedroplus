@@ -1,0 +1,390 @@
+{
+  "hub": {
+    "title": "Impostazioni",
+    "subtitle": "Tutte le impostazioni, organizzate per sezione.",
+    "menu": {
+      "company": {
+        "label": "Attività",
+        "description": "Nome, indirizzo, orari di apertura e contatti"
+      },
+      "general": {
+        "label": "Generale",
+        "description": "Account, lingua, notifiche e codici dell'attività"
+      },
+      "members": {
+        "label": "Team e accessi",
+        "description": "Invita i colleghi, ruoli e permessi"
+      },
+      "plans": {
+        "label": "Piani",
+        "description": "Il tuo piano e i consumi mensili"
+      },
+      "messages": {
+        "label": "Messaggi",
+        "description": "Cronologia dei messaggi e promemoria inviati"
+      },
+      "addons": {
+        "label": "Componenti aggiuntivi e quote",
+        "description": "Acquisto di pacchetti SMS, email e collaboratori"
+      },
+      "history": {
+        "label": "Cronologia",
+        "description": "Registro di tutte le modifiche e azioni nel sistema"
+      }
+    }
+  },
+  "back": "Impostazioni",
+  "general": {
+    "title": "Generale",
+    "subtitle": "Impostazioni di base dell'app e del tuo account",
+    "account": {
+      "title": "Account e profilo",
+      "subtitle": "I tuoi dati personali",
+      "nameLabel": "Nome utente",
+      "nameNote": "Il nome non può essere modificato",
+      "emailLabel": "Email",
+      "emailNote": "L'email non può essere modificata"
+    },
+    "langRegion": {
+      "title": "Lingua e regione",
+      "subtitle": "La lingua dell'app vale per il tuo accesso. Paese, fuso orario e valuta valgono per tutta l'attività.",
+      "languageLabel": "Lingua dell'app",
+      "languageNote": "Vale per il tuo accesso su questo dispositivo.",
+      "languageValue": "Italiano",
+      "regionLabel": "Paese",
+      "regionNote": "Dove opera l'attività. Cambiandolo si impostano anche fuso orario e valuta.",
+      "timezoneLabel": "Fuso orario",
+      "timezoneNote": "In base a questo orario vengono mostrati gli appuntamenti e inviati i promemoria.",
+      "dateFormatLabel": "Formato data",
+      "dateFormatNote": "Come vengono mostrate le date",
+      "currencyLabel": "Valuta",
+      "currencyNote": "Valuta predefinita per nuovi servizi e prezzi.",
+      "saveError": "Impossibile salvare le impostazioni della regione. Riprova."
+    },
+    "notifications": {
+      "title": "Notifiche",
+      "subtitle": "Impostazioni delle notifiche",
+      "emailLabel": "Notifiche via email",
+      "emailNote": "Ricevi le notifiche via email"
+    },
+    "companyData": {
+      "title": "Dati dell'attività",
+      "subtitle": "ID dell'attività e codici per aggiungere utenti",
+      "companyIdLabel": "ID attività",
+      "adminCodeLabel": "Codice amministratore",
+      "adminCodeNote": "Per aggiungere amministratori alla tua attività. L'amministratore ha accesso completo: vede e modifica tutti gli appuntamenti, clienti, servizi, collaboratori, analisi, impostazioni e piani.",
+      "employeeCodeLabel": "Codice collaboratore",
+      "employeeCodeNote": "Per aggiungere collaboratori alla tua attività. Il collaboratore vede solo il proprio orario e gli appuntamenti assegnati. Non ha accesso a impostazioni, analisi o dati di altri collaboratori.",
+      "slugLabel": "Slug dell'attività",
+      "slugNote": "Il suffisso usato nei link di prenotazione e nel chatbot sul sito web",
+      "disclaimer": "Condividi i codici solo con persone di fiducia. L'amministratore ha accesso completo al sistema, il collaboratore solo ai propri appuntamenti."
+    },
+    "qr": {
+      "title": "Codice QR per la registrazione dei clienti",
+      "subtitle": "Per il bancone o la porta: il cliente scansiona il codice e si registra da solo tra i tuoi clienti. In questo modo non prenota un appuntamento.",
+      "noSlug": "Lo slug dell'attività non è impostato.",
+      "caption": "Per le prenotazioni online usa il link nella pagina Prenotazioni."
+    },
+    "legal": {
+      "title": "Documenti legali",
+      "subtitle": "Le condizioni alle quali usi Jedro+ e come trattiamo i dati.",
+      "docs": {
+        "terms": "Condizioni generali d'uso",
+        "privacy": "Informativa sulla privacy",
+        "dpa": "Accordo sul trattamento dei dati personali",
+        "subprocessors": "Sub-responsabili del trattamento"
+      }
+    }
+  },
+  "company": {
+    "title": "Attività",
+    "subtitle": "Dati di base e impostazioni della tua attività",
+    "basicInfo": {
+      "title": "Dati di base",
+      "subtitle": "Dati legali e identificativi",
+      "nameLabel": "Nome dell'attività",
+      "nameNote": "Nome completo della tua attività",
+      "namePlaceholder": "Inserisci il nome dell'attività",
+      "industryLabel": "Settore",
+      "industryNote": "Il settore della tua attività",
+      "industryPlaceholder": "es. Parrucchiere, Estetica, Fitness...",
+      "taxLabel": "Partita IVA",
+      "taxNote": "Partita IVA dell'attività, se ce l'hai (con il prefisso del Paese, es. IT12345678901)."
+    },
+    "contact": {
+      "title": "Contatti",
+      "subtitle": "Indirizzo e informazioni di contatto",
+      "addressLabel": "Indirizzo",
+      "addressNote": "Via e numero civico",
+      "phoneLabel": "Telefono",
+      "phoneNote": "Numero di contatto principale",
+      "emailLabel": "Email",
+      "emailNote": "Email di contatto",
+      "websiteLabel": "Sito web",
+      "websiteNote": "URL del tuo sito web"
+    },
+    "workingHours": {
+      "title": "Orari di apertura",
+      "subtitle": "Quando è aperta la tua attività (sono supportate più fasce al giorno)",
+      "closed": "Chiuso",
+      "addInterval": "Fascia"
+    },
+    "actions": {
+      "save": "Salva modifiche",
+      "saving": "Salvataggio...",
+      "saved": "Salvato ✓",
+      "cancel": "Annulla",
+      "saveError": "Si è verificato un errore durante il salvataggio"
+    },
+    "logo": {
+      "title": "Logo",
+      "subtitle": "I clienti vedono il logo nella pagina di prenotazione e nel modulo di registrazione.",
+      "emptyState": "Nessun logo caricato. Senza logo viene mostrato il nome dell'attività, e va benissimo così.",
+      "upload": "Carica logo",
+      "replace": "Sostituisci logo",
+      "remove": "Rimuovi",
+      "requirements": "PNG, SVG o WEBP con sfondo trasparente, fino a 1 MB.",
+      "previewAlt": "Anteprima del logo",
+      "previewNote": "Ecco come apparirà sui design chiari e scuri della pagina di prenotazione.",
+      "opaqueTitle": "Questo logo non ha lo sfondo trasparente.",
+      "opaqueBody": "Sui design scuri si vedrà un rettangolo bianco attorno. Meglio caricare una versione senza sfondo (PNG o SVG) o lasciare solo il nome dell'attività.",
+      "helpPrefix": "Per un aiuto nella preparazione del logo scrivici a",
+      "errors": {
+        "tooLarge": "Il file è troppo grande. Massimo 1 MB.",
+        "unsupported": "Questo tipo di file non è supportato. Usa PNG, SVG, WEBP o JPG.",
+        "failed": "Caricamento non riuscito. Riprova."
+      }
+    },
+    "vat": {
+      "check": "Verifica nel registro UE (VIES)",
+      "checking": "Verifica…",
+      "valid": "Partita IVA valida",
+      "validWithName": "Partita IVA valida – {name}",
+      "invalid": "Il numero non risulta nel registro dei soggetti IVA dell'UE.",
+      "badFormat": "Il formato non è valido per una partita IVA (es. IT12345678901).",
+      "unavailable": "Il registro UE al momento non risponde. Riprova più tardi."
+    }
+  },
+  "members": {
+    "title": "Team e accessi",
+    "subtitle": "Chi può accedere all'app, con ruoli e permessi. Le persone nel calendario si gestiscono in Collaboratori.",
+    "noAccess": {
+      "title": "Accesso limitato",
+      "message": "Questa pagina è visibile solo ai titolari dell'attività."
+    },
+    "loadError": "Si è verificato un errore durante il caricamento dei dati.",
+    "maxUsersLabel": "Numero massimo di utenti dell'app",
+    "currentTeamLabel": "Attualmente nel team",
+    "list": {
+      "title": "Chi può accedere",
+      "subtitle": "Utenti con accesso a questa attività",
+      "empty": "Nessun membro trovato."
+    },
+    "permissions": {
+      "title": "Permessi dei collaboratori (Staff)",
+      "subtitle": "Imposta cosa possono vedere e modificare i collaboratori",
+      "notConfigured": "I permessi per questa attività non sono ancora stati impostati.",
+      "saved": "Impostazioni salvate.",
+      "saveError": "Si è verificato un errore durante il salvataggio.",
+      "saveButton": "Salva",
+      "saving": "Salvataggio…",
+      "sections": {
+        "termini": "Appuntamenti",
+        "stranke": "Clienti",
+        "storitve": "Servizi",
+        "osebje": "Collaboratori",
+        "analitika": "Analisi",
+        "moduli": "Moduli"
+      },
+      "labels": {
+        "can_view_all_appointments": "Vede tutti gli appuntamenti dell'attività",
+        "can_view_only_own_appointments": "Vede solo i propri appuntamenti",
+        "can_edit_all_appointments": "Modifica tutti gli appuntamenti dell'attività",
+        "can_edit_only_own_appointments": "Modifica solo i propri appuntamenti",
+        "can_create_appointments": "Crea nuovi appuntamenti",
+        "can_delete_appointments": "Elimina appuntamenti",
+        "can_view_clients": "Vede i clienti",
+        "can_edit_clients": "Modifica i clienti",
+        "can_create_clients": "Crea nuovi clienti",
+        "can_delete_clients": "Elimina clienti",
+        "can_view_services": "Vede i servizi",
+        "can_edit_services": "Modifica i servizi",
+        "can_create_services": "Aggiunge servizi",
+        "can_delete_services": "Elimina servizi",
+        "can_view_staff": "Vede l'elenco dei collaboratori",
+        "can_edit_staff": "Modifica i collaboratori",
+        "can_view_analytics": "Vede le analisi",
+        "can_view_zgodovina": "Vede la cronologia (registro delle modifiche)",
+        "can_access_asistent_plus": "Accesso ad Asistent+",
+        "can_access_komunikacija": "Accesso a Comunicazione",
+        "can_access_chatbot_plus": "Accesso a Chatbot+",
+        "can_manage_chatbot_plus_settings": "Modifica delle impostazioni di Chatbot+",
+        "can_access_opomniki": "Accesso ai Promemoria",
+        "can_manage_opomniki": "Gestione dei Promemoria",
+        "can_access_rezervacije": "Accesso alle Prenotazioni",
+        "can_manage_rezervacije": "Gestione delle Prenotazioni",
+        "can_access_lost_leads": "Accesso ai clienti persi",
+        "can_manage_lost_leads": "Gestione dei clienti persi",
+        "can_create_ghost_termin": "Può creare appuntamenti non registrati (esclusi dalle analisi)"
+      }
+    },
+    "invite": {
+      "button": "Invita nel team",
+      "title": "Invita nel team",
+      "subtitle": "Invia un link personale. La persona invitata crea un account e si unisce automaticamente, senza copiare codici.",
+      "close": "Chiudi",
+      "seats": "Accessi all'app: {used} di {total}",
+      "fullTitle": "Tutti i posti di accesso sono occupati",
+      "fullBodyFree": "Il piano gratuito consente 1 accesso. Con Jedro Plus possono accedere 2 persone e puoi acquistare posti aggiuntivi.",
+      "fullBodyPaid": "Per un nuovo collega aggiungi un posto in Componenti aggiuntivi e quote.",
+      "staffStillFree": "Puoi aggiungere collaboratori al calendario senza limiti (Collaboratori); il posto serve solo a chi accede all'app.",
+      "upgrade": "Confronta i piani",
+      "addSeats": "Aggiungi posti",
+      "roleLabel": "Ruolo",
+      "roles": {
+        "staff": {
+          "title": "Collaboratore",
+          "body": "Vede il proprio orario e i propri appuntamenti. Cos'altro può fare lo imposti più sotto nei permessi."
+        },
+        "admin": {
+          "title": "Amministratore",
+          "body": "Accesso completo ad appuntamenti, clienti, servizi, collaboratori, analisi e impostazioni."
+        }
+      },
+      "personLabel": "Collega a un collaboratore",
+      "personHint": "Scegli chi è questa persona nel calendario. Dopo l'adesione vedrà subito i propri appuntamenti.",
+      "personNone": "Non collegare ora",
+      "linkLabel": "Link di invito",
+      "loading": "Preparazione del link …",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "viaEmail": "Email",
+      "emailSubject": "Invito nel team {company}",
+      "message": "Ciao! Ti invito nel team {company} sull'app Jedro+. Apri il link e crea un account: {url}",
+      "privacyNote": "Il link contiene il codice di accesso. Invialo solo alla persona che stai invitando."
+    }
+  },
+  "messages": {
+    "title": "Messaggi",
+    "subtitle": "Viene mostrata solo la cronologia degli ultimi 14 giorni",
+    "messageCount": "{count, plural, one {# messaggio} other {# messaggi}}",
+    "filters": {
+      "all": "Tutti i messaggi",
+      "appointment_reminder": "Promemoria prima",
+      "appointment_post": "Promemoria dopo",
+      "appointment_confirmation": "Conferme appuntamenti",
+      "lost_leads": "Clienti persi",
+      "communication_message": "Comunicazione"
+    },
+    "entityLabels": {
+      "appointment_reminder": "Promemoria prima dell'appuntamento",
+      "appointment_post": "Promemoria dopo l'appuntamento",
+      "appointment_confirmation": "Conferma dell'appuntamento",
+      "lost_leads": "Clienti persi",
+      "communication_message": "Comunicazione"
+    },
+    "status": {
+      "sent": "Inviato",
+      "queued": "In coda",
+      "failed": "Errore"
+    },
+    "expand": "Mostra",
+    "collapse": "Chiudi",
+    "subjectLabel": "Oggetto",
+    "bodyLabel": "Testo del messaggio",
+    "noBody": "Nessun contenuto",
+    "empty": {
+      "title": "Nessun messaggio inviato",
+      "all": "Negli ultimi 14 giorni non è stato inviato alcun messaggio.",
+      "filtered": "Nessun messaggio negli ultimi 14 giorni per il filtro selezionato."
+    }
+  },
+  "zgodovina": {
+    "title": "Cronologia",
+    "subtitle": "Registro di tutte le modifiche e azioni nel sistema",
+    "noAccess": {
+      "title": "Accesso limitato",
+      "message": "Non hai il permesso di visualizzare la cronologia delle azioni."
+    },
+    "loadError": "Si è verificato un errore durante il caricamento della cronologia.",
+    "empty": {
+      "title": "Nessun record",
+      "description": "Nessun record trovato nella cronologia per i filtri selezionati."
+    },
+    "filters": {
+      "tip": "Tipo",
+      "vsi": "Tutti",
+      "termini": "Appuntamenti",
+      "stranke": "Clienti",
+      "akcija": "Azione",
+      "vseAkcije": "Tutte le azioni",
+      "datumOd": "Dal",
+      "datumDo": "Al",
+      "search": "Cerca per ID cliente / appuntamento",
+      "resetFilters": "Reimposta"
+    },
+    "columns": {
+      "datum": "Data e ora",
+      "akcija": "Azione",
+      "entiteta": "Elemento",
+      "kdo": "Chi",
+      "podrobnosti": "Dettagli"
+    },
+    "akcije": {
+      "ustvarjen": "Creato",
+      "spremenjen": "Modificato",
+      "prestavljen": "Spostato",
+      "zakljucen": "Completato",
+      "izbrisan": "Eliminato",
+      "odpovedan": "Annullato",
+      "online_rezervacija": "Prenotazione online",
+      "stranka_dodana": "Cliente aggiunto",
+      "stranka_posodobljena": "Cliente aggiornato"
+    },
+    "tipEntitete": {
+      "termin": "Appuntamento",
+      "stranka": "Cliente"
+    },
+    "izvedel_tip": {
+      "owner": "Titolare",
+      "admin": "Amministratore",
+      "staff": "Collaboratore",
+      "stranka": "Cliente",
+      "sistem": "Sistema"
+    },
+    "expand": "Dettagli",
+    "collapse": "Chiudi",
+    "idTermina": "ID appuntamento",
+    "idStranke": "ID cliente",
+    "spremembe": {
+      "title": "Modifiche",
+      "prej": "Prima",
+      "potem": "Dopo",
+      "noChanges": "Nessuna modifica registrata."
+    },
+    "pagination": {
+      "previous": "Indietro",
+      "next": "Avanti",
+      "of": "di"
+    }
+  },
+  "saveIndicator": {
+    "saving": "Salvataggio...",
+    "saved": "Salvato {relative}",
+    "justNow": "adesso",
+    "secondsAgo": "{seconds} s fa",
+    "minutesAgo": "{minutes} min fa",
+    "hoursAgo": "{hours} h fa"
+  },
+  "qrPage": {
+    "title": "Codice QR per la registrazione dei clienti",
+    "subtitle": "I clienti scansionano questo codice e inseriscono i propri dati.",
+    "noSlug": "Lo slug dell'attività non è impostato."
+  },
+  "qrCard": {
+    "download": "Scarica PNG",
+    "copy": "Copia link",
+    "copied": "Copiato ✓",
+    "info": "Puoi stampare questo codice QR ed esporlo nel tuo salone o studio. I clienti lo scansionano con il telefono e in meno di un minuto inseriscono i propri dati."
+  }
+}

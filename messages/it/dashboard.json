@@ -1,0 +1,201 @@
+{
+  "greeting": {
+    "morning": "Buongiorno,",
+    "day": "Buongiorno,",
+    "afternoon": "Buon pomeriggio,",
+    "evening": "Buonasera,"
+  },
+  "quickActions": {
+    "newAppointment": "Nuovo appuntamento",
+    "newClient": "Nuovo cliente"
+  },
+  "metrics": {
+    "appointmentsToday": "Appuntamenti oggi",
+    "appointmentsTodaySubtitle": "Appuntamenti programmati",
+    "activeAppointments": "Appuntamenti in arrivo",
+    "newClients": "Nuovi clienti",
+    "thisMonth": "Questo mese",
+    "revenue": "Ricavi",
+    "trend": "rispetto al mese scorso",
+    "activeSubtitle": "Programmati da oggi in poi",
+    "pastOpen": "{count, plural, one {# appuntamento passato non è ancora completato} other {# appuntamenti passati non sono ancora completati}}",
+    "pastOpenBody": "I ricavi includono solo gli appuntamenti completati.",
+    "pastOpenCta": "Completa in Appuntamenti"
+  },
+  "nextAppointment": {
+    "title": "Prossimo appuntamento",
+    "today": "Oggi",
+    "tomorrow": "Domani",
+    "empty": "Nessun appuntamento in arrivo"
+  },
+  "appointmentList": {
+    "todayTitle": "Appuntamenti di oggi",
+    "todayEmpty": "Nessun appuntamento oggi",
+    "tomorrowTitle": "Appuntamenti di domani",
+    "tomorrowEmpty": "Nessun appuntamento domani",
+    "defaultEmpty": "Nessun appuntamento",
+    "viewAll": "Vedi tutti gli appuntamenti"
+  },
+  "footer": {
+    "heading": "Ti servono più dettagli?",
+    "body": "Consulta l'intero calendario o le analisi per una visione più approfondita",
+    "openCalendar": "Apri il calendario",
+    "openAnalytics": "Apri le analisi"
+  },
+  "detailModal": {
+    "status": {
+      "scheduled": "Programmato",
+      "confirmed": "Confermato",
+      "completed": "Completato",
+      "cancelled": "Annullato",
+      "pending": "In attesa",
+      "noShow": "Non presentato"
+    },
+    "fields": {
+      "status": "Stato",
+      "client": "Cliente",
+      "service": "Servizio",
+      "employee": "Persona",
+      "date": "Data",
+      "time": "Ora",
+      "duration": "Durata",
+      "price": "Prezzo",
+      "additionalService": "Servizio aggiuntivo",
+      "notes": "Note",
+      "internalNotes": "Note interne",
+      "phone": "Telefono"
+    },
+    "actions": {
+      "complete": "Completa",
+      "edit": "Modifica",
+      "moreOptions": "Altre opzioni",
+      "noShow": "Non presentato",
+      "cancel": "Annulla appuntamento",
+      "delete": "Elimina",
+      "close": "Chiudi"
+    },
+    "openInAppointments": "Apri in Appuntamenti"
+  },
+  "completeModal": {
+    "title": "Completa appuntamento",
+    "subtitle": "Conferma il completamento dell'appuntamento",
+    "client": "Cliente",
+    "service": "Servizio",
+    "date": "Data",
+    "time": "Ora",
+    "messageLabel": "Messaggio al cliente o indicazioni dopo l'appuntamento",
+    "messagePlaceholder": "Inserisci un messaggio o delle indicazioni dopo l'appuntamento (facoltativo)...",
+    "cancel": "Annulla",
+    "completing": "Completamento...",
+    "confirm": "Completa"
+  },
+  "deleteModal": {
+    "title": "Elimina appuntamento",
+    "message": "Sei sicuro di voler eliminare questo appuntamento?"
+  },
+  "toast": {
+    "appointmentAdded": "Appuntamento aggiunto",
+    "appointmentUpdated": "Appuntamento aggiornato",
+    "appointmentCompleted": "Appuntamento completato",
+    "appointmentNoShow": "Appuntamento segnato come mancata presentazione",
+    "appointmentCancelled": "Appuntamento annullato",
+    "clientAdded": "Cliente aggiunto",
+    "loadError": "Si è verificato un errore durante il caricamento dei dati.",
+    "saveError": "Si è verificato un errore durante il salvataggio.",
+    "completeError": "Si è verificato un errore durante il completamento dell'appuntamento.",
+    "noShowError": "Si è verificato un errore durante la segnalazione della mancata presentazione.",
+    "cancelError": "Si è verificato un errore durante l'annullamento dell'appuntamento.",
+    "deleteError": "Si è verificato un errore durante l'eliminazione.",
+    "clientSaveError": "Si è verificato un errore durante il salvataggio del cliente."
+  },
+  "errorState": {
+    "title": "Si è verificato un errore",
+    "retry": "Riprova"
+  },
+  "defaultUser": "Utente",
+  "copyButton": "Copia {label}",
+  "topServices": {
+    "title": "Servizi più richiesti",
+    "subtitle": "Questo mese",
+    "empty": "Nessun dato"
+  },
+  "topEmployees": {
+    "title": "Migliori collaboratori",
+    "subtitle": "Per appuntamenti svolti",
+    "empty": "Nessun dato",
+    "appointmentCount": "{count, plural, one {# appuntamento} other {# appuntamenti}}"
+  },
+  "recentActivity": {
+    "title": "Attività recente",
+    "subtitle": "Ultimi appuntamenti completati",
+    "empty": "Nessuna attività recente",
+    "unknownClient": "Cliente sconosciuto",
+    "serviceLabel": "Servizio",
+    "timeAgo": {
+      "justNow": "Adesso",
+      "minutes": "{count} min fa",
+      "hours": "{count} h fa",
+      "days": "{count} g fa"
+    }
+  },
+  "weeklyChart": {
+    "title": "Appuntamenti - 7 giorni",
+    "subtitle": "Andamento degli ultimi 7 giorni",
+    "tooltipValue": "{value, plural, one {# appuntamento} other {# appuntamenti}}",
+    "tooltipLabel": "N. appuntamenti"
+  },
+  "firstRun": {
+    "preparingTitle": "Stiamo preparando il tuo account",
+    "steps": {
+      "services": "Creiamo i servizi",
+      "owner": "Ti aggiungiamo come collaboratore",
+      "connect": "Colleghiamo il tuo account al tuo orario",
+      "done": "Pronto"
+    },
+    "doneTitle": "Tutto pronto per il primo appuntamento",
+    "doneBody": "I servizi e il tuo orario sono impostati. Inserisci il primo appuntamento e guarda come appare nel calendario.",
+    "cta": "Crea il primo appuntamento",
+    "errorTitle": "Non siamo riusciti a completare la preparazione",
+    "errorBody": "Qualcosa non ha funzionato nella connessione al server. Ciò che è già stato creato rimane: riprova o aggiungi i servizi in Servizi.",
+    "retry": "Riprova",
+    "openServices": "Apri Servizi",
+    "dismiss": "Chiudi"
+  },
+  "gettingStarted": {
+    "title": "Inizia con Jedro+",
+    "subtitle": "Completati {done} di {total}",
+    "hide": "Nascondi elenco",
+    "items": {
+      "tour": {
+        "title": "Guarda la guida (1 min)",
+        "body": "Ti mostriamo dove trovare le cose."
+      },
+      "appointment": {
+        "title": "Inserisci il primo appuntamento",
+        "body": "Scegli cliente, servizio e orario."
+      },
+      "client": {
+        "title": "Aggiungi il primo cliente",
+        "body": "Oppure importa i clienti esistenti da Excel."
+      },
+      "hours": {
+        "title": "Controlla l'orario di apertura",
+        "body": "Il calendario e le prenotazioni online si basano su questo."
+      },
+      "reminders": {
+        "title": "Scopri i promemoria",
+        "body": "Ricordiamo automaticamente l'appuntamento ai clienti."
+      },
+      "team": {
+        "title": "Aggiungi i colleghi",
+        "body": "Se non lavori da solo, aggiungi il team e i loro orari."
+      }
+    }
+  },
+  "staffNotLinked": {
+    "title": "Il tuo account non è ancora collegato al tuo orario",
+    "bodyCanLink": "Per questo non vedi ancora i tuoi appuntamenti. Apri Collaboratori e, accanto al tuo nome, clicca su «Collega il mio account a questa persona».",
+    "bodyAskOwner": "Per questo non vedi ancora i tuoi appuntamenti. Chiedi al titolare di collegarti in Collaboratori.",
+    "cta": "Apri Collaboratori"
+  }
+}

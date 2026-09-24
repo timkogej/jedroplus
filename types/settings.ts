@@ -5,7 +5,7 @@ export interface GeneralSettings {
   userName: string;
   email: string;
   phone: string;
-  language: 'sl' | 'en' | 'de' | 'hr';
+  language: 'sl' | 'en' | 'de' | 'hr' | 'it';
   timezone: string;
   dateFormat: 'DD.MM.YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
   theme: 'light' | 'dark' | 'auto';

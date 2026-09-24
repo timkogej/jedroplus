@@ -1,0 +1,132 @@
+{
+  "page": {
+    "title": "Analisi",
+    "subtitle": "Panoramica dell'attività e dei principali indicatori"
+  },
+  "periods": {
+    "danes": "Oggi",
+    "ta_teden": "Questa settimana",
+    "ta_mesec": "Questo mese",
+    "zadnjih_30": "Ultimi 30 giorni",
+    "ta_leto": "Quest'anno",
+    "custom": "Periodo personalizzato"
+  },
+  "customRange": {
+    "fromLabel": "Dal:",
+    "toLabel": "Al:",
+    "applyButton": "Applica"
+  },
+  "metrics": {
+    "totalRevenue": "Ricavi totali",
+    "averageValue": "Valore medio",
+    "perAppointment": "Per appuntamento",
+    "occupancyRate": "Tasso di occupazione",
+    "workingTime": "Dell'orario di lavoro",
+    "completionRate": "Tasso di completamento",
+    "appointments": "Appuntamenti",
+    "vsPrevious": "rispetto al periodo precedente"
+  },
+  "revenueChart": {
+    "title": "Ricavi e appuntamenti nel tempo",
+    "subtitle": "Andamento giornaliero di appuntamenti completati e ricavi",
+    "noData": "Nessun dato per il periodo selezionato",
+    "revenueLegend": "Ricavi (€)",
+    "appointmentsLegend": "Appuntamenti completati"
+  },
+  "serviceChart": {
+    "title": "Appuntamenti per servizio",
+    "subtitle": "Distribuzione degli appuntamenti per servizio",
+    "noData": "Nessun dato per il periodo selezionato",
+    "tooltipAppointments": "appuntamenti",
+    "moreServices": "+{count, plural, one {# altro servizio} other {# altri servizi}}"
+  },
+  "employeeChart": {
+    "title": "Appuntamenti per collaboratore",
+    "subtitle": "Appuntamenti completati per collaboratore",
+    "noData": "Nessun dato per il periodo selezionato",
+    "tooltipAppointments": "appuntamenti",
+    "moreEmployees": "+{count, plural, one {# altro collaboratore} other {# altri collaboratori}}"
+  },
+  "heatmap": {
+    "title": "Occupazione per fascia oraria",
+    "subtitle": "Quota del tempo totale degli appuntamenti per giorno e ora",
+    "lessOccupied": "Meno occupato",
+    "moreOccupied": "Più occupato",
+    "note": "La % indica la quota del tempo totale degli appuntamenti in ciascuna fascia oraria",
+    "cellTooltip": "{day} {hour}:00–{hourEnd}:00 · {pct}% di occupazione"
+  },
+  "clientGrowth": {
+    "title": "Crescita clienti",
+    "subtitle": "Nuovi clienti nel tempo",
+    "newClientsCount": "nuovi clienti",
+    "noData": "Nessun dato per il periodo selezionato",
+    "totalLabel": "Clienti totali",
+    "newLabel": "Nuovi clienti"
+  },
+  "topPerformers": {
+    "title": "I migliori",
+    "services": "Servizi",
+    "staff": "Collaboratori",
+    "noData": "Nessun dato per il periodo selezionato",
+    "appointmentCount": "{count, plural, one {# appuntamento} other {# appuntamenti}}"
+  },
+  "retention": {
+    "distributionTitle": "Distribuzione dei clienti per numero di appuntamenti",
+    "oneAppointment": "Clienti con 1 appuntamento",
+    "threeAppointments": "Clienti con 3 appuntamenti",
+    "fivePlusAppointments": "Clienti con 5+ appuntamenti",
+    "statusTitle": "Analisi degli stati",
+    "noData": "Nessun dato per il periodo selezionato",
+    "statusNames": {
+      "zakljuceni": "Completati",
+      "nacrtovani": "Programmati",
+      "odpovedani": "Annullati",
+      "niPrisel": "Mancata presentazione"
+    }
+  },
+  "promotions": {
+    "title": "Promozioni",
+    "subtitle": "Analisi di sconti, happy hour e servizi aggiuntivi",
+    "types": {
+      "popust": "Sconti",
+      "happy_hour": "Happy hour",
+      "add_on": "Servizi aggiuntivi"
+    },
+    "appointmentCount": "appuntamenti",
+    "totalSavings": "Risparmio totale",
+    "topPromos": "Sconti più utilizzati",
+    "monthlyTrend": "Utilizzo delle promozioni per mese",
+    "totalSavingsLabel": "Risparmio totale dei clienti con promozioni",
+    "totalCountLabel": "Numero di appuntamenti con promozione",
+    "avgSavingLabel": "Sconto medio per appuntamento",
+    "legend": {
+      "discount": "Sconto",
+      "happyHour": "Happy hour",
+      "addOn": "Servizio aggiuntivo"
+    },
+    "empty": {
+      "title": "Ancora nessun appuntamento con promozioni",
+      "description": "Crea uno sconto o un happy hour e inizia a monitorare i risparmi dei clienti."
+    }
+  },
+  "csvExport": {
+    "metric": "Indicatore",
+    "value": "Valore",
+    "totalRevenue": "Ricavi totali",
+    "averageBookingValue": "Valore medio per appuntamento",
+    "occupancyRate": "Tasso di occupazione",
+    "completionRate": "Tasso di completamento",
+    "totalAppointments": "Appuntamenti totali",
+    "completedAppointments": "Appuntamenti completati",
+    "cancelledAppointments": "Appuntamenti annullati",
+    "revenueGrowth": "Crescita dei ricavi",
+    "bookingGrowth": "Crescita degli appuntamenti",
+    "service": "Servizio",
+    "staff": "Collaboratore",
+    "appointmentCount": "Numero di appuntamenti",
+    "revenue": "Ricavi",
+    "fileMetrics": "analisi-indicatori",
+    "fileServices": "analisi-servizi",
+    "fileStaff": "analisi-collaboratori"
+  }
+}

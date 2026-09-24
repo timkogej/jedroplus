@@ -51,6 +51,9 @@ for (const file of fs.readdirSync(base)) {
     if (tags(en[key]) !== tags(tr[key])) report(`${file}: ${key} tags differ`);
     if (vars(en[key]) !== vars(tr[key])) report(`${file}: ${key} {{variables}} differ`);
     if (tr[key].trim() === '' && en[key].trim() !== '') report(`${file}: ${key} empty`);
+    // ICU treats ' before < { } # as the start of quoted text (swallows tags/args):
+    // write a typographic apostrophe (’) there instead.
+    if (/'[<{}#]/.test(tr[key])) report(`${file}: ${key} has ' before a tag or placeholder (use ’)`);
   }
   for (const key of Object.keys(tr)) if (!(key in en)) report(`${file}: extra ${key}`);
 }

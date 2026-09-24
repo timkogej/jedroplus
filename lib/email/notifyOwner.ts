@@ -24,7 +24,7 @@ export interface NotifyOwnerInput {
   /** Text business id, e.g. 7LHB28. */
   companyId: string;
   data?: Record<string, unknown>;
-  language?: 'sl' | 'en' | 'de' | 'hr';
+  language?: 'sl' | 'en' | 'de' | 'hr' | 'it';
 }
 
 export async function notifyOwner({ event, companyId, data, language }: NotifyOwnerInput): Promise<void> {

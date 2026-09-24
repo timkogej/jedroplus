@@ -1,0 +1,115 @@
+{
+  "page": {
+    "title": "Comunicazione",
+    "subtitle": "Invia messaggi ai tuoi clienti in modo semplice e veloce",
+    "emailQuotaLabel": "Quota email",
+    "step1SectionTitle": "Selezione clienti",
+    "step1ContinueDisabled": "Seleziona i clienti per continuare",
+    "step1Continue": "{count, plural, one {Continua con # cliente} other {Continua con # clienti}}",
+    "step2BackButton": "Torna alla selezione",
+    "step2SelectedBadge": "{count, plural, one {# cliente} other {# clienti}}",
+    "step2SectionTitle": "Scrivi il messaggio"
+  },
+  "result": {
+    "title": "Messaggi inviati",
+    "requested": "Richiesti",
+    "requestedDetail": "Clienti: {clients} · messaggi: {messages}",
+    "sent": "Inviati",
+    "skipped": "Saltati",
+    "skippedLabel": "Saltati:",
+    "newMessage": "Invia un nuovo messaggio",
+    "skippedUnsubscribed": "{name} – disiscritto da novità e offerte"
+  },
+  "customerList": {
+    "searchPlaceholder": "Cerca clienti per nome, email o telefono...",
+    "selectAll": "Seleziona tutti",
+    "deselectAll": "Deseleziona tutti",
+    "selectedCount": "Selezionati: {count}",
+    "resultCount": "{count, plural, one {# cliente} other {# clienti}}",
+    "empty": "Nessun cliente da mostrare",
+    "emptyHint": "Modifica i filtri o la ricerca",
+    "showAll": "Mostra tutti i clienti",
+    "emptyNoClients": "Puoi aggiungere i clienti nel menu Clienti, oppure vengono aggiunti automaticamente al primo appuntamento.",
+    "optedOut": "Disiscritto",
+    "optedOutHint": "Il cliente si è disiscritto da novità e offerte. Continua a ricevere i promemoria degli appuntamenti."
+  },
+  "filters": {
+    "sectionLabel": "Appuntamenti",
+    "all": "Tutti i clienti",
+    "today": "Oggi",
+    "tomorrow": "Domani",
+    "thisWeek": "Questa settimana",
+    "thisMonth": "Questo mese",
+    "advanced": "Filtri avanzati",
+    "serviceLabel": "Servizio",
+    "allServices": "Tutti i servizi",
+    "dateRangeLabel": "Periodo dell'appuntamento"
+  },
+  "ai": {
+    "title": "Asistent+",
+    "subtitle": "Descrivi cosa vuoi comunicare ai clienti",
+    "toneLabel": "Tono del messaggio",
+    "toneFriendly": "Cordiale",
+    "toneProfessional": "Professionale",
+    "promptPlaceholder": "Es.: Comunica ai clienti che questo weekend abbiamo il 20% di sconto su tutti i servizi.",
+    "generateButton": "Genera messaggio",
+    "generatingButton": "Generazione...",
+    "generateError": "Si è verificato un errore durante la generazione del messaggio"
+  },
+  "composer": {
+    "subjectLabel": "Oggetto",
+    "subjectPlaceholder": "Inserisci l'oggetto del messaggio...",
+    "messageLabel": "Messaggio",
+    "messagePlaceholder": "Il tuo messaggio ai clienti...",
+    "charCount": "{count, plural, one {# carattere} other {# caratteri}}",
+    "variableHint": "Clicca su una variabile per inserirla nel testo:",
+    "varClientFirstName": "Nome del cliente",
+    "varClientLastName": "Cognome del cliente",
+    "varCompanyName": "Nome dell'attività",
+    "varCompanyAddress": "Indirizzo dell'attività",
+    "varCompanyPhone": "Telefono dell'attività",
+    "varCompanyEmail": "Email dell'attività",
+    "varYear": "Anno",
+    "varRescheduleLink": "Link per riprenotare"
+  },
+  "preview": {
+    "toggleButton": "Anteprima del messaggio",
+    "subjectLabel": "Oggetto:",
+    "noSubject": "Nessun oggetto",
+    "empty": "L'anteprima comparirà quando scriverai il messaggio...",
+    "note": "Le variabili vengono sostituite con i dati del cliente"
+  },
+  "send": {
+    "recipientsLabel": "Destinatari",
+    "recipientCount": "{count, plural, one {# cliente} other {# clienti}}",
+    "remainingQuotaLabel": "Quota residua",
+    "remainingEmails": "{count, plural, one {# email} other {# email}}",
+    "warnNoSubject": "Inserisci l'oggetto del messaggio",
+    "warnNoMessage": "Inserisci il testo del messaggio",
+    "warnQuotaExceeded": "Quota email superata",
+    "sendButton": "Invia messaggio",
+    "sendingButton": "Invio in corso...",
+    "sendNote": "Il messaggio verrà inviato agli indirizzi email dei clienti selezionati"
+  },
+  "sms": {
+    "quotaTitle": "Quota SMS",
+    "quotaDepleted": "Hai raggiunto il limite di SMS. Passa a un piano superiore per continuare a inviare.",
+    "quotaCritical": "SMS rimanenti questo mese: {remaining}.",
+    "upgradeLink": "Passa a un piano con più SMS",
+    "blockedTitle": "Invio SMS bloccato",
+    "blockedUpgrade": "Cambia piano",
+    "reasonQuota": "Hai raggiunto il limite mensile di SMS",
+    "reasonNoSubscription": "Non hai un abbonamento attivo",
+    "reasonInactive": "Il tuo abbonamento non è attivo",
+    "reasonDefault": "L'invio di SMS non è disponibile"
+  },
+  "toasts": {
+    "selectAtLeastOne": "Seleziona almeno un cliente",
+    "enterSubject": "Inserisci l'oggetto del messaggio",
+    "enterMessage": "Inserisci il testo del messaggio",
+    "invalidId": "Il cliente \"{name}\" non ha un ID numerico valido (Stranke.id)",
+    "someInvalidIds": "Alcuni clienti non hanno un ID valido",
+    "sent": "Messaggi inviati: {sent} / {requested}",
+    "sendError": "Si è verificato un errore durante l'invio del messaggio"
+  }
+}

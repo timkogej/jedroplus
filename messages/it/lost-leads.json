@@ -1,0 +1,98 @@
+{
+  "page": {
+    "title": "Clienti persi",
+    "subtitle": "Panoramica delle impostazioni e dei clienti inattivi",
+    "stats": {
+      "inactiveClients": "Clienti inattivi",
+      "inactiveClientsDesc": "Totale segnalati",
+      "notifiedClients": "Clienti contattati",
+      "notifiedClientsDesc": "Questo mese",
+      "inactivityDays": "Giorni di inattività",
+      "inactivityDaysDesc": "Soglia di inattività"
+    },
+    "table": {
+      "title": "Clienti inattivi",
+      "subtitle": "{count, plural, one {# cliente inattivo} other {# clienti inattivi}} (oltre {days} giorni senza interazioni)",
+      "limitNote": "Vengono mostrati i primi 50 di {total} clienti inattivi",
+      "columns": {
+        "client": "Cliente",
+        "email": "Email",
+        "phone": "Telefono",
+        "daysInactive": "Giorni di inattività",
+        "notified": "Contattato"
+      },
+      "daysValue": "{days, plural, one {# giorno} other {# giorni}}",
+      "notifiedYes": "Sì",
+      "notifiedNo": "No",
+      "empty": "Al momento non ci sono clienti inattivi.",
+      "emptyDesc": "Tutti i clienti hanno avuto un'interazione negli ultimi {days} giorni."
+    },
+    "settings": {
+      "title": "Impostazioni",
+      "statusLabel": "Stato",
+      "inactivityThreshold": "Soglia di inattività",
+      "tone": "Tono della comunicazione",
+      "discount": "Sconto per il ritorno",
+      "aiInstructions": "Istruzioni per l'IA",
+      "notSet": "Non impostato",
+      "noInstructions": "Nessuna istruzione"
+    },
+    "info": {
+      "title": "Informazioni sui clienti persi",
+      "body": "Il sistema <highlight>individua automaticamente i clienti</highlight> che non hanno avuto appuntamenti in un determinato periodo e invia loro un messaggio personalizzato per invitarli a prenotare di nuovo.\n\nL'IA <highlight>scrive il messaggio in base alla tua configurazione</highlight> — il testo si adatta a ogni cliente, tenendo conto della sua storia e dei servizi. Così il tuo messaggio non sembra mai un invio di massa, ma un invito personale a tornare.\n\nGrazie a questo sistema <highlight>recuperi clienti che altrimenti andrebbero dalla concorrenza</highlight> — senza lavoro manuale e senza contatti dimenticati.\n\nPer qualsiasi domanda, scrivici a help@jedroplus.com."
+    }
+  },
+  "status": {
+    "enabled": "Attivo",
+    "disabled": "Disattivato"
+  },
+  "tone": {
+    "professional": "Professionale",
+    "friendly": "Cordiale",
+    "salesOriented": "Orientato alla vendita",
+    "formal": "Formale",
+    "relaxed": "Informale"
+  },
+  "modal": {
+    "title": "Impostazioni clienti persi",
+    "subtitle": "Monitoraggio e recupero dei clienti persi",
+    "closeButton": "Chiudi",
+    "saveButton": "Salva",
+    "savingButton": "Salvataggio...",
+    "saveError": "Si è verificato un errore durante il salvataggio",
+    "enableTitle": "Attiva il monitoraggio dei clienti persi",
+    "enableDesc": "Rilevamento e contatto automatico dei clienti inattivi",
+    "detection": {
+      "sectionTitle": "Rilevamento dei clienti persi",
+      "sectionDesc": "Quando il sistema deve considerare inattivo un cliente",
+      "inactiveAfterLabel": "Inattivo dopo",
+      "inactiveAfterDesc": "Dopo quanti giorni senza appuntamenti un cliente viene considerato inattivo",
+      "daysLabel": "giorni",
+      "inactiveDaysHint": "I clienti verranno segnalati come inattivi dopo {count} giorni senza interazioni"
+    },
+    "communication": {
+      "sectionTitle": "Istruzioni per la comunicazione",
+      "sectionDesc": "Istruzioni per l'IA su come comunicare con i clienti inattivi",
+      "toneLabel": "Tono della comunicazione",
+      "toneDesc": "Come l'IA deve comunicare con i clienti inattivi",
+      "tonePlaceholder": "Scegli il tono",
+      "toneOptions": {
+        "formal": "Formale",
+        "friendly": "Cordiale",
+        "relaxed": "Informale",
+        "professional": "Professionale"
+      },
+      "instructionsLabel": "Istruzioni",
+      "instructionsDesc": "Queste istruzioni servono a scrivere un messaggio personalizzato per ogni cliente inattivo",
+      "instructionsPlaceholder": "Es.: Sii cordiale e personale. Ricorda quanto tempo è passato dall'ultima visita. Offri la possibilità di prenotare un nuovo appuntamento. Se c'è uno sconto, presentalo come offerta speciale per i clienti fedeli."
+    },
+    "discount": {
+      "sectionTitle": "Sconto per il ritorno",
+      "sectionDesc": "Sconto o offerta speciale facoltativa per riattivare i clienti",
+      "label": "Sconto",
+      "fieldDesc": "Descrizione dello sconto o dell'offerta speciale (lascia vuoto se non offri sconti)",
+      "placeholder": "Es.: 15% di sconto sulla prossima visita",
+      "aiHint": "L'IA includerà questa descrizione nei messaggi ai clienti inattivi"
+    }
+  }
+}

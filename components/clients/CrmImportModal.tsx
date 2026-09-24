@@ -61,8 +61,8 @@ const OPTIONAL_FIELDS = ['Opombe', 'Datum vpisa'];
 
 function normalizeSpol(raw: string): string {
   const v = (raw || '').toLowerCase().trim();
-  if (v === 'm' || v === 'male' || v === 'moški' || v === 'moski' || v === 'männlich' || v === 'maennlich' || v === 'herr' || v === 'muški') return 'Moški';
-  if (v === 'f' || v === 'w' || v === 'female' || v === 'ženska' || v === 'zenska' || v === 'ženski' || v === 'weiblich' || v === 'frau') return 'Ženski';
+  if (v === 'm' || v === 'male' || v === 'moški' || v === 'moski' || v === 'männlich' || v === 'maennlich' || v === 'herr' || v === 'muški' || v === 'uomo' || v === 'maschio') return 'Moški';
+  if (v === 'f' || v === 'w' || v === 'female' || v === 'ženska' || v === 'zenska' || v === 'ženski' || v === 'weiblich' || v === 'frau' || v === 'donna' || v === 'femmina') return 'Ženski';
   return raw || '';
 }
 
@@ -151,8 +151,8 @@ export default function CrmImportModal({
     map['Email'] = tryMatch(['email', 'e-mail', 'elektronska pošta', 'elektronska posta', 'e-mail-adresse', 'mail']);
     map['Telefon'] = tryMatch(['telefon', 'phone', 'tel', 'mobile', 'gsm', 'handy', 'telefonnummer', 'mobitel', 'telefono', 'cellulare']);
     map['Spol'] = tryMatch(['spol', 'gender', 'sex', 'geschlecht', 'sesso']);
-    map['Opombe'] = tryMatch(['opombe', 'notes', 'opomba', 'comment', 'comments', 'notizen', 'anmerkungen', 'bemerkung', 'napomena', 'note']);
-    map['Datum vpisa'] = tryMatch(['datum vpisa', 'created_at', 'created at', 'datum', 'date', 'angelegt am', 'date added']);
+    map['Opombe'] = tryMatch(['opombe', 'notes', 'opomba', 'comment', 'comments', 'notizen', 'anmerkungen', 'bemerkung', 'napomena', 'bilješke', 'note']);
+    map['Datum vpisa'] = tryMatch(['datum vpisa', 'created_at', 'created at', 'datum', 'date', 'angelegt am', 'date added', 'datum upisa', 'data di registrazione', 'data creazione']);
 
     setMapping(map);
   };

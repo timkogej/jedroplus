@@ -79,6 +79,7 @@ const LANGUAGES = [
   { value: 'eng', locale: 'en' },
   { value: 'de', locale: 'de' },
   { value: 'hr', locale: 'hr' },
+  { value: 'it', locale: 'it' },
 ] as const;
 
 // SL day names are DB keys for urnik — do not change
@@ -255,7 +256,7 @@ export default function CreateCompanyPage() {
   // the step, so the owner's edits survive going back and forth).
   useEffect(() => {
     if (step !== 4 || servicesForIndustry === industryKey) return;
-    const lang = locale === 'en' || locale === 'de' || locale === 'hr' ? locale : 'sl';
+    const lang = locale === 'en' || locale === 'de' || locale === 'hr' || locale === 'it' ? locale : 'sl';
     setDraftServices(
       getServiceSuggestions(industryKey).map((sug, i) => ({
         key: `${industryKey}-${i}`,
