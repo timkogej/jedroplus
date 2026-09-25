@@ -16,7 +16,9 @@ import {
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { Absence } from '@/lib/supabase/appointments';
 import type { Zaposleni } from '@/types/appointments';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface AbsenceDetailModalProps {
   isOpen: boolean;
@@ -52,10 +54,10 @@ function generateTimeOptions(): string[] {
 
 const TIME_OPTIONS = generateTimeOptions();
 
-function formatAbsenceDate(isoStr: string): string {
+function formatAbsenceDate(isoStr: string, locale: string): string {
   if (!isoStr) return '';
   const d = new Date(isoStr);
-  return d.toLocaleDateString('sl-SI', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return d.toLocaleDateString(intlLocale(locale), { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
 function formatAbsenceTime(isoStr: string): string {
@@ -82,6 +84,7 @@ function AbsenceDetailModal({
   isSaving = false,
 }: AbsenceDetailModalProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
 
   const [mode, setMode] = useState<'view' | 'edit'>('view');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -156,6 +159,7 @@ function AbsenceDetailModal({
   const employeeColor = absence.employee_color || 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)';
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -212,9 +216,9 @@ function AbsenceDetailModal({
                     <CalendarBlank className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" weight="regular" />
                     <div>
                       <p className="text-sm font-medium text-amber-900">
-                        {formatAbsenceDate(absence.start_at)}
+                        {formatAbsenceDate(absence.start_at, locale)}
                         {absence.start_at.split('T')[0] !== absence.end_at.split('T')[0] &&
-                          ` – ${formatAbsenceDate(absence.end_at)}`}
+                          ` – ${formatAbsenceDate(absence.end_at, locale)}`}
                       </p>
                       {!isAllDay(absence) && (
                         <p className="text-xs text-amber-700 flex items-center gap-1 mt-0.5">
@@ -407,6 +411,7 @@ function AbsenceDetailModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

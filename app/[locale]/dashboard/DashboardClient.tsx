@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useFormat } from '@/hooks/useFormat';
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   CalendarCheck,
   UsersThree,
@@ -75,7 +75,7 @@ import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguage
 import FirstRunSetup from "@/components/onboarding/FirstRunSetup";
 import GettingStarted from "@/components/guide/GettingStarted";
 import StaffTourStarter from "@/components/guide/StaffTourStarter";
-import NextLink from "next/link";
+import { Link as NextLink } from "@/i18n/navigation";
 
 // ─── Copy button (reused in detail modal) ────────────────────────────────────
 function CopyButton({ text, label }: { text: string; label: string }) {

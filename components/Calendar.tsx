@@ -93,6 +93,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { useTranslations, useLocale } from 'next-intl';
 import { useOptionalTour } from '@/components/guide/TourProvider';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface CalendarProps {
   companyId: string;
@@ -274,6 +275,7 @@ function AppointmentDetailModal({
   };
 
   return (
+    <BodyPortal>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -724,6 +726,7 @@ function AppointmentDetailModal({
         </div>
       </motion.div>
     </motion.div>
+    </BodyPortal>
   );
 }
 
@@ -2978,6 +2981,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       />
 
       {/* Complete Confirmation Modal - identical to Termini */}
+      <BodyPortal>
       <AnimatePresence>
         {completeTarget && (
           <motion.div
@@ -3159,6 +3163,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
           </motion.div>
         )}
       </AnimatePresence>
+      </BodyPortal>
 
       {/* Success Toast */}
       <AnimatePresence>
@@ -3183,6 +3188,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       </AnimatePresence>
 
       {/* Reschedule confirmation dialog */}
+      <BodyPortal>
       <AnimatePresence>
         {rescheduleConfirm && (
           <motion.div
@@ -3288,6 +3294,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
           </motion.div>
         )}
       </AnimatePresence>
+      </BodyPortal>
 
       {/* Reschedule notification modal */}
       {rescheduleNotifyTarget && (

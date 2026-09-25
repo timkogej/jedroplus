@@ -13,6 +13,7 @@ import {
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { Zaposleni } from '@/types/appointments';
 import { useTranslations } from 'next-intl';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface AbsenceModalProps {
   isOpen: boolean;
@@ -169,6 +170,7 @@ function AbsenceModal({
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence onExitComplete={resetForm}>
       {isOpen && (
         <motion.div
@@ -417,6 +419,7 @@ function AbsenceModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

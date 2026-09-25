@@ -1,7 +1,10 @@
 'use client';
 
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from '@/i18n/navigation';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { useFormat } from '@/hooks/useFormat';
+import { intlLocale } from '@/lib/format';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Clock, CalendarBlank, Plus, Minus, Envelope, Phone, Tag, Warning } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
@@ -148,7 +151,7 @@ function AppointmentModal({
   initialEmployeeId,
   lockEmployee = false,
 }: AppointmentModalProps) {
-  const { money } = useFormat();
+  const { money, locale } = useFormat();
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
@@ -1051,8 +1054,9 @@ function AppointmentModal({
   // If in create/edit mode and no services or no employees — show navigation prompt
   if (mode !== 'view' && (services.length === 0 || employees.length === 0)) {
     return (
+      <BodyPortal>
       <AnimatePresence>
-        <div key="appointment-modal-empty" className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div key="appointment-modal-empty" className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1072,20 +1076,20 @@ function AppointmentModal({
             </p>
             <div className="flex flex-col gap-2">
               {services.length === 0 && (
-                <a
+                <Link
                   href="/services"
                   className="block w-full rounded-xl bg-[#1A1F36] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#2D3461] transition-colors"
                 >
                   {t('modal.emptyState.addService')}
-                </a>
+                </Link>
               )}
               {employees.length === 0 && (
-                <a
+                <Link
                   href="/staff"
                   className="block w-full rounded-xl bg-[#1A1F36] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#2D3461] transition-colors"
                 >
                   {t('modal.emptyState.addEmployee')}
-                </a>
+                </Link>
               )}
               <button
                 type="button"
@@ -1098,6 +1102,7 @@ function AppointmentModal({
           </motion.div>
         </div>
       </AnimatePresence>
+      </BodyPortal>
     );
   }
 
@@ -1131,8 +1136,9 @@ function AppointmentModal({
   const nativeDateTimeInputClass = `${inputBaseClass} native-date-time-input`;
 
   return (
+    <BodyPortal>
     <AnimatePresence>
-      <div key="appointment-modal" className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-2 overscroll-none sm:p-4">
+      <div key="appointment-modal" className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden p-2 overscroll-none sm:p-4">
         {/* Backdrop */}
         <motion.div
           variants={backdropVariants}
@@ -1605,7 +1611,7 @@ function AppointmentModal({
                   <p className="flex items-center gap-2 text-sm font-bold">
                     <CalendarBlank className="h-4 w-4 text-gray-400" weight="regular" />
                     <span className="bg-clip-text text-transparent" style={gradientTextStyle}>
-                      {new Date(formData.datum).toLocaleDateString('sl-SI')}
+                      {new Date(formData.datum).toLocaleDateString(intlLocale(locale))}
                     </span>
                   </p>
                 ) : (
@@ -2147,6 +2153,7 @@ function AppointmentModal({
         />
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

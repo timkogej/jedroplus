@@ -5,7 +5,8 @@ import { useFormat } from '@/hooks/useFormat';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, PencilSimple, Trash, X, MagnifyingGlass, Tag } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { useCompany } from '@/app/company-context';
 import { fetchStoritve } from '@/lib/companyScope';
 import type { Storitev } from '@/types/appointments';
@@ -42,15 +43,16 @@ const DEFAULT_FORM: PopustFormData = {
   storitev_ids: [],
 };
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   if (!dateStr) return '-';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('sl-SI');
+  return d.toLocaleDateString(intlLocale(locale));
 }
 
 export default function DiscountsPage() {
   const { money } = useFormat();
   const t = useTranslations('promotions');
+  const locale = useLocale();
   const tc = useTranslations('common');
   const { companyId } = useCompany();
   const [discounts, setDiscounts] = useState<Popust[]>([]);
@@ -274,8 +276,8 @@ export default function DiscountsPage() {
                       <td className="py-3.5 px-4 font-semibold text-gray-900">
                         {popust.tip_popusta === 'percentage' ? `${popust.vrednost}%` : money(popust.vrednost)}
                       </td>
-                      <td className="py-3.5 px-4 text-gray-600">{formatDate(popust.datum_zacetek)}</td>
-                      <td className="py-3.5 px-4 text-gray-600">{formatDate(popust.datum_konec)}</td>
+                      <td className="py-3.5 px-4 text-gray-600">{formatDate(popust.datum_zacetek, locale)}</td>
+                      <td className="py-3.5 px-4 text-gray-600">{formatDate(popust.datum_konec, locale)}</td>
                       <td className="py-3.5 px-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
                           {status.label}

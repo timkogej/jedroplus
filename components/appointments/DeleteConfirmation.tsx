@@ -3,7 +3,8 @@
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Warning, Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle, Plus } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import type { AppointmentWithDetails } from '@/types/appointments';
 
 interface DeleteConfirmationProps {
@@ -29,6 +30,7 @@ function DeleteConfirmation({
   appointment,
 }: DeleteConfirmationProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   // Animation variants
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -50,7 +52,7 @@ function DeleteConfirmation({
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      return date.toLocaleDateString('sl-SI', {
+      return date.toLocaleDateString(intlLocale(locale), {
         day: 'numeric',
         month: 'long',
         year: 'numeric',

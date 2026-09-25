@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Calendar, ArrowRight, X, Copy, Check, Plus } from "@phosphor-icons/react";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { intlLocale } from "@/lib/format";
 import type { AppointmentItem } from "@/lib/dashboard/fetchDashboardData";
 import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
 
@@ -104,6 +105,7 @@ function AppointmentDetailModal({
   onClose: () => void;
 }) {
   const t = useTranslations('dashboard');
+  const locale = useLocale();
   const getGradientBackground = () => {
     const extractFirst = (barva: string): string => {
       if (!barva) return '#6366F1';
@@ -181,7 +183,7 @@ function AppointmentDetailModal({
     const rawDate = appointment.datum.includes('T') ? appointment.datum : `${appointment.datum}T00:00:00`;
     const date = new Date(rawDate);
     if (Number.isNaN(date.getTime())) return appointment.datum;
-    return date.toLocaleDateString('sl-SI', {
+    return date.toLocaleDateString(intlLocale(locale), {
       day: 'numeric',
       month: 'long',
       year: 'numeric',

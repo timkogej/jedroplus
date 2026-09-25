@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Info } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import type { AppointmentWithDetails } from '@/types/appointments';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface RescheduleNotificationModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export function RescheduleNotificationModal({
   const clientName = [appointment.stranka_ime, appointment.stranka_priimek].filter(Boolean).join(' ');
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -91,5 +93,6 @@ export function RescheduleNotificationModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }

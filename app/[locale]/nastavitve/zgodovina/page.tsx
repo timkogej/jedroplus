@@ -13,7 +13,8 @@ import {
   ArrowLeft,
   ArrowRight,
 } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
@@ -169,6 +170,7 @@ function JsonDiff({
 
 function ZgodovinaCard({ row }: { row: ZgodovinaRow }) {
   const t = useTranslations('settings');
+  const locale = useLocale();
   const [expanded, setExpanded] = useState(false);
 
   const akcija = row.akcija;
@@ -185,7 +187,7 @@ function ZgodovinaCard({ row }: { row: ZgodovinaRow }) {
     ? (t.raw('zgodovina.izvedel_tip') as Record<string, string>)[row.izvedel_tip] ?? row.izvedel_tip
     : null;
 
-  const formattedDate = new Date(row.created_at).toLocaleString('sl-SI', {
+  const formattedDate = new Date(row.created_at).toLocaleString(intlLocale(locale), {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

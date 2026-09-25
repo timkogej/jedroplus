@@ -21,6 +21,7 @@ import {
   extractFirstColorStop,
 } from '@/lib/utils/eventColors';
 import { useTranslations } from 'next-intl';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 export interface EventFormData {
   title: string;
@@ -185,6 +186,7 @@ function EventModal({
   const labelClass = 'text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5 block';
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -571,6 +573,7 @@ function EventModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

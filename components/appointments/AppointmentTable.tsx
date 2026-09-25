@@ -1,7 +1,8 @@
 'use client';
 
 import { memo, useState, useMemo, useId } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Eye,
@@ -45,10 +46,10 @@ interface AppointmentTableProps {
 }
 
 // Format date for display
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('sl-SI', {
+    return date.toLocaleDateString(intlLocale(locale), {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -161,6 +162,7 @@ function AppointmentTable({
   canDeleteAppointment = true,
 }: AppointmentTableProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   const [sortField, setSortField] = useState<SortField>('datum');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [currentPage, setCurrentPage] = useState(1);
@@ -327,7 +329,7 @@ function AppointmentTable({
                         <GradientCalendarIcon size={16} />
                       </span>
                       <span className={`text-sm font-medium text-[#1A1F36] whitespace-nowrap${isCancelled ? ' line-through' : ''}`}>
-                        {formatDate(appointment.datum)}
+                        {formatDate(appointment.datum, locale)}
                       </span>
                     </div>
                   </td>

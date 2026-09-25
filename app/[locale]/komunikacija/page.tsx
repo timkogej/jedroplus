@@ -19,7 +19,8 @@ import AIMessageGenerator from '@/components/komunikacija/AIMessageGenerator';
 import MessageComposer from '@/components/komunikacija/MessageComposer';
 import MessagePreview from '@/components/komunikacija/MessagePreview';
 import SendSection from '@/components/komunikacija/SendSection';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { fetchAllTableRows, fetchTableRows } from '@/lib/companyScope';
@@ -214,6 +215,7 @@ function SendResultPanel({
 
 export default function KomunikacijaPage() {
   const t = useTranslations('communication');
+  const locale = useLocale();
   const { companyId, companySettings } = useCompany();
   const { user } = useAuth();
 
@@ -278,11 +280,11 @@ export default function KomunikacijaPage() {
         let resetDate = '';
         if (usageData?.period_end) {
           const periodEnd = new Date(usageData.period_end);
-          resetDate = periodEnd.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' });
+          resetDate = periodEnd.toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'short', year: 'numeric' });
         } else {
           const now = new Date();
           const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          resetDate = nextMonth.toLocaleDateString('sl-SI', { day: 'numeric', month: 'short', year: 'numeric' });
+          resetDate = nextMonth.toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'short', year: 'numeric' });
         }
 
         setEmailQuota({
@@ -296,7 +298,7 @@ export default function KomunikacijaPage() {
     };
 
     fetchEmailQuota();
-  }, [companyId]);
+  }, [companyId, locale]);
 
   // ── Fetch clients ──────────────────────────────────────────────────────────
   useEffect(() => {
