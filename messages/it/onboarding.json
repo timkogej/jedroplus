@@ -1,7 +1,7 @@
 {
   "entry": {
     "loading": "Verifica in corso...",
-    "title": "Benvenuto in",
+    "title": "Ti diamo il benvenuto in",
     "subtitle": "Crea una nuova attività o unisciti a una esistente",
     "create": {
       "title": "Crea una nuova attività",
@@ -167,15 +167,15 @@
       "errorJoin": "Si è verificato un errore durante l'adesione",
       "errorProfile": "Si è verificato un errore durante il salvataggio del profilo",
       "errorLoad": "Si è verificato un errore durante il caricamento dell'attività",
-      "successWithName": "Ti sei unito a {name}!",
-      "success": "Ti sei unito all'attività!",
+      "successWithName": "Ora fai parte di {name}!",
+      "success": "Ora fai parte dell'attività!",
       "invalidCode": "Il codice dell'attività non è corretto",
       "companyNotFound": "Non esiste un'attività con questo ID"
     },
     "invite": {
       "eyebrow": "Invito",
-      "title": "Sei stato invitato nel team",
-      "titleWithName": "Sei stato invitato in {name}",
+      "title": "Hai ricevuto un invito nel team",
+      "titleWithName": "Hai ricevuto un invito in {name}",
       "body": "Crea un account o accedi. Poi ti aggiungiamo automaticamente al team, senza dover copiare codici.",
       "signUp": "Crea account",
       "logIn": "Ho già un account — accedi",

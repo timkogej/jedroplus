@@ -139,7 +139,7 @@
   },
   "deleteModal": {
     "title": "Eliminazione cliente",
-    "areYouSure": "Sei sicuro?",
+    "areYouSure": "Confermi l'eliminazione?",
     "warningPrefix": "L'eliminazione del cliente",
     "warningSuffix": "sarà definitiva. Questa azione non può essere annullata.",
     "appointmentWarningPrefix": "Questo cliente ha",

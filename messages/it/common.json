@@ -8,7 +8,7 @@
     "back": "Indietro",
     "next": "Avanti",
     "confirm": "Conferma",
-    "discard": "Scarta",
+    "discard": "Annulla",
     "submit": "Invia",
     "tryAgain": "Riprova",
     "viewAll": "Mostra tutto",
@@ -34,7 +34,7 @@
     "saving": "Salvataggio..."
   },
   "confirm": {
-    "title": "Sei sicuro?",
+    "title": "Confermi?",
     "cannotUndo": "Questa azione non può essere annullata.",
     "yes": "Sì",
     "no": "No"

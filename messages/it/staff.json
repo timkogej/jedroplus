@@ -68,7 +68,7 @@
   },
   "deleteModal": {
     "title": "Elimina collaboratore",
-    "confirmMessage": "Sei sicuro di voler eliminare il collaboratore",
+    "confirmMessage": "Vuoi davvero eliminare il collaboratore",
     "warning": "Questa azione è definitiva e non può essere annullata.",
     "deleting": "Eliminazione...",
     "delete": "Elimina"

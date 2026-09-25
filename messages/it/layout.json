@@ -125,7 +125,7 @@
     "tours": {
       "dashboard": {
         "welcome": {
-          "title": "Benvenuto in Jedro+",
+          "title": "Ti diamo il benvenuto in Jedro+",
           "body": "In un minuto ti mostriamo dove trovare le cose. Puoi ripetere la guida quando vuoi dal menu del profilo in alto a destra."
         },
         "newAppointment": {
@@ -189,7 +189,7 @@
       },
       "staff": {
         "welcome": {
-          "title": "Benvenuto nel team",
+          "title": "Ti diamo il benvenuto nel team",
           "body": "Ti mostriamo in breve dove trovare il tuo orario, gli appuntamenti e i clienti."
         },
         "calendar": {

@@ -25,7 +25,7 @@
       },
       "addons": {
         "label": "Dodaci i kvote",
-        "description": "Kupnja dodataka za SMS, e-poštu i zaposlenike"
+        "description": "Kupnja dodatnih SMS poruka, e-pošte i prijava u aplikaciju"
       },
       "history": {
         "label": "Povijest",

@@ -90,7 +90,7 @@
     "titleDelete": "Elimina servizio",
     "warningCount": "{count, plural, one {Questo servizio ha # appuntamento} other {Questo servizio ha # appuntamenti}}",
     "warningDesc": "Non è possibile eliminare un servizio con appuntamenti. Puoi disattivarlo, così non sarà più disponibile per nuovi appuntamenti.",
-    "confirmPrefix": "Sei sicuro di voler eliminare il servizio",
+    "confirmPrefix": "Vuoi davvero eliminare il servizio",
     "confirmSuffix": "Questa azione non può essere annullata.",
     "deactivating": "Disattivazione...",
     "deactivate": "Disattiva servizio",

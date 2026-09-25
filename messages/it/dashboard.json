@@ -91,7 +91,7 @@
   },
   "deleteModal": {
     "title": "Elimina appuntamento",
-    "message": "Sei sicuro di voler eliminare questo appuntamento?"
+    "message": "Vuoi davvero eliminare questo appuntamento?"
   },
   "toast": {
     "appointmentAdded": "Appuntamento aggiunto",
@@ -188,7 +188,7 @@
       },
       "team": {
         "title": "Aggiungi i colleghi",
-        "body": "Se non lavori da solo, aggiungi il team e i loro orari."
+        "body": "Se lavori con altre persone, aggiungi il team e i loro orari."
       }
     }
   },

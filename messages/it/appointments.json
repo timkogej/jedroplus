@@ -34,10 +34,10 @@
   },
   "deleteModal": {
     "title": "Elimina appuntamento",
-    "message": "Sei sicuro di voler eliminare questo appuntamento?"
+    "message": "Vuoi davvero eliminare questo appuntamento?"
   },
   "deleteConfirmation": {
-    "areYouSure": "Sei sicuro?",
+    "areYouSure": "Confermi l'eliminazione?",
     "unknownClient": "Cliente sconosciuto",
     "irreversible": "Questa azione è irreversibile!",
     "cancel": "Annulla",
@@ -335,7 +335,7 @@
         "priceWithDiscount": "Prezzo scontato",
         "additionalService": "Servizio aggiuntivo",
         "deleteTitle": "Elimina appuntamento",
-        "deleteMessage": "Sei sicuro di voler eliminare questo appuntamento?"
+        "deleteMessage": "Vuoi davvero eliminare questo appuntamento?"
       },
       "actions": {
         "noShow": "Non presentato",

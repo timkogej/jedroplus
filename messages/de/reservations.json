@@ -18,11 +18,11 @@
   },
   "standardSection": {
     "title": "Standard-Buchungsseiten",
-    "subtitle": "Designs Classic, Modern und Elegant"
+    "subtitle": "Designs Klassisch, Modern und Elegant"
   },
   "premiumSection": {
     "title": "Designs für Jedro Pro",
-    "subtitle": "Seasonal, Magazine und Casino. Im Paket Jedro Pro enthalten.",
+    "subtitle": "Saisonal, Magazine und Casino. Im Paket Jedro Pro enthalten.",
     "badge": "Pro",
     "lockedNote": "Diese Designs sind in Ihrem Paket gesperrt. Sehen Sie sie sich hier an und schalten Sie sie mit Jedro Pro frei.",
     "upgrade": "Mit Jedro Pro freischalten",
@@ -35,7 +35,7 @@
     "copy": "Kopieren",
     "copied": "Kopiert",
     "classic": {
-      "name": "Classic",
+      "name": "Klassisch",
       "subtitle": "Schlicht und klar",
       "description": "Klassisches Design mit eleganten Farbverläufen im Hintergrund. Ideal, um Ihre Markenfarben zu zeigen und einen Wiedererkennungswert aufzubauen."
     },
@@ -50,7 +50,7 @@
       "description": "Luxuriöses, minimalistisches Design in sanften Erdtönen. Perfekt für gehobene Salons, Spas und exklusive Leistungen."
     },
     "seasonal": {
-      "name": "Seasonal",
+      "name": "Saisonal",
       "subtitle": "Wandelbar und lebendig",
       "description": "Dynamisches Design, das sich automatisch an Jahreszeit und Feiertage anpasst. Frühling, Sommer, Herbst, Winter, Weihnachten, Valentinstag, Halloween und mehr – Ihre Seite wirkt immer frisch und aktuell."
     },
@@ -141,10 +141,10 @@
       "selectPlaceholder": "Link wählen...",
       "missingRequired": "Bitte wählen Sie einen Haupt-Buchungslink.",
       "noLinksAvailable": "Buchungslinks sind noch nicht verfügbar",
-      "classic": "Classic",
+      "classic": "Klassisch",
       "modern": "Modern",
       "minimal": "Minimal",
-      "seasonal": "Seasonal",
+      "seasonal": "Saisonal",
       "magazine": "Magazine"
     },
     "confirmations": {
