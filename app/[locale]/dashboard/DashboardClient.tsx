@@ -124,7 +124,7 @@ function AppointmentDetailModal({
   onCancel?: (appointment: AppointmentWithDetails) => void;
   onDelete?: (appointment: AppointmentWithDetails) => void;
 }) {
-  const { money } = useFormat();
+  const { money, locale } = useFormat();
   const t = useTranslations('dashboard');
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
@@ -175,7 +175,7 @@ function AppointmentDetailModal({
 
   const formatModalDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(intlLocale(locale), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   };
 
   const formatTimeStr = (timeStr: string) => {
@@ -1600,7 +1600,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                   <div>
                     <p className="text-xs text-gray-500">{t('completeModal.date')}</p>
                     <p className="text-sm font-normal text-[#1A1F36]">
-                      {new Date(completeTarget.datum).toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(completeTarget.datum).toLocaleDateString(intlLocale(locale), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
                 </div>

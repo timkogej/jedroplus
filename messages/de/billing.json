@@ -237,6 +237,7 @@
     "staffRestricted": "Diese Funktion ist für Ihr Konto deaktiviert. Wenden Sie sich an den Inhaber."
   },
   "paketi": {
+    "back": "Einstellungen",
     "title": "Pakete",
     "subtitle": "Überblick über Ihr Paket und den Verbrauch",
     "currentBadge": "Aktuell",

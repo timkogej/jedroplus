@@ -2,7 +2,7 @@
 
 import { stripLocalePrefix } from '@/i18n/config';
 import { useRef, useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';

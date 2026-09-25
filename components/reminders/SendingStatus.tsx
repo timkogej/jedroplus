@@ -1,7 +1,7 @@
 'use client';
 
 import { intlLocale } from '@/lib/format';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { CheckCircle, WarningCircle, XCircle } from '@phosphor-icons/react';
 import type { ChannelUsage } from '@/lib/billing/usage';

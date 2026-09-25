@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { motion } from 'motion/react';
 import { CaretLeft, Copy, Check, Lock } from '@phosphor-icons/react';
 import { useLocale, useTranslations } from 'next-intl';

@@ -47,7 +47,8 @@ import { useUserPersonId } from '@/hooks/useUserPersonId';
 import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
 import ExportAppointmentsModal from '@/components/appointments/ExportAppointmentsModal';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -101,6 +102,7 @@ function StatCard({ icon, value, label, delay = 0, loading = false }: StatCardPr
 
 function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialData | null }) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
@@ -1130,7 +1132,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                   <div>
                     <p className="text-xs text-gray-500">{t('completeModal.date')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
-                      {new Date(completeTarget.datum).toLocaleDateString('sl-SI', {
+                      {new Date(completeTarget.datum).toLocaleDateString(intlLocale(locale), {
                         weekday: 'long',
                         day: 'numeric',
                         month: 'long',

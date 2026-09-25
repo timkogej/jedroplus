@@ -1,7 +1,8 @@
 'use client';
 
 import { memo, useState, useMemo, useId } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
 import { formatPhone } from '@/lib/phone';
 import { motion, AnimatePresence } from 'motion/react';
@@ -34,10 +35,10 @@ interface ClientTableProps {
 }
 
 // Format date for display
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('sl-SI', {
+    return date.toLocaleDateString(intlLocale(locale), {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -140,6 +141,7 @@ function ClientTable({
   canDeleteClient = true,
 }: ClientTableProps) {
   const t = useTranslations('clients');
+  const locale = useLocale();
   const region = useCompanyRegion();
   const [sortField, setSortField] = useState<ClientSortField>('priimek');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -363,7 +365,7 @@ function ClientTable({
                     {/* Zadnja interakcija - show last interaction date from Supabase or "/" if none */}
                     <span className="text-sm text-gray-500">
                       {client.zadnja_interakcija
-                        ? formatDate(client.zadnja_interakcija)
+                        ? formatDate(client.zadnja_interakcija, locale)
                         : '/'}
                     </span>
                   </td>

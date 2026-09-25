@@ -237,6 +237,7 @@
     "staffRestricted": "Ova je funkcija za vaš račun onemogućena. Za pristup se obratite vlasniku tvrtke."
   },
   "paketi": {
+    "back": "Postavke",
     "title": "Paketi",
     "subtitle": "Pregled vašeg paketa i potrošnje",
     "currentBadge": "Trenutačni",

@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { ChatTeardropText, Warning, ArrowRight } from '@phosphor-icons/react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useCompany } from '@/app/company-context';
 import { useTranslations } from 'next-intl';
 

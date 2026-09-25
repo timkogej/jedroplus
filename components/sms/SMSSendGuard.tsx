@@ -3,7 +3,7 @@
 import { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Lock, ArrowRight } from '@phosphor-icons/react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useCompany } from '@/app/company-context';
 import { canSendSMS } from '@/lib/api/billingClient';
 import { useTranslations } from 'next-intl';

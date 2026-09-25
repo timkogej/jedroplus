@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { motion } from 'motion/react';
 import { CaretLeft, SpinnerGap, Plus, X } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';

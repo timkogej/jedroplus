@@ -237,6 +237,7 @@
     "staffRestricted": "Ta funkcija je za vaš račun onemogočena. Za dostop kontaktirajte lastnika podjetja."
   },
   "paketi": {
+    "back": "Nastavitve",
     "title": "Paketi",
     "subtitle": "Pregled vašega paketa in porabe",
     "currentBadge": "Trenutni",

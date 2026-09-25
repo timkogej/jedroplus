@@ -25,6 +25,7 @@ import {
   getOffHourRanges,
 } from '@/lib/utils/calendar';
 import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { useSlotHover } from './useSlotHover';
 
 interface DayViewProps {
@@ -512,7 +513,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                     const height = ((clampedEnd - clampedStart) / 60) * HOUR_HEIGHT;
 
                     const fmt = (d: Date) =>
-                      d.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit', hour12: false });
+                      d.toLocaleTimeString(intlLocale(locale), { hour: '2-digit', minute: '2-digit', hour12: false });
 
                     return (
                       <div
@@ -662,7 +663,7 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
               const height = ((clampedEnd - clampedStart) / 60) * HOUR_HEIGHT;
 
               const fmt = (d: Date) =>
-                d.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit', hour12: false });
+                d.toLocaleTimeString(intlLocale(locale), { hour: '2-digit', minute: '2-digit', hour12: false });
 
               return (
                 <div

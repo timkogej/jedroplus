@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useFormat } from '@/hooks/useFormat';
-import Link from 'next/link';
+import { intlLocale } from '@/lib/format';
+import { Link } from '@/i18n/navigation';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -18,7 +19,7 @@ import {
   SpinnerGap,
   Warning,
 } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
@@ -487,6 +488,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 
 export default function PaketiPage() {
   const t = useTranslations('billing');
+  const locale = useLocale();
   const router = useRouter();
   const { companyId, companyUuid, planCode, subscription, isPlanActive } = useCompany();
   const { user } = useAuth();
@@ -536,14 +538,14 @@ export default function PaketiPage() {
   useEffect(() => {
     if (subscription?.current_period_end) {
       setRenewalDate(
-        new Date(subscription.current_period_end).toLocaleDateString('sl-SI', {
+        new Date(subscription.current_period_end).toLocaleDateString(intlLocale(locale), {
           day: 'numeric',
           month: 'long',
           year: 'numeric',
         })
       );
     }
-  }, [subscription]);
+  }, [subscription, locale]);
 
   // Clients and appointments are unlimited on every plan; SMS, email and seats
   // come from useBillingUsage above.
@@ -713,7 +715,7 @@ export default function PaketiPage() {
         className="inline-flex items-center gap-1 text-sm text-gray-400 hover:text-gray-600 transition-colors mb-4"
       >
         <CaretLeft className="w-3.5 h-3.5" weight="regular" />
-        Nastavitve
+        {t('paketi.back')}
       </Link>
 
       <div className="mb-6">

@@ -237,6 +237,7 @@
     "staffRestricted": "Questa funzione è disattivata per il tuo account. Per l'accesso contatta il titolare dell'attività."
   },
   "paketi": {
+    "back": "Impostazioni",
     "title": "Piani",
     "subtitle": "Il tuo piano e i tuoi consumi",
     "currentBadge": "Attuale",

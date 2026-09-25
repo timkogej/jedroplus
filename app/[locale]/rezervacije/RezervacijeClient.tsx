@@ -22,7 +22,7 @@ import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
-import NextLink from 'next/link';
+import { Link as NextLink } from '@/i18n/navigation';
 import { isJedroProPlan } from '@/lib/onlinePayments';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
