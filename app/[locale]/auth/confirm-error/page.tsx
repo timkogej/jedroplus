@@ -13,12 +13,14 @@
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { WarningCircle } from '@phosphor-icons/react/dist/ssr';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 
 const GRADIENT = 'linear-gradient(to right, #7C75FC, #4F8CFF, #50C3D2)';
 
-export default async function ConfirmErrorPage() {
-  const t = await getTranslations('auth.confirmError');
+export default async function ConfirmErrorPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations({ locale, namespace: 'auth.confirmError' });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white p-4">
