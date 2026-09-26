@@ -90,7 +90,7 @@ const RANGE_INPUT_CLASS = [
 ].join(' ');
 
 const SEAT_PRICE_EUR = 6;
-const SUPPORT_EMAIL = 'timkogej@jedroplus.com';
+const SUPPORT_EMAIL = 'info@jedroplus.com';
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 

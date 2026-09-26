@@ -9,7 +9,7 @@ import { sanitizeInput, isHoneypotFilled } from '@/lib/validation/publicForm';
 // shown the address directly — an inquiry is never silently dropped again.
 const N8N_ENTERPRISE_WEBHOOK = 'https://n8n.jedroplus.com/webhook/enterprise-inquiry';
 const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
-const INQUIRY_RECIPIENT = process.env.ENTERPRISE_INQUIRY_EMAIL ?? 'timkogej@jedroplus.com';
+const INQUIRY_RECIPIENT = process.env.ENTERPRISE_INQUIRY_EMAIL ?? 'info@jedroplus.com';
 
 const inquirySchema = z.object({
   name: z.string().trim().min(2).max(100),

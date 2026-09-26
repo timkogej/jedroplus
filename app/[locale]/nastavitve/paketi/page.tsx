@@ -432,7 +432,7 @@ function EnterpriseModal({
             <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
               {t.rich('paketi.enterpriseModal.sendFailed', {
                 email: (chunks) => (
-                  <a href="mailto:timkogej@jedroplus.com" className="font-semibold underline">
+                  <a href="mailto:info@jedroplus.com" className="font-semibold underline">
                     {chunks}
                   </a>
                 ),
