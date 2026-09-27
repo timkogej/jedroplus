@@ -282,5 +282,14 @@
       "address": "Main Street 1"
     },
     "unknownVars": "Unknown variable: {tokens}. The client will see this text as is. Replace it with one from the list above (e.g. Company phone)."
+  },
+  "test": {
+    "buttonSms": "Send a test SMS",
+    "buttonEmail": "Send a test email",
+    "sending": "Sending …",
+    "note": "Goes to your company contact details and counts against your quota. Five per hour.",
+    "sent": "Sent to {recipient}. Check that it reads the way you want.",
+    "unknownVars": "The sender does not know these variables, so they were left as-is: {tokens}.",
+    "failed": "The test could not be sent. Please try again in a few minutes."
   }
 }
