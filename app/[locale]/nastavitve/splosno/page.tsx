@@ -38,6 +38,9 @@ export default function GeneralSettingsPage() {
   const [companySlug, setCompanySlug] = useState('');
 
   const [emailNotifications, setEmailNotifications] = useState(true);
+  // Which company-wide emails we may send (transactional mail always goes out).
+  const [lifecycleOptIn, setLifecycleOptIn] = useState(true);
+  const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   const [copiedId, setCopiedId] = useState(false);
   const [copiedAdminCode, setCopiedAdminCode] = useState(false);
@@ -79,6 +82,30 @@ export default function GeneralSettingsPage() {
 
     loadSettings();
   }, [companyId, user]);
+
+  // Email preferences live in their own table, read and written server-side.
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/company/email-preferences')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.ok) return;
+        setLifecycleOptIn(data.lifecycle_opt_in !== false);
+        setMarketingOptIn(data.marketing_opt_in === true);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [companyId]);
+
+  const saveEmailPreferences = useCallback((patch: Record<string, boolean>) => {
+    fetch('/api/company/email-preferences', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    }).catch(() => {});
+  }, []);
 
   // Join codes come from a server route that checks the caller's role.
   useEffect(() => {
@@ -257,6 +284,34 @@ export default function GeneralSettingsPage() {
               }}
             />
           </SettingRow>
+
+          <SettingRow
+            label={t('general.notifications.lifecycleLabel')}
+            description={t('general.notifications.lifecycleNote')}
+          >
+            <Switch
+              checked={lifecycleOptIn}
+              onChange={(checked) => {
+                setLifecycleOptIn(checked);
+                saveEmailPreferences({ lifecycle_opt_in: checked });
+              }}
+            />
+          </SettingRow>
+
+          <SettingRow
+            label={t('general.notifications.marketingLabel')}
+            description={t('general.notifications.marketingNote')}
+          >
+            <Switch
+              checked={marketingOptIn}
+              onChange={(checked) => {
+                setMarketingOptIn(checked);
+                saveEmailPreferences({ marketing_opt_in: checked });
+              }}
+            />
+          </SettingRow>
+
+          <p className="px-1 pb-2 text-xs text-gray-400">{t('general.notifications.transactionalNote')}</p>
         </SettingsSection>
 
         {/* Company ID & Codes — owners and admins only */}

@@ -62,7 +62,12 @@
       "title": "Notifications",
       "subtitle": "Notification settings",
       "emailLabel": "Email notifications",
-      "emailNote": "Receive notifications by email"
+      "emailNote": "Receive notifications by email",
+      "lifecycleLabel": "Tips and monthly summaries",
+      "lifecycleNote": "How to get more out of the app, plus a short monthly recap.",
+      "marketingLabel": "News and offers",
+      "marketingNote": "Occasional news about what is new. Off by default.",
+      "transactionalNote": "Messages about quotas, payments and invites are always sent, because they concern how your account works."
     },
     "companyData": {
       "title": "Company data",

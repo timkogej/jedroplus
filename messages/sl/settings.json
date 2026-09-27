@@ -62,7 +62,12 @@
       "title": "Obvestila",
       "subtitle": "Nastavitve obvestil",
       "emailLabel": "Email obvestila",
-      "emailNote": "Prejemaj obvestila na email"
+      "emailNote": "Prejemaj obvestila na email",
+      "lifecycleLabel": "Nasveti in mesečni povzetki",
+      "lifecycleNote": "Kako izkoristiti aplikacijo in kratek pregled meseca.",
+      "marketingLabel": "Novosti in akcije",
+      "marketingNote": "Občasna sporočila o novostih. Privzeto izklopljeno.",
+      "transactionalNote": "Sporočila o kvotah, plačilih in povabilih pošljemo vedno, ker se nanašajo na delovanje računa."
     },
     "companyData": {
       "title": "Podatki podjetja",
