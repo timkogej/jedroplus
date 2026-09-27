@@ -25,7 +25,13 @@ export const VAR_LABEL_MAP: Record<string, string> = Object.fromEntries(
 export function migrateTemplate(template: string): string {
   return template
     .replace(/\{\{naziv_podjetja\}\}/g, '{{ime_podjetja}}')
-    .replace(/\{\{lokacija\}\}/g, '{{naslov}}');
+    .replace(/\{\{lokacija\}\}/g, '{{naslov}}')
+    // Short forms people type by hand. n8n's sender understands them, the editor
+    // did not — so a template with {{telefon}} rendered fine in the SMS but showed
+    // up here as an unknown variable. ({{email}} is deliberately absent: the bulk
+    // message preview reads it as the client's address, reminders as the company's.)
+    .replace(/\{\{salon\}\}/g, '{{ime_podjetja}}')
+    .replace(/\{\{telefon\}\}/g, '{{telefon_podjetja}}');
 }
 
 // Parse template string into text/token segments
