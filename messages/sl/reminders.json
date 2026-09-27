@@ -282,5 +282,14 @@
       "address": "Glavna ulica 1"
     },
     "unknownVars": "Neznana spremenljivka: {tokens}. Stranka bo videla to besedilo dobesedno. Zamenjajte jo s spremenljivko s seznama zgoraj (npr. Telefon podjetja)."
+  },
+  "test": {
+    "buttonSms": "Pošlji preizkusni SMS",
+    "buttonEmail": "Pošlji preizkusno e-pošto",
+    "sending": "Pošiljam …",
+    "note": "Gre na kontaktne podatke podjetja in se šteje v vašo kvoto. Največ 5 na uro.",
+    "sent": "Poslano na {recipient}. Preverite, ali je videti tako, kot želite.",
+    "unknownVars": "Teh oznak izris ne pozna in so ostale nespremenjene: {tokens}.",
+    "failed": "Preizkusa ni bilo mogoče poslati. Poskusite čez nekaj minut."
   }
 }

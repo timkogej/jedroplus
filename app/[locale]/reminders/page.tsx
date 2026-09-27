@@ -21,6 +21,7 @@ import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
 import { SendingStatus } from '@/components/reminders/SendingStatus';
 import { MessagePreview } from '@/components/reminders/MessagePreview';
+import { TestSendButton } from '@/components/reminders/TestSendButton';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useTranslations } from 'next-intl';
@@ -594,7 +595,10 @@ export default function RemindersPage() {
                           {beforeChannel === 'sms' && smsModePred === 'manual' ? (
                             <DetailBlock label={t('page.before.manualMode')}>
                               {smsTemplatePred.trim() ? (
-                                <MessagePreview template={smsTemplatePred} companyName={previewCompanyName} />
+                                <>
+                                  <MessagePreview template={smsTemplatePred} companyName={previewCompanyName} />
+                                  <TestSendButton channel="sms" template={smsTemplatePred} />
+                                </>
                               ) : (
                                 renderTextValue(smsTemplatePred)
                               )}
@@ -654,7 +658,10 @@ export default function RemindersPage() {
                           {afterChannel === 'sms' && smsModePo === 'manual' ? (
                             <DetailBlock label={t('page.after.manualMode')}>
                               {smsTemplatePo.trim() ? (
-                                <MessagePreview template={smsTemplatePo} companyName={previewCompanyName} />
+                                <>
+                                  <MessagePreview template={smsTemplatePo} companyName={previewCompanyName} />
+                                  <TestSendButton channel="sms" template={smsTemplatePo} />
+                                </>
                               ) : (
                                 renderTextValue(smsTemplatePo)
                               )}
@@ -702,11 +709,17 @@ export default function RemindersPage() {
                             }
                           >
                             {rescheduleTemplate.trim() ? (
-                              <MessagePreview
-                                template={rescheduleTemplate}
-                                companyName={previewCompanyName}
-                                sms={rescheduleChannel === 'sms'}
-                              />
+                              <>
+                                <MessagePreview
+                                  template={rescheduleTemplate}
+                                  companyName={previewCompanyName}
+                                  sms={rescheduleChannel === 'sms'}
+                                />
+                                <TestSendButton
+                                  channel={rescheduleChannel === 'sms' ? 'sms' : 'email'}
+                                  template={rescheduleTemplate}
+                                />
+                              </>
                             ) : (
                               <span className="text-zinc-400">{t('page.general.notSetTemplate')}</span>
                             )}
