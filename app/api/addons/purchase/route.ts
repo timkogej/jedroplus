@@ -4,7 +4,11 @@ import { requireCompanyAccess } from '@/lib/auth/apiAuth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const N8N_BASE = 'https://tikej.app.n8n.cloud';
+// Pointed at a retired n8n Cloud tenant until 2026-09-27, which answered 404 —
+// every addon purchase and cancellation failed with it.
+const N8N_BASE = (process.env.N8N_WEBHOOK_URL ?? 'https://n8n.jedroplus.com/webhook')
+  .replace(/\/webhook\/?$/, '');
+const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 
 const SMS_PACKAGES = {
   'sms-50':   { quantity: 50,   priceId: process.env.STRIPE_SMS_50_PRICE_ID!,   priceMonthly: 4  },
@@ -152,7 +156,10 @@ export async function POST(request: NextRequest) {
   try {
     const n8nRes = await fetch(`${N8N_BASE}/webhook/addon-purchase`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(N8N_API_KEY ? { 'X-API-Key': N8N_API_KEY } : {}),
+      },
       body: JSON.stringify(n8nPayload),
     });
     const n8nData = await n8nRes.json().catch(() => ({}));
