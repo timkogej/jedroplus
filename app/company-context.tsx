@@ -195,8 +195,65 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // The company id lives in this browser's storage, so it can outlive the
+    // account that put it there — after onboarding a second company, or on a
+    // shared machine. Trusting it blindly shows someone another company's
+    // dashboard, so check the signed-in user actually belongs to it first.
+    const belongsToStoredCompany = async (): Promise<boolean> => {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const authClient = createClient();
+        const { data: { user: authUser } } = await authClient.auth.getUser();
+        if (!authUser) return true; // not signed in: nothing to check against
+
+        const { data: memberships } = await authClient
+          .from("company_members")
+          .select("company_id")
+          .eq("user_id", authUser.id);
+
+        const uuids = (memberships ?? [])
+          .map((m) => (m as { company_id?: string }).company_id)
+          .filter((id): id is string => Boolean(id));
+
+        // Accounts created before company_members existed only have the profile.
+        if (uuids.length === 0) {
+          const { data: profile } = await authClient
+            .from("profiles")
+            .select("default_company_id")
+            .eq("id", authUser.id)
+            .maybeSingle();
+          const fallback = (profile as { default_company_id?: string } | null)?.default_company_id;
+          if (fallback) uuids.push(fallback);
+        }
+        if (uuids.length === 0) return true; // no company anywhere: leave as-is
+
+        const { data: allowed } = await authClient
+          .from("companies")
+          .select("company_id")
+          .in("id", uuids);
+
+        const codes = (allowed ?? [])
+          .map((c) => (c as { company_id?: string }).company_id)
+          .filter((c): c is string => Boolean(c));
+        if (codes.length === 0) return true; // could not resolve: do not lock anyone out
+
+        if (codes.includes(stored)) return true;
+
+        // Wrong company: switch to one this user really has and start over.
+        localStorage.setItem(STORAGE_KEY, codes[0]);
+        localStorage.removeItem(STORAGE_KEY_UUID);
+        document.cookie = `company_id=${codes[0]}; path=/; max-age=31536000`;
+        window.location.reload();
+        return false;
+      } catch {
+        return true; // a failed check must not block the app
+      }
+    };
+
     const loadSettings = async () => {
       setLoading(true);
+
+      if (!(await belongsToStoredCompany())) return;
 
       try {
         // Retry logic: n8n may need a moment to propagate "Podatki podjetij" after company creation.
