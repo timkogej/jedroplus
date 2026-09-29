@@ -25,21 +25,28 @@ import {
   Trash,
   WarningCircle,
   DotsThreeVertical,
-  Envelope,
-  Phone,
-  ClockCountdown,
 } from "@phosphor-icons/react";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import { useCompany } from "@/app/company-context";
 import { useAuth } from "@/app/auth-context";
 import {
-  MetricCard,
   AppointmentListCard,
   TopServicesCard,
   TopEmployeesCard,
   RecentActivityCard,
   WeeklyChart,
+  Section,
+  MetricGroup,
 } from "@/components/dashboard";
+import { initialsStyle } from "@/components/dashboard/initialsStyle";
+import {
+  Sheet,
+  SheetHeader,
+  SheetBody,
+  SheetGroup,
+  SheetRow,
+  SheetFooter,
+} from "@/components/ui/sheet";
 import {
   fetchDashboardData,
   type DashboardData,
@@ -104,7 +111,20 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   );
 }
 
-// ─── Appointment Detail Modal (identical to Calendar) ────────────────────────
+// ─── Podrobnosti termina ─────────────────────────────────────────────────────
+// Na telefonu list od spodaj, na namizju sredinska plošča. Skupine z
+// vrsticami oznaka/vrednost — vzorec iz iOS in macOS Nastavitev.
+
+/** Iz barve storitve (lahko je preliv) potegne eno polno barvo za piko. */
+function solidColor(value?: string | null): string {
+  if (!value) return '#6366F1';
+  if (value.includes('gradient')) {
+    const m = value.match(/#[0-9A-Fa-f]{6}/g);
+    return m?.[0] ?? '#6366F1';
+  }
+  return value;
+}
+
 function AppointmentDetailModal({
   appointment,
   services,
@@ -128,60 +148,15 @@ function AppointmentDetailModal({
   const t = useTranslations('dashboard');
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
-  const getGradientBackground = () => {
-    const extractFirst = (barva: string): string => {
-      if (!barva) return '#6366F1';
-      if (barva.includes('gradient')) {
-        const m = barva.match(/#[0-9A-Fa-f]{6}/g);
-        if (m && m.length > 0) return m[0];
-      }
-      return barva;
-    };
-    const extractLast = (barva: string): string => {
-      if (!barva) return '#6366F1';
-      if (barva.includes('gradient')) {
-        const m = barva.match(/#[0-9A-Fa-f]{6}/g);
-        if (m && m.length > 0) return m[m.length - 1];
-      }
-      return barva;
-    };
-    const singleGradient = (barva: string): string => {
-      if (barva.includes('gradient')) return barva;
-      const hex = barva.replace('#', '');
-      const r = parseInt(hex.substring(0, 2), 16) || 100;
-      const g = parseInt(hex.substring(2, 4), 16) || 100;
-      const b = parseInt(hex.substring(4, 6), 16) || 240;
-      const lr = Math.min(255, r + 40);
-      const lg = Math.min(255, g + 40);
-      const lb = Math.min(255, b + 40);
-      return `linear-gradient(135deg, rgb(${lr}, ${lg}, ${lb}) 0%, ${barva} 100%)`;
-    };
-
-    const primaryColor = appointment.storitev?.barva || '#6366F1';
-    const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
-    const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
-    const addOnService = appointment.add_on_storitev_id
-      ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
-      : appointment.add_on_storitev || null;
-    const allColors: string[] = [primaryColor];
-    if (service2?.barva) allColors.push(service2.barva);
-    if (service3?.barva) allColors.push(service3.barva);
-    if (appointment.add_on_naziv && addOnService?.barva) allColors.push(addOnService.barva);
-
-    if (allColors.length === 1) return singleGradient(primaryColor);
-    if (allColors.length === 2) return `linear-gradient(135deg, ${extractFirst(allColors[0])} 0%, ${extractLast(allColors[1])} 100%)`;
-    return `linear-gradient(135deg, ${extractFirst(allColors[0])} 0%, ${extractLast(allColors[1])} 50%, ${extractLast(allColors[2])} 100%)`;
+  const formatModalDate = (value?: string | null) => {
+    if (!value) return null;
+    const raw = value.includes('T') ? value : `${value}T00:00:00`;
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString('sl-SI', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  const formatModalDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  };
-
-  const formatTimeStr = (timeStr: string) => {
-    if (!timeStr) return '';
-    return timeStr.substring(0, 5);
-  };
+  const formatTimeStr = (timeStr?: string | null) => (timeStr ? timeStr.substring(0, 5) : '');
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -195,362 +170,252 @@ function AppointmentDetailModal({
     }
   };
 
+  // Ploskovni odtenki namesto nasičenih ploščic — barva je namig, ne poudarek.
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'scheduled': return 'bg-emerald-100 text-emerald-700';
-      case 'confirmed': return 'bg-blue-100 text-blue-700';
+      case 'scheduled': return 'bg-emerald-50 text-emerald-700';
+      case 'confirmed': return 'bg-blue-50 text-blue-700';
       case 'completed': return 'bg-gray-100 text-gray-600';
-      case 'cancelled': return 'bg-red-100 text-red-700';
-      case 'pending': return 'bg-amber-100 text-amber-700';
-      case 'no_show': return 'bg-gray-100 text-gray-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'cancelled': return 'bg-red-50 text-red-600';
+      case 'pending': return 'bg-amber-50 text-amber-700';
+      case 'no_show': return 'bg-gray-100 text-gray-600';
+      default: return 'bg-gray-100 text-gray-600';
     }
   };
 
-  const isTerminated = ['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel'].includes(String(appointment.status));
-  const serviceGradient = getGradientBackground();
-  const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
-  const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500';
-  const promotionGradient = 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
-  const gradientTextStyle = {
-    backgroundImage: promotionGradient,
-  };
-  const gradientBorderStyle = {
-    border: '1px solid transparent',
-    background: `linear-gradient(#fff, #fff) padding-box, ${promotionGradient} border-box`,
-  };
-  const clientGradientBorderStyle = {
-    border: '1px solid transparent',
-    background: `linear-gradient(#F9FAFB, #F9FAFB) padding-box, ${promotionGradient} border-box`,
-  };
+  const status = appointment.status || 'scheduled';
+  const isTerminated = ['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel']
+    .includes(String(appointment.status));
+
+  const duration = (() => {
+    if (!appointment.cas_zacetek || !appointment.cas_konec) return appointment.storitev?.trajanje || null;
+    try {
+      const [sh, sm] = appointment.cas_zacetek.split(':').map(Number);
+      const [eh, em] = appointment.cas_konec.split(':').map(Number);
+      const mins = (eh * 60 + em) - (sh * 60 + sm);
+      return mins > 0 ? mins : null;
+    } catch { return appointment.storitev?.trajanje || null; }
+  })();
+
+  const price = (() => {
+    const apt = appointment as unknown as Record<string, unknown>;
+    const c = (apt['Final cena'] as number) ?? (apt['final_cena'] as number) ?? (apt['koncna_cena'] as number)
+      ?? appointment.koncna_cena ?? appointment.cena ?? appointment.storitev?.cena;
+    return c && Number(c) > 0 ? Number(c) : null;
+  })();
+
+  const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
+  const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
+  const addOnService = appointment.add_on_storitev_id
+    ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
+    : appointment.add_on_storitev || null;
+  const addOnName = appointment.add_on_naziv?.trim();
+  const addOnDuration = appointment.add_on_trajanje ?? addOnService?.trajanje ?? 0;
+
+  const internalNotes = appointment.interne_opombe
+    || ((appointment as unknown as Record<string, unknown>)['Interne opombe'] as string)
+    || '';
+
+  const serviceRow = (name: string, color?: string | null, mins?: number, extraBadge?: boolean) => (
+    <SheetRow label={name}>
+      <span className="flex min-w-0 items-center gap-2.5">
+        <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full" style={{ background: solidColor(color) }} />
+        <span className="truncate text-sm font-medium text-gray-900">{name}</span>
+        {extraBadge && (
+          <span className="flex-shrink-0 rounded-full bg-gray-100 px-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+            {t('detailModal.fields.additionalService')}
+          </span>
+        )}
+      </span>
+      {mins && mins > 0 ? (
+        <span className="tnum flex-shrink-0 text-sm text-gray-500">{mins} min</span>
+      ) : null}
+    </SheetRow>
+  );
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-[#F7F8FA] shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="h-1.5 w-full flex-shrink-0" style={{ background: serviceGradient }} />
+    <Sheet onClose={onClose}>
+      <SheetHeader
+        title={appointment.stranka_ime || t('recentActivity.unknownClient')}
+        subtitle={formatModalDate(appointment.datum) ?? undefined}
+        accent={solidColor(appointment.storitev?.barva)}
+        onClose={onClose}
+        closeLabel={t('detailModal.actions.close')}
+        badge={
+          <>
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(status)}`}>
+              {getStatusLabel(status)}
+            </span>
+            <CommunicationLanguageFlag value={appointment.language} />
+          </>
+        }
+      />
 
-        {/* Header */}
-        <div className="border-x border-b border-gray-100 bg-white px-5 py-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex min-w-0 items-center gap-2">
-                <h3 className="min-w-0 truncate text-lg font-semibold text-gray-900">
-                  {appointment.stranka_ime || t('recentActivity.unknownClient')}
-                </h3>
-                <CommunicationLanguageFlag value={appointment.language} />
-                <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
-                  {getStatusLabel(appointment.status || 'scheduled')}
-                </span>
-              </div>
-              <p className="mt-0.5 text-sm text-gray-500">{formatModalDate(appointment.datum)}</p>
-            </div>
-          <motion.button
-            type="button"
-            onClick={onClose}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex-shrink-0 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
-            aria-label={t('detailModal.actions.close')}
-          >
-            <X className="h-5 w-5" weight="bold" />
-          </motion.button>
-          </div>
-        </div>
+      <SheetBody>
+        {/* Kdaj in koliko — datum stoji že v glavi, zato skupina nima oznake */}
+        <SheetGroup>
+          <SheetRow
+            label={t('detailModal.fields.time')}
+            value={
+              <span className="tnum">
+                {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
+              </span>
+            }
+          />
+          {duration !== null && (
+            <SheetRow label={t('detailModal.fields.duration')} value={<span className="tnum">{duration} min</span>} />
+          )}
+          {price !== null && (
+            <SheetRow label={t('detailModal.fields.price')} value={<span className="tnum">{money(price)}</span>} />
+          )}
+        </SheetGroup>
 
-        {/* Content - scrollable */}
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto border-x border-gray-100 p-4">
-          {/* Client */}
-          <div className={sectionClass}>
-            <label className={labelClass}>{t('detailModal.fields.client')}</label>
-            <div className="space-y-2">
-              <div
-                className="flex items-center gap-3 rounded-lg px-4 py-3"
-                style={clientGradientBorderStyle}
-              >
-                <span className="flex-shrink-0 bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
-                  {(() => { const p = (appointment.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
-                </span>
-                <p className="font-medium text-[#1A1F36]">{appointment.stranka_ime || '-'}</p>
-              </div>
-              {(appointment.stranka_email || appointment.stranka_telefon) && (
-                <div className="grid grid-cols-2 gap-2">
-                  {appointment.stranka_email && (
-                    <a
-                      href={`mailto:${appointment.stranka_email}`}
-                      className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-all hover:border-gray-300 hover:shadow-sm"
-                    >
-                      <Envelope className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
-                      <div className="min-w-0">
-                        <div className="text-[10px] text-gray-500">Email</div>
-                        <div className="text-xs font-medium text-[#1A1F36] truncate">{appointment.stranka_email}</div>
-                      </div>
-                    </a>
-                  )}
-                  {appointment.stranka_telefon && (
-                    <a
-                      href={`tel:${appointment.stranka_telefon}`}
-                      className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2.5 transition-all hover:border-gray-300 hover:shadow-sm"
-                    >
-                      <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
-                      <div className="min-w-0">
-                        <div className="text-[10px] text-gray-500">{t('detailModal.fields.phone')}</div>
-                        <div className="text-xs font-medium text-[#1A1F36] truncate">{appointment.stranka_telefon}</div>
-                      </div>
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Storitve */}
+        {appointment.storitev && (
+          <SheetGroup label={t('detailModal.fields.service')}>
+            {serviceRow(appointment.storitev.naziv, appointment.storitev.barva, appointment.storitev.trajanje)}
+            {service2 && serviceRow(service2.naziv, service2.barva, service2.trajanje)}
+            {service3 && serviceRow(service3.naziv, service3.barva, service3.trajanje)}
+            {addOnName && serviceRow(addOnName, addOnService?.barva, addOnDuration, true)}
+          </SheetGroup>
+        )}
 
-          {/* Service(s) */}
-          {appointment.storitev && (() => {
-            const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
-            const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
-            const addOnService = appointment.add_on_storitev_id
-              ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
-              : appointment.add_on_storitev || null;
-            const addOnName = appointment.add_on_naziv?.trim();
-            const addOnDuration = appointment.add_on_trajanje ?? addOnService?.trajanje ?? 0;
-            return (
-              <div className={sectionClass}>
-                <label className={labelClass}>{t('detailModal.fields.service')}</label>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.storitev.barva || '#6366F1' }} />
-                    <p className="text-sm font-medium text-[#1A1F36]">{appointment.storitev.naziv}</p>
-                    {appointment.storitev.trajanje > 0 && (
-                      <span className="text-xs text-gray-400">({appointment.storitev.trajanje} min)</span>
-                    )}
-                  </div>
-                  {service2 && (
-                    <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: service2.barva || '#6366F1' }} />
-                      <p className="text-sm font-medium text-[#1A1F36]">{service2.naziv}</p>
-                      {service2.trajanje > 0 && <span className="text-xs text-gray-400">({service2.trajanje} min)</span>}
-                    </div>
-                  )}
-                  {service3 && (
-                    <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: service3.barva || '#6366F1' }} />
-                      <p className="text-sm font-medium text-[#1A1F36]">{service3.naziv}</p>
-                      {service3.trajanje > 0 && <span className="text-xs text-gray-400">({service3.trajanje} min)</span>}
-                    </div>
-                  )}
-                  {addOnName && (
-                    <div className="flex items-center gap-2">
-                      <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: addOnService?.barva || '#6366F1' }} />
-                      <p className="text-sm font-medium text-[#1A1F36]">{addOnName}</p>
-                      {addOnDuration > 0 && <span className="text-xs text-gray-400">({addOnDuration} min)</span>}
-                      <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
-                        <Plus className="h-2.5 w-2.5" weight="bold" />
-                        {t('detailModal.fields.additionalService')}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Employee */}
-          {appointment.zaposleni && (
-            <div className={sectionClass}>
-              <label className={labelClass}>{t('detailModal.fields.employee')}</label>
-              <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
-                <span
-                  className="text-lg font-normal flex-shrink-0"
-                  style={{
-                    background: appointment.zaposleni.barva || 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
+        {/* Zaposleni */}
+        {appointment.zaposleni && (
+          <SheetGroup label={t('detailModal.fields.employee')}>
+            <SheetRow label={appointment.zaposleni.ime}>
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="flex-shrink-0 text-lg font-bold" style={initialsStyle(appointment.zaposleni.barva)}>
                   {appointment.zaposleni.initials}
                 </span>
-                <p className="font-medium text-[#1A1F36]">
+                <span className="truncate text-sm font-medium text-gray-900">
                   {appointment.zaposleni.ime} {appointment.zaposleni.priimek}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className={`${sectionClass} grid grid-cols-2 gap-4`}>
-            <div>
-              <label className={labelClass}>{t('detailModal.fields.date')}</label>
-              <p className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
-                {formatModalDate(appointment.datum)}
-              </p>
-            </div>
-            <div>
-              <label className={labelClass}>{t('detailModal.fields.time')}</label>
-              <p className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
-                {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
-              </p>
-            </div>
-          </div>
-
-          {/* Duration */}
-          {appointment.cas_zacetek && appointment.cas_konec && (
-            <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
-              <span className="text-sm font-medium text-gray-700">{t('detailModal.fields.duration')}</span>
-              <span className="bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
-                {(() => {
-                  try {
-                    const [sh, sm] = appointment.cas_zacetek.split(':').map(Number);
-                    const [eh, em] = appointment.cas_konec.split(':').map(Number);
-                    return Math.max(0, (eh * 60 + em) - (sh * 60 + sm));
-                  } catch { return appointment.storitev?.trajanje || 0; }
-                })()} min
+                </span>
               </span>
-            </div>
-          )}
+            </SheetRow>
+          </SheetGroup>
+        )}
 
-          {/* Price */}
-          {(() => {
-            const apt = appointment as unknown as Record<string, unknown>;
-            const cena = (apt['Final cena'] as number) ?? (apt['final_cena'] as number) ?? (apt['koncna_cena'] as number) ?? appointment.koncna_cena ?? appointment.cena ?? appointment.storitev?.cena;
-            if (cena && Number(cena) > 0) {
-              return (
-                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
-                  <span className="text-sm font-medium text-gray-700">{t('detailModal.fields.price')}</span>
-                  <span className="bg-clip-text text-xl font-bold text-transparent" style={gradientTextStyle}>
-                    {money(Number(cena))}
-                  </span>
-                </div>
-              );
-            }
-            return null;
-          })()}
-
-          {/* Notes */}
-          {appointment.opombe && (
-            <div className={sectionClass}>
-              <label className={labelClass}>{t('detailModal.fields.notes')}</label>
-              <div className="rounded-lg p-4" style={gradientBorderStyle}>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{appointment.opombe}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Internal Notes */}
-          {(() => {
-            const notes = appointment.interne_opombe
-              || (appointment as unknown as Record<string, unknown>)['Interne opombe'] as string
-              || '';
-            if (!notes) return null;
-            return (
-              <div className={sectionClass}>
-                <label className={labelClass}>{t('detailModal.fields.internalNotes')}</label>
-                <div className="rounded-lg p-4" style={gradientBorderStyle}>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{notes}</p>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-
-        {/* Action buttons */}
-        <div className="border-x border-y border-gray-100 bg-white px-5 py-3">
-          <div className="flex items-center justify-end gap-1">
-            {!isTerminated && onComplete && (
-              <motion.button
-                type="button"
-                onClick={() => onComplete(appointment)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-emerald-50 hover:text-emerald-600"
-                title={t('detailModal.actions.complete')}
-              >
-                <CheckCircle className="h-4.5 w-4.5" weight="regular" />
-              </motion.button>
+        {/* Stranka — vrstici odpreta e-pošto oziroma klic */}
+        {(appointment.stranka_email || appointment.stranka_telefon) && (
+          <SheetGroup label={t('detailModal.fields.client')}>
+            {appointment.stranka_email && (
+              <SheetRow label="Email" href={`mailto:${appointment.stranka_email}`}>
+                <span className="flex-shrink-0 text-sm text-gray-500">Email</span>
+                <span className="truncate text-sm font-medium text-[#6D5EF7]">{appointment.stranka_email}</span>
+              </SheetRow>
             )}
-            {onEdit && (
-              <motion.button
-                type="button"
-                onClick={() => onEdit(appointment)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                title={t('detailModal.actions.edit')}
-              >
-                <NotePencil className="h-4.5 w-4.5" weight="regular" />
-              </motion.button>
+            {appointment.stranka_telefon && (
+              <SheetRow label={t('detailModal.fields.phone')} href={`tel:${appointment.stranka_telefon}`}>
+                <span className="flex-shrink-0 text-sm text-gray-500">{t('detailModal.fields.phone')}</span>
+                <span className="tnum truncate text-sm font-medium text-[#6D5EF7]">{appointment.stranka_telefon}</span>
+              </SheetRow>
             )}
-            {(onNoShow || onCancel || onDelete) && <div className="relative">
-              <motion.button
-                type="button"
-                onClick={() => setActionsMenuOpen(!actionsMenuOpen)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                title={t('detailModal.actions.moreOptions')}
-              >
-                <DotsThreeVertical className="h-4.5 w-4.5" weight="bold" />
-              </motion.button>
-              <AnimatePresence>
-                {actionsMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 bottom-full z-50 mb-1 w-36 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-gray-200"
-                  >
-                    {onNoShow && (
-                      <button
-                        type="button"
-                        onClick={() => { onNoShow(appointment); setActionsMenuOpen(false); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-amber-50 hover:text-amber-700"
-                      >
-                        <WarningCircle className="h-4 w-4" weight="regular" />
-                        {t('detailModal.actions.noShow')}
-                      </button>
-                    )}
-                    {onCancel && (
-                      <button
-                        type="button"
-                        onClick={() => { onCancel(appointment); setActionsMenuOpen(false); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
-                      >
-                        <XCircle className="h-4 w-4" weight="regular" />
-                        {t('detailModal.actions.cancel')}
-                      </button>
-                    )}
-                    {onDelete && (
-                      <button
-                        type="button"
-                        onClick={() => { onDelete(appointment); setActionsMenuOpen(false); }}
-                        className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-700"
-                      >
-                        <Trash className="h-4 w-4" weight="regular" />
-                        {t('detailModal.actions.delete')}
-                      </button>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>}
+          </SheetGroup>
+        )}
+
+        {/* Opombe */}
+        {appointment.opombe && (
+          <SheetGroup label={t('detailModal.fields.notes')}>
+            <SheetRow label={t('detailModal.fields.notes')}>
+              <p className="whitespace-pre-wrap text-sm text-gray-700">{appointment.opombe}</p>
+            </SheetRow>
+          </SheetGroup>
+        )}
+
+        {internalNotes && (
+          <SheetGroup label={t('detailModal.fields.internalNotes')}>
+            <SheetRow label={t('detailModal.fields.internalNotes')}>
+              <p className="whitespace-pre-wrap text-sm text-gray-700">{internalNotes}</p>
+            </SheetRow>
+          </SheetGroup>
+        )}
+      </SheetBody>
+
+      <SheetFooter>
+        {onEdit && (
+          <button
+            type="button"
+            onClick={() => onEdit(appointment)}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 active:opacity-80"
+          >
+            <NotePencil className="h-4 w-4" weight="regular" />
+            {t('detailModal.actions.edit')}
+          </button>
+        )}
+
+        {!isTerminated && onComplete && (
+          <button
+            type="button"
+            onClick={() => onComplete(appointment)}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
+          >
+            <CheckCircle className="h-4 w-4 text-gray-500" weight="regular" />
+            {t('detailModal.actions.complete')}
+          </button>
+        )}
+
+        {(onNoShow || onCancel || onDelete) && (
+          <div className="relative flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setActionsMenuOpen((v) => !v)}
+              aria-label={t('detailModal.actions.moreOptions')}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 active:bg-gray-100"
+            >
+              <DotsThreeVertical className="h-5 w-5" weight="bold" />
+            </button>
+
+            <AnimatePresence>
+              {actionsMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96, y: 4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.96, y: 4 }}
+                  transition={{ duration: 0.16, ease: [0.32, 0.72, 0, 1] }}
+                  style={{ transformOrigin: 'bottom right' }}
+                  className="absolute bottom-full right-0 z-50 mb-1.5 w-44 overflow-hidden rounded-xl border border-gray-100 bg-white/90 py-1 shadow-lg backdrop-blur-xl backdrop-saturate-150"
+                >
+                  {onNoShow && (
+                    <button
+                      type="button"
+                      onClick={() => { onNoShow(appointment); setActionsMenuOpen(false); }}
+                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
+                    >
+                      <WarningCircle className="h-4 w-4 text-gray-500" weight="regular" />
+                      {t('detailModal.actions.noShow')}
+                    </button>
+                  )}
+                  {onCancel && (
+                    <button
+                      type="button"
+                      onClick={() => { onCancel(appointment); setActionsMenuOpen(false); }}
+                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
+                    >
+                      <XCircle className="h-4 w-4 text-gray-500" weight="regular" />
+                      {t('detailModal.actions.cancel')}
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      type="button"
+                      onClick={() => { onDelete(appointment); setActionsMenuOpen(false); }}
+                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50"
+                    >
+                      <Trash className="h-4 w-4" weight="regular" />
+                      {t('detailModal.actions.delete')}
+                    </button>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
-        </div>
-      </motion.div>
-    </motion.div>
+        )}
+      </SheetFooter>
+    </Sheet>
   );
 }
+
 
 // ─── Main Dashboard (client shell) ────────────────────────────────────────────
 // `initialData` is fetched server-side by page.tsx (RSC). When present, the shell
@@ -1130,52 +995,39 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7"
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-normal text-gray-900">
-                  {welcomeGreeting}{" "}
-                  <span className="bg-gradient-to-r from-violet-600 to-cyan-500 bg-clip-text text-transparent">
-                    {displayName}
-                  </span>
+                <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">
+                  {welcomeGreeting} {displayName}
                 </h1>
-                <p className="mt-1 text-gray-500">{todayFormatted}</p>
+                <p className="mt-0.5 text-base text-gray-500">{todayFormatted}</p>
               </div>
 
               {/* Quick Actions */}
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 {canCreateAppointment && (
                   <button
                     type="button"
                     data-tour="new-appointment"
                     onClick={() => setShowNewAppointmentModal(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-medium shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transition-all"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
                   >
-                    <Plus size={18} weight="bold" />
-                    <span className="hidden sm:inline">{t('quickActions.newAppointment')}</span>
+                    <Plus size={17} weight="bold" />
+                    <span>{t('quickActions.newAppointment')}</span>
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={() => setShowNewClientModal(true)}
-                  className="relative inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 font-medium transition-colors hover:bg-gray-50"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
                 >
-                  <svg width="0" height="0" className="absolute" aria-hidden="true" focusable="false">
-                    <defs>
-                      <linearGradient id="dashboard-new-client-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#8B5CF6" />
-                        <stop offset="50%" stopColor="#3B82F6" />
-                        <stop offset="100%" stopColor="#06B6D4" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <UserPlus size={18} weight="bold" color="url(#dashboard-new-client-gradient)" />
-                  <span className="hidden bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent sm:inline">
-                    {t('quickActions.newClient')}
-                  </span>
+                  <UserPlus size={17} weight="regular" className="text-gray-500" />
+                  <span>{t('quickActions.newClient')}</span>
                 </button>
               </div>
             </div>
@@ -1214,149 +1066,110 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
 
           {/* Metrics Cards */}
           {role === 'staff' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <MetricCard
-                title={t('metrics.appointmentsToday')}
-                value={dashboardData?.stats.todayAppointments ?? 0}
-                subtitle={t('metrics.appointmentsTodaySubtitle')}
-                icon={CalendarCheck}
-                iconColor="black"
-                gradientOutline
+            <div className="mb-10 space-y-6">
+              <MetricGroup
+                metrics={[
+                  {
+                    label: t('metrics.appointmentsToday'),
+                    value: dashboardData?.stats.todayAppointments ?? 0,
+                    caption: t('metrics.appointmentsTodaySubtitle'),
+                    icon: CalendarCheck,
+                  },
+                  {
+                    label: t('metrics.activeAppointments'),
+                    value: dashboardData?.stats.activeAppointments ?? 0,
+                    caption: t('metrics.activeSubtitle'),
+                    icon: Clock,
+                  },
+                ]}
               />
-              <MetricCard
-                title={t('metrics.activeAppointments')}
-                value={dashboardData?.stats.activeAppointments ?? 0}
-                subtitle={t('metrics.activeSubtitle')}
-                icon={Clock}
-                iconColor="darkGray"
-              />
-              {/* Naslednji termin — spans 2 columns */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="sm:col-span-2 rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden"
-              >
-                <div className="h-full flex flex-col p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <ClockCountdown className="w-5 h-5 text-black flex-shrink-0" weight="regular" />
-                      <span className="text-sm font-normal text-gray-700">{t('nextAppointment.title')}</span>
-                    </div>
-                    {nextAppointment && (
-                      <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-violet-50 text-violet-600">
-                        {nextAppointment.isToday ? t('nextAppointment.today') : t('nextAppointment.tomorrow')}
-                      </span>
-                    )}
-                  </div>
 
+              {/* Naslednji termin */}
+              <Section className="mb-0" title={t('nextAppointment.title')}>
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+                  className="overflow-hidden rounded-2xl border border-gray-100 bg-white"
+                >
                   {nextAppointment ? (
-                    <motion.button
+                    <button
                       type="button"
                       onClick={() => handleAppointmentClick(nextAppointment)}
-                      className="flex-1 flex items-center gap-3 hover:bg-gray-50 rounded-xl px-2 py-1 -mx-2 transition-colors text-left w-full"
+                      className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
                     >
-                      {/* Service color bar */}
-                      <div
-                        className="w-1 self-stretch rounded-full flex-shrink-0"
-                        style={{
-                          background: (() => {
-                            const c1 = nextAppointment.serviceColor || '#8B5CF6';
-                            const c2 = nextAppointment.serviceColor2;
-                            const c3 = nextAppointment.serviceColor3 || nextAppointment.addOnServiceColor;
-                            const extractFirst = (b: string) => { const m = b.includes('gradient') ? b.match(/#[0-9A-Fa-f]{6}/g) : null; return m ? m[0] : b; };
-                            const extractLast = (b: string) => { const m = b.includes('gradient') ? b.match(/#[0-9A-Fa-f]{6}/g) : null; return m ? m[m.length - 1] : b; };
-                            const singleGrad = (b: string) => {
-                              if (b.includes('gradient')) return b.replace(/\d+deg/, '180deg');
-                              const hex = b.replace('#', ''); const r = parseInt(hex.substring(0,2),16)||100; const g = parseInt(hex.substring(2,4),16)||100; const bv = parseInt(hex.substring(4,6),16)||240;
-                              return `linear-gradient(180deg, rgb(${Math.min(255,r+40)},${Math.min(255,g+40)},${Math.min(255,bv+40)}) 0%, rgb(${Math.max(0,r-20)},${Math.max(0,g-20)},${Math.max(0,bv-20)}) 100%)`;
-                            };
-                            if (!c2) return singleGrad(c1);
-                            if (!c3) return `linear-gradient(180deg, ${extractFirst(c1)} 0%, ${extractLast(c2)} 100%)`;
-                            return `linear-gradient(180deg, ${extractFirst(c1)} 0%, ${extractLast(c2)} 50%, ${extractLast(c3)} 100%)`;
-                          })(),
-                          minHeight: 40,
-                        }}
-                      />
-                      {/* Time */}
-                      <div className="flex-shrink-0">
-                        <div className="text-lg font-normal text-gray-900">{nextAppointment.time}</div>
+                      <div className="w-12 flex-shrink-0">
+                        <div className="tnum text-base font-semibold text-gray-900">
+                          {nextAppointment.time}
+                        </div>
                         {nextAppointment.endTime && (
-                          <div className="text-xs text-gray-500">{nextAppointment.endTime}</div>
+                          <div className="tnum text-xs text-gray-400">{nextAppointment.endTime}</div>
                         )}
                       </div>
-                      {/* Client + service */}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-normal text-gray-900 truncate">{nextAppointment.clientName}</div>
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
+
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-base font-medium text-gray-900">
+                          {nextAppointment.clientName}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
                           <span className="truncate">{nextAppointment.serviceName}</span>
                           {((nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0) + (nextAppointment.addOnName ? 1 : 0)) > 0 && (
-                            <span
-                              className="text-sm font-normal flex-shrink-0"
-                              style={{
-                                backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                              }}
-                            >
+                            <span className="tnum flex-shrink-0 rounded-full bg-gray-100 px-1.5 text-xs font-medium text-gray-600">
                               +{(nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0) + (nextAppointment.addOnName ? 1 : 0)}
                             </span>
                           )}
                         </div>
                       </div>
-                      {/* Employee initials */}
+
+                      <span className="flex-shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                        {nextAppointment.isToday ? t('nextAppointment.today') : t('nextAppointment.tomorrow')}
+                      </span>
+
                       <div
-                        className="flex h-10 w-10 items-center justify-center text-lg font-bold flex-shrink-0"
-                        style={{
-                          background: nextAppointment.employeeColor || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                          color: 'transparent',
-                        }}
+                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center text-lg font-bold"
+                        style={initialsStyle(nextAppointment.employeeColor)}
                       >
                         {nextAppointment.employeeInitials}
                       </div>
-                    </motion.button>
+                    </button>
                   ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-2 py-4">
-                      <CalendarBlank className="w-5 h-5 text-gray-300" weight="regular" />
+                    <div className="px-5 py-10 text-center">
+                      <CalendarBlank className="mx-auto mb-2 h-6 w-6 text-gray-300" weight="regular" />
                       <p className="text-sm text-gray-400">{t('nextAppointment.empty')}</p>
                     </div>
                   )}
-                </div>
-              </motion.div>
+                </motion.div>
+              </Section>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <MetricCard
-                title={t('metrics.appointmentsToday')}
-                value={dashboardData?.stats.todayAppointments ?? 0}
-                subtitle={t('metrics.appointmentsTodaySubtitle')}
-                icon={CalendarCheck}
-                iconColor="black"
-                gradientOutline
-              />
-              <MetricCard
-                title={t('metrics.activeAppointments')}
-                value={dashboardData?.stats.activeAppointments ?? 0}
-                subtitle={t('metrics.activeSubtitle')}
-                icon={Clock}
-                iconColor="darkGray"
-              />
-              <MetricCard
-                title={t('metrics.newClients')}
-                value={dashboardData?.stats.newClientsThisMonth ?? 0}
-                subtitle={t('metrics.thisMonth')}
-                icon={UsersThree}
-                iconColor="mediumGray"
-              />
-              <MetricCard
-                title={t('metrics.revenue')}
-                value={money(dashboardData?.stats.revenueThisMonth ?? 0)}
-                subtitle={t('metrics.thisMonth')}
-                icon={CurrencyCircleDollar}
-                iconColor="slate"
+            <div className="mb-10">
+              <MetricGroup
+                metrics={[
+                  {
+                    label: t('metrics.appointmentsToday'),
+                    value: dashboardData?.stats.todayAppointments ?? 0,
+                    caption: t('metrics.appointmentsTodaySubtitle'),
+                    icon: CalendarCheck,
+                  },
+                  {
+                    label: t('metrics.activeAppointments'),
+                    value: dashboardData?.stats.activeAppointments ?? 0,
+                    caption: t('metrics.activeSubtitle'),
+                    icon: Clock,
+                  },
+                  {
+                    label: t('metrics.newClients'),
+                    value: dashboardData?.stats.newClientsThisMonth ?? 0,
+                    caption: t('metrics.thisMonth'),
+                    icon: UsersThree,
+                  },
+                  {
+                    label: t('metrics.revenue'),
+                    value: money(dashboardData?.stats.revenueThisMonth ?? 0),
+                    caption: t('metrics.thisMonth'),
+                    icon: CurrencyCircleDollar,
+                  },
+                ]}
               />
             </div>
           )}
@@ -1379,70 +1192,86 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
           )}
 
           {/* Today and Tomorrow Appointments */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <AppointmentListCard
+          <div className="mb-10 grid grid-cols-1 items-start gap-x-6 gap-y-8 lg:grid-cols-2">
+            <Section
+              className="mb-0"
               title={t('appointmentList.todayTitle')}
               subtitle={new Date().toLocaleDateString(intlLocale(locale), { day: "numeric", month: "long" })}
-              appointments={dashboardData?.todayAppointments ?? []}
-              emptyMessage={t('appointmentList.todayEmpty')}
-              gradientOutline
-              viewAllHref={`/termini?dateFrom=${format(new Date(), "yyyy-MM-dd")}&dateTo=${format(new Date(), "yyyy-MM-dd")}`}
-              onAppointmentClick={handleAppointmentClick}
-            />
-            <AppointmentListCard
+              actionHref={`/termini?dateFrom=${format(new Date(), "yyyy-MM-dd")}&dateTo=${format(new Date(), "yyyy-MM-dd")}`}
+              actionLabel={t('appointmentList.viewAll')}
+            >
+              <AppointmentListCard
+                appointments={dashboardData?.todayAppointments ?? []}
+                emptyMessage={t('appointmentList.todayEmpty')}
+                onAppointmentClick={handleAppointmentClick}
+              />
+            </Section>
+
+            <Section
+              className="mb-0"
               title={t('appointmentList.tomorrowTitle')}
               subtitle={new Date(Date.now() + 86400000).toLocaleDateString(intlLocale(locale), { day: "numeric", month: "long" })}
-              appointments={dashboardData?.tomorrowAppointments ?? []}
-              emptyMessage={t('appointmentList.tomorrowEmpty')}
-              viewAllHref={`/termini?dateFrom=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}&dateTo=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}`}
-              onAppointmentClick={handleAppointmentClick}
-            />
+              actionHref={`/termini?dateFrom=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}&dateTo=${format(new Date(Date.now() + 86400000), "yyyy-MM-dd")}`}
+              actionLabel={t('appointmentList.viewAll')}
+            >
+              <AppointmentListCard
+                appointments={dashboardData?.tomorrowAppointments ?? []}
+                emptyMessage={t('appointmentList.tomorrowEmpty')}
+                onAppointmentClick={handleAppointmentClick}
+              />
+            </Section>
           </div>
 
           {/* Weekly Chart */}
-          <div className="mb-8">
+          <Section
+            title={t('weeklyChart.title')}
+            subtitle={t('weeklyChart.subtitle')}
+            actionHref="/analytics"
+            actionLabel={t('footer.openAnalytics')}
+          >
             <WeeklyChart data={dashboardData?.weeklyChart ?? []} />
-          </div>
+          </Section>
 
           {/* Bottom Row */}
-          <div className={`grid grid-cols-1 gap-6 ${staffSeesAll ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
-            <TopServicesCard services={dashboardData?.topServices ?? []} />
-            {staffSeesAll && <TopEmployeesCard employees={dashboardData?.topEmployees ?? []} />}
-            {staffSeesAll && <RecentActivityCard activities={dashboardData?.recentActivity ?? []} />}
+          <div className={`grid grid-cols-1 items-start gap-x-6 gap-y-8 ${staffSeesAll ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
+            <Section className="mb-0" title={t('topServices.title')} subtitle={t('topServices.subtitle')}>
+              <TopServicesCard services={dashboardData?.topServices ?? []} />
+            </Section>
+            {staffSeesAll && (
+              <Section className="mb-0" title={t('topEmployees.title')} subtitle={t('topEmployees.subtitle')}>
+                <TopEmployeesCard employees={dashboardData?.topEmployees ?? []} />
+              </Section>
+            )}
+            {staffSeesAll && (
+              <Section className="mb-0" title={t('recentActivity.title')} subtitle={t('recentActivity.subtitle')}>
+                <RecentActivityCard activities={dashboardData?.recentActivity ?? []} />
+              </Section>
+            )}
           </div>
 
           {/* Quick Navigation Footer */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 p-6 rounded-2xl bg-gradient-to-br from-violet-500/5 to-cyan-500/5 border border-violet-100"
-          >
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <h3 className="font-normal text-gray-900">{t('footer.heading')}</h3>
-                <p className="text-sm text-gray-500">
-                  {t('footer.body')}
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <Link
-                  href="/koledar"
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-violet-600 hover:text-violet-700 transition-colors"
-                >
-                  {t('footer.openCalendar')}
-                  <ArrowRight size={16} weight="bold" />
-                </Link>
-                <Link
-                  href="/analytics"
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-cyan-600 hover:text-cyan-700 transition-colors"
-                >
-                  {t('footer.openAnalytics')}
-                  <ArrowRight size={16} weight="bold" />
-                </Link>
-              </div>
+          <div className="hairline-t mt-12 flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-base font-medium text-gray-900">{t('footer.heading')}</h3>
+              <p className="text-sm text-gray-500">{t('footer.body')}</p>
             </div>
-          </motion.div>
+            <div className="flex flex-shrink-0 gap-2">
+              <Link
+                href="/koledar"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50"
+              >
+                {t('footer.openCalendar')}
+                <ArrowRight size={14} weight="bold" className="text-gray-400" />
+              </Link>
+              <Link
+                href="/analytics"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50"
+              >
+                {t('footer.openAnalytics')}
+                <ArrowRight size={14} weight="bold" className="text-gray-400" />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 

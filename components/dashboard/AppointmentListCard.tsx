@@ -2,11 +2,20 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Calendar, ArrowRight, X, Copy, Check, Plus } from "@phosphor-icons/react";
+import { Calendar, ArrowRight, Copy, Check } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import type { AppointmentItem } from "@/lib/dashboard/fetchDashboardData";
+import { initialsStyle } from "./initialsStyle";
 import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
+import {
+  Sheet,
+  SheetHeader,
+  SheetBody,
+  SheetGroup,
+  SheetRow,
+  SheetFooter,
+} from "@/components/ui/sheet";
 
 function extractFirstColor(barva: string): string {
   if (!barva) return '#8B5CF6';
@@ -58,13 +67,8 @@ function buildServiceBarGradient(c1: string, c2?: string, c3?: string): string {
 }
 
 interface AppointmentListCardProps {
-  title: string;
-  subtitle: string;
   appointments: AppointmentItem[];
   emptyMessage?: string;
-  showViewAll?: boolean;
-  viewAllHref?: string;
-  gradientOutline?: boolean;
   onAppointmentClick?: (item: AppointmentItem) => void;
 }
 
@@ -95,7 +99,20 @@ function CopyButton({ text, label }: { text: string; label: string }) {
   );
 }
 
-// Appointment detail modal — matches Calendar AppointmentDetailModal style
+// ─── Podrobnosti termina ─────────────────────────────────────────────────────
+// Na telefonu list od spodaj, na namizju sredinska plošča. Vsebina je urejena
+// v skupine z vrsticami oznaka/vrednost — vzorec iz iOS in macOS Nastavitev.
+
+/** Iz barve storitve (lahko je preliv) potegne eno polno barvo za piko. */
+function solidColor(value?: string | null): string {
+  if (!value) return '#6366F1';
+  if (value.includes('gradient')) {
+    const m = value.match(/#[0-9A-Fa-f]{6}/g);
+    return m?.[0] ?? '#6366F1';
+  }
+  return value;
+}
+
 function AppointmentDetailModal({
   appointment,
   onClose,
@@ -104,44 +121,6 @@ function AppointmentDetailModal({
   onClose: () => void;
 }) {
   const t = useTranslations('dashboard');
-  const getGradientBackground = () => {
-    const extractFirst = (barva: string): string => {
-      if (!barva) return '#6366F1';
-      if (barva.includes('gradient')) {
-        const m = barva.match(/#[0-9A-Fa-f]{6}/g);
-        if (m && m.length > 0) return m[0];
-      }
-      return barva;
-    };
-    const extractLast = (barva: string): string => {
-      if (!barva) return '#6366F1';
-      if (barva.includes('gradient')) {
-        const m = barva.match(/#[0-9A-Fa-f]{6}/g);
-        if (m && m.length > 0) return m[m.length - 1];
-      }
-      return barva;
-    };
-    const singleGradient = (barva: string): string => {
-      if (barva.includes('gradient')) return barva;
-      const hex = barva.replace('#', '');
-      const r = parseInt(hex.substring(0, 2), 16) || 100;
-      const g = parseInt(hex.substring(2, 4), 16) || 100;
-      const b = parseInt(hex.substring(4, 6), 16) || 240;
-      const lr = Math.min(255, r + 40);
-      const lg = Math.min(255, g + 40);
-      const lb = Math.min(255, b + 40);
-      return `linear-gradient(135deg, rgb(${lr}, ${lg}, ${lb}) 0%, ${barva} 100%)`;
-    };
-
-    const allColors: string[] = [appointment.serviceColor || '#6366F1'];
-    if (appointment.serviceColor2) allColors.push(appointment.serviceColor2);
-    if (appointment.serviceColor3) allColors.push(appointment.serviceColor3);
-    if (appointment.addOnName && appointment.addOnServiceColor) allColors.push(appointment.addOnServiceColor);
-
-    if (allColors.length === 1) return singleGradient(allColors[0]);
-    if (allColors.length === 2) return `linear-gradient(135deg, ${extractFirst(allColors[0])} 0%, ${extractLast(allColors[1])} 100%)`;
-    return `linear-gradient(135deg, ${extractFirst(allColors[0])} 0%, ${extractLast(allColors[1])} 50%, ${extractLast(allColors[2])} 100%)`;
-  };
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -155,15 +134,17 @@ function AppointmentDetailModal({
     }
   };
 
+  // Ploskovni odtenki namesto nasičenih ploščic — Apple barvo uporabi
+  // kot namig, ne kot poudarek.
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'scheduled': return 'bg-emerald-100 text-emerald-700';
-      case 'confirmed': return 'bg-blue-100 text-blue-700';
+      case 'scheduled': return 'bg-emerald-50 text-emerald-700';
+      case 'confirmed': return 'bg-blue-50 text-blue-700';
       case 'completed': return 'bg-gray-100 text-gray-600';
-      case 'cancelled': return 'bg-red-100 text-red-700';
-      case 'pending': return 'bg-amber-100 text-amber-700';
-      case 'no_show': return 'bg-gray-100 text-gray-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'cancelled': return 'bg-red-50 text-red-600';
+      case 'pending': return 'bg-amber-50 text-amber-700';
+      case 'no_show': return 'bg-gray-100 text-gray-600';
+      default: return 'bg-gray-100 text-gray-600';
     }
   };
 
@@ -176,279 +157,211 @@ function AppointmentDetailModal({
       return mins > 0 ? mins : null;
     } catch { return null; }
   })();
+
   const formattedDate = (() => {
     if (!appointment.datum) return null;
     const rawDate = appointment.datum.includes('T') ? appointment.datum : `${appointment.datum}T00:00:00`;
     const date = new Date(rawDate);
     if (Number.isNaN(date.getTime())) return appointment.datum;
-    return date.toLocaleDateString('sl-SI', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+    return date.toLocaleDateString('sl-SI', { day: 'numeric', month: 'long', year: 'numeric' });
   })();
-  const serviceGradient = getGradientBackground();
-  const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
-  const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500';
-  const promotionGradient = 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
-  const gradientTextStyle = {
-    backgroundImage: promotionGradient,
-  };
-  const clientGradientBorderStyle = {
-    border: '1px solid transparent',
-    background: `linear-gradient(#F9FAFB, #F9FAFB) padding-box, ${promotionGradient} border-box`,
-  };
+
+  const status = appointment.status || 'scheduled';
+  const hasEmployee = appointment.employeeName && appointment.employeeName !== 'Nedoločeno';
+  const hasContact = Boolean(appointment.clientEmail || appointment.clientPhone);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-[#F7F8FA] shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="h-1.5 w-full flex-shrink-0" style={{ background: serviceGradient }} />
+    <Sheet onClose={onClose}>
+      <SheetHeader
+        title={appointment.clientName}
+        subtitle={formattedDate ?? undefined}
+        accent={solidColor(appointment.serviceColor)}
+        onClose={onClose}
+        closeLabel={t('detailModal.actions.close')}
+        badge={
+          <>
+            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(status)}`}>
+              {getStatusLabel(status)}
+            </span>
+            <CommunicationLanguageFlag value={appointment.language} />
+          </>
+        }
+      />
 
-        {/* Header */}
-        <div className="border-x border-b border-gray-100 bg-white px-5 py-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex min-w-0 items-center gap-2">
-                <h3 className="min-w-0 truncate text-lg font-semibold text-gray-900">
-                  {appointment.clientName}
-                </h3>
-                <CommunicationLanguageFlag value={appointment.language} />
-                <span className={`flex-shrink-0 rounded-full px-2.5 py-1 text-xs font-normal ${getStatusColor(appointment.status || 'scheduled')}`}>
-                  {getStatusLabel(appointment.status || 'scheduled')}
-                </span>
-              </div>
-              <p className="mt-0.5 text-sm text-gray-500">
+      <SheetBody>
+        {/* Kdaj — brez oznake skupine, ker datum stoji že v glavi */}
+        <SheetGroup>
+          <SheetRow
+            label={t('detailModal.fields.time')}
+            value={
+              <span className="tnum">
                 {appointment.time}{appointment.endTime ? ` – ${appointment.endTime}` : ''}
-              </p>
-            </div>
-          <motion.button
-            type="button"
-            onClick={onClose}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex-shrink-0 rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
-            aria-label={t('detailModal.actions.close')}
-          >
-            <X className="h-5 w-5" weight="bold" />
-          </motion.button>
-          </div>
-        </div>
-
-        {/* Content - scrollable */}
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto border-x border-gray-100 p-4">
-          {/* Client */}
-          <div className={sectionClass}>
-            <label className={labelClass}>{t('detailModal.fields.client')}</label>
-            <div
-              className="flex items-center gap-3 rounded-lg px-4 py-3"
-              style={clientGradientBorderStyle}
-            >
-              <span className="flex-shrink-0 bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
-                {appointment.clientName?.split(' ').map(n => n.charAt(0)).join('').substring(0, 2).toUpperCase()}
               </span>
-              <div className="min-w-0">
-                <p className="font-medium text-[#1A1F36]">{appointment.clientName || '-'}</p>
-                {appointment.clientEmail && <p className="text-xs text-gray-500 truncate">{appointment.clientEmail}</p>}
-                {appointment.clientPhone && <p className="text-xs text-gray-500">{appointment.clientPhone}</p>}
-              </div>
-              {(appointment.clientEmail || appointment.clientPhone) && (
-                <div className="flex flex-col gap-1 ml-auto">
-                  {appointment.clientEmail && <CopyButton text={appointment.clientEmail} label="email" />}
-                  {appointment.clientPhone && <CopyButton text={appointment.clientPhone} label="telefon" />}
-                </div>
-              )}
-            </div>
-          </div>
+            }
+          />
+          {duration !== null && (
+            <SheetRow
+              label={t('detailModal.fields.duration')}
+              value={<span className="tnum">{duration} min</span>}
+            />
+          )}
+        </SheetGroup>
 
-          {/* Service */}
-          <div className={sectionClass}>
-            <label className={labelClass}>{t('detailModal.fields.service')}</label>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.serviceColor || '#6366F1' }} />
-                <p className="text-sm font-medium text-[#1A1F36]">{appointment.serviceName}</p>
-              </div>
-              {appointment.addOnName && (
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full flex-shrink-0" style={{ background: appointment.addOnServiceColor || '#6366F1' }} />
-                  <p className="text-sm font-medium text-[#1A1F36]">{appointment.addOnName}</p>
-                  {appointment.addOnDuration && appointment.addOnDuration > 0 && (
-                    <span className="text-xs text-gray-400">({appointment.addOnDuration} min)</span>
-                  )}
-                  <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
-                    <Plus className="h-2.5 w-2.5" weight="bold" />
-                    {t('detailModal.fields.additionalService')}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Storitve */}
+        <SheetGroup label={t('detailModal.fields.service')}>
+          <SheetRow label={appointment.serviceName}>
+            <span className="flex min-w-0 items-center gap-2.5">
+              <span
+                className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                style={{ background: solidColor(appointment.serviceColor) }}
+              />
+              <span className="truncate text-sm font-medium text-gray-900">
+                {appointment.serviceName}
+              </span>
+            </span>
+          </SheetRow>
 
-          {/* Employee */}
-          {appointment.employeeName && appointment.employeeName !== 'Nedoločeno' && (
-            <div className={sectionClass}>
-              <label className={labelClass}>{t('detailModal.fields.employee')}</label>
-              <div className="flex items-center gap-3 rounded-lg bg-gray-50 px-4 py-3">
+          {appointment.addOnName && (
+            <SheetRow label={appointment.addOnName}>
+              <span className="flex min-w-0 items-center gap-2.5">
                 <span
-                  className="text-lg font-normal flex-shrink-0"
-                  style={{
-                    background: appointment.employeeColor || 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
+                  className="h-2.5 w-2.5 flex-shrink-0 rounded-full"
+                  style={{ background: solidColor(appointment.addOnServiceColor) }}
+                />
+                <span className="truncate text-sm font-medium text-gray-900">
+                  {appointment.addOnName}
+                </span>
+                <span className="flex-shrink-0 rounded-full bg-gray-100 px-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                  {t('detailModal.fields.additionalService')}
+                </span>
+              </span>
+              {appointment.addOnDuration && appointment.addOnDuration > 0 ? (
+                <span className="tnum flex-shrink-0 text-sm text-gray-500">
+                  {appointment.addOnDuration} min
+                </span>
+              ) : null}
+            </SheetRow>
+          )}
+        </SheetGroup>
+
+        {/* Zaposleni */}
+        {hasEmployee && (
+          <SheetGroup label={t('detailModal.fields.employee')}>
+            <SheetRow label={appointment.employeeName ?? ''}>
+              <span className="flex min-w-0 items-center gap-3">
+                <span
+                  className="flex-shrink-0 text-lg font-bold"
+                  style={initialsStyle(appointment.employeeColor)}
                 >
                   {appointment.employeeInitials}
                 </span>
-                <p className="font-medium text-[#1A1F36]">{appointment.employeeName}</p>
-              </div>
-            </div>
-          )}
-
-          <div className={`${sectionClass} grid ${formattedDate ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
-            {formattedDate && (
-              <div>
-                <label className={labelClass}>{t('detailModal.fields.date')}</label>
-                <p className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
-                  {formattedDate}
-                </p>
-              </div>
-            )}
-            <div>
-              <label className={labelClass}>{t('detailModal.fields.time')}</label>
-              <p className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
-                {appointment.time}{appointment.endTime ? ` – ${appointment.endTime}` : ''}
-              </p>
-            </div>
-          </div>
-
-          {/* Duration */}
-          {duration !== null && (
-            <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
-              <span className="text-sm font-medium text-gray-700">{t('detailModal.fields.duration')}</span>
-              <span className="bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
-                {duration} min
+                <span className="truncate text-sm font-medium text-gray-900">
+                  {appointment.employeeName}
+                </span>
               </span>
-            </div>
-          )}
-        </div>
+            </SheetRow>
+          </SheetGroup>
+        )}
 
-        {/* Footer */}
-        <div className="border-x border-y border-gray-100 bg-white px-5 py-3">
-          <div className="flex items-center justify-end gap-1">
-            <Link
-              href={`/termini?id=${appointment.id}`}
-              className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-              title={t('detailModal.openInAppointments')}
-            >
-              <ArrowRight className="h-4.5 w-4.5" weight="regular" />
-            </Link>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
+        {/* Stranka — vrstici sta klicljivi oziroma odpreta e-pošto */}
+        {hasContact && (
+          <SheetGroup label={t('detailModal.fields.client')}>
+            {appointment.clientEmail && (
+              <SheetRow label="Email">
+                <span className="flex-shrink-0 text-sm text-gray-500">Email</span>
+                <span className="flex min-w-0 items-center gap-1">
+                  <a
+                    href={`mailto:${appointment.clientEmail}`}
+                    className="truncate text-sm font-medium text-[#6D5EF7] hover:opacity-70"
+                  >
+                    {appointment.clientEmail}
+                  </a>
+                  <CopyButton text={appointment.clientEmail} label="email" />
+                </span>
+              </SheetRow>
+            )}
+            {appointment.clientPhone && (
+              <SheetRow label={t('detailModal.fields.phone')}>
+                <span className="flex-shrink-0 text-sm text-gray-500">
+                  {t('detailModal.fields.phone')}
+                </span>
+                <span className="flex min-w-0 items-center gap-1">
+                  <a
+                    href={`tel:${appointment.clientPhone}`}
+                    className="tnum truncate text-sm font-medium text-[#6D5EF7] hover:opacity-70"
+                  >
+                    {appointment.clientPhone}
+                  </a>
+                  <CopyButton text={appointment.clientPhone} label="telefon" />
+                </span>
+              </SheetRow>
+            )}
+          </SheetGroup>
+        )}
+      </SheetBody>
+
+      <SheetFooter>
+        <Link
+          href={`/termini?id=${appointment.id}`}
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 active:opacity-80"
+        >
+          {t('detailModal.openInAppointments')}
+          <ArrowRight className="h-4 w-4" weight="bold" />
+        </Link>
+      </SheetFooter>
+    </Sheet>
   );
 }
 
+
 export function AppointmentListCard({
-  title,
-  subtitle,
   appointments,
   emptyMessage,
-  showViewAll = true,
-  viewAllHref = "/termini",
-  gradientOutline = false,
   onAppointmentClick,
 }: AppointmentListCardProps) {
   const t = useTranslations('dashboard');
   const resolvedEmptyMessage = emptyMessage ?? t('appointmentList.defaultEmpty');
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentItem | null>(null);
-  const appointmentTimeGradientStyle = {
-    backgroundImage: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-  };
 
   const cardContent = (
     <>
-      {/* Header */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Icon only - no circle background */}
-            <Calendar size={24} weight="regular" className="text-gray-900" />
-            <div>
-              <h3 className="font-normal text-gray-900">{title}</h3>
-              <p className="text-sm text-gray-500">{subtitle}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 text-gray-500">
-            <span className="text-lg font-normal text-gray-900">{appointments.length}</span>
-          </div>
-        </div>
-      </div>
-
       {/* Appointments List - Clickable cards */}
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-gray-100">
         {appointments.length === 0 ? (
-          <div className="p-6 text-center text-gray-400">
-            <Calendar size={32} className="mx-auto mb-2 opacity-50" />
-            <p>{resolvedEmptyMessage}</p>
+          <div className="px-5 py-10 text-center">
+            <Calendar size={24} weight="regular" className="mx-auto mb-2 text-gray-300" />
+            <p className="text-sm text-gray-400">{resolvedEmptyMessage}</p>
           </div>
         ) : (
-          appointments.slice(0, 5).map((appointment, index) => (
+          appointments.slice(0, 5).map((appointment) => (
             <motion.button
               key={appointment.id}
               type="button"
               onClick={() => onAppointmentClick ? onAppointmentClick(appointment) : setSelectedAppointment(appointment)}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="w-full p-4 hover:bg-gray-50 transition-colors text-left"
+              className="w-full px-5 py-3 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
             >
               <div className="flex items-center gap-3">
                 {/* Time */}
-                <div className="flex-shrink-0">
-                  <div
-                    className="bg-clip-text text-lg font-normal text-transparent"
-                    style={appointmentTimeGradientStyle}
-                  >
+                <div className="w-12 flex-shrink-0">
+                  <div className="tnum text-base font-semibold text-gray-900">
                     {appointment.time}
                   </div>
                   {appointment.endTime && (
-                    <div className="text-xs text-gray-500">
+                    <div className="tnum text-xs text-gray-400">
                       {appointment.endTime}
                     </div>
                   )}
                 </div>
 
                 {/* Client - no initials, just name and service */}
-                <div className="flex-1 min-w-0">
-                  <div className="font-normal text-gray-900 truncate">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-base font-medium text-gray-900">
                     {appointment.clientName}
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <div className="flex items-center gap-1.5 text-sm text-gray-500">
                     <span className="truncate">{appointment.serviceName}</span>
                     {((appointment.serviceId2 ? 1 : 0) + (appointment.serviceId3 ? 1 : 0) + (appointment.addOnName ? 1 : 0)) > 0 && (
-                      <span
-                        className="text-sm font-normal flex-shrink-0"
-                        style={{
-                          backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                        }}
-                      >
+                      <span className="tnum flex-shrink-0 rounded-full bg-gray-100 px-1.5 text-xs font-medium text-gray-600">
                         +{(appointment.serviceId2 ? 1 : 0) + (appointment.serviceId3 ? 1 : 0) + (appointment.addOnName ? 1 : 0)}
                       </span>
                     )}
@@ -457,14 +370,8 @@ export function AppointmentListCard({
 
                 {/* Employee initials - gradient text, no circle */}
                 <div
-                  className="flex h-10 w-10 items-center justify-center text-lg font-bold flex-shrink-0"
-                  style={{
-                    background: appointment.employeeColor || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    color: 'transparent'
-                  }}
+                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center text-lg font-bold"
+                  style={initialsStyle(appointment.employeeColor)}
                 >
                   {appointment.employeeInitials}
                 </div>
@@ -474,37 +381,18 @@ export function AppointmentListCard({
         )}
       </div>
 
-      {/* View all link */}
-      {showViewAll && appointments.length > 0 && (
-        <Link
-          href={viewAllHref}
-          className="flex items-center justify-center gap-2 p-4 border-t border-gray-100 text-sm font-medium text-violet-600 hover:bg-violet-50 transition-colors"
-        >
-          {t('appointmentList.viewAll')}
-          <ArrowRight size={16} weight="bold" />
-        </Link>
-      )}
     </>
   );
 
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        className={
-          gradientOutline
-            ? "relative rounded-2xl p-[1.3px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 overflow-hidden"
-            : "rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden"
-        }
+        transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+        className="overflow-hidden rounded-2xl border border-gray-100 bg-white"
       >
-        {gradientOutline ? (
-          <div className="h-full w-full rounded-[14px] bg-white overflow-hidden">
-            {cardContent}
-          </div>
-        ) : (
-          cardContent
-        )}
+        {cardContent}
       </motion.div>
 
       {/* Appointment detail modal */}

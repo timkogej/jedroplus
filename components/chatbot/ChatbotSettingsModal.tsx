@@ -589,8 +589,8 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
                 whileHover={{ scale: saving ? 1 : 1.02 }}
                 whileTap={{ scale: saving ? 1 : 0.98 }}
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
-                           px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/25
-                           transition-shadow hover:shadow-xl hover:shadow-violet-500/30
+                           px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90
+                           transition-opacity
                            disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving ? (

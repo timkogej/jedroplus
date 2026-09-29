@@ -17,17 +17,16 @@ interface SelectProps {
 
 export function Select({ value, onChange, options, placeholder, disabled = false }: SelectProps) {
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         className={`
-          w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg
-          appearance-none bg-white
-          focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-20 focus:border-purple-500
-          transition-colors duration-200
-          ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer'}
+          w-full appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-9
+          text-base text-gray-900 transition-colors duration-150
+          focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25
+          ${disabled ? 'cursor-not-allowed bg-gray-50 opacity-50' : 'cursor-pointer'}
         `}
       >
         {placeholder && (
@@ -41,7 +40,10 @@ export function Select({ value, onChange, options, placeholder, disabled = false
           </option>
         ))}
       </select>
-      <CaretDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+      <CaretDown
+        weight="bold"
+        className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400"
+      />
     </div>
   );
 }

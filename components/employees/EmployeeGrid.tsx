@@ -35,7 +35,7 @@ function EmployeeGrid({
 }: EmployeeGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: 8 }).map((_, index) => (
           <EmployeeCardSkeleton key={index} index={index} />
         ))}
@@ -48,15 +48,13 @@ function EmployeeGrid({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+        className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12"
       >
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-purple-100 to-pink-100">
-          <Users className="h-10 w-10 text-purple-500" weight="duotone" />
-        </div>
-        <h3 className="mt-6 text-lg font-semibold text-[#1A1F36]">
+        <Users className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+        <h3 className="text-base font-semibold text-gray-900">
           Ni zaposlenih
         </h3>
-        <p className="mt-2 text-center text-sm text-gray-500">
+        <p className="mt-1 text-center text-sm text-gray-500">
           Dodajte prvega zaposlenega s klikom na gumb &quot;Dodaj zaposlenega&quot;
         </p>
       </motion.div>
@@ -64,7 +62,7 @@ function EmployeeGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <AnimatePresence mode="popLayout">
         {employees.map((employee, index) => (
           <EmployeeCard

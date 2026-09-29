@@ -64,7 +64,7 @@ const STANDARD_DESIGNS: BookingDesign[] = [
       background: 'linear-gradient(135deg, #7C3AED 0%, #4F46E5 58%, #06B6D4 100%)',
       color: 'rgba(255,255,255,0.96)',
       borderColor: 'rgba(255,255,255,0.22)',
-      fontFamily: '"Nunito", var(--font-geist-sans), Arial, sans-serif',
+      fontFamily: '"Nunito", var(--font-ui), Arial, sans-serif',
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18)',
     },
     badgeStyle: {
@@ -74,7 +74,7 @@ const STANDARD_DESIGNS: BookingDesign[] = [
     },
     titleStyle: {
       color: '#FFFFFF',
-      fontFamily: '"Nunito", var(--font-geist-sans), Arial, sans-serif',
+      fontFamily: '"Nunito", var(--font-ui), Arial, sans-serif',
       fontWeight: 800,
     },
     subtitleStyle: { color: 'rgba(255,255,255,0.72)' },
@@ -92,7 +92,7 @@ const STANDARD_DESIGNS: BookingDesign[] = [
       background: 'linear-gradient(135deg, #0F0F1A 0%, #1A0A1E 56%, #111827 100%)',
       color: '#F8FAFC',
       borderColor: 'rgba(244,63,94,0.28)',
-      fontFamily: '"DM Sans", var(--font-geist-sans), Arial, sans-serif',
+      fontFamily: '"DM Sans", var(--font-ui), Arial, sans-serif',
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
     },
     badgeStyle: {
@@ -102,7 +102,7 @@ const STANDARD_DESIGNS: BookingDesign[] = [
     },
     titleStyle: {
       color: '#F8FAFC',
-      fontFamily: '"Clash Display", var(--font-geist-sans), Arial, sans-serif',
+      fontFamily: '"Clash Display", var(--font-ui), Arial, sans-serif',
       fontWeight: 400,
     },
     subtitleStyle: { color: 'rgba(248,250,252,0.6)' },
@@ -120,7 +120,7 @@ const STANDARD_DESIGNS: BookingDesign[] = [
       background: 'linear-gradient(180deg, rgba(196,149,106,0.12) 0%, #FFFFFF 22%, #FFFFFF 78%, rgba(196,149,106,0.08) 100%)',
       color: '#3D2B1F',
       borderColor: '#E8DDD1',
-      fontFamily: 'Inter, var(--font-geist-sans), Arial, sans-serif',
+      fontFamily: 'Inter, var(--font-ui), Arial, sans-serif',
     },
     badgeStyle: {
       background: '#FAF7F2',
@@ -150,7 +150,7 @@ const PREMIUM_DESIGNS: BookingDesign[] = [
       background: 'linear-gradient(150deg, #E0F7FF 0%, #BAE6FD 58%, #F0F9FF 100%)',
       color: '#0F172A',
       borderColor: 'rgba(14,165,233,0.22)',
-      fontFamily: '"Quicksand", var(--font-geist-sans), Arial, sans-serif',
+      fontFamily: '"Quicksand", var(--font-ui), Arial, sans-serif',
       boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9)',
     },
     badgeStyle: {
@@ -160,7 +160,7 @@ const PREMIUM_DESIGNS: BookingDesign[] = [
     },
     titleStyle: {
       color: '#0F172A',
-      fontFamily: '"Quicksand", var(--font-geist-sans), Arial, sans-serif',
+      fontFamily: '"Quicksand", var(--font-ui), Arial, sans-serif',
       fontWeight: 700,
     },
     subtitleStyle: { color: 'rgba(15,23,42,0.72)' },
@@ -458,7 +458,7 @@ export default function RezervacijeClient({
             <div>
               <h1
                 className="text-3xl font-normal text-[#1A1F36]"
-                style={{ fontFamily: '"Clash Display", var(--font-geist-sans), Arial, sans-serif' }}
+                style={{ fontFamily: '"Clash Display", var(--font-ui), Arial, sans-serif' }}
               >
                 {t('page.title')}
               </h1>
@@ -720,7 +720,7 @@ export default function RezervacijeClient({
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => window.open(settings.mainBookingLink, '_blank')}
-                        className="h-8 w-8 flex items-center justify-center bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-lg shadow-sm"
+                        className="h-8 w-8 flex items-center justify-center bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-lg shadow-sm hover:opacity-90"
                       >
                         <ArrowSquareOut className="w-3.5 h-3.5" weight="bold" />
                       </motion.button>
@@ -782,7 +782,7 @@ export default function RezervacijeClient({
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => window.open(settings.apptManagementLink, '_blank')}
-                        className="h-8 w-8 flex items-center justify-center bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-lg shadow-sm"
+                        className="h-8 w-8 flex items-center justify-center bg-gradient-to-r from-violet-500 to-pink-500 text-white rounded-lg shadow-sm hover:opacity-90"
                       >
                         <ArrowSquareOut className="w-3.5 h-3.5" weight="bold" />
                       </motion.button>

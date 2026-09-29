@@ -164,7 +164,7 @@ export default function FirstRunSetup({ onCreateAppointment, onSeeded }: FirstRu
                 closeReady();
                 onCreateAppointment();
               }}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/25"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90"
             >
               <Plus size={16} weight="bold" />
               {t('cta')}

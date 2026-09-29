@@ -9,6 +9,11 @@ interface SwitchProps {
   variant?: 'default' | 'brand';
 }
 
+/**
+ * Stikalo v iOS merah: tir 51×31, gumb 27×27, pot 20 px.
+ * Barvi ostaneta taki, kot sta bili — spremenjena je samo geometrija in to,
+ * da se gumb ob pritisku rahlo raztegne, kot pri Applu.
+ */
 export function Switch({ checked, onChange, disabled = false, variant = 'default' }: SwitchProps) {
   return (
     <button
@@ -18,9 +23,10 @@ export function Switch({ checked, onChange, disabled = false, variant = 'default
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
       className={`
-        relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900/20 focus-visible:ring-offset-2
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        relative inline-flex h-[31px] w-[51px] flex-shrink-0 items-center rounded-full
+        transition-colors duration-200 ease-out
+        focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#7C78FA]/45 focus-visible:ring-offset-1
+        ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
         ${checked
           ? variant === 'brand' ? 'bg-[#6D5EF7]' : 'bg-[#0a0a0a]'
           : 'bg-gray-200 hover:bg-gray-300'
@@ -29,9 +35,9 @@ export function Switch({ checked, onChange, disabled = false, variant = 'default
     >
       <motion.span
         initial={false}
-        animate={{ x: checked ? 22 : 4 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className="inline-block h-4 w-4 rounded-full bg-white shadow-sm"
+        animate={{ x: checked ? 22 : 2 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+        className="inline-block h-[27px] w-[27px] rounded-full bg-white shadow-[0_2px_4px_rgba(0,0,0,0.18),0_0_1px_rgba(0,0,0,0.12)]"
       />
     </button>
   );

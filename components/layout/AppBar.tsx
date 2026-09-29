@@ -155,7 +155,7 @@ export function AppBar() {
   return (
     <header
       style={{ left: leftOffset }}
-      className="fixed top-0 right-0 z-50 h-14 bg-white border-b border-gray-100 transition-all duration-300"
+      className="glass-bar hairline-b fixed top-0 right-0 z-50 h-14 transition-all duration-300"
     >
       <div className="h-full px-4 md:px-5 flex items-center justify-between gap-4">
 
@@ -165,7 +165,7 @@ export function AppBar() {
           {/* Hamburger — mobile only */}
           <button
             onClick={toggle}
-            className="md:hidden p-2 -ml-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+            className="md:hidden -ml-1.5 flex h-8 w-8 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200"
             aria-label={isOpen ? t('appbar.aria.closeMenu') : t('appbar.aria.openMenu')}
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -233,22 +233,21 @@ export function AppBar() {
           {/* Search bar — desktop */}
           <button
             onClick={openSearch}
-            className="hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-colors group text-sm mr-1"
+            className="group mr-1.5 hidden items-center gap-2 rounded-lg bg-gray-50 px-2.5 py-1.5 text-sm transition-colors hover:bg-gray-100 md:flex"
           >
             <MagnifyingGlass weight="regular" className="w-4 h-4 text-gray-400 group-hover:text-gray-600 flex-shrink-0 transition-colors" />
-            <span className="hidden lg:inline text-gray-400 group-hover:text-gray-600 transition-colors min-w-[120px] text-left">
+            <span className="hidden min-w-[132px] text-left text-gray-500 transition-colors group-hover:text-gray-700 lg:inline">
               {t('appbar.search')}
             </span>
-            <span className="flex items-center gap-0.5 text-[11px] text-gray-300 ml-1">
-              <Command weight="regular" className="w-3 h-3" />
-              K
-            </span>
+            <kbd className="ml-1 flex items-center gap-0.5 rounded border border-gray-200 bg-white/70 px-1 py-px font-sans text-[10px] text-gray-400">
+              <Command weight="regular" className="h-2.5 w-2.5" />K
+            </kbd>
           </button>
 
           {/* Search icon — mobile */}
           <button
             onClick={openSearch}
-            className="md:hidden p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200 md:hidden"
             aria-label={t('appbar.aria.search')}
           >
             <MagnifyingGlass weight="regular" className="w-5 h-5" />
@@ -256,13 +255,13 @@ export function AppBar() {
 
           {/* Notifications */}
           <Link href="/obvestila">
-            <span className="relative flex p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
+            <span className="relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200">
               <Bell weight="regular" className="w-5 h-5" />
               {notificationCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center px-1 text-[9px] font-semibold text-white bg-red-500 rounded-full"
+                  className="tnum absolute right-0.5 top-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-semibold text-white ring-2 ring-white"
                 >
                   {notificationCount > 99 ? '99+' : notificationCount}
                 </motion.span>
@@ -272,7 +271,7 @@ export function AppBar() {
 
           {/* Settings — desktop only */}
           <Link href="/nastavitve" className="hidden md:flex">
-            <span className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
+            <span className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200">
               <Gear weight="regular" className="w-5 h-5" />
             </span>
           </Link>
@@ -282,7 +281,7 @@ export function AppBar() {
             <button
               data-tour="user-menu"
               onClick={() => setIsProfileOpen((prev) => !prev)}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-gray-100 active:bg-gray-200"
             >
               <div className="relative">
                 <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
@@ -306,11 +305,12 @@ export function AppBar() {
             <AnimatePresence>
               {isProfileOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                  initial={{ opacity: 0, y: -4, scale: 0.96 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                  transition={{ duration: 0.12 }}
-                  className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden"
+                  exit={{ opacity: 0, y: -4, scale: 0.96 }}
+                  transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
+                  style={{ transformOrigin: 'top right' }}
+                  className="absolute right-0 top-full mt-1.5 w-60 overflow-hidden rounded-xl border border-gray-100 bg-white/85 shadow-lg backdrop-blur-xl backdrop-saturate-150"
                 >
                   {/* User header */}
                   <div className="px-4 py-3 border-b border-gray-100">
@@ -330,7 +330,7 @@ export function AppBar() {
                     <Link
                       href="/nastavitve"
                       onClick={() => setIsProfileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      className="mx-1 flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                     >
                       <User weight="regular" className="w-4 h-4" />
                       <span>{t('appbar.profile')}</span>
@@ -338,7 +338,7 @@ export function AppBar() {
                     <Link
                       href="/nastavitve/paketi"
                       onClick={() => setIsProfileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      className="mx-1 flex items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                     >
                       <Package weight="regular" className="w-4 h-4" />
                       <span>{t('appbar.plans')}</span>
@@ -350,7 +350,7 @@ export function AppBar() {
                           setIsProfileOpen(false);
                           tour.startTour(pathname.includes('/koledar') ? 'calendar' : role === 'staff' ? 'staff' : 'dashboard');
                         }}
-                        className="flex w-full items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                        className="mx-1 flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                       >
                         <Compass weight="regular" className="w-4 h-4" />
                         <span>{t('guide.menuItem')}</span>
@@ -367,7 +367,7 @@ export function AppBar() {
                   <div className="border-t border-gray-100 py-1">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      className="mx-1 flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900"
                     >
                       <SignOut weight="regular" className="w-4 h-4" />
                       <span>{t('appbar.signOut')}</span>

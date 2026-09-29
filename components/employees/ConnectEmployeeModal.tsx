@@ -169,7 +169,7 @@ export default function ConnectEmployeeModal({
                   whileTap={agreed && !isConnecting ? { scale: 0.98 } : {}}
                   className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all ${
                     agreed && !isConnecting
-                      ? 'bg-gradient-to-r from-violet-500 to-cyan-500 shadow-cyan-500/25 hover:shadow-md hover:shadow-cyan-500/30'
+                      ? 'bg-gradient-to-r from-violet-500 to-cyan-500   '
                       : 'cursor-not-allowed bg-gray-200 text-gray-400 shadow-none'
                   }`}
                 >

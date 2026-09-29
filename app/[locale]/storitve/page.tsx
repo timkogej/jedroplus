@@ -46,61 +46,10 @@ import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } fr
 
 // Components
 import ServiceGrid from '@/components/services/ServiceGrid';
+import { MetricGroup } from '@/components/dashboard';
 import ServiceModal from '@/components/services/ServiceModal';
 import DeleteServiceModal from '@/components/services/DeleteServiceModal';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
-
-// Black & White icon color options
-type IconColor = 'black' | 'darkGray' | 'mediumGray' | 'slate';
-
-const ICON_BOX_CLASSES: Record<IconColor, string> = {
-  black: 'text-black',
-  darkGray: 'text-black',
-  mediumGray: 'text-black',
-  slate: 'text-black',
-};
-
-// Stats card component
-interface StatCardProps {
-  icon: React.ReactNode;
-  value: string | number;
-  label: string;
-  iconColor?: IconColor;
-  delay?: number;
-  loading?: boolean;
-}
-
-function StatCard({ icon, value, label, iconColor = 'black', delay = 0, loading = false }: StatCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: delay * 0.1, duration: 0.3 }}
-      className="group rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition-all
-                 hover:shadow-md hover:ring-gray-200"
-    >
-      <div className="flex items-center gap-4">
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-xl shadow-sm
-                      transition-transform group-hover:scale-105 ${ICON_BOX_CLASSES[iconColor]}`}
-        >
-          {icon}
-        </div>
-        <div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: delay * 0.1 + 0.2 }}
-            className="text-2xl font-normal text-[#1A1F36]"
-          >
-            {loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}
-          </motion.p>
-          <p className="text-xs font-medium text-gray-500">{label}</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
 
 // Empty state component
 function EmptyState({ onCreateService }: { onCreateService: () => void }) {
@@ -109,27 +58,21 @@ function EmptyState({ onCreateService }: { onCreateService: () => void }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+      className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12"
     >
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-violet-100">
-        <Palette className="h-10 w-10 text-violet-500" weight="duotone" />
-      </div>
-      <h3 className="text-xl font-semibold text-[#1A1F36]">{t('emptyState.title')}</h3>
-      <p className="mt-2 text-center text-sm text-gray-500">
+      <Palette className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+      <h3 className="text-base font-semibold text-gray-900">{t('emptyState.title')}</h3>
+      <p className="mt-1 text-center text-sm text-gray-500">
         {t('emptyState.subtitle')}
       </p>
-      <motion.button
+      <button
         type="button"
         onClick={onCreateService}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="mt-6 flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-6 py-3
-                   text-sm font-medium text-white shadow-sm transition-colors
-                   hover:bg-[#1f1f1f]"
+        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
       >
-        <Plus className="h-5 w-5" weight="bold" />
+        <Plus size={17} weight="bold" />
         {t('emptyState.addFirst')}
-      </motion.button>
+      </button>
     </motion.div>
   );
 }
@@ -141,27 +84,23 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+      className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12"
     >
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-slate-100">
-        <MagnifyingGlass className="h-8 w-8 text-gray-400" weight="duotone" />
-      </div>
-      <h3 className="text-lg font-semibold text-[#1A1F36]">
+      <MagnifyingGlass className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+      <h3 className="text-base font-semibold text-gray-900">
         {t('searchEmpty.title', { term: searchTerm })}
       </h3>
-      <p className="mt-2 text-center text-sm text-gray-500">
+      <p className="mt-1 text-center text-sm text-gray-500">
         {t('searchEmpty.subtitle')}
       </p>
-      <motion.button
+      <button
         type="button"
         onClick={onClear}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-violet-600 hover:text-violet-700"
+        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-[#7C78FA] transition-opacity hover:opacity-70"
       >
         {t('searchEmpty.clear')}
-        <ArrowRight className="h-4 w-4" weight="bold" />
-      </motion.button>
+        <ArrowRight className="h-4 w-4" weight="regular" />
+      </button>
     </motion.div>
   );
 }
@@ -667,89 +606,46 @@ export default function StoritvePage() {
       <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-7xl px-6 py-8">
           {/* Header */}
-          <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7 flex flex-wrap items-start justify-between gap-4"
+          >
             <div>
-              <motion.h1
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-2xl font-normal text-[#1A1F36]"
-              >
-                {t('page.title')}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="mt-1 text-gray-500"
-              >
-                {t('page.subtitle')}
-              </motion.p>
+              <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+              <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
             </div>
-            <motion.button
+            <button
               type="button"
               onClick={openCreateModal}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-3
-                         text-sm font-medium text-white shadow-sm transition-colors
-                         hover:bg-[#1f1f1f]"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
             >
-              <Plus className="h-5 w-5" weight="bold" />
+              <Plus size={17} weight="bold" />
               {t('page.newButton')}
-            </motion.button>
-          </div>
+            </button>
+          </motion.div>
 
           {/* Stats */}
           {stats && (
-            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                loading={isLoading}
-                icon={<Briefcase className="h-6 w-6" weight="regular" />}
-                value={stats.total}
-                label={t('stats.total')}
-                iconColor="black"
-                delay={0}
-              />
-              <StatCard
-                loading={isLoading}
-                icon={<ChartLineUp className="h-6 w-6" weight="regular" />}
-                value={stats.active}
-                label={t('stats.active')}
-                iconColor="darkGray"
-                delay={1}
-              />
-              <StatCard
-                loading={isLoading}
-                icon={<Clock className="h-6 w-6" weight="regular" />}
-                value={`${stats.averageDuration} min`}
-                label={t('stats.avgDuration')}
-                iconColor="mediumGray"
-                delay={2}
-              />
-              <StatCard
-                loading={isLoading}
-                icon={<CurrencyEur className="h-6 w-6" weight="regular" />}
-                value={stats.highestPrice > 0 ? money(stats.highestPrice) : '-'}
-                label={t('stats.highestPrice')}
-                iconColor="slate"
-                delay={3}
+            <div className="mb-8">
+              <MetricGroup
+                metrics={[
+                  { label: t('stats.total'), value: isLoading ? '—' : stats.total, icon: Briefcase },
+                  { label: t('stats.active'), value: isLoading ? '—' : stats.active, icon: ChartLineUp },
+                  { label: t('stats.avgDuration'), value: isLoading ? '—' : `${stats.averageDuration} min`, icon: Clock },
+                  { label: t('stats.highestPrice'), value: isLoading ? '—' : (stats.highestPrice > 0 ? money(stats.highestPrice) : '-'), icon: CurrencyEur },
+                ]}
               />
             </div>
           )}
 
           {/* Search and filters bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-6 flex flex-wrap items-center gap-4"
-          >
+          <div className="mb-6 flex flex-wrap items-center gap-3">
             {/* Search */}
-            <div className="relative flex-1 min-w-[280px] max-w-md">
+            <div className="relative min-w-[260px] max-w-md flex-1">
               <MagnifyingGlass
-                className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                 weight="regular"
               />
               <input
@@ -757,38 +653,36 @@ export default function StoritvePage() {
                 placeholder={t('page.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border-0 bg-white py-3 pl-12 pr-12 text-sm text-[#1A1F36]
-                           placeholder-gray-400 shadow-sm ring-1 ring-gray-200 transition-all
-                           focus:outline-none focus:ring-2 focus:ring-violet-500/20"
+                className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900
+                           placeholder-gray-400 transition-colors
+                           focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1
-                             text-gray-400 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1
+                             text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="h-4 w-4" weight="bold" />
+                  <X className="h-4 w-4" weight="regular" />
                 </button>
               )}
             </div>
 
             {/* Show inactive toggle */}
-            <motion.button
+            <button
               type="button"
               onClick={() => setShowInactive(!showInactive)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-all
-                         ${showInactive
-                           ? 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'
-                           : 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
-                         }`}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
+                showInactive
+                  ? 'border border-gray-200 bg-white text-gray-900 hover:bg-gray-50'
+                  : 'border border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-100'
+              }`}
             >
               {showInactive ? t('page.showAll') : t('page.showActiveOnly')}
-              <CaretDown className={`h-4 w-4 transition-transform ${showInactive ? 'rotate-180' : ''}`} />
-            </motion.button>
-          </motion.div>
+              <CaretDown className={`h-3.5 w-3.5 transition-transform ${showInactive ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
 
           {/* Results count */}
           {debouncedSearch && filteredServices.length > 0 && (
@@ -802,10 +696,10 @@ export default function StoritvePage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3"
+              className="mb-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 p-4"
             >
-              <Warning className="h-5 w-5 flex-shrink-0 text-red-500" weight="fill" />
-              <p className="text-sm text-red-700">{error}</p>
+              <Warning className="h-5 w-5 flex-shrink-0 text-red-500" weight="regular" />
+              <p className="text-sm font-medium text-red-700">{error}</p>
               <button
                 type="button"
                 onClick={loadData}

@@ -98,8 +98,8 @@ function DeleteResursModal({ isOpen, onClose, resurs, onConfirm, isDeleting = fa
                   whileHover={{ scale: isDeleting ? 1 : 1.02 }}
                   whileTap={{ scale: isDeleting ? 1 : 0.98 }}
                   className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-5 py-2.5
-                             text-sm font-medium text-white shadow-lg shadow-red-500/25 transition-all
-                             hover:shadow-xl hover:shadow-red-500/30 disabled:opacity-70"
+                             text-sm font-medium text-white shadow-sm hover:opacity-90 transition-all
+                             disabled:opacity-70"
                 >
                   {isDeleting ? (
                     <>

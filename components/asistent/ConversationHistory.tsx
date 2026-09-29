@@ -137,7 +137,7 @@ export function ConversationHistory({
                   onClick={() => onLoadSession(session.session_id)}
                   className={`group relative p-3 rounded-xl cursor-pointer transition-all ${
                     isActive
-                      ? 'bg-gradient-to-r from-violet-500 to-cyan-500 shadow-lg shadow-violet-500/20'
+                      ? 'bg-gradient-to-r from-violet-500 to-cyan-500 shadow-sm hover:opacity-90'
                       : 'bg-gray-50 hover:bg-gray-100 border border-gray-100 hover:border-gray-200'
                   } ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}
                 >

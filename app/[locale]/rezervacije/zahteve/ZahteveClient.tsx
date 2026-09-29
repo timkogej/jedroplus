@@ -120,7 +120,7 @@ export default function ZahteveClient() {
             </button>
             <h1
               className="text-3xl font-normal text-[#1A1F36]"
-              style={{ fontFamily: '"Clash Display", var(--font-geist-sans), Arial, sans-serif' }}
+              style={{ fontFamily: '"Clash Display", var(--font-ui), Arial, sans-serif' }}
             >
               {t('page.title')}
             </h1>

@@ -802,7 +802,7 @@ export default function ChatbotPlusPage() {
                     '0 32px 64px rgba(139, 92, 246, 0.15), ' +
                     '0 16px 32px rgba(0, 0, 0, 0.1), ' +
                     '0 0 0 1px rgba(139, 92, 246, 0.1)',
-                  fontFamily: "var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
+                  fontFamily: "var(--font-ui), -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif",
                 }}
               >
                 {/* Chat Header - transparent, gradient shows through */}

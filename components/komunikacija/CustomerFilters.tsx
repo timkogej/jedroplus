@@ -58,7 +58,7 @@ export default function CustomerFilters({
               whileTap={{ scale: 0.97 }}
               className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-md shadow-violet-500/20'
+                  ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-xs hover:opacity-90'
                   : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300'
               }`}
             >
