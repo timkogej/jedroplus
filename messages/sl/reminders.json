@@ -45,7 +45,19 @@
       "automaticTag": "Oznaka samodejni opomnik",
       "staffInReminder": "Izvajalec v opomniku",
       "notSet": "Ni nastavljeno",
-      "notSetTemplate": "Lastna predloga ni nastavljena"
+      "notSetTemplate": "Lastna predloga ni nastavljena",
+      "languageDesc": "V tem jeziku so napisana vsa sporočila strankam.",
+      "toneDesc": "Kako sporočila zvenijo — bolj sproščeno ali bolj uradno.",
+      "customerAddressingDesc": "Ali stranko nagovorimo s \"ti\" ali z \"vi\".",
+      "automaticTagDesc": "Sporočilu doda pripis, da je bilo poslano samodejno.",
+      "staffInReminderDesc": "V opomnik zapiše, kdo bo storitev opravil.",
+      "replyToDesc": "Na ta naslov pridejo odgovori strank na e-pošto.",
+      "tipsDesc": "Sporočilu doda nasvet, povezan z naročeno storitvijo.",
+      "colorsDesc": "Barvi glave in gumbov v e-poštnih sporočilih.",
+      "groupVoice": "Jezik in ton",
+      "groupSender": "Pošiljatelj",
+      "groupContent": "Vsebina sporočila",
+      "groupEmail": "Videz e-pošte"
     },
     "before": {
       "sectionTitle": "Opomniki pred terminom",

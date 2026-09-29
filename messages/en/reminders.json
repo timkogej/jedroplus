@@ -45,7 +45,19 @@
       "automaticTag": "Automatic reminder tag",
       "staffInReminder": "Staff member in reminder",
       "notSet": "Not set",
-      "notSetTemplate": "No custom template set"
+      "notSetTemplate": "No custom template set",
+      "languageDesc": "All messages to clients are written in this language.",
+      "toneDesc": "How messages sound — more relaxed or more formal.",
+      "customerAddressingDesc": "Whether clients are addressed informally or formally.",
+      "automaticTagDesc": "Adds a note to the message that it was sent automatically.",
+      "staffInReminderDesc": "States in the reminder who will perform the service.",
+      "replyToDesc": "Client replies to emails arrive at this address.",
+      "tipsDesc": "Adds a tip related to the booked service.",
+      "colorsDesc": "The header and button colours in email messages.",
+      "groupVoice": "Language and tone",
+      "groupSender": "Sender",
+      "groupContent": "Message content",
+      "groupEmail": "Email appearance"
     },
     "before": {
       "sectionTitle": "Pre-appointment reminders",

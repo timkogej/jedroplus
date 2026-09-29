@@ -35,7 +35,7 @@ export function SendingStatus({ channels, sms, email, periodEnd, canBuy, isFree 
   return (
     <section aria-label={t('title')} className="mb-7 space-y-2">
       {isFree && (sms?.total || email?.total) ? (
-        <div className="rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-3 text-sm text-violet-900">
+        <div className="rounded-xl border border-violet-100 bg-violet-50 p-4 text-sm text-violet-900">
           <p className="font-semibold">{t('trial.introTitle')}</p>
           <p className="mt-1 text-xs leading-5 opacity-90">
             {t('trial.introBody', { sms: sms?.total ?? 0, email: email?.total ?? 0 })}
@@ -62,15 +62,15 @@ export function SendingStatus({ channels, sms, email, periodEnd, canBuy, isFree 
 
         const tone =
           state === 'ok'
-            ? 'border-zinc-200 bg-white text-zinc-700'
+            ? 'border-gray-100 bg-white text-gray-700'
             : state === 'nearLimit'
-            ? 'border-amber-200 bg-amber-50 text-amber-900'
-            : 'border-red-200 bg-red-50 text-red-800';
+            ? 'border-amber-100 bg-amber-50 text-amber-900'
+            : 'border-red-100 bg-red-50 text-red-800';
         const Icon = state === 'ok' ? CheckCircle : state === 'nearLimit' ? WarningCircle : XCircle;
 
         return (
-          <div key={channel} className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${tone}`}>
-            <Icon size={18} weight="fill" className="mt-0.5 shrink-0" aria-hidden="true" />
+          <div key={channel} className={`flex items-start gap-3 rounded-xl border p-4 text-sm ${tone}`}>
+            <Icon size={18} weight="regular" className="mt-0.5 shrink-0" aria-hidden="true" />
             <div className="min-w-0 space-y-1">
               <p className="font-semibold">
                 {t(isFree && state !== 'unavailable' ? `trial.${state}.title` : `${state}.title`, values)}
