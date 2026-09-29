@@ -14,6 +14,8 @@ export interface Client {
   language?: CommunicationLanguageCode | null; // Communication language
   email: string;
   telefon?: string | null;
+  /** Telefon v enotni obliki (+386...), ki ga izračuna baza. Po njem iščemo dvojnike. */
+  phone_e164?: string | null;
   opombe?: string | null;
   interne_opombe?: string | null; // Internal notes - not sent to client
   barva?: string | null; // Gradient CSS string for client avatar color

@@ -16,6 +16,25 @@ import {
 } from '@phosphor-icons/react';
 import * as XLSX from 'xlsx';
 import type { Client } from '@/types/clients';
+import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
+
+/**
+ * Primerjalni ključ za besedilo: male črke, brez šumnikov, brez odvečnih
+ * presledkov. Ujemati se mora z SQL funkcijo jp_kljuc, da aplikacija in baza
+ * o dvojnikih ne odločata vsaka po svoje.
+ */
+const kljuc = (v?: string | null): string =>
+  (v ?? '')
+    .replace(/ß/g, 'ss')
+    // đ in Đ nista osnovna črka s strešico, zato ju normalize('NFD') NE razstavi.
+    // Brez te vrstice se hrvaški priimki (Đurić) ne bi ujeli s tem, kar izračuna baza.
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
 
 interface ParsedRow {
   [key: string]: string;
@@ -225,13 +244,42 @@ export default function CrmImportModal({
       const posodobi: MappedClient[] = [];
       const preskoci: MappedClient[] = [];
 
-      for (const c of valid) {
-        const emailMatch = c.email
-          ? existingClients.find((e) => e.email?.toLowerCase() === c.email.toLowerCase())
+      // Telefonske številke spravi v enotno obliko baza, da pravilo živi na
+      // enem mestu — isto, po katerem so izračunani obstoječi phone_e164.
+      // En klic za vso datoteko, ne en na vrstico.
+      let telefoni: (string | null)[] = valid.map(() => null);
+      try {
+        const { data, error } = await supabaseReadOnly.rpc('jp_normalize_phones', {
+          company_id: companyId,
+          phones: valid.map((c) => c.telefon || ''),
+        });
+        if (!error && Array.isArray(data) && data.length === valid.length) {
+          telefoni = data as (string | null)[];
+        }
+      } catch {
+        // Brez normalizacije ujemanja po telefonu ne bo. To je namenoma:
+        // raje podvojena vrstica, ki jo je videti, kot tiho prepisana stranka.
+      }
+
+      for (let i = 0; i < valid.length; i += 1) {
+        const c = valid[i];
+        const emailMatch = kljuc(c.email)
+          ? existingClients.find((e) => kljuc(e.email) === kljuc(c.email))
           : null;
-        const phoneMatch = c.telefon
-          ? existingClients.find((e) => e.telefon?.replace(/\s/g, '') === c.telefon.replace(/\s/g, ''))
-          : null;
+
+        // Telefon SAM ne zadošča: družine si delijo številko, saloni pa
+        // vpišejo svojo za stranke brez telefona. Brez ujemanja celotnega
+        // imena bi uvoz prepisal napačno osebo.
+        const tel = telefoni[i];
+        const phoneMatch =
+          tel && kljuc(c.ime) && kljuc(c.priimek)
+            ? existingClients.find(
+                (e) =>
+                  e.phone_e164 === tel &&
+                  kljuc(e.ime) === kljuc(c.ime) &&
+                  kljuc(e.priimek) === kljuc(c.priimek)
+              )
+            : null;
 
         if (emailMatch && phoneMatch) {
           preskoci.push(c);

@@ -90,6 +90,8 @@ export function parseClient(row: Record<string, unknown>): Client | null {
     language: normalizeCommunicationLanguage(schema.languageField ? row[schema.languageField] : undefined),
     email: schema.emailField ? String(row[schema.emailField] ?? '') : '',
     telefon: schema.phoneField ? String(row[schema.phoneField] ?? '') || null : null,
+    // Izračuna ga sprožilec v bazi; aplikacija ga samo prebere.
+    phone_e164: row['phone_e164'] ? String(row['phone_e164']) : null,
     opombe: schema.notesField ? String(row[schema.notesField] ?? '') || null : null, // Always include opombe
     interne_opombe: schema.internalNotesField ? String(row[schema.internalNotesField] ?? '') || null : null,
     barva: schema.colorField ? String(row[schema.colorField] ?? '') || null : null,
