@@ -29,7 +29,7 @@ import {
   PlainMeta,
   FlowStep,
   ColorSwatches,
-} from '@/components/reminders/OverviewPrimitives';
+} from '@/components/ui/OverviewPrimitives';
 import { TestSendButton } from '@/components/reminders/TestSendButton';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';

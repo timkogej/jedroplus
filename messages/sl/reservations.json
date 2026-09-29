@@ -96,7 +96,14 @@
     "yes": "Da",
     "no": "Ne",
     "onlineConfirmOffHint": "Stranke, ki rezervirajo prek spleta, ne dobijo potrdila in ne vedo, ali je termin zabeležen.",
-    "onlineConfirmOffCta": "Vklopi potrdilo"
+    "onlineConfirmOffCta": "Vklopi potrdilo",
+    "bookingEnabledDesc": "Ali stranke lahko rezervirajo termin prek spleta.",
+    "timeSlotsDesc": "Na koliko minut se ponudi naslednji prosti termin.",
+    "clientConfirmDesc": "Stranka po rezervaciji prejme potrdilo termina.",
+    "onlineConfirmDesc": "Potrdilo za termine, rezervirane prek spletne strani.",
+    "mainLinkDesc": "Povezava, ki jo delite strankam za rezervacijo.",
+    "colorsDesc": "Barve rezervacijske strani, ki jo vidijo stranke.",
+    "mgmtLinkDesc": "Prek te povezave stranka prestavi ali odpove termin."
   },
   "modal": {
     "title": "Nastavitve rezervacij",

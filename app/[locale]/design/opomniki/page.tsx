@@ -27,7 +27,7 @@ import {
   PlainMeta,
   FlowStep,
   ColorSwatches,
-} from "@/components/reminders/OverviewPrimitives";
+} from "@/components/ui/OverviewPrimitives";
 
 export default function OpomnikiDesignPreview() {
   return (

@@ -3,11 +3,12 @@
 import type { ReactNode } from 'react';
 
 /**
- * Gradniki pregleda opomnikov.
+ * Gradniki za pregledne strani — Opomniki, Rezervacije in kar pride za njimi.
  *
- * Ločeni od strani zato, da jih lahko predogled v `app/[locale]/design`
- * uporabi iste, kot jih vidi uporabnik — brez podvojene kopije, ki bi se
- * sčasoma razšla z izvirnikom.
+ * Applov vzorec: naslov skupine stoji nad kartico, vrstice znotraj so ločene
+ * z lasnimi črtami, ime in razlaga levo, vrednost desno. Ker jih uporabljajo
+ * tudi predogledi v `app/[locale]/design`, ti kažejo res isto, kar vidi
+ * uporabnik, in se ne moreta razhajati.
  */
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
