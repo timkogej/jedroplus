@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
-import { motion } from 'motion/react';
-import { MagnifyingGlass, X, CheckSquare, MinusSquare } from '@phosphor-icons/react';
+import { MagnifyingGlass, X } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import CustomerFilters from './CustomerFilters';
 import CustomerListItem from './CustomerListItem';
@@ -17,6 +16,18 @@ interface Customer {
   tags: string[];
   /** ISO date-only strings (YYYY-MM-DD) of all appointments for date-based filtering */
   appointmentDates?: string[];
+}
+
+/**
+ * Datum v zapisu YYYY-MM-DD po *krajevnem* času.
+ *
+ * `toISOString()` pretvori v UTC, zato je v Sloveniji polnočni datum pristal
+ * en dan prej in so se meje dneva, tedna in meseca izmaknile za dan.
+ */
+function ymd(date: Date): string {
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${m}-${d}`;
 }
 
 interface CustomerListProps {
@@ -38,11 +49,73 @@ export default function CustomerList({
   const [activeFilter, setActiveFilter] = useState('all');
   const [selectedService, setSelectedService] = useState('Vse storitve');
 
-  // Filter customers based on search and active filter
-  const filteredCustomers = useMemo(() => {
-    let result = customers;
+  /** Meje današnjega dne, jutrišnjega, tedna in meseca — v enakem zapisu
+   *  kot appointmentDates, torej YYYY-MM-DD. */
+  const ranges = useMemo(() => {
+    const now = new Date();
+    const todayStr = ymd(now);
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = ymd(tomorrow);
 
-    // Search filter
+    // Start of this week (Monday) and end (Sunday)
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    const weekStartStr = ymd(weekStart);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const weekEndStr = ymd(weekEnd);
+
+    // Start and end of this month
+    const monthStartStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const monthEndStr = ymd(monthEnd);
+
+    return { todayStr, tomorrowStr, weekStartStr, weekEndStr, monthStartStr, monthEndStr };
+  }, []);
+
+  /** Ali stranka pade v dano skupino. Ista pravila kot prej, samo izvlečena,
+   *  da jih lahko uporabimo tudi za števila na gumbih. */
+  const matchesFilter = useCallback(
+    (c: Customer, filter: string) => {
+      const { todayStr, tomorrowStr, weekStartStr, weekEndStr, monthStartStr, monthEndStr } = ranges;
+      switch (filter) {
+        case 'today':
+          if (c.appointmentDates) return c.appointmentDates.includes(todayStr);
+          return c.nextAppointment ? c.nextAppointment.startsWith(todayStr) : false;
+        case 'tomorrow':
+          if (c.appointmentDates) return c.appointmentDates.includes(tomorrowStr);
+          return c.nextAppointment ? c.nextAppointment.startsWith(tomorrowStr) : false;
+        case 'this-week':
+          if (c.appointmentDates) return c.appointmentDates.some((d) => d >= weekStartStr && d <= weekEndStr);
+          if (!c.nextAppointment) return false;
+          return c.nextAppointment.split('T')[0] >= weekStartStr && c.nextAppointment.split('T')[0] <= weekEndStr;
+        case 'this-month':
+          if (c.appointmentDates) return c.appointmentDates.some((d) => d >= monthStartStr && d <= monthEndStr);
+          if (!c.nextAppointment) return false;
+          return c.nextAppointment.split('T')[0] >= monthStartStr && c.nextAppointment.split('T')[0] <= monthEndStr;
+        default:
+          return true;
+      }
+    },
+    [ranges],
+  );
+
+  const counts = useMemo(
+    () =>
+      ['all', 'today', 'tomorrow', 'this-week', 'this-month'].reduce<Record<string, number>>(
+        (acc, id) => {
+          acc[id] = customers.filter((c) => matchesFilter(c, id)).length;
+          return acc;
+        },
+        {},
+      ),
+    [customers, matchesFilter],
+  );
+
+  const filteredCustomers = useMemo(() => {
+    let result = customers.filter((c) => matchesFilter(c, activeFilter));
+
     if (search.trim()) {
       const searchLower = search.toLowerCase();
       result = result.filter(
@@ -53,66 +126,8 @@ export default function CustomerList({
       );
     }
 
-    // Quick filters — use appointmentDates (date-only strings) when available
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-    // Start of this week (Monday) and end (Sunday)
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-    const weekStartStr = weekStart.toISOString().split('T')[0];
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    const weekEndStr = weekEnd.toISOString().split('T')[0];
-
-    // Start and end of this month
-    const monthStartStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const monthEndStr = monthEnd.toISOString().split('T')[0];
-
-    switch (activeFilter) {
-      case 'today':
-        result = result.filter((c) => {
-          if (c.appointmentDates) return c.appointmentDates.includes(todayStr);
-          // fallback: use nextAppointment
-          if (!c.nextAppointment) return false;
-          return c.nextAppointment.startsWith(todayStr);
-        });
-        break;
-      case 'tomorrow':
-        result = result.filter((c) => {
-          if (c.appointmentDates) return c.appointmentDates.includes(tomorrowStr);
-          if (!c.nextAppointment) return false;
-          return c.nextAppointment.startsWith(tomorrowStr);
-        });
-        break;
-      case 'this-week':
-        result = result.filter((c) => {
-          if (c.appointmentDates) {
-            return c.appointmentDates.some((d) => d >= weekStartStr && d <= weekEndStr);
-          }
-          if (!c.nextAppointment) return false;
-          const d = c.nextAppointment.split('T')[0];
-          return d >= weekStartStr && d <= weekEndStr;
-        });
-        break;
-      case 'this-month':
-        result = result.filter((c) => {
-          if (c.appointmentDates) {
-            return c.appointmentDates.some((d) => d >= monthStartStr && d <= monthEndStr);
-          }
-          if (!c.nextAppointment) return false;
-          const d = c.nextAppointment.split('T')[0];
-          return d >= monthStartStr && d <= monthEndStr;
-        });
-        break;
-    }
-
     return result;
-  }, [customers, search, activeFilter]);
+  }, [customers, search, activeFilter, matchesFilter]);
 
   const toggleCustomer = useCallback(
     (id: string) => {
@@ -140,112 +155,115 @@ export default function CustomerList({
   const allSelected = filteredCustomers.length > 0 && selectedInFiltered === filteredCustomers.length;
 
   return (
-    <div className="space-y-4">
-      {/* Filters */}
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      {/* Skupine s številom — najprej izbereš skupino, posamične stranke pa
+          odkljukaš le še kot izjeme. */}
       <CustomerFilters
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
         onServiceFilterChange={setSelectedService}
         selectedService={selectedService}
+        counts={counts}
       />
 
       {/* Search */}
       <div className="relative">
-        <MagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" weight="regular" />
+        <MagnifyingGlass className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('customerList.searchPlaceholder')}
-          className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-[#1A1F36] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all"
+          className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
         />
         {search && (
           <button
             type="button"
             onClick={() => setSearch('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
           >
-            <X className="h-3.5 w-3.5" weight="bold" />
+            <X className="h-3.5 w-3.5" weight="regular" />
           </button>
         )}
       </div>
 
-      {/* Selection controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      {/* Seznam je ena kartica; vrstice ločijo lasne črte. */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-gray-100 bg-white">
+        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2.5">
           <button
             type="button"
             onClick={allSelected ? deselectAll : selectAll}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#1A1F36] transition-colors"
+            className="text-[13px] font-medium text-[#7C78FA] transition-opacity hover:opacity-70 disabled:opacity-40"
+            disabled={filteredCustomers.length === 0}
           >
-            {allSelected ? (
-              <MinusSquare className="h-5 w-5 text-violet-500" weight="fill" />
-            ) : (
-              <CheckSquare className="h-5 w-5" weight="regular" />
-            )}
-            <span>{allSelected ? t('customerList.deselectAll') : t('customerList.selectAll')}</span>
+            {allSelected
+              ? t('customerList.deselectAll')
+              : t('customerList.selectAll')}
           </button>
-        </div>
-        <div className="flex items-center gap-2">
-          {selectedIds.size > 0 && (
-            <motion.span
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="px-3 py-1 rounded-lg bg-violet-50 text-xs font-semibold text-violet-600 border border-violet-200"
-            >
-              {t('customerList.selectedCount', { count: selectedIds.size })}
-            </motion.span>
-          )}
-          <span className="text-xs text-gray-400">
+          <span className="tnum text-[13px] text-gray-400">
             {t('customerList.resultCount', { count: filteredCustomers.length })}
           </span>
         </div>
-      </div>
 
-      {/* Customer list */}
-      <div className="space-y-2 max-h-[calc(100vh-480px)] overflow-y-auto custom-scrollbar pr-1">
-        {loading ? (
-          <div className="space-y-2">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 animate-pulse">
-                <div className="w-5 h-5 rounded-full bg-gray-200" />
-                <div className="flex-shrink-0 w-8 h-4 rounded bg-gray-200" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3.5 w-28 rounded bg-gray-200" />
-                  <div className="h-3 w-40 rounded bg-gray-100" />
+        <div className="custom-scrollbar min-h-0 flex-1 divide-y divide-gray-100 overflow-y-auto">
+          {loading ? (
+            <div>
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="flex animate-pulse items-center gap-3 px-4 py-2.5">
+                  <div className="h-5 w-5 rounded-full bg-gray-200" />
+                  <div className="h-4 w-7 rounded bg-gray-200" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3.5 w-28 rounded bg-gray-200" />
+                    <div className="h-3 w-40 rounded bg-gray-100" />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : filteredCustomers.length > 0 ? (
-          filteredCustomers.map((customer, index) => (
-            <CustomerListItem
-              key={customer.id}
-              customer={customer}
-              selected={selectedIds.has(customer.id)}
-              onToggle={toggleCustomer}
-              index={index}
-            />
-          ))
-        ) : (
-          <div className="py-12 text-center">
-            <p className="text-sm text-gray-400">{t('customerList.empty')}</p>
-            {activeFilter !== 'all' || search ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveFilter('all');
-                  setSearch('');
-                }}
-                className="mt-3 rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
-              >
-                {t('customerList.showAll')}
-              </button>
-            ) : (
-              <p className="text-xs text-gray-400 mt-1">{t('customerList.emptyNoClients')}</p>
-            )}
-          </div>
-        )}
+              ))}
+            </div>
+          ) : filteredCustomers.length > 0 ? (
+            filteredCustomers.map((customer) => (
+              <CustomerListItem
+                key={customer.id}
+                customer={customer}
+                selected={selectedIds.has(customer.id)}
+                onToggle={toggleCustomer}
+              />
+            ))
+          ) : (
+            <div className="py-12 text-center">
+              <p className="text-sm text-gray-400">{t('customerList.empty')}</p>
+              {activeFilter !== 'all' || search ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveFilter('all');
+                    setSearch('');
+                  }}
+                  className="mt-3 rounded-xl border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-900 transition-colors hover:bg-gray-50"
+                >
+                  {t('customerList.showAll')}
+                </button>
+              ) : (
+                <p className="mt-1 text-xs text-gray-400">{t('customerList.emptyNoClients')}</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Števec izbranih ostane viden tudi med drsenjem po seznamu. */}
+        <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-4 py-2.5">
+          <span className="tnum text-[13px] font-medium text-gray-900">
+            {t('customerList.selectedCount', { count: selectedIds.size })}
+          </span>
+          {selectedIds.size > 0 && (
+            <button
+              type="button"
+              onClick={deselectAll}
+              className="text-[13px] font-medium text-gray-500 transition-colors hover:text-gray-900"
+            >
+              {t('customerList.deselectAll')}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -8,7 +8,8 @@
     "step1Continue": "{count, plural, =1 {Naprej z 1 stranko} =2 {Naprej z 2 strankama} few {Naprej z {count} strankami} other {Naprej z {count} strankami}}",
     "step2BackButton": "Nazaj na izbiro",
     "step2SelectedBadge": "{count, plural, =1 {1 stranka} =2 {2 stranki} few {{count} stranke} other {{count} strank}}",
-    "step2SectionTitle": "Sestavi sporočilo"
+    "step2SectionTitle": "Sestavi sporočilo",
+    "recipientsInlineLabel": "Prejemniki:"
   },
   "result": {
     "title": "Sporočila poslana",

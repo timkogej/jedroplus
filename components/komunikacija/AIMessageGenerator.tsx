@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import { MagicWand, CircleNotch } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 
@@ -75,11 +74,12 @@ export default function AIMessageGenerator({
   };
 
   return (
-    <div className="rounded-2xl border border-violet-100 bg-gradient-to-br from-violet-50/60 to-cyan-50/40 p-5">
-      <div className="flex items-center gap-3 mb-4">
+    <div className="rounded-xl border border-gray-100 bg-white p-4">
+      <div className="mb-3 flex items-center gap-3">
         <div>
+          {/* Asistent+ je ime izdelka, zato obdrži gradient znamke. */}
           <h3
-            className="font-bold"
+            className="text-[15px] font-semibold"
             style={{
               backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
               WebkitBackgroundClip: 'text',
@@ -88,7 +88,7 @@ export default function AIMessageGenerator({
           >
             Asistent+
           </h3>
-          <p className="text-xs text-gray-500">{t('ai.subtitle')}</p>
+          <p className="mt-0.5 text-[13px] text-gray-500">{t('ai.subtitle')}</p>
         </div>
       </div>
 
@@ -96,22 +96,22 @@ export default function AIMessageGenerator({
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder={t('ai.promptPlaceholder')}
-        className="w-full h-24 px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm text-[#1A1F36] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 resize-none"
+        className="h-24 w-full resize-none rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
       />
 
       {/* Tone selector */}
       <div className="mt-3">
-        <p className="text-xs text-gray-500 mb-2">{t('ai.toneLabel')}</p>
+        <p className="mb-2 text-[13px] text-gray-500">{t('ai.toneLabel')}</p>
         <div className="flex gap-2">
           {toneOptions.map((option) => (
             <button
               key={option.value}
               type="button"
               onClick={() => setTone(option.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+              className={`rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
                 tone === option.value
-                  ? 'bg-white border border-violet-300 text-violet-600 shadow-sm'
-                  : 'bg-white/60 border border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {option.label}
@@ -120,57 +120,24 @@ export default function AIMessageGenerator({
         </div>
       </div>
 
-      <motion.button
+      <button
         type="button"
         onClick={handleGenerate}
         disabled={!prompt.trim() || isGenerating}
-        whileHover={{ scale: prompt.trim() && !isGenerating ? 1.01 : 1 }}
-        whileTap={{ scale: prompt.trim() && !isGenerating ? 0.99 : 1 }}
-        className={`mt-3 w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm transition-all duration-200 ${
-          prompt.trim() && !isGenerating
-            ? 'bg-white border border-gray-200 shadow-sm hover:shadow-md'
-            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-        }`}
+        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:bg-none disabled:bg-gray-100 disabled:text-gray-400 disabled:shadow-none"
       >
-        <AnimatePresence mode="wait">
-          {isGenerating ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center gap-2"
-            >
-              <CircleNotch className="h-5 w-5 animate-spin" weight="bold" style={{ fill: 'url(#btn-icon-grad)' }} />
-              <span
-                style={{
-                  backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                {t('ai.generatingButton')}
-              </span>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="idle"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex items-center gap-2"
-              style={prompt.trim() ? {
-                backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              } : undefined}
-            >
-              <MagicWand className="h-5 w-5" weight="bold" style={prompt.trim() ? { fill: 'url(#btn-icon-grad)' } : undefined} />
-              <span>{t('ai.generateButton')}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+        {isGenerating ? (
+          <>
+            <CircleNotch className="h-4 w-4 animate-spin" weight="bold" />
+            {t('ai.generatingButton')}
+          </>
+        ) : (
+          <>
+            <MagicWand className="h-4 w-4" weight="bold" />
+            {t('ai.generateButton')}
+          </>
+        )}
+      </button>
     </div>
   );
 }

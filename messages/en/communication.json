@@ -8,7 +8,8 @@
     "step1Continue": "{count, plural, =1 {Continue with 1 client} other {Continue with {count} clients}}",
     "step2BackButton": "Back to selection",
     "step2SelectedBadge": "{count, plural, =1 {1 client} other {{count} clients}}",
-    "step2SectionTitle": "Compose message"
+    "step2SectionTitle": "Compose message",
+    "recipientsInlineLabel": "Recipients:"
   },
   "result": {
     "title": "Messages sent",
