@@ -1,7 +1,8 @@
 {
   "page": {
     "title": "Analytics",
-    "subtitle": "Business overview and key metrics"
+    "subtitle": "Business overview and key metrics",
+    "exportButton": "Export"
   },
   "periods": {
     "danes": "Today",

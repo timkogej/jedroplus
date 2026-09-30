@@ -4,7 +4,7 @@ import { memo, useState, useEffect } from 'react';
 import { useFormat } from '@/hooks/useFormat';
 import { TrendUp, CurrencyEur, Clock, CheckCircle } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
-import MetricCard from './MetricCard';
+import { MetricGroup } from '@/components/dashboard';
 import {
   fetchAnalyticsMetrics,
   type AnalyticsMetrics,
@@ -49,50 +49,42 @@ function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCards
   }, [companyId, timePeriod, customRange]);
 
   return (
-    <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-      {/* Revenue */}
-      <MetricCard
-        title={t('metrics.totalRevenue')}
-        value={money(metrics?.totalRevenue ?? 0)}
-        icon={<TrendUp className="h-6 w-6" weight="bold" />}
-        iconColor="black"
-        change={metrics?.revenueGrowth}
-        changeLabel={t('metrics.vsPrevious')}
-        isLoading={isLoading}
-      />
-
-      {/* Average Booking Value */}
-      <MetricCard
-        title={t('metrics.averageValue')}
-        value={money(metrics?.averageBookingValue ?? 0)}
-        subtitle={t('metrics.perAppointment')}
-        icon={<CurrencyEur className="h-6 w-6" weight="bold" />}
-        iconColor="darkGray"
-        change={metrics?.bookingGrowth}
-        changeLabel={t('metrics.vsPrevious')}
-        isLoading={isLoading}
-      />
-
-      {/* Occupancy Rate */}
-      <MetricCard
-        title={t('metrics.occupancyRate')}
-        value={`${(metrics?.occupancyRate ?? 0).toFixed(1)}%`}
-        subtitle={t('metrics.workingTime')}
-        icon={<Clock className="h-6 w-6" weight="bold" />}
-        iconColor="mediumGray"
-        progressBar={metrics?.occupancyRate ?? 0}
-        isLoading={isLoading}
-      />
-
-      {/* Completion Rate */}
-      <MetricCard
-        title={t('metrics.completionRate')}
-        value={`${(metrics?.completionRate ?? 0).toFixed(1)}%`}
-        subtitle={t('metrics.appointments')}
-        icon={<CheckCircle className="h-6 w-6" weight="bold" />}
-        iconColor="slate"
-        progressBar={metrics?.completionRate ?? 0}
-        isLoading={isLoading}
+    <div className="mb-6">
+      <MetricGroup
+        metrics={[
+          {
+            label: t('metrics.totalRevenue'),
+            value: isLoading ? '—' : money(metrics?.totalRevenue ?? 0),
+            icon: TrendUp,
+            trend:
+              metrics?.revenueGrowth !== undefined
+                ? { value: metrics.revenueGrowth, isPositive: metrics.revenueGrowth >= 0 }
+                : undefined,
+            caption: t('metrics.vsPrevious'),
+          },
+          {
+            label: t('metrics.averageValue'),
+            value: isLoading ? '—' : money(metrics?.averageBookingValue ?? 0),
+            icon: CurrencyEur,
+            trend:
+              metrics?.bookingGrowth !== undefined
+                ? { value: metrics.bookingGrowth, isPositive: metrics.bookingGrowth >= 0 }
+                : undefined,
+            caption: t('metrics.perAppointment'),
+          },
+          {
+            label: t('metrics.occupancyRate'),
+            value: isLoading ? '—' : `${(metrics?.occupancyRate ?? 0).toFixed(1)}%`,
+            icon: Clock,
+            caption: t('metrics.workingTime'),
+          },
+          {
+            label: t('metrics.completionRate'),
+            value: isLoading ? '—' : `${(metrics?.completionRate ?? 0).toFixed(1)}%`,
+            icon: CheckCircle,
+            caption: t('metrics.appointments'),
+          },
+        ]}
       />
     </div>
   );

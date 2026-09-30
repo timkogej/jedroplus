@@ -1,7 +1,8 @@
 {
   "page": {
     "title": "Analitika",
-    "subtitle": "Pregled poslovanja in ključnih metrik"
+    "subtitle": "Pregled poslovanja in ključnih metrik",
+    "exportButton": "Izvozi"
   },
   "periods": {
     "danes": "Danes",

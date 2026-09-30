@@ -2,7 +2,6 @@
 
 import { memo, useState, useEffect } from 'react';
 import { useFormat } from '@/hooks/useFormat';
-import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import {
   LineChart,
@@ -15,6 +14,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { fetchRevenueChartData, type ChartDataPoint } from '@/lib/analytics/calculations';
+import ChartCard from './ChartCard';
+import { AXIS, GRID, TOOLTIP, NO_ANIM, BRAND } from './chartTheme';
 import {
   type TimePeriod,
   type CustomRange,
@@ -52,38 +53,19 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
     }
   }, [companyId, timePeriod, customRange]);
 
-  if (isLoading) {
-    return (
-      <div className="mb-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <div className="h-6 w-48 animate-pulse rounded bg-gray-200" />
-          <div className="mt-2 h-4 w-64 animate-pulse rounded bg-gray-200" />
-        </div>
-        <div className="h-[350px] animate-pulse rounded-lg bg-gray-100" />
-      </div>
-    );
-  }
-
   const revenueLegend = t('revenueChart.revenueLegend');
   const appointmentsLegend = t('revenueChart.appointmentsLegend');
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
+    <ChartCard
+      title={t('revenueChart.title')}
+      subtitle={t('revenueChart.subtitle')}
+      isLoading={isLoading}
+      isEmpty={chartData.length === 0}
+      emptyLabel={t('revenueChart.noData')}
+      height={320}
     >
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">{t('revenueChart.title')}</h3>
-        <p className="mt-1 text-sm text-gray-500">{t('revenueChart.subtitle')}</p>
-      </div>
-
-      {chartData.length === 0 ? (
-        <div className="flex h-[350px] items-center justify-center text-gray-500">
-          {t('revenueChart.noData')}
-        </div>
-      ) : (
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={320}>
           <LineChart data={chartData}>
             <defs>
               <linearGradient id="revenueGradient" x1="0" y1="0" x2="1" y2="0">
@@ -91,22 +73,17 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
                 <stop offset="100%" stopColor="#06B6D4" />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
+            <CartesianGrid {...GRID} />
+            <XAxis dataKey="date" {...AXIS} />
             <YAxis
               yAxisId="left"
-              tick={{ fontSize: 12 }}
-              stroke="#9CA3AF"
+              {...AXIS}
               tickFormatter={(value) => money(Number(value), { whole: true })}
             />
-            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
+            <YAxis yAxisId="right" orientation="right" {...AXIS} />
             <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-              }}
+              contentStyle={TOOLTIP.contentStyle}
+              labelStyle={TOOLTIP.labelStyle}
               formatter={(value, name) => {
                 const numValue = Number(value) || 0;
                 if (name === revenueLegend) return [money(numValue), name];
@@ -119,25 +96,26 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
               type="monotone"
               dataKey="prihodki"
               stroke="url(#revenueGradient)"
-              strokeWidth={3}
-              dot={{ fill: '#8B5CF6', r: 4 }}
-              activeDot={{ r: 6 }}
+              strokeWidth={2.5}
+              dot={false}
+              activeDot={{ r: 5 }}
               name={revenueLegend}
+              {...NO_ANIM}
             />
             <Line
               yAxisId="right"
               type="monotone"
               dataKey="termini"
-              stroke="#10B981"
-              strokeWidth={3}
-              dot={{ fill: '#10B981', r: 4 }}
-              activeDot={{ r: 6 }}
+              stroke={BRAND.emerald}
+              strokeWidth={2.5}
+              dot={false}
+              activeDot={{ r: 5 }}
               name={appointmentsLegend}
+              {...NO_ANIM}
             />
           </LineChart>
         </ResponsiveContainer>
-      )}
-    </motion.div>
+    </ChartCard>
   );
 }
 

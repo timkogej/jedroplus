@@ -68,7 +68,8 @@ export default function AnalyticsPage() {
 
   return (
     <ProtectedLayout>
-      <main className="mx-auto w-full max-w-[1800px] px-4 py-8 sm:px-6 lg:px-8 bg-white min-h-screen">
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
         {/* Header with Time Filters */}
         <AnalyticsHeader
           timePeriod={timePeriod}
@@ -86,14 +87,16 @@ export default function AnalyticsPage() {
         />
 
         {/* Revenue & Bookings Chart */}
-        <RevenueBookingsChart
-          companyId={companyId}
-          timePeriod={timePeriod}
-          customRange={customRange}
-        />
+        <div className="mb-6">
+          <RevenueBookingsChart
+            companyId={companyId}
+            timePeriod={timePeriod}
+            customRange={customRange}
+          />
+        </div>
 
         {/* Services & Employees Charts */}
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <AppointmentsByServiceChart
             companyId={companyId}
             timePeriod={timePeriod}
@@ -107,7 +110,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Heatmap & Client Growth */}
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <HourlyOccupancyHeatmap
             companyId={companyId}
             timePeriod={timePeriod}
@@ -121,21 +124,26 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Top Performers */}
-        <TopPerformersTable
-          companyId={companyId}
-          timePeriod={timePeriod}
-          customRange={customRange}
-        />
+        <div className="mb-6">
+          <TopPerformersTable
+            companyId={companyId}
+            timePeriod={timePeriod}
+            customRange={customRange}
+          />
+        </div>
 
         {/* Retention & Cancellation */}
-        <RetentionCancellationAnalysis
-          companyId={companyId}
-          timePeriod={timePeriod}
-          customRange={customRange}
-        />
+        <div className="mb-6">
+          <RetentionCancellationAnalysis
+            companyId={companyId}
+            timePeriod={timePeriod}
+            customRange={customRange}
+          />
+        </div>
 
         {/* Promotions Analytics */}
-        <PromotionsAnalytics companyId={companyId} />
+          <PromotionsAnalytics companyId={companyId} />
+        </div>
       </main>
     </ProtectedLayout>
   );

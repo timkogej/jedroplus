@@ -1,10 +1,11 @@
 'use client';
 
 import { memo, useState, useEffect } from 'react';
-import { motion } from 'motion/react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { CalendarCheck, Star, Trophy } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import ChartCard from './ChartCard';
+import { NO_ANIM } from './chartTheme';
 import {
   fetchRetentionData,
   fetchClientAppointmentDistribution,
@@ -70,25 +71,6 @@ function RetentionCancellationAnalysis({
     }
   }, [companyId, timePeriod, customRange]);
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <div className="mb-6 h-6 w-40 animate-pulse rounded bg-gray-200" />
-          <div className="space-y-4">
-            <div className="h-16 animate-pulse rounded-lg bg-gray-100" />
-            <div className="h-16 animate-pulse rounded-lg bg-gray-100" />
-            <div className="h-16 animate-pulse rounded-lg bg-gray-100" />
-          </div>
-        </div>
-        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <div className="mb-6 h-6 w-40 animate-pulse rounded bg-gray-200" />
-          <div className="h-[200px] animate-pulse rounded-full bg-gray-100" />
-        </div>
-      </div>
-    );
-  }
-
   const totalStatuses = statusData.reduce((sum, d) => sum + d.value, 0);
 
   const getStatusDisplayName = (name: string) => {
@@ -100,65 +82,49 @@ function RetentionCancellationAnalysis({
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       {/* Client Appointment Distribution */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
-      >
-        <h3 className="mb-6 text-lg font-semibold text-gray-900">
-          {t('retention.distributionTitle')}
-        </h3>
-
-        <div className="space-y-3">
-          {/* Clients with 1 appointment */}
-          <div className="flex items-center justify-between rounded-lg bg-amber-50 p-4">
-            <div>
-              <div className="text-sm text-gray-600">{t('retention.oneAppointment')}</div>
-              <div className="text-2xl font-bold text-gray-900">
-                {distributionData.clientsWithOneAppointment}
-              </div>
+      <ChartCard title={t('retention.distributionTitle')} isLoading={isLoading} height={220}>
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-gray-100 bg-gray-100 sm:grid-cols-3">
+          <div className="bg-white p-4">
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-[13px] text-gray-500">{t('retention.oneAppointment')}</p>
+              <CalendarCheck className="h-4 w-4 flex-shrink-0 text-amber-500" weight="regular" />
             </div>
-            <CalendarCheck className="h-8 w-8 text-amber-600" weight="duotone" />
+            <p className="tnum mt-2 text-2xl font-semibold text-gray-900">
+              {distributionData.clientsWithOneAppointment}
+            </p>
           </div>
 
-          {/* Clients with 3 appointments */}
-          <div className="flex items-center justify-between rounded-lg bg-emerald-50 p-4">
-            <div>
-              <div className="text-sm text-gray-600">{t('retention.threeAppointments')}</div>
-              <div className="text-2xl font-bold text-gray-900">
-                {distributionData.clientsWithThreeAppointments}
-              </div>
+          <div className="bg-white p-4">
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-[13px] text-gray-500">{t('retention.threeAppointments')}</p>
+              <Star className="h-4 w-4 flex-shrink-0 text-emerald-500" weight="regular" />
             </div>
-            <Star className="h-8 w-8 text-emerald-600" weight="duotone" />
+            <p className="tnum mt-2 text-2xl font-semibold text-gray-900">
+              {distributionData.clientsWithThreeAppointments}
+            </p>
           </div>
 
-          {/* Clients with 5+ appointments */}
-          <div className="flex items-center justify-between rounded-lg bg-gradient-to-r from-violet-500 to-cyan-500 p-4">
-            <div>
-              <div className="text-sm text-white/90">{t('retention.fivePlusAppointments')}</div>
-              <div className="text-2xl font-bold text-white">
-                {distributionData.clientsWithFivePlusAppointments}
-              </div>
+          <div className="bg-white p-4">
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-[13px] text-gray-500">{t('retention.fivePlusAppointments')}</p>
+              <Trophy className="h-4 w-4 flex-shrink-0 text-[#7C78FA]" weight="regular" />
             </div>
-            <Trophy className="h-8 w-8 text-white" weight="duotone" />
+            <p className="tnum mt-2 text-2xl font-semibold text-gray-900">
+              {distributionData.clientsWithFivePlusAppointments}
+            </p>
           </div>
         </div>
-      </motion.div>
+      </ChartCard>
 
       {/* Appointment Status Analysis */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
+      <ChartCard
+        title={t('retention.statusTitle')}
+        isLoading={isLoading}
+        isEmpty={totalStatuses === 0}
+        emptyLabel={t('retention.noData')}
+        height={200}
+        skeletonShape="circle"
       >
-        <h3 className="mb-6 text-lg font-semibold text-gray-900">{t('retention.statusTitle')}</h3>
-
-        {totalStatuses === 0 ? (
-          <div className="flex h-[200px] items-center justify-center text-gray-500">
-            {t('retention.noData')}
-          </div>
-        ) : (
           <>
             <ResponsiveContainer width="100%" height={180}>
               <PieChart>
@@ -170,6 +136,7 @@ function RetentionCancellationAnalysis({
                   outerRadius={70}
                   paddingAngle={2}
                   dataKey="value"
+                  {...NO_ANIM}
                 >
                   {statusData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -189,7 +156,7 @@ function RetentionCancellationAnalysis({
                     <span className="text-sm text-gray-700">{getStatusDisplayName(item.name)}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-900">{item.value}</span>
+                    <span className="tnum text-sm font-semibold text-gray-900">{item.value}</span>
                     <span className="text-xs text-gray-500">
                       {totalStatuses > 0 ? ((item.value / totalStatuses) * 100).toFixed(0) : 0}%
                     </span>
@@ -198,8 +165,7 @@ function RetentionCancellationAnalysis({
               ))}
             </div>
           </>
-        )}
-      </motion.div>
+      </ChartCard>
     </div>
   );
 }

@@ -1,9 +1,9 @@
 'use client';
 
 import { memo, useState, useEffect } from 'react';
-import { motion } from 'motion/react';
 import { Trophy, Medal, Star } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import ChartCard from './ChartCard';
 import { fetchTopPerformers, type TopPerformer } from '@/lib/analytics/calculations';
 import {
   type TimePeriod,
@@ -57,53 +57,21 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
     }
   }, [companyId, timePeriod, customRange]);
 
-  if (isLoading) {
-    return (
-      <div className="mb-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-        <div className="mb-6 h-6 w-40 animate-pulse rounded bg-gray-200" />
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-lg bg-gray-100" />
-            ))}
-          </div>
-          <div className="space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 animate-pulse rounded-lg bg-gray-100" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="mb-8 rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
-    >
-      <h3 className="mb-6 text-lg font-semibold text-gray-900">{t('topPerformers.title')}</h3>
-
-      <div className="grid grid-cols-2 gap-4">
+    <ChartCard title={t('topPerformers.title')} isLoading={isLoading} height={220}>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         {/* Top Services - with service colors */}
         <div>
-          <h4 className="mb-4 text-sm font-semibold text-gray-700">{t('topPerformers.services')}</h4>
+          <h4 className="mb-3 text-[13px] font-semibold uppercase tracking-wider text-gray-500">{t('topPerformers.services')}</h4>
           {topServices.length === 0 ? (
-            <div className="rounded-lg bg-gray-50 p-4 text-center text-gray-500">
+            <div className="rounded-xl bg-gray-50 p-4 text-center text-sm text-gray-400">
               {t('topPerformers.noData')}
             </div>
           ) : (
             <div className="space-y-3">
               {topServices.slice(0, 3).map((service, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="text-2xl font-bold text-gray-300">
+                <div key={index} className="flex items-center gap-3">
+                  <div className="tnum w-5 flex-shrink-0 text-lg font-semibold text-gray-300">
                     {index + 1}
                   </div>
                   <div
@@ -111,15 +79,15 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
                     style={{ backgroundColor: service.color }}
                   />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-gray-900 truncate">{service.name}</div>
-                    <div className="text-xs text-gray-600">
+                    <div className="truncate text-sm font-medium text-gray-900">{service.name}</div>
+                    <div className="text-xs text-gray-500">
                       {t('topPerformers.appointmentCount', { count: service.count })}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
                     {getRankBadge(index)}
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -127,46 +95,47 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
 
         {/* Top Employees - with employee colors and initials */}
         <div>
-          <h4 className="mb-4 text-sm font-semibold text-gray-700">{t('topPerformers.staff')}</h4>
+          <h4 className="mb-3 text-[13px] font-semibold uppercase tracking-wider text-gray-500">{t('topPerformers.staff')}</h4>
           {topEmployees.length === 0 ? (
-            <div className="rounded-lg bg-gray-50 p-4 text-center text-gray-500">
+            <div className="rounded-xl bg-gray-50 p-4 text-center text-sm text-gray-400">
               {t('topPerformers.noData')}
             </div>
           ) : (
             <div className="space-y-3">
               {topEmployees.slice(0, 3).map((employee, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="flex items-center gap-3"
-                >
-                  <div className="text-2xl font-bold text-gray-300">
+                <div key={index} className="flex items-center gap-3">
+                  <div className="tnum w-5 flex-shrink-0 text-lg font-semibold text-gray-300">
                     {index + 1}
                   </div>
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
-                    style={{ backgroundColor: employee.color }}
+                  {/* Gradientne začetnice — brez kroga okoli, kot drugod v aplikaciji. */}
+                  <span
+                    className="w-8 flex-shrink-0 text-sm font-bold"
+                    style={{
+                      backgroundImage: employee.color?.includes('gradient')
+                        ? employee.color
+                        : `linear-gradient(135deg, ${employee.color} 0%, ${employee.color} 100%)`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
                   >
                     {employee.initials || employee.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                  </div>
+                  </span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-gray-900 truncate">{employee.name}</div>
-                    <div className="text-xs text-gray-600">
+                    <div className="truncate text-sm font-medium text-gray-900">{employee.name}</div>
+                    <div className="text-xs text-gray-500">
                       {t('topPerformers.appointmentCount', { count: employee.count })}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
                     {getRankBadge(index)}
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
         </div>
       </div>
-    </motion.div>
+    </ChartCard>
   );
 }
 
