@@ -79,12 +79,12 @@ function HourlyOccupancyHeatmap({
 
       {/* Heatmap Grid */}
       <div className="overflow-x-auto">
-        <div className="inline-block min-w-full">
+        <div className="w-full min-w-[420px]">
           {/* Hour headers */}
           <div className="mb-2 flex">
             <div className="w-12" /> {/* Empty corner */}
             {WORKING_HOURS.map((hour) => (
-              <div key={hour} className="w-10 text-center text-xs font-medium text-gray-600">
+              <div key={hour} className="min-w-[24px] flex-1 text-center text-xs font-medium text-gray-500">
                 {hour}
               </div>
             ))}
@@ -102,7 +102,7 @@ function HourlyOccupancyHeatmap({
                 return (
                   <div
                     key={key}
-                    className={`mx-0.5 flex h-8 w-10 items-center justify-center rounded-md transition-colors ${getIntensityColor(pct, maxPct)}`}
+                    className={`mx-0.5 h-8 min-w-[24px] flex-1 rounded-md transition-colors ${getIntensityColor(pct, maxPct)}`}
                     title={t('heatmap.cellTooltip', {
                       day: translatedDays[dayIndex],
                       hour,
