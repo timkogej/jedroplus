@@ -16,7 +16,6 @@ import {
 } from '@phosphor-icons/react';
 import { useTranslations, useLocale } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { safeDate } from '@/lib/dashboardHelpers';
@@ -25,6 +24,9 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { LostLeadsSettingsModal } from '@/components/lost-leads/LostLeadsSettingsModal';
 import ClientInitialsBadge from '@/components/clients/ClientInitialsBadge';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import { MetricGroup } from '@/components/dashboard';
+import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
+import { SectionPanel, SettingRow, StatusPill, ValuePill } from '@/components/ui/OverviewPrimitives';
 
 type ClientRow = Record<string, unknown>;
 
@@ -201,342 +203,255 @@ export default function LostLeadsPage() {
     pendingNotification: inactiveClients.filter(c => !isClientNotified(c)).length,
   };
 
+  const columns: DataTableColumn<ClientRow>[] = [
+    {
+      id: 'client',
+      header: t('page.table.columns.client'),
+      sortValue: (c) => getClientName(c).toLowerCase(),
+      cell: (c) => (
+        <div className="flex items-center gap-3">
+          <ClientInitialsBadge
+            firstName={getClientName(c).split(/\s+/)[0] || ''}
+            lastName={getClientName(c).split(/\s+/).slice(1).join(' ') || ''}
+            size="sm"
+            gradient="violet-cyan"
+            variant="text"
+          />
+          <span className="text-sm font-medium text-gray-900">{getClientName(c)}</span>
+        </div>
+      ),
+    },
+    {
+      id: 'email',
+      header: t('page.table.columns.email'),
+      sortValue: (c) => getClientEmail(c).toLowerCase(),
+      cell: (c) => (
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <EnvelopeSimple className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
+          <span className="truncate">{getClientEmail(c)}</span>
+        </div>
+      ),
+    },
+    {
+      id: 'phone',
+      header: t('page.table.columns.phone'),
+      cell: (c) => (
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
+          <span className="tnum whitespace-nowrap">{getClientPhone(c)}</span>
+        </div>
+      ),
+    },
+    {
+      id: 'daysInactive',
+      header: t('page.table.columns.daysInactive'),
+      sortValue: (c) => getDaysInactive(c),
+      cell: (c) => (
+        <span className="tnum whitespace-nowrap text-sm text-amber-600">
+          {t('page.table.daysValue', { days: getDaysInactive(c) })}
+        </span>
+      ),
+    },
+    {
+      id: 'notified',
+      header: t('page.table.columns.notified'),
+      sortValue: (c) => (isClientNotified(c) ? 1 : 0),
+      cell: (c) =>
+        isClientNotified(c) ? (
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+            <CheckCircle className="h-3.5 w-3.5" weight="regular" />
+            {t('page.table.notifiedYes')}
+          </span>
+        ) : (
+          <span className="text-sm text-gray-400">{t('page.table.notifiedNo')}</span>
+        ),
+    },
+  ];
+
   return (
     <ProtectedLayout>
-      <main className="relative isolate min-h-screen bg-white">
-        <AmbientBottomGlow tone="turquoise" />
-        <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           {/* Header */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 flex flex-wrap items-start justify-between gap-4"
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
-              <p className="mt-1 text-sm text-gray-500">
-                {t('page.subtitle')}
-              </p>
+              <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+              <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
             </div>
 
-            <div className="flex items-center gap-3">
-              {/* Settings button - icon only */}
-              {canManageSettings && (
-                <motion.button
-                  onClick={() => setShowSettingsModal(true)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                  title={t('page.settings.title')}
-                >
-                  <Gear size={20} weight="bold" className="text-gray-900" />
-                </motion.button>
-              )}
-            </div>
+            {canManageSettings && (
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
+                title={t('page.settings.title')}
+              >
+                <Gear size={17} weight="regular" className="text-gray-500" />
+                {t('page.settings.title')}
+              </button>
+            )}
           </motion.div>
 
-          {/* Statistics Cards - Centered icons and numbers */}
-          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {loading ? (
-              <>
-                {[0, 1, 2].map((i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="h-8 w-16 rounded-lg bg-gray-200 animate-pulse" />
-                      <div className="h-6 w-6 rounded bg-gray-200 animate-pulse" />
-                    </div>
-                    <div className="mt-3 space-y-2">
-                      <div className="h-4 w-24 rounded bg-gray-200 animate-pulse" />
-                      <div className="h-3 w-20 rounded bg-gray-200 animate-pulse" />
-                    </div>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <>
-                {/* Inactive Clients */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0 }}
-                  className="relative rounded-2xl p-[1px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500"
-                >
-                  <div className="rounded-[15px] bg-white p-6 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="text-3xl text-gray-900 leading-none">
-                        {stats.inactiveClients}
-                      </div>
-                      <TrendDown className="h-6 w-6 text-gray-900" weight="regular" />
-                    </div>
-                    <div className="mt-3 text-left">
-                      <div className="text-sm font-medium text-gray-600">{t('page.stats.inactiveClients')}</div>
-                      <div className="text-xs text-gray-500 mt-1">{t('page.stats.inactiveClientsDesc')}</div>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Notified Clients */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="text-3xl text-gray-900 leading-none">
-                      {notifiedThisMonthCount}
-                    </div>
-                    <PaperPlaneRight className="h-6 w-6 text-gray-900" weight="regular" />
-                  </div>
-                  <div className="mt-3 text-left">
-                    <div className="text-sm font-medium text-gray-600">{t('page.stats.notifiedClients')}</div>
-                    <div className="text-xs text-gray-500 mt-1">{t('page.stats.notifiedClientsDesc')}</div>
-                  </div>
-                </motion.div>
-
-                {/* Pending Notification */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="text-3xl text-gray-900 leading-none">
-                      {inactivityDays}
-                    </div>
-                    <CalendarX className="h-6 w-6 text-gray-900" weight="regular" />
-                  </div>
-                  <div className="mt-3 text-left">
-                    <div className="text-sm font-medium text-gray-600">{t('page.stats.inactivityDays')}</div>
-                    <div className="text-xs text-gray-500 mt-1">{t('page.stats.inactivityDaysDesc')}</div>
-                  </div>
-                </motion.div>
-              </>
-            )}
+          {/* Povzetek — ena kartica z lasnimi črtami, kot drugod. */}
+          <div className="mb-8">
+            <MetricGroup
+              metrics={[
+                {
+                  label: t('page.stats.inactiveClients'),
+                  value: loading ? '—' : stats.inactiveClients,
+                  caption: t('page.stats.inactiveClientsDesc'),
+                  icon: TrendDown,
+                },
+                {
+                  label: t('page.stats.notifiedClients'),
+                  value: loading ? '—' : notifiedThisMonthCount,
+                  caption: t('page.stats.notifiedClientsDesc'),
+                  icon: PaperPlaneRight,
+                },
+                {
+                  label: t('page.stats.inactivityDays'),
+                  value: loading ? '—' : inactivityDays,
+                  caption: t('page.stats.inactivityDaysDesc'),
+                  icon: CalendarX,
+                },
+              ]}
+            />
           </div>
 
-          {/* Inactive Clients Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8 rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 overflow-hidden"
-          >
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold text-[#1A1F36]">
-                    {t('page.table.title')}
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {t('page.table.subtitle', { count: inactiveClients.length, days: inactivityDays })}
+          {/* Seznam neaktivnih strank */}
+          <section className="mb-8">
+            <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
+              {t('page.table.title')}
+            </h2>
+            <p className="mb-2 px-1 text-[13px] text-gray-500">
+              {t('page.table.subtitle', { count: inactiveClients.length, days: inactivityDays })}
+            </p>
+            <DataTable<ClientRow>
+              rows={inactiveClients}
+              columns={columns}
+              rowKey={(c) => getClientId(c)}
+              isLoading={loading}
+              pageSize={20}
+              defaultSort={{ columnId: 'daysInactive', direction: 'desc' }}
+              empty={
+                <div className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12 text-center">
+                  <UserCheck className="mb-3 h-7 w-7 text-emerald-400" weight="regular" />
+                  <p className="text-base font-semibold text-gray-900">{t('page.table.empty')}</p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {t('page.table.emptyDesc', { days: inactivityDays })}
                   </p>
                 </div>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="p-12 text-center">
-                <div className="animate-pulse flex flex-col items-center">
-                  <div className="h-16 w-16 rounded-full bg-gray-200 mb-4" />
-                  <div className="h-5 w-32 bg-gray-200 rounded mb-2" />
-                  <div className="h-4 w-48 bg-gray-200 rounded" />
-                </div>
-              </div>
-            ) : inactiveClients.length === 0 ? (
-              <div className="p-12 text-center">
-                <UserCheck className="h-16 w-16 text-emerald-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg font-medium">
-                  {t('page.table.empty')}
-                </p>
-                <p className="text-gray-400 text-sm mt-2">
-                  {t('page.table.emptyDesc', { days: inactivityDays })}
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        {t('page.table.columns.client')}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        {t('page.table.columns.email')}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        {t('page.table.columns.phone')}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        {t('page.table.columns.daysInactive')}
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                        {t('page.table.columns.notified')}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {inactiveClients.slice(0, 50).map((client, index) => {
-                      const daysInactive = getDaysInactive(client);
-                      const notified = isClientNotified(client);
-                      return (
-                        <motion.tr
-                          key={getClientId(client)}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: index * 0.02 }}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-3">
-                              <ClientInitialsBadge
-                                firstName={getClientName(client).split(/\s+/)[0] || ''}
-                                lastName={getClientName(client).split(/\s+/).slice(1).join(' ') || ''}
-                                size="sm"
-                                gradient="violet-cyan"
-                                variant="text"
-                              />
-                              <div className="font-medium text-gray-900">
-                                {getClientName(client)}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2 text-sm text-gray-900">
-                              <EnvelopeSimple className="h-4 w-4 text-gray-900" />
-                              {getClientEmail(client)}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2 text-sm text-gray-900">
-                              <Phone className="h-4 w-4 text-gray-900" />
-                              {getClientPhone(client)}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm text-orange-600">
-                              {t('page.table.daysValue', { days: daysInactive })}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {notified ? (
-                              <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">
-                                <CheckCircle className="h-3.5 w-3.5" weight="fill" />
-                                {t('page.table.notifiedYes')}
-                              </span>
-                            ) : (
-                              <span className="text-sm text-gray-900">
-                                {t('page.table.notifiedNo')}
-                              </span>
-                            )}
-                          </td>
-                        </motion.tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-                {inactiveClients.length > 50 && (
-                  <div className="p-4 text-center text-sm text-gray-500 border-t border-gray-100">
-                    {t('page.table.limitNote', { total: inactiveClients.length })}
-                  </div>
-                )}
-              </div>
-            )}
-          </motion.div>
-
-          {/* Settings Overview */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 mb-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
-          >
-            <h2 className="text-base font-semibold text-[#1A1F36] mb-4">{t('page.settings.title')}</h2>
-            {loading ? (
-              <div className="flex items-center justify-center py-10">
-                <GradientSpinner />
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                  <div className="flex items-center gap-2 flex-1 min-w-0 mr-2">
-                    <TrendDown className="w-4 h-4 flex-shrink-0 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">{t('page.settings.statusLabel')}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm ${enabled ? 'text-green-600' : 'text-red-500'}`}>
-                      {enabled ? t('status.enabled') : t('status.disabled')}
+              }
+              mobile={{
+                leading: (c) => (
+                  <ClientInitialsBadge
+                    firstName={getClientName(c).split(/\s+/)[0] || ''}
+                    lastName={getClientName(c).split(/\s+/).slice(1).join(' ') || ''}
+                    size="md"
+                    gradient="violet-cyan"
+                    variant="text"
+                  />
+                ),
+                title: (c) => getClientName(c),
+                subtitle: (c) => getClientEmail(c),
+                meta: (c) => (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="tnum text-[13px] text-amber-600">
+                      {t('page.table.daysValue', { days: getDaysInactive(c) })}
                     </span>
-                    <div className={`w-2.5 h-2.5 rounded-full ${enabled ? 'bg-green-500' : 'bg-red-400'}`} />
+                    {isClientNotified(c) && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                        <CheckCircle className="h-3 w-3" weight="regular" />
+                        {t('page.table.notifiedYes')}
+                      </span>
+                    )}
                   </div>
-                </div>
+                ),
+              }}
+            />
+          </section>
 
-                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <CalendarX className="w-4 h-4 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">{t('page.settings.inactivityThreshold')}</span>
-                  </div>
-                  <span className="text-sm text-gray-900">{t('page.table.daysValue', { days: inactivityDays })}</span>
+          {/* Nastavitve — isti gradniki kot na Opomnikih in Rezervacijah. */}
+          <section className="mb-8">
+            <SectionPanel title={t('page.settings.title')}>
+              {loading ? (
+                <div className="flex items-center justify-center py-10">
+                  <GradientSpinner />
                 </div>
-
-                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <ChatText className="w-4 h-4 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">{t('page.settings.tone')}</span>
-                  </div>
-                  <span className="text-sm text-gray-900">{getToneLabel(tone)}</span>
-                </div>
-
-                <div className="flex items-center justify-between py-2.5 border-b border-gray-100">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">{t('page.settings.discount')}</span>
-                  </div>
-                  {hasDiscount && discountText ? (
-                    <span className="text-sm text-gray-900">{discountText}</span>
-                  ) : (
-                    <span className="text-sm text-gray-400">{t('page.settings.notSet')}</span>
-                  )}
-                </div>
-
-                <div className="flex items-start justify-between gap-4 py-2.5">
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <EnvelopeSimple className="w-4 h-4 text-gray-900" weight="regular" />
-                    <span className="text-sm text-gray-700">{t('page.settings.aiInstructions')}</span>
-                  </div>
-                  {instructions ? (
-                    <p className="text-sm text-gray-600 whitespace-pre-wrap text-left max-w-xs">{instructions}</p>
-                  ) : (
-                    <span className="text-sm text-gray-400">{t('page.settings.noInstructions')}</span>
-                  )}
-                </div>
-              </div>
-            )}
-          </motion.div>
+              ) : (
+                <>
+                  <SettingRow
+                    icon={<TrendDown size={16} weight="regular" />}
+                    label={t('page.settings.statusLabel')}
+                    description={t('page.settings.statusLabelDesc')}
+                    value={
+                      <StatusPill
+                        enabled={enabled}
+                        label={enabled ? t('status.enabled') : t('status.disabled')}
+                      />
+                    }
+                  />
+                  <SettingRow
+                    icon={<CalendarX size={16} weight="regular" />}
+                    label={t('page.settings.inactivityThreshold')}
+                    description={t('page.settings.inactivityThresholdDesc')}
+                    value={<ValuePill>{t('page.table.daysValue', { days: inactivityDays })}</ValuePill>}
+                  />
+                  <SettingRow
+                    icon={<ChatText size={16} weight="regular" />}
+                    label={t('page.settings.tone')}
+                    description={t('page.settings.toneDesc')}
+                    value={<ValuePill>{getToneLabel(tone)}</ValuePill>}
+                  />
+                  <SettingRow
+                    icon={<Users size={16} weight="regular" />}
+                    label={t('page.settings.discount')}
+                    description={t('page.settings.discountDesc')}
+                    value={
+                      hasDiscount && discountText ? (
+                        <span className="text-sm text-gray-900">{discountText}</span>
+                      ) : (
+                        <span className="text-sm text-gray-400">{t('page.settings.notSet')}</span>
+                      )
+                    }
+                  />
+                  <SettingRow
+                    icon={<EnvelopeSimple size={16} weight="regular" />}
+                    label={t('page.settings.aiInstructions')}
+                    description={t('page.settings.aiInstructionsDesc')}
+                    value={
+                      instructions ? (
+                        <p className="max-w-xs whitespace-pre-wrap text-left text-sm text-gray-900 sm:text-right">
+                          {instructions}
+                        </p>
+                      ) : (
+                        <span className="text-sm text-gray-400">{t('page.settings.noInstructions')}</span>
+                      )
+                    }
+                  />
+                </>
+              )}
+            </SectionPanel>
+          </section>
 
           {/* Info Box */}
           {!loading && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-8 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100"
-            >
-              <h4 className="mb-3 text-base font-semibold text-gray-900">{t('page.info.title')}</h4>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
-                {t.rich('page.info.body', {
-                  highlight: (chunks) => (
-                    <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text font-semibold text-transparent">
-                      {chunks}
-                    </span>
-                  ),
-                })}
-              </p>
-            </motion.div>
+            <SectionPanel title={t('page.info.title')}>
+              <div className="p-4">
+                <p className="whitespace-pre-wrap text-sm leading-7 text-gray-600">
+                  {t.rich('page.info.body', {
+                    highlight: (chunks) => (
+                      <span className="font-semibold text-gray-900">{chunks}</span>
+                    ),
+                  })}
+                </p>
+              </div>
+            </SectionPanel>
           )}
         </div>
       </main>

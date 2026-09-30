@@ -35,7 +35,12 @@
       "discount": "Popust za vrnitev",
       "aiInstructions": "Navodila AI-ju",
       "notSet": "Ni nastavljeno",
-      "noInstructions": "Ni navodil"
+      "noInstructions": "Ni navodil",
+      "statusLabelDesc": "Ali samodejno obveščanje neaktivnih strank teče.",
+      "inactivityThresholdDesc": "Po koliko dneh brez obiska velja stranka za neaktivno.",
+      "toneDesc": "Kako sporočilo zveni — bolj sproščeno ali bolj uradno.",
+      "discountDesc": "Ponudba, s katero stranko povabimo nazaj.",
+      "aiInstructionsDesc": "Kaj naj Asistent+ upošteva pri pisanju sporočila."
     },
     "info": {
       "title": "O izgubljenih strankah",
