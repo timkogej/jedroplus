@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CalendarBlank } from '@phosphor-icons/react';
+import { CalendarBlank, DownloadSimple } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { useTranslations } from 'next-intl';
 import { type TimePeriod, type CustomRange } from '@/lib/analytics/dateUtils';
@@ -38,32 +38,47 @@ function AnalyticsHeader({
   };
 
   return (
-    <div className="mb-8">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Title */}
+    <div className="mb-7">
+      <motion.div
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+        className="mb-5 flex flex-wrap items-start justify-between gap-4"
+      >
         <div>
-          <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
-          <p className="mt-1 text-gray-600">{t('page.subtitle')}</p>
+          <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+          <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
         </div>
 
-      </div>
+        {/* Izvoz je bil doslej speljan v komponento, a gumba ni nihče izrisal,
+            zato do izvoza ni bilo mogoče priti. */}
+        {onExportCSV && (
+          <button
+            type="button"
+            onClick={onExportCSV}
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
+          >
+            <DownloadSimple size={17} weight="regular" className="text-gray-500" />
+            {t('page.exportButton')}
+          </button>
+        )}
+      </motion.div>
 
-      {/* Time Period Pills */}
-      <div className="flex flex-wrap gap-3">
+      {/* Obdobje */}
+      <div className="flex flex-wrap gap-1.5">
         {TIME_PERIODS.map((period) => (
-          <motion.button
+          <button
             key={period.value}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            type="button"
             onClick={() => setTimePeriod(period.value)}
-            className={`rounded-xl px-4 py-2 font-medium transition-all ${
+            className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
               timePeriod === period.value
-                ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-lg'
-                : 'border border-gray-200 bg-white text-gray-700 hover:border-violet-300'
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             {period.label}
-          </motion.button>
+          </button>
         ))}
       </div>
 
@@ -78,7 +93,7 @@ function AnalyticsHeader({
           >
             <div className="flex flex-wrap items-end gap-4 rounded-xl bg-gray-50 p-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-[13px] font-medium text-gray-500">
                   {t('customRange.fromLabel')}
                 </label>
                 <div className="relative">
@@ -92,12 +107,12 @@ function AnalyticsHeader({
                         start: e.target.value ? new Date(e.target.value) : null,
                       })
                     }
-                    className="rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
+                    className="rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-1 block text-[13px] font-medium text-gray-500">
                   {t('customRange.toLabel')}
                 </label>
                 <div className="relative">
@@ -111,19 +126,18 @@ function AnalyticsHeader({
                         end: e.target.value ? new Date(e.target.value) : null,
                       })
                     }
-                    className="rounded-lg border border-gray-300 py-2 pl-10 pr-4 text-sm focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
+                    className="rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-4 text-sm text-gray-900 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                   />
                 </div>
               </div>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <button
+                type="button"
                 onClick={handleApplyCustomRange}
                 disabled={!customRange.start || !customRange.end}
-                className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-700 disabled:opacity-50"
+                className="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:bg-none disabled:bg-gray-100 disabled:text-gray-400 disabled:shadow-none"
               >
                 {t('customRange.applyButton')}
-              </motion.button>
+              </button>
             </div>
           </motion.div>
         )}

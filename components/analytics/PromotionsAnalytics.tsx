@@ -153,45 +153,37 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
     <div className="mb-8 space-y-6">
       {/* Section header */}
       <div>
-        <h2 className="text-xl font-bold text-[#1A1F36]">{t('promotions.title')}</h2>
-        <p className="mt-1 text-sm text-gray-500">{t('promotions.subtitle')}</p>
+        <h2 className="text-[13px] font-semibold uppercase tracking-wider text-gray-500">
+          {t('promotions.title')}
+        </h2>
+        <p className="mt-1 text-[13px] text-gray-500">{t('promotions.subtitle')}</p>
       </div>
 
       {/* A) Summary cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {summary.map(({ type, count, savings }, idx) => {
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-gray-100 bg-gray-100 sm:grid-cols-3">
+        {summary.map(({ type, count, savings }) => {
           const cfg = TYPE_CONFIG[type];
           const { Icon } = cfg;
           return (
-            <motion.div
-              key={type}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.08 }}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-full ${cfg.bgClass}`}
-                >
-                  <Icon size={18} className={cfg.iconClass} weight="fill" />
-                </div>
-                <span className="font-semibold text-gray-800">{cfg.label}</span>
+            <div key={type} className="bg-white p-5">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-[13px] text-gray-500">{cfg.label}</span>
+                <Icon size={18} className={`flex-shrink-0 ${cfg.iconClass}`} weight="regular" />
               </div>
-              <p className="text-3xl font-bold text-gray-900 mb-0.5">{count}</p>
-              <p className="text-sm text-gray-500 mb-4">{t('promotions.appointmentCount')}</p>
-              <div className="pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-400 mb-0.5">{t('promotions.totalSavings')}</p>
-                <p className="text-lg font-bold text-green-600">{money(savings)}</p>
+              <p className="tnum mt-2 text-3xl font-semibold text-gray-900">{count}</p>
+              <p className="mt-0.5 text-[13px] text-gray-400">{t('promotions.appointmentCount')}</p>
+              <div className="mt-3 border-t border-gray-100 pt-3">
+                <p className="text-xs text-gray-400">{t('promotions.totalSavings')}</p>
+                <p className="tnum mt-0.5 text-base font-semibold text-emerald-600">{money(savings)}</p>
               </div>
-            </motion.div>
+            </div>
           );
         })}
       </div>
 
       {/* B) Horizontal bar chart — most used promotions */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-base font-bold text-[#1A1F36] mb-5">
+      <div className="rounded-xl border border-gray-100 bg-white p-5">
+        <h3 className="mb-5 text-[15px] font-semibold text-gray-900">
           {t('promotions.topPromos')}
         </h3>
         <div className="space-y-3">
@@ -199,13 +191,7 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
             const widthPct = (count / maxCount) * 100;
             const cfg = TYPE_CONFIG[type as keyof typeof TYPE_CONFIG];
             return (
-              <motion.div
-                key={naziv}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.04 * idx }}
-                className="flex items-center gap-3"
-              >
+              <div key={naziv} className="flex items-center gap-3">
                 <div className="w-40 shrink-0 space-y-0.5">
                   <span className="text-sm font-medium text-gray-700 truncate block">
                     {naziv}
@@ -224,24 +210,24 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${widthPct}%` }}
-                      transition={{ duration: 0.55, delay: 0.04 * idx, ease: 'easeOut' }}
+                      transition={{ duration: 0.45, delay: 0.03 * idx, ease: [0.32, 0.72, 0, 1] }}
                       className="h-full rounded-full"
                       style={{ background: cfg?.barBg ?? '#6D5EF7' }}
                     />
                   </div>
-                  <span className="w-6 text-right text-sm font-semibold text-gray-700">
+                  <span className="tnum w-6 text-right text-sm font-semibold text-gray-900">
                     {count}
                   </span>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
       </div>
 
       {/* C) Monthly trend — last 6 months, stacked bars */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-base font-bold text-[#1A1F36] mb-5">
+      <div className="rounded-xl border border-gray-100 bg-white p-5">
+        <h3 className="mb-5 text-[15px] font-semibold text-gray-900">
           {t('promotions.monthlyTrend')}
         </h3>
         <div className="flex items-end gap-2" style={{ height: '160px' }}>
@@ -297,25 +283,18 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
       </div>
 
       {/* D) Total savings gradient summary card */}
-      <div
-        className="rounded-2xl p-6 text-white"
-        style={{
-          background: 'linear-gradient(135deg, #6D5EF7 0%, #2F80ED 50%, #2AD4C5 100%)',
-        }}
-      >
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div>
-            <p className="text-white/70 text-sm mb-1">{t('promotions.totalSavingsLabel')}</p>
-            <p className="text-2xl font-bold">{money(totalSavings)}</p>
-          </div>
-          <div>
-            <p className="text-white/70 text-sm mb-1">{t('promotions.totalCountLabel')}</p>
-            <p className="text-2xl font-bold">{totalCount}</p>
-          </div>
-          <div>
-            <p className="text-white/70 text-sm mb-1">{t('promotions.avgSavingLabel')}</p>
-            <p className="text-2xl font-bold">{money(avgSaving)}</p>
-          </div>
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-gray-100 bg-gray-100 sm:grid-cols-3">
+        <div className="bg-white p-5">
+          <p className="text-[13px] text-gray-500">{t('promotions.totalSavingsLabel')}</p>
+          <p className="tnum mt-2 text-2xl font-semibold text-gray-900">{money(totalSavings)}</p>
+        </div>
+        <div className="bg-white p-5">
+          <p className="text-[13px] text-gray-500">{t('promotions.totalCountLabel')}</p>
+          <p className="tnum mt-2 text-2xl font-semibold text-gray-900">{totalCount}</p>
+        </div>
+        <div className="bg-white p-5">
+          <p className="text-[13px] text-gray-500">{t('promotions.avgSavingLabel')}</p>
+          <p className="tnum mt-2 text-2xl font-semibold text-gray-900">{money(avgSaving)}</p>
         </div>
       </div>
     </div>
@@ -333,7 +312,7 @@ function SkeletonLoader() {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
+            className="rounded-xl border border-gray-100 bg-white p-5"
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="h-10 w-10 bg-gray-200 rounded-full animate-pulse" />
@@ -348,7 +327,7 @@ function SkeletonLoader() {
           </div>
         ))}
       </div>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <div className="rounded-xl border border-gray-100 bg-white p-5">
         <div className="h-5 w-64 bg-gray-200 rounded animate-pulse mb-5" />
         <div className="space-y-3">
           {[0, 1, 2, 3].map((i) => (
@@ -366,9 +345,9 @@ function SkeletonLoader() {
 
 function EmptyState({ t }: { t: ReturnType<typeof useTranslations<'analytics'>> }) {
   return (
-    <div className="mb-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
-      <div className="text-4xl mb-4">🏷️</div>
-      <h3 className="text-base font-semibold text-[#1A1F36] mb-2">
+    <div className="mb-8 rounded-xl border border-gray-100 bg-white p-12 text-center">
+      <Tag className="mx-auto mb-3 h-7 w-7 text-gray-300" weight="regular" />
+      <h3 className="mb-1 text-base font-semibold text-gray-900">
         {t('promotions.empty.title')}
       </h3>
       <p className="text-sm text-gray-500 leading-relaxed">
