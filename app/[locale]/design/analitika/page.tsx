@@ -197,11 +197,11 @@ export default function AnalitikaDesignPreview() {
 
         <ChartCard title="Zasedenost po urah" subtitle="Kdaj ste najbolj polni" height={280}>
           <div className="overflow-x-auto">
-            <div className="inline-block min-w-full">
+            <div className="w-full min-w-[420px]">
               <div className="mb-2 flex">
                 <div className="w-12" />
                 {HOURS.map((h) => (
-                  <div key={h} className="w-10 text-center text-xs font-medium text-gray-500">{h}</div>
+                  <div key={h} className="min-w-[24px] flex-1 text-center text-xs font-medium text-gray-500">{h}</div>
                 ))}
               </div>
               {DAYS.map((d, di) => (
@@ -209,7 +209,7 @@ export default function AnalitikaDesignPreview() {
                   <div className="flex w-12 items-center text-sm font-medium text-gray-700">{d}</div>
                   {HOURS.map((h) => {
                     const pct = Math.max(0, Math.round(Math.sin((di + 1) * (h / 4)) * 50 + 45));
-                    return <div key={h} className={`mx-0.5 h-8 w-10 rounded-md ${cellColor(pct)}`} title={`${d} ${h}:00 — ${pct} %`} />;
+                    return <div key={h} className={`mx-0.5 h-8 min-w-[24px] flex-1 rounded-md ${cellColor(pct)}`} title={`${d} ${h}:00 — ${pct} %`} />;
                   })}
                 </div>
               ))}
