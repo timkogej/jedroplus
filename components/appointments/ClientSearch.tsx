@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MagnifyingGlass, X, Plus, User, Check } from '@phosphor-icons/react';
+import { MagnifyingGlass, X, Plus, Check } from '@phosphor-icons/react';
 import type { Client } from '@/lib/supabase/clients';
 import { searchClients } from '@/lib/supabase/clients';
 import { useCompany } from '@/app/company-context';
@@ -162,13 +162,13 @@ function ClientSearch({
       <div ref={containerRef} className="relative">
         {/* Selected client display or search input */}
         {selectedClient ? (
-          <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3">
+          <div className="flex items-center gap-3 rounded-[10px] border border-gray-200 bg-white px-3 py-2.5">
             <span className="text-lg font-bold bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
               {selectedClient.ime.charAt(0)}
               {selectedClient.priimek.charAt(0)}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="font-medium text-[#1A1F36]">
+              <p className="font-medium text-gray-900">
                 {selectedClient.ime} {selectedClient.priimek}
               </p>
               <p className="text-xs text-gray-500 truncate">{selectedClient.email}</p>
@@ -202,10 +202,10 @@ function ClientSearch({
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
                 placeholder={placeholder}
-                className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-11 pr-4
-                           text-sm text-[#1A1F36] placeholder-gray-400 transition-all
-                           focus:border-[#1A1F36]/30 focus:outline-none focus:ring-2
-                           focus:ring-[#1A1F36]/10"
+                className="w-full rounded-[10px] border border-gray-200 bg-white py-2.5 pl-11 pr-4
+                           text-sm text-gray-900 placeholder-gray-400 transition-colors
+                           focus:border-[#7C78FA] focus:outline-none focus:ring-[3px]
+                           focus:ring-[#7C78FA]/25"
               />
               {isLoading && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -233,22 +233,18 @@ function ClientSearch({
                           <motion.button
                             key={`cs-${index}-${client.id}`}
                             type="button"
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.03 }}
                             onClick={() => handleSelect(client)}
                             onMouseEnter={() => setHighlightedIndex(index)}
                             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left
                                        transition-colors
-                                       ${highlightedIndex === index ? 'bg-[#1A1F36]/5' : ''}
-                                       hover:bg-[#1A1F36]/5`}
+                                       ${highlightedIndex === index ? 'bg-gray-100' : ''}
+                                       hover:bg-gray-100`}
                           >
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full
-                                            bg-gradient-to-br from-gray-200 to-gray-300 text-gray-600">
-                              <User className="h-4 w-4" weight="regular" />
-                            </div>
+                            <span className="w-7 flex-shrink-0 bg-gradient-to-r from-violet-500 to-cyan-500 bg-clip-text text-sm font-bold text-transparent">
+                              {`${client.ime?.charAt(0) ?? ''}${client.priimek?.charAt(0) ?? ''}`.toUpperCase() || '?'}
+                            </span>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-[#1A1F36]">
+                              <p className="font-medium text-gray-900">
                                 {client.ime} {client.priimek}
                               </p>
                               <p className="text-xs text-gray-500 truncate">
@@ -266,13 +262,12 @@ function ClientSearch({
                               onCreateNew();
                             }}
                             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left
-                                       transition-colors hover:bg-violet-50 border-t border-gray-100 mt-1 pt-2.5"
+                                       transition-colors hover:bg-gray-100 border-t border-gray-100 mt-1 pt-2.5"
                           >
-                            <div className="flex h-9 w-9 items-center justify-center rounded-full
-                                            bg-gradient-to-r from-violet-500 to-cyan-500 text-white">
+                            <span className="flex w-7 flex-shrink-0 justify-center text-[#7C78FA]">
                               <Plus className="h-4 w-4" weight="bold" />
-                            </div>
-                            <p className="text-sm font-medium text-violet-600">Dodaj novo stranko</p>
+                            </span>
+                            <p className="text-sm font-medium text-[#7C78FA]">Dodaj novo stranko</p>
                           </button>
                         )}
                       </>
