@@ -305,7 +305,7 @@ function ClientModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -313,20 +313,18 @@ function ClientModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className="relative flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
+            <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6">
+              <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
               <div className="flex items-start justify-between">
                 <div>
-                  <h2
-                    className="text-xl font-semibold text-transparent bg-clip-text"
-                    style={{ backgroundImage: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
-                  >
+                  <h2 className="text-[17px] font-semibold text-gray-900">
                     {mode === 'create' ? t('modal.title.create') : t('modal.title.edit')}
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-0.5 text-[13px] text-gray-500">
                     {mode === 'create' ? t('modal.subtitle.create') : t('modal.subtitle.edit')}
                   </p>
                 </div>
@@ -335,9 +333,9 @@ function ClientModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
             </div>
@@ -347,8 +345,8 @@ function ClientModal({
               <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
                 <div className="space-y-4">
                   {/* First name */}
-                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.fields.firstNameRequired')}
                   </label>
                   <div className="relative">
@@ -358,25 +356,25 @@ function ClientModal({
                       value={formData.ime}
                       onChange={(e) => handleChange('ime', e.target.value)}
                       placeholder="Jana"
-                      className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
+                      className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.ime
                                    ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                   : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                  }`}
                     />
                   </div>
                   {errors.ime && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
+                      <Warning className="h-3 w-3" weight="regular" />
                       {errors.ime}
                     </p>
                   )}
                 </div>
 
                 {/* Last name */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.fields.lastNameRequired')}
                   </label>
                   <div className="relative">
@@ -386,36 +384,36 @@ function ClientModal({
                       value={formData.priimek}
                       onChange={(e) => handleChange('priimek', e.target.value)}
                       placeholder="Novak"
-                      className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
+                      className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.priimek
                                    ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                   : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                  }`}
                     />
                   </div>
                   {errors.priimek && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
+                      <Warning className="h-3 w-3" weight="regular" />
                       {errors.priimek}
                     </p>
                   )}
                 </div>
 
                 {/* Gender */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.fields.genderRequired')}
                   </label>
                   <div className="relative">
-                    <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400">
                       <GenderIntersex className="h-4 w-4" weight="regular" />
                     </div>
                     <Select
                       value={formData.spol}
                       setValue={(value) => handleChange('spol', value)}
                       placeholder={t('modal.gender.placeholder')}
-                      className="[&>button]:rounded-lg [&>button]:pl-10 [&>button]:focus:ring-gray-900/10"
+                      className="[&>button]:pl-10"
                     >
                       <SelectOption value="moški">{t('modal.gender.male')}</SelectOption>
                       <SelectOption value="ženska">{t('modal.gender.female')}</SelectOption>
@@ -424,19 +422,19 @@ function ClientModal({
                   </div>
                   {errors.spol && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
+                      <Warning className="h-3 w-3" weight="regular" />
                       {errors.spol}
                     </p>
                   )}
                 </div>
 
                 {/* Client type */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.fields.clientType')}
                   </label>
                   {!showClientTypeSelect ? (
-                    <div className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+                    <div className="flex items-center justify-between gap-3 rounded-[10px] bg-gray-50 px-3 py-2.5">
                       <div className="flex items-center gap-2 text-sm text-gray-700">
                         <Tag className="h-4 w-4 text-gray-400" weight="regular" />
                         <span>{getClientTypeLabel(formData.tip_stranke)}</span>
@@ -444,21 +442,21 @@ function ClientModal({
                       <button
                         type="button"
                         onClick={() => setShowClientTypeSelect(true)}
-                        className="text-xs font-semibold text-gray-600 underline underline-offset-2 hover:text-gray-900"
+                        className="text-xs font-semibold text-[#7C78FA] transition-opacity hover:opacity-70"
                       >
                         {t('modal.clientType.change')}
                       </button>
                     </div>
                   ) : (
                     <div className="relative">
-                      <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400">
                         <Tag className="h-4 w-4" weight="regular" />
                       </div>
                       <Select
                         value={formData.tip_stranke || '__none__'}
                         setValue={(value) => handleChange('tip_stranke', value === '__none__' ? '' : value)}
                         placeholder={t('modal.clientType.placeholder')}
-                        className="[&>button]:rounded-lg [&>button]:pl-10 [&>button]:focus:ring-gray-900/10"
+                        className="[&>button]:pl-10"
                       >
                         <SelectOption value="__none__" dimmed>{t('modal.clientType.none')}</SelectOption>
                         <SelectOption value="nova">{t('modal.clientType.nova')}</SelectOption>
@@ -470,8 +468,8 @@ function ClientModal({
                 </div>
 
                 {/* Email */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     Email <span className="text-gray-400 normal-case font-normal">{t('modal.fields.emailHint')}</span>
                   </label>
                   <div className="relative">
@@ -482,11 +480,11 @@ function ClientModal({
                       onChange={(e) => handleChange('email', e.target.value)}
                       onBlur={handleEmailBlur}
                       placeholder="jana.novak@email.com"
-                      className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
+                      className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.email
                                    ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                   : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                  }`}
                     />
                     {emailChecking && (
@@ -495,15 +493,15 @@ function ClientModal({
                   </div>
                   {errors.email && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
+                      <Warning className="h-3 w-3" weight="regular" />
                       {errors.email}
                     </p>
                   )}
                 </div>
 
                 {/* Phone */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.fields.phone')}
                   </label>
                   <div className="relative">
@@ -513,25 +511,25 @@ function ClientModal({
                       value={formData.telefon}
                       onChange={(e) => handleChange('telefon', e.target.value)}
                       placeholder="+386 40 123 456"
-                      className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
+                      className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.telefon
                                    ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                   : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                   : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                  }`}
                     />
                   </div>
                   {errors.telefon && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />
+                      <Warning className="h-3 w-3" weight="regular" />
                       {errors.telefon}
                     </p>
                   )}
                 </div>
 
                 {/* Notes */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.fields.notes')}
                   </label>
                   <textarea
@@ -539,17 +537,17 @@ function ClientModal({
                     onChange={(e) => handleChange('opombe', e.target.value)}
                     placeholder={t('modal.fields.notesPlaceholder')}
                     rows={3}
-                    className={`w-full resize-none rounded-lg border bg-white py-2.5 px-4 text-sm text-[#1A1F36]
+                    className={`w-full resize-none rounded-[10px] border bg-white py-2.5 px-4 text-sm text-gray-900
                                placeholder-gray-400 transition-all focus:outline-none focus:ring-2
                                ${errors.opombe
                                  ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
-                                 : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                 : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                }`}
                   />
                   <div className="mt-1 flex items-center justify-between">
                     {errors.opombe ? (
                       <p className="flex items-center gap-1 text-xs text-red-500">
-                        <Warning className="h-3 w-3" weight="fill" />
+                        <Warning className="h-3 w-3" weight="regular" />
                         {errors.opombe}
                       </p>
                     ) : (
@@ -563,8 +561,8 @@ function ClientModal({
 
                 {/* Internal Notes - Not sent to client */}
                 {showInternalNotes ? (
-                  <div className="rounded-2xl border border-amber-100 bg-white p-5">
-                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  <div className="rounded-xl bg-white p-4">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {t('modal.fields.internalNotes')}
                     </label>
                     <div className="relative">
@@ -573,7 +571,7 @@ function ClientModal({
                         onChange={(e) => handleChange('interne_opombe', e.target.value)}
                         placeholder={t('modal.fields.internalNotesPlaceholder')}
                         rows={3}
-                        className={`w-full resize-none rounded-lg border bg-white py-2.5 px-4 text-sm text-[#1A1F36]
+                        className={`w-full resize-none rounded-[10px] border bg-white py-2.5 px-4 text-sm text-gray-900
                                    placeholder-gray-400 transition-all focus:outline-none focus:ring-2
                                    ${errors.interne_opombe
                                      ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
@@ -584,7 +582,7 @@ function ClientModal({
                     <div className="mt-1 flex items-center justify-between">
                       {errors.interne_opombe ? (
                         <p className="flex items-center gap-1 text-xs text-red-500">
-                          <Warning className="h-3 w-3" weight="fill" />
+                          <Warning className="h-3 w-3" weight="regular" />
                           {errors.interne_opombe}
                         </p>
                       ) : (
@@ -601,13 +599,13 @@ function ClientModal({
                     onClick={() => setShowInternalNotes(true)}
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-amber-200 bg-white py-3 text-amber-700 transition-colors hover:bg-amber-50"
+                    className="flex w-full items-center gap-2 rounded-xl bg-white px-4 py-3 text-amber-700 transition-colors hover:bg-amber-50"
                   >
                     <span className="text-sm font-medium">{t('modal.addInternalNotes')}</span>
                   </motion.button>
                 )}
 
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                <div className="rounded-xl bg-white p-4">
                   <CommunicationLanguageControl
                     value={formData.language}
                     onChange={(value) => handleChange('language', value)}
@@ -622,10 +620,10 @@ function ClientModal({
                 <motion.div
                   initial={{ opacity: 0, y: -8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4"
+                  className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-4"
                 >
                   <div className="flex items-start gap-2 mb-2">
-                    <Warning className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" weight="fill" />
+                    <Warning className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" weight="regular" />
                     <p className="text-sm font-semibold text-amber-800">
                       {contactWarning.missingEmail ? t('modal.warning.missingEmail') : t('modal.warning.missingPhone')}
                     </p>
@@ -666,13 +664,13 @@ function ClientModal({
               </div>
 
               {/* Footer */}
-              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
+              <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                  className="flex-1 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 sm:flex-none"
                 >
                   {t('modal.actions.cancel')}
                 </motion.button>
@@ -681,10 +679,9 @@ function ClientModal({
                   disabled={isSaving}
                   whileHover={{ scale: isSaving ? 1 : 1.02 }}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-lg px-5 py-2.5
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5
                              text-sm font-medium text-white shadow-sm transition-opacity
-                             hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                  style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
+                             hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none"
                 >
                   {isSaving ? (
                     <>

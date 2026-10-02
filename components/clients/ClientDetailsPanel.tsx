@@ -125,20 +125,6 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-// Gradient icon wrapper for action buttons
-function GradientIconButton({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <motion.a
-      href={href}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md"
-    >
-      {children}
-    </motion.a>
-  );
-}
-
 function ClientDetailsPanel({
   isOpen,
   onClose,
@@ -230,136 +216,109 @@ function ClientDetailsPanel({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative h-full w-full max-w-lg overflow-y-auto bg-gray-50 shadow-2xl"
+            className="relative h-full w-full max-w-lg overflow-y-auto bg-[#F2F2F7] shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header - NO INITIALS, JUST NAME */}
-            <div className="sticky top-0 z-10 bg-gradient-to-r from-violet-500 to-cyan-500 p-8">
-              <div className="flex items-start justify-between">
-                <div className="min-w-0">
-                  <div className="mb-2 flex min-w-0 items-center gap-2">
-                    <h2 className="truncate text-3xl font-bold text-white">
-                      {client.ime} {client.priimek}
-                    </h2>
-                    <CommunicationLanguageFlag
-                      value={clientLanguage}
-                      className="bg-white/20 text-white shadow-none"
-                    />
-                  </div>
-                  {/* Date added - from created_at */}
-                  <div className="text-white/90 text-sm">
-                    {t('details.added')} {formatDate(client.created_at || '')}
-                  </div>
-                </div>
+            {/* Glava kot v Applovih Stikih: začetnice, ime, datum, akcije */}
+            <div className="glass-bar sticky top-0 z-10 border-b border-gray-200/70 px-6 pb-5 pt-4">
+              <div className="flex justify-end">
                 <motion.button
                   type="button"
                   onClick={onClose}
-                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
-
-              {/* Quick actions */}
-              {(onEdit || onDelete) && (
-                <div className="mt-4 flex items-center gap-2">
-                  {onEdit && (
-                    <motion.button
-                      type="button"
-                      onClick={() => onEdit(client)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-sm font-medium text-white
-                                 transition-colors hover:bg-white/30"
-                    >
-                      <PencilSimple className="h-4 w-4" weight="bold" />
-                      {t('details.edit')}
-                    </motion.button>
-                  )}
-                  {onDelete && (
-                    <motion.button
-                      type="button"
-                      onClick={() => onDelete(client)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="flex items-center gap-1.5 rounded-lg bg-white/20 px-3 py-1.5 text-sm font-medium text-white
-                                 transition-colors hover:bg-white/30"
-                    >
-                      <Trash className="h-4 w-4" weight="bold" />
-                      {t('details.delete')}
-                    </motion.button>
-                  )}
+              <div className="flex flex-col items-center text-center">
+                {/* Gradientne začetnice — brez kroga okoli */}
+                <span className="bg-gradient-to-r from-violet-500 to-cyan-500 bg-clip-text text-4xl font-bold text-transparent">
+                  {`${client.ime?.charAt(0) ?? ''}${client.priimek?.charAt(0) ?? ''}`.toUpperCase()}
+                </span>
+                <div className="mt-2 flex min-w-0 items-center gap-2">
+                  <h2 className="truncate text-2xl font-semibold text-gray-900">
+                    {client.ime} {client.priimek}
+                  </h2>
+                  <CommunicationLanguageFlag value={clientLanguage} />
                 </div>
-              )}
+                <div className="mt-0.5 text-[13px] text-gray-500">
+                  {t('details.added')} {formatDate(client.created_at || '')}
+                </div>
+
+                {(onEdit || onDelete) && (
+                  <div className="mt-4 flex items-center gap-2">
+                    {onEdit && (
+                      <button
+                        type="button"
+                        onClick={() => onEdit(client)}
+                        className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
+                      >
+                        <PencilSimple className="h-4 w-4" weight="regular" />
+                        {t('details.edit')}
+                      </button>
+                    )}
+                    {onDelete && (
+                      <button
+                        type="button"
+                        onClick={() => onDelete(client)}
+                        className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+                      >
+                        <Trash className="h-4 w-4" weight="regular" />
+                        {t('details.delete')}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              {/* Contact info */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+            <div className="space-y-6 p-5">
+              {/* Kontakt in podatki — ena skupina z vrsticami */}
+              <section>
+                <h3 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
                   {t('details.contactInfo')}
                 </h3>
-
-                {/* Email */}
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Envelope
-                        className="h-5 w-5 text-[#1A1F36]"
-                        weight="regular"
-                      />
-                      <div className="flex-1">
-                        <div className="text-xs text-gray-500">Email</div>
-                        <div className="text-sm font-medium text-gray-900">{client.email || '-'}</div>
+                <div className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white">
+                  <div className="flex items-center justify-between gap-3 px-4 py-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Envelope className="h-5 w-5 flex-shrink-0 text-gray-400" weight="regular" />
+                      <div className="min-w-0">
+                        <div className="text-[13px] text-gray-500">Email</div>
+                        {client.email ? (
+                          <a href={`mailto:${client.email}`} className="block truncate text-sm font-medium text-[#7C78FA] hover:opacity-70">
+                            {client.email}
+                          </a>
+                        ) : (
+                          <div className="text-sm text-gray-400">-</div>
+                        )}
                       </div>
                     </div>
-                    {client.email && (
-                      <div className="flex items-center gap-2">
-                        <CopyButton text={client.email} />
-                        <GradientIconButton href={`mailto:${client.email}`}>
-                          <Envelope className="h-4 w-4 text-gray-600" weight="regular" />
-                        </GradientIconButton>
-                      </div>
-                    )}
+                    {client.email && <CopyButton text={client.email} />}
                   </div>
-                </div>
 
-                {/* Phone */}
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Phone
-                        className="h-5 w-5 text-[#1A1F36]"
-                        weight="regular"
-                      />
-                      <div className="flex-1">
-                        <div className="text-xs text-gray-500">Telefon</div>
-                        <div className="text-sm font-medium text-gray-900">{client.telefon || '-'}</div>
+                  <div className="flex items-center justify-between gap-3 px-4 py-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Phone className="h-5 w-5 flex-shrink-0 text-gray-400" weight="regular" />
+                      <div className="min-w-0">
+                        <div className="text-[13px] text-gray-500">Telefon</div>
+                        {client.telefon ? (
+                          <a href={`tel:${client.telefon}`} className="tnum block truncate text-sm font-medium text-[#7C78FA] hover:opacity-70">
+                            {client.telefon}
+                          </a>
+                        ) : (
+                          <div className="text-sm text-gray-400">-</div>
+                        )}
                       </div>
                     </div>
-                    {client.telefon && (
-                      <div className="flex items-center gap-2">
-                        <CopyButton text={client.telefon} />
-                        <GradientIconButton href={`tel:${client.telefon}`}>
-                          <Phone className="h-4 w-4 text-gray-600" weight="regular" />
-                        </GradientIconButton>
-                      </div>
-                    )}
+                    {client.telefon && <CopyButton text={client.telefon} />}
                   </div>
-                </div>
 
-                {/* Gender */}
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <div className="flex items-center gap-3">
-                    <GenderIntersex
-                      className="h-5 w-5 text-[#1A1F36]"
-                      weight="regular"
-                    />
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <GenderIntersex className="h-5 w-5 flex-shrink-0 text-gray-400" weight="regular" />
                     <div>
-                      <div className="text-xs text-gray-500">{t('details.gender')}</div>
+                      <div className="text-[13px] text-gray-500">{t('details.gender')}</div>
                       <div className="text-sm font-medium text-gray-900">
                         {client.spol === 'ženska' ? t('details.genderFemale') :
                          client.spol === 'drugo' ? t('details.genderOther') :
@@ -367,14 +326,11 @@ function ClientDetailsPanel({
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Client type */}
-                <div className="rounded-xl border border-gray-200 bg-white p-4">
-                  <div className="flex items-center gap-3">
-                    <Tag className="h-5 w-5 text-[#1A1F36]" weight="regular" />
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <Tag className="h-5 w-5 flex-shrink-0 text-gray-400" weight="regular" />
                     <div>
-                      <div className="text-xs text-gray-500">{t('details.clientType')}</div>
+                      <div className="text-[13px] text-gray-500">{t('details.clientType')}</div>
                       <div className="text-sm font-medium text-gray-900">
                         {client.tip_stranke === 'vip' ? t('modal.clientType.vip') :
                          client.tip_stranke === 'redna' ? t('modal.clientType.redna') :
@@ -384,83 +340,81 @@ function ClientDetailsPanel({
                     </div>
                   </div>
                 </div>
+              </section>
 
-                {/* Notes - Check multiple column name variations */}
-                {(() => {
-                  const clientRecord = detailsClient as unknown as Record<string, unknown>;
-                  const normalizeValue = (value: unknown) => {
-                    if (typeof value === 'string') return value;
-                    if (value === null || value === undefined) return '';
-                    return String(value);
-                  };
-                  const opombe = normalizeValue(
-                    clientRecord['Opombe stranke']
-                    ?? clientRecord['opombe']
-                    ?? detailsClient.opombe
-                    ?? ''
-                  );
-                  const interneOpombe = normalizeValue(
-                    clientRecord['Interne opombe']
-                    ?? clientRecord['interne_opombe']
-                    ?? detailsClient.interne_opombe
-                    ?? ''
-                  );
-                  const opombeText = opombe.trim();
-                  const interneOpombeText = interneOpombe.trim();
+              {/* Opombe — preverja več imen stolpcev */}
+              {(() => {
+                const clientRecord = detailsClient as unknown as Record<string, unknown>;
+                const normalizeValue = (value: unknown) => {
+                  if (typeof value === 'string') return value;
+                  if (value === null || value === undefined) return '';
+                  return String(value);
+                };
+                const opombe = normalizeValue(
+                  clientRecord['Opombe stranke']
+                  ?? clientRecord['opombe']
+                  ?? detailsClient.opombe
+                  ?? ''
+                );
+                const interneOpombe = normalizeValue(
+                  clientRecord['Interne opombe']
+                  ?? clientRecord['interne_opombe']
+                  ?? detailsClient.interne_opombe
+                  ?? ''
+                );
+                const opombeText = opombe.trim();
+                const interneOpombeText = interneOpombe.trim();
 
-                  return (
-                    <>
-                      {/* Regular Notes - always show */}
-                      <div className="rounded-xl border border-gray-200 bg-white p-4">
-                        <div className="flex items-center gap-3">
-                          <PencilSimple className="h-5 w-5 text-[#1A1F36] flex-shrink-0" weight="regular" />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-xs text-gray-500">{t('details.notes')}</div>
-                            <p className="text-sm text-[#1A1F36] whitespace-pre-wrap mt-1">{opombeText || '-'}</p>
-                          </div>
+                return (
+                  <section>
+                    <h3 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
+                      {t('details.notes')}
+                    </h3>
+                    <div className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white">
+                      <div className="flex items-start gap-3 px-4 py-3">
+                        <PencilSimple className="mt-0.5 h-5 w-5 flex-shrink-0 text-gray-400" weight="regular" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[13px] text-gray-500">{t('details.notes')}</div>
+                          <p className="mt-0.5 whitespace-pre-wrap text-sm text-gray-900">{opombeText || '-'}</p>
                         </div>
                       </div>
-
-                      {/* Internal Notes - always show */}
-                      <div className="rounded-xl border border-gray-200 bg-white p-4">
-                        <div className="flex items-center gap-3">
-                          <LockKey className="h-5 w-5 text-[#1A1F36] flex-shrink-0" weight="regular" />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-xs text-gray-500">{t('details.internalNotes')}</div>
-                            <p className="text-sm text-[#1A1F36] whitespace-pre-wrap mt-1">{interneOpombeText || '-'}</p>
-                          </div>
+                      <div className="flex items-start gap-3 bg-amber-50/30 px-4 py-3">
+                        <LockKey className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" weight="regular" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[13px] text-gray-500">{t('details.internalNotes')}</div>
+                          <p className="mt-0.5 whitespace-pre-wrap text-sm text-gray-900">{interneOpombeText || '-'}</p>
                         </div>
                       </div>
-                    </>
-                  );
-                })()}
-              </div>
+                    </div>
+                  </section>
+                );
+              })()}
 
-              {/* Statistics - white boxes with gradient text */}
-              <div className="mt-8">
-                <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              {/* Statistika — povzetek z lasnimi črtami */}
+              <section>
+                <h3 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
                   {t('details.stats')}
                 </h3>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
-                    <p className="text-2xl text-[#1A1F36]">{stats.total}</p>
-                    <p className="text-xs text-[#1A1F36]">{t('details.statTotal')}</p>
+                <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-gray-100">
+                  <div className="bg-white p-4 text-center">
+                    <p className="tnum text-2xl font-semibold text-gray-900">{stats.total}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">{t('details.statTotal')}</p>
                   </div>
-                  <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
-                    <p className="text-2xl text-[#1A1F36]">{stats.noShow}</p>
-                    <p className="text-xs text-[#1A1F36]">{t('details.statNoShow')}</p>
+                  <div className="bg-white p-4 text-center">
+                    <p className="tnum text-2xl font-semibold text-gray-900">{stats.noShow}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">{t('details.statNoShow')}</p>
                   </div>
-                  <div className="rounded-xl bg-white border border-gray-100 p-4 text-center shadow-sm">
-                    <p className="text-2xl text-[#1A1F36]">{stats.cancelled}</p>
-                    <p className="text-xs text-[#1A1F36]">{t('details.statCancelled')}</p>
+                  <div className="bg-white p-4 text-center">
+                    <p className="tnum text-2xl font-semibold text-gray-900">{stats.cancelled}</p>
+                    <p className="mt-0.5 text-xs text-gray-500">{t('details.statCancelled')}</p>
                   </div>
                 </div>
-              </div>
+              </section>
 
               {/* Appointments history */}
-              <div className="mt-8">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <div>
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <h3 className="text-[13px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('details.appointmentHistory')}
                   </h3>
                   {onNewAppointment && (
@@ -481,15 +435,15 @@ function ClientDetailsPanel({
                 {isLoading ? (
                   <div className="space-y-3">
                     {[...Array(3)].map((_, i) => (
-                      <div key={i} className="animate-pulse rounded-xl bg-gray-100 p-4">
+                      <div key={i} className="animate-pulse rounded-xl bg-white p-4">
                         <div className="h-4 w-32 rounded bg-gray-200" />
                         <div className="mt-2 h-3 w-48 rounded bg-gray-200" />
                       </div>
                     ))}
                   </div>
                 ) : clientData?.appointments.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center rounded-xl bg-gray-50 py-8">
-                    <CalendarBlank className="h-10 w-10 text-gray-300" weight="duotone" />
+                  <div className="flex flex-col items-center justify-center rounded-xl bg-white py-8">
+                    <CalendarBlank className="h-7 w-7 text-gray-300" weight="regular" />
                     <p className="mt-2 text-sm text-gray-500">{t('details.noAppointments')}</p>
                     {onNewAppointment && (
                       <motion.button
@@ -497,7 +451,7 @@ function ClientDetailsPanel({
                         onClick={() => onNewAppointment(client)}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="mt-3 flex items-center gap-1 text-sm font-medium text-purple-600 hover:text-purple-700"
+                        className="mt-3 flex items-center gap-1 text-sm font-medium text-[#7C78FA] transition-opacity hover:opacity-70"
                       >
                         {t('details.addFirstAppointment')}
                         <ArrowRight className="h-4 w-4" weight="bold" />
@@ -525,7 +479,7 @@ function ClientDetailsPanel({
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.05 }}
-                          className="rounded-xl border border-gray-100 bg-white p-4 transition-shadow hover:shadow-md"
+                          className="rounded-xl bg-white p-4"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-3">
@@ -535,7 +489,7 @@ function ClientDetailsPanel({
                                 style={{ backgroundColor: apt.storitev_barva }}
                               />
                               <div>
-                                <p className="font-medium text-[#1A1F36]">
+                                <p className="font-medium text-gray-900">
                                   {apt.storitev_naziv || 'Storitev'}
                                 </p>
                                 {apt.add_on_naziv && (
@@ -544,8 +498,8 @@ function ClientDetailsPanel({
                                       className="h-2.5 w-2.5 rounded-full flex-shrink-0"
                                       style={{ backgroundColor: apt.add_on_barva || '#6366F1' }}
                                     />
-                                    <span className="text-sm font-medium text-[#1A1F36]">{apt.add_on_naziv}</span>
-                                    <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                                    <span className="text-sm font-medium text-gray-900">{apt.add_on_naziv}</span>
+                                    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
                                       <Plus className="h-2.5 w-2.5" weight="bold" />
                                       Dodatna storitev
                                     </span>
