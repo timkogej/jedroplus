@@ -9,9 +9,10 @@ import { useState } from 'react';
 import ServiceModal from '@/components/services/ServiceModal';
 import EmployeeModal from '@/components/employees/EmployeeModal';
 import ResursModal from '@/components/resursi/ResursModal';
+import EmployeeSettingsModal from '@/components/employees/EmployeeSettingsModal';
 import type { Service } from '@/types/services';
-import type { Employee } from '@/types/employees';
-import type { Resurs } from '@/types/resursi';
+import type { Employee, ScheduleWithIntervals } from '@/types/employees';
+import type { Resurs, UrnikData } from '@/types/resursi';
 import { DEFAULT_URNIK } from '@/types/resursi';
 import { SERVICE_GRADIENTS } from '@/lib/constants/serviceGradients';
 import { EMPLOYEE_GRADIENTS } from '@/lib/constants/gradients';
@@ -32,12 +33,39 @@ const EMPLOYEE: Employee = {
   pozicija: 'Vodja salona', barva: EMPLOYEE_GRADIENTS[2].value, aktivna: true, opombe: 'Ob petkih dela samo dopoldne.',
 };
 
+const day = (enabled: boolean, ...intervals: [string, string][]) => ({
+  enabled,
+  intervals: intervals.length ? intervals.map(([start, end]) => ({ start, end })) : [{ start: '08:00', end: '16:00' }],
+});
+
+const COMPANY_SCHEDULE = {
+  Ponedeljek: day(true, ['08:00', '20:00']), Torek: day(true, ['08:00', '20:00']), Sreda: day(true, ['08:00', '20:00']),
+  Četrtek: day(true, ['08:00', '20:00']), Petek: day(true, ['08:00', '18:00']), Sobota: day(true, ['08:00', '13:00']), Nedelja: day(false),
+};
+
+const CUSTOM_SCHEDULE: ScheduleWithIntervals = {
+  Ponedeljek: day(true, ['08:00', '12:00'], ['13:00', '17:00']), Torek: day(true, ['08:00', '16:00']), Sreda: day(true, ['12:00', '20:00']),
+  Četrtek: day(true, ['08:00', '16:00']), Petek: day(true, ['08:00', '12:00']), Sobota: day(false), Nedelja: day(false),
+};
+
+const WEEK_A = { ...CUSTOM_SCHEDULE } as unknown as UrnikData;
+const WEEK_B = { ...CUSTOM_SCHEDULE, Ponedeljek: day(false), Sobota: day(true, ['08:00', '13:00']) } as unknown as UrnikData;
+
+const SETTINGS_EMPLOYEES: Record<'company' | 'custom' | 'rotating', Employee> = {
+  company: { ...EMPLOYEE, ali_ima_urnik_podjetja: true, storitve: ['s1', 's2', 's3'] },
+  custom: { ...EMPLOYEE, ali_ima_urnik_podjetja: false, urnik: CUSTOM_SCHEDULE, storitve: ['s1', 's3'] },
+  rotating: {
+    ...EMPLOYEE, ali_ima_urnik_podjetja: false, storitve: ['s2'],
+    urnik: { tip: 'izmenicen', cikel_tednov: 2, zacetek_cikla: '2026-10-05', vzorci: { '0': WEEK_A, '1': WEEK_B } } as unknown as ScheduleWithIntervals,
+  },
+};
+
 const RESURSI: Resurs[] = [
   { id: 'r1', row_id: 1, naziv: 'Frizerski stol', booking_naziv: 'Stol', opis: 'Hidravlični stoli v glavnem prostoru.', kolicina: 3, kapaciteta: 1, prikazi_v_bookingu: true, urnik: DEFAULT_URNIK, status: 'active', barva: G2, podjetje_id: 'preview', created_at: base.created_at },
   { id: 'r2', row_id: 2, naziv: 'Umivalnik', booking_naziv: null, opis: null, kolicina: 2, kapaciteta: 1, prikazi_v_bookingu: false, urnik: null, status: 'active', barva: G1, podjetje_id: 'preview', created_at: base.created_at },
 ];
 
-type Open = 'service' | 'service-new' | 'employee' | 'employee-new' | 'resurs' | 'resurs-new' | null;
+type Open = 'service' | 'service-new' | 'employee' | 'employee-new' | 'resurs' | 'resurs-new' | `settings-${keyof typeof SETTINGS_EMPLOYEES}` | null;
 
 export default function OkencaKatalogPreview() {
   const [open, setOpen] = useState<Open>('service');
@@ -58,6 +86,9 @@ export default function OkencaKatalogPreview() {
           <button type="button" onClick={() => setOpen('service-new')} className={btn}>Nova storitev</button>
           <button type="button" onClick={() => setOpen('employee')} className={btn}>Uredi zaposlenega</button>
           <button type="button" onClick={() => setOpen('employee-new')} className={btn}>Nov zaposleni</button>
+          <button type="button" onClick={() => setOpen('settings-company')} className={btn}>Nastavitve · urnik podjetja</button>
+          <button type="button" onClick={() => setOpen('settings-custom')} className={btn}>Nastavitve · lasten urnik</button>
+          <button type="button" onClick={() => setOpen('settings-rotating')} className={btn}>Nastavitve · izmenični urnik</button>
           <button type="button" onClick={() => setOpen('resurs')} className={btn}>Uredi resurs</button>
           <button type="button" onClick={() => setOpen('resurs-new')} className={btn}>Nov resurs</button>
         </div>
@@ -85,6 +116,17 @@ export default function OkencaKatalogPreview() {
         companyId="preview"
         onSave={async () => close()}
       />
+      {(['company', 'custom', 'rotating'] as const).map((k) => (
+        <EmployeeSettingsModal
+          key={k}
+          isOpen={open === `settings-${k}`}
+          onClose={close}
+          employee={SETTINGS_EMPLOYEES[k]}
+          companySchedule={COMPANY_SCHEDULE}
+          allServices={SERVICES}
+          onSave={async () => close()}
+        />
+      ))}
       <ResursModal
         isOpen={open === 'resurs' || open === 'resurs-new'}
         onClose={close}
