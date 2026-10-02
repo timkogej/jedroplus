@@ -96,5 +96,13 @@
     "thu": "Č",
     "fri": "P",
     "sat": "S"
+  },
+  "qr": {
+    "downloadPng": "Prenesi PNG",
+    "downloadPdf": "Prenesi PDF",
+    "copyLink": "Kopiraj povezavo",
+    "copied": "Kopirano",
+    "preparing": "Pripravljam...",
+    "registrationInfo": "To QR kodo lahko natisnete in jo postavite v vaš salon ali ordinacijo. Stranke jo skenirajo s telefonom in v manj kot minuti vnesejo svoje podatke."
   }
 }
