@@ -22,6 +22,7 @@ import AppointmentFilters, { type FilterState } from '@/components/appointments/
 import AppointmentTable from '@/components/appointments/AppointmentTable';
 import { MetricGroup } from '@/components/dashboard';
 import AppointmentModal, { type AppointmentFormData } from '@/components/appointments/AppointmentModal';
+import { AppointmentDetailModal } from '@/components/calendar/AppointmentDetailSheet';
 import DeleteConfirmation from '@/components/appointments/DeleteConfirmation';
 import { normalizeStatus } from '@/components/appointments/StatusBadge';
 import { pickFirst } from '@/lib/dashboardHelpers';
@@ -69,6 +70,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
   const { role, personId: rolePersonId, permissions } = useRolePermissions();
   const [showDisabledCreateModal, setShowDisabledCreateModal] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [viewingAppointment, setViewingAppointment] = useState<AppointmentWithDetails | null>(null);
 
   // Data states — seeded from server-fetched initialData when available.
   const [appointments, setAppointments] = useState<AppointmentWithDetails[]>(initialData?.appointments ?? []);
@@ -337,10 +339,11 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
   }, [appointments, filters, staffViewOwnOnly, rolePersonId, showPastOpen, pastOpenIds]);
 
   // Handlers
+  // Ogled odpre isto okence kot v Koledarju in na nadzorni plošči — z vsemi
+  // podatki (promocije, popusti, valuta, ID termina) in akcijami. Prej je bil
+  // to obrazec za urejanje v načinu samo za branje, brez promocij.
   const handleView = (appointment: AppointmentWithDetails) => {
-    setSelectedAppointment(appointment);
-    setModalMode('view');
-    setModalOpen(true);
+    setViewingAppointment(appointment);
   };
 
   const handleEdit = (appointment: AppointmentWithDetails) => {
@@ -911,6 +914,30 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
           </motion.div>
         </div>
       </main>
+
+      {/* Podrobnosti termina */}
+      <AnimatePresence>
+        {viewingAppointment && (() => {
+          const aptEditable = canEditAppointment(viewingAppointment);
+          // Vsaka akcija najprej zapre ogled, nato naredi isto kot gumb v vrstici.
+          const thenClose = (fn: (a: AppointmentWithDetails) => void) => (a: AppointmentWithDetails) => {
+            setViewingAppointment(null);
+            fn(a);
+          };
+          return (
+            <AppointmentDetailModal
+              appointment={viewingAppointment}
+              services={services}
+              onClose={() => setViewingAppointment(null)}
+              onEdit={aptEditable ? thenClose(handleEdit) : undefined}
+              onComplete={aptEditable ? thenClose(handleComplete) : undefined}
+              onNoShow={aptEditable ? thenClose(handleNoShow) : undefined}
+              onCancel={aptEditable ? thenClose(handleCancel) : undefined}
+              onDelete={aptEditable && canDeleteAppointment ? thenClose(handleDelete) : undefined}
+            />
+          );
+        })()}
+      </AnimatePresence>
 
       {/* Modals */}
       <AppointmentModal

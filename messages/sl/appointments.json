@@ -326,7 +326,10 @@
         "priceWithDiscount": "Cena z popustom",
         "additionalService": "Dodatna storitev",
         "deleteTitle": "Izbriši termin",
-        "deleteMessage": "Ali ste prepričani, da želite izbrisati ta termin?"
+        "deleteMessage": "Ali ste prepričani, da želite izbrisati ta termin?",
+        "appointmentId": "ID termina",
+        "resources": "Resursi v uporabi",
+        "details": "Podrobnosti"
       },
       "actions": {
         "noShow": "Ni prišel",
