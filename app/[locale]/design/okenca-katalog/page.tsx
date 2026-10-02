@@ -10,6 +10,7 @@ import ServiceModal from '@/components/services/ServiceModal';
 import EmployeeModal from '@/components/employees/EmployeeModal';
 import ResursModal from '@/components/resursi/ResursModal';
 import EmployeeSettingsModal from '@/components/employees/EmployeeSettingsModal';
+import ConnectEmployeeModal from '@/components/employees/ConnectEmployeeModal';
 import type { Service } from '@/types/services';
 import type { Employee, ScheduleWithIntervals } from '@/types/employees';
 import type { Resurs, UrnikData } from '@/types/resursi';
@@ -65,7 +66,7 @@ const RESURSI: Resurs[] = [
   { id: 'r2', row_id: 2, naziv: 'Umivalnik', booking_naziv: null, opis: null, kolicina: 2, kapaciteta: 1, prikazi_v_bookingu: false, urnik: null, status: 'active', barva: G1, podjetje_id: 'preview', created_at: base.created_at },
 ];
 
-type Open = 'service' | 'service-new' | 'employee' | 'employee-new' | 'resurs' | 'resurs-new' | `settings-${keyof typeof SETTINGS_EMPLOYEES}` | null;
+type Open = 'service' | 'service-new' | 'employee' | 'employee-new' | 'resurs' | 'resurs-new' | `settings-${keyof typeof SETTINGS_EMPLOYEES}` | 'connect' | null;
 
 export default function OkencaKatalogPreview() {
   const [open, setOpen] = useState<Open>('service');
@@ -89,6 +90,7 @@ export default function OkencaKatalogPreview() {
           <button type="button" onClick={() => setOpen('settings-company')} className={btn}>Nastavitve · urnik podjetja</button>
           <button type="button" onClick={() => setOpen('settings-custom')} className={btn}>Nastavitve · lasten urnik</button>
           <button type="button" onClick={() => setOpen('settings-rotating')} className={btn}>Nastavitve · izmenični urnik</button>
+          <button type="button" onClick={() => setOpen('connect')} className={btn}>Poveži zaposlenega</button>
           <button type="button" onClick={() => setOpen('resurs')} className={btn}>Uredi resurs</button>
           <button type="button" onClick={() => setOpen('resurs-new')} className={btn}>Nov resurs</button>
         </div>
@@ -127,6 +129,13 @@ export default function OkencaKatalogPreview() {
           onSave={async () => close()}
         />
       ))}
+      <ConnectEmployeeModal
+        isOpen={open === 'connect'}
+        employee={EMPLOYEE}
+        isConnecting={false}
+        onClose={close}
+        onConfirm={() => close()}
+      />
       <ResursModal
         isOpen={open === 'resurs' || open === 'resurs-new'}
         onClose={close}
