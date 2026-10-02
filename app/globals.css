@@ -1,63 +1,363 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================================
+   Jedro+ — Apple-like design tokens
+   ----------------------------------------------------------------------------
+   Vse, kar določa videz aplikacije, je tu. Ker Tailwind v4 dovoli
+   predefiniranje obstoječih utility razredov prek @theme, se sprememba v tem
+   bloku pozna po celi aplikaciji — brez dotikanja posameznih komponent.
 
-  /* Primary colors */
-  --color-primary: #1A1F36;
-  --color-primary-light: #2D3350;
-  --color-primary-dark: #0F1220;
+   Model površin: BELA stran + hairline ločnice (kot macOS Mail / Notes).
+   Sivo ozadje se uporablja samo za zapolnitve (hover, izbrano stanje),
+   nikoli kot platno za celo stran.
+   ========================================================================== */
 
-  /* Accent gradients */
-  --gradient-pink-purple: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
-  --gradient-blue-violet: linear-gradient(135deg, #3B82F6 0%, #7C3AED 100%);
-  --gradient-green: linear-gradient(135deg, #10B981 0%, #059669 100%);
-  --gradient-orange: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-  --gradient-red: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-  --gradient-blue: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+/* `static` je nujen: privzeti @theme izpiše samo tokene, ki jih kak utility
+   razred dejansko uporabi. Ker --font-sans, --ease-* in semantične vloge
+   (--color-label, --color-separator) kličemo ročno prek var(), bi jih Tailwind
+   brez tega porezal iz izhoda. */
+@theme static {
+  /* ── Pisava ───────────────────────────────────────────────────────────────
+     --font-sans je definiran v @theme inline spodaj, ker kliče var(--font-ui);
+     token, ki se sklicuje na drugo spremenljivko, Tailwind iz navadnega @theme
+     ne izpiše. */
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
-  --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.08);
+  /* ── Tipografska lestvica ─────────────────────────────────────────────────
+     Applova lestvica (HIG), preslikana na obstoječe razrede. Vsaka stopnja se
+     pomakne za ~1px navzdol in dobi tracking, ki raste z velikostjo — to je
+     tisto, kar naredi Apple občutek, ne sama velikost. */
 
-  /* Border radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-full: 9999px;
+  /* Caption2 — 11px */
+  --text-xs: 0.6875rem;
+  --text-xs--line-height: 0.875rem;
+  --text-xs--letter-spacing: 0.005em;
+
+  /* Footnote — 13px (najpogostejša velikost v aplikaciji) */
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.125rem;
+  --text-sm--letter-spacing: -0.003em;
+
+  /* Subheadline — 15px */
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.3125rem;
+  --text-base--letter-spacing: -0.01em;
+
+  /* Body — 17px */
+  --text-lg: 1.0625rem;
+  --text-lg--line-height: 1.4375rem;
+  --text-lg--letter-spacing: -0.014em;
+
+  /* Title3 — 19px */
+  --text-xl: 1.1875rem;
+  --text-xl--line-height: 1.5625rem;
+  --text-xl--letter-spacing: -0.018em;
+
+  /* Title2 — 22px */
+  --text-2xl: 1.375rem;
+  --text-2xl--line-height: 1.75rem;
+  --text-2xl--letter-spacing: -0.021em;
+
+  /* Title1 — 28px */
+  --text-3xl: 1.75rem;
+  --text-3xl--line-height: 2.125rem;
+  --text-3xl--letter-spacing: -0.024em;
+
+  /* LargeTitle — 34px */
+  --text-4xl: 2.125rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-4xl--letter-spacing: -0.028em;
+
+  /* Display — 44px / 56px */
+  --text-5xl: 2.75rem;
+  --text-5xl--line-height: 3rem;
+  --text-5xl--letter-spacing: -0.03em;
+
+  --text-6xl: 3.5rem;
+  --text-6xl--line-height: 3.625rem;
+  --text-6xl--letter-spacing: -0.032em;
+
+  /* ── Sivine ───────────────────────────────────────────────────────────────
+     Applove sistemske sivine namesto Tailwindovih. Hladnejše, bolj nevtralne.
+     gray-100 je namenoma malo temnejša od Tailwindove privzete, da hairline
+     ločnice sploh vidiš na beli podlagi. */
+  --color-gray-50: #f5f5f7; /* systemGray6 — hover, subtle fill */
+  --color-gray-100: #e8e8ed; /* hairline ločnica, izbrano stanje */
+  --color-gray-200: #d8d8de; /* obroba vnosnih polj */
+  --color-gray-300: #c7c7cc; /* systemGray3 — onemogočeno */
+  --color-gray-400: #aeaeb2; /* systemGray2 — ikone v mirovanju */
+  --color-gray-500: #8e8e93; /* systemGray — sekundarno besedilo */
+  --color-gray-600: #6e6e73; /* secondaryLabel */
+  --color-gray-700: #48484a;
+  --color-gray-800: #2c2c2e;
+  --color-gray-900: #1d1d1f; /* label — primarno besedilo */
+  --color-gray-950: #000000;
+
+  /* Semantične vloge — uporabljaj te v novem delu kode */
+  --color-label: #1d1d1f;
+  --color-label-secondary: #6e6e73;
+  --color-label-tertiary: #8e8e93;
+  --color-label-quaternary: #aeaeb2;
+  --color-separator: #e8e8ed;
+  --color-separator-strong: #d1d1d6;
+  --color-fill: #f5f5f7;
+  --color-fill-strong: #ebebf0;
+
+  /* Brand — ostaja nespremenjena, mirrors lib/brand/geometry.ts */
+  --color-brand-ink: #1e2021;
+  --color-brand-violet: #7c78fa;
+  --color-brand-cyan: #35e3db;
+  --color-brand-blue: #59aeea;
+
+  /* ── Radiji ───────────────────────────────────────────────────────────────
+     Applove vrednosti. Prava razlika ni v številkah, ampak v obliki kota
+     (squircle) — glej blok corner-shape spodaj. */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+
+  /* ── Sence ────────────────────────────────────────────────────────────────
+     Vedno nevtralne in dvoslojne: tesna senca za rob, široka za globino.
+     Nikoli barvne — barvni glow je najbolj ne-Apple stvar v UI. */
+  --shadow-2xs: 0 0.5px 1px rgb(0 0 0 / 0.04);
+  --shadow-xs: 0 0.5px 1px rgb(0 0 0 / 0.04), 0 1px 2px rgb(0 0 0 / 0.03);
+  --shadow-sm: 0 0.5px 1px rgb(0 0 0 / 0.04), 0 1px 3px rgb(0 0 0 / 0.04);
+  --shadow-md: 0 1px 2px rgb(0 0 0 / 0.04), 0 4px 12px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 2px 6px rgb(0 0 0 / 0.05), 0 12px 28px rgb(0 0 0 / 0.07);
+  --shadow-xl: 0 4px 12px rgb(0 0 0 / 0.06), 0 24px 48px rgb(0 0 0 / 0.09);
+  --shadow-2xl: 0 8px 24px rgb(0 0 0 / 0.08), 0 40px 80px rgb(0 0 0 / 0.12);
+
+  /* ── Motion ───────────────────────────────────────────────────────────────
+     Applove krivulje. --ease-sheet je tista iz iOS predstavitev listov:
+     hitro odpre, mehko ustavi, brez odboja. */
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #1d1d1f;
+
+  /* Na Applovih napravah dobimo pravo SF Pro prek sistemskih vzdevkov; licenca
+     SF Pro ne dovoli serviranja kot spletne pisave, sistemsko kopijo pa smemo
+     uporabiti. Preverjeno z meritvijo na macOS:
+       BlinkMacSystemFont  → razreši v SF Pro   (Chrome, Edge)
+       -apple-system       → razreši v SF Pro   (Safari)
+     Imena "SF Pro Text", "SF Pro Display" in "SF NS" NE razrešijo v nič — v
+     skladu bi bila le mrtva teža, zato jih tu ni.
+     Namenoma tudi ni ključne besede system-ui: ta razreši na vsaki platformi
+     (Segoe UI na Windows, Roboto na Androidu) in bi Inter nikoli ne prišel na
+     vrsto. Tako SF dobijo samo Applove naprave, vsi ostali pa Inter.
+
+     Definirano tu in ne v @theme: token, ki kliče drugo spremenljivko, Tailwind
+     iz @theme izpusti, navaden :root pa ga prenese. Ker Tailwindov font-sans
+     utility bere isto ime, se lestvica ujema povsod. */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, var(--font-ui), "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* Brand — mirrors lib/brand/geometry.ts, the source of truth for the logo */
+  --brand-ink: #1e2021;
+  --brand-violet: #7c78fa;
+  --brand-cyan: #35e3db;
+  --brand-blue: #59aeea;
+  --gradient-brand: linear-gradient(135deg, var(--brand-violet) 0%, var(--brand-cyan) 100%);
+
+  /* Primary colors */
+  --color-primary: #1a1f36;
+  --color-primary-light: #2d3350;
+  --color-primary-dark: #0f1220;
+
+  /* Accent gradients — ostajajo za primarne akcije in status badge */
+  --gradient-pink-purple: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  --gradient-blue-violet: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+  --gradient-green: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  --gradient-orange: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --gradient-red: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+
+  /* Trajanja — komponente naj uporabljajo te, ne trdo kodiranih ms */
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+
+  /* Višine sistemskih elementov (Applov 4pt grid) */
+  --height-toolbar: 3.25rem; /* 52px */
+  --height-row: 2.75rem; /* 44px — minimalna tappable vrstica */
+  --height-row-compact: 2rem; /* 32px — sidebar, gosti seznami */
 }
 
 /* Dark mode intentionally disabled - this is a business app that always uses light theme */
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  /* Applov videz pisave stoji in pade na antialiasingu */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
 }
 
-/* Gradient button styles */
+::selection {
+  background: color-mix(in srgb, var(--brand-violet) 22%, transparent);
+}
+
+/* ── Squircle ────────────────────────────────────────────────────────────────
+   Applovi koti niso krožni lok, ampak zvezna krivulja. Kjer brskalnik to
+   podpira (Chrome 139+), dobijo vsi zaobljeni elementi pravo obliko.
+   Krogi (rounded-full) so izvzeti — tam squircle ni zaželen.
+   Če bi to kdaj povzročalo težave, je dovolj pobrisati ta blok. */
+@supports (corner-shape: squircle) {
+  :where([class*="rounded-"]:not([class*="rounded-full"])) {
+    corner-shape: squircle;
+  }
+}
+
+/* ── Hairline ločnice ────────────────────────────────────────────────────────
+   Prava Applova ločnica je na retini pol piksla. border: 1px je na retini dva
+   fizična piksla in izgleda debelo. Ti razredi narišejo ločnico, ki se na
+   retini stisne na 0.5px. */
+.hairline-b,
+.hairline-t,
+.hairline-r,
+.hairline-l {
+  position: relative;
+}
+
+.hairline-b::after,
+.hairline-t::after,
+.hairline-r::after,
+.hairline-l::after {
+  content: "";
+  position: absolute;
+  background: var(--color-separator);
+  pointer-events: none;
+}
+
+.hairline-b::after {
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+}
+
+.hairline-t::after {
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+}
+
+.hairline-r::after {
+  inset-block: 0;
+  right: 0;
+  width: 1px;
+}
+
+.hairline-l::after {
+  inset-block: 0;
+  left: 0;
+  width: 1px;
+}
+
+/* Ločnica, zamaknjena od levega roba — kot pri Applovih seznamih, kjer se
+   črta začne šele za ikono. */
+.hairline-inset::after {
+  inset-inline-start: var(--hairline-inset, 1rem);
+}
+
+@media (min-resolution: 2dppx) {
+  .hairline-b::after,
+  .hairline-t::after {
+    transform: scaleY(0.5);
+  }
+
+  .hairline-b::after {
+    transform-origin: bottom;
+  }
+
+  .hairline-t::after {
+    transform-origin: top;
+  }
+
+  .hairline-r::after,
+  .hairline-l::after {
+    transform: scaleX(0.5);
+  }
+
+  .hairline-r::after {
+    transform-origin: right;
+  }
+
+  .hairline-l::after {
+    transform-origin: left;
+  }
+}
+
+/* ── Translucentna orodna vrstica ────────────────────────────────────────────
+   Applov toolbar ni bel, ampak prosojen z nasičenim blurom vsebine pod njim. */
+.glass-bar {
+  background: color-mix(in srgb, #ffffff 72%, transparent);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-bar {
+    background: #ffffff;
+  }
+}
+
+/* ── Fokus ───────────────────────────────────────────────────────────────────
+   Applov fokusni obroč je zunaj elementa, debel in poltransparenten. */
+.focus-ring:focus-visible,
+.focus-ring:has(:focus-visible) {
+  outline: 3px solid color-mix(in srgb, var(--brand-violet) 45%, transparent);
+  outline-offset: 1px;
+}
+
+/* ── Številke ────────────────────────────────────────────────────────────────
+   Metrike, ure in zneski naj ne poskakujejo, ko se vrednost spremeni. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ── Gumbi ───────────────────────────────────────────────────────────────────
+   Gradient ostaja na primarnih akcijah, senca postane nevtralna.
+   Apple ob pritisku ne dvigne elementa, ampak ga rahlo stisne. */
 .btn-gradient-primary {
   background: var(--gradient-pink-purple);
   color: white;
   border: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+  box-shadow: var(--shadow-sm);
+  transition: opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
 }
 
 .btn-gradient-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+  opacity: 0.92;
+}
+
+.btn-gradient-primary:active {
+  transform: scale(0.97);
+  opacity: 0.88;
 }
 
 /* Status badge gradients */
@@ -77,23 +377,33 @@ body {
   background: var(--gradient-blue);
 }
 
-/* Custom scrollbar */
+/* ── Drsniki ─────────────────────────────────────────────────────────────────
+   Applov drsnik je ozek, brez tira, in se pojavi šele ob interakciji. */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(0 0 0 / 0.22) transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
+  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #c7c7c7;
-  border-radius: 3px;
+  background: rgb(0 0 0 / 0.18);
+  border: 2px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: rgb(0 0 0 / 0.32);
+  border: 2px solid transparent;
+  background-clip: content-box;
 }
 
 .native-date-time-input {
@@ -120,21 +430,32 @@ body {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
   }
+
+  /* iOS povečа stran, kadar je vnosno polje manjše od 16 px. Applove lastne
+     aplikacije tega nikoli ne naredijo, zato polja na telefonu dvignemo na
+     16 px — velikost je enaka le na telefonu, videz na namizju ostane. */
+  input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
 /* Smooth transitions */
 .transition-smooth {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all var(--duration-base) var(--ease-in-out);
 }
 
-/* Card hover effect */
+/* ── Kartice ─────────────────────────────────────────────────────────────────
+   Brez dviga ob hoverju — Apple namesto premika spremeni podlago.
+   Stari .card-hover ostaja, da ničesar ne zlomi, samo ne skače več. */
 .card-hover {
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  background-color: color-mix(in srgb, var(--color-fill) 55%, transparent);
 }
 
 /* Gradient text */
@@ -147,7 +468,7 @@ body {
 
 /* Company identity gradient — used only on big ID values in /nastavitve/splosno */
 .gradient-text {
-  background: linear-gradient(135deg, #6D5EF7, #2F80ED, #2AD4C5);
+  background: linear-gradient(135deg, #6d5ef7, #2f80ed, #2ad4c5);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -166,10 +487,24 @@ body {
 .skeleton {
   background: linear-gradient(
     90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
+    var(--color-fill) 25%,
+    var(--color-fill-strong) 50%,
+    var(--color-fill) 75%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.5s var(--ease-in-out) infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────────
+   Apple to spoštuje povsod; animacije se ne izklopijo, samo skrajšajo. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

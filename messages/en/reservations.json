@@ -96,7 +96,14 @@
     "yes": "Yes",
     "no": "No",
     "onlineConfirmOffHint": "Clients who book online get no confirmation, so they can’t tell whether the booking went through.",
-    "onlineConfirmOffCta": "Turn on confirmation"
+    "onlineConfirmOffCta": "Turn on confirmation",
+    "bookingEnabledDesc": "Whether clients can book an appointment online.",
+    "timeSlotsDesc": "How many minutes apart the offered slots are.",
+    "clientConfirmDesc": "The client receives a confirmation after booking.",
+    "onlineConfirmDesc": "Confirmation for appointments booked through the website.",
+    "mainLinkDesc": "The link you share with clients for booking.",
+    "colorsDesc": "The colours of the booking page your clients see.",
+    "mgmtLinkDesc": "Clients reschedule or cancel through this link."
   },
   "modal": {
     "title": "Booking settings",

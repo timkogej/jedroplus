@@ -16,11 +16,11 @@ import {
   ClockCounterClockwise,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import AppointmentFilters, { type FilterState } from '@/components/appointments/AppointmentFilters';
 import AppointmentTable from '@/components/appointments/AppointmentTable';
+import { MetricGroup } from '@/components/dashboard';
 import AppointmentModal, { type AppointmentFormData } from '@/components/appointments/AppointmentModal';
 import DeleteConfirmation from '@/components/appointments/DeleteConfirmation';
 import { normalizeStatus } from '@/components/appointments/StatusBadge';
@@ -59,46 +59,6 @@ const DEFAULT_FILTERS: FilterState = {
 };
 
 // Stats card component - Gradient border with black icon (no circle)
-interface StatCardProps {
-  icon: React.ReactNode;
-  value: number;
-  label: string;
-  delay?: number;
-  loading?: boolean;
-}
-
-function StatCard({ icon, value, label, delay = 0, loading = false }: StatCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: delay * 0.1, duration: 0.3 }}
-      className="relative overflow-hidden rounded-2xl p-6 bg-white border border-gray-100 shadow-sm"
-    >
-      {/* FLEX LAYOUT - Icon on right */}
-      <div className="flex items-center justify-between">
-        {/* Left side - Numbers */}
-        <div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: delay * 0.1 + 0.2 }}
-            className="text-3xl text-gray-900 mb-1"
-          >
-            {loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}
-          </motion.p>
-          <p className="text-sm font-medium text-gray-600">{label}</p>
-        </div>
-
-        {/* Right side - Icon (black, no circle) */}
-        <div className="text-gray-900 flex-shrink-0">
-          {icon}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialData | null }) {
   const t = useTranslations('appointments');
   const router = useRouter();
@@ -805,71 +765,51 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
   return (
     <ProtectedLayout>
-      <main className="relative isolate min-h-screen bg-white">
-        <AmbientBottomGlow tone="purple" />
-        <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           {/* Header */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8 flex flex-wrap items-start justify-between gap-4"
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7 flex flex-wrap items-start justify-between gap-4"
           >
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
-              <p className="mt-1 text-sm text-gray-500">
+              <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+              <p className="mt-0.5 text-base text-gray-500">
                 {t('page.subtitle')}
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <motion.button
-                type="button"
-                onClick={() => setExportModalOpen(true)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-white border border-gray-200 px-4 py-2.5
-                           text-sm font-medium text-gray-700 shadow-sm transition-all
-                           hover:bg-gray-50 hover:shadow-md"
-              >
-                <DownloadSimple className="h-4 w-4" weight="regular" />
-                <span className="hidden sm:inline">Izvozi</span>
-              </motion.button>
-
-              <motion.button
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <button
                 type="button"
                 onClick={canCreateAppointment ? handleCreate : () => setShowDisabledCreateModal(true)}
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
               >
-                <Plus className="h-4 w-4" weight="bold" />
+                <Plus size={17} weight="bold" />
                 <span>{t('page.newAppointment')}</span>
-              </motion.button>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setExportModalOpen(true)}
+                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
+              >
+                <DownloadSimple size={17} weight="regular" className="text-gray-500" />
+                <span>Izvozi</span>
+              </button>
             </div>
           </motion.div>
 
-          {/* Stats cards */}
-          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <StatCard
-              loading={isLoading}
-              icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
-              value={currentMonthCount}
-              label={t('page.stats.thisMonth')}
-              delay={0}
-            />
-            <StatCard
-              loading={isLoading}
-              icon={<Clock className="h-6 w-6" weight="regular" />}
-              value={todayCount}
-              label={t('page.stats.today')}
-              delay={1}
-            />
-            <StatCard
-              loading={isLoading}
-              icon={<ArrowRight className="h-6 w-6" weight="regular" />}
-              value={upcomingCount}
-              label={t('page.stats.upcoming')}
-              delay={2}
+          {/* Povzetek — ena kartica z lasnimi črtami, kot na dashboardu */}
+          <div className="mb-8">
+            <MetricGroup
+              metrics={[
+                { label: t('page.stats.thisMonth'), value: isLoading ? '—' : currentMonthCount, icon: CalendarBlank },
+                { label: t('page.stats.today'), value: isLoading ? '—' : todayCount, icon: Clock },
+                { label: t('page.stats.upcoming'), value: isLoading ? '—' : upcomingCount, icon: ArrowRight },
+              ]}
             />
           </div>
 
@@ -880,14 +820,11 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                 initial={{ opacity: 0, y: -10, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -10, height: 0 }}
-                className="mb-6 overflow-hidden rounded-xl bg-gradient-to-r from-red-50 to-rose-50
-                           ring-1 ring-red-100"
+                className="mb-6 overflow-hidden rounded-xl border border-red-100 bg-red-50"
               >
                 <div className="flex items-center justify-between p-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-100">
-                      <Warning className="h-5 w-5 text-red-600" weight="regular" />
-                    </div>
+                    <Warning className="h-5 w-5 flex-shrink-0 text-red-500" weight="regular" />
                     <p className="text-sm font-medium text-red-700">{error || actionError}</p>
                   </div>
                   <button
@@ -905,8 +842,8 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
           {/* Past appointments still open */}
           {!isLoading && pastOpenIds.size > 0 && (
             <div
-              className={`mb-4 flex flex-col gap-3 rounded-2xl p-4 ring-1 sm:flex-row sm:items-center sm:justify-between ${
-                showPastOpen ? 'bg-violet-50 ring-violet-200' : 'bg-amber-50 ring-amber-200'
+              className={`mb-4 flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between ${
+                showPastOpen ? 'border-violet-100 bg-violet-50' : 'border-amber-100 bg-amber-50'
               }`}
             >
               <div className="flex items-start gap-3">
@@ -929,7 +866,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
               <button
                 type="button"
                 onClick={() => setShowPastOpen((v) => !v)}
-                className="flex-shrink-0 rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+                className="flex-shrink-0 rounded-lg bg-gray-900 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 active:bg-gray-700"
               >
                 {showPastOpen ? t('pastOpen.showAll') : t('pastOpen.show')}
               </button>
@@ -938,10 +875,10 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
           {/* Filters */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-100"
+            className="mb-6 rounded-xl border border-gray-100 bg-white p-4"
           >
             <AppointmentFilters
               filters={filters}
@@ -955,7 +892,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
           {/* Table */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
           >

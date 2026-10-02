@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "motion/react";
-import { ChartBar } from "@phosphor-icons/react";
 import { useTranslations } from "next-intl";
 import {
   BarChart,
@@ -24,24 +23,13 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden"
+      transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+      className="overflow-hidden rounded-2xl border border-gray-100 bg-white"
     >
-      {/* Header */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          {/* Icon only - no circle background */}
-          <ChartBar size={24} weight="regular" className="text-gray-900" />
-          <div>
-            <h3 className="font-normal text-gray-900">{t('weeklyChart.title')}</h3>
-            <p className="text-sm text-gray-500">{t('weeklyChart.subtitle')}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Chart */}
-      <div className="p-6">
+      <div className="p-5">
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -77,7 +65,9 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
                 ]}
                 labelStyle={{ color: "#111827", fontWeight: 600 }}
               />
-              <Bar dataKey="termini" radius={[6, 6, 0, 0]} maxBarSize={40}>
+              {/* Brez animacije: če se stran naloži v zavihku v ozadju, brskalnik
+                      zadrži rAF in stolpci obtičijo na ničli. */}
+              <Bar dataKey="termini" radius={[6, 6, 0, 0]} maxBarSize={40} isAnimationActive={false}>
                 {data.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}

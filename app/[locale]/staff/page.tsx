@@ -31,6 +31,7 @@ import {
 } from '@/lib/supabase/employees';
 import { fetchServices } from '@/lib/supabase/services';
 import EmployeeGrid from '@/components/employees/EmployeeGrid';
+import { MetricGroup } from '@/components/dashboard';
 import EmployeeModal from '@/components/employees/EmployeeModal';
 import DeleteEmployeeModal from '@/components/employees/DeleteEmployeeModal';
 import EmployeeSettingsModal from '@/components/employees/EmployeeSettingsModal';
@@ -57,47 +58,6 @@ import { useRolePermissions } from '@/app/role-permission-context';
 
 type FilterType = 'all' | 'active' | 'inactive';
 
-// Gradient border colors for stat cards
-const STAT_GRADIENTS = [
-  'linear-gradient(135deg, #EC4899 0%, #F97316 100%)', // Pink-Orange
-  'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)', // Violet-Cyan
-  'linear-gradient(135deg, #10B981 0%, #3B82F6 100%)', // Emerald-Blue
-  'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', // Amber-Red
-];
-
-// Stats Card Component - matches Storitve page style
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  loading = false,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: number;
-  loading?: boolean;
-  trend?: { value: number; positive: boolean };
-  gradientIndex?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="group relative rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 transition-all hover:shadow-md hover:ring-gray-200"
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-3xl font-normal text-gray-900 mb-1">{loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}</p>
-          <p className="text-sm font-medium text-gray-600">{label}</p>
-        </div>
-        <div className="text-black flex-shrink-0">
-          <Icon className="h-6 w-6" weight="regular" />
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 // Search Input Component
 function SearchInput({
   value,
@@ -113,7 +73,7 @@ function SearchInput({
   return (
     <div className="relative">
       <MagnifyingGlass
-        className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+        className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
         weight="regular"
       />
       <input
@@ -121,9 +81,9 @@ function SearchInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="h-12 w-full rounded-xl border border-gray-200 bg-white pl-12 pr-10 text-sm
-                   text-[#1A1F36] placeholder:text-gray-400
-                   focus:border-purple-500 focus:outline-none focus:ring-4 focus:ring-purple-500/10"
+        className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm
+                   text-gray-900 placeholder:text-gray-400 transition-colors
+                   focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
       />
       <AnimatePresence>
         {value && (
@@ -133,9 +93,9 @@ function SearchInput({
             exit={{ opacity: 0, scale: 0.8 }}
             type="button"
             onClick={onClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
           >
-            <X className="h-4 w-4" weight="bold" />
+            <X className="h-4 w-4" weight="regular" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -695,62 +655,49 @@ export default function OsebjePage() {
   return (
     <ProtectedLayout>
       <main className="min-h-screen bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-8">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           {/* Header */}
-          <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7 flex flex-wrap items-start justify-between gap-4"
+          >
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
-              <p className="mt-1 text-gray-500">
-                {t('page.subtitle')}
-              </p>
+              <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+              <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
             </div>
             {role !== 'staff' && (
-              <motion.button
+              <button
                 type="button"
                 onClick={() => {
                   setSelectedEmployee(null);
                   setIsModalOpen(true);
                 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
               >
-                <Plus className="h-5 w-5" weight="bold" />
+                <Plus size={17} weight="bold" />
                 {t('page.newButton')}
-              </motion.button>
+              </button>
             )}
-          </div>
+          </motion.div>
 
           {/* Stats Cards */}
-          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard
-              loading={isLoading}
-              icon={Users}
-              label={t('stats.total')}
-              value={stats?.total || 0}
-              gradientIndex={0}
-            />
-            <StatCard
-              loading={isLoading}
-              icon={UserCirclePlus}
-              label={t('stats.active')}
-              value={stats?.active || 0}
-              gradientIndex={1}
-            />
-            <StatCard
-              loading={isLoading}
-              icon={Briefcase}
-              label={t('stats.inactive')}
-              value={stats?.inactive || 0}
-              gradientIndex={2}
-            />
-            <StatCard
-              loading={isLoading}
-              icon={CalendarCheck}
-              label={t('stats.today')}
-              value={stats?.appointmentsToday || 0}
-              trend={stats?.weeklyGrowth ? { value: stats.weeklyGrowth, positive: stats.weeklyGrowth > 0 } : undefined}
-              gradientIndex={3}
+          <div className="mb-8">
+            <MetricGroup
+              metrics={[
+                { label: t('stats.total'), value: isLoading ? '—' : (stats?.total || 0), icon: Users },
+                { label: t('stats.active'), value: isLoading ? '—' : (stats?.active || 0), icon: UserCirclePlus },
+                { label: t('stats.inactive'), value: isLoading ? '—' : (stats?.inactive || 0), icon: Briefcase },
+                {
+                  label: t('stats.today'),
+                  value: isLoading ? '—' : (stats?.appointmentsToday || 0),
+                  icon: CalendarCheck,
+                  trend: stats?.weeklyGrowth
+                    ? { value: stats.weeklyGrowth, isPositive: stats.weeklyGrowth > 0 }
+                    : undefined,
+                },
+              ]}
             />
           </div>
 
@@ -796,31 +743,25 @@ export default function OsebjePage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+              className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12"
             >
-              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-violet-100">
-                <Users className="h-10 w-10 text-violet-500" weight="duotone" />
-              </div>
-              <h3 className="text-xl font-semibold text-[#1A1F36]">{t('emptyState.title')}</h3>
-              <p className="mt-2 text-center text-sm text-gray-500">
+              <Users className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+              <h3 className="text-base font-semibold text-gray-900">{t('emptyState.title')}</h3>
+              <p className="mt-1 text-center text-sm text-gray-500">
                 {t('emptyState.subtitle')}
               </p>
               {role !== 'staff' && (
-                <motion.button
+                <button
                   type="button"
                   onClick={() => {
                     setSelectedEmployee(null);
                     setIsModalOpen(true);
                   }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="mt-6 flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-6 py-3
-                             text-sm font-medium text-white shadow-sm transition-colors
-                             hover:bg-[#1f1f1f]"
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
                 >
-                  <Plus className="h-5 w-5" weight="bold" />
+                  <Plus size={17} weight="bold" />
                   {t('emptyState.addFirst')}
-                </motion.button>
+                </button>
               )}
             </motion.div>
           ) : (

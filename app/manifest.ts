@@ -22,10 +22,16 @@ export default function manifest(): MetadataRoute.Manifest {
         type: 'image/png',
         purpose: 'any',
       },
+      {
+        src: '/brand/jedro-icon.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+        purpose: 'any',
+      },
     ],
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
-    theme_color: '#6D5EF7',
+    theme_color: '#7C78FA',
   };
 }

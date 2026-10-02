@@ -80,7 +80,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   }, [companyUuid, setNotificationCount]);
 
   return (
-    <div className="min-h-screen bg-gray-50/30">
+    <div className="min-h-screen bg-white">
       {/* Sidebar */}
       <Sidebar />
 
@@ -265,9 +265,9 @@ export default function ProtectedLayout({
 function AppShellSkeleton() {
   const bar = 'animate-pulse rounded-md bg-gray-100';
   return (
-    <div className="min-h-screen bg-gray-50/30" aria-busy="true" aria-live="polite">
+    <div className="min-h-screen bg-white" aria-busy="true" aria-live="polite">
       <span className="sr-only">Nalaganje …</span>
-      <aside className="fixed inset-y-0 left-0 hidden w-[240px] flex-col border-r border-gray-100 bg-white p-5 md:flex" aria-hidden="true">
+      <aside className="hairline-r fixed inset-y-0 left-0 hidden w-[240px] flex-col bg-white p-5 md:flex" aria-hidden="true">
         <div className={`h-7 w-28 ${bar}`} />
         <div className="mt-8 flex items-center gap-3">
           <div className="h-9 w-9 animate-pulse rounded-full bg-gray-100" />
@@ -286,7 +286,7 @@ function AppShellSkeleton() {
         </div>
       </aside>
       <div className="md:ml-[240px]" aria-hidden="true">
-        <div className="flex h-14 items-center justify-between border-b border-gray-100 bg-white px-6">
+        <div className="hairline-b flex h-14 items-center justify-between bg-white px-6">
           <div className={`h-3.5 w-40 ${bar}`} />
           <div className="h-8 w-8 animate-pulse rounded-full bg-gray-100" />
         </div>

@@ -65,11 +65,13 @@ export default function SettingsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-gray-900">{t('hub.title')}</h1>
-        <p className="text-sm text-gray-500 mt-1">{t('hub.subtitle')}</p>
+        <h1 className="text-2xl font-semibold text-gray-900">{t('hub.title')}</h1>
+        <p className="mt-0.5 text-base text-gray-500">{t('hub.subtitle')}</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 px-5">
+      {/* Applov seznam: vrstica visoka vsaj 44 px, kljukica desno, ločnica
+          zamaknjena za ikono — začne se šele pod besedilom, ne pod ikono. */}
+      <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
         {visibleItems.map((item, index) => {
           const Icon = item.icon;
           const menuKey = menuKeyMap[item.id];
@@ -78,14 +80,26 @@ export default function SettingsPage() {
             <Link
               key={item.id}
               href={item.path}
-              className={`group flex items-center gap-4 py-4${!isLast ? ' border-b border-gray-100' : ''}`}
+              className="group relative flex min-h-[44px] items-center gap-3.5 px-4 py-3 transition-colors hover:bg-gray-50 active:bg-gray-100"
             >
-              <Icon className="w-5 h-5 text-gray-400 group-hover:text-gray-900 transition-colors duration-150 flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900">{t(`hub.menu.${menuKey}.label`)}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{t(`hub.menu.${menuKey}.description`)}</p>
+              <Icon
+                weight="regular"
+                className="h-[18px] w-[18px] flex-shrink-0 text-gray-400 transition-colors duration-150 group-hover:text-gray-600"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-medium text-gray-900">{t(`hub.menu.${menuKey}.label`)}</p>
+                <p className="mt-0.5 text-sm text-gray-500">{t(`hub.menu.${menuKey}.description`)}</p>
               </div>
-              <CaretRight className="w-4 h-4 text-gray-300 group-hover:text-gray-500 transition-colors duration-150 flex-shrink-0" />
+              <CaretRight
+                weight="bold"
+                className="h-3.5 w-3.5 flex-shrink-0 text-gray-300 transition-colors duration-150 group-hover:text-gray-400"
+              />
+              {!isLast && (
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-0 left-[3.25rem] right-0 h-px bg-gray-100"
+                />
+              )}
             </Link>
           );
         })}

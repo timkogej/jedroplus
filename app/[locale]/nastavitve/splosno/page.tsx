@@ -271,7 +271,11 @@ export default function GeneralSettingsPage() {
         </SettingsSection>
 
         {/* Notifications */}
-        <SettingsSection title={t('general.notifications.title')} description={t('general.notifications.subtitle')}>
+        <SettingsSection
+          title={t('general.notifications.title')}
+          description={t('general.notifications.subtitle')}
+          footnote={t('general.notifications.transactionalNote')}
+        >
           <SettingRow
             label={t('general.notifications.emailLabel')}
             description={t('general.notifications.emailNote')}
@@ -311,13 +315,12 @@ export default function GeneralSettingsPage() {
             />
           </SettingRow>
 
-          <p className="px-1 pb-2 text-xs text-gray-400">{t('general.notifications.transactionalNote')}</p>
         </SettingsSection>
 
         {/* Company ID & Codes — owners and admins only */}
         {canSeeJoinCodes && (
         <SettingsSection title={t('general.companyData.title')} description={t('general.companyData.subtitle')}>
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
+          <>
             {/* Company ID */}
             <div className="flex items-center justify-between">
               <div className="flex-1">
@@ -339,11 +342,8 @@ export default function GeneralSettingsPage() {
               </motion.button>
             </div>
 
-            <div className="border-t border-gray-100" />
-
             {/* Admin Code — owner only (the API returns null for admins) */}
             {adminCode && (
-            <>
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <p className="text-sm font-semibold text-gray-900 mb-0.5">{t('general.companyData.adminCodeLabel')}</p>
@@ -364,9 +364,6 @@ export default function GeneralSettingsPage() {
                 )}
               </motion.button>
             </div>
-
-            <div className="border-t border-gray-100" />
-            </>
             )}
 
             {/* Employee Code */}
@@ -393,8 +390,6 @@ export default function GeneralSettingsPage() {
               )}
             </div>
 
-            <div className="border-t border-gray-100" />
-
             {/* Company Slug */}
             <div className="flex items-center justify-between">
               <div className="flex-1">
@@ -410,12 +405,10 @@ export default function GeneralSettingsPage() {
               </div>
             </div>
 
-            <div className="border-t border-gray-100" />
-
-            <div className="text-xs text-gray-400">
+            <div className="text-sm text-gray-400">
               {t('general.companyData.disclaimer')}
             </div>
-          </div>
+          </>
         </SettingsSection>
         )}
 

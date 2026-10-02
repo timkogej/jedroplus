@@ -3,8 +3,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  PaperPlaneTilt,
-  Users,
   CheckCircle,
   X,
   Warning,
@@ -12,7 +10,6 @@ import {
   CaretRight,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import CustomerList from '@/components/komunikacija/CustomerList';
 import AIMessageGenerator from '@/components/komunikacija/AIMessageGenerator';
 import MessageComposer from '@/components/komunikacija/MessageComposer';
@@ -506,157 +503,191 @@ export default function KomunikacijaPage() {
 
   const remaining = emailQuota.total - emailQuota.used;
 
+  /** Imena izbranih — da med pisanjem vidiš, komu sporočilo gre. */
+  const selectedNames = customers.filter((c) => selectedIds.has(c.id)).map((c) => c.name);
+
+  /**
+   * Rezultat pošiljanja se pobriše, ko spremeniš izbor prejemnikov — sicer bi
+   * ob vrnitvi na sporočilo visel izpis za prejšnjo pošiljko. Samo premik med
+   * korakoma ga ne pobriše več.
+   */
+  const handleSelectionChange = useCallback((ids: Set<string>) => {
+    setSelectedIds(ids);
+    setSendResult(null);
+  }, []);
+
+  const audience = (
+    <CustomerList
+      customers={customers}
+      selectedIds={selectedIds}
+      onSelectionChange={handleSelectionChange}
+      loading={loadingCustomers}
+    />
+  );
+
+  const composer = (
+    <div className="space-y-4">
+      {/* Kdo dobi sporočilo — vidno tudi med pisanjem. */}
+      {selectedIds.size > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-gray-100 bg-white p-3">
+          <span className="text-[13px] text-gray-500">{t('page.recipientsInlineLabel')}</span>
+          {selectedNames.slice(0, 3).map((name) => (
+            <span
+              key={name}
+              className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[13px] font-medium text-gray-700"
+            >
+              {name}
+            </span>
+          ))}
+          {selectedNames.length > 3 && (
+            <span className="tnum rounded-full bg-gray-100 px-2.5 py-0.5 text-[13px] font-medium text-gray-700">
+              +{selectedNames.length - 3}
+            </span>
+          )}
+        </div>
+      )}
+
+      <AIMessageGenerator
+        onGenerate={handleAIGenerate}
+        onError={(msg) => setToast({ message: msg, type: 'error' })}
+        companyId={companyId || undefined}
+        actor={actor}
+      />
+
+      <div className="rounded-xl border border-gray-100 bg-white p-4">
+        <MessageComposer
+          subject={subject}
+          onSubjectChange={setSubject}
+          message={message}
+          onMessageChange={setMessage}
+          availableVariables={availableVariables}
+        />
+      </div>
+
+      <MessagePreview
+        subject={subject}
+        message={message}
+        senderName={companyName}
+      />
+
+      {/* Rezultat zamenja vrstico za pošiljanje na mestu — brez koraka nazaj. */}
+      <AnimatePresence mode="wait">
+        {sendResult ? (
+          <SendResultPanel key="result" result={sendResult} onReset={handleReset} />
+        ) : (
+          <motion.div key="send" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <SendSection
+              selectedCount={selectedIds.size}
+              remainingQuota={remaining}
+              hasMessage={message.trim().length > 0}
+              hasSubject={subject.trim().length > 0}
+              onSend={handleSend}
+              sending={isSending}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+
   return (
     <ProtectedLayout>
-      <main className="relative isolate min-h-screen bg-white">
-        <AmbientBottomGlow tone="turquoise" />
-        <div className="relative z-10 mx-auto max-w-2xl px-4 sm:px-6 py-6 sm:py-8">
-
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           {/* Header */}
-          <div className="flex items-start justify-between mb-6">
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7 flex flex-wrap items-start justify-between gap-4"
+          >
             <div>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {t('page.subtitle')}
-              </p>
+              <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+              <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
             </div>
-            {/* Email quota inline */}
             {emailQuota.total > 0 && (
-              <div className="text-right flex-shrink-0">
-                <p className="text-xs text-gray-400">{t('page.emailQuotaLabel')}</p>
-                <p className="text-sm font-medium text-gray-700 mt-0.5">
+              <div className="flex-shrink-0 text-right">
+                <p className="text-[13px] text-gray-500">{t('page.emailQuotaLabel')}</p>
+                <p className="tnum mt-0.5 text-sm font-medium">
                   <span className="text-gray-900">{emailQuota.used}</span>
                   <span className="text-gray-400"> / {emailQuota.total}</span>
                 </p>
               </div>
             )}
+          </motion.div>
+
+          {/* Računalnik: oboje hkrati, levo komu, desno kaj. Telefon: koraka,
+              ker dva stolpca tam ne gresta. */}
+          <div className="hidden lg:grid lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-6">
+            <div className="flex max-h-[calc(100vh-11rem)] flex-col lg:sticky lg:top-6">
+              <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
+                {t('page.step1SectionTitle')}
+              </h2>
+              {audience}
+            </div>
+            <div className="min-w-0">
+              <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
+                {t('page.step2SectionTitle')}
+              </h2>
+              {composer}
+            </div>
           </div>
 
-          {/* Stepped Flow */}
-          <AnimatePresence mode="wait">
-            {step === 1 ? (
-              <motion.div
-                key="step1"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                {/* Customer selection card */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Users className="h-4 w-4 text-gray-400" weight="regular" />
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      {t('page.step1SectionTitle')}
-                    </p>
-                  </div>
-                  <CustomerList
-                    customers={customers}
-                    selectedIds={selectedIds}
-                    onSelectionChange={setSelectedIds}
-                    loading={loadingCustomers}
-                  />
-                </div>
-
-                {/* Continue button */}
-                <button
-                  type="button"
-                  onClick={() => setStep(2)}
-                  disabled={selectedIds.size === 0}
-                  className="w-full py-2.5 rounded-lg text-sm font-medium transition-colors bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          <div className="lg:hidden">
+            <AnimatePresence mode="wait">
+              {step === 1 ? (
+                <motion.div
+                  key="step1"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex max-h-[calc(100vh-13rem)] flex-col"
                 >
-                  {selectedIds.size > 0 ? (
-                    <>
-                      {t('page.step1Continue', { count: selectedIds.size })}
-                      <CaretRight className="h-3.5 w-3.5" weight="bold" />
-                    </>
-                  ) : (
-                    t('page.step1ContinueDisabled')
-                  )}
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="step2"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-4"
-              >
-                {/* Step nav */}
-                <div className="flex items-center justify-between">
+                  {audience}
                   <button
                     type="button"
-                    onClick={() => { setStep(1); setSendResult(null); }}
-                    className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+                    onClick={() => setStep(2)}
+                    disabled={selectedIds.size === 0}
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:bg-none disabled:bg-gray-100 disabled:text-gray-400 disabled:shadow-none"
                   >
-                    <ArrowLeft className="h-3.5 w-3.5" weight="bold" />
-                    {t('page.step2BackButton')}
+                    {selectedIds.size > 0 ? (
+                      <>
+                        {t('page.step1Continue', { count: selectedIds.size })}
+                        <CaretRight className="h-3.5 w-3.5" weight="bold" />
+                      </>
+                    ) : (
+                      t('page.step1ContinueDisabled')
+                    )}
                   </button>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
-                    {t('page.step2SelectedBadge', { count: selectedIds.size })}
-                  </span>
-                </div>
-
-                {/* Composer card */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                  <div className="flex items-center gap-2 mb-5">
-                    <PaperPlaneTilt className="h-4 w-4 text-gray-400" weight="regular" />
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      {t('page.step2SectionTitle')}
-                    </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="step2"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-gray-900"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5" weight="regular" />
+                      {t('page.step2BackButton')}
+                    </button>
+                    <span className="tnum rounded-full bg-gray-100 px-2.5 py-0.5 text-[13px] font-medium text-gray-700">
+                      {t('page.step2SelectedBadge', { count: selectedIds.size })}
+                    </span>
                   </div>
-
-                  <div className="mb-5">
-                    <AIMessageGenerator
-                      onGenerate={handleAIGenerate}
-                      onError={(msg) => setToast({ message: msg, type: 'error' })}
-                      companyId={companyId || undefined}
-                      actor={actor}
-                    />
-                  </div>
-
-                  <MessageComposer
-                    subject={subject}
-                    onSubjectChange={setSubject}
-                    message={message}
-                    onMessageChange={setMessage}
-                    availableVariables={availableVariables}
-                  />
-                </div>
-
-                {/* Preview */}
-                <MessagePreview
-                  subject={subject}
-                  message={message}
-                  senderName={companyName}
-                />
-
-                {/* Send result or send section */}
-                <AnimatePresence mode="wait">
-                  {sendResult ? (
-                    <SendResultPanel
-                      key="result"
-                      result={sendResult}
-                      onReset={handleReset}
-                    />
-                  ) : (
-                    <motion.div key="send" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <SendSection
-                        selectedCount={selectedIds.size}
-                        remainingQuota={remaining}
-                        hasMessage={message.trim().length > 0}
-                        hasSubject={subject.trim().length > 0}
-                        onSend={handleSend}
-                        sending={isSending}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  {composer}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </main>
 

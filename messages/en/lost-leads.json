@@ -35,7 +35,12 @@
       "discount": "Return discount",
       "aiInstructions": "AI instructions",
       "notSet": "Not set",
-      "noInstructions": "No instructions"
+      "noInstructions": "No instructions",
+      "statusLabelDesc": "Whether inactive clients are contacted automatically.",
+      "inactivityThresholdDesc": "After how many days without a visit a client counts as inactive.",
+      "toneDesc": "How the message sounds — more relaxed or more formal.",
+      "discountDesc": "The offer used to invite the client back.",
+      "aiInstructionsDesc": "What Asistent+ should take into account when writing."
     },
     "info": {
       "title": "About Lost Clients",

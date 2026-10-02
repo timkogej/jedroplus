@@ -618,9 +618,8 @@ function CalendarAppointmentModal({
                   whileHover={{ scale: isSaving ? 1 : 1.02 }}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
                   className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
-                             px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-cyan-500/25
-                             transition-all disabled:cursor-not-allowed disabled:opacity-70
-                             hover:shadow-xl hover:shadow-cyan-500/30"
+                             px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90
+                             transition-all disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isSaving ? (
                     <>

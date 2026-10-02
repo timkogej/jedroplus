@@ -36,48 +36,34 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
   const getActivityColor = (type: RecentActivity["type"]) => {
     switch (type) {
       case "completed":
-        return "text-green-600 bg-green-50";
+        return "text-emerald-600";
       case "booking":
-        return "text-emerald-600 bg-emerald-50";
+        return "text-emerald-600";
       case "client":
-        return "text-violet-600 bg-violet-50";
+        return "text-violet-600";
       case "cancellation":
-        return "text-red-500 bg-red-50";
+        return "text-red-500";
       default:
-        return "text-gray-600 bg-gray-50";
+        return "text-gray-500";
     }
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden"
+      transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+      className="overflow-hidden rounded-2xl border border-gray-100 bg-white"
     >
-      {/* Header */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <ClockCounterClockwise
-            size={24}
-            weight="regular"
-            className="text-gray-900"
-          />
-          <div>
-            <h3 className="font-normal text-gray-900">{t('recentActivity.title')}</h3>
-            <p className="text-sm text-gray-500">{t('recentActivity.subtitle')}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Activity List */}
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-gray-100">
         {activities.length === 0 ? (
-          <div className="p-6 text-center text-gray-400">
-            <ClockCounterClockwise size={32} className="mx-auto mb-2 opacity-50" />
-            <p>{t('recentActivity.empty')}</p>
+          <div className="px-5 py-10 text-center">
+            <ClockCounterClockwise size={24} weight="regular" className="mx-auto mb-2 text-gray-300" />
+            <p className="text-sm text-gray-400">{t('recentActivity.empty')}</p>
           </div>
         ) : (
-          activities.map((activity, index) => {
+          activities.map((activity) => {
             const Icon = getActivityIcon(activity.type);
             const colorClass = getActivityColor(activity.type);
 
@@ -86,17 +72,14 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
               return (
                 <motion.div
                   key={activity.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.03 }}
-                  className="flex items-start gap-4 p-4 hover:bg-gray-50 transition-colors"
+                  className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-gray-50"
                 >
                   {/* Icon */}
-                  <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-full flex-shrink-0 ${colorClass}`}
-                  >
-                    <Icon size={18} weight="regular" />
-                  </div>
+                  <Icon
+                    size={18}
+                    weight="regular"
+                    className={`mt-0.5 flex-shrink-0 ${colorClass}`}
+                  />
 
                   {/* Client and Service Info */}
                   <div className="flex-1 min-w-0">
@@ -128,17 +111,14 @@ export function RecentActivityCard({ activities }: RecentActivityCardProps) {
             return (
               <motion.div
                 key={activity.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.03 }}
-                className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-gray-50"
               >
                 {/* Icon */}
-                <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-full ${colorClass}`}
-                >
-                  <Icon size={18} weight="regular" />
-                </div>
+                <Icon
+                  size={18}
+                  weight="regular"
+                  className={`flex-shrink-0 ${colorClass}`}
+                />
 
                 {/* Description */}
                 <div className="flex-1 min-w-0">

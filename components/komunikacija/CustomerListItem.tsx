@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'motion/react';
+import { Check } from '@phosphor-icons/react';
 
 interface Customer {
   id: string;
@@ -17,14 +18,19 @@ interface CustomerListItemProps {
   customer: Customer;
   selected: boolean;
   onToggle: (id: string) => void;
-  index: number;
 }
 
+/**
+ * Ena vrstica v seznamu prejemnikov.
+ *
+ * Vrstica nima svoje obrobe — seznam je ena kartica, vrstice pa ločijo lasne
+ * črte, kot v Applovih skupinskih seznamih. Izbrana vrstica je samo rahlo
+ * obarvana, kljukica pa stoji levo, kot v iOS načinu urejanja.
+ */
 export default function CustomerListItem({
   customer,
   selected,
   onToggle,
-  index,
 }: CustomerListItemProps) {
   const initials = customer.name
     .split(/\s+/)
@@ -35,65 +41,43 @@ export default function CustomerListItem({
     .slice(0, 2);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.03, duration: 0.2 }}
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={selected}
       onClick={() => onToggle(customer.id)}
-      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
-        selected
-          ? 'bg-violet-50/50 border-violet-200 shadow-sm'
-          : 'bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200'
+      className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+        selected ? 'bg-violet-50/60' : 'hover:bg-gray-50'
       }`}
     >
-      {/* Checkbox */}
-      <div className="flex-shrink-0">
-        <div
-          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-            selected
-              ? 'bg-violet-500 border-transparent'
-              : 'border-gray-300 bg-white'
-          }`}
-        >
-          {selected && (
-            <motion.svg
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="w-3 h-3 text-white"
-              viewBox="0 0 12 12"
-              fill="none"
-            >
-              <path
-                d="M2.5 6L5 8.5L9.5 3.5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </motion.svg>
-          )}
-        </div>
-      </div>
+      <span
+        className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full transition-colors ${
+          selected ? 'bg-[#7C78FA]' : 'border border-gray-300 bg-white'
+        }`}
+      >
+        {selected && (
+          <motion.span initial={{ scale: 0.6 }} animate={{ scale: 1 }}>
+            <Check className="h-3 w-3 text-white" weight="bold" />
+          </motion.span>
+        )}
+      </span>
 
-      {/* Avatar - gradient text initials, no circle */}
-      <div className="flex-shrink-0 w-8 flex items-center justify-center">
-        <span
-          className="text-sm font-bold"
-          style={{
-            background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          {initials}
-        </span>
-      </div>
+      {/* Gradientne začetnice — brez kroga okoli */}
+      <span
+        className="w-7 flex-shrink-0 text-sm font-bold"
+        style={{
+          backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+        }}
+      >
+        {initials}
+      </span>
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[#1A1F36] truncate">{customer.name}</p>
-        <p className="text-xs text-gray-400 truncate">{customer.email}</p>
-      </div>
-    </motion.div>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-medium text-gray-900">{customer.name}</span>
+        <span className="block truncate text-[13px] text-gray-500">{customer.email}</span>
+      </span>
+    </button>
   );
 }

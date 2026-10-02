@@ -130,8 +130,8 @@ function CalendarSidebar({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
-                             px-4 py-3 text-sm font-medium text-white shadow-lg shadow-cyan-500/25
-                             transition-shadow hover:shadow-xl hover:shadow-cyan-500/30"
+                             px-4 py-3 text-sm font-medium text-white shadow-sm hover:opacity-90
+                             transition-opacity"
                 >
                   <Plus className="h-4 w-4" weight="bold" />
                   {t('page.newAppointment')}
@@ -158,8 +158,7 @@ function CalendarSidebar({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2.5
-                               text-sm font-medium text-white shadow-md shadow-orange-500/25 transition-all
-                               hover:shadow-lg hover:shadow-orange-500/30"
+                               text-sm font-medium text-white shadow-xs hover:opacity-90 transition-all"
                   >
                     <ProhibitInset className="h-4 w-4" weight="bold" />
                     {t('calendarView.sidebar.newAbsence')}

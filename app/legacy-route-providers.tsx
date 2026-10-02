@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 import { NextIntlClientProvider } from 'next-intl';
 import { Providers } from './providers';
 import './globals.css';
@@ -45,14 +45,10 @@ const messages = {
   resursi,
 };
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+const interUi = Inter({
+  variable: '--font-ui',
+  subsets: ['latin', 'latin-ext'],
+  display: 'swap',
 });
 
 const playfair = Playfair_Display({
@@ -72,8 +68,8 @@ const playfair = Playfair_Display({
 // mounted [locale] page) has no <html>/<body> and no CSS at all.
 export function LegacyRouteProviders({ children }: { children: ReactNode }) {
   return (
-    <html lang="sl">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased`}>
+    <html lang="sl" className={interUi.variable}>
+      <body className={`${playfair.variable} antialiased`}>
         <NextIntlClientProvider locale="sl" messages={messages}>
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

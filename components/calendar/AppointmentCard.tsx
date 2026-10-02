@@ -112,7 +112,7 @@ function SmartClientName({
     return { firstName: words[0] || trimmed, lastName: '' };
   }, [fullName, priimek]);
 
-  const font = `${fontWeight} ${fontSize} ui-sans-serif, system-ui, sans-serif`;
+  const font = `${fontWeight} ${fontSize} ${renderedFontFamily()}`;
 
   const computeDisplay = useCallback(() => {
     const container = containerRef.current;
@@ -772,12 +772,25 @@ function AppointmentCard({
   );
 }
 
+/**
+ * Sklad pisave, v katerem se besedilo dejansko izriše.
+ *
+ * Tu je bil prej trdo zapisan `ui-sans-serif, system-ui, sans-serif` — Tailwindov
+ * privzetek. Odkar aplikacija teče v SF Pro (oziroma Inter), so bile meritve
+ * širine napačne, zato se je ime stranke ali končni čas skrival prezgodaj
+ * oziroma prepozno. Beremo ga iz `body`, da meritev in izris uporabljata isto.
+ */
+function renderedFontFamily(): string {
+  if (typeof window === 'undefined') return 'sans-serif';
+  return getComputedStyle(document.body).fontFamily || 'sans-serif';
+}
+
 // Time row: shows "HH:MM - HH:MM" or just "HH:MM" if the end time doesn't fit
 function TimeRow({ startTime, endTime }: { startTime: string; endTime: string | null }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showEnd, setShowEnd] = useState(true);
 
-  const font = '500 10px ui-sans-serif, system-ui, sans-serif';
+  const font = `500 10px ${renderedFontFamily()}`;
 
   const computeVisibility = useCallback(() => {
     const container = containerRef.current;

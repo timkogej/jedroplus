@@ -19,7 +19,6 @@ import {
   CaretDown,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useRolePermissions } from '@/app/role-permission-context';
@@ -42,6 +41,7 @@ import { TABLES } from '@/lib/data';
 
 // Components
 import ClientTable from '@/components/clients/ClientTable';
+import { MetricGroup } from '@/components/dashboard';
 import ClientModal from '@/components/clients/ClientModal';
 import ClientDetailsPanel from '@/components/clients/ClientDetailsPanel';
 import DeleteClientModal from '@/components/clients/DeleteClientModal';
@@ -54,47 +54,6 @@ const CrmImportModal = dynamic(() => import('@/components/clients/CrmImportModal
   ssr: false,
 });
 
-// Stats card component - Gradient border with black icon (no circle)
-interface StatCardProps {
-  icon: React.ReactNode;
-  value: number;
-  label: string;
-  delay?: number;
-  loading?: boolean;
-}
-
-function StatCard({ icon, value, label, delay = 0, loading = false }: StatCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: delay * 0.1, duration: 0.3 }}
-      className="relative overflow-hidden rounded-2xl p-6 bg-white border border-gray-100 shadow-sm"
-    >
-      {/* FLEX LAYOUT - Icon on right */}
-      <div className="flex items-center justify-between">
-        {/* Left side - Numbers */}
-        <div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: delay * 0.1 + 0.2 }}
-            className="text-3xl text-gray-900 mb-1"
-          >
-            {loading ? <span className="inline-block h-8 w-12 animate-pulse rounded-md bg-gray-100 align-middle" aria-hidden="true" /> : value}
-          </motion.p>
-          <p className="text-sm font-medium text-gray-600">{label}</p>
-        </div>
-
-        {/* Right side - Icon (black, no circle) */}
-        <div className="text-gray-900 flex-shrink-0">
-          {icon}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
 // Empty state component
 function EmptyState({ onCreateClient }: { onCreateClient: () => void }) {
   const t = useTranslations('clients');
@@ -102,25 +61,21 @@ function EmptyState({ onCreateClient }: { onCreateClient: () => void }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+      className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12"
     >
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
-        <Users className="h-10 w-10 text-gray-600" weight="duotone" />
-      </div>
-      <h3 className="text-xl font-semibold text-[#1A1F36]">{t('emptyState.noClients')}</h3>
-      <p className="mt-2 text-center text-sm text-gray-500">
+      <Users className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+      <h3 className="text-base font-semibold text-gray-900">{t('emptyState.noClients')}</h3>
+      <p className="mt-1 text-center text-sm text-gray-500">
         {t('emptyState.noClientsSubtitle')}
       </p>
-      <motion.button
+      <button
         type="button"
         onClick={onCreateClient}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="mt-6 flex items-center gap-2 rounded-xl bg-[#0a0a0a] px-6 py-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
+        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
       >
-        <UserPlus className="h-5 w-5" weight="regular" />
+        <UserPlus size={17} weight="bold" />
         {t('emptyState.addFirst')}
-      </motion.button>
+      </button>
     </motion.div>
   );
 }
@@ -132,27 +87,23 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-sm ring-1 ring-gray-100"
+      className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12"
     >
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-slate-100">
-        <MagnifyingGlass className="h-8 w-8 text-gray-400" weight="duotone" />
-      </div>
-      <h3 className="text-lg font-semibold text-[#1A1F36]">
+      <MagnifyingGlass className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+      <h3 className="text-base font-semibold text-gray-900">
         {t('emptyState.noResults', { term: searchTerm })}
       </h3>
-      <p className="mt-2 text-center text-sm text-gray-500">
+      <p className="mt-1 text-center text-sm text-gray-500">
         {t('emptyState.noResultsSubtitle')}
       </p>
-      <motion.button
+      <button
         type="button"
         onClick={onClear}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-purple-600 hover:text-purple-700"
+        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-[#7C78FA] transition-opacity hover:opacity-70"
       >
         {t('emptyState.clearSearch')}
         <ArrowRight className="h-4 w-4" weight="regular" />
-      </motion.button>
+      </button>
     </motion.div>
   );
 }
@@ -614,50 +565,35 @@ export default function ClientsClient({
 
   return (
     <ProtectedLayout>
-      <main className="relative isolate min-h-screen bg-white">
-        <AmbientBottomGlow tone="purple" />
-        <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
           {/* Header */}
-          <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7 flex flex-wrap items-start justify-between gap-4"
+          >
             <div>
-              <motion.h1
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-2xl font-normal text-[#1A1F36]"
-              >
-                {t('page.title')}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="mt-1 text-gray-500"
-              >
-                {t('page.subtitle')}
-              </motion.p>
+              <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+              <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {/* Import CRM Dropdown */}
               <div className="relative">
-                <motion.button
+                <button
                   type="button"
                   onClick={() => {
                     setImportDropdownOpen(!importDropdownOpen);
                     setExportDropdownOpen(false);
                   }}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 rounded-xl bg-white border border-gray-200 px-4 py-2.5
-                             text-sm font-medium text-gray-700 shadow-sm transition-all
-                             hover:bg-gray-50 hover:shadow-md"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
                 >
-                  <DownloadSimple className="h-4 w-4" weight="regular" />
+                  <DownloadSimple className="h-4 w-4 text-gray-500" weight="regular" />
                   <span className="hidden md:inline">{t('crm.importButton')}</span>
-                  <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${importDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
-                </motion.button>
+                  <CaretDown className={`hidden md:block h-3 w-3 text-gray-400 transition-transform ${importDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
+                </button>
 
                 <AnimatePresence>
                   {importDropdownOpen && (
@@ -665,7 +601,7 @@ export default function ClientsClient({
                       initial={{ opacity: 0, y: 5, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden z-50"
+                      className="absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-gray-100 bg-white/90 py-1 shadow-lg backdrop-blur-xl backdrop-saturate-150"
                     >
                       <button
                         type="button"
@@ -673,7 +609,7 @@ export default function ClientsClient({
                           setImportDropdownOpen(false);
                           setImportModalOpen(true);
                         }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="w-full px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100"
                       >
                         {t('crm.importCsv')}
                       </button>
@@ -683,7 +619,7 @@ export default function ClientsClient({
                           setImportDropdownOpen(false);
                           setImportModalOpen(true);
                         }}
-                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="w-full px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100"
                       >
                         {t('crm.importExcel')}
                       </button>
@@ -691,7 +627,7 @@ export default function ClientsClient({
                         <button
                           type="button"
                           disabled
-                          className="w-full px-4 py-2.5 text-left text-sm text-gray-400 cursor-not-allowed"
+                          className="w-full cursor-not-allowed px-3 py-2 text-left text-sm text-gray-400"
                         >
                           {t('crm.importOther')}
                         </button>
@@ -706,24 +642,18 @@ export default function ClientsClient({
 
               {/* Export CRM Dropdown */}
               <div className="relative">
-                <motion.button
+                <button
                   type="button"
                   onClick={() => {
                     setExportDropdownOpen(!exportDropdownOpen);
                     setImportDropdownOpen(false);
                   }}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 rounded-xl bg-white border border-gray-200 px-4 py-2.5
-                             text-sm font-medium text-gray-700 shadow-sm transition-all
-                             hover:bg-gray-50 hover:shadow-md"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
                 >
-                  <UploadSimple className="h-4 w-4" weight="regular" />
+                  <UploadSimple className="h-4 w-4 text-gray-500" weight="regular" />
                   <span className="hidden md:inline">{t('crm.exportButton')}</span>
-                  <CaretDown className={`hidden md:block h-3 w-3 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
-                </motion.button>
+                  <CaretDown className={`hidden md:block h-3 w-3 text-gray-400 transition-transform ${exportDropdownOpen ? 'rotate-180' : ''}`} weight="regular" />
+                </button>
 
                 <AnimatePresence>
                   {exportDropdownOpen && (
@@ -731,7 +661,7 @@ export default function ClientsClient({
                       initial={{ opacity: 0, y: 5, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-white border border-gray-200 shadow-lg overflow-hidden z-50"
+                      className="absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-gray-100 bg-white/90 py-1 shadow-lg backdrop-blur-xl backdrop-saturate-150"
                     >
                       <button
                         type="button"
@@ -740,7 +670,7 @@ export default function ClientsClient({
                           handleExportXlsx();
                         }}
                         disabled={isExporting}
-                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-60"
+                        className="w-full px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-60"
                       >
                         {isExporting ? 'Izvažam...' : t('crm.exportExcel')}
                       </button>
@@ -748,7 +678,7 @@ export default function ClientsClient({
                         <button
                           type="button"
                           disabled
-                          className="w-full px-4 py-2.5 text-left text-sm text-gray-400 cursor-not-allowed"
+                          className="w-full cursor-not-allowed px-3 py-2 text-left text-sm text-gray-400"
                         >
                           {t('crm.exportCsv')}
                         </button>
@@ -760,7 +690,7 @@ export default function ClientsClient({
                         <button
                           type="button"
                           disabled
-                          className="w-full px-4 py-2.5 text-left text-sm text-gray-400 cursor-not-allowed"
+                          className="w-full cursor-not-allowed px-3 py-2 text-left text-sm text-gray-400"
                         >
                           {t('crm.exportPdf')}
                         </button>
@@ -774,58 +704,35 @@ export default function ClientsClient({
               </div>
 
               {/* Nova stranka button */}
-              <motion.button
+              <button
                 type="button"
                 onClick={canCreateClient ? openCreateModal : () => setShowDisabledCreateModal(true)}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
               >
-                <Plus className="h-5 w-5 flex-shrink-0" weight="regular" />
+                <Plus size={17} weight="bold" />
                 <span className="whitespace-nowrap">{t('page.newClient')}</span>
-              </motion.button>
+              </button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Stats */}
           {stats && (
-            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <StatCard
-                loading={isLoading}
-                icon={<Users className="h-6 w-6" weight="regular" />}
-                value={stats.total}
-                label={t('stats.total')}
-                delay={0}
-              />
-              <StatCard
-                loading={isLoading}
-                icon={<CalendarBlank className="h-6 w-6" weight="regular" />}
-                value={stats.withAppointments}
-                label={t('stats.withAppointments')}
-                delay={1}
-              />
-              <StatCard
-                loading={isLoading}
-                icon={<UserPlus className="h-6 w-6" weight="regular" />}
-                value={stats.newThisMonth}
-                label={t('stats.newThisMonth')}
-                delay={2}
+            <div className="mb-8">
+              <MetricGroup
+                metrics={[
+                  { label: t('stats.total'), value: isLoading ? '—' : stats.total, icon: Users },
+                  { label: t('stats.withAppointments'), value: isLoading ? '—' : stats.withAppointments, icon: CalendarBlank },
+                  { label: t('stats.newThisMonth'), value: isLoading ? '—' : stats.newThisMonth, icon: UserPlus },
+                ]}
               />
             </div>
           )}
 
           {/* Search bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-6"
-          >
+          <div className="mb-6">
             <div className="relative max-w-md">
               <MagnifyingGlass
-                className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400"
+                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
                 weight="regular"
               />
               <input
@@ -833,16 +740,16 @@ export default function ClientsClient({
                 placeholder={t('page.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-xl border-0 bg-white py-3 pl-12 pr-12 text-sm text-[#1A1F36]
-                           placeholder-gray-400 shadow-sm ring-1 ring-gray-200 transition-all
-                           focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900
+                           placeholder-gray-400 transition-colors
+                           focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1
-                             text-gray-400 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1
+                             text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
                   <X className="h-4 w-4" weight="regular" />
                 </button>
@@ -853,17 +760,17 @@ export default function ClientsClient({
                 {t('page.showingCount', { shown: filteredClients.length, total: clients.length })}
               </p>
             )}
-          </motion.div>
+          </div>
 
           {/* Error state */}
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3"
+              className="mb-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 p-4"
             >
-              <Warning className="h-5 w-5 flex-shrink-0 text-red-500" weight="fill" />
-              <p className="text-sm text-red-700">{error}</p>
+              <Warning className="h-5 w-5 flex-shrink-0 text-red-500" weight="regular" />
+              <p className="text-sm font-medium text-red-700">{error}</p>
               <button
                 type="button"
                 onClick={loadData}

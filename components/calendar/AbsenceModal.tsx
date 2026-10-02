@@ -397,8 +397,8 @@ function AbsenceModal({
                 onClick={handleSubmit}
                 disabled={isSaving}
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5
-                           text-sm font-medium text-white shadow-lg shadow-orange-500/25 transition-all
-                           hover:shadow-xl hover:shadow-orange-500/30 disabled:opacity-70"
+                           text-sm font-medium text-white shadow-sm hover:opacity-90 transition-all
+                           disabled:opacity-70"
               >
                 {isSaving ? (
                   <>

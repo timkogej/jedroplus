@@ -5,23 +5,41 @@ import { motion } from 'motion/react';
 interface SettingsSectionProps {
   title: string;
   description?: string;
+  /** Drobna razlaga POD skupino — Apple jo postavi izven kartice, ne vanjo. */
+  footnote?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function SettingsSection({ title, description, children }: SettingsSectionProps) {
+/**
+ * Skupina nastavitev v Applovem slogu.
+ *
+ * Naslov stoji NAD kartico, ne v njej — tako kot v iOS in macOS Nastavitvah.
+ * Vrstice v kartici loči lasna črta; padding dobijo neposredni otroci prek
+ * `[&>*]`, da vzorec deluje tudi tam, kjer stran namesto `SettingRow` poda
+ * svoj `div` ali polje.
+ */
+export function SettingsSection({ title, description, footnote, children }: SettingsSectionProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
+    <motion.section
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl border border-gray-100 p-5 mb-5"
+      transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+      className="mb-7"
     >
-      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">{title}</p>
+      <h2 className="mb-1.5 px-1 text-xs font-semibold uppercase tracking-[0.04em] text-gray-400">
+        {title}
+      </h2>
       {description && (
-        <p className="text-xs text-gray-500 mb-3 -mt-1">{description}</p>
+        <p className="mb-2 px-1 text-sm text-gray-500">{description}</p>
       )}
-      <div className="space-y-4">
-        {children}
+      <div className="rounded-xl border border-gray-100 bg-white px-4">
+        <div className="divide-y divide-gray-100 [&>*]:py-4 [&>*:first-child]:pt-4 [&>*:last-child]:pb-4">
+          {children}
+        </div>
       </div>
-    </motion.div>
+      {footnote && (
+        <p className="mt-1.5 px-1 text-sm text-gray-400">{footnote}</p>
+      )}
+    </motion.section>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, type ReactNode } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
 import {
   Bell,
@@ -13,7 +13,6 @@ import {
   Warning,
 } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
@@ -21,6 +20,16 @@ import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
 import { SendingStatus } from '@/components/reminders/SendingStatus';
 import { MessagePreview } from '@/components/reminders/MessagePreview';
+import {
+  StatusPill,
+  ValuePill,
+  SettingRow,
+  SectionPanel,
+  DetailBlock,
+  PlainMeta,
+  FlowStep,
+  ColorSwatches,
+} from '@/components/ui/OverviewPrimitives';
 import { TestSendButton } from '@/components/reminders/TestSendButton';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
@@ -40,216 +49,6 @@ const isEnabledValue = (value: unknown, fallback = false) => {
   }
   return fallback;
 };
-
-const cx = (...classes: Array<string | false | null | undefined>) =>
-  classes.filter(Boolean).join(' ');
-
-function StatusPill({ enabled, label }: { enabled: boolean; label: string }) {
-  return (
-    <span
-      className={cx(
-        'inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-medium',
-        enabled
-          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-          : 'border-rose-200 bg-rose-50 text-rose-700'
-      )}
-    >
-      <span
-        className={cx(
-          'h-1.5 w-1.5 rounded-full',
-          enabled ? 'bg-emerald-500' : 'bg-rose-500'
-        )}
-      />
-      {label}
-    </span>
-  );
-}
-
-function ValuePill({
-  children,
-  tone = 'neutral',
-}: {
-  children: ReactNode;
-  tone?: 'neutral' | 'blue' | 'green' | 'amber';
-}) {
-  const variants = {
-    neutral: 'border-zinc-200 bg-white text-zinc-700',
-    blue: 'border-sky-200 bg-sky-50 text-sky-800',
-    green: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-    amber: 'border-amber-200 bg-amber-50 text-amber-800',
-  };
-
-  return (
-    <span
-      className={cx(
-        'inline-flex max-w-full items-center rounded-full border px-2.5 py-1 text-left text-xs font-medium leading-5',
-        variants[tone]
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
-function SettingRow({
-  icon,
-  label,
-  description,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  description?: ReactNode;
-  value: ReactNode;
-}) {
-  return (
-    <div className="grid gap-3 border-b border-zinc-100 py-4 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(160px,auto)] sm:items-start">
-      <div className="flex min-w-0 items-start gap-3">
-        <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-700">
-          {icon}
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-zinc-900">{label}</p>
-          {description ? (
-            <div className="mt-1 text-xs leading-relaxed text-zinc-500">{description}</div>
-          ) : null}
-        </div>
-      </div>
-      <div className="min-w-0 text-left text-sm text-zinc-900 sm:text-right">{value}</div>
-    </div>
-  );
-}
-
-function SectionPanel({
-  eyebrow,
-  title,
-  children,
-  className,
-}: {
-  eyebrow?: string;
-  title: string;
-  children: ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      className={cx(
-        'rounded-lg border border-zinc-200 bg-white p-5 shadow-[0_16px_38px_rgba(15,23,42,0.04)]',
-        className
-      )}
-    >
-      {eyebrow ? (
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
-          {eyebrow}
-        </p>
-      ) : null}
-      <h2 className="text-base font-semibold text-zinc-950">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function DetailBlock({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="border-l-2 border-zinc-200 pl-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-400">{label}</p>
-      <div className="mt-1 text-sm leading-relaxed text-zinc-900">{children}</div>
-    </div>
-  );
-}
-
-function PlainMeta({
-  label,
-  children,
-}: {
-  label: string;
-  children: ReactNode;
-}) {
-  return (
-    <p className="text-sm leading-6 text-zinc-950">
-      <span className="font-medium">{label}:</span> {children}
-    </p>
-  );
-}
-
-function FlowStep({
-  icon,
-  eyebrow,
-  title,
-  enabled,
-  statusLabel,
-  editLabel,
-  onEdit,
-  children,
-}: {
-  icon: ReactNode;
-  eyebrow: string;
-  title: string;
-  enabled: boolean;
-  statusLabel: string;
-  editLabel?: string;
-  onEdit?: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <article className="grid gap-4 border-b border-zinc-100 py-6 first:pt-0 last:border-b-0 last:pb-0 sm:grid-cols-[42px_minmax(0,1fr)]">
-      <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-800">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
-              {eyebrow}
-            </p>
-            <h3 className="mt-1 text-lg font-semibold text-zinc-950">{title}</h3>
-          </div>
-          <div className="flex items-center gap-2">
-            <StatusPill enabled={enabled} label={statusLabel} />
-            {onEdit && editLabel ? (
-              <button
-                type="button"
-                onClick={onEdit}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-800 transition hover:border-zinc-900"
-              >
-                {editLabel}
-              </button>
-            ) : null}
-          </div>
-        </div>
-        <div className="mt-4 space-y-4">{children}</div>
-      </div>
-    </article>
-  );
-}
-
-function ColorSwatches({ colors, emptyLabel }: { colors: string[]; emptyLabel: string }) {
-  const normalizedColors = colors
-    .map((color) => color.trim())
-    .filter(Boolean)
-    .map((color) => (color.startsWith('#') ? color : `#${color}`));
-
-  if (normalizedColors.length === 0) {
-    return <span className="text-zinc-400">{emptyLabel}</span>;
-  }
-
-  return (
-    <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
-      {normalizedColors.map((color, index) => (
-        <span
-          key={`${color}-${index}`}
-          className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-2 py-1 text-xs font-medium text-zinc-700"
-        >
-          <span
-            className="h-4 w-4 rounded-full border border-black/10 shadow-inner"
-            style={{ backgroundColor: color }}
-          />
-          {color.toUpperCase()}
-        </span>
-      ))}
-    </div>
-  );
-}
 
 export default function RemindersPage() {
   useMarkVisited('reminders');
@@ -467,63 +266,66 @@ export default function RemindersPage() {
     value.trim() ? (
       <span className="break-words">{value}</span>
     ) : (
-      <span className="text-zinc-400">{t('page.general.notSet')}</span>
+      <span className="text-gray-400">{t('page.general.notSet')}</span>
     );
 
   return (
     <ProtectedLayout>
-      <main className="relative isolate min-h-screen bg-white">
-        <AmbientBottomGlow tone="turquoise" />
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+      <main className="min-h-screen bg-white">
+        {/* En sam stolpec, kot v Applovih Nastavitvah — vsebina ostane
+            berljivo široka, namesto da se stiska v ozek stranski stolpec. */}
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-7 flex flex-wrap items-start justify-between gap-4 border-b border-zinc-200 pb-6"
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7 flex flex-wrap items-start justify-between gap-4"
           >
             <div className="max-w-2xl">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                {t('page.kicker')}
-              </p>
-              <h1 className="text-2xl font-normal text-[#1A1F36]">{t('page.title')}</h1>
-              <p className="mt-2 text-sm leading-6 text-zinc-500">{t('page.subtitle')}</p>
+              <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+              <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
             </div>
 
             {canManageSettings && (
-              <motion.button
+              <button
+                type="button"
                 onClick={() => openSettings()}
-                whileHover={{ y: -1 }}
-                whileTap={{ scale: 0.98 }}
-                className="relative inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-zinc-300 bg-white px-3.5 text-sm font-medium text-zinc-950 shadow-sm transition hover:border-zinc-900"
+                className="relative inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
               >
-                <Gear size={18} weight="bold" />
+                <Gear size={17} weight="regular" className="text-gray-500" />
                 {t('page.settingsButton')}
                 {hasIncompleteSettings && (
                   <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-amber-500 text-[9px] font-bold leading-none text-white">
                     !
                   </span>
                 )}
-              </motion.button>
+              </button>
             )}
           </motion.div>
 
           {!loading && billingUsage && (
-            <SendingStatus
+            <>
+              <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wider text-gray-500">
+                {t('page.sendingStatus.title')}
+              </h2>
+              <SendingStatus
               channels={[...channelsInUse]}
               sms={billingUsage.sms}
               email={billingUsage.email}
               periodEnd={billingUsage.periodEnd}
               canBuy={canManageSettings && !billingUsage.isFree}
-              isFree={billingUsage.isFree}
-            />
+                isFree={billingUsage.isFree}
+              />
+            </>
           )}
 
           {hasIncompleteSettings && (
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3"
+              className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-amber-100 bg-amber-50 p-4"
             >
-              <Warning size={18} weight="fill" className="flex-shrink-0 text-amber-600" />
+              <Warning size={18} weight="regular" className="flex-shrink-0 text-amber-600" />
               <p className="min-w-0 flex-1 text-sm leading-6 text-amber-900">
                 <span className="font-semibold">{t('page.incompleteBannerTitle')}</span>{' '}
                 {t('page.incompleteBannerDesc')}
@@ -544,17 +346,17 @@ export default function RemindersPage() {
               <GradientSpinner />
             </div>
           ) : (
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_390px]">
+            <div className="space-y-6">
               <motion.div
-                initial={{ opacity: 0, y: 18 }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.12 }}
+                transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
                 className="min-w-0"
               >
-                <SectionPanel eyebrow={t('page.flow.eyebrow')} title={t('page.flow.title')}>
-                  <div className="mt-6">
+                <SectionPanel title={t('page.flow.title')}>
+                  <div>
                     <FlowStep
-                      icon={<Bell size={20} weight="bold" />}
+                      icon={<Bell size={20} weight="regular" />}
                       eyebrow={t('page.flow.beforeEyebrow')}
                       title={t('page.before.sectionTitle')}
                       editLabel={t('page.flow.edit')}
@@ -583,11 +385,11 @@ export default function RemindersPage() {
                               {beforeConsiderations.length > 0 ? (
                                 <div className="space-y-1">
                                   {beforeConsiderations.map((item) => (
-                                    <p key={item} className="text-sm text-zinc-950">{item}</p>
+                                    <p key={item} className="text-sm text-gray-900">{item}</p>
                                   ))}
                                 </div>
                               ) : (
-                                <span className="text-zinc-400">{t('page.before.noSpecialInstructions')}</span>
+                                <span className="text-gray-400">{t('page.before.noSpecialInstructions')}</span>
                               )}
                             </DetailBlock>
                           ) : null}
@@ -612,12 +414,12 @@ export default function RemindersPage() {
                           ) : null}
                         </>
                       ) : (
-                        <p className="text-sm text-zinc-500">{t('page.flow.disabledReminder')}</p>
+                        <p className="text-sm text-gray-500">{t('page.flow.disabledReminder')}</p>
                       )}
                     </FlowStep>
 
                     <FlowStep
-                      icon={<CheckCircle size={20} weight="bold" />}
+                      icon={<CheckCircle size={20} weight="regular" />}
                       eyebrow={t('page.flow.afterEyebrow')}
                       title={t('page.after.sectionTitle')}
                       editLabel={t('page.flow.edit')}
@@ -646,11 +448,11 @@ export default function RemindersPage() {
                               {afterConsiderations.length > 0 ? (
                                 <div className="space-y-1">
                                   {afterConsiderations.map((item) => (
-                                    <p key={item} className="text-sm text-zinc-950">{item}</p>
+                                    <p key={item} className="text-sm text-gray-900">{item}</p>
                                   ))}
                                 </div>
                               ) : (
-                                <span className="text-zinc-400">{t('page.after.noSpecialInstructions')}</span>
+                                <span className="text-gray-400">{t('page.after.noSpecialInstructions')}</span>
                               )}
                             </DetailBlock>
                           ) : null}
@@ -681,12 +483,12 @@ export default function RemindersPage() {
                           ) : null}
                         </>
                       ) : (
-                        <p className="text-sm text-zinc-500">{t('page.flow.disabledReminder')}</p>
+                        <p className="text-sm text-gray-500">{t('page.flow.disabledReminder')}</p>
                       )}
                     </FlowStep>
 
                     <FlowStep
-                      icon={<Clock size={20} weight="bold" />}
+                      icon={<Clock size={20} weight="regular" />}
                       eyebrow={t('page.flow.rescheduleEyebrow')}
                       title={t('page.reschedule.sectionTitle')}
                       editLabel={t('page.flow.edit')}
@@ -721,127 +523,138 @@ export default function RemindersPage() {
                                 />
                               </>
                             ) : (
-                              <span className="text-zinc-400">{t('page.general.notSetTemplate')}</span>
+                              <span className="text-gray-400">{t('page.general.notSetTemplate')}</span>
                             )}
                           </DetailBlock>
                         </>
                       ) : (
-                        <p className="text-sm text-zinc-500">{t('page.flow.disabledReschedule')}</p>
+                        <p className="text-sm text-gray-500">{t('page.flow.disabledReschedule')}</p>
                       )}
                     </FlowStep>
                   </div>
                 </SectionPanel>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="mt-6"
-                >
-                  <SectionPanel eyebrow={t('page.flow.detailsEyebrow')} title={t('page.info.title')}>
-                    <div className="mt-5 border-t border-zinc-100 pt-5">
-                      <p className="whitespace-pre-wrap text-sm leading-7 text-zinc-600">
-                        {t.rich('page.info.body', {
-                          highlight: (chunks) => (
-                            <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 bg-clip-text font-semibold text-transparent">
-                              {chunks}
-                            </span>
-                          ),
-                        })}
-                      </p>
-                    </div>
-                  </SectionPanel>
-                </motion.div>
               </motion.div>
 
-              <motion.aside
-                initial={{ opacity: 0, y: 18 }}
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.16 }}
-                className="min-w-0"
+                transition={{ duration: 0.28, delay: 0.04, ease: [0.32, 0.72, 0, 1] }}
+                className="space-y-6"
               >
-                <SectionPanel
-                  eyebrow={t('page.flow.settingsEyebrow')}
-                  title={t('page.general.sectionTitle')}
-                  className="lg:sticky lg:top-6"
-                >
-                  <div className="mt-5">
-                    <SettingRow
-                      icon={<ChatText size={16} weight="bold" />}
-                      label={t('page.general.language')}
-                      value={<ValuePill>{getLanguageLabel(sendingLanguage)}</ValuePill>}
-                    />
-                    <SettingRow
-                      icon={<ChatText size={16} weight="bold" />}
-                      label={t('page.general.tone')}
-                      value={<ValuePill>{getToneLabel(tone)}</ValuePill>}
-                    />
-                    <SettingRow
-                      icon={<ChatText size={16} weight="bold" />}
-                      label={t('page.general.customerAddressing')}
-                      value={
-                        <ValuePill>
-                          {nagovor === 'tikanje'
-                            ? t('page.general.informalAddressing')
-                            : t('page.general.formalAddressing')}
-                        </ValuePill>
-                      }
-                    />
-                    <SettingRow
-                      icon={<Bell size={16} weight="bold" />}
-                      label={t('page.general.automaticTag')}
-                      value={
-                        <StatusPill
-                          enabled={samodejniOpomnik}
-                          label={samodejniOpomnik ? t('status.enabled') : t('status.disabled')}
-                        />
-                      }
-                    />
-                    <SettingRow
-                      icon={<CheckCircle size={16} weight="bold" />}
-                      label={t('page.general.staffInReminder')}
-                      value={
-                        <StatusPill
-                          enabled={smsOsebaPred}
-                          label={smsOsebaPred ? t('status.enabled') : t('status.disabled')}
-                        />
-                      }
-                    />
-                    <SettingRow
-                      icon={<EnvelopeSimple size={16} weight="bold" />}
-                      label={t('page.general.replyTo')}
-                      value={renderTextValue(replyToEmail)}
-                    />
-                    <SettingRow
-                      icon={<EnvelopeSimple size={16} weight="bold" />}
-                      label={t('page.general.fromName')}
-                      description={t('page.general.fromNameDesc')}
-                      value={renderTextValue(fromName)}
-                    />
-                    <SettingRow
-                      icon={<ChatText size={16} weight="bold" />}
-                      label={t('page.general.senderId')}
-                      description={t('page.general.senderIdDesc')}
-                      value={renderTextValue(smsSenderId)}
-                    />
-                    <SettingRow
-                      icon={<ChatText size={16} weight="bold" />}
-                      label={t('page.general.tips')}
-                      value={<ValuePill>{tipsLabel}</ValuePill>}
-                    />
-                    <SettingRow
-                      icon={<Palette size={16} weight="bold" />}
-                      label={t('page.general.colors')}
-                      value={
-                        <ColorSwatches
-                          colors={[emailPrimary, emailSecondary]}
-                          emptyLabel={t('page.general.notSet')}
-                        />
-                      }
-                    />
+                {/* Nastavitve so razbite v štiri pomenske skupine namesto enega
+                    dolgega seznama — tako je na prvi pogled jasno, kaj kam sodi. */}
+                <SectionPanel title={t('page.general.groupVoice')}>
+                  <SettingRow
+                    icon={<ChatText size={16} weight="regular" />}
+                    label={t('page.general.language')}
+                    description={t('page.general.languageDesc')}
+                    value={<ValuePill>{getLanguageLabel(sendingLanguage)}</ValuePill>}
+                  />
+                  <SettingRow
+                    icon={<ChatText size={16} weight="regular" />}
+                    label={t('page.general.tone')}
+                    description={t('page.general.toneDesc')}
+                    value={<ValuePill>{getToneLabel(tone)}</ValuePill>}
+                  />
+                  <SettingRow
+                    icon={<ChatText size={16} weight="regular" />}
+                    label={t('page.general.customerAddressing')}
+                    description={t('page.general.customerAddressingDesc')}
+                    value={
+                      <ValuePill>
+                        {nagovor === 'tikanje'
+                          ? t('page.general.informalAddressing')
+                          : t('page.general.formalAddressing')}
+                      </ValuePill>
+                    }
+                  />
+                </SectionPanel>
+
+                <SectionPanel title={t('page.general.groupSender')}>
+                  <SettingRow
+                    icon={<EnvelopeSimple size={16} weight="regular" />}
+                    label={t('page.general.replyTo')}
+                    description={t('page.general.replyToDesc')}
+                    value={renderTextValue(replyToEmail)}
+                  />
+                  <SettingRow
+                    icon={<EnvelopeSimple size={16} weight="regular" />}
+                    label={t('page.general.fromName')}
+                    description={t('page.general.fromNameDesc')}
+                    value={renderTextValue(fromName)}
+                  />
+                  <SettingRow
+                    icon={<ChatText size={16} weight="regular" />}
+                    label={t('page.general.senderId')}
+                    description={t('page.general.senderIdDesc')}
+                    value={renderTextValue(smsSenderId)}
+                  />
+                </SectionPanel>
+
+                <SectionPanel title={t('page.general.groupContent')}>
+                  <SettingRow
+                    icon={<Bell size={16} weight="regular" />}
+                    label={t('page.general.automaticTag')}
+                    description={t('page.general.automaticTagDesc')}
+                    value={
+                      <StatusPill
+                        enabled={samodejniOpomnik}
+                        label={samodejniOpomnik ? t('status.enabled') : t('status.disabled')}
+                      />
+                    }
+                  />
+                  <SettingRow
+                    icon={<CheckCircle size={16} weight="regular" />}
+                    label={t('page.general.staffInReminder')}
+                    description={t('page.general.staffInReminderDesc')}
+                    value={
+                      <StatusPill
+                        enabled={smsOsebaPred}
+                        label={smsOsebaPred ? t('status.enabled') : t('status.disabled')}
+                      />
+                    }
+                  />
+                  <SettingRow
+                    icon={<ChatText size={16} weight="regular" />}
+                    label={t('page.general.tips')}
+                    description={t('page.general.tipsDesc')}
+                    value={<ValuePill>{tipsLabel}</ValuePill>}
+                  />
+                </SectionPanel>
+
+                <SectionPanel title={t('page.general.groupEmail')}>
+                  <SettingRow
+                    icon={<Palette size={16} weight="regular" />}
+                    label={t('page.general.colors')}
+                    description={t('page.general.colorsDesc')}
+                    value={
+                      <ColorSwatches
+                        colors={[emailPrimary, emailSecondary]}
+                        emptyLabel={t('page.general.notSet')}
+                      />
+                    }
+                  />
+                </SectionPanel>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.28, delay: 0.08, ease: [0.32, 0.72, 0, 1] }}
+              >
+                <SectionPanel title={t('page.info.title')}>
+                  <div className="p-4">
+                    <p className="whitespace-pre-wrap text-sm leading-7 text-gray-600">
+                      {t.rich('page.info.body', {
+                        highlight: (chunks) => (
+                          <span className="font-semibold text-gray-900">{chunks}</span>
+                        ),
+                      })}
+                    </p>
                   </div>
                 </SectionPanel>
-              </motion.aside>
+              </motion.div>
             </div>
           )}
         </div>

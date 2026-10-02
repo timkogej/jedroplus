@@ -45,10 +45,10 @@ export function MetricCard({
   const content = (
     <div className="relative flex items-start justify-between">
       <div className="flex-1">
-        <p className="text-sm font-medium text-gray-500">
+        <p className="text-sm text-gray-500">
           {title}
         </p>
-        <p className="mt-2 text-3xl font-normal text-gray-900">
+        <p className="tnum mt-1.5 text-3xl font-semibold text-gray-900">
           {value}
         </p>
         {subtitle && (
@@ -58,7 +58,7 @@ export function MetricCard({
         )}
         {trend && (
           <div
-            className={`mt-2 inline-flex items-center gap-1 text-sm font-medium ${
+            className={`tnum mt-2 inline-flex items-center gap-1 text-sm font-medium ${
               trend.isPositive ? "text-emerald-600" : "text-red-500"
             }`}
           >
@@ -72,9 +72,9 @@ export function MetricCard({
       </div>
 
       {/* Icon only - no black circle, just the icon in black */}
-      <div className="text-gray-900">
+      <div className="text-gray-400">
         <Icon
-          size={24}
+          size={20}
           weight="regular"
         />
       </div>
@@ -84,11 +84,12 @@ export function MetricCard({
   if (gradientOutline) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative rounded-2xl p-[1.3px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 overflow-hidden"
+        transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+        className="relative overflow-hidden rounded-xl bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 p-px"
       >
-        <div className="h-full w-full rounded-[14px] bg-white p-6">
+        <div className="h-full w-full rounded-[11px] bg-white p-5">
           {content}
         </div>
       </motion.div>
@@ -97,9 +98,10 @@ export function MetricCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-2xl p-6 bg-white border border-gray-100 shadow-sm"
+      transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+      className="relative overflow-hidden rounded-xl border border-gray-100 bg-white p-5"
     >
       {content}
     </motion.div>

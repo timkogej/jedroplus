@@ -8,7 +8,6 @@ import { ArrowLeft, Clock, Envelope, Phone, CalendarBlank } from '@phosphor-icon
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import ProtectedLayout from '@/components/ProtectedLayout';
-import AmbientBottomGlow from '@/components/shared/AmbientBottomGlow';
 import { useCompany } from '@/app/company-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
@@ -33,11 +32,11 @@ type FilterValue = 'all' | ZahtevaTerminaStatus;
 function statusBadgeClasses(status: ZahtevaTerminaStatus) {
   switch (status) {
     case 'potrjeno':
-      return 'bg-green-50 text-green-700 border-green-200';
+      return 'bg-emerald-50 text-emerald-700';
     case 'zavrnjeno':
-      return 'bg-red-50 text-red-600 border-red-200';
+      return 'bg-red-50 text-red-600';
     default:
-      return 'bg-amber-50 text-amber-700 border-amber-200';
+      return 'bg-amber-50 text-amber-700';
   }
 }
 
@@ -103,45 +102,40 @@ export default function ZahteveClient() {
 
   return (
     <ProtectedLayout>
-      <main className="relative isolate min-h-screen bg-white">
-        <AmbientBottomGlow tone="turquoise" />
-        <div className="relative z-10 mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:py-10">
+      <main className="min-h-screen bg-white">
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7"
           >
             <button
               onClick={() => router.push('/rezervacije')}
               className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
             >
-              <ArrowLeft className="h-4 w-4" weight="bold" />
+              <ArrowLeft className="h-4 w-4" weight="regular" />
               {t('page.backLink')}
             </button>
-            <h1
-              className="text-3xl font-normal text-[#1A1F36]"
-              style={{ fontFamily: '"Clash Display", var(--font-geist-sans), Arial, sans-serif' }}
-            >
-              {t('page.title')}
-            </h1>
-            <p className="mt-1 text-sm text-gray-500">{t('page.subtitle')}</p>
+            <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+            <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
             className="mb-6"
           >
             <SegmentedControl options={filterOptions} value={filter} onChange={(v) => setFilter(v as FilterValue)} />
           </motion.div>
 
           {loading ? (
-            <div className="flex items-center justify-center rounded-lg border border-gray-200 bg-white py-20 shadow-sm">
+            <div className="flex items-center justify-center rounded-xl border border-gray-100 bg-white py-20">
               <GradientSpinner />
             </div>
           ) : filteredZahteve.length === 0 ? (
-            <div className="rounded-lg border border-gray-200 bg-white px-6 py-16 text-center shadow-sm">
+            <div className="rounded-xl border border-gray-100 bg-white px-6 py-16 text-center">
               <p className="text-base font-semibold text-gray-900">{t('empty.title')}</p>
               <p className="mt-1 text-sm text-gray-500">{t('empty.subtitle')}</p>
             </div>
@@ -152,19 +146,20 @@ export default function ZahteveClient() {
                   <motion.article
                     key={zahteva.id}
                     layout
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0 }}
-                    className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm"
+                    transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+                    className="rounded-xl border border-gray-100 bg-white p-5"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-base font-semibold text-gray-900">
+                          <h3 className="text-[15px] font-semibold text-gray-900">
                             {zahteva.ime} {zahteva.priimek}
                           </h3>
                           <span
-                            className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${statusBadgeClasses(zahteva.status)}`}
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBadgeClasses(zahteva.status)}`}
                           >
                             {t(`status.${zahteva.status}`)}
                           </span>
@@ -189,13 +184,13 @@ export default function ZahteveClient() {
                         <div className="flex flex-shrink-0 gap-2">
                           <button
                             onClick={() => setRejectTarget(zahteva)}
-                            className="h-9 rounded-lg border border-gray-200 px-3.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                            className="h-9 rounded-xl border border-gray-200 px-3.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
                           >
                             {t('card.reject')}
                           </button>
                           <button
                             onClick={() => setConfirmTarget(zahteva)}
-                            className="h-9 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-500 px-3.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90"
+                            className="h-9 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-3.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
                           >
                             {t('card.confirm')}
                           </button>
