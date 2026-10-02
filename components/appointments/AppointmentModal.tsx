@@ -1065,14 +1065,14 @@ function AppointmentModal({
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl p-6 text-center space-y-4"
           >
-            <p className="text-sm font-medium text-[#1A1F36]">
+            <p className="text-sm font-medium text-gray-900">
               {t('modal.emptyState.message')}
             </p>
             <div className="flex flex-col gap-2">
               {services.length === 0 && (
                 <a
-                  href="/services"
-                  className="block w-full rounded-xl bg-[#1A1F36] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#2D3461] transition-colors"
+                  href="/storitve"
+                  className="block w-full rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-center text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90"
                 >
                   {t('modal.emptyState.addService')}
                 </a>
@@ -1080,7 +1080,7 @@ function AppointmentModal({
               {employees.length === 0 && (
                 <a
                   href="/staff"
-                  className="block w-full rounded-xl bg-[#1A1F36] px-4 py-2.5 text-sm font-medium text-white text-center hover:bg-[#2D3461] transition-colors"
+                  className="block w-full rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-center text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90"
                 >
                   {t('modal.emptyState.addEmployee')}
                 </a>
@@ -1123,21 +1123,23 @@ function AppointmentModal({
     background: `linear-gradient(#F9FAFB, #F9FAFB) padding-box, ${promotionGradient} border-box`,
   };
   const currentLanguageOption = getCommunicationLanguageOption(formData.language ?? defaultLanguage);
-  const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60 sm:p-5';
-  const labelClass = 'mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500';
-  const inputBaseClass = 'w-full max-w-full min-w-0 rounded-lg border bg-white px-3 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900/10';
+  // Applova skupinska oblika (kot "Nov dogodek" v Koledarju na iPhonu):
+  // sivo ozadje, bele skupine brez obrob in senc, oznake drobne in sive.
+  const sectionClass = 'rounded-xl bg-white p-4';
+  const labelClass = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500';
+  const inputBaseClass = 'w-full max-w-full min-w-0 rounded-[10px] border bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25';
   const nativeDateTimeInputClass = `${inputBaseClass} native-date-time-input`;
 
   return (
     <AnimatePresence>
-      <div key="appointment-modal" className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-2 overscroll-none sm:p-4">
+      <div key="appointment-modal" className="fixed inset-0 z-50 flex items-end justify-center overflow-hidden overscroll-none sm:items-center sm:p-4">
         {/* Backdrop */}
         <motion.div
           variants={backdropVariants}
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           onClick={onClose}
         />
 
@@ -1147,23 +1149,22 @@ function AppointmentModal({
           initial="hidden"
           animate="visible"
           exit="exit"
-          className="relative flex max-h-[calc(100dvh-1rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl sm:max-h-[90vh]"
+          className="relative flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
         >
           {/* Header */}
-          <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
+          <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6">
+            {/* Ročica, s katero se list na telefonu prepozna kot list */}
+            <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between">
-              <h2
-                className="bg-clip-text text-xl font-semibold text-transparent"
-                style={gradientTextStyle}
-              >
+              <h2 className="text-[17px] font-semibold text-gray-900">
                 {title}
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
               >
-                <X className="h-5 w-5" weight="bold" />
+                <X className="h-5 w-5" weight="regular" />
               </button>
             </div>
           </div>
@@ -1190,7 +1191,7 @@ function AppointmentModal({
                     <span className="flex-shrink-0 bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
                       {(() => { const p = (formData.stranka_ime || '').trim().split(/\s+/).filter(Boolean); return p.length >= 2 ? `${p[0][0]}${p[1][0]}`.toUpperCase() : (p[0] || '?').substring(0, 2).toUpperCase(); })()}
                     </span>
-                    <p className="min-w-0 flex-1 truncate font-medium text-[#1A1F36]">{formData.stranka_ime || '-'}</p>
+                    <p className="min-w-0 flex-1 truncate font-medium text-gray-900">{formData.stranka_ime || '-'}</p>
                     <span
                       className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-600"
                       title={`${t('modal.fields.communicationLanguage')}: ${currentLanguageOption.label}`}
@@ -1214,7 +1215,7 @@ function AppointmentModal({
                           <Envelope className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                           <div className="min-w-0">
                             <div className="text-[10px] text-gray-500">Email</div>
-                            <div className="text-xs font-medium text-[#1A1F36] truncate">{formData.stranka_email}</div>
+                            <div className="text-xs font-medium text-gray-900 truncate">{formData.stranka_email}</div>
                           </div>
                         </a>
                       )}
@@ -1226,7 +1227,7 @@ function AppointmentModal({
                           <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
                           <div className="min-w-0">
                             <div className="text-[10px] text-gray-500">{t('modal.fields.phone')}</div>
-                            <div className="text-xs font-medium text-[#1A1F36] truncate">{formData.stranka_telefon}</div>
+                            <div className="text-xs font-medium text-gray-900 truncate">{formData.stranka_telefon}</div>
                           </div>
                         </a>
                       )}
@@ -1262,7 +1263,7 @@ function AppointmentModal({
                         style={{ background: selectedService.barva }}
                       />
                     )}
-                    <p className="text-sm font-medium text-[#1A1F36]">
+                    <p className="text-sm font-medium text-gray-900">
                       {selectedService?.naziv || '-'}
                     </p>
                     {selectedService?.trajanje && (
@@ -1280,7 +1281,7 @@ function AppointmentModal({
                           style={{ background: selectedService2.barva }}
                         />
                       )}
-                      <p className="text-sm font-medium text-[#1A1F36]">
+                      <p className="text-sm font-medium text-gray-900">
                         {selectedService2?.naziv}
                       </p>
                       {selectedService2?.trajanje && (
@@ -1299,7 +1300,7 @@ function AppointmentModal({
                           style={{ background: selectedService3.barva }}
                         />
                       )}
-                      <p className="text-sm font-medium text-[#1A1F36]">
+                      <p className="text-sm font-medium text-gray-900">
                         {selectedService3?.naziv}
                       </p>
                       {selectedService3?.trajanje && (
@@ -1313,7 +1314,7 @@ function AppointmentModal({
                   {(selectedService2 || selectedService3) && (
                     <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                       <span className="text-xs font-medium text-gray-500">{t('modal.totalDuration')}</span>
-                      <span className="bg-clip-text text-sm font-bold text-transparent" style={gradientTextStyle}>
+                      <span className="tnum text-sm font-semibold text-gray-900">
                         {totalDuration} min
                       </span>
                     </div>
@@ -1350,11 +1351,11 @@ function AppointmentModal({
                           exit={{ opacity: 0, x: -8 }}
                           className={`mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
                             promotions.slot1.type === 'happy_hour'
-                              ? 'border border-amber-200 bg-amber-50 text-amber-800'
-                              : 'border border-blue-100 bg-blue-50 text-blue-800'
+                              ? 'bg-amber-50 text-amber-800'
+                              : 'bg-blue-50 text-blue-800'
                           }`}
                         >
-                          <span>{promotions.slot1.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
+                          {promotions.slot1.type === 'happy_hour' ? <Clock className="h-4 w-4 flex-shrink-0" weight="regular" /> : <Tag className="h-4 w-4 flex-shrink-0" weight="regular" />}
                           <span>{promotions.slot1.naziv || (promotions.slot1.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                           <span className="ml-auto font-semibold">
                             {promotions.slot1.tip_popusta === 'percentage' ? `${promotions.slot1.vrednost}%` : money(promotions.slot1.vrednost)} {t('modal.promotions.discountSuffix')}
@@ -1406,11 +1407,11 @@ function AppointmentModal({
                             exit={{ opacity: 0, x: -8 }}
                             className={`mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
                               promotions.slot2.type === 'happy_hour'
-                                ? 'border border-amber-200 bg-amber-50 text-amber-800'
-                                : 'border border-blue-100 bg-blue-50 text-blue-800'
+                                ? 'bg-amber-50 text-amber-800'
+                                : 'bg-blue-50 text-blue-800'
                             }`}
                           >
-                            <span>{promotions.slot2.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
+                            {promotions.slot2.type === 'happy_hour' ? <Clock className="h-4 w-4 flex-shrink-0" weight="regular" /> : <Tag className="h-4 w-4 flex-shrink-0" weight="regular" />}
                             <span>{promotions.slot2.naziv || (promotions.slot2.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                             <span className="ml-auto font-semibold">
                               {promotions.slot2.tip_popusta === 'percentage' ? `${promotions.slot2.vrednost}%` : money(promotions.slot2.vrednost)} {t('modal.promotions.discountSuffix')}
@@ -1463,11 +1464,11 @@ function AppointmentModal({
                             exit={{ opacity: 0, x: -8 }}
                             className={`mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium ${
                               promotions.slot3.type === 'happy_hour'
-                                ? 'border border-amber-200 bg-amber-50 text-amber-800'
-                                : 'border border-blue-100 bg-blue-50 text-blue-800'
+                                ? 'bg-amber-50 text-amber-800'
+                                : 'bg-blue-50 text-blue-800'
                             }`}
                           >
-                            <span>{promotions.slot3.type === 'happy_hour' ? '⏰' : '🏷️'}</span>
+                            {promotions.slot3.type === 'happy_hour' ? <Clock className="h-4 w-4 flex-shrink-0" weight="regular" /> : <Tag className="h-4 w-4 flex-shrink-0" weight="regular" />}
                             <span>{promotions.slot3.naziv || (promotions.slot3.type === 'happy_hour' ? 'Happy Hour' : t('modal.price.discount'))}</span>
                             <span className="ml-auto font-semibold">
                               {promotions.slot3.tip_popusta === 'percentage' ? `${promotions.slot3.vrednost}%` : money(promotions.slot3.vrednost)} {t('modal.promotions.discountSuffix')}
@@ -1485,7 +1486,7 @@ function AppointmentModal({
                       onClick={handleAddService}
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
-                      className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-gray-300 py-2.5 text-gray-600 transition-colors hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
+                      className="flex w-full items-center gap-2 rounded-[10px] px-1 py-1.5 text-[#7C78FA] transition-opacity hover:opacity-70"
                     >
                       <Plus className="h-4 w-4" weight="bold" />
                       <span className="text-sm font-medium">{t('modal.addService')}</span>
@@ -1499,12 +1500,12 @@ function AppointmentModal({
                         initial={{ opacity: 0, y: 8 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 8 }}
-                        className="overflow-hidden rounded-xl border border-gray-100 bg-gray-50"
+                        className="overflow-hidden rounded-[10px] border border-gray-100"
                       >
-                        <div className="border-b border-gray-100 bg-white px-3 py-2">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">Dodaj storitev</p>
+                        <div className="border-b border-gray-100 px-3 py-2">
+                          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Dodaj storitev</p>
                         </div>
-                        <div className="p-2 space-y-1.5">
+                        <div className="divide-y divide-gray-100">
                           {availableAddOns.map((ao) => {
                             const isSelected = selectedAddOnId === ao.id;
                             const discount = ao.tip_popusta === 'percentage'
@@ -1517,17 +1518,15 @@ function AppointmentModal({
                                 onClick={() => handleSelectAddOn(ao)}
                                 whileHover={{ scale: 1.01 }}
                                 whileTap={{ scale: 0.99 }}
-                                className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-all ${
-                                  isSelected
-                                    ? 'border border-gray-900 bg-white shadow-sm'
-                                    : 'border border-gray-200 bg-white hover:border-gray-300'
+                                className={`flex w-full items-center justify-between px-3 py-2.5 text-left transition-colors ${
+                                  isSelected ? 'bg-[#7C78FA]/10' : 'hover:bg-gray-50'
                                 }`}
                               >
                                 <span className="text-sm font-medium text-gray-900">{ao.naziv}</span>
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-gray-400 line-through">{money(ao.original_cena)}</span>
                                   <span className="text-sm font-semibold text-gray-900">{money(ao.final_cena)}</span>
-                                  <span className="text-xs font-medium text-emerald-600">-{discount}</span>
+                                  <span className="tnum text-xs font-medium text-emerald-600">−{discount}</span>
                                 </div>
                               </motion.button>
                             );
@@ -1539,9 +1538,9 @@ function AppointmentModal({
 
                   {/* Total duration display when multiple services */}
                   {serviceCount > 1 && totalDuration > 0 && (
-                    <div className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3">
-                      <span className="text-sm font-medium text-gray-700">{t('modal.totalDuration')}</span>
-                      <span className="bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
+                    <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+                      <span className="text-sm text-gray-500">{t('modal.totalDuration')}</span>
+                      <span className="tnum text-sm font-semibold text-gray-900">
                         {totalDuration} min
                       </span>
                     </div>
@@ -1567,7 +1566,7 @@ function AppointmentModal({
                   >
                     {selectedEmployee?.ime?.charAt(0)}{selectedEmployee?.priimek?.charAt(0)}
                   </span>
-                  <p className="text-sm font-medium text-[#1A1F36]">
+                  <p className="text-sm font-medium text-gray-900">
                     {selectedEmployee
                       ? `${selectedEmployee.ime} ${selectedEmployee.priimek}`
                       : '-'}
@@ -1683,9 +1682,9 @@ function AppointmentModal({
 
             {/* Duration info display */}
             {formData.cas_zacetek && formData.cas_konec && (
-              <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
-                <span className="text-sm font-medium text-gray-700">{t('modal.appointmentDuration')}</span>
-                <span className="bg-clip-text text-lg font-bold text-transparent" style={gradientTextStyle}>
+              <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3">
+                <span className="text-sm text-gray-500">{t('modal.appointmentDuration')}</span>
+                <span className="tnum text-sm font-semibold text-gray-900">
                   {(() => {
                     const [startH, startM] = formData.cas_zacetek.split(':').map(Number);
                     const [endH, endM] = formData.cas_konec.split(':').map(Number);
@@ -1804,9 +1803,9 @@ function AppointmentModal({
                       ...prev,
                       cena: Math.max(0, (prev.cena ?? 0) - 5)
                     }))}
-                    className="flex h-12 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-all hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[10px] bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-300"
                   >
-                    <span className="text-xl font-semibold">−</span>
+                    <Minus className="h-4 w-4" weight="bold" />
                   </button>
 
                   {/* Price input */}
@@ -1821,9 +1820,9 @@ function AppointmentModal({
                         cena: e.target.value ? parseFloat(e.target.value) : undefined
                       }))}
                       placeholder="0.00"
-                      className="w-full rounded-lg border border-gray-200 py-3 pr-12 text-center text-2xl font-bold text-[#1A1F36] placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                      className="tnum w-full rounded-[10px] border border-gray-200 py-2.5 pr-10 text-center text-xl font-semibold text-gray-900 placeholder-gray-400 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-semibold text-gray-500">€</span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-medium text-gray-400">€</span>
                   </div>
 
                   {/* Increase button */}
@@ -1833,9 +1832,9 @@ function AppointmentModal({
                       ...prev,
                       cena: (prev.cena ?? 0) + 5
                     }))}
-                    className="flex h-12 w-12 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition-all hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[10px] bg-gray-100 text-gray-700 transition-colors hover:bg-gray-200 active:bg-gray-300"
                   >
-                    <span className="text-xl font-semibold">+</span>
+                    <Plus className="h-4 w-4" weight="bold" />
                   </button>
                 </div>
               )}
@@ -1845,10 +1844,10 @@ function AppointmentModal({
             {!isViewMode && (
               <div className={`${sectionClass} space-y-4`}>
                 {/* Toggle to enable discount */}
-                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+                <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div className="font-semibold text-gray-900">{t('modal.discount.add')}</div>
-                    <div className="text-sm text-gray-600">{t('modal.discount.lower')}</div>
+                    <div className="text-sm font-medium text-gray-900">{t('modal.discount.add')}</div>
+                    <div className="text-[13px] text-gray-500">{t('modal.discount.lower')}</div>
                   </div>
                   <button
                     type="button"
@@ -1888,7 +1887,7 @@ function AppointmentModal({
                           popust: e.target.value ? parseFloat(e.target.value) : undefined
                         }))}
                         placeholder="10"
-                        className="w-full rounded-lg border border-gray-200 py-2.5 pl-4 pr-10 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        className="tnum w-full rounded-[10px] border border-gray-200 py-2.5 pl-4 pr-10 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                       />
                       <span className="absolute right-4 top-[calc(50%+12px)] -translate-y-1/2 text-gray-500">
                         {formData.popust_tip === '€' ? '€' : '%'}
@@ -1899,14 +1898,14 @@ function AppointmentModal({
                         {t('modal.discount.type')}
                       </label>
                       {/* Toggle buttons for discount type */}
-                      <div className="flex h-[46px] items-center gap-1 rounded-lg bg-gray-100 p-1">
+                      <div className="flex h-[42px] items-center gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
                         <button
                           type="button"
                           onClick={() => setFormData((prev) => ({ ...prev, popust_tip: '€' }))}
-                          className={`flex-1 h-full rounded-lg font-medium transition-all ${
+                          className={`h-full flex-1 rounded-[7px] font-medium transition-colors ${
                             formData.popust_tip === '€'
-                              ? 'bg-white shadow-sm text-gray-900'
-                              : 'text-gray-600 hover:text-gray-900'
+                              ? 'border border-black/[0.04] bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                              : 'text-gray-500 hover:text-gray-900'
                           }`}
                         >
                           <span className="text-lg">€</span>
@@ -1914,10 +1913,10 @@ function AppointmentModal({
                         <button
                           type="button"
                           onClick={() => setFormData((prev) => ({ ...prev, popust_tip: '%' }))}
-                          className={`flex-1 h-full rounded-lg font-medium transition-all ${
+                          className={`h-full flex-1 rounded-[7px] font-medium transition-colors ${
                             formData.popust_tip === '%'
-                              ? 'bg-white shadow-sm text-gray-900'
-                              : 'text-gray-600 hover:text-gray-900'
+                              ? 'border border-black/[0.04] bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                              : 'text-gray-500 hover:text-gray-900'
                           }`}
                         >
                           <span className="text-lg">%</span>
@@ -1931,16 +1930,16 @@ function AppointmentModal({
 
             {/* Final price display */}
             {((formData.cena && formData.cena > 0) || (formData.popust && formData.popust > 0)) && (
-              <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
+              <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700">{t('modal.discount.final')}</span>
+                  <span className="text-sm text-gray-500">{t('modal.discount.final')}</span>
                   {formData.popust && formData.popust > 0 && (
                     <span className="text-xs text-gray-400 line-through">
                       {money(formData.cena ?? 0)}
                     </span>
                   )}
                 </div>
-                <span className="bg-clip-text text-xl font-bold text-transparent" style={gradientTextStyle}>
+                <span className="tnum text-lg font-semibold text-gray-900">
                   {money(calculateFinalPrice())}
                 </span>
               </div>
@@ -1997,7 +1996,7 @@ function AppointmentModal({
                   onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
                   placeholder={t('modal.internalNotesPlaceholder')}
                   rows={3}
-                  className="w-full resize-none rounded-lg border border-yellow-200 bg-white px-4 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  className="w-full resize-none rounded-[10px] border border-amber-200 bg-amber-50/30 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-amber-400 focus:outline-none focus:ring-[3px] focus:ring-amber-200/50"
                 />
               </div>
             ) : (
@@ -2012,7 +2011,7 @@ function AppointmentModal({
                     onChange={(e) => setFormData((prev) => ({ ...prev, internal_opombe: e.target.value }))}
                     placeholder={t('modal.internalNotesPlaceholder')}
                     rows={3}
-                    className="w-full resize-none rounded-lg border border-yellow-200 bg-white px-4 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 transition-colors focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                    className="w-full resize-none rounded-[10px] border border-amber-200 bg-amber-50/30 px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-amber-400 focus:outline-none focus:ring-[3px] focus:ring-amber-200/50"
                   />
                 </div>
               ) : (
@@ -2021,8 +2020,9 @@ function AppointmentModal({
                   onClick={() => setShowInternalNotes(true)}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-yellow-300 bg-white py-3 text-yellow-700 transition-colors hover:bg-yellow-50"
+                  className="flex w-full items-center gap-2 rounded-xl bg-white px-4 py-3 text-amber-700 transition-colors hover:bg-amber-50"
                 >
+                  <Plus className="h-4 w-4" weight="bold" />
                   <span className="text-sm font-medium">{t('modal.addInternalNotes')}</span>
                 </motion.button>
               )
@@ -2042,10 +2042,10 @@ function AppointmentModal({
             {/* Ghost termin toggle — owner/admin always see it, staff only if permission granted */}
             {!isViewMode && (role === 'owner' || role === 'admin' || (role === 'staff' && (permissions?.can_create_ghost_termin ?? false))) && (
               <div className={`${sectionClass} space-y-2`}>
-                <div className="flex items-center justify-between rounded-lg bg-gray-50 p-4">
+                <div className="flex items-center justify-between gap-4">
                   <div>
-                    <div id="ghost-termin-label" className="font-semibold text-gray-900">{t('ghost.title')}</div>
-                    <div className="text-sm text-gray-600">{t('ghost.description')}</div>
+                    <div id="ghost-termin-label" className="text-sm font-medium text-gray-900">{t('ghost.title')}</div>
+                    <div className="text-[13px] text-gray-500">{t('ghost.description')}</div>
                   </div>
                   <button
                     type="button"
@@ -2065,8 +2065,8 @@ function AppointmentModal({
                   </button>
                 </div>
                 {isGhostTermin && (
-                  <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-                    <Warning className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" weight="fill" />
+                  <div className="flex items-start gap-2 rounded-[10px] bg-amber-50 px-3 py-2.5">
+                    <Warning className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" weight="regular" />
                     <p className="text-xs text-amber-700">
                       {t('ghost.warning')}
                     </p>
@@ -2077,9 +2077,9 @@ function AppointmentModal({
 
             {/* Resource conflict warning */}
             {!isViewMode && resourceConflicts.length > 0 && (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
                 <div className="flex items-start gap-2.5">
-                  <Warning weight="fill" className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" />
+                  <Warning weight="regular" className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" />
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-amber-800">
                       {resourceConflictTitle}
@@ -2104,12 +2104,12 @@ function AppointmentModal({
 
             {/* Actions */}
             {!isViewMode && (
-              <div className="flex justify-end gap-3 border-t border-gray-100 bg-white px-5 py-4 sm:px-6">
+              <div className="glass-bar flex justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
+                  className="flex-1 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 sm:flex-none"
                 >
                   {t('modal.actions.cancel')}
                 </motion.button>
@@ -2117,12 +2117,7 @@ function AppointmentModal({
                   type="submit"
                   disabled={isSaving}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-lg px-6 py-2.5 text-sm font-medium text-white shadow-lg transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
-                  style={{
-                    backgroundImage: isSaving
-                      ? 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)'
-                      : gradientTextStyle.backgroundImage,
-                  }}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                 >
                   {isSaving && (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white
