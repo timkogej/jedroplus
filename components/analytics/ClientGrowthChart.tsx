@@ -1,8 +1,9 @@
 'use client';
 
 import { memo, useState, useEffect } from 'react';
-import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
+import ChartCard from './ChartCard';
+import { AXIS, GRID, TOOLTIP, NO_ANIM } from './chartTheme';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { fetchClientGrowthData, type ClientGrowthData } from '@/lib/analytics/calculations';
 import {
@@ -41,44 +42,25 @@ function ClientGrowthChart({ companyId, timePeriod, customRange }: ClientGrowthC
     }
   }, [companyId, timePeriod, customRange]);
 
-  if (isLoading) {
-    return (
-      <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <div className="h-6 w-32 animate-pulse rounded bg-gray-200" />
-          <div className="mt-2 h-4 w-48 animate-pulse rounded bg-gray-200" />
-        </div>
-        <div className="h-[300px] animate-pulse rounded-lg bg-gray-100" />
-      </div>
-    );
-  }
-
   const totalNewClients = chartData.reduce((sum, d) => sum + d.nove, 0);
   const totalLabel = t('clientGrowth.totalLabel');
   const newLabel = t('clientGrowth.newLabel');
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm"
-    >
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">{t('clientGrowth.title')}</h3>
-          <p className="mt-1 text-sm text-gray-500">{t('clientGrowth.subtitle')}</p>
-        </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-gray-900">+{totalNewClients}</div>
+    <ChartCard
+      title={t('clientGrowth.title')}
+      subtitle={t('clientGrowth.subtitle')}
+      isLoading={isLoading}
+      isEmpty={chartData.length === 0}
+      emptyLabel={t('clientGrowth.noData')}
+      height={250}
+      aside={
+        <>
+          <div className="tnum text-2xl font-semibold text-gray-900">+{totalNewClients}</div>
           <div className="text-xs text-gray-500">{t('clientGrowth.newClientsCount')}</div>
-        </div>
-      </div>
-
-      {chartData.length === 0 ? (
-        <div className="flex h-[250px] items-center justify-center text-gray-500">
-          {t('clientGrowth.noData')}
-        </div>
-      ) : (
+        </>
+      }
+    >
         <ResponsiveContainer width="100%" height={250}>
           <AreaChart data={chartData}>
             <defs>
@@ -87,15 +69,12 @@ function ClientGrowthChart({ companyId, timePeriod, customRange }: ClientGrowthC
                 <stop offset="100%" stopColor="#06B6D4" stopOpacity={0.2} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#9CA3AF" />
-            <YAxis tick={{ fontSize: 12 }} stroke="#9CA3AF" />
+            <CartesianGrid {...GRID} />
+            <XAxis dataKey="date" {...AXIS} />
+            <YAxis {...AXIS} />
             <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
-              }}
+              contentStyle={TOOLTIP.contentStyle}
+              labelStyle={TOOLTIP.labelStyle}
               formatter={(value, name) => {
                 if (name === totalLabel) return [value, String(name)];
                 return [value, newLabel];
@@ -109,11 +88,11 @@ function ClientGrowthChart({ companyId, timePeriod, customRange }: ClientGrowthC
               fillOpacity={1}
               fill="url(#clientGradient)"
               name={totalLabel}
+              {...NO_ANIM}
             />
           </AreaChart>
         </ResponsiveContainer>
-      )}
-    </motion.div>
+    </ChartCard>
   );
 }
 

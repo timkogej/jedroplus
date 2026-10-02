@@ -1,6 +1,5 @@
 export { default as AnalyticsHeader } from './AnalyticsHeader';
 export { default as KeyMetricsCards } from './KeyMetricsCards';
-export { default as MetricCard } from './MetricCard';
 export { default as RevenueBookingsChart } from './RevenueBookingsChart';
 export { default as AppointmentsByServiceChart } from './AppointmentsByServiceChart';
 export { default as AppointmentsByEmployeeChart } from './AppointmentsByEmployeeChart';
@@ -9,3 +8,4 @@ export { default as ClientGrowthChart } from './ClientGrowthChart';
 export { default as TopPerformersTable } from './TopPerformersTable';
 export { default as RetentionCancellationAnalysis } from './RetentionCancellationAnalysis';
 export { default as PromotionsAnalytics } from './PromotionsAnalytics';
+export { default as ChartCard } from './ChartCard';

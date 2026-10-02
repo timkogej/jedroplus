@@ -71,9 +71,10 @@
   },
   "mainLink": {
     "title": "Main booking link",
-    "subtitle": "Clients pick a service and a free slot themselves. Add it to your website, Instagram or Google; we also include it in messages. To collect client details without a booking, use the QR code in Settings → General.",
+    "subtitle": "The client picks a service and a free slot themselves. Add it to your website, Instagram or Google — we also send it in messages. For the counter, use the QR code.",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "qrButton": "Print code"
   },
   "mgmtLink": {
     "title": "Rescheduling & cancellation link",
@@ -209,6 +210,32 @@
       "save": "Save",
       "saving": "Saving...",
       "saveError": "An error occurred while saving"
+    }
+  },
+  "qr": {
+    "title": "QR codes",
+    "subtitle": "Print them for the counter, the door or the window.",
+    "booking": {
+      "title": "For booking an appointment",
+      "subtitle": "The code points to your main booking page. If you change the page design later, the printed code stays correct.",
+      "noMainLink": "No main booking link is selected, so the code cannot be created yet.",
+      "goToReservations": "Choose a main link"
+    },
+    "registration": {
+      "title": "For registering a new client",
+      "subtitle": "The client enters their details and joins your client list. This does not book an appointment.",
+      "noSlug": "Company slug is not set."
+    },
+    "poster": {
+      "cta": "Book an appointment",
+      "chooseLook": "Choose a look",
+      "format": "A6 — 105 × 148 mm",
+      "looks": {
+        "cisti": "Clean",
+        "barve": "Your colours",
+        "eleganten": "Elegant",
+        "temen": "Dark"
+      }
     }
   }
 }

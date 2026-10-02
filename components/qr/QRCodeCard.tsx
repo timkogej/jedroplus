@@ -5,25 +5,44 @@ import QRCode from 'react-qr-code';
 import { toPng } from 'html-to-image';
 import { DownloadSimple, Copy, Check, Info } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
+import { useTranslations } from 'next-intl';
 
 interface QRCodeCardProps {
   slug: string;
   size?: number;
   showInfo?: boolean;
   compact?: boolean;
+  /**
+   * Kam kaže koda. Brez te lastnosti se sestavi registracijska povezava iz
+   * `slug` — tako se komponenta na starih klicnih mestih obnaša nespremenjeno.
+   */
+  url?: string;
+  /** Ime prenesene datoteke brez končnice. Privzeto `qr-<slug>`. */
+  fileName?: string;
+  /** Besedilo v modrem okvirju, ko je `showInfo`. Privzeto registracijsko. */
+  infoText?: string;
 }
 
-export function QRCodeCard({ slug, size = 280, showInfo = false, compact = false }: QRCodeCardProps) {
+export function QRCodeCard({
+  slug,
+  size = 280,
+  showInfo = false,
+  compact = false,
+  url: urlProp,
+  fileName,
+  infoText,
+}: QRCodeCardProps) {
+  const t = useTranslations('common.qr');
   const qrRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
-  const url = `https://client.jedroplus.com/${slug}`;
+  const url = urlProp ?? `https://client.jedroplus.com/${slug}`;
 
   const handleDownload = async () => {
     if (!qrRef.current) return;
     try {
       const dataUrl = await toPng(qrRef.current, { cacheBust: true, pixelRatio: 2 });
       const link = document.createElement('a');
-      link.download = `qr-${slug}.png`;
+      link.download = `${fileName ?? `qr-${slug}`}.png`;
       link.href = dataUrl;
       link.click();
     } catch (e) {
@@ -71,7 +90,7 @@ export function QRCodeCard({ slug, size = 280, showInfo = false, compact = false
           className={`${btnBase} bg-gray-900 text-white hover:bg-gray-700`}
         >
           <DownloadSimple className={iconSize} weight="bold" />
-          Prenesi PNG
+          {t('downloadPng')}
         </motion.button>
 
         <motion.button
@@ -85,17 +104,14 @@ export function QRCodeCard({ slug, size = 280, showInfo = false, compact = false
           ) : (
             <Copy className={iconSize} weight="regular" />
           )}
-          {copied ? 'Kopirano ✓' : 'Kopiraj povezavo'}
+          {copied ? t('copied') : t('copyLink')}
         </motion.button>
       </div>
 
       {showInfo && (
         <div className="mt-2 flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-xl p-4 max-w-sm text-sm text-blue-700">
           <Info className="w-5 h-5 flex-shrink-0 mt-0.5" weight="fill" />
-          <p>
-            To QR kodo lahko natisnete in jo postavite v vaš salon ali ordinacijo.
-            Stranke jo skenirajo s telefonom in v manj kot minuti vnesejo svoje podatke.
-          </p>
+          <p>{infoText ?? t('registrationInfo')}</p>
         </div>
       )}
     </div>
