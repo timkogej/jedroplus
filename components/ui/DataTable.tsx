@@ -277,7 +277,7 @@ export function DataTable<T>({
             </div>
 
             {mobile.trailing && (
-              <div className="flex flex-shrink-0 items-center [&_button]:p-1.5">{mobile.trailing(row)}</div>
+              <div className="flex flex-shrink-0 items-center [&_button:not([role=switch])]:p-1.5">{mobile.trailing(row)}</div>
             )}
           </div>
         ))}

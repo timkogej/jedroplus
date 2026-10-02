@@ -7,6 +7,8 @@ import { Plus, PencilSimple, Trash, X, MagnifyingGlass, Clock } from '@phosphor-
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
+import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
+import { MiniSwitch } from '@/components/ui/MiniSwitch';
 import { fetchStoritve } from '@/lib/companyScope';
 import type { Storitev } from '@/types/appointments';
 
@@ -164,89 +166,100 @@ export default function HappyHoursPage() {
     return naziv.toLowerCase().includes(serviceSearch.toLowerCase());
   });
 
-  if (loading) return <div className="flex items-center justify-center py-16"><div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent" /></div>;
+  const discountLabel = (hh: HappyHour) =>
+    hh.tip_popusta === 'percentage' ? `${hh.vrednost}%` : money(hh.vrednost);
+
+  function renderActions(hh: HappyHour) {
+    return (
+      <div className="flex items-center justify-end gap-1">
+        <MiniSwitch checked={hh.aktiven} onChange={() => handleToggleActive(hh)} />
+        <button type="button" onClick={() => openEdit(hh)} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900">
+          <PencilSimple className="h-4 w-4" weight="regular" />
+        </button>
+        <button type="button" onClick={() => setDeleteId(hh.id)} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
+          <Trash className="h-4 w-4" weight="regular" />
+        </button>
+      </div>
+    );
+  }
+
+  const statusBadge = (hh: HappyHour) => (
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${hh.aktiven ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+      {hh.aktiven ? tc('status.active') : tc('status.inactive')}
+    </span>
+  );
+
+  const dayChips = (hh: HappyHour) => (
+    <div className="flex flex-wrap gap-1">
+      {[...(hh.dnevi_v_tednu || [])].sort().map((d) => (
+        <span key={d} className="rounded-md bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700">{DAYS[d]}</span>
+      ))}
+    </div>
+  );
+
+  const columns: DataTableColumn<HappyHour>[] = [
+    { id: 'naziv', header: t('happyHours.table.name'), sortValue: (h) => h.naziv.toLowerCase(),
+      cell: (h) => <span className="text-sm font-medium text-gray-900">{h.naziv}</span> },
+    { id: 'days', header: t('happyHours.table.days'), cell: (h) => dayChips(h) },
+    { id: 'time', header: t('happyHours.table.time'), sortValue: (h) => h.cas_zacetek || '',
+      cell: (h) => <span className="tnum whitespace-nowrap text-sm text-gray-600">{h.cas_zacetek?.substring(0, 5)} – {h.cas_konec?.substring(0, 5)}</span> },
+    { id: 'value', header: t('happyHours.table.discount'), sortValue: (h) => h.vrednost,
+      cell: (h) => <span className="tnum text-sm font-semibold text-gray-900">{discountLabel(h)}</span> },
+    { id: 'services', header: t('happyHours.table.services'),
+      cell: (h) => h.vse_storitve
+        ? <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">{t('happyHours.servicesAll')}</span>
+        : <span className="tnum rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-700">{(h.storitev_ids || []).length}</span> },
+    { id: 'status', header: t('happyHours.table.status'), cell: (h) => statusBadge(h) },
+    { id: 'actions', header: t('happyHours.table.actions'), align: 'right', cell: (h) => renderActions(h) },
+  ];
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-        <h3 className="text-sm font-medium text-gray-600">{t('happyHours.count', { count: happyHours.length })}</h3>
-        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={openCreate} className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]">
-          <Plus className="w-4 h-4" weight="bold" />
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <p className="tnum text-[13px] text-gray-500">{t('happyHours.count', { count: happyHours.length })}</p>
+        <button
+          type="button"
+          onClick={openCreate}
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
+        >
+          <Plus size={17} weight="bold" />
           {t('happyHours.newButton')}
-        </motion.button>
+        </button>
       </div>
 
-      {happyHours.length === 0 ? (
-        <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-400 shadow-sm">
-          <Clock className="w-10 h-10 mx-auto mb-3 opacity-40" weight="thin" />
-          <p className="text-sm">{t('happyHours.empty')}</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100">
-                {[
-                  t('happyHours.table.name'),
-                  t('happyHours.table.days'),
-                  t('happyHours.table.time'),
-                  t('happyHours.table.discount'),
-                  t('happyHours.table.services'),
-                  t('happyHours.table.status'),
-                  t('happyHours.table.actions'),
-                ].map((h) => (
-                  <th key={h} className={`py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider ${h === t('happyHours.table.actions') ? 'text-right' : 'text-left'}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <AnimatePresence>
-                {happyHours.map((hh, i) => (
-                  <motion.tr key={hh.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.04 }} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="py-3.5 px-4 font-medium text-gray-900">{hh.naziv}</td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex flex-wrap gap-1">
-                        {(hh.dnevi_v_tednu || []).sort().map((d) => (
-                          <span key={d} className="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">{DAYS[d]}</span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 text-gray-600">{hh.cas_zacetek?.substring(0, 5)} – {hh.cas_konec?.substring(0, 5)}</td>
-                    <td className="py-3.5 px-4 font-semibold text-gray-900">{hh.tip_popusta === 'percentage' ? `${hh.vrednost}%` : money(hh.vrednost)}</td>
-                    <td className="py-3.5 px-4">
-                      {hh.vse_storitve
-                        ? <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">{t('happyHours.servicesAll')}</span>
-                        : <span className="rounded-lg bg-gray-50 px-2 py-1 text-xs text-gray-700 ring-1 ring-gray-100">{(hh.storitev_ids || []).length}</span>
-                      }
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${hh.aktiven ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
-                        {hh.aktiven ? tc('status.active') : tc('status.inactive')}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleToggleActive(hh)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${hh.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
-                          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${hh.aktiven ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
-                        </button>
-                        <button onClick={() => openEdit(hh)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"><PencilSimple className="w-4 h-4" weight="regular" /></button>
-                        <button onClick={() => setDeleteId(hh.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"><Trash className="w-4 h-4" weight="regular" /></button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable<HappyHour>
+        rows={happyHours}
+        columns={columns}
+        rowKey={(h) => h.id}
+        isLoading={loading}
+        pageSize={20}
+        empty={
+          <div className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12 text-center">
+            <Clock className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+            <p className="text-sm text-gray-500">{t('happyHours.empty')}</p>
+          </div>
+        }
+        mobile={{
+          title: (h) => h.naziv,
+          subtitle: (h) => (
+            <span className="tnum">{h.cas_zacetek?.substring(0, 5)} – {h.cas_konec?.substring(0, 5)} · {discountLabel(h)}</span>
+          ),
+          meta: (h) => (
+            <div className="flex flex-wrap items-center gap-2">
+              {dayChips(h)}
+              {statusBadge(h)}
+            </div>
+          ),
+          trailing: (h) => renderActions(h),
+        }}
+      />
 
       {/* Modal */}
       <AnimatePresence>
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-xl">
               <div className="flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
                 <h2 className="text-lg font-semibold text-gray-900">
                   {editingId ? t('happyHours.modal.editTitle') : t('happyHours.modal.createTitle')}
@@ -357,7 +370,7 @@ export default function HappyHoursPage() {
 
               <div className="flex justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
                 <button onClick={() => setModalOpen(false)} className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900">{t('shared.cancelButton')}</button>
-                <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f] disabled:opacity-50">
+                <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50">
                   {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                   {editingId ? t('shared.saveButton') : t('shared.createButton')}
                 </motion.button>
@@ -372,7 +385,7 @@ export default function HappyHoursPage() {
         {deleteId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteId(null)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-xl">
               <p className="text-base font-semibold text-gray-900 mb-2">{t('happyHours.deleteConfirm.title')}</p>
               <p className="text-sm text-gray-500 mb-5">{t('shared.cannotUndo')}</p>
               <div className="flex gap-3">
