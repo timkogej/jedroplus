@@ -23,6 +23,7 @@ import { callN8nAction } from '@/src/lib/n8nClient';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
 import { useTranslations } from 'next-intl';
+import { sheet } from '@/components/ui/sheetClasses';
 
 const SENDING_LANGUAGES = [
   { value: 'sl', label: 'Slovenščina' },
@@ -446,7 +447,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   };
 
   const lockedFieldClass = 'flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-sm text-gray-700';
-  const innerPanelClass = 'space-y-4 rounded-2xl border border-gray-100 bg-gray-50 p-4';
+  const innerPanelClass = 'space-y-4 rounded-[10px] bg-gray-50 p-4';
   const infoPanelClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
   const textareaClass = 'w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10';
 
@@ -466,7 +467,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                 : 'text-gray-500 hover:text-gray-900'
             }`}
           >
-            <EnvelopeSimple className="h-4 w-4" weight={value === 'email' ? 'fill' : 'regular'} />
+            <EnvelopeSimple className="h-4 w-4" weight="regular" />
             Email
           </button>
           <button
@@ -497,32 +498,35 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={onClose}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className={`${sheet.panel} sm:max-w-xl`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between gap-3 border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
-              <div className="min-w-0 flex-1">
-                <h2 className="truncate text-xl font-semibold text-gray-900">
-                  {t('modal.title')}
-                </h2>
-                <p className="mt-0.5 truncate text-sm text-gray-500">{t('modal.subtitle')}</p>
-              </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <SaveIndicator saving={saving} lastSaved={lastSaved} />
-                <button
-                  onClick={onClose}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
-                >
-                  <X className="h-5 w-5" weight="bold" />
-                </button>
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h2 className={`${sheet.title} truncate`}>
+                    {t('modal.title')}
+                  </h2>
+                  <p className={`${sheet.subtitle} truncate`}>{t('modal.subtitle')}</p>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <SaveIndicator saving={saving} lastSaved={lastSaved} />
+                  <button
+                    onClick={onClose}
+                    className={sheet.close}
+                  >
+                    <X className="h-5 w-5" weight="regular" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -531,7 +535,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
               {isLoading ? (
                 <div className="space-y-6">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="bg-gray-50 rounded-xl p-6 animate-pulse">
+                    <div key={i} className="bg-white rounded-xl p-6 animate-pulse">
                       <div className="h-6 bg-gray-200 rounded w-1/4 mb-4" />
                       <div className="space-y-3">
                         <div className="h-10 bg-gray-100 rounded" />
@@ -784,7 +788,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                             <div className="font-semibold text-gray-900 text-sm">{t('modal.before.smsSettings')}</div>
 
                             {/* Mode selector */}
-                            <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
+                            <div className="grid grid-cols-2 gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
                               {([
                                 { value: 'ai' as const, labelKey: 'modal.before.modeAI' },
                                 { value: 'manual' as const, labelKey: 'modal.before.modeManual' },
@@ -793,9 +797,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   key={opt.value}
                                   type="button"
                                   onClick={() => setSmsModePred(opt.value)}
-                                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                                  className={`rounded-[7px] px-3 py-1.5 text-sm font-medium transition-all ${
                                     smsModePred === opt.value
-                                      ? 'bg-white text-gray-900 shadow-sm'
+                                      ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
                                       : 'text-gray-500 hover:text-gray-900'
                                   }`}
                                 >
@@ -941,7 +945,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                             <div className="font-semibold text-gray-900 text-sm">{t('modal.after.smsSettings')}</div>
 
                             {/* Mode selector */}
-                            <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
+                            <div className="grid grid-cols-2 gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
                               {([
                                 { value: 'ai' as const, labelKey: 'modal.after.modeAI' },
                                 { value: 'manual' as const, labelKey: 'modal.after.modeManual' },
@@ -950,9 +954,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   key={opt.value}
                                   type="button"
                                   onClick={() => setSmsModePo(opt.value)}
-                                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                                  className={`rounded-[7px] px-3 py-1.5 text-sm font-medium transition-all ${
                                     smsModePo === opt.value
-                                      ? 'bg-white text-gray-900 shadow-sm'
+                                      ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
                                       : 'text-gray-500 hover:text-gray-900'
                                   }`}
                                 >
@@ -1061,12 +1065,12 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                         {/* Discount option — hidden when SMS LP (custom template handles its own content) */}
                         {!(chanelPo === 'sms' && smsModePo === 'manual') && (
                           <>
-                            <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
+                            <div className="flex items-center justify-between gap-4 rounded-[10px] bg-gray-50 p-4">
                               <div>
-                                <div className="font-semibold text-gray-900">
+                                <div className="text-sm font-medium text-gray-900">
                                   {t('modal.after.discountTitle')}
                                 </div>
-                                <div className="text-sm text-gray-600 mt-1">
+                                <div className="mt-0.5 text-sm text-gray-500">
                                   {t('modal.after.discountDesc')}
                                 </div>
                               </div>
@@ -1200,13 +1204,13 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 border-t border-gray-100 bg-white px-5 py-4 sm:px-6">
+            <div className={sheet.footer}>
               <motion.button
                 type="button"
                 onClick={onClose}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                className={sheet.cancel}
               >
                 {t('modal.closeButton')}
               </motion.button>
@@ -1216,7 +1220,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                 disabled={saving || isLoading}
                 whileHover={{ scale: saving ? 1 : 1.02 }}
                 whileTap={{ scale: saving ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500 disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 {saving ? (
                   <>

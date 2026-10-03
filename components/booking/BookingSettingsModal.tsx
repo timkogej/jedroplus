@@ -20,6 +20,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
+import { sheet } from '@/components/ui/sheetClasses';
 
 interface BookingSettingsModalProps {
   isOpen: boolean;
@@ -43,21 +44,21 @@ function ChannelPicker({
 }) {
   return (
     <div className="mt-3 flex flex-col gap-2">
-      <div className="flex flex-wrap gap-2">
+      <div className="inline-flex w-fit flex-wrap gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
         <button
           type="button"
           onClick={() => onChange('email')}
-          className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors
+          className={`flex items-center gap-2 rounded-[7px] px-3 py-1.5 text-sm font-medium transition-colors
                      ${value === 'email'
-                       ? 'border-gray-900 bg-gray-900 text-white'
-                       : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-900'
+                       ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                       : 'text-gray-500 hover:text-gray-900'
                      }`}
         >
-          <EnvelopeSimple className="h-4 w-4" weight={value === 'email' ? 'fill' : 'regular'} />
+          <EnvelopeSimple className="h-4 w-4" weight="regular" />
           Email
         </button>
         {smsLocked ? (
-          <div className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm font-medium text-gray-400">
+          <div className="flex cursor-not-allowed items-center gap-2 rounded-[7px] px-3 py-1.5 text-sm font-medium text-gray-400">
             <DeviceMobile className="h-4 w-4" weight="regular" />
             SMS
             <span className="text-xs text-gray-400">{t('modal.confirmations.smsUnavailable')}</span>
@@ -66,13 +67,13 @@ function ChannelPicker({
           <button
             type="button"
             onClick={() => onChange('sms')}
-            className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors
+            className={`flex items-center gap-2 rounded-[7px] px-3 py-1.5 text-sm font-medium transition-colors
                        ${value === 'sms'
-                         ? 'border-gray-900 bg-gray-900 text-white'
-                         : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-900'
+                         ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                         : 'text-gray-500 hover:text-gray-900'
                        }`}
           >
-            <DeviceMobile className="h-4 w-4" weight={value === 'sms' ? 'fill' : 'regular'} />
+            <DeviceMobile className="h-4 w-4" weight="regular" />
             SMS
           </button>
         )}
@@ -354,31 +355,34 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={onClose}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className={`${sheet.panel} sm:max-w-2xl`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">{t('modal.title')}</h2>
-                <p className="text-sm text-gray-500 mt-0.5">{t('modal.subtitle')}</p>
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className={sheet.title}>{t('modal.title')}</h2>
+                <p className={sheet.subtitle}>{t('modal.subtitle')}</p>
               </div>
               <div className="flex items-center gap-3">
                 <SaveIndicator saving={saving} lastSaved={lastSaved} />
                 <button
                   onClick={onClose}
-                  className="rounded-lg p-2 transition-colors hover:bg-gray-100"
+                  className={sheet.close}
                 >
-                  <X className="w-5 h-5 text-gray-500" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </button>
               </div>
+            </div>
             </div>
 
             {/* Content */}
@@ -386,7 +390,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
               {isLoading ? (
                 <div className="space-y-5">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-5">
+                    <div key={i} className="animate-pulse rounded-xl bg-white p-5">
                       <div className="mb-4 h-4 w-1/4 rounded bg-gray-100" />
                       <div className="space-y-3">
                         <div className="h-10 bg-gray-100 rounded" />
@@ -417,7 +421,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         value={koledarUre}
                         setValue={(value) => setKoledarUre(value as '15' | '30' | '60')}
                         placeholder={t('modal.general.intervalPlaceholder')}
-                        className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
+                        className="[&>button]:rounded-[10px]"
                       >
                         <SelectOption value="15">{t('modal.general.interval15')}</SelectOption>
                         <SelectOption value="30">{t('modal.general.interval30')}</SelectOption>
@@ -440,7 +444,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                     </SettingRow>
 
                     {(!hasOnlinePaymentAccess || checkingPosSubscription) && (
-                      <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                      <div className="rounded-[10px] bg-gray-50 p-3">
                         <p className="mb-2 text-xs font-medium text-gray-600">
                           {checkingPosSubscription ? t('modal.payments.checking') : t('modal.payments.requirementsTitle')}
                         </p>
@@ -471,7 +475,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             value={stripePaymentMode}
                             setValue={(value) => setStripePaymentMode(value === 'deposit' ? 'deposit' : 'full')}
                             placeholder={t('modal.payments.modePlaceholder')}
-                            className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
+                            className="[&>button]:rounded-[10px]"
                           >
                             <SelectOption value="full">{t('modal.payments.modeFull')}</SelectOption>
                             <SelectOption value="deposit">{t('modal.payments.modeDeposit')}</SelectOption>
@@ -522,7 +526,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                             : t('modal.mainLink.noLinksAvailable')
                         }
                         disabled={!hasBookingLinkOptions}
-                        className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
+                        className="[&>button]:rounded-[10px]"
                       >
                         {bookingLinkOptions.map((option) => (
                           <SelectOption key={option.value} value={option.value}>
@@ -532,7 +536,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                       </Select>
                     </SettingRow>
                     {mainBookingLink && (
-                      <div className="rounded-lg border border-gray-100 bg-gray-50/70 px-3 py-2">
+                      <div className="rounded-[10px] bg-gray-50 px-3 py-2">
                         <p className="break-all text-xs text-gray-500">{mainBookingLink}</p>
                       </div>
                     )}
@@ -581,11 +585,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           />
 
                           {potrdiloChannel === 'sms' && !smsLockedForPlan && (
-                            <div className="mt-3 space-y-4 rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                            <div className="mt-3 space-y-4 rounded-[10px] bg-gray-50 p-4">
                               <div className="font-semibold text-gray-900 text-sm">{t('modal.confirmations.smsSettings')}</div>
 
                               {/* Mode selector */}
-                              <div className="grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
+                              <div className="grid grid-cols-2 gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
                                 {([
                                   { value: 'ai' as const, labelKey: 'modal.confirmations.modeAI' },
                                   { value: 'manual' as const, labelKey: 'modal.confirmations.modeManual' },
@@ -594,9 +598,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                                     key={opt.value}
                                     type="button"
                                     onClick={() => setSmsModePotrdilo(opt.value)}
-                                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                                    className={`rounded-[7px] px-3 py-1.5 text-sm font-medium transition-all ${
                                       smsModePotrdilo === opt.value
-                                        ? 'bg-white text-gray-900 shadow-sm'
+                                        ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
                                         : 'text-gray-500 hover:text-gray-900'
                                     }`}
                                   >
@@ -679,7 +683,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         value={cancelApptDays}
                         setValue={setCancelApptDays}
                         placeholder={t('modal.policy.selectPlaceholder')}
-                        className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
+                        className="[&>button]:rounded-[10px]"
                       >
                         <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
                         <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
@@ -699,7 +703,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         value={rescheduleApptDays}
                         setValue={setRescheduleApptDays}
                         placeholder={t('modal.policy.selectPlaceholder')}
-                        className="[&>button]:rounded-lg [&>button]:focus:ring-gray-900/10"
+                        className="[&>button]:rounded-[10px]"
                       >
                         <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
                         <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
@@ -821,13 +825,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
             </div>
 
             {/* Footer */}
-            <div className="flex flex-shrink-0 justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
+            <div className={sheet.footer}>
               <motion.button
                 type="button"
                 onClick={onClose}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                className={sheet.cancel}
               >
                 {t('modal.footer.close')}
               </motion.button>
@@ -837,9 +841,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                 disabled={saving || isLoading}
                 whileHover={{ scale: saving ? 1 : 1.02 }}
                 whileTap={{ scale: saving ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5
-                           text-sm font-medium text-white shadow-sm transition-colors
-                           hover:bg-[#1f1f1f] disabled:cursor-not-allowed disabled:opacity-50"
+                className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500 disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 {saving ? (
                   <>
