@@ -27,7 +27,7 @@ language plpgsql
 stable
 security definer
 set search_path = public
-as $$
+as $jp_akter$
 declare
   v_guc_kdo text := nullif(btrim(coalesce(current_setting('jp.izvedel', true), '')), '');
   v_guc_tip text := nullif(btrim(coalesce(current_setting('jp.izvedel_tip', true), '')), '');
@@ -65,7 +65,7 @@ begin
   -- c) servisni ključ, n8n, portal, uvoz
   return query select null::text, 'sistem'::text;
 end;
-$$;
+$jp_akter$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 2) Zapis z varovalko proti podvajanju
@@ -87,7 +87,7 @@ returns void
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $jp_zapisi$
 declare
   v_zdaj timestamp := (now() at time zone 'utc');
   v_kdo  text;
@@ -121,7 +121,7 @@ begin
     (p_company, p_tip, p_entiteta, p_akcija, p_spremembe,
      v_kdo, coalesce(v_tip, 'sistem'), p_id_termina, p_id_stranke, v_zdaj);
 end;
-$$;
+$jp_zapisi$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 3) Termini
@@ -134,7 +134,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $jp_termini$
 declare
   STOLPCI constant text[] := array[
     'Datum', 'Čas', 'Konec', 'Storitev', 'Oseba', 'Status',
@@ -219,7 +219,7 @@ begin
 exception when others then
   return coalesce(NEW, OLD);
 end;
-$$;
+$jp_termini$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 4) Stranke
@@ -229,7 +229,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $jp_stranke$
 declare
   STOLPCI constant text[] := array[
     'Ime', 'Priimek', 'Email stranke', 'Telefonska številka', 'Status',
@@ -278,7 +278,7 @@ begin
 exception when others then
   return coalesce(NEW, OLD);
 end;
-$$;
+$jp_stranke$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5) Pripni sprožilce
