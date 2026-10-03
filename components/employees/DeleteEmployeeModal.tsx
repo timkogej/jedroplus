@@ -2,7 +2,8 @@
 
 import { memo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Warning, Trash, Spinner } from '@phosphor-icons/react';
+import { X, Trash, Spinner } from '@phosphor-icons/react';
+import { sheet } from '@/components/ui/sheetClasses';
 import { useTranslations } from 'next-intl';
 import type { Employee } from '@/types/employees';
 import EmployeeAvatar from './EmployeeAvatar';
@@ -44,7 +45,7 @@ function DeleteEmployeeModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={onClose}
         >
           <motion.div
@@ -52,55 +53,59 @@ function DeleteEmployeeModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', duration: 0.5 }}
-            className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-                  <Warning className="h-5 w-5 text-red-600" weight="fill" />
-                </div>
-                <h2 className="text-lg font-semibold text-[#1A1F36]">
-                  {t('deleteModal.title')}
-                </h2>
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-4">
+                <h2 className={sheet.title}>{t('deleteModal.title')}</h2>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isDeleting}
+                  className={sheet.close}
+                >
+                  <X className="h-5 w-5" weight="regular" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isDeleting}
-                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50"
-              >
-                <X className="h-5 w-5" weight="bold" />
-              </button>
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              <div className="flex flex-col items-center text-center">
+            <div className={sheet.body}>
+              <div className={`${sheet.group} flex items-center gap-3`}>
                 <EmployeeAvatar
                   firstName={employee.ime}
                   lastName={employee.priimek}
                   gradient={employee.barva}
-                  size="xl"
+                  size="md"
                 />
-                <p className="mt-4 text-gray-600">
+                <div className="min-w-0">
+                  <p className="truncate text-[15px] font-semibold text-gray-900">{fullName}</p>
+                  {employee.pozicija && (
+                    <p className="truncate text-[13px] text-gray-500">{employee.pozicija}</p>
+                  )}
+                </div>
+              </div>
+              <div className="rounded-xl bg-red-50 p-4">
+                <p className="text-sm text-red-800">
                   {t('deleteModal.confirmMessage')}{' '}
-                  <span className="font-semibold text-[#1A1F36]">{fullName}</span>?
+                  <span className="font-semibold">{fullName}</span>?
                 </p>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-red-700/80">
                   {t('deleteModal.warning')}
                 </p>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
+            <div className={sheet.footer}>
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isDeleting}
-                className="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                className={sheet.cancel}
               >
                 {tCommon('buttons.cancel')}
               </button>
@@ -110,7 +115,7 @@ function DeleteEmployeeModal({
                 disabled={isDeleting}
                 whileHover={{ scale: isDeleting ? 1 : 1.02 }}
                 whileTap={{ scale: isDeleting ? 1 : 0.98 }}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+                className={`${sheet.action} bg-red-500`}
               >
                 {isDeleting ? (
                   <>

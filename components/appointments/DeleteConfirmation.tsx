@@ -2,7 +2,8 @@
 
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Warning, Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle, Plus } from '@phosphor-icons/react';
+import { Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle, Plus } from '@phosphor-icons/react';
+import { sheet } from '@/components/ui/sheetClasses';
 import { useTranslations } from 'next-intl';
 import type { AppointmentWithDetails } from '@/types/appointments';
 
@@ -68,7 +69,7 @@ function DeleteConfirmation({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={(e) => e.target === e.currentTarget && !isDeleting && onClose()}
         >
           <motion.div
@@ -76,82 +77,70 @@ function DeleteConfirmation({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 p-6">
-              <div className="flex items-center gap-3">
-                <Warning className="h-6 w-6 text-red-600 flex-shrink-0" weight="regular" />
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F36]">
-                    {title}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    {t('deleteConfirmation.areYouSure')}
-                  </p>
+                  <h2 className={sheet.title}>{title}</h2>
+                  <p className={sheet.subtitle}>{t('deleteConfirmation.areYouSure')}</p>
                 </div>
+                <motion.button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isDeleting}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={sheet.close}
+                >
+                  <X className="h-5 w-5" weight="regular" />
+                </motion.button>
               </div>
-              <motion.button
-                type="button"
-                onClick={onClose}
-                disabled={isDeleting}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]
-                           disabled:opacity-50"
-              >
-                <X className="h-5 w-5" weight="bold" />
-              </motion.button>
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              {/* Appointment details card */}
+            <div className={sheet.body}>
+              {/* Appointment details */}
               {appointment ? (
-                <div className="rounded-xl bg-gray-50 p-4 space-y-3">
+                <div className="overflow-hidden rounded-xl bg-white">
                   {/* Client */}
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <p className="font-semibold text-[#1A1F36]">
-                        {appointment.stranka_ime || t('deleteConfirmation.unknownClient')}
-                      </p>
-                      {appointment.stranka_email && (
-                        <p className="text-sm text-gray-500">{appointment.stranka_email}</p>
-                      )}
-                    </div>
+                  <div className="px-4 py-3">
+                    <p className="text-[15px] font-semibold text-gray-900">
+                      {appointment.stranka_ime || t('deleteConfirmation.unknownClient')}
+                    </p>
+                    {appointment.stranka_email && (
+                      <p className="text-[13px] text-gray-500">{appointment.stranka_email}</p>
+                    )}
                   </div>
 
-                  {/* Appointment details */}
-                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-200">
-                    {/* Date */}
-                    <div className="flex items-center gap-2">
-                      <CalendarBlank className="h-4 w-4 text-gray-400" weight="regular" />
-                      <span className="text-sm text-gray-700">
+                  <div className="divide-y divide-gray-100 border-t border-gray-100">
+                    {/* Date + time */}
+                    <div className="flex items-center gap-3 px-4 py-2.5">
+                      <CalendarBlank className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
+                      <span className="flex-1 text-sm text-gray-900">
                         {appointment.datum ? formatDate(appointment.datum) : '-'}
                       </span>
-                    </div>
-
-                    {/* Time */}
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-gray-400" weight="regular" />
-                      <span className="text-sm text-gray-700">
+                      <span className="tnum flex items-center gap-1.5 text-sm text-gray-500">
+                        <Clock className="h-4 w-4 text-gray-400" weight="regular" />
                         {appointment.cas_zacetek ? appointment.cas_zacetek.substring(0, 5) : '-'}
                       </span>
                     </div>
 
                     {/* Service */}
                     {appointment.storitev?.naziv && (
-                      <div className="flex items-start gap-2 col-span-2">
-                        <Briefcase className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
-                        <div className="space-y-1">
-                          <span className="block text-sm text-gray-700">
+                      <div className="flex items-start gap-3 px-4 py-2.5">
+                        <Briefcase className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
+                        <div className="min-w-0 space-y-1">
+                          <span className="block text-sm text-gray-900">
                             {appointment.storitev.naziv}
                           </span>
                           {appointment.add_on_naziv && (
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-gray-700">{appointment.add_on_naziv}</span>
-                              <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-sm text-gray-900">{appointment.add_on_naziv}</span>
+                              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
                                 <Plus className="h-2.5 w-2.5" weight="bold" />
                                 Dodatna storitev
                               </span>
@@ -163,9 +152,9 @@ function DeleteConfirmation({
 
                     {/* Employee */}
                     {appointment.zaposleni && (
-                      <div className="flex items-center gap-2 col-span-2">
-                        <UserCircle className="h-4 w-4 text-gray-400 flex-shrink-0" weight="regular" />
-                        <span className="text-sm text-gray-700">
+                      <div className="flex items-center gap-3 px-4 py-2.5">
+                        <UserCircle className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
+                        <span className="text-sm text-gray-900">
                           {appointment.zaposleni.ime} {appointment.zaposleni.priimek}
                         </span>
                       </div>
@@ -173,15 +162,15 @@ function DeleteConfirmation({
                   </div>
                 </div>
               ) : itemName ? (
-                <div className="rounded-xl bg-gray-50 p-4">
-                  <p className="font-semibold text-[#1A1F36] text-center">
+                <div className={sheet.group}>
+                  <p className="text-center text-[15px] font-semibold text-gray-900">
                     {itemName}
                   </p>
                 </div>
               ) : null}
 
               {/* Warning message */}
-              <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4">
+              <div className="rounded-xl bg-red-50 p-4">
                 <p className="text-sm text-red-800">
                   {message}
                 </p>
@@ -192,15 +181,14 @@ function DeleteConfirmation({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 p-6">
+            <div className={sheet.footer}>
               <motion.button
                 type="button"
                 onClick={onClose}
                 disabled={isDeleting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100
-                           disabled:opacity-50"
+                className={sheet.cancel}
               >
                 {t('deleteConfirmation.cancel')}
               </motion.button>
@@ -210,9 +198,7 @@ function DeleteConfirmation({
                 disabled={isDeleting}
                 whileHover={{ scale: isDeleting ? 1 : 1.02 }}
                 whileTap={{ scale: isDeleting ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-5 py-2.5
-                           text-sm font-medium text-white shadow-sm hover:opacity-90 transition-all
-                           disabled:opacity-70"
+                className={`${sheet.action} bg-gradient-to-r from-red-500 to-rose-600`}
               >
                 {isDeleting ? (
                   <>
