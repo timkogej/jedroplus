@@ -113,7 +113,7 @@ export default function OnboardingPage() {
         <div className="mb-10 flex flex-col items-center text-center">
           <JedroLogo height={36} className="mb-6" title="Jedro+" />
           <h1 className="mb-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
-            {t('entry.title')} Jedro+
+            {t('entry.title')} JedroPlus
           </h1>
           <p className="text-[17px] text-gray-500">
             {t('entry.subtitle')}
