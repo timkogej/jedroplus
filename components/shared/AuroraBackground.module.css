@@ -132,3 +132,49 @@
     animation: none;
   }
 }
+
+/*
+ * Svetla različica (onboarding): belo ozadje, po katerem se počasi
+ * premikajo mehki pastelni siji v istih barvah — brez nočnega neba.
+ */
+.light {
+  background:
+    radial-gradient(120% 70% at 50% 110%, #f4f1ff 0%, transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #fbfbff 60%, #f6f7ff 100%);
+}
+
+.light .ribbon {
+  mix-blend-mode: normal;
+  filter: blur(80px);
+}
+
+.light .r1 {
+  opacity: 0.38;
+}
+
+.light .r2 {
+  opacity: 0.32;
+}
+
+.light .r3 {
+  opacity: 0.3;
+}
+
+.light .r4 {
+  opacity: 0.35;
+}
+
+.light .stars {
+  display: none;
+}
+
+.light .grain {
+  opacity: 0.035;
+  mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .light .ribbon {
+    animation: none;
+  }
+}

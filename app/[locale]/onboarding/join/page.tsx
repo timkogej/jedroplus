@@ -8,6 +8,7 @@ import { joinCompany, type JoinCompanyResult } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import AuroraBackground from '@/components/shared/AuroraBackground';
 import { Link as LocaleLink } from '@/i18n/navigation';
 import {
   clearPendingInvite,
@@ -271,27 +272,28 @@ export default function JoinCompanyPage() {
   // Invite link opened while signed out: explain and send them to sign up.
   if (invite && signedIn === false) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center bg-white p-4">
-        <PublicLanguageToggle className="absolute right-4 top-4" />
-        <div className="w-full max-w-md text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-600">{t('join.invite.eyebrow')}</p>
-          <h1 className="mt-3 text-3xl font-bold text-gray-900">
+      <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+        <AuroraBackground tone="light" />
+        <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
+        <div className="relative z-10 w-full max-w-md text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-600">{t('join.invite.eyebrow')}</p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-gray-900">
             {invite.companyName
               ? t('join.invite.titleWithName', { name: invite.companyName })
               : t('join.invite.title')}
           </h1>
-          <p className="mt-3 text-sm leading-6 text-gray-600">{t('join.invite.body')}</p>
+          <p className="mt-3 text-[15px] leading-6 text-gray-500">{t('join.invite.body')}</p>
           <div className="mt-8 space-y-3">
             <LocaleLink
               href="/signup"
-              className="flex h-12 w-full items-center justify-center rounded-xl font-semibold text-white"
+              className="flex h-11 w-full items-center justify-center rounded-xl font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
               style={{ background: 'linear-gradient(to right, #8B5CF6, #06B6D4)' }}
             >
               {t('join.invite.signUp')}
             </LocaleLink>
             <LocaleLink
               href="/login"
-              className="flex h-12 w-full items-center justify-center rounded-xl border-2 border-gray-200 font-semibold text-gray-700 hover:bg-gray-50"
+              className="flex h-11 w-full items-center justify-center rounded-xl border border-gray-200 bg-white font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
             >
               {t('join.invite.logIn')}
             </LocaleLink>
@@ -304,35 +306,36 @@ export default function JoinCompanyPage() {
   // Role selection view
   if (!selectedRole) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white p-4">
-        <div className="w-full max-w-4xl">
+      <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+        <AuroraBackground tone="light" />
+        <div className="relative z-10 w-full max-w-3xl">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">
+          <div className="mb-10 text-center">
+            <h1 className="mb-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
               {t('join.title')}
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-[17px] text-gray-500">
               {t('join.subtitle')}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid gap-4 md:grid-cols-2 md:gap-5">
             {/* JOIN AS ADMIN */}
             <button
               onClick={() => setSelectedRole('admin')}
-              className="group relative bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-10 text-left hover:border-violet-300 hover:shadow-2xl transition-all duration-300"
+              className="group relative rounded-2xl border border-gray-200/70 bg-white/80 p-7 text-left shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_28px_60px_-25px_rgba(60,50,140,0.45)] sm:p-8"
             >
-              <div className="absolute top-6 right-6 w-16 h-16 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="mb-8">
+                <svg className="h-8 w-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
 
-              <div className="mt-16">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <div>
+                <h3 className="mb-2 text-xl font-semibold text-gray-900">
                   {t('join.admin.title')}
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="mb-3 text-[15px] leading-relaxed text-gray-500">
                   {t('join.admin.description')}
                 </p>
                 <p className="text-xs text-gray-400 mb-6">
@@ -350,19 +353,19 @@ export default function JoinCompanyPage() {
             {/* JOIN AS EMPLOYEE */}
             <button
               onClick={() => setSelectedRole('employee')}
-              className="group relative bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-10 text-left hover:border-cyan-300 hover:shadow-2xl transition-all duration-300"
+              className="group relative rounded-2xl border border-gray-200/70 bg-white/80 p-7 text-left shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-[0_28px_60px_-25px_rgba(60,50,140,0.45)] sm:p-8"
             >
-              <div className="absolute top-6 right-6 w-16 h-16 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-8 h-8 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <div className="mb-8">
+                <svg className="h-8 w-8 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
 
-              <div className="mt-16">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <div>
+                <h3 className="mb-2 text-xl font-semibold text-gray-900">
                   {t('join.employee.title')}
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="mb-3 text-[15px] leading-relaxed text-gray-500">
                   {t('join.employee.description')}
                 </p>
                 <p className="text-xs text-gray-400 mb-6">
@@ -382,7 +385,7 @@ export default function JoinCompanyPage() {
           <div className="text-center mt-8">
             <button
               onClick={() => router.push('/onboarding')}
-              className="text-gray-500 hover:text-gray-700 font-medium transition-colors"
+              className="text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
             >
               {t('join.back')}
             </button>
@@ -396,10 +399,11 @@ export default function JoinCompanyPage() {
   const isAdmin = selectedRole === 'admin';
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-white p-4">
-      <PublicLanguageToggle className="absolute right-4 top-4" />
-      <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+      <AuroraBackground tone="light" />
+      <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
+      <div className="relative z-10 w-full max-w-md">
+        <h1 className="mb-1.5 text-center text-3xl font-semibold tracking-tight text-gray-900">
           {invite
             ? invite.companyName
               ? t('join.invite.titleWithName', { name: invite.companyName })
@@ -408,13 +412,13 @@ export default function JoinCompanyPage() {
             ? t('join.form.adminTitle')
             : t('join.form.employeeTitle')}
         </h1>
-        <p className="text-center text-gray-500 mb-8 text-sm">
+        <p className="mb-6 text-center text-[15px] text-gray-500">
           {invite ? t('join.invite.readyBody') : isAdmin ? t('join.form.adminSubtitle') : t('join.form.employeeSubtitle')}
         </p>
 
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 space-y-6">
+        <div className="rounded-2xl border border-gray-200/70 bg-white/85 shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl space-y-5 p-6 sm:p-8">
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <label className="mb-1.5 block text-[13px] font-medium text-gray-900">
               {isAdmin ? t('join.form.adminCodeLabel') : t('join.form.employeeCodeLabel')}
             </label>
             <Input
@@ -437,7 +441,7 @@ export default function JoinCompanyPage() {
           <button
             onClick={handleJoin}
             disabled={loading || !joinCode.trim()}
-            className="w-full h-12 text-white font-semibold rounded-xl transition-all duration-300 hover:opacity-90 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 w-full rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
             style={{
               background: isAdmin
                 ? 'linear-gradient(to right, #8B5CF6, #06B6D4)'
@@ -450,7 +454,7 @@ export default function JoinCompanyPage() {
           <button
             onClick={() => setSelectedRole(null)}
             disabled={loading}
-            className="w-full h-12 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 w-full rounded-xl border border-gray-200 bg-white font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {t('join.back')}
           </button>

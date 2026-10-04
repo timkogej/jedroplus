@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { createCompany, type UrnikDay } from '@/lib/api/billingClient';
 import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
+import AuroraBackground from '@/components/shared/AuroraBackground';
 
 const STORAGE_KEY = "jedroplus_company_id";
 const STORAGE_KEY_UUID = "jedroplus_company_uuid";
@@ -159,35 +160,22 @@ function Confetti() {
 
 // Step indicator
 function StepIndicator({ current, total }: { current: number; total: number }) {
+  // Napredek kot vrsta tankih črtic (kot pri Applovih uvodnih korakih):
+  // opravljeni in trenutni korak sta v gradientu, ostali sivi.
   return (
-    <div className="flex items-center gap-2 mb-8">
+    <div
+      className="mb-8 flex w-56 items-center gap-1.5"
+      role="progressbar"
+      aria-valuemin={1}
+      aria-valuemax={total}
+      aria-valuenow={current + 1}
+    >
       {Array.from({ length: total }).map((_, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300"
-            style={
-              i < current
-                ? { background: 'linear-gradient(to right, #8B5CF6, #06B6D4)', color: '#fff' }
-                : i === current
-                ? { background: 'linear-gradient(to right, #8B5CF6, #06B6D4)', color: '#fff', boxShadow: '0 0 0 3px rgba(139,92,246,0.2)' }
-                : { background: '#F3F4F6', color: '#9CA3AF' }
-            }
-          >
-            {i < current ? (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              i + 1
-            )}
-          </div>
-          {i < total - 1 && (
-            <div
-              className="h-0.5 w-8 transition-all duration-300"
-              style={{ background: i < current ? 'linear-gradient(to right, #8B5CF6, #06B6D4)' : '#E5E7EB' }}
-            />
-          )}
-        </div>
+        <div
+          key={i}
+          className="h-1 flex-1 rounded-full transition-all duration-300"
+          style={{ background: i <= current ? 'linear-gradient(to right, #8B5CF6, #06B6D4)' : '#E5E7EB' }}
+        />
       ))}
     </div>
   );
@@ -449,23 +437,19 @@ export default function CreateCompanyPage() {
   // --- Success screen ---
   if (createdCompanyPublicId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white p-4">
+      <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+        <AuroraBackground tone="light" />
         {showConfetti && <Confetti />}
-        <div className="w-full max-w-sm">
-          <div className="bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-10 text-center">
-            <div
-              className="w-24 h-24 mx-auto mb-8 rounded-full flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%)', boxShadow: '0 8px 32px rgba(16,185,129,0.25)' }}
-            >
-              <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">{t('create.success.title')}</h2>
-            <p className="text-gray-500 mb-10">{t('create.success.subtitle')}</p>
+        <div className="relative z-10 w-full max-w-sm">
+          <div className="rounded-2xl border border-gray-200/70 bg-white/85 shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl p-8 text-center sm:p-10">
+            <svg className="mx-auto mb-6 h-16 w-16 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <h2 className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900">{t('create.success.title')}</h2>
+            <p className="mb-8 text-[15px] text-gray-500">{t('create.success.subtitle')}</p>
             <button
               onClick={() => (window.location.href = '/dashboard')}
-              className="w-full h-12 text-white font-semibold rounded-xl transition-all duration-300 hover:opacity-90 hover:shadow-lg"
+              className="h-11 w-full rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80"
               style={{ background: 'linear-gradient(to right, #8B5CF6, #06B6D4)' }}
             >
               {t('create.success.goToDashboard')}
@@ -485,29 +469,30 @@ export default function CreateCompanyPage() {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-2 text-center text-gray-900">{t('create.title')}</h1>
-        <p className="text-center text-gray-500 mb-8 text-sm">{stepTitles[step]}</p>
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+      <AuroraBackground tone="light" />
+      <div className="relative z-10 w-full max-w-md">
+        <h1 className="mb-1.5 text-center text-3xl font-semibold tracking-tight text-gray-900">{t('create.title')}</h1>
+        <p className="mb-6 text-center text-[15px] text-gray-500">{stepTitles[step]}</p>
 
         <div className="flex justify-center">
           <StepIndicator current={step} total={TOTAL_STEPS} />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 space-y-6">
+        <div className="rounded-2xl border border-gray-200/70 bg-white/85 shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl space-y-6 p-6 sm:p-8">
 
           {/* STEP 0 — Country & Language */}
           {step === 0 && (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="mb-1.5 block text-[13px] font-medium text-gray-900">
                   {t('create.localization.countryLabel')}
                 </label>
                 <div className="relative">
                   <select
                     value={country}
                     onChange={e => setCountry(e.target.value)}
-                    className="w-full h-10 rounded-lg border border-gray-200 bg-white px-3 pr-8 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400 appearance-none"
+                    className="h-10 w-full appearance-none rounded-xl border border-gray-200 bg-white px-3 pr-8 text-sm text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                   >
                     {COUNTRIES_DATA.map(c => (
                       <option key={c.value} value={c.value}>
@@ -524,21 +509,20 @@ export default function CreateCompanyPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="mb-1.5 block text-[13px] font-medium text-gray-900">
                   {t('create.localization.languageLabel')}
                 </label>
-                <div className="flex gap-3">
+                <div className="flex gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
                   {LANGUAGES.map(lang => (
                     <button
                       key={lang.value}
                       type="button"
                       onClick={() => chooseLanguage(lang.value)}
-                      className="flex-1 h-11 rounded-xl border-2 text-sm font-semibold transition-all duration-200"
-                      style={
+                      className={`h-9 flex-1 rounded-[7px] text-sm font-medium transition-all duration-200 ${
                         language === lang.value
-                          ? { borderColor: '#8B5CF6', background: 'rgba(139,92,246,0.06)', color: '#7C3AED' }
-                          : { borderColor: '#E5E7EB', background: '#fff', color: '#6B7280' }
-                      }
+                          ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                          : 'text-gray-500 hover:text-gray-900'
+                      }`}
                     >
                       {t(`create.languages.${lang.value}`)}
                     </button>
@@ -551,7 +535,7 @@ export default function CreateCompanyPage() {
           {/* STEP 1 — Company Name */}
           {step === 1 && (
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="mb-1.5 block text-[13px] font-medium text-gray-900">
                 {t('create.companyName.label')}
               </label>
               <Input
@@ -571,7 +555,7 @@ export default function CreateCompanyPage() {
           {/* STEP 2 — Industry */}
           {step === 2 && (
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-gray-900">
+              <label className="block text-[13px] font-medium text-gray-900">
                 {t('create.industry.label')}
               </label>
               <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
@@ -580,11 +564,11 @@ export default function CreateCompanyPage() {
                     key={p.value}
                     type="button"
                     onClick={() => { setSelectedPanoga(p.value); if (p.value !== 'Drugo') setCustomPanoga(''); }}
-                    className="text-left px-3 py-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-150"
+                    className="rounded-[10px] border px-3 py-2.5 text-left text-sm font-medium transition-all duration-150"
                     style={
                       selectedPanoga === p.value
                         ? { borderColor: '#8B5CF6', background: 'rgba(139,92,246,0.06)', color: '#7C3AED' }
-                        : { borderColor: '#E5E7EB', background: '#FAFAFA', color: '#374151' }
+                        : { borderColor: '#E5E7EB', background: '#fff', color: '#374151' }
                     }
                   >
                     {t(`create.industries.${p.key}`)}
@@ -611,7 +595,7 @@ export default function CreateCompanyPage() {
           {/* STEP 3 — Schedule */}
           {step === 3 && (
             <div className="space-y-3">
-              <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+              <p className="rounded-[10px] bg-gray-50 px-3 py-2 text-xs text-gray-500">
                 {t('create.schedule.hint')}
               </p>
               {DAYS.map(day => {
@@ -620,7 +604,7 @@ export default function CreateCompanyPage() {
                 return (
                   <div
                     key={day}
-                    className="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition-all duration-200"
+                    className="flex items-center gap-3 rounded-[10px] border px-4 py-2.5 transition-all duration-200"
                     style={{ borderColor: d.enabled ? '#E9D5FF' : '#F3F4F6', background: d.enabled ? 'rgba(139,92,246,0.03)' : '#FAFAFA' }}
                   >
                     {/* Toggle */}
@@ -646,14 +630,14 @@ export default function CreateCompanyPage() {
                           type="time"
                           value={d.intervals[0]?.start ?? '08:00'}
                           onChange={e => updateInterval(day, 'start', e.target.value)}
-                          className="h-8 rounded-lg border border-gray-200 px-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                          className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-sm text-gray-900 tabular-nums focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                         />
                         <span className="text-gray-400 text-xs">–</span>
                         <input
                           type="time"
                           value={d.intervals[0]?.end ?? '16:00'}
                           onChange={e => updateInterval(day, 'end', e.target.value)}
-                          className="h-8 rounded-lg border border-gray-200 px-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-violet-400"
+                          className="h-8 rounded-lg border border-gray-200 bg-white px-2 text-sm text-gray-900 tabular-nums focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                         />
                       </div>
                     ) : (
@@ -670,7 +654,7 @@ export default function CreateCompanyPage() {
           {/* STEP 4 — Starter services + owner as staff */}
           {step === 4 && (
             <div className="space-y-4">
-              <p className="text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+              <p className="rounded-[10px] bg-gray-50 px-3 py-2 text-xs text-gray-500">
                 {t('create.services.hint')}
               </p>
 
@@ -678,7 +662,7 @@ export default function CreateCompanyPage() {
                 {draftServices.map((d) => (
                   <div
                     key={d.key}
-                    className="rounded-xl border-2 px-3 py-2.5 transition-all duration-150"
+                    className="rounded-[10px] border px-3 py-2.5 transition-all duration-150"
                     style={{ borderColor: d.selected ? '#E9D5FF' : '#F3F4F6', background: d.selected ? 'rgba(139,92,246,0.03)' : '#FAFAFA' }}
                   >
                     <div className="flex items-center gap-2">
@@ -717,7 +701,7 @@ export default function CreateCompanyPage() {
                             step={5}
                             value={d.durationMin}
                             onChange={(e) => updateDraft(d.key, { durationMin: Number(e.target.value) })}
-                            className="h-8 w-20 rounded-lg border border-gray-200 px-2 text-sm text-gray-800 tabular-nums focus:outline-none focus:ring-2 focus:ring-violet-400"
+                            className="h-8 w-20 rounded-lg border border-gray-200 bg-white px-2 text-sm text-gray-900 tabular-nums focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                           />
                         </label>
                         <label className="flex flex-1 items-center gap-2 text-xs text-gray-500">
@@ -729,7 +713,7 @@ export default function CreateCompanyPage() {
                             step={1}
                             value={d.priceEur}
                             onChange={(e) => updateDraft(d.key, { priceEur: Number(e.target.value) })}
-                            className="h-8 w-20 rounded-lg border border-gray-200 px-2 text-sm text-gray-800 tabular-nums focus:outline-none focus:ring-2 focus:ring-violet-400"
+                            className="h-8 w-20 rounded-lg border border-gray-200 bg-white px-2 text-sm text-gray-900 tabular-nums focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                           />
                         </label>
                       </div>
@@ -741,7 +725,7 @@ export default function CreateCompanyPage() {
               <button
                 type="button"
                 onClick={addDraft}
-                className="w-full rounded-xl border-2 border-dashed border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50"
+                className="w-full rounded-[10px] border border-dashed border-gray-300 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:border-gray-400 hover:bg-white"
               >
                 + {t('create.services.addCustom')}
               </button>
@@ -750,7 +734,7 @@ export default function CreateCompanyPage() {
                 <p className="text-xs text-amber-700">{t('create.services.noneSelected')}</p>
               )}
 
-              <div className="rounded-xl border-2 border-gray-100 px-4 py-3 space-y-3">
+              <div className="space-y-3 rounded-[10px] border border-gray-200 bg-white px-4 py-3">
                 <label htmlFor="owner-as-staff" className="flex items-start gap-3 cursor-pointer">
                   <input
                     id="owner-as-staff"
@@ -781,14 +765,14 @@ export default function CreateCompanyPage() {
             <button
               onClick={handleBack}
               disabled={loading}
-              className="flex-1 h-12 bg-white border-2 border-gray-200 rounded-xl text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="h-11 flex-1 rounded-xl border border-gray-200 bg-white font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {t('create.nav.back')}
             </button>
             <button
               onClick={handleNext}
               disabled={loading || !canAdvance()}
-              className="flex-1 h-12 text-white font-semibold rounded-xl transition-all duration-300 hover:opacity-90 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+              className="h-11 flex-1 rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
               style={{ background: 'linear-gradient(to right, #8B5CF6, #06B6D4)' }}
             >
               {loading
