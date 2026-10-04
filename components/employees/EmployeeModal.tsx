@@ -233,7 +233,7 @@ function EmployeeModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -241,11 +241,12 @@ function EmployeeModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className="relative flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
+            <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6">
+              <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   {/* Avatar preview */}
@@ -256,10 +257,10 @@ function EmployeeModal({
                     size="md"
                   />
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900">
+                    <h2 className="text-[17px] font-semibold text-gray-900">
                       {mode === 'create' ? t('modal.createTitle') : t('modal.editTitle')}
                     </h2>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-0.5 text-[13px] text-gray-500">
                       {mode === 'create' ? t('modal.createSubtitle') : t('modal.editSubtitle')}
                     </p>
                   </div>
@@ -269,9 +270,9 @@ function EmployeeModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
             </div>
@@ -281,11 +282,11 @@ function EmployeeModal({
               <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
                 <div className="space-y-5">
                   {/* Personal info */}
-                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                  <div className="rounded-xl bg-white p-4">
                     <div className="grid gap-4 sm:grid-cols-2">
                       {/* First name */}
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                        <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                           {t('modal.firstNameLabel')}
                         </label>
                         <div className="relative">
@@ -295,17 +296,17 @@ function EmployeeModal({
                             value={formData.ime}
                             onChange={(e) => handleChange('ime', e.target.value)}
                             placeholder={t('modal.firstNamePlaceholder')}
-                            className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                            className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                        transition-colors focus:outline-none focus:ring-2
                                        ${errors.ime
                                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                         : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                         : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                        }`}
                           />
                         </div>
                         {errors.ime && (
                           <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                            <Warning className="h-3 w-3" weight="fill" />
+                            <Warning className="h-3 w-3" weight="regular" />
                             {errors.ime}
                           </p>
                         )}
@@ -313,7 +314,7 @@ function EmployeeModal({
 
                       {/* Last name */}
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                        <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                           {t('modal.lastNameLabel')}
                         </label>
                         <div className="relative">
@@ -323,17 +324,17 @@ function EmployeeModal({
                             value={formData.priimek}
                             onChange={(e) => handleChange('priimek', e.target.value)}
                             placeholder={t('modal.lastNamePlaceholder')}
-                            className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                            className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                        transition-colors focus:outline-none focus:ring-2
                                        ${errors.priimek
                                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                         : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                         : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                        }`}
                           />
                         </div>
                         {errors.priimek && (
                           <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                            <Warning className="h-3 w-3" weight="fill" />
+                            <Warning className="h-3 w-3" weight="regular" />
                             {errors.priimek}
                           </p>
                         )}
@@ -342,7 +343,7 @@ function EmployeeModal({
 
                     {/* Email */}
                     <div className="mt-4">
-                      <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                         {t('modal.emailLabel')}
                       </label>
                       <div className="relative">
@@ -353,11 +354,11 @@ function EmployeeModal({
                           onChange={(e) => handleChange('email', e.target.value)}
                           onBlur={handleEmailBlur}
                           placeholder={t('modal.emailPlaceholder')}
-                          className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder-gray-400
+                          className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder-gray-400
                                      transition-colors focus:outline-none focus:ring-2
                                      ${errors.email
                                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                       : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                       : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                      }`}
                         />
                         {emailChecking && (
@@ -366,7 +367,7 @@ function EmployeeModal({
                       </div>
                       {errors.email && (
                         <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                          <Warning className="h-3 w-3" weight="fill" />
+                          <Warning className="h-3 w-3" weight="regular" />
                           {errors.email}
                         </p>
                       )}
@@ -375,7 +376,7 @@ function EmployeeModal({
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       {/* Phone */}
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                        <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                           {t('modal.phoneLabel')}
                         </label>
                         <div className="relative">
@@ -385,17 +386,17 @@ function EmployeeModal({
                             value={formData.telefon}
                             onChange={(e) => handleChange('telefon', e.target.value)}
                             placeholder={t('modal.phonePlaceholder')}
-                            className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                            className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                        transition-colors focus:outline-none focus:ring-2
                                        ${errors.telefon
                                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                         : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                         : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                        }`}
                           />
                         </div>
                         {errors.telefon && (
                           <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                            <Warning className="h-3 w-3" weight="fill" />
+                            <Warning className="h-3 w-3" weight="regular" />
                             {errors.telefon}
                           </p>
                         )}
@@ -403,7 +404,7 @@ function EmployeeModal({
 
                       {/* Position */}
                       <div>
-                        <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                        <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                           {t('modal.positionLabel')}
                         </label>
                         <div className="relative">
@@ -413,8 +414,8 @@ function EmployeeModal({
                             value={formData.pozicija}
                             onChange={(e) => handleChange('pozicija', e.target.value)}
                             placeholder={t('modal.positionPlaceholder')}
-                            className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
-                                      placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                            className="w-full rounded-[10px] border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                                      placeholder-gray-400 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                           />
                         </div>
                       </div>
@@ -422,7 +423,7 @@ function EmployeeModal({
                   </div>
 
                   {/* Gradient selector */}
-                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                  <div className="rounded-xl bg-white p-4">
                     <div className="mb-4 flex items-center gap-3">
                       <EmployeeAvatar
                         firstName={formData.ime || '?'}
@@ -431,7 +432,7 @@ function EmployeeModal({
                         size="md"
                       />
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                           {t('modal.avatarColorLabel')}
                         </p>
                       </div>
@@ -442,15 +443,15 @@ function EmployeeModal({
                     />
                     {errors.barva && (
                       <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                        <Warning className="h-3 w-3" weight="fill" />
+                        <Warning className="h-3 w-3" weight="regular" />
                         {errors.barva}
                       </p>
                     )}
                   </div>
 
                   {/* Notes */}
-                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                    <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                  <div className="rounded-xl bg-white p-4">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {t('modal.notesLabel')}
                     </label>
                     <div className="relative">
@@ -460,18 +461,18 @@ function EmployeeModal({
                         onChange={(e) => handleChange('opombe', e.target.value)}
                         placeholder={t('modal.notesPlaceholder')}
                         rows={3}
-                        className={`w-full resize-none rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                        className={`w-full resize-none rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
                                    placeholder-gray-400 transition-colors focus:outline-none focus:ring-2
                                    ${errors.opombe
                                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                     : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                     : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                    }`}
                       />
                     </div>
                     <div className="mt-1 flex items-center justify-between">
                       {errors.opombe ? (
                         <p className="flex items-center gap-1 text-xs text-red-600">
-                          <Warning className="h-3 w-3" weight="fill" />
+                          <Warning className="h-3 w-3" weight="regular" />
                           {errors.opombe}
                         </p>
                       ) : (
@@ -486,13 +487,13 @@ function EmployeeModal({
               </div>
 
               {/* Footer */}
-              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
+              <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                  className="flex-1 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 sm:flex-none"
                 >
                   {tCommon('buttons.cancel')}
                 </motion.button>
@@ -501,9 +502,9 @@ function EmployeeModal({
                   disabled={isSaving}
                   whileHover={{ scale: isSaving ? 1 : 1.02 }}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5
-                             text-sm font-medium text-white shadow-sm transition-colors
-                             hover:bg-[#1f1f1f] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5
+                             text-sm font-medium text-white shadow-sm transition-opacity
+                             hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none"
                 >
                   {isSaving ? (
                     <>

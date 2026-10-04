@@ -15,6 +15,7 @@ import {
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
+import { sheet } from '@/components/ui/sheetClasses';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { buildLostLeadsSettingsData, getPodatkiPodjetja } from '@/lib/webhookPayloadBuilders';
@@ -152,39 +153,42 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={onClose}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-3xl max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            className={`${sheet.panel} sm:max-w-3xl`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 gap-3">
-              <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-semibold text-gray-900 truncate">{t('modal.title')}</h2>
-                <p className="text-sm text-gray-500 mt-0.5 truncate">{t('modal.subtitle')}</p>
-              </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <SaveIndicator saving={saving} lastSaved={lastSaved} />
-                <button
-                  onClick={onClose}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" weight="bold" />
-                </button>
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h2 className={`${sheet.title} truncate`}>{t('modal.title')}</h2>
+                  <p className={`${sheet.subtitle} truncate`}>{t('modal.subtitle')}</p>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <SaveIndicator saving={saving} lastSaved={lastSaved} />
+                  <button
+                    onClick={onClose}
+                    className={sheet.close}
+                  >
+                    <X className="h-5 w-5" weight="regular" />
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
               {isLoading ? (
                 <div className="space-y-6">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-gray-50 rounded-xl p-6 animate-pulse">
+                    <div key={i} className="bg-white rounded-xl p-6 animate-pulse">
                       <div className="h-6 bg-gray-200 rounded w-1/4 mb-4" />
                       <div className="space-y-3">
                         <div className="h-10 bg-gray-100 rounded" />
@@ -196,13 +200,13 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   {/* Enable Lost Leads */}
-                  <div className="mb-6 p-5 bg-gradient-to-r from-violet-50 to-cyan-50 border-2 border-violet-200 rounded-xl">
+                  <div className="mb-7 rounded-xl border border-gray-100 bg-white px-4 py-4">
                     <div className="flex items-center justify-between gap-4">
                       <div className="min-w-0">
-                        <div className="text-base font-bold text-gray-900">
+                        <div className="text-[15px] font-semibold text-gray-900">
                           {t('modal.enableTitle')}
                         </div>
-                        <div className="text-sm text-gray-600 mt-1">
+                        <div className="mt-0.5 text-sm text-gray-500">
                           {t('modal.enableDesc')}
                         </div>
                       </div>
@@ -232,17 +236,17 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                           disabled={inactiveDays <= 10}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className="flex items-center justify-center w-10 h-10 rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-40"
                         >
-                          <Minus className="h-5 w-5 text-gray-600" weight="bold" />
+                          <Minus className="h-4 w-4 text-gray-900" weight="bold" />
                         </motion.button>
 
                         <div className="flex-1">
-                          <div className="text-center p-4 bg-white border-2 border-gray-200 rounded-xl">
-                            <div className="text-4xl font-bold text-gray-900">
+                          <div className="text-center">
+                            <div className="tnum text-4xl font-semibold tracking-tight text-gray-900">
                               {inactiveDays}
                             </div>
-                            <div className="text-sm text-gray-600 mt-1">{t('modal.detection.daysLabel')}</div>
+                            <div className="mt-0.5 text-[13px] text-gray-500">{t('modal.detection.daysLabel')}</div>
                           </div>
                         </div>
 
@@ -251,9 +255,9 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                           onClick={() => adjustDays(10)}
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
-                          className="flex items-center justify-center w-10 h-10 rounded-lg border-2 border-gray-200 hover:bg-gray-50 transition-colors"
+                          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200"
                         >
-                          <Plus className="h-5 w-5 text-gray-600" weight="bold" />
+                          <Plus className="h-4 w-4 text-gray-900" weight="bold" />
                         </motion.button>
                       </div>
                       <p className="text-xs text-gray-500 mt-3 text-center">
@@ -327,13 +331,13 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <div className={sheet.footer}>
               <motion.button
                 type="button"
                 onClick={onClose}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                className={sheet.cancel}
               >
                 {t('modal.closeButton')}
               </motion.button>
@@ -343,10 +347,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
                 disabled={saving || isLoading}
                 whileHover={{ scale: saving ? 1 : 1.02 }}
                 whileTap={{ scale: saving ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500
-                           px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90
-                           transition-opacity
-                           disabled:cursor-not-allowed disabled:opacity-50"
+                className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500 disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 {saving ? (
                   <>

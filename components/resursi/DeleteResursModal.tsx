@@ -2,7 +2,8 @@
 
 import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Warning, Trash, SpinnerGap } from '@phosphor-icons/react';
+import { X, Trash, SpinnerGap } from '@phosphor-icons/react';
+import { sheet } from '@/components/ui/sheetClasses';
 import { useTranslations } from 'next-intl';
 import type { Resurs } from '@/types/resursi';
 
@@ -34,7 +35,7 @@ function DeleteResursModal({ isOpen, onClose, resurs, onConfirm, isDeleting = fa
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -42,78 +43,71 @@ function DeleteResursModal({ isOpen, onClose, resurs, onConfirm, isDeleting = fa
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div
-              className="relative p-6"
-              style={{ background: resurs.barva }}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                    <Warning className="h-5 w-5 text-white" weight="bold" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-white">{t('deleteModal.title')}</h2>
-                    <p className="text-sm text-white/80">{resurs.naziv}</p>
-                  </div>
-                </div>
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-4">
+                <h2 className={sheet.title}>{t('deleteModal.title')}</h2>
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                  className={sheet.close}
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-4">
-              <p className="text-sm text-gray-600">
+            <div className={sheet.body}>
+              <div className={`${sheet.group} flex items-center gap-3`}>
+                <span className="h-8 w-8 flex-shrink-0 rounded-lg" style={{ background: resurs.barva }} />
+                <p className="min-w-0 truncate text-[15px] font-semibold text-gray-900">{resurs.naziv}</p>
+              </div>
+              <p className="px-1 text-sm text-gray-600">
                 {t('deleteModal.confirmPrefix')}{' '}
-                <span className="font-semibold">&quot;{resurs.naziv}&quot;</span>?{' '}
+                <span className="font-semibold text-gray-900">&quot;{resurs.naziv}&quot;</span>?{' '}
                 {t('deleteModal.confirmSuffix')}
               </p>
+            </div>
 
-              <div className="flex items-center justify-end gap-3">
-                <motion.button
-                  type="button"
-                  onClick={onClose}
-                  disabled={isDeleting}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 disabled:opacity-50"
-                >
-                  {t('deleteModal.cancel')}
-                </motion.button>
-                <motion.button
-                  type="button"
-                  onClick={onConfirm}
-                  disabled={isDeleting}
-                  whileHover={{ scale: isDeleting ? 1 : 1.02 }}
-                  whileTap={{ scale: isDeleting ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-500 px-5 py-2.5
-                             text-sm font-medium text-white shadow-sm hover:opacity-90 transition-all
-                             disabled:opacity-70"
-                >
-                  {isDeleting ? (
-                    <>
-                      <SpinnerGap className="h-4 w-4 animate-spin" />
-                      {t('deleteModal.deleting')}
-                    </>
-                  ) : (
-                    <>
-                      <Trash className="h-4 w-4" weight="bold" />
-                      {t('deleteModal.delete')}
-                    </>
-                  )}
-                </motion.button>
-              </div>
+            {/* Footer */}
+            <div className={sheet.footer}>
+              <motion.button
+                type="button"
+                onClick={onClose}
+                disabled={isDeleting}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={sheet.cancel}
+              >
+                {t('deleteModal.cancel')}
+              </motion.button>
+              <motion.button
+                type="button"
+                onClick={onConfirm}
+                disabled={isDeleting}
+                whileHover={{ scale: isDeleting ? 1 : 1.02 }}
+                whileTap={{ scale: isDeleting ? 1 : 0.98 }}
+                className={`${sheet.action} bg-gradient-to-r from-red-500 to-rose-500`}
+              >
+                {isDeleting ? (
+                  <>
+                    <SpinnerGap className="h-4 w-4 animate-spin" />
+                    {t('deleteModal.deleting')}
+                  </>
+                ) : (
+                  <>
+                    <Trash className="h-4 w-4" weight="bold" />
+                    {t('deleteModal.delete')}
+                  </>
+                )}
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>

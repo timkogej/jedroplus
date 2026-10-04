@@ -3,7 +3,8 @@
 import { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
-import { Warning, Trash, X, SpinnerGap, CalendarBlank } from '@phosphor-icons/react';
+import { Trash, X, SpinnerGap, CalendarBlank } from '@phosphor-icons/react';
+import { sheet } from '@/components/ui/sheetClasses';
 import type { Client } from '@/types/clients';
 import ClientInitialsBadge from './ClientInitialsBadge';
 
@@ -54,7 +55,7 @@ function DeleteClientModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={(e) => e.target === e.currentTarget && !isDeleting && onClose()}
         >
           <motion.div
@@ -62,55 +63,50 @@ function DeleteClientModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 p-6">
-              <div className="flex items-center gap-3">
-                <Warning className="h-6 w-6 text-red-600 flex-shrink-0" weight="regular" />
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold text-[#1A1F36]">
-                    {t('deleteModal.title')}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    {t('deleteModal.areYouSure')}
-                  </p>
+                  <h2 className={sheet.title}>{t('deleteModal.title')}</h2>
+                  <p className={sheet.subtitle}>{t('deleteModal.areYouSure')}</p>
                 </div>
+                <motion.button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isDeleting}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={sheet.close}
+                >
+                  <X className="h-5 w-5" weight="regular" />
+                </motion.button>
               </div>
-              <motion.button
-                type="button"
-                onClick={onClose}
-                disabled={isDeleting}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]
-                           disabled:opacity-50"
-              >
-                <X className="h-5 w-5" weight="bold" />
-              </motion.button>
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              {/* Client info card */}
-              <div className="flex items-center gap-4 rounded-xl bg-gray-50 p-4">
+            <div className={sheet.body}>
+              {/* Client info */}
+              <div className={`${sheet.group} flex items-center gap-3`}>
                 <ClientInitialsBadge
                   firstName={client.ime}
                   lastName={client.priimek}
                   size="lg"
                   variant="text"
                 />
-                <div>
-                  <p className="font-semibold text-[#1A1F36]">
+                <div className="min-w-0">
+                  <p className="truncate text-[15px] font-semibold text-gray-900">
                     {client.ime} {client.priimek}
                   </p>
-                  <p className="text-sm text-gray-500">{client.email}</p>
+                  <p className="truncate text-[13px] text-gray-500">{client.email}</p>
                 </div>
               </div>
 
               {/* Warning message */}
-              <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-4">
+              <div className="rounded-xl bg-red-50 p-4">
                 <p className="text-sm text-red-800">
                   {t('deleteModal.warningPrefix')} <strong>{client.ime} {client.priimek}</strong> {t('deleteModal.warningSuffix')}
                 </p>
@@ -118,8 +114,8 @@ function DeleteClientModal({
 
               {/* Appointment count warning */}
               {appointmentCount > 0 && (
-                <div className="mt-4 flex items-center gap-3 rounded-xl border border-amber-100 bg-amber-50 p-4">
-                  <CalendarBlank className="h-5 w-5 flex-shrink-0 text-amber-600" weight="duotone" />
+                <div className="flex items-start gap-3 rounded-xl bg-amber-50 p-4">
+                  <CalendarBlank className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" weight="regular" />
                   <p className="text-sm text-amber-800">
                     {t('deleteModal.appointmentWarningPrefix')} <strong>{t('deleteModal.appointmentCount', { count: appointmentCount })}</strong>. {t('deleteModal.appointmentWarningSuffix')}
                   </p>
@@ -128,15 +124,14 @@ function DeleteClientModal({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 p-6">
+            <div className={sheet.footer}>
               <motion.button
                 type="button"
                 onClick={onClose}
                 disabled={isDeleting}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100
-                           disabled:opacity-50"
+                className={sheet.cancel}
               >
                 {t('deleteModal.cancel')}
               </motion.button>
@@ -146,9 +141,7 @@ function DeleteClientModal({
                 disabled={isDeleting}
                 whileHover={{ scale: isDeleting ? 1 : 1.02 }}
                 whileTap={{ scale: isDeleting ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-5 py-2.5
-                           text-sm font-medium text-white shadow-sm hover:opacity-90 transition-all
-                           disabled:opacity-70"
+                className={`${sheet.action} bg-gradient-to-r from-red-500 to-rose-600`}
               >
                 {isDeleting ? (
                   <>

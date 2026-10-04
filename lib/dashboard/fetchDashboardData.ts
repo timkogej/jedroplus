@@ -4,6 +4,11 @@ import { fetchAllTableRows, fetchTableRows } from "@/lib/companyScope";
 import { TABLES } from "@/lib/data";
 import { detectBookingSchema, pickFirst } from "@/lib/dashboardHelpers";
 import { normalizeCommunicationLanguage, type CommunicationLanguageCode } from "@/lib/communicationLanguage";
+import {
+  extractPricingFields,
+  extractPromotionFields,
+  extractAddOnFields,
+} from "@/lib/supabase/appointments";
 
 /** Same window Termini loads by default (start of last month), so the count
  * on the dashboard matches the list it links to. */
@@ -52,6 +57,48 @@ export interface AppointmentItem {
   opombe?: string;
   interneOpombe?: string;
   cena?: number;
+  /**
+   * Cena s popustom, promocija, popust dodatka, valuta, ID termina in ali se
+   * termin beleži — vse, kar okence termina pokaže v Koledarju in Terminih.
+   * Doslej jih nadzorna plošča ni naložila, zato okence tu ni moglo pokazati
+   * popustov in je kot končno ceno prikazalo osnovno.
+   */
+  details?: AppointmentItemDetails;
+}
+
+export interface AppointmentItemDetails {
+  koncna_cena: number | null;
+  osnovna_cena: number | null;
+  popust: number | null;
+  popust_tip: string | null;
+  promocija_tip: 'popust' | 'happy_hour' | 'add_on' | null;
+  promocija_naziv: string | null;
+  popust_id: string | null;
+  happy_hour_id: string | null;
+  add_on_popust: string | null;
+  add_on_popust_tip: string | null;
+  valuta: string | null;
+  id_termina?: string;
+  belezi_termin: boolean;
+}
+
+function extractItemDetails(row: Record<string, unknown>): AppointmentItemDetails {
+  const pricing = extractPricingFields(row);
+  const promotion = extractPromotionFields(row);
+  const addOn = extractAddOnFields(row);
+  const belezi = row['belezi_termin'];
+  return {
+    koncna_cena: pricing.koncna_cena,
+    osnovna_cena: pricing.cena,
+    popust: pricing.popust,
+    popust_tip: pricing.popust_tip,
+    ...promotion,
+    add_on_popust: addOn.add_on_popust,
+    add_on_popust_tip: addOn.add_on_popust_tip,
+    valuta: addOn.valuta,
+    id_termina: row['ID termina'] ? String(row['ID termina']) : undefined,
+    belezi_termin: !(belezi === false || belezi === 0),
+  };
 }
 
 export interface TopService {
@@ -317,6 +364,7 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
         opombe: opombe || undefined,
         interneOpombe: interneOpombe || undefined,
         cena,
+        details: extractItemDetails(row),
       });
     }
 
@@ -479,6 +527,7 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
         opombe: opombe || undefined,
         interneOpombe: interneOpombe || undefined,
         cena,
+        details: extractItemDetails(row),
       });
     }
 
@@ -1084,6 +1133,7 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
       const clientPhone = String(pickFirst(row, ['Telefon', 'stranka_telefon', 'client_phone', 'Telefon stranke', 'Telefonska številka', 'telefon', 'phone']) ?? '');
       const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
       const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes']) ?? '');
+      const interneOpombe = String(pickFirst(row, ['interne_opombe', 'Interne opombe', 'internal_notes']) ?? '');
       const cena = getAppointmentTotalCena(row);
       const language = pickLanguage(row);
 
@@ -1124,7 +1174,9 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
           employeeId: staffId || undefined,
           status: 'scheduled',
           opombe: opombe || undefined,
+          interneOpombe: interneOpombe || undefined,
           cena,
+          details: extractItemDetails(row),
         },
       });
     }

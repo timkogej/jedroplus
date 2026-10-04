@@ -14,59 +14,50 @@ import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { WarningCircle } from '@phosphor-icons/react/dist/ssr';
 import { getTranslations } from 'next-intl/server';
+import AuroraBackground from '@/components/shared/AuroraBackground';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import { JedroLogo } from '@/components/brand/JedroLogo';
 
 const GRADIENT = 'linear-gradient(to right, #7C75FC, #4F8CFF, #50C3D2)';
 
-export default async function ConfirmErrorPage() {
-  const t = await getTranslations('auth.confirmError');
+export default async function ConfirmErrorPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  // Jezik iz naslova strani — brez tega se vnaprej zgrajena stran vedno
+  // prikaže v privzeti slovenščini.
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth.confirmError' });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] px-4 py-16">
+      <AuroraBackground />
+      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <div className="relative z-10 w-full max-w-[400px]">
 
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <h1
-            className="text-4xl font-bold tracking-tight mb-2"
-            style={{
-              background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              color: 'transparent',
-            }}
-          >
-            Jedro+
+        {/* Logo Jedro+ (components/brand/JedroLogo) */}
+        <div className="mb-8 flex justify-center">
+          <h1>
+            <JedroLogo height={44} tone="onDark" title="Jedro+" />
           </h1>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 flex flex-col items-center text-center gap-6">
+        <div className="rounded-3xl border border-white/40 bg-white/90 shadow-[0_30px_80px_-20px_rgba(10,8,40,0.65)] backdrop-blur-2xl flex flex-col items-center gap-6 p-7 text-center sm:p-8">
 
           {/* Icon */}
-          <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center shadow-sm">
-            <WarningCircle size={32} weight="duotone" className="text-red-400" />
-          </div>
+          <WarningCircle size={44} weight="regular" className="text-red-500" />
 
           {/* Eyebrow */}
-          <p className="text-xs font-semibold uppercase tracking-widest text-red-400 -mb-2">
+          <p className="-mb-2 text-[11px] font-semibold uppercase tracking-wider text-red-500">
             {t('eyebrow')}
           </p>
 
           {/* Heading */}
-          <h2 className="text-2xl font-bold text-gray-900 leading-snug">
+          <h2 className="text-[22px] font-semibold leading-snug text-gray-900">
             {t('heading')}{' '}
-            <span
-              style={{
-                background: GRADIENT,
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent',
-              }}
-            >
-              {t('headingHighlight')}
-            </span>
+            <span>{t('headingHighlight')}</span>
           </h2>
 
           {/* Body */}
@@ -86,8 +77,7 @@ export default async function ConfirmErrorPage() {
                 className="flex items-start gap-2 text-sm text-gray-500"
               >
                 <span
-                  className="mt-0.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
-                  style={{ background: GRADIENT, minWidth: '6px', minHeight: '6px' }}
+                  className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-gray-300"
                 />
                 {reason}
               </li>
@@ -101,7 +91,7 @@ export default async function ConfirmErrorPage() {
           <div className="w-full flex flex-col gap-3">
             <Link href="/login" className="w-full">
               <Button
-                className="w-full h-12 text-white font-medium transition-all duration-300 ease-in-out hover:opacity-90 hover:shadow-lg"
+                className="h-11 w-full rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80"
                 style={{ background: GRADIENT }}
               >
                 {t('backToLoginButton')}
@@ -111,7 +101,7 @@ export default async function ConfirmErrorPage() {
             <Link href="/signup" className="w-full">
               <Button
                 variant="outline"
-                className="w-full h-12 font-medium text-gray-700 border-gray-200 hover:bg-gray-50 transition-colors"
+                className="h-11 w-full rounded-xl border-gray-200 font-medium text-gray-900 transition-colors hover:bg-gray-50"
               >
                 {t('tryAgainButton')}
               </Button>
@@ -131,10 +121,10 @@ export default async function ConfirmErrorPage() {
         </div>
 
         {/* Back to home */}
-        <p className="text-center mt-6 text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm">
           <Link
             href="/"
-            className="hover:text-gray-700 transition-colors underline underline-offset-2"
+            className="text-white/70 underline underline-offset-4 transition-colors hover:text-white"
           >
             {t('backToStart')}
           </Link>

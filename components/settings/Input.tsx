@@ -12,7 +12,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 // roba. Enak obroč uporabljajo vsa polja v nastavitvah, da fokus povsod
 // pomeni isto.
 const base =
-  'w-full rounded-lg border bg-white px-3 py-2 text-base text-gray-900 ' +
+  'w-full rounded-lg border bg-white px-3 py-2 text-base text-gray-900 sm:py-1.5 sm:text-sm ' +
   'transition-colors duration-150 placeholder:text-gray-400 focus:outline-none ' +
   'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500';
 

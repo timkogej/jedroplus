@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { XCircle, ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import AuroraBackground from '@/components/shared/AuroraBackground';
 
 function getSafeReturnPath(): string {
   if (typeof window === 'undefined') return '/nastavitve/paketi';
@@ -19,11 +20,12 @@ export default function BillingCancelPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50 flex items-center justify-center p-4">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+      <AuroraBackground tone="light" />
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center"
+        className="relative z-10 w-full max-w-md rounded-2xl border border-gray-200/70 bg-white/85 shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl p-8 text-center"
       >
         {/* Cancel Icon */}
         <motion.div
@@ -32,15 +34,14 @@ export default function BillingCancelPage() {
           transition={{ type: 'spring', duration: 0.5 }}
           className="relative inline-block mb-6"
         >
-          <div className="absolute inset-0 bg-gray-400/20 rounded-full blur-2xl" />
-          <XCircle className="h-20 w-20 text-gray-400 relative" weight="fill" />
+          <XCircle className="h-16 w-16 text-gray-400" weight="regular" />
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-2xl font-bold text-gray-900 mb-2"
+          className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900"
         >
           {t('cancel.title')}
         </motion.h1>
@@ -49,7 +50,7 @@ export default function BillingCancelPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-gray-600 mb-8"
+          className="mb-8 text-[15px] text-gray-500"
         >
           {t('cancel.message')}
         </motion.p>
@@ -62,7 +63,7 @@ export default function BillingCancelPage() {
         >
           <button
             onClick={() => router.push(getSafeReturnPath())}
-            className="w-full py-3 px-4 bg-gradient-to-r from-violet-500 to-cyan-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2"
+            className="w-full flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
           >
             <ArrowLeft className="h-4 w-4" weight="bold" />
             {t('cancel.backButton')}
@@ -70,7 +71,7 @@ export default function BillingCancelPage() {
 
           <button
             onClick={() => router.push('/dashboard')}
-            className="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+            className="w-full flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
           >
             {t('cancel.dashboardButton')}
             <ArrowRight className="h-4 w-4" weight="bold" />

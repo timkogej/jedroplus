@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabaseClient';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import AuroraBackground from '@/components/shared/AuroraBackground';
+import { JedroLogo } from '@/components/brand/JedroLogo';
 import { inviteFromMetadata, joinPath, loadPendingInvite } from '@/lib/team/invite';
 
 const STORAGE_KEY = "jedroplus_company_id";
@@ -81,8 +83,9 @@ export default function OnboardingPage() {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
+      <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white">
+        <AuroraBackground tone="light" />
+        <div className="relative z-10 text-center">
           <div className="w-10 h-10 mx-auto mb-4">
             <svg className="w-10 h-10 animate-spin" viewBox="0 0 50 50">
               <defs>
@@ -102,45 +105,38 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-white p-4">
-      <PublicLanguageToggle className="absolute right-4 top-4" />
-      <div className="w-full max-w-4xl">
-        {/* Header - no J+ symbol, just text */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3">
-            {t('entry.title')}{' '}
-            <span
-              style={{
-                background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Jedro+
-            </span>
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+      <AuroraBackground tone="light" />
+      <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
+      <div className="relative z-10 w-full max-w-3xl">
+        {/* Glava — logotip Jedro+ (components/brand/JedroLogo) */}
+        <div className="mb-10 flex flex-col items-center text-center">
+          <JedroLogo height={36} className="mb-6" title="Jedro+" />
+          <h1 className="mb-2 text-3xl font-semibold tracking-tight text-gray-900 sm:text-4xl">
+            {t('entry.title')} JedroPlus
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-[17px] text-gray-500">
             {t('entry.subtitle')}
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-4 md:grid-cols-2 md:gap-5">
           {/* CREATE COMPANY */}
           <button
             onClick={() => router.push('/onboarding/create')}
-            className="group relative bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-10 text-left hover:border-violet-300 hover:shadow-2xl transition-all duration-300"
+            className="group relative rounded-2xl border border-gray-200/70 bg-white/80 p-7 text-left shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-[0_28px_60px_-25px_rgba(60,50,140,0.45)] sm:p-8"
           >
-            <div className="absolute top-6 right-6 w-16 h-16 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <svg className="w-8 h-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="mb-8">
+              <svg className="h-8 w-8 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
 
-            <div className="mt-16">
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            <div>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900">
                 {t('entry.create.title')}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="mb-6 text-[15px] leading-relaxed text-gray-500">
                 {t('entry.create.description')}
               </p>
               <div className="text-violet-600 font-semibold group-hover:translate-x-2 transition-transform duration-300 inline-flex items-center gap-2">
@@ -155,19 +151,19 @@ export default function OnboardingPage() {
           {/* JOIN COMPANY */}
           <button
             onClick={() => router.push('/onboarding/join')}
-            className="group relative bg-white rounded-3xl shadow-xl border-2 border-gray-100 p-10 text-left hover:border-cyan-300 hover:shadow-2xl transition-all duration-300"
+            className="group relative rounded-2xl border border-gray-200/70 bg-white/80 p-7 text-left shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-300 hover:shadow-[0_28px_60px_-25px_rgba(60,50,140,0.45)] sm:p-8"
           >
-            <div className="absolute top-6 right-6 w-16 h-16 rounded-full bg-white border-2 border-gray-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <svg className="w-8 h-8 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="mb-8">
+              <svg className="h-8 w-8 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
 
-            <div className="mt-16">
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            <div>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900">
                 {t('entry.join.title')}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="mb-6 text-[15px] leading-relaxed text-gray-500">
                 {t('entry.join.description')}
               </p>
               <div className="text-cyan-600 font-semibold group-hover:translate-x-2 transition-transform duration-300 inline-flex items-center gap-2">

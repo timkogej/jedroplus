@@ -304,7 +304,8 @@
       "datumOd": "From",
       "datumDo": "To",
       "search": "Search by client / appointment ID",
-      "resetFilters": "Reset"
+      "resetFilters": "Reset",
+      "apply": "Apply"
     },
     "columns": {
       "datum": "Date & time",

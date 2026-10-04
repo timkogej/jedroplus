@@ -9,7 +9,10 @@ import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { fetchStoritve } from '@/lib/companyScope';
 import type { Storitev } from '@/types/appointments';
+import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
+import { MiniSwitch } from '@/components/ui/MiniSwitch';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 interface Popust {
   id: string;
   company_id: string;
@@ -198,116 +201,149 @@ export default function DiscountsPage() {
     return String(raw['Naziv'] ?? raw['naziv'] ?? svc.naziv ?? id);
   };
 
-  if (loading) {
+  const columns: DataTableColumn<Popust>[] = [
+    {
+      id: 'naziv',
+      header: t('discounts.table.name'),
+      sortValue: (p) => p.naziv.toLowerCase(),
+      cell: (p) => <span className="text-sm font-medium text-gray-900">{p.naziv}</span>,
+    },
+    {
+      id: 'services',
+      header: t('discounts.table.services'),
+      sortValue: (p) => (p.storitev_ids || []).length,
+      cell: (p) => (
+        <span
+          className="inline-flex cursor-default items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+          title={(p.storitev_ids || []).map(getServiceName).join(', ')}
+        >
+          {t('discounts.serviceCount', { count: (p.storitev_ids || []).length })}
+        </span>
+      ),
+    },
+    {
+      id: 'value',
+      header: t('discounts.table.discount'),
+      sortValue: (p) => p.vrednost,
+      cell: (p) => (
+        <span className="tnum text-sm font-semibold text-gray-900">
+          {p.tip_popusta === 'percentage' ? `${p.vrednost}%` : money(p.vrednost)}
+        </span>
+      ),
+    },
+    {
+      id: 'from',
+      header: t('discounts.table.dateFrom'),
+      sortValue: (p) => new Date(p.datum_zacetek || 0).getTime(),
+      cell: (p) => <span className="tnum whitespace-nowrap text-sm text-gray-600">{formatDate(p.datum_zacetek)}</span>,
+    },
+    {
+      id: 'to',
+      header: t('discounts.table.dateTo'),
+      sortValue: (p) => new Date(p.datum_konec || 0).getTime(),
+      cell: (p) => <span className="tnum whitespace-nowrap text-sm text-gray-600">{formatDate(p.datum_konec)}</span>,
+    },
+    {
+      id: 'status',
+      header: t('discounts.table.status'),
+      cell: (p) => {
+        const status = getStatus(p);
+        return (
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${status.color}`}>
+            {status.label}
+          </span>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      header: t('discounts.table.actions'),
+      align: 'right',
+      cell: (p) => renderActions(p),
+    },
+  ];
+
+  /** Stikalo, uredi, izbriši — isto v tabeli in v mobilnem seznamu. */
+  function renderActions(popust: Popust) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="w-6 h-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent" />
+      <div className="flex items-center justify-end gap-1">
+        <MiniSwitch checked={popust.aktiven} onChange={() => handleToggleActive(popust)} />
+        <button
+          type="button"
+          onClick={() => openEdit(popust)}
+          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
+        >
+          <PencilSimple className="h-4 w-4" weight="regular" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setDeleteId(popust.id)}
+          className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+        >
+          <Trash className="h-4 w-4" weight="regular" />
+        </button>
       </div>
     );
   }
 
   return (
     <div>
-      {/* Toolbar */}
-      <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-        <div className="relative flex-1 max-w-sm">
-          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" weight="regular" />
+      {/* Iskanje in nov popust */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="relative min-w-[220px] max-w-sm flex-1">
+          <MagnifyingGlass className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('discounts.search')}
-            className="w-full rounded-lg border border-gray-200 bg-[#F7F8FA] py-2.5 pl-9 pr-4 text-sm focus:border-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+            className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
           />
         </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
+          type="button"
           onClick={openCreate}
-          className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
         >
-          <Plus className="w-4 h-4" weight="bold" />
+          <Plus size={17} weight="bold" />
           {t('discounts.newButton')}
-        </motion.button>
+        </button>
       </div>
 
-      {/* Table */}
-      {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-400 shadow-sm">
-          <Tag className="w-10 h-10 mx-auto mb-3 opacity-40" weight="thin" />
-          <p className="text-sm">{t('discounts.empty')}</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.name')}</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.services')}</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.discount')}</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.dateFrom')}</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.dateTo')}</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.status')}</th>
-                <th className="text-right py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">{t('discounts.table.actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <AnimatePresence>
-                {filtered.map((popust, i) => {
-                  const status = getStatus(popust);
-                  return (
-                    <motion.tr
-                      key={popust.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ delay: i * 0.04 }}
-                      className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="py-3.5 px-4 font-medium text-gray-900">{popust.naziv}</td>
-                      <td className="py-3.5 px-4">
-                        <span className="inline-flex cursor-pointer items-center rounded-lg bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-gray-100"
-                          title={(popust.storitev_ids || []).map(getServiceName).join(', ')}
-                        >
-                          {t('discounts.serviceCount', { count: (popust.storitev_ids || []).length })}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 font-semibold text-gray-900">
-                        {popust.tip_popusta === 'percentage' ? `${popust.vrednost}%` : money(popust.vrednost)}
-                      </td>
-                      <td className="py-3.5 px-4 text-gray-600">{formatDate(popust.datum_zacetek)}</td>
-                      <td className="py-3.5 px-4 text-gray-600">{formatDate(popust.datum_konec)}</td>
-                      <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status.color}`}>
-                          {status.label}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Active toggle */}
-                          <button
-                            onClick={() => handleToggleActive(popust)}
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                              popust.aktiven ? 'bg-gray-900' : 'bg-gray-300'
-                            }`}
-                          >
-                            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${popust.aktiven ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
-                          </button>
-                          <button onClick={() => openEdit(popust)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900">
-                            <PencilSimple className="w-4 h-4" weight="regular" />
-                          </button>
-                          <button onClick={() => setDeleteId(popust.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50">
-                            <Trash className="w-4 h-4" weight="regular" />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable<Popust>
+        rows={filtered}
+        columns={columns}
+        rowKey={(p) => p.id}
+        isLoading={loading}
+        pageSize={20}
+        empty={
+          <div className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12 text-center">
+            <Tag className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+            <p className="text-sm text-gray-500">{t('discounts.empty')}</p>
+          </div>
+        }
+        mobile={{
+          title: (p) => p.naziv,
+          subtitle: (p) => (
+            <span className="tnum">
+              {formatDate(p.datum_zacetek)} – {formatDate(p.datum_konec)}
+            </span>
+          ),
+          meta: (p) => {
+            const status = getStatus(p);
+            return (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="tnum text-[13px] font-semibold text-gray-900">
+                  {p.tip_popusta === 'percentage' ? `${p.vrednost}%` : money(p.vrednost)}
+                </span>
+                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${status.color}`}>
+                  {status.label}
+                </span>
+              </div>
+            );
+          },
+          trailing: (p) => renderActions(p),
+        }}
+      />
 
       {/* Create/Edit Modal */}
       <AnimatePresence>
@@ -324,7 +360,7 @@ export default function DiscountsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+              className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-xl"
             >
               <div className="flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
                 <h2 className="text-lg font-semibold text-gray-900">
@@ -459,9 +495,9 @@ export default function DiscountsPage() {
                   <span className="text-sm font-medium text-gray-700">{t('shared.activeLabel')}</span>
                   <button
                     onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}
+                    className={`${switchTrack} ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}
                   >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.aktiven ? 'translate-x-6' : 'translate-x-1'}`} />
+                    <span className={`${switchKnob(form.aktiven)}`} />
                   </button>
                 </div>
               </div>
@@ -474,7 +510,7 @@ export default function DiscountsPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f] disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
                 >
                   {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                   {editingId ? t('shared.saveButton') : t('shared.createButton')}
@@ -490,7 +526,7 @@ export default function DiscountsPage() {
         {deleteId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteId(null)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-xl">
               <p className="text-base font-semibold text-gray-900 mb-2">{t('discounts.deleteConfirm.title')}</p>
               <p className="text-sm text-gray-500 mb-5">{t('shared.cannotUndo')}</p>
               <div className="flex gap-3">

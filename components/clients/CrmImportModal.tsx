@@ -17,6 +17,7 @@ import {
 import * as XLSX from 'xlsx';
 import type { Client } from '@/types/clients';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
+import { sheet } from '@/components/ui/sheetClasses';
 
 /**
  * Primerjalni ključ za besedilo: male črke, brez šumnikov, brez odvečnih
@@ -35,6 +36,64 @@ const kljuc = (v?: string | null): string =>
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase();
+
+/**
+ * CSV kot besedilo. Knjižnica xlsx bajte CSV brez BOM bere kot windows-1252,
+ * zato bi se »Šušteršič« uvozil kot »Å uÅ¡terÅ¡iÄ«. Najprej poskusimo UTF-8
+ * (izvoz večine CRM-jev, Google Sheets), sicer windows-1250 (starejši
+ * Excel na Windows s šumniki).
+ */
+function decodeCsv(bytes: Uint8Array): string {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/^﻿/, '');
+  } catch {
+    return new TextDecoder('windows-1250').decode(bytes);
+  }
+}
+
+/** Datumske celice iz Excela izpiše kot YYYY-MM-DD (sicer bi xlsx vrnil »3/14/24«). */
+function formatDateCells(ws: XLSX.WorkSheet) {
+  for (const key of Object.keys(ws)) {
+    if (key.startsWith('!')) continue;
+    const cell = ws[key] as XLSX.CellObject;
+    if (cell.t === 'n' && typeof cell.z === 'string' && XLSX.SSF.is_date(cell.z)) {
+      cell.w = XLSX.SSF.format('yyyy-mm-dd', cell.v as number);
+    }
+  }
+}
+
+/**
+ * Datum vpisa v obliki, ki jo pričakuje baza in iz katere aplikacija šteje
+ * nove stranke (YYYY-MM-DD). Pike in poševnice beremo po slovensko kot
+ * dan.mesec.leto. Česar ni mogoče prepoznati, ostane prazno, da v bazo ne
+ * gre napačen datum.
+ */
+function toIsoDate(raw: string): string {
+  const v = raw.trim();
+  if (!v) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const valid = (y: number, m: number, d: number) => {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+  };
+
+  let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) {
+    const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    return valid(y, mo, d) ? `${y}-${pad(mo)}-${pad(d)}` : '';
+  }
+
+  m = v.match(/^(\d{1,2})[./](\d{1,2})[./](\d{2,4})/);
+  if (m) {
+    const d = Number(m[1]);
+    const mo = Number(m[2]);
+    let y = Number(m[3]);
+    if (y < 100) y += 2000;
+    return valid(y, mo, d) ? `${y}-${pad(mo)}-${pad(d)}` : '';
+  }
+
+  return '';
+}
 
 interface ParsedRow {
   [key: string]: string;
@@ -131,8 +190,12 @@ export default function CrmImportModal({
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const wb = XLSX.read(data, { type: 'array' });
+        const isCsv = /\.csv$/i.test(f.name) || f.type === 'text/csv';
+        const wb = isCsv
+          ? XLSX.read(decodeCsv(data), { type: 'string', raw: true })
+          : XLSX.read(data, { type: 'array', cellNF: true });
         const ws = wb.Sheets[wb.SheetNames[0]];
+        if (!isCsv) formatDateCells(ws);
         const rows = XLSX.utils.sheet_to_json<ParsedRow>(ws, { defval: '', raw: false });
         if (rows.length === 0) {
           setParseError('Datoteka je prazna ali nima veljavnih podatkov.');
@@ -232,7 +295,7 @@ export default function CrmImportModal({
           telefon: mapping['Telefon'] ? String(row[mapping['Telefon']] ?? '').trim() : '',
           spol: normalizeSpol(mapping['Spol'] ? String(row[mapping['Spol']] ?? '') : ''),
           opombe: mapping['Opombe'] ? String(row[mapping['Opombe']] ?? '').trim() : '',
-          datum_vpisa: mapping['Datum vpisa'] ? String(row[mapping['Datum vpisa']] ?? '').trim() : '',
+          datum_vpisa: mapping['Datum vpisa'] ? toIsoDate(String(row[mapping['Datum vpisa']] ?? '')) : '',
         };
       });
 
@@ -362,7 +425,7 @@ export default function CrmImportModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop.replace('z-50', 'z-[100]')}
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -370,20 +433,18 @@ export default function CrmImportModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative flex w-full max-w-lg max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className={`${sheet.panel} sm:max-w-lg`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="border-b border-gray-100 bg-white px-6 py-4">
-              <div className="flex items-center justify-between">
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2
-                    className="text-xl font-semibold text-transparent bg-clip-text"
-                    style={{ backgroundImage: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
-                  >
+                  <h2 className={sheet.title}>
                     Uvozi stranke
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className={sheet.subtitle}>
                     {step === 1 && 'Izberite datoteko za uvoz'}
                     {step === 2 && 'Preglejte podatke in povežite stolpce'}
                     {step === 3 && 'Uvažam stranke...'}
@@ -395,19 +456,19 @@ export default function CrmImportModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className={sheet.close}
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
 
               {/* Step dots */}
-              <div className="mt-3 flex items-center gap-1.5">
+              <div className="mt-3 flex items-center gap-1.5" aria-hidden="true">
                 {([1, 2, 3, 4] as const).map((s) => (
                   <div
                     key={s}
                     className={`h-1.5 rounded-full transition-all ${
-                      s === step ? 'w-6 bg-violet-500' : s < step ? 'w-4 bg-violet-300' : 'w-4 bg-gray-200'
+                      s === step ? 'w-6 bg-violet-500' : s < step ? 'w-4 bg-violet-300' : 'w-4 bg-gray-300'
                     }`}
                   />
                 ))}
@@ -415,7 +476,7 @@ export default function CrmImportModal({
             </div>
 
             {/* Body */}
-            <div className="flex-1 overflow-y-auto p-5">
+            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
 
               {/* ── Step 1: File upload ── */}
               {step === 1 && (
@@ -425,17 +486,17 @@ export default function CrmImportModal({
                     onDragLeave={() => setIsDragging(false)}
                     onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-10 px-6 cursor-pointer transition-all ${
+                    className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 transition-all ${
                       isDragging
                         ? 'border-violet-400 bg-violet-50'
-                        : 'border-gray-200 bg-white hover:border-violet-300 hover:bg-violet-50/30'
+                        : 'border-gray-300 bg-white hover:border-violet-300 hover:bg-violet-50/30'
                     }`}
                   >
                     <UploadSimple
-                      className={`mb-3 h-10 w-10 ${isDragging ? 'text-violet-500' : 'text-gray-400'}`}
-                      weight="duotone"
+                      className={`mb-3 h-9 w-9 ${isDragging ? 'text-violet-500' : 'text-gray-400'}`}
+                      weight="regular"
                     />
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className="text-sm font-medium text-gray-900">
                       Povlecite datoteko sem ali kliknite za izbiro
                     </p>
                     <p className="mt-1 text-xs text-gray-400">Podprte vrste: .csv, .xlsx, .xls</p>
@@ -455,22 +516,22 @@ export default function CrmImportModal({
                     <motion.div
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-4"
+                      className="flex items-center gap-3 rounded-xl bg-white p-4"
                     >
-                      <FileText className="h-8 w-8 flex-shrink-0 text-violet-500" weight="duotone" />
+                      <FileText className="h-7 w-7 flex-shrink-0 text-violet-500" weight="regular" />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-gray-800">{file.name}</p>
+                        <p className="truncate text-sm font-medium text-gray-900">{file.name}</p>
                         <p className="text-xs text-gray-400">{formatBytes(file.size)}</p>
                       </div>
                       {headers.length > 0 && (
-                        <CheckCircle className="h-5 w-5 flex-shrink-0 text-emerald-500" weight="fill" />
+                        <CheckCircle className="h-5 w-5 flex-shrink-0 text-emerald-500" weight="regular" />
                       )}
                     </motion.div>
                   )}
 
                   {parseError && (
-                    <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
-                      <Warning className="h-4 w-4 flex-shrink-0 text-red-500" weight="fill" />
+                    <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3">
+                      <Warning className="h-4 w-4 flex-shrink-0 text-red-500" weight="regular" />
                       <p className="text-sm text-red-700">{parseError}</p>
                     </div>
                   )}
@@ -482,15 +543,15 @@ export default function CrmImportModal({
                 <div className="space-y-5">
                   {/* Preview table */}
                   <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       Predogled (prvih 5 vrstic)
                     </p>
-                    <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white">
+                    <div className="overflow-x-auto rounded-xl bg-white">
                       <table className="w-full text-xs">
                         <thead>
-                          <tr className="border-b border-gray-100 bg-gray-50">
+                          <tr className="border-b border-gray-100">
                             {headers.map((h) => (
-                              <th key={h} className="whitespace-nowrap px-3 py-2 text-left font-semibold text-gray-600">
+                              <th key={h} className="whitespace-nowrap px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                                 {h}
                               </th>
                             ))}
@@ -498,9 +559,9 @@ export default function CrmImportModal({
                         </thead>
                         <tbody>
                           {previewRows.map((row, i) => (
-                            <tr key={i} className="border-b border-gray-50 last:border-0">
+                            <tr key={i} className="border-b border-gray-100 last:border-0">
                               {headers.map((h) => (
-                                <td key={h} className="max-w-[120px] truncate px-3 py-2 text-gray-700">
+                                <td key={h} className="max-w-[120px] truncate px-3 py-2 text-gray-900">
                                   {row[h] ?? ''}
                                 </td>
                               ))}
@@ -513,22 +574,22 @@ export default function CrmImportModal({
 
                   {/* Column mapping */}
                   <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       Povežite stolpce
                     </p>
-                    <div className="rounded-xl border border-gray-100 bg-white divide-y divide-gray-50">
+                    <div className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white">
                       {[...REQUIRED_FIELDS, ...OPTIONAL_FIELDS].map((field) => {
                         const isRequired = REQUIRED_FIELDS.includes(field);
                         return (
                           <div key={field} className="flex items-center gap-3 px-4 py-3">
-                            <span className="w-40 flex-shrink-0 text-sm text-gray-700">
+                            <span className="w-40 flex-shrink-0 text-sm text-gray-900">
                               {field}
                               {isRequired && <span className="ml-1 text-xs text-gray-400">(zahtevano)</span>}
                             </span>
                             <select
                               value={mapping[field] ?? ''}
                               onChange={(e) => setMapping((prev) => ({ ...prev, [field]: e.target.value }))}
-                              className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400/30"
+                              className="min-w-0 flex-1 rounded-[10px] border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                             >
                               <option value="">— preskoči —</option>
                               {headers.map((h) => (
@@ -541,13 +602,13 @@ export default function CrmImportModal({
                     </div>
                   </div>
 
-                  <p className="text-xs text-gray-400 text-center">
-                    Skupaj vrstic za uvoz: <span className="font-semibold text-gray-600">{allRows.length}</span>
+                  <p className="text-center text-[13px] text-gray-500">
+                    Skupaj vrstic za uvoz: <span className="tnum font-semibold text-gray-900">{allRows.length}</span>
                   </p>
 
                   {parseError && (
-                    <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 px-4 py-3">
-                      <Warning className="h-4 w-4 flex-shrink-0 text-red-500" weight="fill" />
+                    <div className="flex items-center gap-2 rounded-xl bg-red-50 px-4 py-3">
+                      <Warning className="h-4 w-4 flex-shrink-0 text-red-500" weight="regular" />
                       <p className="text-sm text-red-700">{parseError}</p>
                     </div>
                   )}
@@ -558,7 +619,7 @@ export default function CrmImportModal({
               {step === 3 && (
                 <div className="flex flex-col items-center justify-center py-12 gap-4">
                   <SpinnerGap className="h-10 w-10 animate-spin text-violet-500" weight="bold" />
-                  <p className="text-sm font-medium text-gray-700">Uvažam stranke...</p>
+                  <p className="text-sm font-medium text-gray-900">Uvažam stranke...</p>
                   <p className="text-xs text-gray-400">To lahko traja nekaj sekund.</p>
                 </div>
               )}
@@ -567,25 +628,25 @@ export default function CrmImportModal({
               {step === 4 && result && (
                 <div className="space-y-3">
                   <div className="flex flex-col items-center pb-2">
-                    <CheckCircle className="mb-3 h-12 w-12 text-emerald-500" weight="duotone" />
-                    <p className="text-lg font-semibold text-gray-800">Uvoz zaključen</p>
+                    <CheckCircle className="mb-3 h-12 w-12 text-emerald-500" weight="regular" />
+                    <p className="text-[17px] font-semibold text-gray-900">Uvoz zaključen</p>
                   </div>
 
-                  <div className="rounded-xl border border-gray-100 bg-white divide-y divide-gray-50">
+                  <div className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white">
                     <div className="flex items-center gap-3 px-4 py-3">
-                      <CheckCircle className="h-5 w-5 flex-shrink-0 text-emerald-500" weight="fill" />
-                      <span className="flex-1 text-sm text-gray-700">Novih strank uvoženih</span>
-                      <span className="text-sm font-semibold text-gray-900">{counts?.nove ?? result.nove.length}</span>
+                      <CheckCircle className="h-5 w-5 flex-shrink-0 text-emerald-500" weight="regular" />
+                      <span className="flex-1 text-sm text-gray-900">Novih strank uvoženih</span>
+                      <span className="tnum text-sm font-semibold text-gray-900">{counts?.nove ?? result.nove.length}</span>
                     </div>
                     <div className="flex items-center gap-3 px-4 py-3">
-                      <ArrowsClockwise className="h-5 w-5 flex-shrink-0 text-blue-500" weight="fill" />
-                      <span className="flex-1 text-sm text-gray-700">Strank posodobljenih</span>
-                      <span className="text-sm font-semibold text-gray-900">{counts?.posodobi ?? result.posodobi.length}</span>
+                      <ArrowsClockwise className="h-5 w-5 flex-shrink-0 text-blue-500" weight="regular" />
+                      <span className="flex-1 text-sm text-gray-900">Strank posodobljenih</span>
+                      <span className="tnum text-sm font-semibold text-gray-900">{counts?.posodobi ?? result.posodobi.length}</span>
                     </div>
                     <div className="flex items-center gap-3 px-4 py-3">
-                      <SkipForward className="h-5 w-5 flex-shrink-0 text-gray-400" weight="fill" />
-                      <span className="flex-1 text-sm text-gray-700">Strank preskočenih (duplikati)</span>
-                      <span className="text-sm font-semibold text-gray-900">{counts?.preskoci ?? result.preskoci.length}</span>
+                      <SkipForward className="h-5 w-5 flex-shrink-0 text-gray-400" weight="regular" />
+                      <span className="flex-1 text-sm text-gray-900">Strank preskočenih (duplikati)</span>
+                      <span className="tnum text-sm font-semibold text-gray-900">{counts?.preskoci ?? result.preskoci.length}</span>
                     </div>
                   </div>
                 </div>
@@ -593,7 +654,7 @@ export default function CrmImportModal({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between border-t border-gray-100 bg-white px-5 py-4">
+            <div className={`${sheet.footer} !justify-between`}>
               {/* Back / cancel */}
               {step === 1 && (
                 <motion.button
@@ -601,7 +662,7 @@ export default function CrmImportModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                  className={sheet.cancel}
                 >
                   Prekliči
                 </motion.button>
@@ -612,7 +673,7 @@ export default function CrmImportModal({
                   onClick={() => { setStep(1); setParseError(null); }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                  className={`${sheet.cancel} flex items-center justify-center gap-1.5`}
                 >
                   <ArrowLeft className="h-4 w-4" weight="bold" />
                   Nazaj
@@ -628,8 +689,7 @@ export default function CrmImportModal({
                   onClick={() => setStep(2)}
                   whileHover={{ scale: (!file || headers.length === 0) ? 1 : 1.02 }}
                   whileTap={{ scale: (!file || headers.length === 0) ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-                  style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
+                  className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500 disabled:cursor-not-allowed disabled:opacity-40`}
                 >
                   Naprej
                   <ArrowRight className="h-4 w-4" weight="bold" />
@@ -642,8 +702,7 @@ export default function CrmImportModal({
                   onClick={handleImport}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-70"
-                  style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
+                  className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500`}
                 >
                   <UploadSimple className="h-4 w-4" weight="bold" />
                   Uvozi
@@ -655,8 +714,7 @@ export default function CrmImportModal({
                   onClick={() => { onImportComplete(); onClose(); }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90"
-                  style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
+                  className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500`}
                 >
                   <CheckCircle className="h-4 w-4" weight="bold" />
                   Zapri

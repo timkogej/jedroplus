@@ -13,6 +13,9 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from '@/i18n/navigation';
+import AuroraBackground from '@/components/shared/AuroraBackground';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import { JedroLogo } from '@/components/brand/JedroLogo';
 import { EnvelopeSimple, ArrowLeft, CheckCircle } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 
@@ -57,36 +60,27 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md">
-        {/* Brand heading */}
-        <div className="text-center mb-8">
-          <h1
-            className="text-4xl font-bold tracking-tight mb-2"
-            style={{
-              background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              color: 'transparent',
-            }}
-          >
-            Jedro+
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] p-4">
+      <AuroraBackground />
+      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <div className="relative z-10 w-full max-w-[400px]">
+        {/* Brand heading — logotip Jedro+ (components/brand/JedroLogo) */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <h1 className="mb-3">
+            <JedroLogo height={44} tone="onDark" title="Jedro+" />
           </h1>
-          <p className="text-gray-600">{t('subtitle')}</p>
+          <p className="text-[15px] text-white/70">{t('subtitle')}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8">
+        <div className="rounded-3xl border border-white/40 bg-white/90 p-7 shadow-[0_30px_80px_-20px_rgba(10,8,40,0.65)] backdrop-blur-2xl sm:p-8">
           {submitted ? (
             /* ── Success state ── */
             <div className="text-center space-y-4">
               <div className="flex justify-center">
-                <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
-                  <CheckCircle size={32} weight="fill" className="text-green-500" />
-                </div>
+                <CheckCircle size={44} weight="regular" className="text-green-500" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('success.title')}</h2>
+                <h2 className="mb-1.5 text-[17px] font-semibold text-gray-900">{t('success.title')}</h2>
                 <p className="text-sm text-gray-600 leading-relaxed">
                   {t('success.message')}
                 </p>
@@ -103,14 +97,14 @@ export default function ForgotPasswordPage() {
             /* ── Request form ── */
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('title')}</h2>
+                <h2 className="mb-1 text-[17px] font-semibold text-gray-900">{t('title')}</h2>
                 <p className="text-sm text-gray-500">
                   {t('description')}
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="mb-1.5 block text-[13px] font-medium text-gray-900">
                   {t('emailLabel')}
                 </label>
                 <div className="relative">
@@ -139,7 +133,7 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 text-white font-medium transition-all duration-300 ease-in-out hover:opacity-90 hover:shadow-lg"
+                className="h-11 w-full rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80"
                 style={{
                   background: 'linear-gradient(to right, #8B5CF6, #06B6D4)',
                 }}
@@ -152,11 +146,11 @@ export default function ForgotPasswordPage() {
 
         {/* Back to login */}
         {!submitted && (
-          <p className="text-center mt-6 text-sm text-gray-600">
+          <p className="mt-6 text-center text-sm text-white/70">
             {t('rememberPassword')}{' '}
             <Link
               href="/login"
-              className="font-semibold text-violet-600 hover:text-violet-700 transition-colors"
+              className="font-semibold text-white underline-offset-4 transition-colors hover:underline"
             >
               {t('loginLink')}
             </Link>

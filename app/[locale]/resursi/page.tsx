@@ -12,11 +12,13 @@ import {
   Warning,
   ArrowRight,
   CaretDown,
+  CheckCircle,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import { MetricGroup } from '@/components/dashboard';
 import type { Resurs, ResursFormData, StoritevResurs } from '@/types/resursi';
 import type { Service } from '@/types/services';
 import {
@@ -31,7 +33,6 @@ import ResursGrid from '@/components/resursi/ResursGrid';
 import ResursModal from '@/components/resursi/ResursModal';
 import DeleteResursModal from '@/components/resursi/DeleteResursModal';
 
-const RESOURCE_ACCENT = 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
 
 // ─── Toast ───────────────────────────────────────────────────────────────────
 
@@ -72,27 +73,19 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-12 shadow-sm"
+      className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12"
     >
-      <div
-        className="mb-4 flex h-20 w-20 items-center justify-center rounded-2xl text-white shadow-sm"
-        style={{ background: RESOURCE_ACCENT }}
-      >
-        <Cube className="h-10 w-10" weight="duotone" />
-      </div>
-      <h3 className="text-xl font-semibold text-[#1A1F36]">{t('emptyState.title')}</h3>
-      <p className="mt-2 text-center text-sm text-gray-500">{t('emptyState.subtitle')}</p>
-      <motion.button
+      <Cube className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+      <h3 className="text-base font-semibold text-gray-900">{t('emptyState.title')}</h3>
+      <p className="mt-1 text-center text-sm text-gray-500">{t('emptyState.subtitle')}</p>
+      <button
         type="button"
         onClick={onCreate}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="mt-6 flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-6 py-3
-                   text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]"
+        className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
       >
-        <Plus className="h-5 w-5" weight="bold" />
+        <Plus size={17} weight="bold" />
         {t('emptyState.addFirst')}
-      </motion.button>
+      </button>
     </motion.div>
   );
 }
@@ -105,23 +98,19 @@ function SearchEmptyState({ searchTerm, onClear }: { searchTerm: string; onClear
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-12 shadow-sm"
+      className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12"
     >
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-slate-100">
-        <MagnifyingGlass className="h-8 w-8 text-gray-400" weight="duotone" />
-      </div>
-      <h3 className="text-lg font-semibold text-[#1A1F36]">{t('searchEmpty.title', { term: searchTerm })}</h3>
-      <p className="mt-2 text-center text-sm text-gray-500">{t('searchEmpty.subtitle')}</p>
-      <motion.button
+      <MagnifyingGlass className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+      <h3 className="text-base font-semibold text-gray-900">{t('searchEmpty.title', { term: searchTerm })}</h3>
+      <p className="mt-1 text-center text-sm text-gray-500">{t('searchEmpty.subtitle')}</p>
+      <button
         type="button"
         onClick={onClear}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-gray-700 hover:text-gray-900"
+        className="mt-4 flex items-center gap-1.5 text-sm font-medium text-[#7C78FA] transition-opacity hover:opacity-70"
       >
         {t('searchEmpty.clear')}
-        <ArrowRight className="h-4 w-4" weight="bold" />
-      </motion.button>
+        <ArrowRight className="h-4 w-4" weight="regular" />
+      </button>
     </motion.div>
   );
 }
@@ -341,118 +330,80 @@ export default function ResursiPage() {
   return (
     <ProtectedLayout>
       <main className="min-h-screen bg-white">
-        <div className="mx-auto max-w-7xl px-6 py-8">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
 
           {/* Header */}
-          <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+            className="mb-7 flex flex-wrap items-start justify-between gap-4"
+          >
             <div>
-              <motion.h1
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-2xl font-normal text-[#1A1F36]"
-              >
-                {t('page.title')}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.1 }}
-                className="mt-1 text-gray-500"
-              >
-                {t('page.subtitle')}
-              </motion.p>
+              <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('page.title')}</h1>
+              <p className="mt-0.5 text-base text-gray-500">{t('page.subtitle')}</p>
             </div>
-            <motion.button
+            <button
               type="button"
               onClick={openCreateModal}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-3
-                         text-sm font-medium text-white shadow-sm transition-colors
-                         hover:bg-[#1f1f1f]"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
             >
-              <Plus className="h-5 w-5" weight="bold" />
+              <Plus size={17} weight="bold" />
               {t('page.newButton')}
-            </motion.button>
-          </div>
+            </button>
+          </motion.div>
 
-          {/* Stats */}
+          {/* Povzetek — ena kartica z lasnimi črtami, kot drugod */}
           {resursi.length > 0 && (
-            <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              {[
-                { icon: <Cube className="h-6 w-6" weight="regular" />, value: resursi.length, label: t('stats.total') },
-                { icon: <Cube className="h-6 w-6" weight="fill" />, value: activeCount, label: t('stats.active') },
-                { icon: <Users className="h-6 w-6" weight="regular" />, value: totalCapacity, label: t('stats.totalCapacity') },
-              ].map((stat, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1, duration: 0.3 }}
-                  className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:border-gray-200 hover:shadow-md"
-                >
-                  <div className="absolute inset-x-0 top-0 h-0.5 opacity-80" style={{ background: RESOURCE_ACCENT }} />
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#F7F8FA] text-gray-700 ring-1 ring-gray-100">
-                      {stat.icon}
-                    </div>
-                    <div>
-                      <p className="text-2xl font-normal text-[#1A1F36]">{stat.value}</p>
-                      <p className="text-xs font-medium text-gray-500">{stat.label}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="mb-8">
+              <MetricGroup
+                metrics={[
+                  { label: t('stats.total'), value: resursi.length, icon: Cube },
+                  { label: t('stats.active'), value: activeCount, icon: CheckCircle },
+                  { label: t('stats.totalCapacity'), value: totalCapacity, icon: Users },
+                ]}
+              />
             </div>
           )}
 
           {/* Search and filter bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-6 flex flex-wrap items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
-          >
-            <div className="relative flex-1 min-w-[280px] max-w-md">
-              <MagnifyingGlass className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" weight="regular" />
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            <div className="relative min-w-[260px] max-w-md flex-1">
+              <MagnifyingGlass className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
               <input
                 type="text"
                 placeholder={t('page.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full rounded-lg border border-gray-200 bg-[#F7F8FA] py-3 pl-12 pr-12 text-sm text-[#1A1F36]
+                className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900
                            placeholder-gray-400 transition-colors
-                           focus:border-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                           focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
               />
               {search && (
                 <button
                   type="button"
                   onClick={() => setSearch('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1
-                             text-gray-400 hover:bg-gray-100 hover:text-[#1A1F36]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1
+                             text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="h-4 w-4" weight="bold" />
+                  <X className="h-4 w-4" weight="regular" />
                 </button>
               )}
             </div>
 
-            <motion.button
+            <button
               type="button"
               onClick={() => setShowInactive(!showInactive)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors
-                         ${showInactive
-                           ? 'bg-[#F7F8FA] text-gray-600 ring-1 ring-gray-200 hover:bg-white hover:text-gray-900'
-                           : 'bg-gray-900 text-white'
-                         }`}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
+                showInactive
+                  ? 'border border-gray-200 bg-white text-gray-900 hover:bg-gray-50'
+                  : 'border border-gray-900 bg-gray-900 text-white'
+              }`}
             >
               {showInactive ? t('page.showAll') : t('page.showActiveOnly')}
-              <CaretDown className={`h-4 w-4 transition-transform ${showInactive ? 'rotate-180' : ''}`} />
-            </motion.button>
-          </motion.div>
+              <CaretDown className={`h-3.5 w-3.5 transition-transform ${showInactive ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
 
           {/* Results count */}
           {debouncedSearch && filteredResursi.length > 0 && (
@@ -466,9 +417,9 @@ export default function ResursiPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mb-6 flex items-center gap-3 rounded-lg border border-red-100 bg-red-50 px-4 py-3"
+              className="mb-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 p-4"
             >
-              <Warning className="h-5 w-5 flex-shrink-0 text-red-500" weight="fill" />
+              <Warning className="h-5 w-5 flex-shrink-0 text-red-500" weight="regular" />
               <p className="text-sm text-red-700">{error}</p>
               <button type="button" onClick={loadData} className="ml-auto text-sm font-medium text-red-600 hover:text-red-700">
                 {t('page.retry')}

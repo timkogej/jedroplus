@@ -9,6 +9,8 @@ import { Link } from '@/i18n/navigation';
 import { SpinnerGap } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import AuroraBackground from '@/components/shared/AuroraBackground';
+import { JedroLogo } from '@/components/brand/JedroLogo';
 import { inviteToMetadata, loadPendingInvite, type PendingInvite } from '@/lib/team/invite';
 
 export default function SignupPage() {
@@ -24,7 +26,8 @@ export default function SignupPage() {
     fullName: '',
     email: '',
     confirmEmail: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -43,7 +46,7 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.email || !formData.confirmEmail || !formData.password) {
+    if (!formData.fullName || !formData.email || !formData.confirmEmail || !formData.password || !formData.confirmPassword) {
       toast.error(t('errors.fillAllFields'));
       return;
     }
@@ -55,6 +58,11 @@ export default function SignupPage() {
 
     if (formData.password.length < 6) {
       toast.error(t('errors.passwordTooShort'));
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error(t('errors.passwordMismatch'));
       return;
     }
 
@@ -125,24 +133,18 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-white p-4">
-      <PublicLanguageToggle className="absolute right-4 top-4" />
-      <div className="w-full max-w-md">
-        {/* Heading */}
-        <div className="text-center mb-8">
-          <h1
-            className="text-4xl font-bold tracking-tight mb-2"
-            style={{
-              background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Jedro+
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] px-4 py-16">
+      <AuroraBackground />
+      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <div className="relative z-10 w-full max-w-[400px]">
+        {/* Heading — logotip Jedro+ (components/brand/JedroLogo) */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <h1 className="mb-3">
+            <JedroLogo height={44} tone="onDark" title="Jedro+" />
           </h1>
-          <p className="text-gray-600">{t('subtitle')}</p>
+          <p className="text-[15px] text-white/70">{t('subtitle')}</p>
           {invite && (
-            <p className="mt-4 rounded-xl bg-violet-50 px-4 py-3 text-sm text-violet-900">
+            <p className="mt-4 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-white backdrop-blur-md">
               {invite.companyName
                 ? t('inviteBannerWithName', { name: invite.companyName })
                 : t('inviteBanner')}
@@ -151,9 +153,9 @@ export default function SignupPage() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSignup} className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 space-y-5">
+        <form onSubmit={handleSignup} className="space-y-5 rounded-3xl border border-white/40 bg-white/90 p-7 shadow-[0_30px_80px_-20px_rgba(10,8,40,0.65)] backdrop-blur-2xl sm:p-8">
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('fullNameLabel')}</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-gray-900">{t('fullNameLabel')}</label>
             <Input
               type="text"
               value={formData.fullName}
@@ -164,7 +166,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('emailLabel')}</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-gray-900">{t('emailLabel')}</label>
             <Input
               type="email"
               value={formData.email}
@@ -176,7 +178,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('confirmEmailLabel')}</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-gray-900">{t('confirmEmailLabel')}</label>
             <Input
               type="email"
               value={formData.confirmEmail}
@@ -188,7 +190,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">{t('passwordLabel')}</label>
+            <label className="mb-1.5 block text-[13px] font-medium text-gray-900">{t('passwordLabel')}</label>
             <Input
               type="password"
               value={formData.password}
@@ -200,10 +202,33 @@ export default function SignupPage() {
             <p className="text-xs text-gray-500 mt-1">{t('passwordHint')}</p>
           </div>
 
+          <div>
+            <label className="mb-1.5 block text-[13px] font-medium text-gray-900">{t('confirmPasswordLabel')}</label>
+            <Input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+              placeholder="••••••••"
+              disabled={loading}
+              autoComplete="new-password"
+              aria-invalid={
+                formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password
+              }
+              className={
+                formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password
+                  ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                  : ''
+              }
+            />
+            {formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password && (
+              <p className="mt-1 text-xs text-red-500">{t('errors.passwordMismatch')}</p>
+            )}
+          </div>
+
           <Button
             type="submit"
             disabled={loading || googleLoading}
-            className="w-full h-12 text-white font-medium transition-all duration-300 ease-in-out hover:opacity-90 hover:shadow-lg"
+            className="h-11 w-full rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80"
             style={{
               background: 'linear-gradient(to right, #8B5CF6, #06B6D4)',
             }}
@@ -228,7 +253,7 @@ export default function SignupPage() {
             type="button"
             onClick={handleGoogleSignup}
             disabled={loading || googleLoading}
-            className="w-full flex items-center justify-center gap-3 h-12 px-6 rounded-xl border border-gray-200 bg-white text-gray-700 font-medium text-sm shadow-sm hover:bg-gray-50 hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-6 text-sm font-medium text-gray-900 transition-colors duration-200 hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-5 h-5 flex-shrink-0">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -242,9 +267,9 @@ export default function SignupPage() {
         </form>
 
         {/* Login Link */}
-        <p className="text-center mt-6 text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-white/70">
           {t('hasAccount')}{' '}
-          <Link href="/login" className="font-semibold text-violet-600 hover:text-violet-700 transition-colors">
+          <Link href="/login" className="font-semibold text-white underline-offset-4 transition-colors hover:underline">
             {t('loginLink')}
           </Link>
         </p>

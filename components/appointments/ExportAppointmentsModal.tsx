@@ -13,6 +13,7 @@ import {
 import * as XLSX from 'xlsx';
 import { normalizeStatus } from '@/components/appointments/StatusBadge';
 import type { AppointmentWithDetails } from '@/types/appointments';
+import { sheet } from '@/components/ui/sheetClasses';
 
 interface ExportAppointmentsModalProps {
   isOpen: boolean;
@@ -208,6 +209,35 @@ export default function ExportAppointmentsModal({
     }
   }, [filtered, from, to, rangeValid, isExporting, onClose]);
 
+  const labelClass = 'mb-2 block text-[11px] font-semibold uppercase tracking-wider text-gray-500';
+  const dateClass =
+    'w-full rounded-[10px] border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25';
+
+  /** Vrstica s stikalom; pravo potrditveno polje ostane (skrito) za dostopnost. */
+  const switchRow = (checked: boolean, onChange: (v: boolean) => void, label: string) => (
+    <label className="flex cursor-pointer items-center justify-between gap-3 px-4 py-3">
+      <span className="text-sm text-gray-900">{label}</span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="peer sr-only"
+      />
+      <span
+        aria-hidden="true"
+        className={`relative h-5 w-9 flex-shrink-0 rounded-full transition-colors peer-focus-visible:ring-[3px] peer-focus-visible:ring-[#7C78FA]/40 ${
+          checked ? 'bg-gray-900' : 'bg-gray-300'
+        }`}
+      >
+        <span
+          className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white shadow-sm transition-all ${
+            checked ? 'left-[18px]' : 'left-0.5'
+          }`}
+        />
+      </span>
+    </label>
+  );
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -215,7 +245,7 @@ export default function ExportAppointmentsModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop.replace('z-50', 'z-[100]')}
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -225,20 +255,18 @@ export default function ExportAppointmentsModal({
               transition: { type: 'spring', stiffness: 400, damping: 36 },
             }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="border-b border-gray-100 bg-white px-6 py-4">
-              <div className="flex items-center justify-between">
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2
-                    className="text-xl font-semibold text-transparent bg-clip-text"
-                    style={{ backgroundImage: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
-                  >
+                  <h2 className={sheet.title}>
                     Izvozi termine
                   </h2>
-                  <p className="mt-0.5 text-sm text-gray-500">
+                  <p className={sheet.subtitle}>
                     Izberite obdobje in možnosti izvoza
                   </p>
                 </div>
@@ -247,37 +275,32 @@ export default function ExportAppointmentsModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className={sheet.close}
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
             </div>
 
             {/* Body */}
-            <div className="p-5 space-y-4">
+            <div className={sheet.body}>
 
               {/* Preset chips */}
-              <div>
-                <p className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <div className={sheet.group}>
+                <p className={labelClass}>
                   Hitri izbor
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {PRESETS.map((p) => (
                     <button
                       key={p.key}
                       type="button"
                       onClick={() => handlePreset(p.key)}
-                      className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
+                      className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
                         preset === p.key
-                          ? 'text-white shadow-sm'
-                          : 'bg-white border border-gray-200 text-gray-600 hover:border-violet-300 hover:text-violet-700'
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
-                      style={
-                        preset === p.key
-                          ? { background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }
-                          : undefined
-                      }
                     >
                       {p.label}
                     </button>
@@ -286,13 +309,13 @@ export default function ExportAppointmentsModal({
               </div>
 
               {/* Date range */}
-              <div className="rounded-xl border border-gray-100 bg-white p-4">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+              <div className={sheet.group}>
+                <p className={labelClass}>
                   Obdobje
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-xs text-gray-500">Datum od</label>
+                    <label className="mb-1 block text-[13px] text-gray-500">Datum od</label>
                     <div className="relative">
                       <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
                       <input
@@ -300,12 +323,12 @@ export default function ExportAppointmentsModal({
                         value={from}
                         max={to || undefined}
                         onChange={(e) => handleDateChange('from', e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-800 focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400/30"
+                        className={dateClass}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-gray-500">Datum do</label>
+                    <label className="mb-1 block text-[13px] text-gray-500">Datum do</label>
                     <div className="relative">
                       <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
                       <input
@@ -313,98 +336,43 @@ export default function ExportAppointmentsModal({
                         value={to}
                         min={from || undefined}
                         onChange={(e) => handleDateChange('to', e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 bg-white py-2 pl-9 pr-3 text-sm text-gray-800 focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400/30"
+                        className={dateClass}
                       />
                     </div>
                   </div>
                 </div>
                 {from && to && new Date(from) > new Date(to) && (
                   <p className="mt-2 flex items-center gap-1.5 text-xs text-red-500">
-                    <Warning className="h-3.5 w-3.5" weight="fill" />
+                    <Warning className="h-3.5 w-3.5" weight="regular" />
                     Datum &quot;od&quot; ne sme biti poznejši od &quot;do&quot;.
                   </p>
                 )}
               </div>
 
-              {/* Filter checkboxes */}
-              <div className="rounded-xl border border-gray-100 bg-white p-4">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                  <FunnelSimple className="h-3.5 w-3.5" weight="bold" />
+              {/* Filters */}
+              <div className="overflow-hidden rounded-xl bg-white">
+                <p className={`${labelClass} flex items-center gap-1.5 px-4 pt-4 !mb-1`}>
+                  <FunnelSimple className="h-3.5 w-3.5" weight="regular" />
                   Filtri
                 </p>
-                <div className="space-y-3">
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <div className="relative flex-shrink-0">
-                      <input
-                        type="checkbox"
-                        checked={onlyCompleted}
-                        onChange={(e) => setOnlyCompleted(e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div
-                        className={`h-4.5 w-4.5 flex h-[18px] w-[18px] items-center justify-center rounded transition-all ${
-                          onlyCompleted ? 'border-0' : 'border border-gray-300 bg-white'
-                        }`}
-                        style={
-                          onlyCompleted
-                            ? { background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)' }
-                            : undefined
-                        }
-                      >
-                        {onlyCompleted && (
-                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-700">Vključi samo zaključene termine</span>
-                  </label>
-
-                  <label className="flex cursor-pointer items-center gap-3">
-                    <div className="relative flex-shrink-0">
-                      <input
-                        type="checkbox"
-                        checked={excludeGhost}
-                        onChange={(e) => setExcludeGhost(e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div
-                        className={`flex h-[18px] w-[18px] items-center justify-center rounded transition-all ${
-                          excludeGhost ? 'border-0' : 'border border-gray-300 bg-white'
-                        }`}
-                        style={
-                          excludeGhost
-                            ? { background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)' }
-                            : undefined
-                        }
-                      >
-                        {excludeGhost && (
-                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-700">Izključi ghost termine</span>
-                  </label>
+                <div className="divide-y divide-gray-100">
+                  {switchRow(onlyCompleted, setOnlyCompleted, 'Vključi samo zaključene termine')}
+                  {switchRow(excludeGhost, setExcludeGhost, 'Izključi ghost termine')}
                 </div>
               </div>
 
-              {/* Live count chip */}
+              {/* Live count */}
               <motion.div
                 key={`${from}-${to}-${onlyCompleted}-${excludeGhost}`}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={`flex items-center justify-between rounded-xl px-4 py-3 ${
-                  filtered.length > 0
-                    ? 'border border-violet-100 bg-violet-50'
-                    : 'border border-gray-100 bg-gray-50'
+                  filtered.length > 0 ? 'bg-violet-50' : 'bg-white'
                 }`}
               >
                 <span className="text-sm text-gray-600">Najdenih terminov za izvoz</span>
                 <span
-                  className={`text-lg font-bold tabular-nums ${
+                  className={`text-lg font-semibold tabular-nums ${
                     filtered.length > 0 ? 'text-violet-600' : 'text-gray-400'
                   }`}
                 >
@@ -414,13 +382,13 @@ export default function ExportAppointmentsModal({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between border-t border-gray-100 bg-white px-5 py-4">
+            <div className={sheet.footer}>
               <motion.button
                 type="button"
                 onClick={onClose}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                className={sheet.cancel}
               >
                 Prekliči
               </motion.button>
@@ -431,8 +399,7 @@ export default function ExportAppointmentsModal({
                 disabled={!rangeValid || filtered.length === 0 || isExporting}
                 whileHover={{ scale: (!rangeValid || filtered.length === 0 || isExporting) ? 1 : 1.02 }}
                 whileTap={{ scale: (!rangeValid || filtered.length === 0 || isExporting) ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-                style={{ background: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
+                className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500 disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 {isExporting ? (
                   <>

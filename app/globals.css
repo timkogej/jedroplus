@@ -235,11 +235,17 @@ body {
    Prava Applova ločnica je na retini pol piksla. border: 1px je na retini dva
    fizična piksla in izgleda debelo. Ti razredi narišejo ločnico, ki se na
    retini stisne na 0.5px. */
-.hairline-b,
-.hairline-t,
-.hairline-r,
-.hairline-l {
-  position: relative;
+/* `position: relative` je v plasti components, da ga Tailwindovi razredi
+   (fixed, sticky, absolute) lahko povozijo. Brez plasti ima to pravilo
+   prednost pred vsemi utility razredi — stranska in zgornja vrstica (fixed +
+   hairline) sta zato stali v toku strani in vsebina se je začela pod njima. */
+@layer components {
+  .hairline-b,
+  .hairline-t,
+  .hairline-r,
+  .hairline-l {
+    position: relative;
+  }
 }
 
 .hairline-b::after,

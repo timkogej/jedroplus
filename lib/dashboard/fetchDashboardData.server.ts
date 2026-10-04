@@ -20,7 +20,13 @@ import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { pickFirst, detectBookingSchema } from "@/lib/dashboardHelpers";
 import { TABLES } from "@/lib/data";
 import { normalizeCommunicationLanguage, type CommunicationLanguageCode } from "@/lib/communicationLanguage";
+import {
+  extractPricingFields,
+  extractPromotionFields,
+  extractAddOnFields,
+} from "@/lib/supabase/appointments";
 import type {
+  AppointmentItemDetails,
   DashboardData,
   DashboardStats,
   AppointmentItem,
@@ -212,6 +218,30 @@ function buildClientsMap(clients: Row[]) {
   return map;
 }
 
+/**
+ * Cena s popustom, promocija, popust dodatka, valuta, ID termina in ali se
+ * termin beleži — enako kot extractItemDetails v brskalniški različici, da
+ * okence termina ob prvem nalaganju pokaže vse podatke.
+ */
+function extractItemDetails(row: Row): AppointmentItemDetails {
+  const pricing = extractPricingFields(row);
+  const promotion = extractPromotionFields(row);
+  const addOn = extractAddOnFields(row);
+  const belezi = row["belezi_termin"];
+  return {
+    koncna_cena: pricing.koncna_cena,
+    osnovna_cena: pricing.cena,
+    popust: pricing.popust,
+    popust_tip: pricing.popust_tip,
+    ...promotion,
+    add_on_popust: addOn.add_on_popust,
+    add_on_popust_tip: addOn.add_on_popust_tip,
+    valuta: addOn.valuta,
+    id_termina: row["ID termina"] ? String(row["ID termina"]) : undefined,
+    belezi_termin: !(belezi === false || belezi === 0),
+  };
+}
+
 type Maps = {
   servicesMap: ReturnType<typeof buildServicesMap>;
   employeesMap: ReturnType<typeof buildEmployeesMap>;
@@ -364,6 +394,7 @@ function buildAppointmentsForDate(
       opombe: opombe || undefined,
       interneOpombe: interneOpombe || undefined,
       cena,
+      details: extractItemDetails(row),
     });
   }
 
@@ -535,7 +566,7 @@ function buildNextPersonAppointment(
   personId: string,
   now: Date
 ): AppointmentItem | null {
-  const { servicesMap, employeesMap } = maps;
+  const { servicesMap, employeesMap, clientsMap } = maps;
   const todayStr = format(now, "yyyy-MM-dd");
   const currentTimeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
 
@@ -569,14 +600,16 @@ function buildNextPersonAppointment(
     const clientPhone = String(pickFirst(row, ["Telefon", "stranka_telefon", "client_phone", "Telefon stranke", "Telefonska številka", "telefon", "phone"]) ?? "");
     const clientId = String(pickFirst(row, ["ID stranke", "stranka_id", "client_id"]) ?? "");
     const opombe = String(pickFirst(row, ["opombe", "Opombe", "notes"]) ?? "");
+    const interneOpombe = String(pickFirst(row, ["interne_opombe", "Interne opombe", "internal_notes"]) ?? "");
 
     const service = servicesMap.get(serviceId);
     const service2 = serviceId2 ? servicesMap.get(serviceId2) : undefined;
     const service3 = serviceId3 ? servicesMap.get(serviceId3) : undefined;
     const addOn = extractAppointmentAddOn(row, servicesMap);
     const employee = employeesMap.get(staffId);
+    const client = clientsMap.get(clientId);
     const cena = getAppointmentTotalCena(row);
-    const language = pickLanguage(row);
+    const language = pickLanguage(row, client?.language);
 
     candidates.push({
       dateStr: bookingDateStr,
@@ -589,6 +622,7 @@ function buildNextPersonAppointment(
         clientName,
         clientEmail: clientEmail || undefined,
         clientPhone: clientPhone || undefined,
+        clientColor: client?.barva || undefined,
         language,
         clientId: clientId || undefined,
         serviceName: service?.naziv || "Neznana storitev",
@@ -609,7 +643,9 @@ function buildNextPersonAppointment(
         employeeId: staffId || undefined,
         status: "scheduled",
         opombe: opombe || undefined,
+        interneOpombe: interneOpombe || undefined,
         cena,
+        details: extractItemDetails(row),
       },
     });
   }

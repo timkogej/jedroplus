@@ -24,7 +24,7 @@ export function Select({ value, onChange, options, placeholder, disabled = false
         disabled={disabled}
         className={`
           w-full appearance-none rounded-lg border border-gray-200 bg-white py-2 pl-3 pr-9
-          text-base text-gray-900 transition-colors duration-150
+          text-base text-gray-900 transition-colors duration-150 sm:py-1.5 sm:text-sm
           focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25
           ${disabled ? 'cursor-not-allowed bg-gray-50 opacity-50' : 'cursor-pointer'}
         `}

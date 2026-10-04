@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 import { Textarea } from '@/components/settings';
 import { rejectRequest } from '@/lib/bookingRequests';
 import type { ZahtevaTermina } from '@/lib/supabase/zahteveTermini';
+import { sheet } from '@/components/ui/sheetClasses';
+import { RequestSummary } from './RequestSummary';
 
 interface RejectRequestModalProps {
   zahteva: ZahtevaTermina;
@@ -48,56 +50,65 @@ export function RejectRequestModal({ zahteva, onClose, onRejected }: RejectReque
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+        className={sheet.backdrop}
         onClick={onClose}
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl"
+          className={sheet.panel}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-            <h2 className="text-lg font-semibold text-gray-900">{t('rejectModal.title')}</h2>
-            <button onClick={onClose} className="rounded-lg p-2 transition-colors hover:bg-gray-100">
-              <X className="h-4 w-4 text-gray-500" weight="bold" />
-            </button>
+          <div className={sheet.header}>
+            <div className={sheet.grabber} aria-hidden="true" />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className={sheet.title}>{t('rejectModal.title')}</h2>
+                <p className={sheet.subtitle}>
+                  {t('rejectModal.subtitle', { name: `${zahteva.ime} ${zahteva.priimek}`.trim() })}
+                </p>
+              </div>
+              <button onClick={onClose} className={sheet.close}>
+                <X className="h-5 w-5" weight="regular" />
+              </button>
+            </div>
           </div>
 
-          <div className="px-5 py-4">
-            <p className="mb-3 text-sm text-gray-500">
-              {t('rejectModal.subtitle', { name: `${zahteva.ime} ${zahteva.priimek}`.trim() })}
-            </p>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700">
-              {t('rejectModal.reasonLabel')}
-            </label>
-            <Textarea
-              value={razlog}
-              onChange={(e) => {
-                setRazlog(e.target.value);
-                if (error) setError(false);
-              }}
-              placeholder={t('rejectModal.reasonPlaceholder')}
-              rows={3}
-              error={error}
-            />
-            {error && (
-              <p className="mt-1 text-xs text-red-500">{t('rejectModal.reasonRequired')}</p>
-            )}
+          <div className={sheet.body}>
+            <RequestSummary zahteva={zahteva} />
+
+            <div className={sheet.group}>
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                {t('rejectModal.reasonLabel')}
+              </label>
+              <Textarea
+                value={razlog}
+                onChange={(e) => {
+                  setRazlog(e.target.value);
+                  if (error) setError(false);
+                }}
+                placeholder={t('rejectModal.reasonPlaceholder')}
+                rows={3}
+                error={error}
+              />
+              {error && (
+                <p className="mt-1 text-xs text-red-500">{t('rejectModal.reasonRequired')}</p>
+              )}
+            </div>
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-gray-100 px-5 py-4">
+          <div className={sheet.footer}>
             <button
               onClick={onClose}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+              className={sheet.cancel}
             >
               {t('rejectModal.cancel')}
             </button>
             <button
               onClick={handleReject}
               disabled={submitting}
-              className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className={`${sheet.action} bg-red-600 disabled:cursor-not-allowed disabled:opacity-50`}
             >
               {submitting ? (
                 <>

@@ -27,6 +27,7 @@ import { URNIK_DAYS, DEFAULT_URNIK } from '@/types/resursi';
 import type { Service } from '@/types/services';
 import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/constants/serviceGradients';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 interface ResursModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -180,7 +181,7 @@ function ResursModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -188,17 +189,18 @@ function ResursModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className="relative flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
+            <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6">
+              <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
+                  <h2 className="text-[17px] font-semibold text-gray-900">
                     {mode === 'create' ? t('modal.createTitle') : t('modal.editTitle')}
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-0.5 text-[13px] text-gray-500">
                     {mode === 'create' ? t('modal.createSubtitle') : t('modal.editSubtitle')}
                   </p>
                 </div>
@@ -207,9 +209,9 @@ function ResursModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
             </div>
@@ -220,8 +222,8 @@ function ResursModal({
               <div className="space-y-5">
 
                 {/* Naziv */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.nameLabel')}
                   </label>
                   <div className="relative">
@@ -232,21 +234,21 @@ function ResursModal({
                       onChange={(e) => handleChange('naziv', e.target.value)}
                       placeholder={t('modal.namePlaceholder')}
                       maxLength={100}
-                      className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36] placeholder-gray-400
+                      className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
-                                 ${errors.naziv ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'}`}
+                                 ${errors.naziv ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'}`}
                     />
                   </div>
                   {errors.naziv && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-red-500">
-                      <Warning className="h-3 w-3" weight="fill" />{errors.naziv}
+                      <Warning className="h-3 w-3" weight="regular" />{errors.naziv}
                     </p>
                   )}
                 </div>
 
                 {/* Booking naziv */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.bookingNameLabel')}
                   </label>
                   <div className="relative">
@@ -257,16 +259,16 @@ function ResursModal({
                       onChange={(e) => handleChange('booking_naziv', e.target.value)}
                       placeholder={form.naziv || t('modal.bookingNamePlaceholder', { naziv: '…' })}
                       maxLength={100}
-                      className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                 placeholder-gray-400 transition-all focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                      className="w-full rounded-[10px] border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                                 placeholder-gray-400 transition-all focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                     />
                   </div>
                   <p className="mt-1 text-xs text-gray-400">{t('modal.bookingNameHint')}</p>
                 </div>
 
                 {/* Opis */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.descriptionLabel')}
                   </label>
                   <div className="relative">
@@ -277,15 +279,15 @@ function ResursModal({
                       placeholder={t('modal.descriptionPlaceholder')}
                       rows={2}
                       maxLength={500}
-                      className="w-full resize-none rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                 placeholder-gray-400 transition-all focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                      className="w-full resize-none rounded-[10px] border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                                 placeholder-gray-400 transition-all focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                     />
                   </div>
                 </div>
 
                 {/* Color */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-3 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-3 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.colorLabel')}
                   </label>
                   <div className="flex items-center gap-2">
@@ -352,9 +354,9 @@ function ResursModal({
                 </div>
 
                 {/* Kolicina + Kapaciteta */}
-                <div className="grid grid-cols-1 gap-4 rounded-2xl border border-gray-100 bg-white p-5 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 rounded-xl bg-white p-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {t('modal.quantityLabel')}
                     </label>
                     <div className="relative">
@@ -364,15 +366,15 @@ function ResursModal({
                         value={form.kolicina}
                         onChange={(e) => handleChange('kolicina', Math.max(1, parseInt(e.target.value, 10) || 1))}
                         min={1}
-                        className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                   focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        className="w-full rounded-[10px] border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                                   focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                       />
                     </div>
                     <p className="mt-1 text-xs text-gray-400">{t('modal.quantityHelp')}</p>
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {t('modal.capacityLabel')}
                     </label>
                     <div className="relative">
@@ -382,8 +384,8 @@ function ResursModal({
                         value={form.kapaciteta}
                         onChange={(e) => handleChange('kapaciteta', Math.max(1, parseInt(e.target.value, 10) || 1))}
                         min={1}
-                        className="w-full rounded-lg border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-[#1A1F36]
-                                   focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                        className="w-full rounded-[10px] border border-gray-200 bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                                   focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                       />
                     </div>
                     <p className="mt-1 text-xs text-gray-400">{t('modal.capacityHelp')}</p>
@@ -391,52 +393,51 @@ function ResursModal({
                 </div>
 
                 {/* Total capacity badge */}
-                <div className="flex items-center gap-2 rounded-lg border border-gray-100 bg-white px-4 py-2.5">
-                  <Users className="h-4 w-4 text-gray-500" weight="fill" />
+                <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-2.5">
+                  <Users className="h-4 w-4 text-gray-500" weight="regular" />
                   <span className="text-sm font-medium text-gray-700">
                     {t('modal.totalCapacityLabel')}: {t('modal.totalCapacityValue', { value: skupnaKapaciteta })}
                   </span>
                 </div>
 
                 {/* Show in booking toggle */}
-                <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white px-5 py-4">
+                <div className="flex items-center justify-between rounded-xl bg-white px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Globe className="h-5 w-5 text-gray-400" weight="regular" />
-                    <span className="text-sm text-[#1A1F36]">{t('modal.showInBookingLabel')}</span>
+                    <span className="text-sm text-gray-900">{t('modal.showInBookingLabel')}</span>
                   </div>
                   <button
                     type="button"
                     role="switch"
                     aria-checked={form.prikazi_v_bookingu}
                     onClick={() => handleChange('prikazi_v_bookingu', !form.prikazi_v_bookingu)}
-                    className={`relative h-6 w-11 rounded-full transition-colors focus:outline-none
+                    className={`${switchTrack} focus:outline-none
                                ${form.prikazi_v_bookingu ? 'bg-gray-900' : 'bg-gray-200'}`}
                   >
                     <span
-                      className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform
-                                 ${form.prikazi_v_bookingu ? 'translate-x-5' : 'translate-x-0'}`}
+                      className={`${switchKnob(form.prikazi_v_bookingu)}`}
                     />
                   </button>
                 </div>
 
                 {/* Schedule section */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.scheduleLabel')}
                   </label>
 
                   {/* Toggle: always available vs custom schedule */}
-                  <div className="flex gap-2">
+                  <div className="flex gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
                     <button
                       type="button"
                       onClick={() => {
                         setUseCustomSchedule(false);
                         handleChange('urnik', null);
                       }}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-[7px] px-3 py-1.5 text-sm font-medium transition-colors
                                  ${!useCustomSchedule
-                                   ? 'border-gray-900 bg-gray-900 text-white'
-                                   : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                   ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                                   : 'text-gray-500 hover:text-gray-900'}`}
                     >
                       <Globe className="h-4 w-4" weight="regular" />
                       {t('modal.alwaysAvailable')}
@@ -447,10 +448,10 @@ function ResursModal({
                         setUseCustomSchedule(true);
                         if (!form.urnik) handleChange('urnik', DEFAULT_URNIK);
                       }}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-[7px] px-3 py-1.5 text-sm font-medium transition-colors
                                  ${useCustomSchedule
-                                   ? 'border-gray-900 bg-gray-900 text-white'
-                                   : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                   ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                                   : 'text-gray-500 hover:text-gray-900'}`}
                     >
                       <Clock className="h-4 w-4" weight="regular" />
                       {t('modal.customSchedule')}
@@ -468,7 +469,7 @@ function ResursModal({
                       {URNIK_DAYS.map((day) => {
                         const dayData = urnik[day];
                         return (
-                          <div key={day} className="rounded-lg border border-gray-100 bg-[#F7F8FA] p-3">
+                          <div key={day} className="rounded-[10px] bg-gray-50 p-3">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <button
@@ -484,7 +485,7 @@ function ResursModal({
                                                ${dayData.enabled ? 'translate-x-4' : 'translate-x-0'}`}
                                   />
                                 </button>
-                                <span className={`text-sm font-medium ${dayData.enabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
+                                <span className={`text-sm font-medium ${dayData.enabled ? 'text-gray-900' : 'text-gray-400'}`}>
                                   {t(`days.${day}`)} <span className="hidden sm:inline font-normal text-gray-400">({day})</span>
                                 </span>
                               </div>
@@ -509,14 +510,14 @@ function ResursModal({
                                       type="time"
                                       value={interval.start}
                                       onChange={(e) => updateInterval(day, idx, 'start', e.target.value)}
-                                      className="rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-[#1A1F36] focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900/10"
+                                      className="rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                                     />
                                     <span className="text-xs text-gray-400">–</span>
                                     <input
                                       type="time"
                                       value={interval.end}
                                       onChange={(e) => updateInterval(day, idx, 'end', e.target.value)}
-                                      className="rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-[#1A1F36] focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900/10"
+                                      className="rounded-lg border border-gray-200 px-2 py-1.5 text-xs text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                                     />
                                     {dayData.intervals.length > 1 && (
                                       <button
@@ -539,18 +540,18 @@ function ResursModal({
                 </div>
 
                 {/* Connected services */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.servicesLabel')}
                   </label>
                   <p className="mb-2 text-xs text-gray-400">{t('modal.servicesHelp')}</p>
 
                   {services.length === 0 ? (
-                    <p className="rounded-lg border border-gray-200 bg-[#F7F8FA] p-4 text-center text-sm text-gray-400">
+                    <p className="rounded-[10px] bg-gray-50 p-4 text-center text-sm text-gray-400">
                       {t('modal.noServicesAvailable')}
                     </p>
                   ) : (
-                    <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-200">
+                    <div className="max-h-48 overflow-y-auto rounded-[10px] border border-gray-200">
                       {services.map((svc) => {
                         const isLinked = form.storitve_ids.includes(svc.id);
                         return (
@@ -566,7 +567,7 @@ function ResursModal({
                               style={{ background: svc.barva }}
                             />
                             <div className="flex-1 min-w-0">
-                              <span className={`text-sm font-medium ${isLinked ? 'text-gray-900' : 'text-[#1A1F36]'}`}>
+                              <span className={`text-sm font-medium ${isLinked ? 'text-gray-900' : 'text-gray-900'}`}>
                                 {svc.naziv}
                               </span>
                               <span className="ml-2 text-xs text-gray-400">{svc.trajanje} min</span>
@@ -585,13 +586,13 @@ function ResursModal({
               </div>
 
               {/* Footer */}
-              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
+              <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                  className="flex-1 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 sm:flex-none"
                 >
                   Prekliči
                 </motion.button>
@@ -600,9 +601,9 @@ function ResursModal({
                   disabled={isSaving}
                   whileHover={{ scale: isSaving ? 1 : 1.02 }}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5
-                             text-sm font-medium text-white shadow-sm transition-colors
-                             hover:bg-[#1f1f1f] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5
+                             text-sm font-medium text-white shadow-sm transition-opacity
+                             hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none"
                 >
                   {isSaving ? (
                     <>

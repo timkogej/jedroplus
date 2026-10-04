@@ -595,6 +595,18 @@ export async function fetchTerminResursiMap(
   return { data: map, error: null };
 }
 
+/** Aktivni resursi, dodeljeni eni vrstici termina (za okence s podrobnostmi). */
+export async function fetchActiveResursiForTerminRow(
+  companyId: string,
+  terminRowId: number,
+): Promise<{ data: Resurs[]; error: string | null }> {
+  const ids = await fetchResursIdsForTerminRow(companyId, terminRowId);
+  if (ids.error || ids.data.size === 0) return { data: [], error: ids.error };
+
+  const active = await fetchActiveResursi(companyId);
+  return { data: active.data.filter((r) => ids.data.has(r.row_id)), error: active.error };
+}
+
 // ─── Real-time resource conflict detection ────────────────────────────────────
 
 export interface ResourceConflict {

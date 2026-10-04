@@ -9,7 +9,7 @@
  * predolga.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Copy,
@@ -24,11 +24,15 @@ import {
   Clock,
   Plus,
   Tag,
+  EyeSlash,
 } from '@phosphor-icons/react';
 import { useTranslations, useLocale } from 'next-intl';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Resurs } from '@/types/resursi';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
+import { useFormat } from '@/hooks/useFormat';
+import { useCompany } from '@/app/company-context';
+import { fetchActiveResursiForTerminRow } from '@/lib/supabase/resursi';
 import { initialsStyle } from '@/components/dashboard/initialsStyle';
 import {
   Sheet,
@@ -55,7 +59,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       onClick={handleCopy}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="rounded-lg p-2 border border-gray-200 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+      className="p-1.5 text-gray-400 transition-colors hover:text-gray-900"
       title={label}
     >
       {copied ? (
@@ -101,8 +105,9 @@ export function AppointmentDetailModal({
 }: {
   appointment: AppointmentWithDetails;
   services: Storitev[];
-  terminResursiMap: Map<number, Set<number>>;
-  activeResursi: Resurs[];
+  /** Neobvezno: kjer jih stran ne poda, okence resurse termina naloži samo. */
+  terminResursiMap?: Map<number, Set<number>>;
+  activeResursi?: Resurs[];
   onClose: () => void;
   onEdit?: (appointment: AppointmentWithDetails) => void;
   onComplete?: (appointment: AppointmentWithDetails) => void;
@@ -113,14 +118,30 @@ export function AppointmentDetailModal({
 }) {
   const t = useTranslations('appointments');
   const locale = useLocale();
+  const { money } = useFormat();
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
+  const { companyId } = useCompany();
+  const hasResursiProps = !!(activeResursi && terminResursiMap);
+  // Kjer stran resursov ne naloži (Termini, nadzorna plošča), jih okence
+  // prebere samo za ta termin, da so podatki povsod enaki kot v koledarju.
+  const [fetchedResursi, setFetchedResursi] = useState<Resurs[]>([]);
+  useEffect(() => {
+    if (hasResursiProps || !companyId) return;
+    let cancelled = false;
+    fetchActiveResursiForTerminRow(companyId, Number(appointment.id)).then(({ data }) => {
+      if (!cancelled) setFetchedResursi(data);
+    });
+    return () => { cancelled = true; };
+  }, [hasResursiProps, companyId, appointment.id]);
+
   const aptResursi = useMemo(() => {
+    if (!activeResursi || !terminResursiMap) return fetchedResursi;
     const aptId = Number(appointment.id);
     return activeResursi.filter((r) =>
       terminResursiMap.get(r.row_id)?.has(aptId)
     );
-  }, [appointment.id, activeResursi, terminResursiMap]);
+  }, [appointment.id, activeResursi, terminResursiMap, fetchedResursi]);
 
   const formatModalDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -164,8 +185,14 @@ export function AppointmentDetailModal({
 
   const isTerminated = ['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel'].includes(String(appointment.status));
 
-  const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
-  const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
+  // Če storitve ni v seznamu (npr. medtem izbrisana), uporabi podatke, ki jih
+  // ima termin sam — sicer bi druga ali tretja storitev tiho izginila.
+  const service2 = appointment.storitev_id_2
+    ? services.find(s => s.id === appointment.storitev_id_2) ?? appointment.storitev_2 ?? null
+    : null;
+  const service3 = appointment.storitev_id_3
+    ? services.find(s => s.id === appointment.storitev_id_3) ?? appointment.storitev_3 ?? null
+    : null;
   const addOnService = appointment.add_on_storitev_id
     ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
     : appointment.add_on_storitev || null;
@@ -195,20 +222,19 @@ export function AppointmentDetailModal({
   const popustVrednost = appointment.popust ?? 0;
   const finalCena = appointment.koncna_cena ?? originalCena;
   const popustTip = appointment.popust_tip ?? '€';
+  const isPercent = (tip?: string | null) => tip === 'percent' || tip === '%';
+  // Cene v valuti termina (prej je bila povsod na trdo evro).
+  const price = (val: number) => money(val, { currency: appointment.valuta });
   const imaPopust = popustVrednost > 0;
-  const hasAddOnPrice = !!(appointment.add_on_naziv && appointment.add_on_final_cena);
-  const showPrices = !(originalCena === 0 && !imaPopust && !hasAddOnPrice);
 
   const promotionGradient = 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
   const promoBadge = (() => {
-    if (appointment.promocija_tip === 'happy_hour') return { label: 'Happy Hour', Icon: Clock };
-    if (appointment.promocija_tip === 'add_on') return { label: 'Add-on', Icon: Plus };
+    if (appointment.promocija_tip === 'happy_hour') return { label: appointment.promocija_naziv || 'Happy Hour', Icon: Clock };
+    if (appointment.promocija_tip === 'add_on') return { label: appointment.promocija_naziv || 'Add-on', Icon: Plus };
     if (imaPopust) return { label: appointment.promocija_naziv ?? 'Popust', Icon: Tag };
     return null;
   })();
 
-  const fmt = (val: number) =>
-    new Intl.NumberFormat(locale === 'sl' ? 'sl-SI' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val);
 
   const serviceRow = (name: string, color?: string | null, mins?: number, extraBadge?: boolean) => (
     <SheetRow key={`${name}-${color ?? ''}`} label={name}>
@@ -352,7 +378,6 @@ export function AppointmentDetailModal({
         </SheetGroup>
 
         {/* Cena */}
-        {showPrices && (
           <>
             {promoBadge && (
               <div
@@ -369,13 +394,13 @@ export function AppointmentDetailModal({
                 <>
                   <SheetRow
                     label={t('calendarView.detailModal.fields.originalPrice')}
-                    value={<span className="tnum text-gray-400 line-through">{fmt(originalCena)} EUR</span>}
+                    value={<span className="tnum text-gray-400 line-through">{price(originalCena)}</span>}
                   />
                   <SheetRow
                     label={t('calendarView.detailModal.fields.discount')}
                     value={
                       <span className="tnum text-red-500">
-                        − {popustTip === 'percent' ? `${popustVrednost}%` : `${fmt(popustVrednost)} EUR`}
+                        − {isPercent(popustTip) ? `${popustVrednost}%` : price(popustVrednost)}
                       </span>
                     }
                   />
@@ -383,22 +408,26 @@ export function AppointmentDetailModal({
                     <span className="flex-shrink-0 text-sm font-medium text-gray-900">
                       {t('calendarView.detailModal.fields.priceWithDiscount')}
                     </span>
-                    <span className="tnum text-base font-semibold text-gray-900">{fmt(finalCena)} EUR</span>
+                    <span className="tnum text-base font-semibold text-gray-900">{price(finalCena)}</span>
                   </SheetRow>
                 </>
-              ) : originalCena > 0 ? (
+              ) : (
                 <SheetRow
                   label={t('calendarView.detailModal.fields.price')}
-                  value={<span className="tnum font-semibold">{fmt(originalCena)} EUR</span>}
+                  value={
+                    originalCena > 0
+                      ? <span className="tnum font-semibold">{price(originalCena)}</span>
+                      : <span className="text-gray-400">-</span>
+                  }
                 />
-              ) : null}
+              )}
             </SheetGroup>
 
             {/* Dodatna storitev s svojo ceno */}
             {appointment.add_on_naziv && (appointment.add_on_final_cena || appointment.promocija_tip === 'add_on') && (
               <SheetGroup label={t('calendarView.detailModal.fields.additionalService')}>
                 <SheetRow
-                  label={appointment.add_on_naziv}
+                  label={t('modal.fields.service')}
                   value={<span className="font-medium">{appointment.add_on_naziv}</span>}
                 />
                 {appointment.add_on_final_cena && (
@@ -407,9 +436,9 @@ export function AppointmentDetailModal({
                       label={t('calendarView.detailModal.fields.discount')}
                       value={
                         <span className="tnum text-red-500">
-                          − {appointment.add_on_popust_tip === '%'
+                          − {isPercent(appointment.add_on_popust_tip)
                             ? `${appointment.add_on_popust}%`
-                            : `${fmt(parseFloat(appointment.add_on_popust ?? '0'))} EUR`}
+                            : price(parseFloat(appointment.add_on_popust ?? '0'))}
                         </span>
                       }
                     />
@@ -417,7 +446,7 @@ export function AppointmentDetailModal({
                       label={t('calendarView.detailModal.fields.priceWithDiscount')}
                       value={
                         <span className="tnum font-semibold text-emerald-600">
-                          {fmt(parseFloat(appointment.add_on_final_cena))} EUR
+                          {price(parseFloat(appointment.add_on_final_cena))}
                         </span>
                       }
                     />
@@ -426,12 +455,11 @@ export function AppointmentDetailModal({
               </SheetGroup>
             )}
           </>
-        )}
 
         {/* Resursi */}
         {aptResursi.length > 0 && (
-          <SheetGroup label="Resursi v uporabi">
-            <SheetRow label="Resursi v uporabi">
+          <SheetGroup label={t('calendarView.detailModal.fields.resources')}>
+            <SheetRow label={t('calendarView.detailModal.fields.resources')}>
               <div className="flex flex-wrap gap-1.5">
                 {aptResursi.map((r) => (
                   <span
@@ -461,6 +489,26 @@ export function AppointmentDetailModal({
             <SheetRow label={t('modal.fields.internalNotes')}>
               <p className="whitespace-pre-wrap text-sm text-gray-700">{internalNotes}</p>
             </SheetRow>
+          </SheetGroup>
+        )}
+
+        {/* Podrobnosti — ID termina in ali se termin beleži */}
+        {(appointment.id_termina || appointment.belezi_termin === false) && (
+          <SheetGroup label={t('calendarView.detailModal.fields.details')}>
+            {appointment.belezi_termin === false && (
+              <SheetRow label={t('ghost.title')}>
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <EyeSlash className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
+                  <span className="text-sm text-gray-700">{t('ghost.badge')}</span>
+                </span>
+              </SheetRow>
+            )}
+            {appointment.id_termina && (
+              <SheetRow
+                label={t('calendarView.detailModal.fields.appointmentId')}
+                value={<span className="tnum font-mono text-[13px] text-gray-500">{appointment.id_termina}</span>}
+              />
+            )}
           </SheetGroup>
         )}
       </SheetBody>
@@ -530,14 +578,16 @@ export function AppointmentDetailModal({
                       {t('calendarView.detailModal.actions.cancel')}
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => { onDelete?.(appointment); setActionsMenuOpen(false); }}
-                    className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50"
-                  >
-                    <Trash className="h-4 w-4" weight="regular" />
-                    {t('calendarView.eventModal.actions.delete')}
-                  </button>
+                  {onDelete && (
+                    <button
+                      type="button"
+                      onClick={() => { onDelete(appointment); setActionsMenuOpen(false); }}
+                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50"
+                    >
+                      <Trash className="h-4 w-4" weight="regular" />
+                      {t('calendarView.eventModal.actions.delete')}
+                    </button>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

@@ -27,6 +27,7 @@ import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { supabase } from '@/lib/supabaseClient';
 import { getCustomerPortal, startCheckout } from '@/lib/api/billingClient';
 import { Input } from '@/components/settings';
+import { sheet } from '@/components/ui/sheetClasses';
 
 // ─── Plan definitions ───────────────────────────────────────────────────────
 
@@ -130,15 +131,15 @@ function FreePlanCard({
 }) {
   const features = t.raw('paketi.freeCard.features') as string[];
   return (
-    <div className="bg-white border rounded-2xl p-5 flex flex-col border-[#6D5EF7]/40 ring-1 ring-[#6D5EF7]/20">
+    <div className="flex flex-col rounded-xl border border-[#6D5EF7]/40 bg-white p-5 ring-1 ring-[#6D5EF7]/20">
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="text-base font-semibold text-gray-900">{t('paketi.freeCard.name')}</h3>
+        <h3 className="whitespace-nowrap text-base font-semibold text-gray-900">{t('paketi.freeCard.name')}</h3>
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
           {t('paketi.currentBadge')}
         </span>
       </div>
       <div className="mb-5">
-        <span className="text-3xl font-bold tracking-tight text-gray-900">{t('paketi.freeCard.price')}</span>
+        <span className="tnum text-3xl font-semibold tracking-tight text-gray-900">{t('paketi.freeCard.price')}</span>
         <p className="text-xs text-gray-400 mt-1 h-4">{t('paketi.freeCard.priceNote')}</p>
       </div>
       <ul className="space-y-2 flex-1">
@@ -181,7 +182,7 @@ function PlanCard({
   const { money } = useFormat();
   if (loading) {
     return (
-      <div className="bg-white border border-gray-100 rounded-2xl p-5 animate-pulse space-y-3">
+      <div className="animate-pulse space-y-3 rounded-xl border border-gray-100 bg-white p-5">
         <div className="h-5 w-24 bg-gray-100 rounded" />
         <div className="h-8 w-20 bg-gray-100 rounded" />
         <div className="space-y-2">
@@ -196,26 +197,38 @@ function PlanCard({
 
   const features = t.raw(`paketi.plans.${planKey(plan.id)}.features`) as string[];
 
+  const recommended = Boolean(plan.recommended);
+
   return (
+    // Priporočeni paket: gradientni okvir, rahlo obarvana podlaga in značka
+    // »Najbolj priljubljen« na zgornjem robu, čez okvir.
     <div
-      className={`bg-white border rounded-2xl p-5 flex flex-col ${
-        isCurrent
-          ? 'border-[#6D5EF7]/40 ring-1 ring-[#6D5EF7]/20'
-          : 'border-gray-100'
+      className={`relative flex rounded-xl ${
+        recommended
+          ? 'bg-gradient-to-br from-violet-500 to-cyan-500 p-[1.5px] shadow-[0_14px_34px_-14px_rgba(124,120,250,0.55)]'
+          : ''
+      }`}
+    >
+      {recommended && (
+        <span className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+          {t('paketi.recommendedBadge')}
+        </span>
+      )}
+    <div
+      className={`flex w-full flex-col p-5 ${
+        recommended
+          ? 'rounded-[10.5px] bg-gradient-to-b from-violet-50 to-white'
+          : `rounded-xl border bg-white ${isCurrent ? 'border-[#6D5EF7]/40 ring-1 ring-[#6D5EF7]/20' : 'border-gray-100'}`
       }`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="text-base font-semibold text-gray-900">{plan.name}</h3>
-        {isCurrent ? (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
+        <h3 className="whitespace-nowrap text-base font-semibold text-gray-900">{plan.name}</h3>
+        {isCurrent && (
+          <span className="inline-flex flex-shrink-0 items-center rounded-full bg-[#6D5EF7]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#6D5EF7]">
             {t('paketi.currentBadge')}
           </span>
-        ) : plan.recommended ? (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-50 text-amber-700">
-            {t('paketi.recommendedBadge')}
-          </span>
-        ) : null}
+        )}
       </div>
 
       {/* Price */}
@@ -229,7 +242,7 @@ function PlanCard({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.15 }}
-                className="text-3xl font-bold gradient-text tracking-tight"
+                className="tnum text-3xl font-semibold tracking-tight text-gray-900"
               >
                 {money(plan.price[billingPeriod], { whole: true })}
               </motion.span>
@@ -262,16 +275,16 @@ function PlanCard({
         type="button"
         onClick={() => onCta(plan)}
         disabled={isCurrent || ctaLoading || disabled}
-        className={`mt-6 w-full px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+        className={`mt-6 w-full rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
           isCurrent
-            ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+            ? 'cursor-not-allowed bg-gray-100 text-gray-500'
             : ctaLoading
-            ? 'bg-[#0a0a0a] text-white cursor-wait'
+            ? 'cursor-wait bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-sm'
             : disabled
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            ? 'cursor-not-allowed bg-gray-100 text-gray-400'
             : plan.id === 'ENTERPRISE'
-            ? 'bg-white border border-gray-200 text-gray-900 hover:border-gray-300 hover:bg-gray-50'
-            : 'bg-[#0a0a0a] text-white hover:bg-[#1f1f1f]'
+            ? 'border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 active:bg-gray-100'
+            : 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-sm hover:opacity-90 active:opacity-80'
         }`}
       >
         {ctaLoading
@@ -287,6 +300,7 @@ function PlanCard({
           ? t('paketi.planButtons.sendInquiry')
           : t('paketi.planButtons.upgrade')}
       </button>
+    </div>
     </div>
   );
 }
@@ -354,35 +368,40 @@ function EnterpriseModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className={sheet.backdrop}
       onClick={onClose}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 16 }}
-        className="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden"
+        className={`${sheet.panel} sm:max-w-lg`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between p-6 pb-4">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">{t('paketi.enterpriseModal.title')}</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {t('paketi.enterpriseModal.subtitle')}
-            </p>
+        <div className={sheet.header}>
+          <div className={sheet.grabber} aria-hidden="true" />
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className={sheet.title}>{t('paketi.enterpriseModal.title')}</h2>
+              <p className={sheet.subtitle}>
+                {t('paketi.enterpriseModal.subtitle')}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className={sheet.close}
+            >
+              <X className="h-5 w-5" weight="regular" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X className="w-4 h-4" weight="bold" />
-          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className={sheet.body}>
+          <div className={`${sheet.group} space-y-4`}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
               {t('paketi.enterpriseModal.fields.fullName')} <span className="text-red-500">*</span>
             </label>
             <Input
@@ -393,7 +412,7 @@ function EnterpriseModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
               {t('paketi.enterpriseModal.fields.email')} <span className="text-red-500">*</span>
             </label>
             <Input
@@ -405,7 +424,7 @@ function EnterpriseModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
               {t('paketi.enterpriseModal.fields.phone')}
             </label>
             <Input
@@ -416,7 +435,7 @@ function EnterpriseModal({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
               {t('paketi.enterpriseModal.fields.message')} <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -425,11 +444,12 @@ function EnterpriseModal({
               onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
               placeholder={t('paketi.enterpriseModal.fields.messagePlaceholder')}
               required
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 resize-y focus:outline-none focus:ring-2 focus:ring-[#6D5EF7]/30 focus:border-[#6D5EF7]/40 placeholder:text-gray-400"
+              className="w-full resize-y rounded-[10px] border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
             />
           </div>
+          </div>
           {sendFailed && (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
               {t.rich('paketi.enterpriseModal.sendFailed', {
                 email: (chunks) => (
                   <a href="mailto:info@jedroplus.com" className="font-semibold underline">
@@ -439,20 +459,21 @@ function EnterpriseModal({
               })}
             </p>
           )}
-          <div className="flex items-center gap-3 pt-1">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-5 py-2.5 rounded-lg text-sm font-medium bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] disabled:opacity-60 transition-colors"
-            >
-              {submitting ? t('paketi.enterpriseModal.submittingButton') : t('paketi.enterpriseModal.submitButton')}
-            </button>
+          </div>
+          <div className={sheet.footer}>
             <button
               type="button"
               onClick={onClose}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              className={sheet.cancel}
             >
               {t('paketi.enterpriseModal.cancelButton')}
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500 disabled:opacity-60`}
+            >
+              {submitting ? t('paketi.enterpriseModal.submittingButton') : t('paketi.enterpriseModal.submitButton')}
             </button>
           </div>
         </form>
@@ -474,7 +495,7 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
       initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 32 }}
-      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium"
+      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-gray-900/95 px-4 py-3 text-sm font-medium text-white shadow-lg backdrop-blur"
     >
       <Check className="w-4 h-4 text-emerald-400" weight="bold" />
       {message}
@@ -500,7 +521,7 @@ export default function PaketiPage() {
 
   const [renewalDate, setRenewalDate] = useState('—');
 
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual');
 
   const [enterpriseOpen, setEnterpriseOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -721,13 +742,13 @@ export default function PaketiPage() {
       </div>
 
       {/* Section 1 — Current plan */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-5">
+      <div className="mb-7 rounded-xl border border-gray-100 bg-white p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
+            <span className="inline-flex items-center rounded-full bg-[#6D5EF7]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#6D5EF7]">
               {planLabel}
             </span>
-            <h2 className="text-xl font-semibold text-gray-900 mt-3 tracking-tight">
+            <h2 className="mt-2.5 text-xl font-semibold tracking-tight text-gray-900">
               {planFullName}
             </h2>
             <p className="text-sm text-gray-500 mt-1">{planDescription}</p>
@@ -735,15 +756,15 @@ export default function PaketiPage() {
           {canUpgrade && (
             <a
               href="#razpolozljivi-paketi"
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-colors flex-shrink-0"
+              className="flex-shrink-0 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
             >
               {t('paketi.upgradeButton')}
             </a>
           )}
         </div>
         <div className="border-t border-gray-100 mt-5 pt-4 flex items-center justify-between">
-          <span className="text-xs text-gray-500">{t('paketi.renewalLabel')}</span>
-          <span className="text-xs font-medium text-gray-700">
+          <span className="text-[13px] text-gray-500">{t('paketi.renewalLabel')}</span>
+          <span className="tnum text-[13px] font-medium text-gray-900">
             {currentPlanId === 'FREE' ? t('paketi.freeRenewal') : renewalDate}
           </span>
         </div>
@@ -754,7 +775,7 @@ export default function PaketiPage() {
               type="button"
               onClick={handleManageSubscription}
               disabled={isLoadingPortal}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#0a0a0a] text-white rounded-lg text-sm font-medium hover:bg-[#1f1f1f] disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
             >
               {isLoadingPortal ? (
                 <>
@@ -780,11 +801,11 @@ export default function PaketiPage() {
       {/* (maxUsers banner rendered by parent if needed) */}
 
       {/* Section 3 — Usage this month */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-5">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
+      <div className="mb-7">
+        <p className="mb-1.5 px-1 text-xs font-semibold uppercase tracking-[0.04em] text-gray-400">
           {t('paketi.usageTitle')}
         </p>
-        <div className="space-y-5">
+        <div className="space-y-5 rounded-xl border border-gray-100 bg-white p-4">
           {quotas.map((q, i) => (
             <QuotaRow key={i} item={q} loading={loadingQuotas || billingLoading} />
           ))}
@@ -794,17 +815,17 @@ export default function PaketiPage() {
       {/* Section 4 — Available plans */}
       <div id="razpolozljivi-paketi" className="mb-5 scroll-mt-20">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+          <p className="px-1 text-xs font-semibold uppercase tracking-[0.04em] text-gray-400">
             {t('paketi.availablePlans')}
           </p>
-          <div className="inline-flex border border-gray-200 rounded-lg overflow-hidden bg-white self-start sm:self-auto">
+          <div className="inline-flex gap-0.5 self-start rounded-[9px] bg-gray-100 p-0.5 sm:self-auto">
             <button
               type="button"
               onClick={() => setBillingPeriod('monthly')}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`rounded-[7px] px-3 py-1 text-[13px] font-medium transition-colors ${
                 billingPeriod === 'monthly'
-                  ? 'bg-[#0a0a0a] text-white'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                  : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               {t('paketi.billingPeriod.monthly')}
@@ -812,19 +833,15 @@ export default function PaketiPage() {
             <button
               type="button"
               onClick={() => setBillingPeriod('annual')}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors inline-flex items-center gap-1.5 ${
+              className={`inline-flex items-center gap-1.5 rounded-[7px] px-3 py-1 text-[13px] font-medium transition-colors ${
                 billingPeriod === 'annual'
-                  ? 'bg-[#0a0a0a] text-white'
-                  : 'text-gray-600 hover:bg-gray-50'
+                  ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                  : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               {t('paketi.billingPeriod.yearly')}
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-semibold leading-none ${
-                  billingPeriod === 'annual'
-                    ? 'bg-white/15 text-white'
-                    : 'bg-[#6D5EF7]/10 text-[#6D5EF7]'
-                }`}
+                className="rounded px-1.5 py-0.5 text-[10px] font-semibold leading-none bg-[#6D5EF7]/10 text-[#6D5EF7]"
               >
                 −21%
               </span>
@@ -832,13 +849,13 @@ export default function PaketiPage() {
           </div>
         </div>
         {checkoutError && (
-          <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">
-            <Warning className="h-4 w-4 flex-shrink-0 mt-0.5" weight="fill" />
+          <div className="mb-3 flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+            <Warning className="mt-0.5 h-4 w-4 flex-shrink-0" weight="regular" />
             <span>{checkoutError}</span>
           </div>
         )}
         <div
-          className={`grid grid-cols-1 gap-3 ${
+          className={`grid grid-cols-1 gap-x-3 gap-y-5 pt-2.5 ${
             currentPlanId === 'FREE' ? 'md:grid-cols-2 xl:grid-cols-4' : 'md:grid-cols-3'
           }`}
         >

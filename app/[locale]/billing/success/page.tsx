@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { getBillingStatus } from '@/lib/api/billingClient';
+import AuroraBackground from '@/components/shared/AuroraBackground';
 
 const MAX_POLL_TIME_MS = 60000;
 const POLL_INTERVAL_MS = 3000;
@@ -113,9 +114,9 @@ function GradientCheck({ size = 16 }: { size?: number }) {
         </linearGradient>
       </defs>
       <path
-        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        d="M5 13l4 4L19 7"
         stroke="url(#check-gradient)"
-        strokeWidth={2}
+        strokeWidth={2.5}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -229,9 +230,10 @@ function BillingSuccessContent() {
   // No session ID
   if (!sessionId) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 max-w-md w-full text-center">
-          <Warning className="h-16 w-16 text-amber-500 mx-auto mb-4" weight="fill" />
+      <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+        <AuroraBackground tone="light" />
+        <div className="relative z-10 w-full max-w-md rounded-2xl border border-gray-200/70 bg-white/85 shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl p-8 text-center">
+          <Warning className="mx-auto mb-4 h-14 w-14 text-amber-500" weight="regular" />
           <h1 className="text-xl font-semibold text-gray-900 mb-4">
             {t('success.missingSession.title')}
           </h1>
@@ -240,7 +242,7 @@ function BillingSuccessContent() {
           </p>
           <button
             onClick={() => router.push(returnPath)}
-            className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+            className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
           >
             {t('success.missingSession.backButton')}
           </button>
@@ -250,12 +252,13 @@ function BillingSuccessContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+      <AuroraBackground tone="light" />
       {showConfetti && <Confetti />}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 max-w-lg w-full"
+        className="relative z-10 w-full max-w-lg rounded-2xl border border-gray-200/70 bg-white/85 shadow-[0_20px_50px_-25px_rgba(60,50,140,0.35)] backdrop-blur-xl p-8"
       >
         {status === 'verifying' && (
           <div className="text-center py-8">
@@ -301,23 +304,16 @@ function BillingSuccessContent() {
               transition={{ type: 'spring', duration: 0.5 }}
               className="inline-block"
             >
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center mx-auto"
-                style={{
-                  background: 'linear-gradient(135deg, #10B981 0%, #34D399 50%, #6EE7B7 100%)',
-                }}
-              >
-                <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+              <svg className="mx-auto h-16 w-16 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-2xl font-bold text-gray-900 mt-6 mb-2"
+              className="mb-1.5 mt-5 text-[26px] font-semibold tracking-tight text-gray-900"
             >
               {t('success.complete.title')}
             </motion.h1>
@@ -326,7 +322,7 @@ function BillingSuccessContent() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-gray-600 mb-2"
+              className="mb-4 text-[15px] text-gray-500"
             >
               {t('success.complete.subtitle')}
             </motion.p>
@@ -337,17 +333,10 @@ function BillingSuccessContent() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-100 rounded-full text-sm font-medium mb-6"
+                className="mb-6 inline-flex items-center gap-2 rounded-full bg-gray-100 px-3.5 py-1.5 text-sm font-medium"
               >
                 <span className="text-gray-600">{t('success.complete.yourPlan')}</span>
-                <span
-                  className="font-bold"
-                  style={{
-                    background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}
-                >
+                <span className="font-semibold text-gray-900">
                   {activePlanName || activePlanCode}
                 </span>
               </motion.div>
@@ -359,9 +348,9 @@ function BillingSuccessContent() {
               transition={{ delay: 0.5 }}
               className="space-y-4"
             >
-              <div className="p-4 bg-gray-50 rounded-xl text-left">
-                <h3 className="font-semibold text-gray-900 mb-3">{t('success.complete.whatsNext')}</h3>
-                <ul className="space-y-2.5 text-sm text-gray-600">
+              <div className="rounded-xl bg-gray-50 p-4 text-left">
+                <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('success.complete.whatsNext')}</h3>
+                <ul className="space-y-2.5 text-sm text-gray-700">
                   {planFeatures.map((feature, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                       <span className="mt-0.5 flex-shrink-0">
@@ -390,7 +379,7 @@ function BillingSuccessContent() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleContinue}
-                  className="flex-1 py-3 px-4 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
                 >
                   {t('success.complete.backToBilling')}
                   <ArrowRight className="h-4 w-4" weight="bold" />
@@ -399,17 +388,9 @@ function BillingSuccessContent() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleGoToDashboard}
-                  className="flex-1 py-3 px-4 bg-white border-2 border-gray-200 rounded-xl font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
                 >
-                  <span
-                    style={{
-                      background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    {t('success.complete.dashboard')}
-                  </span>
+                  {t('success.complete.dashboard')}
                 </motion.button>
               </div>
             </motion.div>
@@ -418,9 +399,7 @@ function BillingSuccessContent() {
 
         {status === 'timeout' && (
           <div className="text-center py-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-6">
-              <SpinnerGap className="h-8 w-8 text-amber-600" weight="bold" />
-            </div>
+            <SpinnerGap className="mx-auto mb-5 h-12 w-12 text-amber-500" weight="regular" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               {t('success.timeout.title')}
             </h2>
@@ -430,13 +409,13 @@ function BillingSuccessContent() {
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleRetry}
-                className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+                className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
               >
                 {t('success.timeout.retryButton')}
               </button>
               <button
                 onClick={() => router.push(returnPath)}
-                className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+                className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
               >
                 {t('success.timeout.backButton')}
               </button>
@@ -446,7 +425,7 @@ function BillingSuccessContent() {
 
         {status === 'error' && (
           <div className="text-center py-8">
-            <Warning className="h-16 w-16 text-red-500 mx-auto mb-4" weight="fill" />
+            <Warning className="mx-auto mb-4 h-14 w-14 text-red-500" weight="regular" />
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               {t('success.error.title')}
             </h2>
@@ -455,7 +434,7 @@ function BillingSuccessContent() {
             </p>
             <button
               onClick={() => router.push(returnPath)}
-              className="px-6 py-3 bg-white border-2 border-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+              className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
             >
               {t('success.error.backButton')}
             </button>
@@ -469,8 +448,9 @@ function BillingSuccessContent() {
 function LoadingFallback() {
   const t = useTranslations('billing');
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <div className="text-center">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-white px-4 py-16">
+      <AuroraBackground tone="light" />
+      <div className="relative z-10 text-center">
         <div className="w-10 h-10 mx-auto mb-4">
           <svg className="w-10 h-10 animate-spin" viewBox="0 0 50 50">
             <defs>

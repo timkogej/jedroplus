@@ -32,6 +32,7 @@ import {
   extractAdditionalServiceIds,
   extractPricingFields,
   extractPromotionFields,
+  extractAddOnFields,
 } from "@/lib/supabase/appointments";
 import type { AppointmentWithDetails, Storitev, Zaposleni } from "@/types/appointments";
 
@@ -324,6 +325,8 @@ function buildAppointments(
 
     const pricing = extractPricingFields(row);
     const promo = extractPromotionFields(row);
+    const addOn = extractAddOnFields(row);
+    const addOnService = addOn.add_on_storitev_id ? serviceMap.get(addOn.add_on_storitev_id) || null : null;
 
     const beleziTermin = row["belezi_termin"];
     const belezi_termin = beleziTermin === false || beleziTermin === 0 ? false : true;
@@ -349,6 +352,9 @@ function buildAppointments(
       storitev_id: serviceId || undefined,
       storitev_id_2: serviceId2 || undefined,
       storitev_id_3: serviceId3 || undefined,
+      add_on_storitev_id: addOn.add_on_storitev_id,
+      add_on_naziv: addOn.add_on_naziv,
+      add_on_trajanje: addOn.add_on_trajanje,
       zaposleni_id: staffId || undefined,
       status: normalizedStatus,
       opombe: notes || undefined,
@@ -361,11 +367,16 @@ function buildAppointments(
       promocija_naziv: promo.promocija_naziv,
       popust_id: promo.popust_id,
       happy_hour_id: promo.happy_hour_id,
+      add_on_popust: addOn.add_on_popust,
+      add_on_popust_tip: addOn.add_on_popust_tip,
+      add_on_final_cena: addOn.add_on_final_cena,
+      valuta: addOn.valuta,
       belezi_termin,
       deleted_at,
       storitev: serviceData,
       storitev_2: storitev2,
       storitev_3: storitev3,
+      add_on_storitev: addOnService,
       zaposleni: staffMap.get(staffId) || null,
     });
   }

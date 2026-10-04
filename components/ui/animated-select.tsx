@@ -231,7 +231,7 @@ export function Select({
           animate="visible"
           exit="exit"
           style={dropdownStyle}
-          className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-lg shadow-gray-200/50"
+          className="overflow-hidden rounded-xl border border-gray-100 bg-white/95 shadow-lg backdrop-blur-xl backdrop-saturate-150"
         >
           <div className="max-h-60 overflow-y-auto p-1.5">
             {React.Children.map(children, (child, index) => {
@@ -261,17 +261,17 @@ export function Select({
             setIsOpen(!isOpen);
           }}
           disabled={disabled}
-          className={`flex w-full items-center justify-between gap-2 rounded-xl border px-4 py-2.5
-                     text-left text-sm transition-all
+          className={`flex w-full items-center justify-between gap-2 rounded-[10px] border px-3 py-2.5
+                     text-left text-sm transition-colors
                      ${isOpen
-                       ? 'border-[#1A1F36]/30 ring-2 ring-[#1A1F36]/10 bg-white'
+                       ? 'border-[#7C78FA] bg-white ring-[3px] ring-[#7C78FA]/25'
                        : 'border-gray-200 bg-white hover:border-gray-300'
                      }
                      ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-                     focus:outline-none focus:ring-2 focus:ring-[#1A1F36]/20`}
+                     focus:outline-none focus-visible:border-[#7C78FA] focus-visible:ring-[3px] focus-visible:ring-[#7C78FA]/25`}
           whileTap={{ scale: disabled ? 1 : 0.99 }}
         >
-          <span className={`flex items-center gap-2 ${!selectedOption ? 'text-gray-400' : 'text-[#1A1F36]'}`}>
+          <span className={`flex items-center gap-2 ${!selectedOption ? 'text-gray-400' : 'text-gray-900'}`}>
             {selectedOption ? (
               <>
                 {selectedOption.props.colorDot && (
@@ -330,9 +330,9 @@ export function SelectOption({
       onMouseEnter={() => setHighlightedIndex(_index)}
       className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm
                  transition-colors
-                 ${isHighlighted ? 'bg-[#1A1F36]/5' : ''}
-                 ${isSelected ? 'bg-[#1A1F36]/10' : ''}
-                 hover:bg-[#1A1F36]/5`}
+                 ${isHighlighted ? 'bg-gray-100' : ''}
+                 ${isSelected ? 'bg-gray-100' : ''}
+                 hover:bg-gray-100`}
     >
       {/* Color dot with gradient support */}
       {colorDot && (
@@ -347,7 +347,7 @@ export function SelectOption({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className={`font-medium ${dimmed ? 'text-gray-400' : isSelected ? 'text-[#1A1F36]' : 'text-gray-700'}`}>
+        <div className={`font-medium ${dimmed ? 'text-gray-400' : isSelected ? 'text-gray-900' : 'text-gray-700'}`}>
           {children}
         </div>
         {description && (
@@ -362,7 +362,7 @@ export function SelectOption({
           animate={{ scale: 1 }}
           className="flex-shrink-0"
         >
-          <Check className="h-4 w-4 text-[#1A1F36]" weight="bold" />
+          <Check className="h-4 w-4 text-[#7C78FA]" weight="bold" />
         </motion.span>
       )}
     </motion.button>

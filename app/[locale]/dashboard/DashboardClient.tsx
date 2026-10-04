@@ -24,7 +24,6 @@ import {
   XCircle,
   Trash,
   WarningCircle,
-  DotsThreeVertical,
 } from "@phosphor-icons/react";
 import ProtectedLayout from "@/components/ProtectedLayout";
 import { useCompany } from "@/app/company-context";
@@ -40,14 +39,6 @@ import {
 } from "@/components/dashboard";
 import { initialsStyle } from "@/components/dashboard/initialsStyle";
 import {
-  Sheet,
-  SheetHeader,
-  SheetBody,
-  SheetGroup,
-  SheetRow,
-  SheetFooter,
-} from "@/components/ui/sheet";
-import {
   fetchDashboardData,
   type DashboardData,
   type AppointmentItem,
@@ -60,6 +51,8 @@ import DeleteConfirmation from "@/components/appointments/DeleteConfirmation";
 import ClientModal from "@/components/clients/ClientModal";
 import { fetchServices, fetchEmployees } from "@/lib/supabase/appointments";
 import type { AppointmentWithDetails, Storitev, Zaposleni } from "@/types/appointments";
+// Isto okence termina kot v Koledarju — z vsemi podatki in akcijami.
+import { AppointmentDetailModal } from "@/components/calendar/AppointmentDetailSheet";
 import type { ClientFormData } from "@/types/clients";
 import { callN8nAction } from "@/src/lib/n8nClient";
 import {
@@ -78,343 +71,14 @@ import { TABLES } from "@/lib/data";
 import { useUserPersonId } from "@/hooks/useUserPersonId";
 import { useRolePermissions } from "@/app/role-permission-context";
 import { useTranslations } from "next-intl";
-import CommunicationLanguageFlag from "@/components/shared/CommunicationLanguageFlag";
 import FirstRunSetup from "@/components/onboarding/FirstRunSetup";
 import GettingStarted from "@/components/guide/GettingStarted";
 import StaffTourStarter from "@/components/guide/StaffTourStarter";
 import NextLink from "next/link";
 
-// ─── Copy button (reused in detail modal) ────────────────────────────────────
-function CopyButton({ text, label }: { text: string; label: string }) {
-  const t = useTranslations('dashboard');
-  const [copied, setCopied] = useState(false);
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <motion.button
-      type="button"
-      onClick={handleCopy}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      className="rounded-lg p-2 border border-gray-200 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
-      title={t('copyButton', { label })}
-    >
-      {copied ? (
-        <Check className="h-4 w-4 text-emerald-500" weight="bold" />
-      ) : (
-        <Copy className="h-4 w-4" weight="regular" />
-      )}
-    </motion.button>
-  );
-}
-
 // ─── Podrobnosti termina ─────────────────────────────────────────────────────
 // Na telefonu list od spodaj, na namizju sredinska plošča. Skupine z
 // vrsticami oznaka/vrednost — vzorec iz iOS in macOS Nastavitev.
-
-/** Iz barve storitve (lahko je preliv) potegne eno polno barvo za piko. */
-function solidColor(value?: string | null): string {
-  if (!value) return '#6366F1';
-  if (value.includes('gradient')) {
-    const m = value.match(/#[0-9A-Fa-f]{6}/g);
-    return m?.[0] ?? '#6366F1';
-  }
-  return value;
-}
-
-function AppointmentDetailModal({
-  appointment,
-  services,
-  onClose,
-  onEdit,
-  onComplete,
-  onNoShow,
-  onCancel,
-  onDelete,
-}: {
-  appointment: AppointmentWithDetails;
-  services: Storitev[];
-  onClose: () => void;
-  onEdit?: (appointment: AppointmentWithDetails) => void;
-  onComplete?: (appointment: AppointmentWithDetails) => void;
-  onNoShow?: (appointment: AppointmentWithDetails) => void;
-  onCancel?: (appointment: AppointmentWithDetails) => void;
-  onDelete?: (appointment: AppointmentWithDetails) => void;
-}) {
-  const { money } = useFormat();
-  const t = useTranslations('dashboard');
-  const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
-
-  const formatModalDate = (value?: string | null) => {
-    if (!value) return null;
-    const raw = value.includes('T') ? value : `${value}T00:00:00`;
-    const date = new Date(raw);
-    if (Number.isNaN(date.getTime())) return value;
-    return date.toLocaleDateString('sl-SI', { day: 'numeric', month: 'long', year: 'numeric' });
-  };
-
-  const formatTimeStr = (timeStr?: string | null) => (timeStr ? timeStr.substring(0, 5) : '');
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'scheduled': return t('detailModal.status.scheduled');
-      case 'confirmed': return t('detailModal.status.confirmed');
-      case 'completed': return t('detailModal.status.completed');
-      case 'cancelled': return t('detailModal.status.cancelled');
-      case 'pending': return t('detailModal.status.pending');
-      case 'no_show': return t('detailModal.status.noShow');
-      default: return status;
-    }
-  };
-
-  // Ploskovni odtenki namesto nasičenih ploščic — barva je namig, ne poudarek.
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'scheduled': return 'bg-emerald-50 text-emerald-700';
-      case 'confirmed': return 'bg-blue-50 text-blue-700';
-      case 'completed': return 'bg-gray-100 text-gray-600';
-      case 'cancelled': return 'bg-red-50 text-red-600';
-      case 'pending': return 'bg-amber-50 text-amber-700';
-      case 'no_show': return 'bg-gray-100 text-gray-600';
-      default: return 'bg-gray-100 text-gray-600';
-    }
-  };
-
-  const status = appointment.status || 'scheduled';
-  const isTerminated = ['completed', 'zaključen', 'Zaključen', 'cancelled', 'Odpovedan', 'no_show', 'Ni prišel']
-    .includes(String(appointment.status));
-
-  const duration = (() => {
-    if (!appointment.cas_zacetek || !appointment.cas_konec) return appointment.storitev?.trajanje || null;
-    try {
-      const [sh, sm] = appointment.cas_zacetek.split(':').map(Number);
-      const [eh, em] = appointment.cas_konec.split(':').map(Number);
-      const mins = (eh * 60 + em) - (sh * 60 + sm);
-      return mins > 0 ? mins : null;
-    } catch { return appointment.storitev?.trajanje || null; }
-  })();
-
-  const price = (() => {
-    const apt = appointment as unknown as Record<string, unknown>;
-    const c = (apt['Final cena'] as number) ?? (apt['final_cena'] as number) ?? (apt['koncna_cena'] as number)
-      ?? appointment.koncna_cena ?? appointment.cena ?? appointment.storitev?.cena;
-    return c && Number(c) > 0 ? Number(c) : null;
-  })();
-
-  const service2 = appointment.storitev_id_2 ? services.find(s => s.id === appointment.storitev_id_2) : null;
-  const service3 = appointment.storitev_id_3 ? services.find(s => s.id === appointment.storitev_id_3) : null;
-  const addOnService = appointment.add_on_storitev_id
-    ? services.find(s => s.id === appointment.add_on_storitev_id) || appointment.add_on_storitev || null
-    : appointment.add_on_storitev || null;
-  const addOnName = appointment.add_on_naziv?.trim();
-  const addOnDuration = appointment.add_on_trajanje ?? addOnService?.trajanje ?? 0;
-
-  const internalNotes = appointment.interne_opombe
-    || ((appointment as unknown as Record<string, unknown>)['Interne opombe'] as string)
-    || '';
-
-  const serviceRow = (name: string, color?: string | null, mins?: number, extraBadge?: boolean) => (
-    <SheetRow label={name}>
-      <span className="flex min-w-0 items-center gap-2.5">
-        <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full" style={{ background: solidColor(color) }} />
-        <span className="truncate text-sm font-medium text-gray-900">{name}</span>
-        {extraBadge && (
-          <span className="flex-shrink-0 rounded-full bg-gray-100 px-1.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
-            {t('detailModal.fields.additionalService')}
-          </span>
-        )}
-      </span>
-      {mins && mins > 0 ? (
-        <span className="tnum flex-shrink-0 text-sm text-gray-500">{mins} min</span>
-      ) : null}
-    </SheetRow>
-  );
-
-  return (
-    <Sheet onClose={onClose}>
-      <SheetHeader
-        title={appointment.stranka_ime || t('recentActivity.unknownClient')}
-        subtitle={formatModalDate(appointment.datum) ?? undefined}
-        accent={solidColor(appointment.storitev?.barva)}
-        onClose={onClose}
-        closeLabel={t('detailModal.actions.close')}
-        badge={
-          <>
-            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusColor(status)}`}>
-              {getStatusLabel(status)}
-            </span>
-            <CommunicationLanguageFlag value={appointment.language} />
-          </>
-        }
-      />
-
-      <SheetBody>
-        {/* Kdaj in koliko — datum stoji že v glavi, zato skupina nima oznake */}
-        <SheetGroup>
-          <SheetRow
-            label={t('detailModal.fields.time')}
-            value={
-              <span className="tnum">
-                {formatTimeStr(appointment.cas_zacetek)} – {formatTimeStr(appointment.cas_konec)}
-              </span>
-            }
-          />
-          {duration !== null && (
-            <SheetRow label={t('detailModal.fields.duration')} value={<span className="tnum">{duration} min</span>} />
-          )}
-          {price !== null && (
-            <SheetRow label={t('detailModal.fields.price')} value={<span className="tnum">{money(price)}</span>} />
-          )}
-        </SheetGroup>
-
-        {/* Storitve */}
-        {appointment.storitev && (
-          <SheetGroup label={t('detailModal.fields.service')}>
-            {serviceRow(appointment.storitev.naziv, appointment.storitev.barva, appointment.storitev.trajanje)}
-            {service2 && serviceRow(service2.naziv, service2.barva, service2.trajanje)}
-            {service3 && serviceRow(service3.naziv, service3.barva, service3.trajanje)}
-            {addOnName && serviceRow(addOnName, addOnService?.barva, addOnDuration, true)}
-          </SheetGroup>
-        )}
-
-        {/* Zaposleni */}
-        {appointment.zaposleni && (
-          <SheetGroup label={t('detailModal.fields.employee')}>
-            <SheetRow label={appointment.zaposleni.ime}>
-              <span className="flex min-w-0 items-center gap-3">
-                <span className="flex-shrink-0 text-lg font-bold" style={initialsStyle(appointment.zaposleni.barva)}>
-                  {appointment.zaposleni.initials}
-                </span>
-                <span className="truncate text-sm font-medium text-gray-900">
-                  {appointment.zaposleni.ime} {appointment.zaposleni.priimek}
-                </span>
-              </span>
-            </SheetRow>
-          </SheetGroup>
-        )}
-
-        {/* Stranka — vrstici odpreta e-pošto oziroma klic */}
-        {(appointment.stranka_email || appointment.stranka_telefon) && (
-          <SheetGroup label={t('detailModal.fields.client')}>
-            {appointment.stranka_email && (
-              <SheetRow label="Email" href={`mailto:${appointment.stranka_email}`}>
-                <span className="flex-shrink-0 text-sm text-gray-500">Email</span>
-                <span className="truncate text-sm font-medium text-[#6D5EF7]">{appointment.stranka_email}</span>
-              </SheetRow>
-            )}
-            {appointment.stranka_telefon && (
-              <SheetRow label={t('detailModal.fields.phone')} href={`tel:${appointment.stranka_telefon}`}>
-                <span className="flex-shrink-0 text-sm text-gray-500">{t('detailModal.fields.phone')}</span>
-                <span className="tnum truncate text-sm font-medium text-[#6D5EF7]">{appointment.stranka_telefon}</span>
-              </SheetRow>
-            )}
-          </SheetGroup>
-        )}
-
-        {/* Opombe */}
-        {appointment.opombe && (
-          <SheetGroup label={t('detailModal.fields.notes')}>
-            <SheetRow label={t('detailModal.fields.notes')}>
-              <p className="whitespace-pre-wrap text-sm text-gray-700">{appointment.opombe}</p>
-            </SheetRow>
-          </SheetGroup>
-        )}
-
-        {internalNotes && (
-          <SheetGroup label={t('detailModal.fields.internalNotes')}>
-            <SheetRow label={t('detailModal.fields.internalNotes')}>
-              <p className="whitespace-pre-wrap text-sm text-gray-700">{internalNotes}</p>
-            </SheetRow>
-          </SheetGroup>
-        )}
-      </SheetBody>
-
-      <SheetFooter>
-        {onEdit && (
-          <button
-            type="button"
-            onClick={() => onEdit(appointment)}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 active:opacity-80"
-          >
-            <NotePencil className="h-4 w-4" weight="regular" />
-            {t('detailModal.actions.edit')}
-          </button>
-        )}
-
-        {!isTerminated && onComplete && (
-          <button
-            type="button"
-            onClick={() => onComplete(appointment)}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
-          >
-            <CheckCircle className="h-4 w-4 text-gray-500" weight="regular" />
-            {t('detailModal.actions.complete')}
-          </button>
-        )}
-
-        {(onNoShow || onCancel || onDelete) && (
-          <div className="relative flex-shrink-0">
-            <button
-              type="button"
-              onClick={() => setActionsMenuOpen((v) => !v)}
-              aria-label={t('detailModal.actions.moreOptions')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 active:bg-gray-100"
-            >
-              <DotsThreeVertical className="h-5 w-5" weight="bold" />
-            </button>
-
-            <AnimatePresence>
-              {actionsMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96, y: 4 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.96, y: 4 }}
-                  transition={{ duration: 0.16, ease: [0.32, 0.72, 0, 1] }}
-                  style={{ transformOrigin: 'bottom right' }}
-                  className="absolute bottom-full right-0 z-50 mb-1.5 w-44 overflow-hidden rounded-xl border border-gray-100 bg-white/90 py-1 shadow-lg backdrop-blur-xl backdrop-saturate-150"
-                >
-                  {onNoShow && (
-                    <button
-                      type="button"
-                      onClick={() => { onNoShow(appointment); setActionsMenuOpen(false); }}
-                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
-                    >
-                      <WarningCircle className="h-4 w-4 text-gray-500" weight="regular" />
-                      {t('detailModal.actions.noShow')}
-                    </button>
-                  )}
-                  {onCancel && (
-                    <button
-                      type="button"
-                      onClick={() => { onCancel(appointment); setActionsMenuOpen(false); }}
-                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
-                    >
-                      <XCircle className="h-4 w-4 text-gray-500" weight="regular" />
-                      {t('detailModal.actions.cancel')}
-                    </button>
-                  )}
-                  {onDelete && (
-                    <button
-                      type="button"
-                      onClick={() => { onDelete(appointment); setActionsMenuOpen(false); }}
-                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50"
-                    >
-                      <Trash className="h-4 w-4" weight="regular" />
-                      {t('detailModal.actions.delete')}
-                    </button>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        )}
-      </SheetFooter>
-    </Sheet>
-  );
-}
 
 
 // ─── Main Dashboard (client shell) ────────────────────────────────────────────
@@ -642,8 +306,21 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       status: (item.status || 'scheduled') as AppointmentWithDetails['status'],
       opombe: item.opombe,
       interne_opombe: item.interneOpombe,
-      cena: item.cena ?? null,
-      koncna_cena: item.cena ?? null,
+      // Osnovna in končna cena sta ločeni; prej je bila končna kar osnovna,
+      // zato se popust na nadzorni plošči ni nikoli pokazal.
+      cena: item.details?.osnovna_cena ?? item.cena ?? null,
+      koncna_cena: item.details?.koncna_cena ?? item.cena ?? null,
+      popust: item.details?.popust ?? null,
+      popust_tip: (item.details?.popust_tip as AppointmentWithDetails['popust_tip']) ?? null,
+      promocija_tip: item.details?.promocija_tip ?? null,
+      promocija_naziv: item.details?.promocija_naziv ?? null,
+      popust_id: item.details?.popust_id ?? null,
+      happy_hour_id: item.details?.happy_hour_id ?? null,
+      add_on_popust: item.details?.add_on_popust ?? null,
+      add_on_popust_tip: item.details?.add_on_popust_tip ?? null,
+      valuta: item.details?.valuta ?? null,
+      id_termina: item.details?.id_termina,
+      belezi_termin: item.details?.belezi_termin ?? true,
       add_on_final_cena: item.addOnFinalCena ?? null,
       storitev: primaryService
         ? { id: primaryService.id, naziv: primaryService.naziv, barva: primaryService.barva, trajanje: primaryService.trajanje, cena: primaryService.cena }

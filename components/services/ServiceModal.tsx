@@ -27,6 +27,7 @@ import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/c
 import type { Resurs } from '@/types/resursi';
 import { Cube } from '@phosphor-icons/react';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 type ModalMode = 'create' | 'edit';
 
 interface ServiceModalProps {
@@ -279,7 +280,7 @@ function ServiceModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -287,17 +288,18 @@ function ServiceModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className="relative flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
+            <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6">
+              <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">
+                  <h2 className="text-[17px] font-semibold text-gray-900">
                     {mode === 'create' ? t('modal.createTitle') : t('modal.editTitle')}
                   </h2>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="mt-0.5 text-[13px] text-gray-500">
                     {mode === 'create' ? t('modal.createSubtitle') : t('modal.editSubtitle')}
                   </p>
                 </div>
@@ -306,9 +308,9 @@ function ServiceModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
             </div>
@@ -318,10 +320,10 @@ function ServiceModal({
               <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
                 <div className="space-y-5">
                 {/* Basic info */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                <div className="rounded-xl bg-white p-4">
                   {/* Service name */}
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {t('modal.nameLabel')}
                     </label>
                     <div className="relative">
@@ -332,17 +334,17 @@ function ServiceModal({
                         onChange={(e) => handleChange('naziv', e.target.value)}
                         placeholder={t('modal.namePlaceholder')}
                         maxLength={100}
-                        className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                        className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                    transition-colors focus:outline-none focus:ring-2
                                    ${errors.naziv
                                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                     : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                     : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                    }`}
                       />
                     </div>
                     {errors.naziv && (
                       <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                        <Warning className="h-3 w-3" weight="fill" />
+                        <Warning className="h-3 w-3" weight="regular" />
                         {errors.naziv}
                       </p>
                     )}
@@ -350,7 +352,7 @@ function ServiceModal({
 
                   {/* Category - Select with existing categories + custom option */}
                   <div className="mt-4">
-                    <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {t('modal.categoryLabel')}
                     </label>
                     {customCategory ? (
@@ -363,11 +365,11 @@ function ServiceModal({
                             onChange={(e) => handleChange('kategorija', e.target.value)}
                             placeholder={t('modal.categoryInputPlaceholder')}
                             autoFocus
-                            className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                            className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                        transition-colors focus:outline-none focus:ring-2
                                        ${errors.kategorija
                                          ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                         : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                         : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                        }`}
                           />
                         </div>
@@ -386,7 +388,7 @@ function ServiceModal({
                       </div>
                     ) : existingCategories.length > 0 ? (
                       <div className="relative">
-                        <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400">
                           <Folder className="h-4 w-4" weight="regular" />
                         </div>
                         <Select
@@ -400,7 +402,7 @@ function ServiceModal({
                             }
                           }}
                           placeholder={t('modal.categorySelectPlaceholder')}
-                          className="[&>button]:rounded-lg [&>button]:pl-10 [&>button]:focus:ring-gray-900/10"
+                          className="[&>button]:pl-10"
                         >
                           {existingCategories.map((cat) => (
                             <SelectOption key={cat} value={cat}>
@@ -420,18 +422,18 @@ function ServiceModal({
                           value={formData.kategorija}
                           onChange={(e) => handleChange('kategorija', e.target.value)}
                           placeholder={t('modal.categoryFirstPlaceholder')}
-                          className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                          className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                      transition-colors focus:outline-none focus:ring-2
                                      ${errors.kategorija
                                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                       : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                       : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                      }`}
                         />
                       </div>
                     )}
                     {errors.kategorija && (
                       <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                        <Warning className="h-3 w-3" weight="fill" />
+                        <Warning className="h-3 w-3" weight="regular" />
                         {errors.kategorija}
                       </p>
                     )}
@@ -439,8 +441,8 @@ function ServiceModal({
                 </div>
 
                 {/* Gradient Color Selector with Pagination */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <div className="rounded-xl bg-white p-4">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('modal.colorLabel')}
                   </p>
                   <p className="mb-4 text-xs text-gray-500">
@@ -543,7 +545,7 @@ function ServiceModal({
                   </div>
 
                   {/* Selected gradient preview */}
-                  <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50/70 p-3">
+                  <div className="mt-4 rounded-[10px] bg-gray-50 p-3">
                     <div className="flex items-center gap-3">
                       <div
                         className="h-10 w-10 flex-shrink-0 rounded-lg shadow-sm"
@@ -562,29 +564,29 @@ function ServiceModal({
 
                   {errors.barva && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                      <Warning className="h-3 w-3" weight="fill" />
+                      <Warning className="h-3 w-3" weight="regular" />
                       {errors.barva}
                     </p>
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                <div className="rounded-xl bg-white p-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     {/* Duration */}
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                         {t('modal.durationLabel')}
                       </label>
                       {!customDuration ? (
                         <div className="relative">
-                          <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <div className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400">
                             <Clock className="h-4 w-4" weight="regular" />
                           </div>
                           <Select
                             value={formData.trajanje.toString()}
                             setValue={handleDurationSelect}
                             placeholder={t('modal.durationSelectPlaceholder')}
-                            className="[&>button]:rounded-lg [&>button]:pl-10 [&>button]:focus:ring-gray-900/10"
+                            className="[&>button]:pl-10"
                           >
                             {DURATION_OPTIONS.map((opt) => (
                               <SelectOption key={opt.value} value={opt.value.toString()}>
@@ -605,11 +607,11 @@ function ServiceModal({
                               placeholder="45"
                               min={1}
                               max={480}
-                              className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-16 text-sm text-gray-900 placeholder-gray-400
+                              className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-16 text-sm text-gray-900 placeholder-gray-400
                                          transition-colors focus:outline-none focus:ring-2
                                          ${errors.trajanje
                                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                           : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                           : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                          }`}
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
@@ -627,7 +629,7 @@ function ServiceModal({
                       )}
                       {errors.trajanje && (
                         <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                          <Warning className="h-3 w-3" weight="fill" />
+                          <Warning className="h-3 w-3" weight="regular" />
                           {errors.trajanje}
                         </p>
                       )}
@@ -637,7 +639,7 @@ function ServiceModal({
                     <div>
                       <div className="grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
                         <div>
-                          <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                             {t('modal.priceLabel')}
                           </label>
                           <div className="relative">
@@ -649,25 +651,25 @@ function ServiceModal({
                               placeholder="35.00"
                               step="0.01"
                               min={0}
-                              className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
+                              className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                          transition-colors focus:outline-none focus:ring-2
                                          ${errors.cena
                                            ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                           : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                           : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                          }`}
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                          <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                             {t('modal.currencyLabel')}
                           </label>
                           <Select
                             value={formData.currency}
                             setValue={(value) => handleChange('currency', value.toUpperCase())}
                             placeholder={t('modal.currencySelectPlaceholder')}
-                            className="[&>button]:rounded-lg [&>button]:px-3 [&>button]:focus:ring-gray-900/10"
+                            className="[&>button]:px-3"
                           >
                             {currencyOptions.map((option) => (
                               <SelectOption key={option.value} value={option.value}>
@@ -679,7 +681,7 @@ function ServiceModal({
                       </div>
                       {(errors.cena || errors.currency) && (
                         <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                          <Warning className="h-3 w-3" weight="fill" />
+                          <Warning className="h-3 w-3" weight="regular" />
                           {errors.cena || errors.currency}
                         </p>
                       )}
@@ -688,7 +690,7 @@ function ServiceModal({
 
                   {/* Description */}
                   <div className="mt-4">
-                    <label className="mb-1.5 block text-sm font-medium text-gray-900">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {t('modal.descriptionLabel')}
                     </label>
                     <div className="relative">
@@ -699,18 +701,18 @@ function ServiceModal({
                         placeholder={t('modal.descriptionPlaceholder')}
                         rows={3}
                         maxLength={500}
-                        className={`w-full resize-none rounded-lg border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
+                        className={`w-full resize-none rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900
                                    placeholder-gray-400 transition-colors focus:outline-none focus:ring-2
                                    ${errors.opis
                                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10'
-                                     : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
+                                     : 'border-gray-200 focus:border-[#7C78FA] focus:ring-[3px] focus:ring-[#7C78FA]/25'
                                    }`}
                       />
                     </div>
                     <div className="mt-1 flex items-center justify-between">
                       {errors.opis ? (
                         <p className="flex items-center gap-1 text-xs text-red-600">
-                          <Warning className="h-3 w-3" weight="fill" />
+                          <Warning className="h-3 w-3" weight="regular" />
                           {errors.opis}
                         </p>
                       ) : (
@@ -724,7 +726,7 @@ function ServiceModal({
                 </div>
 
                 {/* Online booking and payment toggles */}
-                <div className="rounded-2xl border border-gray-100 bg-white p-5">
+                <div className="rounded-xl bg-white p-4">
                   <button
                     type="button"
                     onClick={() => setFormData((prev) => ({
@@ -735,9 +737,9 @@ function ServiceModal({
                     className="flex w-full items-center justify-between gap-4"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-colors
-                                      ${formData.spletne_rezervacije ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400'}`}>
-                        <Globe className="h-5 w-5" weight="duotone" />
+                      <div className={`flex flex-shrink-0 items-center justify-center transition-colors
+                                      ${formData.spletne_rezervacije ? 'text-emerald-600' : 'text-gray-400'}`}>
+                        <Globe className="h-5 w-5" weight="regular" />
                       </div>
                       <div className="text-left">
                         <p className="text-sm font-medium text-gray-900">
@@ -751,10 +753,9 @@ function ServiceModal({
                       </div>
                     </div>
                     {/* Toggle switch */}
-                    <div className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors
+                    <div className={`${switchTrack}
                                     ${formData.spletne_rezervacije ? 'bg-emerald-500' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform
-                                      ${formData.spletne_rezervacije ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                      <div className={`${switchKnob(formData.spletne_rezervacije)}`} />
                     </div>
                   </button>
 
@@ -769,15 +770,15 @@ function ServiceModal({
                       className="flex w-full items-center justify-between gap-4 disabled:cursor-not-allowed"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl transition-colors
+                        <div className={`flex flex-shrink-0 items-center justify-center transition-colors
                                         ${formData.zahteva_placilo && paymentRequirementAvailable
-                                          ? 'bg-violet-50 text-violet-600'
-                                          : 'bg-gray-100 text-gray-400'
+                                          ? 'text-violet-600'
+                                          : 'text-gray-400'
                                         }`}>
                           {paymentRequirementAvailable ? (
-                            <CreditCard className="h-5 w-5" weight="duotone" />
+                            <CreditCard className="h-5 w-5" weight="regular" />
                           ) : (
-                            <LockKey className="h-5 w-5" weight="duotone" />
+                            <LockKey className="h-5 w-5" weight="regular" />
                           )}
                         </div>
                         <div className="text-left">
@@ -793,15 +794,14 @@ function ServiceModal({
                           </p>
                         </div>
                       </div>
-                      <div className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors
+                      <div className={`${switchTrack}
                                       ${formData.zahteva_placilo && paymentRequirementAvailable && formData.spletne_rezervacije ? 'bg-violet-500' : 'bg-gray-200'}`}>
-                        <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform
-                                        ${formData.zahteva_placilo && paymentRequirementAvailable && formData.spletne_rezervacije ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                        <div className={`${switchKnob(formData.zahteva_placilo && paymentRequirementAvailable && formData.spletne_rezervacije)}`} />
                       </div>
                     </button>
 
                     {paymentRequirementChecks && (!paymentRequirementAvailable || paymentRequirementChecks.loading) && (
-                      <div className="mt-3 rounded-xl border border-gray-100 bg-gray-50 p-3">
+                      <div className="mt-3 rounded-[10px] bg-gray-50 p-3">
                         <p className="mb-2 text-xs font-medium text-gray-600">
                           {paymentRequirementChecks.loading
                             ? t('modal.requiresPaymentChecking')
@@ -817,7 +817,7 @@ function ServiceModal({
                               {item.ok ? (
                                 <Check className="h-3.5 w-3.5 text-emerald-500" weight="bold" />
                               ) : (
-                                <Warning className="h-3.5 w-3.5 text-amber-500" weight="fill" />
+                                <Warning className="h-3.5 w-3.5 text-amber-500" weight="regular" />
                               )}
                               <span>{item.label}</span>
                             </div>
@@ -830,14 +830,14 @@ function ServiceModal({
 
                 {/* Resursi section (Feature 3) */}
                 {availableResursi.length > 0 && (
-                  <div className="rounded-2xl border border-gray-100 bg-white p-5">
-                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <div className="rounded-xl bg-white p-4">
+                    <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                       {t('modal.resourcesTitle')}
                     </p>
                     <p className="mb-3 text-xs text-gray-500">
                       {t('modal.resourcesDescription')}
                     </p>
-                    <div className="max-h-40 overflow-y-auto rounded-xl border border-gray-100">
+                    <div className="max-h-40 overflow-y-auto rounded-[10px] border border-gray-200">
                       {availableResursi.map((r) => {
                         const isLinked = selectedResursiIds.includes(r.id);
                         return (
@@ -877,7 +877,7 @@ function ServiceModal({
                           const r = availableResursi.find((x) => x.id === id);
                           return r ? (
                             <span key={id} className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700">
-                              <Cube className="h-3 w-3" weight="fill" />
+                              <Cube className="h-3 w-3" weight="regular" />
                               {r.naziv}
                             </span>
                           ) : null;
@@ -890,13 +890,13 @@ function ServiceModal({
               </div>
 
               {/* Footer */}
-              <div className="flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
+              <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
                 <motion.button
                   type="button"
                   onClick={onClose}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                  className="flex-1 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 sm:flex-none"
                 >
                   {tCommon('buttons.cancel')}
                 </motion.button>
@@ -905,9 +905,9 @@ function ServiceModal({
                   disabled={isSaving}
                   whileHover={{ scale: isSaving ? 1 : 1.02 }}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                  className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5
-                             text-sm font-medium text-white shadow-sm transition-colors
-                             hover:bg-[#1f1f1f] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5
+                             text-sm font-medium text-white shadow-sm transition-opacity
+                             hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none"
                 >
                   {isSaving ? (
                     <>

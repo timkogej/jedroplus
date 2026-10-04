@@ -7,9 +7,12 @@ import { Plus, PencilSimple, Trash, X, MagnifyingGlass } from '@phosphor-icons/r
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { useCompany } from '@/app/company-context';
+import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
+import { MiniSwitch } from '@/components/ui/MiniSwitch';
 import { fetchStoritve } from '@/lib/companyScope';
 import type { Storitev } from '@/types/appointments';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 interface AddOn {
   id: string;
   company_id: string;
@@ -142,78 +145,92 @@ export default function AddOnsPage() {
     return naziv.toLowerCase().includes(serviceSearch.toLowerCase());
   });
 
-  if (loading) return <div className="flex items-center justify-center py-16"><div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-900 border-t-transparent" /></div>;
+  const discountLabel = (ao: AddOn) =>
+    ao.tip_popusta === 'percentage' ? `${ao.vrednost_popusta}%` : money(ao.vrednost_popusta);
+
+  function renderActions(ao: AddOn) {
+    return (
+      <div className="flex items-center justify-end gap-1">
+        <MiniSwitch checked={ao.aktiven} onChange={() => handleToggleActive(ao)} />
+        <button type="button" onClick={() => openEdit(ao)} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900">
+          <PencilSimple className="h-4 w-4" weight="regular" />
+        </button>
+        <button type="button" onClick={() => setDeleteId(ao.id)} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500">
+          <Trash className="h-4 w-4" weight="regular" />
+        </button>
+      </div>
+    );
+  }
+
+  const statusBadge = (ao: AddOn) => (
+    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ao.aktiven ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
+      {ao.aktiven ? tc('status.active') : tc('status.inactive')}
+    </span>
+  );
+
+  const columns: DataTableColumn<AddOn>[] = [
+    { id: 'service', header: t('addOns.table.service'),
+      sortValue: (a) => (a.naziv || getServiceName(a.storitev_id)).toLowerCase(),
+      cell: (a) => <span className="text-sm font-medium text-gray-900">{a.naziv || getServiceName(a.storitev_id)}</span> },
+    { id: 'original', header: t('addOns.table.originalPrice'), sortValue: (a) => a.original_cena ?? 0,
+      cell: (a) => <span className="tnum text-sm text-gray-600">{a.original_cena != null ? money(a.original_cena) : '–'}</span> },
+    { id: 'value', header: t('addOns.table.discount'), sortValue: (a) => a.vrednost_popusta,
+      cell: (a) => <span className="tnum text-sm font-semibold text-gray-900">{discountLabel(a)}</span> },
+    { id: 'final', header: t('addOns.table.finalPrice'), sortValue: (a) => a.final_cena ?? 0,
+      cell: (a) => <span className="tnum text-sm font-semibold text-gray-900">{a.final_cena != null ? money(a.final_cena) : '–'}</span> },
+    { id: 'status', header: t('addOns.table.status'), cell: (a) => statusBadge(a) },
+    { id: 'actions', header: t('addOns.table.actions'), align: 'right', cell: (a) => renderActions(a) },
+  ];
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-        <h3 className="text-sm font-medium text-gray-600">{t('addOns.count', { count: addOns.length })}</h3>
-        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={openCreate} className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f]">
-          <Plus className="w-4 h-4" weight="bold" />
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <p className="tnum text-[13px] text-gray-500">{t('addOns.count', { count: addOns.length })}</p>
+        <button
+          type="button"
+          onClick={openCreate}
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
+        >
+          <Plus size={17} weight="bold" />
           {t('addOns.newButton')}
-        </motion.button>
+        </button>
       </div>
 
-      {addOns.length === 0 ? (
-        <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center text-gray-400 shadow-sm">
-          <Plus className="w-10 h-10 mx-auto mb-3 opacity-40" weight="thin" />
-          <p className="text-sm">{t('addOns.empty')}</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-100">
-                {[
-                  t('addOns.table.service'),
-                  t('addOns.table.originalPrice'),
-                  t('addOns.table.discount'),
-                  t('addOns.table.finalPrice'),
-                  t('addOns.table.status'),
-                  t('addOns.table.actions'),
-                ].map((h) => (
-                  <th key={h} className={`py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider ${h === t('addOns.table.actions') ? 'text-right' : 'text-left'}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <AnimatePresence>
-                {addOns.map((ao, i) => (
-                  <motion.tr key={ao.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.04 }} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="py-3.5 px-4 font-medium text-gray-900">{ao.naziv || getServiceName(ao.storitev_id)}</td>
-                    <td className="py-3.5 px-4 text-gray-600">{ao.original_cena != null ? money(ao.original_cena) : '–'}</td>
-                    <td className="py-3.5 px-4 font-semibold text-gray-900">{ao.tip_popusta === 'percentage' ? `${ao.vrednost_popusta}%` : money(ao.vrednost_popusta)}</td>
-                    <td className="py-3.5 px-4 font-semibold text-gray-900">
-                      {ao.final_cena != null ? money(ao.final_cena) : '–'}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${ao.aktiven ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>
-                        {ao.aktiven ? tc('status.active') : tc('status.inactive')}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleToggleActive(ao)} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${ao.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
-                          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${ao.aktiven ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
-                        </button>
-                        <button onClick={() => openEdit(ao)} className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"><PencilSimple className="w-4 h-4" weight="regular" /></button>
-                        <button onClick={() => setDeleteId(ao.id)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50"><Trash className="w-4 h-4" weight="regular" /></button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable<AddOn>
+        rows={addOns}
+        columns={columns}
+        rowKey={(a) => a.id}
+        isLoading={loading}
+        pageSize={20}
+        empty={
+          <div className="flex flex-col items-center justify-center rounded-xl border border-gray-100 bg-white p-12 text-center">
+            <Plus className="mb-3 h-7 w-7 text-gray-300" weight="regular" />
+            <p className="text-sm text-gray-500">{t('addOns.empty')}</p>
+          </div>
+        }
+        mobile={{
+          title: (a) => a.naziv || getServiceName(a.storitev_id),
+          subtitle: (a) => (
+            <span className="tnum">
+              {a.original_cena != null ? money(a.original_cena) : '–'} → {a.final_cena != null ? money(a.final_cena) : '–'}
+            </span>
+          ),
+          meta: (a) => (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="tnum text-[13px] font-semibold text-gray-900">{discountLabel(a)}</span>
+              {statusBadge(a)}
+            </div>
+          ),
+          trailing: (a) => renderActions(a),
+        }}
+      />
 
       {/* Modal */}
       <AnimatePresence>
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative flex w-full max-w-xl max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-xl">
               <div className="flex items-center justify-between border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
                 <h2 className="text-lg font-semibold text-gray-900">
                   {editingId ? t('addOns.modal.editTitle') : t('addOns.modal.createTitle')}
@@ -288,15 +305,15 @@ export default function AddOnsPage() {
 
                 <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5">
                   <span className="text-sm font-medium text-gray-700">{t('addOns.modal.fields.active')}</span>
-                  <button onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.aktiven ? 'translate-x-6' : 'translate-x-1'}`} />
+                  <button onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))} className={`${switchTrack} ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
+                    <span className={`${switchKnob(form.aktiven)}`} />
                   </button>
                 </div>
               </div>
 
               <div className="flex justify-end gap-3 border-t border-gray-100 bg-white px-4 py-4 sm:px-5">
                 <button onClick={() => setModalOpen(false)} className="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900">{t('shared.cancelButton')}</button>
-                <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-lg bg-[#0a0a0a] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#1f1f1f] disabled:opacity-50">
+                <motion.button whileTap={{ scale: 0.98 }} onClick={handleSave} disabled={saving} className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50">
                   {saving && <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                   {editingId ? t('shared.saveButton') : t('shared.createButton')}
                 </motion.button>
@@ -311,7 +328,7 @@ export default function AddOnsPage() {
         {deleteId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setDeleteId(null)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-xl">
               <p className="text-base font-semibold text-gray-900 mb-2">{t('addOns.deleteConfirm.title')}</p>
               <p className="text-sm text-gray-500 mb-5">{t('shared.cannotUndo')}</p>
               <div className="flex gap-3">

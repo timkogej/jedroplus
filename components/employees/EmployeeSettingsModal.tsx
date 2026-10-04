@@ -12,8 +12,6 @@ import {
   SpinnerGap,
   CalendarBlank,
   Briefcase,
-  ToggleRight,
-  ToggleLeft,
   Plus,
   Trash,
 } from '@phosphor-icons/react';
@@ -455,13 +453,9 @@ function EmployeeSettingsModal({
 
   if (!employee) return null;
 
-  const employeeAccent = employee.barva || 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
-  const gradientTextStyle = {
-    backgroundImage: 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-  };
-  const sectionClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
-  const labelClass = 'mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-500';
-  const timeSelectClass = 'appearance-none rounded-lg border border-gray-200 bg-white px-3 py-2 pr-8 text-sm font-medium text-[#1A1F36] transition-colors cursor-pointer hover:border-gray-300 focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10';
+  const sectionClass = 'rounded-xl bg-white p-4';
+  const labelClass = 'mb-2 block text-[11px] font-semibold uppercase tracking-wider text-gray-500';
+  const timeSelectClass = 'appearance-none rounded-[10px] border border-gray-200 bg-white px-3 py-2 pr-8 text-sm font-medium text-gray-900 transition-colors cursor-pointer hover:border-gray-300 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25';
 
   return (
     <AnimatePresence>
@@ -471,7 +465,7 @@ function EmployeeSettingsModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -479,26 +473,25 @@ function EmployeeSettingsModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-gray-100 bg-[#F7F8FA] shadow-2xl"
+            className="relative flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="h-1.5 w-full flex-shrink-0" style={{ background: employeeAccent }} />
-
             {/* Header */}
-            <div className="border-b border-gray-100 bg-white px-5 py-4 sm:px-6">
+            <div className="glass-bar px-5 pt-3.5 pb-3 sm:px-6">
+              <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <EmployeeAvatar
                     firstName={employee.ime}
                     lastName={employee.priimek}
                     gradient={employee.barva}
-                    size="lg"
+                    size="md"
                   />
                   <div>
-                    <h2 className="bg-clip-text text-xl font-semibold text-transparent" style={gradientTextStyle}>
+                    <h2 className="text-[17px] font-semibold text-gray-900">
                       {t('settings.title')}
                     </h2>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <p className="mt-0.5 text-[13px] text-gray-500">
                       {employee.ime} {employee.priimek}
                     </p>
                   </div>
@@ -508,38 +501,38 @@ function EmployeeSettingsModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </motion.button>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-100 bg-white px-4 py-3 sm:px-5">
-              <div className="grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1">
+            <div className="glass-bar border-b border-gray-200/70 px-5 pb-3 sm:px-6">
+              <div className="grid grid-cols-2 gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab('schedule')}
-                className={`flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-all
+                className={`flex items-center justify-center gap-2 rounded-[7px] px-3 py-1.5 text-sm font-medium transition-all
                            ${activeTab === 'schedule'
-                             ? 'bg-white text-gray-900 shadow-sm'
+                             ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
                              : 'text-gray-500 hover:text-gray-900'
                            }`}
               >
-                <CalendarBlank className="h-4 w-4" weight={activeTab === 'schedule' ? 'fill' : 'regular'} />
+                <CalendarBlank className="h-4 w-4" weight="regular" />
                 {t('settings.tabSchedule')}
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('services')}
-                className={`flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-all
+                className={`flex items-center justify-center gap-2 rounded-[7px] px-3 py-1.5 text-sm font-medium transition-all
                            ${activeTab === 'services'
-                             ? 'bg-white text-gray-900 shadow-sm'
+                             ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
                              : 'text-gray-500 hover:text-gray-900'
                            }`}
               >
-                <Briefcase className="h-4 w-4" weight={activeTab === 'services' ? 'fill' : 'regular'} />
+                <Briefcase className="h-4 w-4" weight="regular" />
                 {t('settings.tabServices')} ({selectedServices.length}/{allServices.length})
               </button>
               </div>
@@ -553,7 +546,7 @@ function EmployeeSettingsModal({
                   <div className={sectionClass}>
                     <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="font-semibold text-[#1A1F36]">{t('settings.companyScheduleTitle')}</div>
+                      <div className="font-semibold text-gray-900">{t('settings.companyScheduleTitle')}</div>
                       <div className="text-sm text-gray-500">
                         {t('settings.companyScheduleSubtitle')}
                       </div>
@@ -578,11 +571,9 @@ function EmployeeSettingsModal({
                       }}
                       className="flex items-center gap-2"
                     >
-                      {usesCompanySchedule ? (
-                        <ToggleRight className="h-8 w-8 text-gray-900" weight="fill" />
-                      ) : (
-                        <ToggleLeft className="h-8 w-8 text-gray-400" weight="regular" />
-                      )}
+                      <span className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors ${usesCompanySchedule ? 'bg-gray-900' : 'bg-gray-300'}`}>
+                        <span className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${usesCompanySchedule ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                        </span>
                     </button>
                     </div>
                   </div>
@@ -594,7 +585,7 @@ function EmployeeSettingsModal({
                       <div className={sectionClass}>
                         <div className="flex items-center justify-between gap-4">
                         <div>
-                          <div className="font-semibold text-[#1A1F36]">Izmenični urnik</div>
+                          <div className="font-semibold text-gray-900">Izmenični urnik</div>
                           <div className="text-sm text-gray-500">Urnik se menjava po tednih v ciklu</div>
                         </div>
                         <button
@@ -620,11 +611,9 @@ function EmployeeSettingsModal({
                           }}
                           className="flex items-center gap-2"
                         >
-                          {isIzmenicen ? (
-                            <ToggleRight className="h-8 w-8 text-gray-900" weight="fill" />
-                          ) : (
-                            <ToggleLeft className="h-8 w-8 text-gray-400" weight="regular" />
-                          )}
+                          <span className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors ${isIzmenicen ? 'bg-gray-900' : 'bg-gray-300'}`}>
+                            <span className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${isIzmenicen ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                            </span>
                         </button>
                         </div>
                       </div>
@@ -638,16 +627,16 @@ function EmployeeSettingsModal({
                               <label className={labelClass}>
                                 Število tednov v ciklu
                               </label>
-                              <div className="flex gap-2">
+                              <div className="flex gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
                                 {([2, 3, 4] as const).map((n) => (
                                   <button
                                     key={n}
                                     type="button"
                                     onClick={() => handleCikelTednovChange(n)}
-                                    className={`flex-1 rounded-lg border py-2 text-sm font-semibold transition-colors
+                                    className={`flex-1 rounded-[7px] py-1.5 text-sm font-medium transition-colors
                                       ${cikelTednov === n
-                                        ? 'border-gray-900 bg-gray-900 text-white shadow-sm'
-                                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-900'
+                                        ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                                        : 'text-gray-500 hover:text-gray-900'
                                       }`}
                                   >
                                     {n} tedna
@@ -667,7 +656,7 @@ function EmployeeSettingsModal({
                                   const d = new Date(e.target.value);
                                   if (d.getDay() === 1) setZacetekCikla(e.target.value);
                                 }}
-                                className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-[#1A1F36] transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                                className="rounded-[10px] border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                               />
                               {zacetekCikla && new Date(zacetekCikla).getDay() !== 1 && (
                                 <p className="text-xs text-red-500 mt-1">Izbrani datum mora biti ponedeljek.</p>
@@ -684,15 +673,15 @@ function EmployeeSettingsModal({
                             // ancestor can suppress intermediate re-renders of the subtree.
                             const weekStateKey = `${weekKey}-${DAYS.map((d) => vzorci[weekKey]?.[d]?.enabled ? '1' : '0').join('')}`;
                             return (
-                              <div key={weekStateKey} className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm shadow-gray-100/60">
+                              <div key={weekStateKey} className="overflow-hidden rounded-xl bg-white">
                                 {/* Week header */}
-                                <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
+                                <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
                                   <h4 className="font-semibold text-gray-900">{WEEK_LABELS[i]}</h4>
                                   {i > 0 && (
                                     <button
                                       type="button"
                                       onClick={() => copyFromTedanA(weekKey)}
-                                      className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
+                                      className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-200 hover:text-gray-900"
                                     >
                                       Kopiraj iz Tedna A
                                     </button>
@@ -700,7 +689,7 @@ function EmployeeSettingsModal({
                                 </div>
 
                                 {/* Days */}
-                                <div className="space-y-2 bg-[#F7F8FA] p-3">
+                                <div className="space-y-2 p-3">
                                   {DAYS.map((day) => {
                                     // Read directly from vzorci state each render — never from a cached weekSchedule
                                     const liveDaySchedule: DayScheduleWithIntervals =
@@ -710,8 +699,8 @@ function EmployeeSettingsModal({
                                     return (
                                       <div
                                         key={day}
-                                        className={`rounded-xl border bg-white p-4 transition-colors
-                                                   ${isEnabled ? 'border-gray-100 shadow-sm shadow-gray-100/60' : 'border-gray-100 opacity-60'}`}
+                                        className={`rounded-[10px] bg-gray-50 p-3 transition-colors
+                                                   ${isEnabled ? '' : 'opacity-60'}`}
                                       >
                                         {/* Day header with toggle */}
                                         <div className="flex items-center justify-between mb-3">
@@ -725,7 +714,7 @@ function EmployeeSettingsModal({
                                             ) : (
                                               <Square className="h-5 w-5 text-gray-400" weight="regular" />
                                             )}
-                                            <span className={`font-semibold ${isEnabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
+                                            <span className={`font-semibold ${isEnabled ? 'text-gray-900' : 'text-gray-400'}`}>
                                               {dayLabel[day]}
                                             </span>
                                           </button>
@@ -773,7 +762,7 @@ function EmployeeSettingsModal({
                                             <button
                                               type="button"
                                               onClick={() => addVzorciInterval(weekKey, day)}
-                                              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
+                                              className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-gray-400 hover:bg-white hover:text-gray-900"
                                             >
                                               <Plus className="h-4 w-4" weight="bold" />
                                               {t('settings.addInterval')}
@@ -804,8 +793,8 @@ function EmployeeSettingsModal({
                               return (
                                 <div
                                   key={day}
-                                  className={`rounded-xl border bg-white p-4 transition-colors
-                                             ${daySchedule.enabled ? 'border-gray-100 shadow-sm shadow-gray-100/60' : 'border-gray-100 opacity-60'}`}
+                                  className={`rounded-[10px] bg-gray-50 p-3 transition-colors
+                                             ${daySchedule.enabled ? '' : 'opacity-60'}`}
                                 >
                                   <div className="flex items-center justify-between mb-3">
                                     <button
@@ -818,7 +807,7 @@ function EmployeeSettingsModal({
                                       ) : (
                                         <Square className="h-5 w-5 text-gray-400" weight="regular" />
                                       )}
-                                      <span className={`font-semibold ${daySchedule.enabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
+                                      <span className={`font-semibold ${daySchedule.enabled ? 'text-gray-900' : 'text-gray-400'}`}>
                                         {dayLabel[day]}
                                       </span>
                                     </button>
@@ -866,7 +855,7 @@ function EmployeeSettingsModal({
                                       <button
                                         type="button"
                                         onClick={() => addInterval(day)}
-                                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-gray-900 hover:bg-gray-50 hover:text-gray-900"
+                                        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-dashed border-gray-300 py-2 text-sm font-medium text-gray-600 transition-colors hover:border-gray-400 hover:bg-white hover:text-gray-900"
                                       >
                                         <Plus className="h-4 w-4" weight="bold" />
                                         {t('settings.addInterval')}
@@ -892,7 +881,7 @@ function EmployeeSettingsModal({
                         if (!companyDay) return null;
                         const intervals: TimeInterval[] = companyDay.intervals || [{ start: companyDay.start ?? '08:00', end: companyDay.end ?? '17:00' }];
                         return (
-                          <div key={day} className={`flex items-start gap-3 text-sm ${companyDay.enabled ? 'text-[#1A1F36]' : 'text-gray-400'}`}>
+                          <div key={day} className={`flex items-start gap-3 text-sm ${companyDay.enabled ? 'text-gray-900' : 'text-gray-400'}`}>
                             <span className="w-24 font-medium flex-shrink-0">{dayLabel[day]}</span>
                             {companyDay.enabled ? (
                               <span className="text-gray-600">
@@ -917,7 +906,7 @@ function EmployeeSettingsModal({
                   <div className={sectionClass}>
                     <div className="flex items-center justify-between gap-4">
                     <div>
-                      <div className="font-semibold text-[#1A1F36]">{t('settings.allServicesTitle')}</div>
+                      <div className="font-semibold text-gray-900">{t('settings.allServicesTitle')}</div>
                       <div className="text-sm text-gray-500">
                         {t('settings.allServicesSubtitle')}
                       </div>
@@ -933,11 +922,9 @@ function EmployeeSettingsModal({
                       }}
                       className="flex items-center gap-2"
                     >
-                      {selectedServices.length === allServices.length ? (
-                        <ToggleRight className="h-8 w-8 text-gray-900" weight="fill" />
-                      ) : (
-                        <ToggleLeft className="h-8 w-8 text-gray-400" weight="regular" />
-                      )}
+                      <span className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors ${selectedServices.length === allServices.length ? 'bg-gray-900' : 'bg-gray-300'}`}>
+                        <span className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${selectedServices.length === allServices.length ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                        </span>
                     </button>
                     </div>
                   </div>
@@ -977,10 +964,10 @@ function EmployeeSettingsModal({
                           onClick={() => toggleService(service.id)}
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-all
+                          className={`flex items-center gap-3 rounded-xl border bg-white px-4 py-3 text-left transition-all
                                      ${isSelected
-                                       ? 'border-gray-900 bg-white shadow-sm ring-1 ring-gray-900/10'
-                                       : 'border-gray-100 bg-white hover:border-gray-300'
+                                       ? 'border-gray-900'
+                                       : 'border-transparent hover:border-gray-300'
                                      }`}
                         >
                           {/* Color indicator */}
@@ -991,7 +978,7 @@ function EmployeeSettingsModal({
 
                           {/* Service info */}
                           <div className="flex-1 min-w-0">
-                            <p className={`truncate font-medium ${isSelected ? 'text-gray-900' : 'text-[#1A1F36]'}`}>
+                            <p className={`truncate font-medium ${isSelected ? 'text-gray-900' : 'text-gray-900'}`}>
                               {service.naziv}
                             </p>
                             <p className="text-xs text-gray-500">
@@ -1013,7 +1000,7 @@ function EmployeeSettingsModal({
 
                       {allServices.length === 0 && (
                         <div className="text-center py-8 text-gray-500">
-                          <Briefcase className="h-12 w-12 mx-auto mb-3 text-gray-300" weight="duotone" />
+                          <Briefcase className="h-10 w-10 mx-auto mb-3 text-gray-300" weight="regular" />
                           <p>{t('settings.noServices')}</p>
                         </div>
                       )}
@@ -1024,13 +1011,13 @@ function EmployeeSettingsModal({
             </form>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-white px-5 py-4 sm:px-6">
+            <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
               <motion.button
                 type="button"
                 onClick={onClose}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="rounded-lg px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
+                className="flex-1 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 sm:flex-none"
               >
                 {tCommon('buttons.cancel')}
               </motion.button>
@@ -1040,7 +1027,7 @@ function EmployeeSettingsModal({
                 disabled={isSaving}
                 whileHover={{ scale: isSaving ? 1 : 1.02 }}
                 whileTap={{ scale: isSaving ? 1 : 0.98 }}
-                className="flex items-center gap-2 rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-gray-800 disabled:opacity-70"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-70 sm:flex-none"
               >
                 {isSaving ? (
                   <>

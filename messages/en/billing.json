@@ -240,7 +240,7 @@
     "title": "Plans",
     "subtitle": "Overview of your plan and usage",
     "currentBadge": "Current",
-    "recommendedBadge": "Recommended",
+    "recommendedBadge": "Most popular",
     "renewalLabel": "Next renewal",
     "upgradeButton": "Upgrade",
     "maxUsersLabel": "Maximum number of app users",

@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { Info } from '@phosphor-icons/react';
 import type { AppointmentWithDetails } from '@/types/appointments';
+import { sheet } from '@/components/ui/sheetClasses';
 
 interface RescheduleNotificationModalProps {
   isOpen: boolean;
@@ -39,7 +40,7 @@ export function RescheduleNotificationModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          className={sheet.backdrop.replace('z-50', 'z-[100]')}
           onClick={onClose}
         >
           <motion.div
@@ -47,45 +48,48 @@ export function RescheduleNotificationModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}
             transition={{ type: 'spring', stiffness: 400, damping: 36 }}
-            className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className={`${sheet.panel} sm:max-w-sm`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="px-6 py-5 border-b border-gray-100">
-              <h3 className="text-base font-semibold text-[#1A1F36]">Obvestiti stranko?</h3>
-              <p className="text-sm text-gray-500 mt-1">
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <h3 className={sheet.title}>Obvestiti stranko?</h3>
+              <p className={sheet.subtitle}>
                 Termin je bil prestavljen. Ali želite stranki poslati obvestilo?
               </p>
             </div>
 
             {/* Body */}
-            <div className="px-6 py-4 space-y-3">
+            <div className={sheet.body}>
               {/* Client + new time summary */}
-              <div className="rounded-xl bg-[#F7F8FA] px-4 py-3">
-                <p className="text-sm font-medium text-[#1A1F36]">{clientName}</p>
-                <p className="text-sm text-gray-500 mt-0.5">{formattedDate} · {newTime}</p>
-              </div>
+              <div className="overflow-hidden rounded-xl bg-white">
+                <div className="px-4 py-3">
+                  <p className="text-[15px] font-semibold text-gray-900">{clientName}</p>
+                  <p className="tnum mt-0.5 text-sm text-gray-500">{formattedDate} · {newTime}</p>
+                </div>
 
-              {/* Channel info */}
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Info className="h-4 w-4 flex-shrink-0 text-violet-400" weight="fill" />
-                <span>{CHANNEL_LABEL[channel]}</span>
+                {/* Channel info */}
+                <div className="flex items-center gap-2 border-t border-gray-100 px-4 py-2.5 text-[13px] text-gray-500">
+                  <Info className="h-4 w-4 flex-shrink-0 text-violet-500" weight="regular" />
+                  <span>{CHANNEL_LABEL[channel]}</span>
+                </div>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex gap-3 px-6 pb-5">
+            <div className={sheet.footer}>
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+                className={sheet.cancel}
               >
                 Preskoči
               </button>
               <button
                 type="button"
                 onClick={onConfirm}
-                className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white"
+                className={sheet.action}
                 style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
               >
                 Pošlji obvestilo

@@ -78,7 +78,6 @@ const EMAIL_PACKAGES_LIST = [
 ];
 
 const BRAND_GRADIENT = 'from-[#6D5EF7] via-[#2F80ED] to-[#2AD4C5]';
-const BRAND_TEXT_GRADIENT = `bg-gradient-to-r ${BRAND_GRADIENT} bg-clip-text text-transparent`;
 const RANGE_INPUT_CLASS = [
   'h-1.5 w-full cursor-pointer appearance-none rounded-full disabled:cursor-not-allowed disabled:opacity-40',
   '[&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none',
@@ -107,8 +106,8 @@ function Toast({ message, type, onClose }: { message: string; type: ToastType; o
       initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 32 }}
-      className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ${
-        type === 'error' ? 'bg-red-600 text-white' : 'bg-[#0a0a0a] text-white'
+      className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg backdrop-blur ${
+        type === 'error' ? 'bg-red-600' : 'bg-gray-900/95'
       }`}
     >
       {type === 'error'
@@ -125,7 +124,7 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-4">
       {[120, 200, 180].map((h, i) => (
-        <div key={i} className="bg-white rounded-2xl border border-gray-100 animate-pulse" style={{ height: h }} />
+        <div key={i} className="animate-pulse rounded-xl border border-gray-100 bg-white" style={{ height: h }} />
       ))}
     </div>
   );
@@ -139,10 +138,10 @@ function CurrentPlanCard({ subscription, isFree }: { subscription: SubscriptionD
 
   if (!subscription || isFree) {
     return (
-      <div className={`rounded-[22px] bg-gradient-to-r ${BRAND_GRADIENT} p-[2px] shadow-[0_18px_45px_rgba(15,23,42,0.06)]`}>
-        <div className="rounded-[20px] bg-white p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{t('currentPlan')}</p>
-          <h2 className={`mt-2 text-2xl font-bold tracking-tight ${BRAND_TEXT_GRADIENT}`}>
+      <div className="rounded-xl border border-gray-100 bg-white">
+        <div className="p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('currentPlan')}</p>
+          <h2 className="mt-1.5 text-2xl font-semibold tracking-tight text-gray-900">
             {isFree ? t('freeTitle') : t('noSubscription')}
           </h2>
           <p className="mt-3 max-w-prose text-sm leading-6 text-gray-600">
@@ -151,7 +150,7 @@ function CurrentPlanCard({ subscription, isFree }: { subscription: SubscriptionD
           {isFree && (
             <Link
               href="/nastavitve/paketi#razpolozljivi-paketi"
-              className="mt-4 inline-flex rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
+              className="mt-4 inline-flex rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
             >
               {t('freeCta')}
             </Link>
@@ -164,22 +163,22 @@ function CurrentPlanCard({ subscription, isFree }: { subscription: SubscriptionD
   const plan = subscription.plan;
 
   return (
-    <div className={`rounded-[22px] bg-gradient-to-r ${BRAND_GRADIENT} p-[2px] shadow-[0_18px_45px_rgba(15,23,42,0.06)]`}>
-      <div className="rounded-[20px] bg-white p-6">
+    <div className="rounded-xl border border-gray-100 bg-white">
+      <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-400">{t('currentPlan')}</p>
-            <h2 className={`mt-2 truncate text-3xl font-bold tracking-tight ${BRAND_TEXT_GRADIENT}`}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('currentPlan')}</p>
+            <h2 className="mt-1.5 truncate text-2xl font-semibold tracking-tight text-gray-900">
               {plan.name}
             </h2>
-            <p className="mt-2 text-sm font-medium text-gray-700">
+            <p className="tnum mt-1 text-sm font-medium text-gray-700">
               {t('perMonth', { price: f.money(plan.price_monthly_cents / 100, { whole: true }) })}
             </p>
           </div>
         </div>
         {subscription.current_period_start && subscription.current_period_end && (
-          <div className="mt-5 border-t border-gray-100 pt-4">
-            <p className="text-xs text-gray-500">
+          <div className="mt-4 border-t border-gray-100 pt-3">
+            <p className="tnum text-[13px] text-gray-500">
               {t('period', {
                 start: f.dateShort(subscription.current_period_start),
                 end: f.dateShort(subscription.current_period_end),
@@ -266,12 +265,12 @@ function QuotaCard({
     : t('includedNone');
 
   return (
-    <div className="overflow-hidden rounded-[22px] border border-gray-100 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
       {/* Header */}
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-base font-semibold tracking-tight text-gray-950">{t(`${type}.title`)}</h3>
+            <h3 className="text-base font-semibold tracking-tight text-gray-900">{t(`${type}.title`)}</h3>
             <p className="mt-0.5 text-xs text-gray-500">
               {includedLine}
               {addonActive > 0 && includedInPlan > 0 && (
@@ -279,14 +278,14 @@ function QuotaCard({
               )}
             </p>
           </div>
-          <span className="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700 tabular-nums">
+          <span className="inline-flex shrink-0 items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium tabular-nums text-gray-700">
             {Math.round(usagePercent)}%
           </span>
         </div>
 
         {/* Progress bar */}
         <div className="mt-5">
-          <div className="h-0.5 overflow-hidden rounded-full bg-gray-100">
+          <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
             <div
               className={`h-full rounded-full transition-all duration-500 ${barColor}`}
               style={{ width: `${Math.min(usagePercent, 100)}%` }}
@@ -300,9 +299,9 @@ function QuotaCard({
             ['available', remaining],
             ['total', total],
           ] as const).map(([label, value]) => (
-            <div key={label} className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{t(label)}</p>
-              <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{f.count(value)}</p>
+            <div key={label} className="rounded-[10px] bg-gray-50 px-3 py-2.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t(label)}</p>
+              <p className="mt-1 text-sm font-semibold tabular-nums text-gray-900">{f.count(value)}</p>
             </div>
           ))}
         </div>
@@ -313,9 +312,9 @@ function QuotaCard({
 
       {/* Active addon */}
       {addonStripeItemId && (
-        <div className="mx-5 mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 p-3">
+        <div className="mx-5 mb-5 flex flex-wrap items-center gap-2 rounded-[10px] bg-gray-50 p-3">
           {addonCancelAtPeriodEnd ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
               <Warning className="w-3 h-3" weight="bold" />
               {t('cancelScheduled')}
             </span>
@@ -344,7 +343,7 @@ function QuotaCard({
       {/* Package selector */}
       <div className="border-t border-gray-100 p-5 pt-4">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">{t('extraQuota')}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('extraQuota')}</p>
           {freeTrial && includedInPlan > 0 && <p className="text-xs text-gray-500">{t('freeLocked')}</p>}
         </div>
         <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
@@ -359,25 +358,21 @@ function QuotaCard({
                 disabled={disabled}
                 aria-pressed={isSelected}
                 onClick={() => onSelectPackage(pkg.key)}
-                className={`group relative min-h-[132px] rounded-[18px] p-[1.5px] text-left transition-all sm:aspect-[1.08/1] disabled:cursor-not-allowed disabled:opacity-40 ${
+                className={`group relative min-h-[120px] rounded-xl border text-left transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
                   isEmphasized
-                    ? `bg-gradient-to-r ${BRAND_GRADIENT} shadow-[0_12px_28px_rgba(109,94,247,0.16)]`
-                    : `bg-gradient-to-r ${BRAND_GRADIENT} shadow-[0_8px_20px_rgba(15,23,42,0.04)] hover:shadow-[0_12px_26px_rgba(109,94,247,0.12)]`
+                    ? 'border-[#7C78FA] bg-violet-50/40 ring-1 ring-[#7C78FA]/40'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
-                <span className="flex h-full min-h-[129px] flex-col justify-between rounded-[16px] bg-white px-4 py-3.5 transition-colors group-hover:bg-gray-50 sm:min-h-0">
+                <span className="flex h-full min-h-[118px] flex-col justify-between px-4 py-3.5">
                   <span>
-                    <span className={`block text-2xl font-bold tracking-tight tabular-nums ${isEmphasized ? BRAND_TEXT_GRADIENT : 'text-gray-950'}`}>
+                    <span className={`block text-2xl font-semibold tracking-tight tabular-nums ${isEmphasized ? 'text-[#6D5EF7]' : 'text-gray-900'}`}>
                       +{f.count(pkg.quantity)}
                     </span>
                     <span className="mt-1 block text-xs font-medium text-gray-500">{unit}</span>
                   </span>
-                  <span className={`flex items-end justify-between gap-2 rounded-xl px-2.5 py-2 ${
-                    isEmphasized
-                      ? 'bg-gradient-to-r from-violet-50 via-blue-50 to-cyan-50'
-                      : 'bg-gradient-to-r from-violet-50/70 via-blue-50/70 to-cyan-50/70'
-                  }`}>
-                    <span className="text-sm font-semibold text-gray-950">{f.money(pkg.priceMonthly, { whole: true })}</span>
+                  <span className="mt-3 flex items-end justify-between gap-2 border-t border-gray-100 pt-2">
+                    <span className="tnum text-sm font-semibold text-gray-900">{f.money(pkg.priceMonthly, { whole: true })}</span>
                     <span className="text-[11px] font-medium text-gray-400">{t('month')}</span>
                   </span>
                 </span>
@@ -387,9 +382,7 @@ function QuotaCard({
                   </span>
                 )}
                 {isActive && (
-                  <span className={`absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-r ${BRAND_GRADIENT} shadow-sm`}>
-                    <Check className="h-3 w-3 text-white" weight="bold" />
-                  </span>
+                  <Check className="absolute right-2.5 top-2.5 h-4 w-4 text-[#6D5EF7]" weight="bold" aria-hidden="true" />
                 )}
               </button>
             );
@@ -403,7 +396,7 @@ function QuotaCard({
               type="button"
               onClick={onPurchase}
               disabled={purchasing || activeQtyMatchesSelected || disabled}
-              className={`mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${BRAND_GRADIENT} px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(109,94,247,0.18)] transition-all hover:shadow-[0_16px_32px_rgba(109,94,247,0.24)] disabled:opacity-50`}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50"
             >
               {purchasing ? (
                 <>
@@ -465,7 +458,7 @@ function CancelButton({
           setConfirming(false);
           onCancel();
         }}
-        className="rounded-md bg-red-600 px-2 py-1 font-semibold text-white hover:bg-red-700"
+        className="rounded-lg bg-red-600 px-2.5 py-1 font-medium text-white transition-colors hover:bg-red-700"
       >
         {t('cancel')}
       </button>
@@ -519,42 +512,42 @@ function EmployeesCard({
   const sliderPercent = (extraEmployees / 20) * 100;
 
   return (
-    <div className="overflow-hidden rounded-[22px] border border-gray-100 bg-white shadow-[0_14px_40px_rgba(15,23,42,0.04)]">
+    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
       {/* Header */}
       <div className="p-5 pb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-base font-semibold tracking-tight text-gray-950">{t('title')}</h3>
+            <h3 className="text-base font-semibold tracking-tight text-gray-900">{t('title')}</h3>
             <p className="mt-0.5 text-xs text-gray-500">{t('body')}</p>
           </div>
-          <span className="inline-flex shrink-0 items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700">
+          <span className="inline-flex shrink-0 items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium tabular-nums text-gray-700">
             {activeCount} / {maxUsers}
           </span>
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-2">
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{t('inPlan')}</p>
-            <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{includedInPlan}</p>
+          <div className="rounded-[10px] bg-gray-50 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t('inPlan')}</p>
+            <p className="mt-1 text-sm font-semibold tabular-nums text-gray-900">{includedInPlan}</p>
           </div>
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{t('extra')}</p>
-            <p className={`mt-1 text-sm font-semibold tabular-nums ${extraEmployees > 0 ? BRAND_TEXT_GRADIENT : 'text-gray-950'}`}>
+          <div className="rounded-[10px] bg-gray-50 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t('extra')}</p>
+            <p className={`mt-1 text-sm font-semibold tabular-nums ${extraEmployees > 0 ? 'text-[#6D5EF7]' : 'text-gray-900'}`}>
               {extraEmployees}
             </p>
           </div>
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{t('total')}</p>
-            <p className="mt-1 text-sm font-semibold text-gray-950 tabular-nums">{projectedMax}</p>
+          <div className="rounded-[10px] bg-gray-50 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t('total')}</p>
+            <p className="mt-1 text-sm font-semibold tabular-nums text-gray-900">{projectedMax}</p>
           </div>
         </div>
       </div>
 
       {/* Active addon */}
       {stripeItemId && (
-        <div className="mx-5 mb-5 flex flex-wrap items-center gap-2 rounded-2xl border border-gray-100 bg-gray-50 p-3">
+        <div className="mx-5 mb-5 flex flex-wrap items-center gap-2 rounded-[10px] bg-gray-50 p-3">
           {cancelAtPeriodEnd ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
               <Warning className="w-3 h-3" weight="bold" />
               {tAddons('cancelScheduled')}
             </span>
@@ -579,10 +572,10 @@ function EmployeesCard({
       {/* Slider */}
       <div className="border-t border-gray-100 p-5 pt-4">
         <div className="mb-3 flex items-center justify-between">
-          <label htmlFor="extra-seats" className="text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">{t('sliderLabel')}</label>
-          <span className={`text-lg font-bold tabular-nums ${BRAND_TEXT_GRADIENT}`}>{extraEmployees}</span>
+          <label htmlFor="extra-seats" className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('sliderLabel')}</label>
+          <span className="text-lg font-semibold tabular-nums text-[#6D5EF7]">{extraEmployees}</span>
         </div>
-        <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
+        <div className="rounded-[10px] bg-gray-50 px-4 py-4">
           <input
             id="extra-seats"
             type="range"
@@ -624,8 +617,8 @@ function EmployeesCard({
 
         {/* Over-quota warning */}
         {overQuota && (
-          <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3">
-            <Warning className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" weight="bold" />
+          <div className="mt-4 flex items-start gap-2 rounded-[10px] bg-amber-50 p-3">
+            <Warning className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" weight="regular" />
             <p className="text-xs text-amber-700">
               <span className="font-semibold">{t('overTitle')}</span> {t('over', { count: activeCount - projectedMax })}
             </p>
@@ -637,7 +630,7 @@ function EmployeesCard({
           type="button"
           onClick={onUpdate}
           disabled={noChange || disabled || purchasing}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-950 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-800 disabled:opacity-40"
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-40"
         >
           {purchasing ? (
             <>
@@ -821,10 +814,10 @@ export default function AddoniPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: 0.05 }}
-              className="p-4 rounded-xl bg-amber-50 border border-amber-200"
+              className="rounded-xl bg-amber-50 p-4"
             >
               <div className="flex items-start gap-2">
-                <Warning className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" weight="bold" />
+                <Warning className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" weight="regular" />
                 <p className="text-sm text-amber-800">
                   {t('noStripe', { email: SUPPORT_EMAIL })}
                 </p>

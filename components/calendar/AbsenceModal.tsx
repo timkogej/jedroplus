@@ -13,6 +13,7 @@ import {
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { Zaposleni } from '@/types/appointments';
 import { useTranslations } from 'next-intl';
+import { sheet } from '@/components/ui/sheetClasses';
 
 interface AbsenceModalProps {
   isOpen: boolean;
@@ -168,6 +169,10 @@ function AbsenceModal({
     exit: { opacity: 0, scale: 0.95, y: 20 },
   };
 
+  const labelClass = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500';
+  const fieldClass =
+    'w-full max-w-full min-w-0 rounded-[10px] border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 focus:border-orange-400 focus:outline-none focus:ring-[3px] focus:ring-orange-100';
+
   return (
     <AnimatePresence onExitComplete={resetForm}>
       {isOpen && (
@@ -176,7 +181,7 @@ function AbsenceModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -184,37 +189,38 @@ function AbsenceModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-lg max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className={`${sheet.panel} sm:max-w-lg`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6">
-              <div className="flex items-start justify-between">
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-white">
+                  <h2 className={sheet.title}>
                     {t('calendarView.absenceModal.title')}
                   </h2>
-                  <p className="mt-1 text-sm text-white/80">
+                  <p className={sheet.subtitle}>
                     {t('calendarView.absenceModal.subtitle')}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full p-1.5 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                  className={sheet.close}
                 >
-                  <X className="h-5 w-5" weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </button>
               </div>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="max-h-[calc(90vh-200px)] overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 space-y-5">
+            <form onSubmit={handleSubmit} className={`${sheet.body} overflow-x-hidden`}>
               {/* Errors */}
               {errors.length > 0 && (
-                <div className="rounded-xl bg-red-50 border border-red-200 p-4">
+                <div className="rounded-xl bg-red-50 p-4">
                   <div className="flex items-start gap-3">
-                    <Warning className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" weight="fill" />
+                    <Warning className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" weight="regular" />
                     <div className="space-y-1">
                       {errors.map((error, i) => (
                         <p key={i} className="text-sm text-red-600">{error}</p>
@@ -225,11 +231,11 @@ function AbsenceModal({
               )}
 
               {/* Employee Selection */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-[#1A1F36]">
+              <div className={sheet.group}>
+                <label className={labelClass}>
                   {t('calendarView.absenceModal.fields.employee')}
                 </label>
-                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto overflow-x-hidden p-1">
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto overflow-x-hidden p-0.5">
                   {employees.map((employee, idx) => {
                     const isSelected = selectedEmployeeId === employee.id;
                     const color = extractColor(employee.barva || '');
@@ -238,7 +244,7 @@ function AbsenceModal({
                         key={`emp-${idx}-${employee.id}`}
                         type="button"
                         onClick={() => setSelectedEmployeeId(employee.id)}
-                        className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-left
+                        className={`flex items-center gap-2 rounded-[10px] border px-3 py-2.5 text-left transition-all
                                    ${isSelected
                                      ? 'bg-orange-50 border-orange-300 ring-1 ring-orange-200'
                                      : 'bg-white border-gray-200 hover:border-gray-300'
@@ -250,7 +256,7 @@ function AbsenceModal({
                         >
                           {employee.initials}
                         </span>
-                        <span className={`text-sm truncate ${isSelected ? 'text-orange-700 font-medium' : 'text-[#1A1F36]'}`}>
+                        <span className={`text-sm truncate ${isSelected ? 'text-orange-700 font-medium' : 'text-gray-900'}`}>
                           {employee.ime} {employee.priimek}
                         </span>
                       </button>
@@ -259,52 +265,51 @@ function AbsenceModal({
                 </div>
               </div>
 
-              {/* Single day vs Date range toggle */}
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSingleDay(true)}
-                  className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all
-                             ${singleDay
-                               ? 'bg-[#1A1F36] text-white border-[#1A1F36]'
-                               : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                             }`}
-                >
-                  <Clock className="h-4 w-4" weight={singleDay ? 'fill' : 'regular'} />
-                  <span className="text-sm font-medium">{t('calendarView.absenceModal.fields.hoursOnly')}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSingleDay(false)}
-                  className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all
-                             ${!singleDay
-                               ? 'bg-[#1A1F36] text-white border-[#1A1F36]'
-                               : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                             }`}
-                >
-                  <CalendarBlank className="h-4 w-4" weight={!singleDay ? 'fill' : 'regular'} />
-                  <span className="text-sm font-medium">{t('calendarView.absenceModal.fields.multipleDays')}</span>
-                </button>
-              </div>
+              <div className={`${sheet.group} space-y-4`}>
+                {/* Single day vs Date range toggle */}
+                <div className="flex gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setSingleDay(true)}
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-[7px] px-3 py-1.5 transition-all
+                               ${singleDay
+                                 ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                                 : 'text-gray-500 hover:text-gray-900'
+                               }`}
+                  >
+                    <Clock className="h-4 w-4" weight="regular" />
+                    <span className="text-sm font-medium">{t('calendarView.absenceModal.fields.hoursOnly')}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSingleDay(false)}
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-[7px] px-3 py-1.5 transition-all
+                               ${!singleDay
+                                 ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                                 : 'text-gray-500 hover:text-gray-900'
+                               }`}
+                  >
+                    <CalendarBlank className="h-4 w-4" weight="regular" />
+                    <span className="text-sm font-medium">{t('calendarView.absenceModal.fields.multipleDays')}</span>
+                  </button>
+                </div>
 
-              {/* Date selection */}
-              <div className="space-y-3">
+                {/* Date selection */}
                 <div className={singleDay ? '' : 'grid grid-cols-1 gap-3 sm:grid-cols-2'}>
                   <div>
-                    <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
+                    <label className={labelClass}>
                       {singleDay ? t('calendarView.absenceModal.fields.date') : t('calendarView.absenceModal.fields.dateFrom')}
                     </label>
                     <input
                       type="date"
                       value={dateFrom}
                       onChange={(e) => setDateFrom(e.target.value)}
-                      className="w-full max-w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-[#1A1F36]
-                               focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                      className={fieldClass}
                     />
                   </div>
                   {!singleDay && (
                     <div>
-                      <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
+                      <label className={labelClass}>
                         {t('calendarView.absenceModal.fields.dateTo')}
                       </label>
                       <input
@@ -312,8 +317,7 @@ function AbsenceModal({
                         value={dateTo}
                         onChange={(e) => setDateTo(e.target.value)}
                         min={dateFrom}
-                        className="w-full max-w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-[#1A1F36]
-                                 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                        className={fieldClass}
                       />
                     </div>
                   )}
@@ -323,7 +327,7 @@ function AbsenceModal({
                 {singleDay && (
                   <div className="grid grid-cols-2 gap-3">
                     <div className="min-w-0">
-                      <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
+                      <label className={labelClass}>
                         {t('calendarView.absenceModal.fields.timeFrom')}
                       </label>
                       {isMobile ? (
@@ -331,8 +335,7 @@ function AbsenceModal({
                           type="time"
                           value={timeFrom}
                           onChange={(e) => setTimeFrom(e.target.value)}
-                          className="w-full max-w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-[#1A1F36]
-                                   focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                          className={fieldClass}
                         />
                       ) : (
                         <Select value={timeFrom} setValue={setTimeFrom} placeholder={t('calendarView.absenceModal.fields.timePlaceholder')}>
@@ -343,7 +346,7 @@ function AbsenceModal({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
+                      <label className={labelClass}>
                         {t('calendarView.absenceModal.fields.timeTo')}
                       </label>
                       {isMobile ? (
@@ -351,8 +354,7 @@ function AbsenceModal({
                           type="time"
                           value={timeTo}
                           onChange={(e) => setTimeTo(e.target.value)}
-                          className="w-full max-w-full min-w-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-[#1A1F36]
-                                   focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                          className={fieldClass}
                         />
                       ) : (
                         <Select value={timeTo} setValue={setTimeTo} placeholder={t('calendarView.absenceModal.fields.timePlaceholder')}>
@@ -367,8 +369,8 @@ function AbsenceModal({
               </div>
 
               {/* Reason */}
-              <div>
-                <label className="text-sm font-medium text-[#1A1F36] mb-1.5 block">
+              <div className={sheet.group}>
+                <label className={labelClass}>
                   {t('calendarView.absenceModal.fields.reason')}
                 </label>
                 <textarea
@@ -376,19 +378,17 @@ function AbsenceModal({
                   onChange={(e) => setReason(e.target.value)}
                   placeholder={t('calendarView.absenceModal.fields.reasonPlaceholder')}
                   rows={2}
-                  className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-[#1A1F36]
-                           placeholder-gray-400 resize-none
-                           focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100"
+                  className={`${fieldClass} resize-none px-4 placeholder-gray-400`}
                 />
               </div>
             </form>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
+            <div className={sheet.footer}>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100"
+                className={sheet.cancel}
               >
                 {t('calendarView.absenceModal.actions.cancel')}
               </button>
@@ -396,9 +396,7 @@ function AbsenceModal({
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSaving}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5
-                           text-sm font-medium text-white shadow-sm hover:opacity-90 transition-all
-                           disabled:opacity-70"
+                className={`${sheet.action} bg-gradient-to-r from-orange-500 to-red-500`}
               >
                 {isSaving ? (
                   <>
