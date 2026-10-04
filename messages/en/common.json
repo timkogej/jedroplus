@@ -96,5 +96,13 @@
     "thu": "T",
     "fri": "F",
     "sat": "S"
+  },
+  "qr": {
+    "downloadPng": "Download PNG",
+    "downloadPdf": "Download PDF",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "preparing": "Preparing...",
+    "registrationInfo": "Print this QR code and put it up in your salon or practice. Clients scan it with their phone and enter their details in under a minute."
   }
 }

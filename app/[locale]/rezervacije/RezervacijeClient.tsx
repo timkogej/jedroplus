@@ -17,6 +17,7 @@ import {
   ClipboardText,
   CaretRight,
   Lock,
+  QrCode,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
@@ -394,6 +395,15 @@ export default function RezervacijeClient({
                         ) : (
                           <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('mainLink.copy')}</span></>
                         )}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => router.push('/qr-koda')}
+                        className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs transition-colors hover:bg-gray-100"
+                      >
+                        <QrCode className="w-3 h-3 text-gray-500" weight="regular" />
+                        <span className="text-gray-600">{t('mainLink.qrButton')}</span>
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.05 }}

@@ -71,9 +71,10 @@
   },
   "mainLink": {
     "title": "Glavna povezava za naročanje",
-    "subtitle": "Stranka izbere storitev in prost termin sama. Dodajte jo na spletno stran, Instagram ali Google, pošljemo jo tudi v sporočilih. Za zbiranje podatkov strank brez termina je QR koda v Nastavitve → Splošno.",
+    "subtitle": "Stranka izbere storitev in prost termin sama. Dodajte jo na spletno stran, Instagram ali Google, pošljemo jo tudi v sporočilih. Za tisk na pult uporabite QR kodo.",
     "copy": "Kopiraj",
-    "copied": "Kopirano"
+    "copied": "Kopirano",
+    "qrButton": "Kodo za tisk"
   },
   "mgmtLink": {
     "title": "Link za prenaročanje in odpoved terminov",
@@ -209,6 +210,32 @@
       "save": "Shrani",
       "saving": "Shranjujem...",
       "saveError": "Prišlo je do napake pri shranjevanju"
+    }
+  },
+  "qr": {
+    "title": "QR kode",
+    "subtitle": "Natisnite jih za pult, vrata ali izložbo.",
+    "booking": {
+      "title": "Za rezervacijo termina",
+      "subtitle": "Koda pelje na vašo glavno rezervacijsko stran. Če kasneje zamenjate videz strani, natisnjena koda ostane pravilna.",
+      "noMainLink": "Glavna rezervacijska povezava ni izbrana, zato kode še ni mogoče narediti.",
+      "goToReservations": "Izberi glavno povezavo"
+    },
+    "registration": {
+      "title": "Za vpis nove stranke",
+      "subtitle": "Stranka vnese svoje podatke in se vpiše med vaše stranke. Termina s tem ne rezervira.",
+      "noSlug": "Slug podjetja ni nastavljen."
+    },
+    "poster": {
+      "cta": "Rezerviraj termin",
+      "chooseLook": "Izberite videz",
+      "format": "A6 — 105 × 148 mm",
+      "looks": {
+        "cisti": "Čisti",
+        "barve": "Vaše barve",
+        "eleganten": "Eleganten",
+        "temen": "Temen"
+      }
     }
   }
 }
