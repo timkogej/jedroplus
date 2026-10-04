@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Link } from '@/i18n/navigation';
 import AuroraBackground from '@/components/shared/AuroraBackground';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 import { JedroLogo } from '@/components/brand/JedroLogo';
 import { EnvelopeSimple, ArrowLeft, CheckCircle } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
@@ -61,6 +62,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] p-4">
       <AuroraBackground />
+      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
       <div className="relative z-10 w-full max-w-[400px]">
         {/* Brand heading — logotip Jedro+ (components/brand/JedroLogo) */}
         <div className="mb-8 flex flex-col items-center text-center">

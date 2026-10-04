@@ -7,20 +7,37 @@ import { useTransition } from 'react';
 const LANGUAGES = [
   { code: 'sl', label: 'SL', name: 'Slovenščina' },
   { code: 'en', label: 'EN', name: 'English' },
+  { code: 'hr', label: 'HR', name: 'Hrvatski' },
+  { code: 'de', label: 'DE', name: 'Deutsch' },
+  { code: 'it', label: 'IT', name: 'Italiano' },
 ] as const;
+
+type LanguageCode = (typeof LANGUAGES)[number]['code'];
+
+/** Jeziki s prevedenim celotnim vmesnikom (glej i18n/config fullLocales). */
+const FULL_LANGUAGES: readonly LanguageCode[] = ['sl', 'en'];
 
 /**
  * Language switch for pages before login (login, sign-up, onboarding), where
  * the in-app switcher in the app bar isn't available. Remembers the choice in
  * the NEXT_LOCALE cookie so later visits open in the same language.
  */
-export default function PublicLanguageToggle({ className = '' }: { className?: string }) {
+export default function PublicLanguageToggle({
+  className = '',
+  allLanguages = false,
+}: {
+  className?: string;
+  /** Pokaži vseh pet jezikov — samo na straneh, prevedenih v vse (prijava, registracija, geslo). */
+  allLanguages?: boolean;
+}) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
 
-  const change = (next: 'sl' | 'en') => {
+  const languages = allLanguages ? LANGUAGES : LANGUAGES.filter((l) => FULL_LANGUAGES.includes(l.code));
+
+  const change = (next: LanguageCode) => {
     if (next === locale) return;
     document.cookie = `NEXT_LOCALE=${next};path=/;max-age=${60 * 60 * 24 * 365}`;
     startTransition(() => router.replace(pathname, { locale: next }));
@@ -32,7 +49,7 @@ export default function PublicLanguageToggle({ className = '' }: { className?: s
       aria-label="Jezik / Language"
       className={`inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-xs font-semibold ${className}`}
     >
-      {LANGUAGES.map((lang) => (
+      {languages.map((lang) => (
         <button
           key={lang.code}
           type="button"

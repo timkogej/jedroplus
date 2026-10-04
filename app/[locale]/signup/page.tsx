@@ -26,7 +26,8 @@ export default function SignupPage() {
     fullName: '',
     email: '',
     confirmEmail: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -45,7 +46,7 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.fullName || !formData.email || !formData.confirmEmail || !formData.password) {
+    if (!formData.fullName || !formData.email || !formData.confirmEmail || !formData.password || !formData.confirmPassword) {
       toast.error(t('errors.fillAllFields'));
       return;
     }
@@ -57,6 +58,11 @@ export default function SignupPage() {
 
     if (formData.password.length < 6) {
       toast.error(t('errors.passwordTooShort'));
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error(t('errors.passwordMismatch'));
       return;
     }
 
@@ -129,7 +135,7 @@ export default function SignupPage() {
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] px-4 py-16">
       <AuroraBackground />
-      <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
+      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
       <div className="relative z-10 w-full max-w-[400px]">
         {/* Heading — logotip Jedro+ (components/brand/JedroLogo) */}
         <div className="mb-8 flex flex-col items-center text-center">
@@ -194,6 +200,29 @@ export default function SignupPage() {
               autoComplete="new-password"
             />
             <p className="text-xs text-gray-500 mt-1">{t('passwordHint')}</p>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-[13px] font-medium text-gray-900">{t('confirmPasswordLabel')}</label>
+            <Input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+              placeholder="••••••••"
+              disabled={loading}
+              autoComplete="new-password"
+              aria-invalid={
+                formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password
+              }
+              className={
+                formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password
+                  ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+                  : ''
+              }
+            />
+            {formData.confirmPassword.length > 0 && formData.confirmPassword !== formData.password && (
+              <p className="mt-1 text-xs text-red-500">{t('errors.passwordMismatch')}</p>
+            )}
           </div>
 
           <Button

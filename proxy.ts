@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
+import { fullLocales, publicAuthPaths } from './i18n/config';
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -58,11 +59,25 @@ export async function proxy(request: NextRequest) {
   }
 
   // 6. Determine locale and strip it for public-path matching
-  const localeMatch = pathname.match(/^\/(sl|en)(\/|$)/);
+  const localeMatch = pathname.match(/^\/(sl|en|hr|de|it)(\/|$)/);
   const locale = localeMatch?.[1] ?? 'sl';
   const pathnameWithoutLocale = localeMatch
     ? pathname.slice(locale.length + 1) || '/'
     : pathname;
+
+  // hr/de/it so zaenkrat prevedeni le pred prijavo — drugje angleščina.
+  const isAuthPage = publicAuthPaths.some(
+    (p) => pathnameWithoutLocale === p || pathnameWithoutLocale.startsWith(p + '/')
+  );
+  if (!(fullLocales as readonly string[]).includes(locale) && !isAuthPage) {
+    const englishUrl = request.nextUrl.clone();
+    englishUrl.pathname = `/en${pathnameWithoutLocale === '/' ? '' : pathnameWithoutLocale}`;
+    const redirect = NextResponse.redirect(englishUrl);
+    for (const cookie of supabaseResponse.cookies.getAll()) {
+      if (cookie.name !== 'NEXT_LOCALE') redirect.cookies.set(cookie.name, cookie.value, cookie);
+    }
+    return redirect;
+  }
 
   if (!user || isPublicPath(pathnameWithoutLocale)) {
     return supabaseResponse;
