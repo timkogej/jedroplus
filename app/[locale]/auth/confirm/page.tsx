@@ -22,8 +22,9 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { useTranslations } from 'next-intl';
-
-const GRADIENT = 'linear-gradient(to right, #7C75FC, #4F8CFF, #50C3D2)';
+import AuroraBackground from '@/components/shared/AuroraBackground';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import { JedroLogo } from '@/components/brand/JedroLogo';
 
 function ConfirmInner() {
   const t = useTranslations('auth.confirm');
@@ -57,27 +58,20 @@ function ConfirmInner() {
   }, [params, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] px-4 py-16">
+      <AuroraBackground />
+      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <div className="relative z-10 w-full max-w-[400px]">
 
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <h1
-            className="text-4xl font-bold tracking-tight mb-2"
-            style={{
-              background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              color: 'transparent',
-            }}
-          >
-            Jedro+
+        {/* Logo Jedro+ (components/brand/JedroLogo) */}
+        <div className="mb-8 flex justify-center">
+          <h1>
+            <JedroLogo height={44} tone="onDark" title="Jedro+" />
           </h1>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-10 flex flex-col items-center text-center gap-6">
+        <div className="rounded-3xl border border-white/40 bg-white/90 shadow-[0_30px_80px_-20px_rgba(10,8,40,0.65)] backdrop-blur-2xl flex flex-col items-center gap-6 p-10 text-center">
 
           {/* Spinner */}
           <div className="relative w-14 h-14">
@@ -96,21 +90,12 @@ function ConfirmInner() {
           </div>
 
           {/* Eyebrow */}
-          <p
-            className="text-xs font-semibold uppercase tracking-widest"
-            style={{
-              background: GRADIENT,
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              color: 'transparent',
-            }}
-          >
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
             {t('eyebrow')}
           </p>
 
           {/* Main message */}
-          <h2 className="text-xl font-bold text-gray-900 -mt-2">
+          <h2 className="-mt-3 text-[20px] font-semibold text-gray-900">
             {t('heading')}
           </h2>
 

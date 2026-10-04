@@ -11,71 +11,44 @@ import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { EnvelopeSimple } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import AuroraBackground from '@/components/shared/AuroraBackground';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import { JedroLogo } from '@/components/brand/JedroLogo';
 
 const GRADIENT = 'linear-gradient(to right, #7C75FC, #4F8CFF, #50C3D2)';
 
 export default function CheckEmailPage() {
   const t = useTranslations('auth.checkEmail');
+  const tCommon = useTranslations('common');
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] px-4 py-16">
+      <AuroraBackground />
+      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <div className="relative z-10 w-full max-w-[400px]">
 
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <h1
-            className="text-4xl font-bold tracking-tight mb-2"
-            style={{
-              background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              color: 'transparent',
-            }}
-          >
-            Jedro+
+        {/* Logo Jedro+ (components/brand/JedroLogo) */}
+        <div className="mb-8 flex justify-center">
+          <h1>
+            <JedroLogo height={44} tone="onDark" title="Jedro+" />
           </h1>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8 flex flex-col items-center text-center gap-6">
+        <div className="rounded-3xl border border-white/40 bg-white/90 shadow-[0_30px_80px_-20px_rgba(10,8,40,0.65)] backdrop-blur-2xl flex flex-col items-center gap-6 p-7 text-center sm:p-8">
 
           {/* Icon */}
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-md"
-            style={{ background: GRADIENT }}
-          >
-            <EnvelopeSimple size={32} weight="bold" color="white" />
-          </div>
+          <EnvelopeSimple size={44} weight="regular" className="text-[#7C78FA]" />
 
           {/* Eyebrow */}
-          <p
-            className="text-xs font-semibold uppercase tracking-widest"
-            style={{
-              background: GRADIENT,
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              color: 'transparent',
-            }}
-          >
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
             {t('eyebrow')}
           </p>
 
           {/* Heading */}
-          <h2 className="text-2xl font-bold text-gray-900 leading-snug -mt-2">
+          <h2 className="-mt-3 text-[22px] font-semibold leading-snug text-gray-900">
             {t('heading')}{' '}
-            <span
-              style={{
-                background: GRADIENT,
-                WebkitBackgroundClip: 'text',
-                backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                color: 'transparent',
-              }}
-            >
-              {t('headingHighlight')}
-            </span>
+            <span>{t('headingHighlight')}</span>
           </h2>
 
           {/* Body */}
@@ -86,7 +59,7 @@ export default function CheckEmailPage() {
           {/* Spam hint */}
           <p className="text-sm text-gray-500">
             {t('spamHint')}{' '}
-            <span className="font-medium text-gray-700">{t('spamFolder')}</span> ali{' '}
+            <span className="font-medium text-gray-700">{t('spamFolder')}</span> {tCommon('divider.or')}{' '}
             <span className="font-medium text-gray-700">{t('promotionsFolder')}</span>.
           </p>
 
@@ -98,7 +71,7 @@ export default function CheckEmailPage() {
             {/* Primary — go to login */}
             <Link href="/login" className="w-full">
               <Button
-                className="w-full h-12 text-white font-medium transition-all duration-300 ease-in-out hover:opacity-90 hover:shadow-lg"
+                className="h-11 w-full rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80"
                 style={{ background: GRADIENT }}
               >
                 {t('openLoginButton')}
@@ -110,7 +83,7 @@ export default function CheckEmailPage() {
               type="button"
               variant="outline"
               disabled
-              className="w-full h-12 font-medium text-gray-400 border-gray-200 cursor-not-allowed"
+              className="h-11 w-full cursor-not-allowed rounded-xl border-gray-200 font-medium text-gray-400"
               title={t('resendTooltip')}
             >
               {t('resendButton')}
@@ -124,8 +97,8 @@ export default function CheckEmailPage() {
         </div>
 
         {/* Back to home */}
-        <p className="text-center mt-6 text-sm text-gray-500">
-          <Link href="/" className="hover:text-gray-700 transition-colors underline underline-offset-2">
+        <p className="mt-6 text-center text-sm">
+          <Link href="/" className="text-white/70 underline underline-offset-4 transition-colors hover:text-white">
             {t('backToStart')}
           </Link>
         </p>
