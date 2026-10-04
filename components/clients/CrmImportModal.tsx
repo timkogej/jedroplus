@@ -51,6 +51,50 @@ function decodeCsv(bytes: Uint8Array): string {
   }
 }
 
+/** Datumske celice iz Excela izpiše kot YYYY-MM-DD (sicer bi xlsx vrnil »3/14/24«). */
+function formatDateCells(ws: XLSX.WorkSheet) {
+  for (const key of Object.keys(ws)) {
+    if (key.startsWith('!')) continue;
+    const cell = ws[key] as XLSX.CellObject;
+    if (cell.t === 'n' && typeof cell.z === 'string' && XLSX.SSF.is_date(cell.z)) {
+      cell.w = XLSX.SSF.format('yyyy-mm-dd', cell.v as number);
+    }
+  }
+}
+
+/**
+ * Datum vpisa v obliki, ki jo pričakuje baza in iz katere aplikacija šteje
+ * nove stranke (YYYY-MM-DD). Pike in poševnice beremo po slovensko kot
+ * dan.mesec.leto. Česar ni mogoče prepoznati, ostane prazno, da v bazo ne
+ * gre napačen datum.
+ */
+function toIsoDate(raw: string): string {
+  const v = raw.trim();
+  if (!v) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const valid = (y: number, m: number, d: number) => {
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+  };
+
+  let m = v.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) {
+    const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    return valid(y, mo, d) ? `${y}-${pad(mo)}-${pad(d)}` : '';
+  }
+
+  m = v.match(/^(\d{1,2})[./](\d{1,2})[./](\d{2,4})/);
+  if (m) {
+    const d = Number(m[1]);
+    const mo = Number(m[2]);
+    let y = Number(m[3]);
+    if (y < 100) y += 2000;
+    return valid(y, mo, d) ? `${y}-${pad(mo)}-${pad(d)}` : '';
+  }
+
+  return '';
+}
+
 interface ParsedRow {
   [key: string]: string;
 }
@@ -148,9 +192,10 @@ export default function CrmImportModal({
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const isCsv = /\.csv$/i.test(f.name) || f.type === 'text/csv';
         const wb = isCsv
-          ? XLSX.read(decodeCsv(data), { type: 'string' })
-          : XLSX.read(data, { type: 'array' });
+          ? XLSX.read(decodeCsv(data), { type: 'string', raw: true })
+          : XLSX.read(data, { type: 'array', cellNF: true });
         const ws = wb.Sheets[wb.SheetNames[0]];
+        if (!isCsv) formatDateCells(ws);
         const rows = XLSX.utils.sheet_to_json<ParsedRow>(ws, { defval: '', raw: false });
         if (rows.length === 0) {
           setParseError('Datoteka je prazna ali nima veljavnih podatkov.');
@@ -250,7 +295,7 @@ export default function CrmImportModal({
           telefon: mapping['Telefon'] ? String(row[mapping['Telefon']] ?? '').trim() : '',
           spol: normalizeSpol(mapping['Spol'] ? String(row[mapping['Spol']] ?? '') : ''),
           opombe: mapping['Opombe'] ? String(row[mapping['Opombe']] ?? '').trim() : '',
-          datum_vpisa: mapping['Datum vpisa'] ? String(row[mapping['Datum vpisa']] ?? '').trim() : '',
+          datum_vpisa: mapping['Datum vpisa'] ? toIsoDate(String(row[mapping['Datum vpisa']] ?? '')) : '',
         };
       });
 
