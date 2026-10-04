@@ -25,6 +25,9 @@ import { Input } from '@/components/ui/input';
 import { Link } from '@/i18n/navigation';
 import { CheckCircle, WarningCircle, LockKey, ArrowLeft, SpinnerGap } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import AuroraBackground from '@/components/shared/AuroraBackground';
+import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
+import { JedroLogo } from '@/components/brand/JedroLogo';
 
 /* ─────────────────────────────────────────────────────────────────────────── */
 /*  Inner component — needs access to useSearchParams()                        */
@@ -128,12 +131,10 @@ function ResetPasswordForm() {
     return (
       <div className="text-center space-y-4">
         <div className="flex justify-center">
-          <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
-            <WarningCircle size={32} weight="fill" className="text-red-400" />
-          </div>
+          <WarningCircle size={44} weight="regular" className="text-red-500" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('invalidLink.title')}</h2>
+          <h2 className="mb-1.5 text-[17px] font-semibold text-gray-900">{t('invalidLink.title')}</h2>
           <p className="text-sm text-gray-600 leading-relaxed">{sessionError}</p>
         </div>
         <Link
@@ -163,12 +164,10 @@ function ResetPasswordForm() {
     return (
       <div className="text-center space-y-4">
         <div className="flex justify-center">
-          <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center">
-            <CheckCircle size={32} weight="fill" className="text-green-500" />
-          </div>
+          <CheckCircle size={44} weight="regular" className="text-green-500" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('success.title')}</h2>
+          <h2 className="mb-1.5 text-[17px] font-semibold text-gray-900">{t('success.title')}</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
             {t('success.message')}
           </p>
@@ -184,12 +183,12 @@ function ResetPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-1">{t('form.title')}</h2>
+        <h2 className="mb-1 text-[17px] font-semibold text-gray-900">{t('form.title')}</h2>
         <p className="text-sm text-gray-500">{t('form.description')}</p>
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">{t('form.newPasswordLabel')}</label>
+        <label className="mb-1.5 block text-[13px] font-medium text-gray-900">{t('form.newPasswordLabel')}</label>
         <div className="relative">
           <LockKey
             size={16}
@@ -212,7 +211,7 @@ function ResetPasswordForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold text-gray-900 mb-2">{t('form.confirmPasswordLabel')}</label>
+        <label className="mb-1.5 block text-[13px] font-medium text-gray-900">{t('form.confirmPasswordLabel')}</label>
         <div className="relative">
           <LockKey
             size={16}
@@ -234,8 +233,8 @@ function ResetPasswordForm() {
       </div>
 
       {formError && (
-        <div className="flex items-start gap-2 rounded-xl bg-red-50 border border-red-100 px-4 py-3">
-          <WarningCircle size={16} weight="fill" className="text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3">
+          <WarningCircle size={16} weight="regular" className="text-red-500 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-red-600">{formError}</p>
         </div>
       )}
@@ -243,7 +242,7 @@ function ResetPasswordForm() {
       <Button
         type="submit"
         disabled={loading}
-        className="w-full h-12 text-white font-medium transition-all duration-300 ease-in-out hover:opacity-90 hover:shadow-lg"
+        className="h-11 w-full rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80"
         style={{
           background: 'linear-gradient(to right, #8B5CF6, #06B6D4)',
         }}
@@ -267,26 +266,19 @@ export default function ResetPasswordPage() {
   const t = useTranslations('auth.resetPassword');
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
-      <div className="w-full max-w-md">
-        {/* Brand heading */}
-        <div className="text-center mb-8">
-          <h1
-            className="text-4xl font-bold tracking-tight mb-2"
-            style={{
-              background: 'linear-gradient(to right, #8B5CF6, #3B82F6, #06B6D4)',
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              color: 'transparent',
-            }}
-          >
-            Jedro+
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] p-4">
+      <AuroraBackground />
+      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <div className="relative z-10 w-full max-w-[400px]">
+        {/* Brand heading — logotip Jedro+ (components/brand/JedroLogo) */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <h1 className="mb-3">
+            <JedroLogo height={44} tone="onDark" title="Jedro+" />
           </h1>
-          <p className="text-gray-600">{t('subtitle')}</p>
+          <p className="text-[15px] text-white/70">{t('subtitle')}</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-100 p-8">
+        <div className="rounded-3xl border border-white/40 bg-white/90 p-7 shadow-[0_30px_80px_-20px_rgba(10,8,40,0.65)] backdrop-blur-2xl sm:p-8">
           <Suspense
             fallback={
               <div className="text-center py-4">
@@ -302,10 +294,10 @@ export default function ResetPasswordPage() {
         </div>
 
         {/* Back to login */}
-        <p className="text-center mt-6 text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm">
           <Link
             href="/login"
-            className="inline-flex items-center gap-1.5 font-semibold text-violet-600 hover:text-violet-700 transition-colors"
+            className="inline-flex items-center gap-1.5 font-semibold text-white/80 underline-offset-4 transition-colors hover:text-white hover:underline"
           >
             <ArrowLeft size={14} />
             {t('backToLogin')}
