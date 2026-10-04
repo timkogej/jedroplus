@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { intlLocale } from "@/lib/format";
 import {
   BarChart,
   Bar,
@@ -13,12 +14,27 @@ import {
 } from "recharts";
 import type { WeeklyChartData } from "@/lib/dashboard/fetchDashboardData";
 
+// Podatki pridejo s slovenskimi kraticami dni (Ned … Sob); za prikaz jih
+// prevedemo v jezik aplikacije.
+const SL_DAYS = ["Ned", "Pon", "Tor", "Sre", "Čet", "Pet", "Sob"];
+
+function localizedDay(day: string, locale: string): string {
+  const index = SL_DAYS.indexOf(day);
+  if (index < 0) return day;
+  // 7. 1. 2024 je bila nedelja.
+  const date = new Date(2024, 0, 7 + index);
+  const label = date.toLocaleDateString(intlLocale(locale), { weekday: "short" }).replace(/\.$/, "");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 interface WeeklyChartProps {
   data: WeeklyChartData[];
 }
 
 export function WeeklyChart({ data }: WeeklyChartProps) {
   const t = useTranslations('dashboard');
+  const locale = useLocale();
+  const chartData = data.map((d) => ({ ...d, day: localizedDay(d.day, locale) }));
   const maxValue = Math.max(...data.map((d) => d.termini), 1);
 
   return (
@@ -32,7 +48,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       <div className="p-5">
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#8B5CF6" />

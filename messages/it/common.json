@@ -96,5 +96,13 @@
     "thu": "G",
     "fri": "V",
     "sat": "S"
+  },
+  "qr": {
+    "downloadPng": "Scarica PNG",
+    "downloadPdf": "Scarica PDF",
+    "copyLink": "Copia link",
+    "copied": "Copiato",
+    "preparing": "Preparazione...",
+    "registrationInfo": "Stampa questo codice QR ed esponilo nel tuo salone o studio. I clienti lo scansionano con il telefono e inseriscono i propri dati in meno di un minuto."
   }
 }

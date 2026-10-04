@@ -1106,7 +1106,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                   <div>
                     <p className="text-xs text-gray-500">{t('completeModal.date')}</p>
                     <p className="text-sm font-normal text-[#1A1F36]">
-                      {new Date(completeTarget.datum).toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(completeTarget.datum).toLocaleDateString(intlLocale(locale), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
                 </div>

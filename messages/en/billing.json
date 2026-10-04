@@ -237,6 +237,7 @@
     "staffRestricted": "This feature is disabled for your account. Contact the business owner for access."
   },
   "paketi": {
+    "back": "Settings",
     "title": "Plans",
     "subtitle": "Overview of your plan and usage",
     "currentBadge": "Current",

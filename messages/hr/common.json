@@ -96,5 +96,13 @@
     "thu": "Č",
     "fri": "P",
     "sat": "S"
+  },
+  "qr": {
+    "downloadPng": "Preuzmi PNG",
+    "downloadPdf": "Preuzmi PDF",
+    "copyLink": "Kopiraj poveznicu",
+    "copied": "Kopirano",
+    "preparing": "Priprema...",
+    "registrationInfo": "Ispišite ovaj QR kod i postavite ga u svoj salon ili ordinaciju. Klijenti ga skeniraju mobitelom i unesu svoje podatke za manje od minute."
   }
 }
