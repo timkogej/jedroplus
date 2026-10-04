@@ -133,6 +133,8 @@ export interface RecentActivity {
 
 export interface WeeklyChartData {
   day: string;
+  /** 0 = Sunday … 6 = Saturday; the chart localizes the label from this. */
+  weekday?: number;
   date: string;
   termini: number;
 }
@@ -736,6 +738,7 @@ async function fetchWeeklyChart(companyId: string, personId?: string | null): Pr
 
       weekData.push({
         day: dayNames[date.getDay()],
+        weekday: date.getDay(),
         date: format(date, "dd.MM"),
         termini: count,
       });
@@ -751,6 +754,7 @@ async function fetchWeeklyChart(companyId: string, personId?: string | null): Pr
       const date = subDays(today, i);
       weekData.push({
         day: dayNames[date.getDay()],
+        weekday: date.getDay(),
         date: format(date, "dd.MM"),
         termini: 0,
       });

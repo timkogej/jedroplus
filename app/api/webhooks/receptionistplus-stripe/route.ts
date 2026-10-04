@@ -42,6 +42,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   const admin = adminClient();
 
+  // One transaction: duplicate check, balance increment, log row
+  // (migration 1790500000). Falls back to the old steps until it exists.
+  const { error: rpcError } = await admin.rpc('receptionist_add_purchase', {
+    p_company_slug: companySlug,
+    p_credits: credits,
+    p_checkout_session: session.id,
+    p_note: `Stripe payment_intent: ${session.payment_intent ?? 'n/a'}`,
+  });
+  if (!rpcError) return;
+  if (rpcError.code !== 'PGRST202') {
+    console.error('[receptionistplus-webhook] receptionist_add_purchase failed', rpcError);
+    throw new Error('credit top-up failed');
+  }
+
   // Idempotency guard against Stripe's at-least-once delivery.
   const { data: existing } = await admin
     .from('receptionist_credit_transactions')
@@ -104,7 +118,12 @@ export async function POST(request: NextRequest) {
   }
 
   if (event.type === 'checkout.session.completed') {
-    await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+    try {
+      await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
+    } catch {
+      // 500 → Stripe retries; the top-up is idempotent per session.
+      return NextResponse.json({ ok: false, error: 'processing_failed' }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ ok: true });

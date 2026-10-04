@@ -1,5 +1,6 @@
 'use client';
 
+import { locales, type Locale } from '@/i18n/config';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -70,7 +71,8 @@ export default function LoginPage() {
               .eq('ID Podjetja', company.company_id)
               .maybeSingle();
 
-            const preferred = (companyData?.preferred_language ?? 'sl') as 'sl' | 'en';
+            const stored = String(companyData?.preferred_language ?? 'sl');
+            const preferred = (locales as readonly string[]).includes(stored) ? (stored as Locale) : 'sl';
 
             setTimeout(() => {
               if (preferred !== locale) {
@@ -117,7 +119,7 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] p-4">
       <AuroraBackground />
-      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
       <div className="relative z-10 w-full max-w-[400px]">
         {/* Heading — logotip Jedro+ (components/brand/JedroLogo) */}
         <div className="mb-8 flex flex-col items-center text-center">
@@ -138,7 +140,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="janez@podjetje.si"
+              placeholder={tCommon('placeholders.email')}
               disabled={loading}
               autoComplete="email"
             />

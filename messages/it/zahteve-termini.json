@@ -1,0 +1,71 @@
+{
+  "page": {
+    "title": "Richieste di appuntamento",
+    "subtitle": "Esamina le richieste dei clienti e conferma l'orario esatto",
+    "backLink": "Torna a Prenotazioni"
+  },
+  "filters": {
+    "all": "Tutte",
+    "pending": "In revisione",
+    "confirmed": "Confermate",
+    "rejected": "Rifiutate"
+  },
+  "empty": {
+    "title": "Nessuna richiesta",
+    "subtitle": "Le nuove richieste di appuntamento dei clienti compariranno qui."
+  },
+  "loadError": "Impossibile caricare le richieste di appuntamento.",
+  "status": {
+    "v_pregledu": "In revisione",
+    "potrjeno": "Confermata",
+    "zavrnjeno": "Rifiutata"
+  },
+  "delDneva": {
+    "dopoldan": "Mattina",
+    "popoldan": "Pomeriggio",
+    "vseeno": "Indifferente"
+  },
+  "card": {
+    "preferredRange": "Preferenza: {from} – {to}",
+    "requested": "Richiesta il {date}",
+    "confirm": "Conferma",
+    "reject": "Rifiuta",
+    "rejectedReason": "Motivo: {reason}"
+  },
+  "rejectModal": {
+    "title": "Rifiuta richiesta",
+    "subtitle": "Spiega a {name} perché non è possibile fissare l'appuntamento.",
+    "reasonLabel": "Motivo",
+    "reasonPlaceholder": "Es. nessuna disponibilità nel periodo richiesto",
+    "reasonRequired": "Inserisci un motivo.",
+    "cancel": "Annulla",
+    "confirm": "Rifiuta richiesta",
+    "rejecting": "Rifiuto in corso...",
+    "success": "Richiesta rifiutata.",
+    "error": "Impossibile rifiutare la richiesta."
+  },
+  "confirmModal": {
+    "title": "Conferma richiesta",
+    "subtitle": "Assegna il servizio e la persona, poi scegli l'orario.",
+    "steps": {
+      "service": "Servizio",
+      "employee": "Persona",
+      "slot": "Data e ora"
+    },
+    "serviceLabel": "Servizio",
+    "servicePlaceholder": "Seleziona un servizio...",
+    "employeeLabel": "Persona",
+    "employeePlaceholder": "Seleziona una persona...",
+    "loadingSlots": "Ricerca degli orari disponibili...",
+    "noSlots": "Nessun orario disponibile nel periodo richiesto.",
+    "slotsError": "Impossibile caricare gli orari disponibili.",
+    "back": "Indietro",
+    "next": "Avanti",
+    "confirmButton": "Conferma appuntamento",
+    "confirming": "Conferma in corso...",
+    "success": "Appuntamento confermato.",
+    "error": "Impossibile confermare l'appuntamento.",
+    "unavailableDay": "Non disponibile",
+    "fullyBookedDay": "Al completo"
+  }
+}

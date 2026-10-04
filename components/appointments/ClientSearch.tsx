@@ -7,6 +7,7 @@ import type { Client } from '@/lib/supabase/clients';
 import { searchClients } from '@/lib/supabase/clients';
 import { useCompany } from '@/app/company-context';
 import ClientInfoCard from './ClientInfoCard';
+import { useTranslations } from 'next-intl';
 
 interface ClientSearchProps {
   selectedClient: Client | null;
@@ -18,9 +19,10 @@ interface ClientSearchProps {
 function ClientSearch({
   selectedClient,
   onSelect,
-  placeholder = 'Išči po imenu, emailu ali telefonu...',
+  placeholder,
   onCreateNew,
 }: ClientSearchProps) {
+  const t = useTranslations('appointments');
   const { companyId } = useCompany();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Client[]>([]);
@@ -201,7 +203,7 @@ function ClientSearch({
                 }}
                 onFocus={handleFocus}
                 onKeyDown={handleKeyDown}
-                placeholder={placeholder}
+                placeholder={placeholder ?? t('clientSearch.placeholder')}
                 className="w-full rounded-[10px] border border-gray-200 bg-white py-2.5 pl-11 pr-4
                            text-sm text-gray-900 placeholder-gray-400 transition-colors
                            focus:border-[#7C78FA] focus:outline-none focus:ring-[3px]
@@ -248,7 +250,7 @@ function ClientSearch({
                                 {client.ime} {client.priimek}
                               </p>
                               <p className="text-xs text-gray-500 truncate">
-                                {client.email || client.telefon || 'Ni podatkov'}
+                                {client.email || client.telefon || t('clientSearch.noContact')}
                               </p>
                             </div>
                           </motion.button>
@@ -267,7 +269,7 @@ function ClientSearch({
                             <span className="flex w-7 flex-shrink-0 justify-center text-[#7C78FA]">
                               <Plus className="h-4 w-4" weight="bold" />
                             </span>
-                            <p className="text-sm font-medium text-[#7C78FA]">Dodaj novo stranko</p>
+                            <p className="text-sm font-medium text-[#7C78FA]">{t('clientSearch.addNew')}</p>
                           </button>
                         )}
                       </>
@@ -286,14 +288,14 @@ function ClientSearch({
                                        text-white transition-all hover:shadow-lg"
                           >
                             <Plus className="h-4 w-4" weight="bold" />
-                            Dodaj novo stranko
+                            {t('clientSearch.addNew')}
                           </button>
                         )}
                       </div>
                     ) : isLoading ? (
                       <div className="px-3 py-4 text-center">
                         <div className="mx-auto h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-[#1A1F36]" />
-                        <p className="mt-2 text-sm text-gray-500">Iščem...</p>
+                        <p className="mt-2 text-sm text-gray-500">{t('clientSearch.searching')}</p>
                       </div>
                     ) : null}
                   </div>

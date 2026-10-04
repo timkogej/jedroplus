@@ -4,7 +4,8 @@ import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle, Plus } from '@phosphor-icons/react';
 import { sheet } from '@/components/ui/sheetClasses';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import type { AppointmentWithDetails } from '@/types/appointments';
 
 interface DeleteConfirmationProps {
@@ -30,6 +31,7 @@ function DeleteConfirmation({
   appointment,
 }: DeleteConfirmationProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   // Animation variants
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -51,7 +53,7 @@ function DeleteConfirmation({
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
-      return date.toLocaleDateString('sl-SI', {
+      return date.toLocaleDateString(intlLocale(locale), {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
@@ -142,7 +144,7 @@ function DeleteConfirmation({
                               <span className="text-sm text-gray-900">{appointment.add_on_naziv}</span>
                               <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
                                 <Plus className="h-2.5 w-2.5" weight="bold" />
-                                Dodatna storitev
+                                {t('modal.price.addOnLabel')}
                               </span>
                             </div>
                           )}

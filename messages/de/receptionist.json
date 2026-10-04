@@ -1,0 +1,91 @@
+{
+  "title": "ReceptionistPlus",
+  "subtitle": "Ihre KI-Telefonassistentin",
+  "loadError": "Die Seite konnte nicht geladen werden.",
+  "tabs": {
+    "settings": "Einstellungen",
+    "calls": "Anrufprotokoll",
+    "credits": "Credits"
+  },
+  "settings": {
+    "generalTitle": "Allgemein",
+    "enabledLabel": "ReceptionistPlus aktivieren",
+    "enabledDesc": "Wenn aktiviert, nimmt die KI-Rezeptionistin Anrufe im Namen Ihres Unternehmens entgegen.",
+    "languageLabel": "Sprache",
+    "languageDesc": "In dieser Sprache begrüßt die Rezeptionistin Anrufer und spricht mit ihnen.",
+    "detectLabel": "In der Sprache des Anrufers antworten",
+    "detectDesc": "Spricht der Anrufer eine andere Sprache (Englisch, Deutsch, Kroatisch, Italienisch), wechselt die Rezeptionistin in diese Sprache.",
+    "thresholdLabel": "Schwelle für niedriges Guthaben",
+    "thresholdDesc": "Sie werden benachrichtigt, sobald Ihr Guthaben unter diesen Wert fällt.",
+    "creditsSuffix": "Credits",
+    "greetingTitle": "Begrüßung",
+    "greetingDesc": "Optional. Bleibt das Feld leer, wird die Standardbegrüßung in der gewählten Sprache verwendet.",
+    "greetingLabel": "Begrüßung beim Annehmen",
+    "recordingTitle": "Hinweis auf Aufzeichnung",
+    "recordingDesc": "Anrufer müssen erfahren, dass das Gespräch aufgezeichnet und transkribiert wird. Die Rezeptionistin sagt das vor der Begrüßung.",
+    "recordingLabel": "Hinweis auf Aufzeichnung ansagen",
+    "recordingTextLabel": "Text des Hinweises",
+    "recordingOffWarning": "Ohne Hinweis dürfen Anrufe nicht aufgezeichnet oder transkribiert werden (DSGVO; in Deutschland und Italien ist das strafbar).",
+    "saveError": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut."
+  },
+  "languages": {
+    "sl": "Slowenisch",
+    "en": "Englisch",
+    "de": "Deutsch",
+    "hr": "Kroatisch",
+    "it": "Italienisch"
+  },
+  "calls": {
+    "loadError": "Das Anrufprotokoll konnte nicht geladen werden.",
+    "empty": "Noch keine Anrufe",
+    "emptyHint": "Anrufe erscheinen hier, sobald die KI-Rezeptionistin sie entgegennimmt.",
+    "noTranscript": "Kein Transkript.",
+    "transcript": "Transkript",
+    "collapse": "Einklappen",
+    "appointment": "Termin #{id}",
+    "credits": "{amount} Credits",
+    "durationMinSec": "{m} Min. {s} Sek.",
+    "durationSec": "{s} Sek.",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "pageOf": "{page} von {total}",
+    "outcome": {
+      "booked": "Gebucht",
+      "info_only": "Nur Auskunft",
+      "message_taken": "Nachricht aufgenommen",
+      "abandoned": "Aufgelegt",
+      "no_credits": "Keine Credits"
+    }
+  },
+  "credits": {
+    "loadError": "Credits konnten nicht geladen werden.",
+    "balance": "Aktuelles Guthaben",
+    "amount": "{amount} Credits",
+    "buyTitle": "Credits kaufen",
+    "loading": "Wird geladen…",
+    "checkoutError": "Die Zahlung konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
+    "transactionsTitle": "Letzte Transaktionen",
+    "noTransactions": "Noch keine Transaktionen.",
+    "packs": {
+      "zagon": "Starter",
+      "standard": "Standard",
+      "profi": "Profi"
+    },
+    "tx": {
+      "purchase": "Kauf {sign}{amount} Credits",
+      "deduction": "Anruf {sign}{amount} Credits",
+      "trial_grant": "Kostenlose Testphase {sign}{amount} Credits",
+      "adjustment": "Korrektur {sign}{amount} Credits",
+      "other": "{type} {sign}{amount} Credits"
+    },
+    "checkoutSuccess": "Zahlung erfolgreich. Die Credits werden in Kürze gutgeschrieben.",
+    "checkoutCanceled": "Die Zahlung wurde abgebrochen."
+  },
+  "notActivated": {
+    "title": "ReceptionistPlus ist nicht aktiviert",
+    "body": "Aktivieren Sie die KI-Rezeptionistin für Ihr Unternehmen und erhalten Sie 30 kostenlose Test-Credits.",
+    "button": "ReceptionistPlus aktivieren",
+    "activating": "Wird aktiviert…",
+    "error": "Die Aktivierung ist fehlgeschlagen. Bitte versuchen Sie es erneut."
+  }
+}

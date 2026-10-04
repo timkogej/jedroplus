@@ -87,7 +87,10 @@
     },
     "languages": {
       "slo": "Slovenian",
-      "eng": "English"
+      "eng": "English",
+      "de": "German",
+      "hr": "Croatian",
+      "it": "Italian"
     },
     "industries": {
       "hairSalons": "Hair salons",

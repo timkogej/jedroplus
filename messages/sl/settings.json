@@ -47,16 +47,19 @@
     },
     "langRegion": {
       "title": "Jezik & Regija",
-      "subtitle": "Jezik aplikacije lahko spremenite, ostalo je nastavljeno za Slovenijo.",
+      "subtitle": "Jezik aplikacije velja za vašo prijavo. Država, časovni pas in valuta veljajo za celo podjetje.",
       "languageLabel": "Jezik aplikacije",
       "languageNote": "Velja za vašo prijavo na tej napravi.",
       "languageValue": "Slovenščina",
-      "regionLabel": "Regija",
-      "regionNote": "Vaša geografska lokacija",
+      "regionLabel": "Država",
+      "regionNote": "Kjer podjetje posluje. Ob menjavi se nastavita tudi časovni pas in valuta.",
       "timezoneLabel": "Časovni pas",
-      "timezoneNote": "Vaš lokalni časovni pas",
+      "timezoneNote": "Po tem času se prikazujejo termini in pošiljajo opomniki.",
       "dateFormatLabel": "Format datuma",
-      "dateFormatNote": "Kako se prikazujejo datumi"
+      "dateFormatNote": "Kako se prikazujejo datumi",
+      "currencyLabel": "Valuta",
+      "currencyNote": "Privzeta valuta za nove storitve in cene.",
+      "saveError": "Nastavitve regije ni bilo mogoče shraniti. Poskusite znova."
     },
     "notifications": {
       "title": "Obvestila",
@@ -86,6 +89,16 @@
       "subtitle": "Za pult ali vrata: stranka skenira kodo in se sama vpiše med vaše stranke. Termina s tem ne rezervira.",
       "noSlug": "Slug podjetja ni nastavljen.",
       "caption": "Za spletno naročanje na termin uporabite povezavo na strani Rezervacije."
+    },
+    "legal": {
+      "title": "Pravni dokumenti",
+      "subtitle": "Pogoji, pod katerimi uporabljate Jedro+, in kako obdelujemo podatke.",
+      "docs": {
+        "terms": "Splošni pogoji uporabe",
+        "privacy": "Politika zasebnosti",
+        "dpa": "Pogodba o obdelavi osebnih podatkov",
+        "subprocessors": "Podobdelovalci"
+      }
     }
   },
   "company": {
@@ -101,7 +114,7 @@
       "industryNote": "Dejavnost vašega podjetja",
       "industryPlaceholder": "npr. Frizerstvo, Kozmetika, Fitness...",
       "taxLabel": "Davčna številka",
-      "taxNote": "Davčna številka podjetja"
+      "taxNote": "DDV številka podjetja, če jo imate (z oznako države, npr. SI12345678)."
     },
     "contact": {
       "title": "Kontaktni podatki",
@@ -146,6 +159,15 @@
         "unsupported": "Ta vrsta datoteke ni podprta. Uporabite PNG, SVG, WEBP ali JPG.",
         "failed": "Nalaganje ni uspelo. Poskusite znova."
       }
+    },
+    "vat": {
+      "check": "Preveri v registru EU (VIES)",
+      "checking": "Preverjam…",
+      "valid": "Veljavna DDV številka",
+      "validWithName": "Veljavna DDV številka – {name}",
+      "invalid": "Številka ni vpisana v register DDV zavezancev EU.",
+      "badFormat": "Oblika ni prava za DDV številko (npr. SI12345678).",
+      "unavailable": "Register EU trenutno ne odgovarja. Poskusite znova pozneje."
     }
   },
   "members": {
@@ -359,5 +381,16 @@
     "secondsAgo": "pred {seconds}s",
     "minutesAgo": "pred {minutes}min",
     "hoursAgo": "pred {hours}h"
+  },
+  "qrPage": {
+    "title": "QR koda za registracijo strank",
+    "subtitle": "Stranke skenirajo to kodo in izpolnijo svoje podatke.",
+    "noSlug": "Slug podjetja ni nastavljen."
+  },
+  "qrCard": {
+    "download": "Prenesi PNG",
+    "copy": "Kopiraj povezavo",
+    "copied": "Kopirano ✓",
+    "info": "To QR kodo lahko natisnete in jo postavite v vaš salon ali ordinacijo. Stranke jo skenirajo s telefonom in v manj kot minuti vnesejo svoje podatke."
   }
 }

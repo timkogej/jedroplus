@@ -7,15 +7,19 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Link } from '@/i18n/navigation';
 import { SpinnerGap } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 import AuroraBackground from '@/components/shared/AuroraBackground';
 import { JedroLogo } from '@/components/brand/JedroLogo';
 import { inviteToMetadata, loadPendingInvite, type PendingInvite } from '@/lib/team/invite';
+import { TERMS_VERSION, legalPath } from '@/lib/legal/paths';
 
 export default function SignupPage() {
   const t = useTranslations('auth.signup');
   const tCommon = useTranslations('common');
+  const locale = useLocale();
+  // Terms, privacy policy and the data processing agreement (business use only).
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   // Set when the visitor came from a team invite link.
   const [invite, setInvite] = useState<PendingInvite | null>(null);
   useEffect(() => {
@@ -33,6 +37,10 @@ export default function SignupPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleGoogleSignup = async () => {
+    if (!acceptedTerms) {
+      toast.error(t('errors.acceptTerms'));
+      return;
+    }
     setGoogleLoading(true);
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
@@ -66,6 +74,11 @@ export default function SignupPage() {
       return;
     }
 
+    if (!acceptedTerms) {
+      toast.error(t('errors.acceptTerms'));
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -82,6 +95,8 @@ export default function SignupPage() {
             options: {
               data: {
                 full_name: formData.fullName,
+                terms_accepted_at: new Date().toISOString(),
+                terms_version: TERMS_VERSION,
                 // Keeps the invite if the email is confirmed on another device.
                 ...inviteToMetadata(invite),
               }
@@ -135,7 +150,7 @@ export default function SignupPage() {
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] px-4 py-16">
       <AuroraBackground />
-      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
       <div className="relative z-10 w-full max-w-[400px]">
         {/* Heading — logotip Jedro+ (components/brand/JedroLogo) */}
         <div className="mb-8 flex flex-col items-center text-center">
@@ -171,7 +186,7 @@ export default function SignupPage() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({...formData, email: e.target.value})}
-              placeholder="janez@podjetje.si"
+              placeholder={tCommon('placeholders.email')}
               disabled={loading}
               autoComplete="email"
             />
@@ -183,7 +198,7 @@ export default function SignupPage() {
               type="email"
               value={formData.confirmEmail}
               onChange={(e) => setFormData({...formData, confirmEmail: e.target.value})}
-              placeholder="janez@podjetje.si"
+              placeholder={tCommon('placeholders.email')}
               disabled={loading}
               autoComplete="email"
             />
@@ -224,6 +239,35 @@ export default function SignupPage() {
               <p className="mt-1 text-xs text-red-500">{t('errors.passwordMismatch')}</p>
             )}
           </div>
+
+          <label className="flex items-start gap-2.5 text-sm text-gray-600">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              disabled={loading || googleLoading}
+              className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-gray-300 accent-[#7C78FA]"
+            />
+            <span>
+              {t.rich('acceptTerms', {
+                terms: (chunks) => (
+                  <a href={legalPath('terms', locale)} target="_blank" rel="noopener noreferrer" className="font-medium text-[#7C78FA] hover:opacity-70">
+                    {chunks}
+                  </a>
+                ),
+                privacy: (chunks) => (
+                  <a href={legalPath('privacy', locale)} target="_blank" rel="noopener noreferrer" className="font-medium text-[#7C78FA] hover:opacity-70">
+                    {chunks}
+                  </a>
+                ),
+                dpa: (chunks) => (
+                  <a href={legalPath('dpa', locale)} target="_blank" rel="noopener noreferrer" className="font-medium text-[#7C78FA] hover:opacity-70">
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </span>
+          </label>
 
           <Button
             type="submit"

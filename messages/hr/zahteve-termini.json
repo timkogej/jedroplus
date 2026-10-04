@@ -1,0 +1,71 @@
+{
+  "page": {
+    "title": "Zahtjevi za termin",
+    "subtitle": "Pregledajte zahtjeve klijenata i potvrdite točan termin",
+    "backLink": "Natrag na Rezervacije"
+  },
+  "filters": {
+    "all": "Svi",
+    "pending": "Na pregledu",
+    "confirmed": "Potvrđeni",
+    "rejected": "Odbijeni"
+  },
+  "empty": {
+    "title": "Nema zahtjeva",
+    "subtitle": "Ovdje će se prikazati novi zahtjevi klijenata za termin."
+  },
+  "loadError": "Učitavanje zahtjeva za termin nije uspjelo.",
+  "status": {
+    "v_pregledu": "Na pregledu",
+    "potrjeno": "Potvrđeno",
+    "zavrnjeno": "Odbijeno"
+  },
+  "delDneva": {
+    "dopoldan": "Prijepodne",
+    "popoldan": "Poslijepodne",
+    "vseeno": "Svejedno"
+  },
+  "card": {
+    "preferredRange": "Željeno: {from} – {to}",
+    "requested": "Zatraženo {date}",
+    "confirm": "Potvrdi",
+    "reject": "Odbij",
+    "rejectedReason": "Razlog: {reason}"
+  },
+  "rejectModal": {
+    "title": "Odbij zahtjev",
+    "subtitle": "Obavijestite klijenta ({name}) zašto termin nije moguće zakazati.",
+    "reasonLabel": "Razlog",
+    "reasonPlaceholder": "Npr. nema slobodnih termina u željenom razdoblju",
+    "reasonRequired": "Unesite razlog.",
+    "cancel": "Odustani",
+    "confirm": "Odbij zahtjev",
+    "rejecting": "Odbijanje...",
+    "success": "Zahtjev je odbijen.",
+    "error": "Odbijanje zahtjeva nije uspjelo."
+  },
+  "confirmModal": {
+    "title": "Potvrdi zahtjev",
+    "subtitle": "Dodijelite uslugu i osobu, zatim odaberite termin.",
+    "steps": {
+      "service": "Usluga",
+      "employee": "Osoba",
+      "slot": "Datum i vrijeme"
+    },
+    "serviceLabel": "Usluga",
+    "servicePlaceholder": "Odaberite uslugu...",
+    "employeeLabel": "Osoba",
+    "employeePlaceholder": "Odaberite osobu...",
+    "loadingSlots": "Traženje slobodnih termina...",
+    "noSlots": "U željenom razdoblju nema slobodnih termina.",
+    "slotsError": "Učitavanje slobodnih termina nije uspjelo.",
+    "back": "Natrag",
+    "next": "Dalje",
+    "confirmButton": "Potvrdi termin",
+    "confirming": "Potvrđivanje...",
+    "success": "Termin je potvrđen.",
+    "error": "Potvrda termina nije uspjela.",
+    "unavailableDay": "Nedostupno",
+    "fullyBookedDay": "Popunjeno"
+  }
+}

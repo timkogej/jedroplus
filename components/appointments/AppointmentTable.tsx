@@ -1,7 +1,8 @@
 'use client';
 
 import { memo, useId, useMemo, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Eye,
@@ -43,10 +44,10 @@ const CLOSED_STATUSES = [
 ];
 
 // Format date for display
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('sl-SI', {
+    return date.toLocaleDateString(intlLocale(locale), {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -70,9 +71,9 @@ function formatTime(timeStr: string): string {
 }
 
 /** Krajši zapis za mobilni seznam: "3. 10." brez leta. */
-function formatDateShort(dateStr: string): string {
+function formatDateShort(dateStr: string, locale: string): string {
   try {
-    return new Date(dateStr).toLocaleDateString('sl-SI', { day: 'numeric', month: 'numeric' });
+    return new Date(dateStr).toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'numeric' });
   } catch {
     return dateStr;
   }
@@ -173,6 +174,7 @@ function AppointmentTable({
   canDeleteAppointment = true,
 }: AppointmentTableProps) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   const [openActionsMenu, setOpenActionsMenu] = useState<string | null>(null);
 
   const renderActions = (appointment: AppointmentWithDetails) => {
@@ -308,7 +310,7 @@ function AppointmentTable({
               <span
                 className={`tnum whitespace-nowrap text-sm font-medium text-gray-900${struck ? ' line-through' : ''}`}
               >
-                {formatDate(a.datum)}
+                {formatDate(a.datum, locale)}
               </span>
             </div>
           );
@@ -427,7 +429,7 @@ function AppointmentTable({
         title: (a) => a.stranka_ime || '-',
         subtitle: (a) => (
           <span className="tnum">
-            {formatDateShort(a.datum)} · {formatTime(a.cas_zacetek)}
+            {formatDateShort(a.datum, locale)} · {formatTime(a.cas_zacetek)}
             {a.cas_konec ? `–${formatTime(a.cas_konec)}` : ''}
           </span>
         ),

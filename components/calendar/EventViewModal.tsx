@@ -18,6 +18,7 @@ import type { CalendarEvent } from '@/types/events';
 import { extractFirstColorStop } from '@/lib/utils/eventColors';
 import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface EventViewModalProps {
   isOpen: boolean;
@@ -76,6 +77,7 @@ function EventViewModal({
   const iconColor = extractFirstColorStop(event.color || '#6D5EF7');
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -230,6 +232,7 @@ function EventViewModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

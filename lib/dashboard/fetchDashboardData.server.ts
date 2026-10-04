@@ -17,6 +17,8 @@ import "server-only";
 import { isOpenAppointmentStatus } from "@/lib/appointments/status";
 import { format, startOfMonth, endOfMonth, addDays, subDays, subMonths } from "date-fns";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
+import { fetchCompanyRegionServer } from "@/lib/region.server";
+import { zonedNow } from "@/lib/timezone";
 import { pickFirst, detectBookingSchema } from "@/lib/dashboardHelpers";
 import { TABLES } from "@/lib/data";
 import { normalizeCommunicationLanguage, type CommunicationLanguageCode } from "@/lib/communicationLanguage";
@@ -38,7 +40,8 @@ import type {
 
 /** Same window Termini loads by default (start of last month), so the count
  * on the dashboard matches the list it links to. */
-const PAST_OPEN_FROM = () => format(startOfMonth(subMonths(new Date(), 1)), "yyyy-MM-dd");
+const pastOpenFrom = (todayStr: string) =>
+  format(startOfMonth(subMonths(new Date(`${todayStr}T12:00:00`), 1)), "yyyy-MM-dd");
 
 
 type Row = Record<string, unknown>;
@@ -282,7 +285,7 @@ function buildStats(
       // counted separately so the owner can close them (revenue counts only
       // completed appointments).
       if (bookingDateStr >= todayStr) activeCount++;
-      else if (bookingDateStr >= PAST_OPEN_FROM() && isRecorded(row)) pastOpenCount++;
+      else if (bookingDateStr >= pastOpenFrom(todayStr) && isRecorded(row)) pastOpenCount++;
     }
 
     const isCompletedStatus =
@@ -426,6 +429,7 @@ function buildWeeklyChart(bookings: Row[], personId: string | null, today: Date)
     const dateStr = format(date, "yyyy-MM-dd");
     weekData.push({
       day: dayNames[date.getDay()],
+      weekday: date.getDay(),
       date: format(date, "dd.MM"),
       termini: countsByDate[dateStr] || 0,
     });
@@ -698,11 +702,12 @@ export async function fetchDashboardDataServer(companyId: string): Promise<Dashb
   const personId = await resolvePersonId(supabase, user.id);
 
   // Single fetch per table, shared across all aggregators (was ~8× before).
-  const [bookings, services, staff, clients] = await Promise.all([
+  const [bookings, services, staff, clients, region] = await Promise.all([
     fetchTableOnce(supabase, TABLES.bookings, companyId, "Datum"),
     fetchTableOnce(supabase, TABLES.services, companyId),
     fetchTableOnce(supabase, TABLES.staff, companyId),
     fetchTableOnce(supabase, TABLES.clients, companyId),
+    fetchCompanyRegionServer(supabase, companyId),
   ]);
 
   const maps: Maps = {
@@ -711,7 +716,8 @@ export async function fetchDashboardDataServer(companyId: string): Promise<Dashb
     clientsMap: buildClientsMap(clients),
   };
 
-  const now = new Date();
+  // The company's wall clock, not the server's (UTC on Vercel).
+  const now = zonedNow(region.timezone);
   const todayStr = format(now, "yyyy-MM-dd");
   const tomorrowStr = format(addDays(now, 1), "yyyy-MM-dd");
   const monthStart = format(startOfMonth(now), "yyyy-MM-dd");

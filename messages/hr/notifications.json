@@ -1,0 +1,35 @@
+{
+  "page": {
+    "title": "Obavijesti",
+    "subtitle": "Pregledajte poruke o rezervacijama, terminima i obavijestima vaše tvrtke.",
+    "markAllRead": "Označi sve kao pročitano",
+    "loading": "Učitavanje obavijesti...",
+    "loadError": "Došlo je do pogreške pri učitavanju obavijesti",
+    "retry": "Pokušaj ponovno",
+    "emptyTitle": "Nema novih obavijesti",
+    "emptySubtitle": "Kada primite nove obavijesti o rezervacijama ili važnim događajima, prikazat će se ovdje."
+  },
+  "filters": {
+    "all": "Sve",
+    "unread": "Nepročitane",
+    "reservations": "Rezervacije",
+    "system": "Sustav"
+  },
+  "card": {
+    "open": "Otvori",
+    "markRead": "Pročitano",
+    "archive": "Arhiviraj"
+  },
+  "relativeTime": {
+    "justNow": "Upravo sada",
+    "minutesAgo": "{count, plural, one {Prije {count} minutu} few {Prije {count} minute} other {Prije {count} minuta}}",
+    "hoursAgo": "{count, plural, one {Prije {count} sat} few {Prije {count} sata} other {Prije {count} sati}}",
+    "yesterday": "Jučer",
+    "daysAgo": "{count, plural, one {Prije {count} dan} few {Prije {count} dana} other {Prije {count} dana}}",
+    "weeksAgo": "{count, plural, one {Prije {count} tjedan} few {Prije {count} tjedna} other {Prije {count} tjedana}}"
+  },
+  "dateLabel": {
+    "today": "Danas",
+    "yesterday": "Jučer"
+  }
+}

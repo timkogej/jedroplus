@@ -2,6 +2,7 @@
 
 import { motion } from 'motion/react';
 import { Check } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 
 interface Customer {
   id: string;
@@ -12,6 +13,7 @@ interface Customer {
   lastVisit: string;
   tags: string[];
   appointmentDates?: string[];
+  optedOut?: boolean;
 }
 
 interface CustomerListItemProps {
@@ -32,6 +34,7 @@ export default function CustomerListItem({
   selected,
   onToggle,
 }: CustomerListItemProps) {
+  const t = useTranslations('communication');
   const initials = customer.name
     .split(/\s+/)
     .filter(Boolean)
@@ -46,8 +49,12 @@ export default function CustomerListItem({
       role="checkbox"
       aria-checked={selected}
       onClick={() => onToggle(customer.id)}
+      aria-disabled={customer.optedOut || undefined}
+      title={customer.optedOut ? t('customerList.optedOutHint') : undefined}
       className={`flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-        selected ? 'bg-violet-50/60' : 'hover:bg-gray-50'
+        customer.optedOut
+          ? 'cursor-not-allowed opacity-50'
+          : selected ? 'bg-violet-50/60' : 'hover:bg-gray-50'
       }`}
     >
       <span
@@ -78,6 +85,12 @@ export default function CustomerListItem({
         <span className="block truncate text-sm font-medium text-gray-900">{customer.name}</span>
         <span className="block truncate text-[13px] text-gray-500">{customer.email}</span>
       </span>
+
+      {customer.optedOut && (
+        <span className="flex-shrink-0 text-[13px] text-gray-400">
+          {t('customerList.optedOut')}
+        </span>
+      )}
     </button>
   );
 }

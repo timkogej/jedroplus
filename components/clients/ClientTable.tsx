@@ -1,7 +1,10 @@
 'use client';
 
 import { memo, useId, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
+import { formatPhone } from '@/lib/phone';
 import { motion } from 'motion/react';
 import {
   Eye,
@@ -27,10 +30,10 @@ interface ClientTableProps {
 }
 
 // Format date for display
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   try {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('sl-SI', {
+    return date.toLocaleDateString(intlLocale(locale), {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -83,6 +86,8 @@ function ClientTable({
   canDeleteClient = true,
 }: ClientTableProps) {
   const t = useTranslations('clients');
+  const locale = useLocale();
+  const region = useCompanyRegion();
 
   const columns: DataTableColumn<Client>[] = useMemo(() => {
     const typeLabel = (client: Client) => {
@@ -137,7 +142,7 @@ function ClientTable({
         cell: (c) => (
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Phone className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />
-            <span className="tnum whitespace-nowrap">{c.telefon || '-'}</span>
+            <span className="tnum whitespace-nowrap">{formatPhone(c.telefon, region.countryCode) || '-'}</span>
           </div>
         ),
       },
@@ -158,7 +163,7 @@ function ClientTable({
         sortValue: (c) => new Date(c.created_at || 0).getTime(),
         cell: (c) => (
           <span className="tnum whitespace-nowrap text-sm text-gray-500">
-            {c.zadnja_interakcija ? formatDate(c.zadnja_interakcija) : '/'}
+            {c.zadnja_interakcija ? formatDate(c.zadnja_interakcija, locale) : '/'}
           </span>
         ),
       },
@@ -180,7 +185,7 @@ function ClientTable({
         ),
       },
     ];
-  }, [t, canViewClient, canEditClient, canDeleteClient, onView, onEdit, onDelete]);
+  }, [t, locale, region.countryCode, canViewClient, canEditClient, canDeleteClient, onView, onEdit, onDelete]);
 
   return (
     <DataTable<Client>
@@ -210,7 +215,7 @@ function ClientTable({
               <GradientCalendarIcon size={14} />
               <span className="tnum">{c.appointment_count || 0}</span>
             </span>
-            {c.telefon && <span className="tnum text-[13px] text-gray-400">{c.telefon}</span>}
+            {c.telefon && <span className="tnum text-[13px] text-gray-400">{formatPhone(c.telefon, region.countryCode)}</span>}
           </div>
         ),
         trailing: (c) => (

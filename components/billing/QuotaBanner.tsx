@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { WarningCircle, XCircle, X } from '@phosphor-icons/react';
 import { useBillingUsage } from '@/hooks/useBillingUsage';

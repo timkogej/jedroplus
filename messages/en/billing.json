@@ -237,6 +237,7 @@
     "staffRestricted": "This feature is disabled for your account. Contact the business owner for access."
   },
   "paketi": {
+    "back": "Settings",
     "title": "Plans",
     "subtitle": "Overview of your plan and usage",
     "currentBadge": "Current",
@@ -335,7 +336,8 @@
         "Import clients from Excel"
       ],
       "trialFeature": "Reminder trial: {sms} SMS and {email} emails"
-    }
+    },
+    "vatNote": "Prices are final. No VAT is charged — Jedro+ is not registered for VAT."
   },
   "trialModal": {
     "badge": "Free trial",

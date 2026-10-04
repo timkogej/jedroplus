@@ -1,0 +1,91 @@
+{
+  "title": "ReceptionistPlus",
+  "subtitle": "Vaša AI telefonska asistentica",
+  "loadError": "Pogreška pri učitavanju stranice.",
+  "tabs": {
+    "settings": "Postavke",
+    "calls": "Popis poziva",
+    "credits": "Krediti"
+  },
+  "settings": {
+    "generalTitle": "Općenito",
+    "enabledLabel": "Omogući ReceptionistPlus",
+    "enabledDesc": "Kada je uključeno, AI recepcionarka odgovara na pozive u ime vaše tvrtke.",
+    "languageLabel": "Jezik",
+    "languageDesc": "Na ovom jeziku recepcionarka pozdravlja i razgovara.",
+    "detectLabel": "Odgovaraj na jeziku pozivatelja",
+    "detectDesc": "Ako pozivatelj govori drugi jezik (engleski, njemački, slovenski, talijanski), recepcionarka prelazi na njega.",
+    "thresholdLabel": "Prag za nisko stanje kredita",
+    "thresholdDesc": "Kada stanje padne ispod ove vrijednosti, obavijestit ćemo vas o niskom stanju kredita.",
+    "creditsSuffix": "kredita",
+    "greetingTitle": "Tekst pozdrava",
+    "greetingDesc": "Neobavezno. Ako ostavite prazno, koristit će se zadani pozdrav na odabranom jeziku.",
+    "greetingLabel": "Pozdrav pri javljanju",
+    "recordingTitle": "Obavijest o snimanju",
+    "recordingDesc": "Pozivatelja treba obavijestiti da se poziv snima i prepisuje. Recepcionarka to kaže prije pozdrava.",
+    "recordingLabel": "Izgovori obavijest o snimanju",
+    "recordingTextLabel": "Tekst obavijesti",
+    "recordingOffWarning": "Bez obavijesti ne smijete snimati ni prepisivati pozive (GDPR; u Njemačkoj i Italiji to je kazneno djelo).",
+    "saveError": "Spremanje nije uspjelo. Pokušajte ponovno."
+  },
+  "languages": {
+    "sl": "Slovenski",
+    "en": "Engleski",
+    "de": "Njemački",
+    "hr": "Hrvatski",
+    "it": "Talijanski"
+  },
+  "calls": {
+    "loadError": "Pogreška pri učitavanju popisa poziva.",
+    "empty": "Još nema poziva",
+    "emptyHint": "Pozivi će se prikazati ovdje kada ih AI recepcionarka primi.",
+    "noTranscript": "Nema zapisa razgovora.",
+    "transcript": "Prijepis",
+    "collapse": "Sažmi",
+    "appointment": "Termin #{id}",
+    "credits": "{amount} kredita",
+    "durationMinSec": "{m} min {s} s",
+    "durationSec": "{s} s",
+    "prev": "Prethodna",
+    "next": "Sljedeća",
+    "pageOf": "{page} od {total}",
+    "outcome": {
+      "booked": "Rezervirano",
+      "info_only": "Samo informacije",
+      "message_taken": "Poruka zaprimljena",
+      "abandoned": "Prekinuto",
+      "no_credits": "Nema kredita"
+    }
+  },
+  "credits": {
+    "loadError": "Pogreška pri učitavanju kredita.",
+    "balance": "Trenutačno stanje",
+    "amount": "{amount} kredita",
+    "buyTitle": "Kupi kredite",
+    "loading": "Učitavanje…",
+    "checkoutError": "Plaćanje nije moguće pokrenuti. Pokušajte ponovno.",
+    "transactionsTitle": "Nedavne transakcije",
+    "noTransactions": "Još nema transakcija.",
+    "packs": {
+      "zagon": "Početni",
+      "standard": "Standard",
+      "profi": "Profi"
+    },
+    "tx": {
+      "purchase": "Kupnja {sign}{amount} kredita",
+      "deduction": "Poziv {sign}{amount} kredita",
+      "trial_grant": "Besplatno probno razdoblje {sign}{amount} kredita",
+      "adjustment": "Prilagodba {sign}{amount} kredita",
+      "other": "{type} {sign}{amount} kredita"
+    },
+    "checkoutSuccess": "Plaćanje je uspjelo. Krediti će biti dodani za nekoliko trenutaka.",
+    "checkoutCanceled": "Plaćanje je otkazano."
+  },
+  "notActivated": {
+    "title": "ReceptionistPlus nije aktiviran",
+    "body": "Omogućite AI recepcionarku za svoju tvrtku i dobijte 30 besplatnih probnih kredita.",
+    "button": "Aktiviraj ReceptionistPlus",
+    "activating": "Aktiviranje…",
+    "error": "Aktivacija nije uspjela. Pokušajte ponovno."
+  }
+}

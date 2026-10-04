@@ -43,7 +43,7 @@
     "owner": "Inhaber",
     "admin": "Administrator",
     "staff": "Mitarbeiter",
-    "receptionist": "Rezeption"
+    "receptionist": "Empfang"
   },
   "errors": {
     "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
@@ -96,5 +96,21 @@
     "thu": "D",
     "fri": "F",
     "sat": "S"
+  },
+  "placeholders": {
+    "email": "max@firma.de",
+    "contactEmail": "anna@firma.de",
+    "infoEmail": "info@firma.de",
+    "mobile": "+49 151 23456789",
+    "landline": "+49 30 1234567",
+    "website": "https://www.firma.de"
+  },
+  "qr": {
+    "downloadPng": "PNG herunterladen",
+    "downloadPdf": "PDF herunterladen",
+    "copyLink": "Link kopieren",
+    "copied": "Kopiert",
+    "preparing": "Wird vorbereitet...",
+    "registrationInfo": "Drucken Sie diesen QR-Code aus und stellen Sie ihn in Ihrem Salon oder Ihrer Praxis auf. Kunden scannen ihn mit dem Handy und geben ihre Daten in weniger als einer Minute ein."
   }
 }

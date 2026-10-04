@@ -8,6 +8,7 @@ import TimeGrid from './TimeGrid';
 import AppointmentCard from './AppointmentCard';
 import EventCard from './EventCard';
 import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import {
   getWeekDays,
   isSameDay,
@@ -563,7 +564,7 @@ function WeekView({ currentDate, appointments, absences = [], events = [], servi
                   const height = ((clampedEnd - clampedStart) / 60) * HOUR_HEIGHT;
 
                   const fmt = (d: Date) =>
-                    d.toLocaleTimeString('sl-SI', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    d.toLocaleTimeString(intlLocale(locale), { hour: '2-digit', minute: '2-digit', hour12: false });
 
                   return (
                     <div

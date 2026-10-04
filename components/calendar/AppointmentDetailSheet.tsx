@@ -31,6 +31,8 @@ import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Resurs } from '@/types/resursi';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
 import { useFormat } from '@/hooks/useFormat';
+import { intlLocale } from '@/lib/format';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { useCompany } from '@/app/company-context';
 import { fetchActiveResursiForTerminRow } from '@/lib/supabase/resursi';
 import { initialsStyle } from '@/components/dashboard/initialsStyle';
@@ -145,7 +147,7 @@ export function AppointmentDetailModal({
 
   const formatModalDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString(locale === 'sl' ? 'sl-SI' : 'en-US', {
+    return date.toLocaleDateString(intlLocale(locale), {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -254,6 +256,9 @@ export function AppointmentDetailModal({
   );
 
   return (
+    // V body: koledar ima svoj sklad (isolate + z-10), zato bi bil list sicer
+    // pod zgornjo in stransko vrstico.
+    <BodyPortal>
     <Sheet onClose={onClose}>
       <SheetHeader
         title={appointment.stranka_ime || t('calendarView.detailModal.fields.unknownClient')}
@@ -595,5 +600,6 @@ export function AppointmentDetailModal({
         )}
       </SheetFooter>
     </Sheet>
+    </BodyPortal>
   );
 }

@@ -268,7 +268,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] p-4">
       <AuroraBackground />
-      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
       <div className="relative z-10 w-full max-w-[400px]">
         {/* Brand heading — logotip Jedro+ (components/brand/JedroLogo) */}
         <div className="mb-8 flex flex-col items-center text-center">

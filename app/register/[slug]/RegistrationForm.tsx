@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { legalPath } from '@/lib/legal/paths'
 import { motion, AnimatePresence } from 'motion/react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -19,6 +20,7 @@ interface Translations {
   genderFemale: string
   genderPrefer: string
   gdprText: string
+  privacyLink: string
   marketingText: string
   submit: string
   submitting: string
@@ -75,6 +77,7 @@ const translations: Record<Language, Translations> = {
     genderFemale: 'Ženski',
     genderPrefer: 'Raje ne povem',
     gdprText: 'Strinjam se z obdelavo mojih osebnih podatkov v skladu z GDPR.',
+    privacyLink: 'Kako obdelujemo podatke',
     marketingText: 'Strinjam se s prejemanjem promocijskih sporočil (SMS, email).',
     submit: 'Registriraj se',
     submitting: 'Pošiljam...',
@@ -106,6 +109,7 @@ const translations: Record<Language, Translations> = {
     genderFemale: 'Female',
     genderPrefer: 'Prefer not to say',
     gdprText: 'I agree to the processing of my personal data in accordance with GDPR.',
+    privacyLink: 'How your data is processed',
     marketingText: 'I agree to receive promotional messages (SMS, email).',
     submit: 'Register',
     submitting: 'Sending...',
@@ -137,6 +141,7 @@ const translations: Record<Language, Translations> = {
     genderFemale: 'Ženski',
     genderPrefer: 'Radije ne kažem',
     gdprText: 'Slažem se sa obradom mojih ličnih podataka u skladu sa GDPR.',
+    privacyLink: 'Kako obrađujemo podatke',
     marketingText: 'Slažem se sa primanjem promotivnih poruka (SMS, email).',
     submit: 'Registruj se',
     submitting: 'Šaljem...',
@@ -168,6 +173,7 @@ const translations: Record<Language, Translations> = {
     genderFemale: 'Ženski',
     genderPrefer: 'Radije ne kažem',
     gdprText: 'Slažem se s obradom mojih osobnih podataka u skladu s GDPR-om.',
+    privacyLink: 'Kako obrađujemo podatke',
     marketingText: 'Slažem se s primanjem promotivnih poruka (SMS, email).',
     submit: 'Registriraj se',
     submitting: 'Šaljem...',
@@ -1249,7 +1255,16 @@ export default function RegistrationForm({
                         fontWeight: 300,
                       }}
                     >
-                      {t.gdprText}
+                      {t.gdprText}{' '}
+                      <a
+                        href={legalPath('privacy', lang === 'sr' ? 'hr' : lang)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ color: '#7C3AED', textDecoration: 'underline' }}
+                      >
+                        {t.privacyLink}
+                      </a>
                     </span>
                   </div>
                   {errors.gdpr && (

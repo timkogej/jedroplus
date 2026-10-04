@@ -1,0 +1,35 @@
+{
+  "page": {
+    "title": "Benachrichtigungen",
+    "subtitle": "Nachrichten zu Buchungen, Terminen und Ihrem Unternehmen im Überblick.",
+    "markAllRead": "Alle als gelesen markieren",
+    "loading": "Benachrichtigungen werden geladen...",
+    "loadError": "Beim Laden der Benachrichtigungen ist ein Fehler aufgetreten",
+    "retry": "Erneut versuchen",
+    "emptyTitle": "Keine neuen Benachrichtigungen",
+    "emptySubtitle": "Neue Benachrichtigungen zu Buchungen oder wichtigen Ereignissen erscheinen hier."
+  },
+  "filters": {
+    "all": "Alle",
+    "unread": "Ungelesen",
+    "reservations": "Buchungen",
+    "system": "System"
+  },
+  "card": {
+    "open": "Öffnen",
+    "markRead": "Als gelesen markieren",
+    "archive": "Archivieren"
+  },
+  "relativeTime": {
+    "justNow": "Gerade eben",
+    "minutesAgo": "{count, plural, =1 {vor 1 Minute} other {vor {count} Minuten}}",
+    "hoursAgo": "{count, plural, =1 {vor 1 Stunde} other {vor {count} Stunden}}",
+    "yesterday": "Gestern",
+    "daysAgo": "{count, plural, =1 {vor 1 Tag} other {vor {count} Tagen}}",
+    "weeksAgo": "{count, plural, =1 {vor 1 Woche} other {vor {count} Wochen}}"
+  },
+  "dateLabel": {
+    "today": "Heute",
+    "yesterday": "Gestern"
+  }
+}

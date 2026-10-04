@@ -1,5 +1,6 @@
 "use client";
 
+import { stripLocalePrefix } from '@/i18n/config';
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
@@ -142,7 +143,7 @@ export default function ProtectedLayout({
   const { usage: billingUsage, loading: billingLoading } = useBillingUsage();
 
   // Strip locale prefix so route checks work with or without /sl/, /en/ prefix
-  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(\/|$)/, '/').replace(/\/$/, '') || '/';
+  const pathnameWithoutLocale = stripLocalePrefix(pathname).replace(/\/$/, '') || '/';
 
   // Free accounts may use reminders while their one-time free quota lasts
   // (plans.FREE sms/email quota > 0). The gate opens only when that quota exists.
@@ -263,10 +264,11 @@ export default function ProtectedLayout({
 }
 
 function AppShellSkeleton() {
+  const t = useTranslations('common');
   const bar = 'animate-pulse rounded-md bg-gray-100';
   return (
     <div className="min-h-screen bg-white" aria-busy="true" aria-live="polite">
-      <span className="sr-only">Nalaganje …</span>
+      <span className="sr-only">{t('status.loading')}</span>
       <aside className="hairline-r fixed inset-y-0 left-0 hidden w-[240px] flex-col bg-white p-5 md:flex" aria-hidden="true">
         <div className={`h-7 w-28 ${bar}`} />
         <div className="mt-8 flex items-center gap-3">

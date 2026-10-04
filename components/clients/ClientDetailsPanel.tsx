@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, useEffect, memo, useCallback, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
+import { formatPhone } from '@/lib/phone';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -41,7 +44,7 @@ interface ClientDetailsPanelProps {
 }
 
 // Format date for display
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   if (!dateStr) return '-';
   try {
     const trimmed = dateStr.trim();
@@ -51,7 +54,7 @@ function formatDate(dateStr: string): string {
       const month = Number(dotMatch[2]) - 1;
       const year = Number(dotMatch[3]);
       const date = new Date(year, month, day);
-      return date.toLocaleDateString('sl-SI', {
+      return date.toLocaleDateString(intlLocale(locale), {
         day: '2-digit',
         month: 'short',
         year: 'numeric',
@@ -59,7 +62,7 @@ function formatDate(dateStr: string): string {
     }
     const date = new Date(trimmed);
     if (Number.isNaN(date.getTime())) return dateStr;
-    return date.toLocaleDateString('sl-SI', {
+    return date.toLocaleDateString(intlLocale(locale), {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -135,6 +138,8 @@ function ClientDetailsPanel({
   onNewAppointment,
 }: ClientDetailsPanelProps) {
   const t = useTranslations('clients');
+  const locale = useLocale();
+  const region = useCompanyRegion();
   const tAppt = useTranslations('appointments');
   const [clientData, setClientData] = useState<ClientWithAppointments | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -243,7 +248,7 @@ function ClientDetailsPanel({
                   <CommunicationLanguageFlag value={clientLanguage} />
                 </div>
                 <div className="mt-0.5 text-[13px] text-gray-500">
-                  {t('details.added')} {formatDate(client.created_at || '')}
+                  {t('details.added')} {formatDate(client.created_at || '', locale)}
                 </div>
 
                 {(onEdit || onDelete) && (
@@ -302,10 +307,10 @@ function ClientDetailsPanel({
                     <div className="flex min-w-0 items-center gap-3">
                       <Phone className="h-5 w-5 flex-shrink-0 text-gray-400" weight="regular" />
                       <div className="min-w-0">
-                        <div className="text-[13px] text-gray-500">Telefon</div>
+                        <div className="text-[13px] text-gray-500">{t('modal.fields.phone')}</div>
                         {client.telefon ? (
                           <a href={`tel:${client.telefon}`} className="tnum block truncate text-sm font-medium text-[#7C78FA] hover:opacity-70">
-                            {client.telefon}
+                            {formatPhone(client.telefon, region.countryCode)}
                           </a>
                         ) : (
                           <div className="text-sm text-gray-400">-</div>
@@ -501,14 +506,14 @@ function ClientDetailsPanel({
                                     <span className="text-sm font-medium text-gray-900">{apt.add_on_naziv}</span>
                                     <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
                                       <Plus className="h-2.5 w-2.5" weight="bold" />
-                                      Dodatna storitev
+                                      {tAppt('modal.price.addOnLabel')}
                                     </span>
                                   </div>
                                 )}
                                 <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
                                   <span className="flex items-center gap-1">
                                     <CalendarBlank className="h-3.5 w-3.5" weight="regular" />
-                                    {formatDate(apt.datum)}
+                                    {formatDate(apt.datum, locale)}
                                   </span>
                                   <span className="flex items-center gap-1">
                                     <Clock className="h-3.5 w-3.5" weight="regular" />

@@ -130,7 +130,13 @@
     "subtitle": "Latest completed appointments",
     "empty": "No recent activity",
     "unknownClient": "Unknown client",
-    "serviceLabel": "Service"
+    "serviceLabel": "Service",
+    "timeAgo": {
+      "justNow": "Just now",
+      "minutes": "{count} min ago",
+      "hours": "{count} h ago",
+      "days": "{count} d ago"
+    }
   },
   "weeklyChart": {
     "title": "Appointments - 7 Days",

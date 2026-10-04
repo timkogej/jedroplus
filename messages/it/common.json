@@ -8,7 +8,7 @@
     "back": "Indietro",
     "next": "Avanti",
     "confirm": "Conferma",
-    "discard": "Annulla modifiche",
+    "discard": "Annulla",
     "submit": "Invia",
     "tryAgain": "Riprova",
     "viewAll": "Mostra tutto",
@@ -16,7 +16,7 @@
     "create": "Crea",
     "update": "Aggiorna",
     "search": "Cerca",
-    "filter": "Filtra",
+    "filter": "Filtro",
     "export": "Esporta",
     "import": "Importa",
     "copy": "Copia",
@@ -28,13 +28,13 @@
     "expired": "Scaduto",
     "confirmed": "Confermato",
     "cancelled": "Annullato",
-    "pending": "In attesa",
+    "pending": "In elaborazione",
     "completed": "Completato",
     "loading": "Caricamento...",
     "saving": "Salvataggio..."
   },
   "confirm": {
-    "title": "Sei sicuro?",
+    "title": "Confermi?",
     "cannotUndo": "Questa azione non può essere annullata.",
     "yes": "Sì",
     "no": "No"
@@ -42,22 +42,22 @@
   "roles": {
     "owner": "Titolare",
     "admin": "Amministratore",
-    "staff": "Personale",
-    "receptionist": "Receptionist"
+    "staff": "Collaboratore",
+    "receptionist": "Reception"
   },
   "errors": {
-    "generic": "Qualcosa è andato storto. Riprova.",
-    "loadFailed": "Caricamento non riuscito",
+    "generic": "Si è verificato un errore. Riprova.",
+    "loadFailed": "Errore durante il caricamento",
     "noResults": "Nessun risultato",
-    "networkError": "Problema di connessione",
-    "unauthorized": "Non hai i permessi per questa azione",
+    "networkError": "Problemi di connessione",
+    "unauthorized": "Non hai l'autorizzazione per questa azione",
     "fillAllFields": "Compila tutti i campi"
   },
   "time": {
     "today": "Oggi",
     "yesterday": "Ieri",
     "tomorrow": "Domani",
-    "now": "Adesso"
+    "now": "Ora"
   },
   "daysShort": {
     "mon": "Lun",
@@ -79,7 +79,7 @@
   },
   "search": {
     "placeholder": "Cerca...",
-    "noResults": "Nessuna corrispondenza"
+    "noResults": "Nessun risultato"
   },
   "divider": {
     "or": "oppure"
@@ -96,5 +96,21 @@
     "thu": "G",
     "fri": "V",
     "sat": "S"
+  },
+  "placeholders": {
+    "email": "mario@azienda.it",
+    "contactEmail": "giulia@azienda.it",
+    "infoEmail": "info@azienda.it",
+    "mobile": "+39 333 123 4567",
+    "landline": "+39 02 1234 5678",
+    "website": "https://www.azienda.it"
+  },
+  "qr": {
+    "downloadPng": "Scarica PNG",
+    "downloadPdf": "Scarica PDF",
+    "copyLink": "Copia link",
+    "copied": "Copiato",
+    "preparing": "Preparazione...",
+    "registrationInfo": "Stampa questo codice QR ed esponilo nel tuo salone o studio. I clienti lo scansionano con il telefono e inseriscono i propri dati in meno di un minuto."
   }
 }

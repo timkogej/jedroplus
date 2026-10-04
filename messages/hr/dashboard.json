@@ -1,0 +1,201 @@
+{
+  "greeting": {
+    "morning": "Dobro jutro,",
+    "day": "Dobar dan,",
+    "afternoon": "Dobar dan,",
+    "evening": "Dobra večer,"
+  },
+  "quickActions": {
+    "newAppointment": "Novi termin",
+    "newClient": "Novi klijent"
+  },
+  "metrics": {
+    "appointmentsToday": "Termini danas",
+    "appointmentsTodaySubtitle": "Zakazanih termina",
+    "activeAppointments": "Nadolazeći termini",
+    "newClients": "Novi klijenti",
+    "thisMonth": "Ovaj mjesec",
+    "revenue": "Prihod",
+    "trend": "u odnosu na prošli mjesec",
+    "activeSubtitle": "Zakazani od danas nadalje",
+    "pastOpen": "{count, plural, one {# prošli termin još nije završen} few {# prošla termina još nisu završena} other {# prošlih termina još nije završeno}}",
+    "pastOpenBody": "Prihod uključuje samo završene termine.",
+    "pastOpenCta": "Završi u Terminima"
+  },
+  "nextAppointment": {
+    "title": "Sljedeći termin",
+    "today": "Danas",
+    "tomorrow": "Sutra",
+    "empty": "Nema nadolazećih termina"
+  },
+  "appointmentList": {
+    "todayTitle": "Termini danas",
+    "todayEmpty": "Danas nema termina",
+    "tomorrowTitle": "Termini sutra",
+    "tomorrowEmpty": "Sutra nema termina",
+    "defaultEmpty": "Nema termina",
+    "viewAll": "Prikaži sve termine"
+  },
+  "footer": {
+    "heading": "Trebate više pojedinosti?",
+    "body": "Pregledajte cijeli kalendar ili analitiku za detaljniji uvid",
+    "openCalendar": "Otvori kalendar",
+    "openAnalytics": "Otvori analitiku"
+  },
+  "detailModal": {
+    "status": {
+      "scheduled": "Zakazano",
+      "confirmed": "Potvrđeno",
+      "completed": "Završeno",
+      "cancelled": "Otkazano",
+      "pending": "Na čekanju",
+      "noShow": "Nije došao/la"
+    },
+    "fields": {
+      "status": "Status",
+      "client": "Klijent",
+      "service": "Usluga",
+      "employee": "Osoba",
+      "date": "Datum",
+      "time": "Vrijeme",
+      "duration": "Trajanje",
+      "price": "Cijena",
+      "additionalService": "Dodatna usluga",
+      "notes": "Bilješke",
+      "internalNotes": "Interne bilješke",
+      "phone": "Telefon"
+    },
+    "actions": {
+      "complete": "Završi",
+      "edit": "Uredi",
+      "moreOptions": "Više mogućnosti",
+      "noShow": "Nije došao/la",
+      "cancel": "Otkaži",
+      "delete": "Izbriši",
+      "close": "Zatvori"
+    },
+    "openInAppointments": "Otvori u Terminima"
+  },
+  "completeModal": {
+    "title": "Završi termin",
+    "subtitle": "Potvrdite završetak termina",
+    "client": "Klijent",
+    "service": "Usluga",
+    "date": "Datum",
+    "time": "Vrijeme",
+    "messageLabel": "Poruka klijentu ili upute nakon termina",
+    "messagePlaceholder": "Unesite poruku ili upute nakon završenog termina (neobavezno)...",
+    "cancel": "Odustani",
+    "completing": "Završavanje...",
+    "confirm": "Završi"
+  },
+  "deleteModal": {
+    "title": "Izbriši termin",
+    "message": "Jeste li sigurni da želite izbrisati ovaj termin?"
+  },
+  "toast": {
+    "appointmentAdded": "Termin je uspješno dodan",
+    "appointmentUpdated": "Termin je uspješno ažuriran",
+    "appointmentCompleted": "Termin je uspješno završen",
+    "appointmentNoShow": "Termin je označen kao nedolazak",
+    "appointmentCancelled": "Termin je uspješno otkazan",
+    "clientAdded": "Klijent je uspješno dodan",
+    "loadError": "Došlo je do pogreške pri učitavanju podataka.",
+    "saveError": "Došlo je do pogreške pri spremanju.",
+    "completeError": "Došlo je do pogreške pri završavanju termina.",
+    "noShowError": "Došlo je do pogreške pri označavanju nedolaska.",
+    "cancelError": "Došlo je do pogreške pri otkazivanju termina.",
+    "deleteError": "Došlo je do pogreške pri brisanju.",
+    "clientSaveError": "Došlo je do pogreške pri spremanju klijenta."
+  },
+  "errorState": {
+    "title": "Došlo je do pogreške",
+    "retry": "Pokušaj ponovno"
+  },
+  "defaultUser": "Korisnik",
+  "copyButton": "Kopiraj {label}",
+  "topServices": {
+    "title": "Najpopularnije usluge",
+    "subtitle": "Ovaj mjesec",
+    "empty": "Nema podataka"
+  },
+  "topEmployees": {
+    "title": "Najbolji zaposlenici",
+    "subtitle": "Po obavljenim terminima",
+    "empty": "Nema podataka",
+    "appointmentCount": "{count, plural, one {# termin} other {# termina}}"
+  },
+  "recentActivity": {
+    "title": "Nedavna aktivnost",
+    "subtitle": "Posljednji završeni termini",
+    "empty": "Nema nedavne aktivnosti",
+    "unknownClient": "Nepoznat klijent",
+    "serviceLabel": "Usluga",
+    "timeAgo": {
+      "justNow": "Upravo sada",
+      "minutes": "Prije {count} min",
+      "hours": "Prije {count} h",
+      "days": "Prije {count} d"
+    }
+  },
+  "weeklyChart": {
+    "title": "Termini - 7 dana",
+    "subtitle": "Pregled posljednjih 7 dana",
+    "tooltipValue": "{value, plural, one {# termin} other {# termina}}",
+    "tooltipLabel": "Br. termina"
+  },
+  "firstRun": {
+    "preparingTitle": "Pripremamo vaš račun",
+    "steps": {
+      "services": "Izrađujemo usluge",
+      "owner": "Dodajemo vas kao zaposlenika",
+      "connect": "Povezujemo vaš račun s vašim rasporedom",
+      "done": "Spremno"
+    },
+    "doneTitle": "Sve je spremno za prvi termin",
+    "doneBody": "Usluge i vaš raspored su postavljeni. Upišite prvi termin i pogledajte kako izgleda u kalendaru.",
+    "cta": "Izradi prvi termin",
+    "errorTitle": "Pripremu nismo mogli dovršiti",
+    "errorBody": "Nešto nije uspjelo u vezi s poslužiteljem. Ono što je već izrađeno ostaje — pokušajte ponovno ili dodajte usluge u izborniku Usluge.",
+    "retry": "Pokušaj ponovno",
+    "openServices": "Otvori Usluge",
+    "dismiss": "Zatvori"
+  },
+  "gettingStarted": {
+    "title": "Započnite s Jedro+",
+    "subtitle": "Dovršeno {done} od {total}",
+    "hide": "Sakrij popis",
+    "items": {
+      "tour": {
+        "title": "Pogledajte vodič (1 min)",
+        "body": "Pokazat ćemo vam gdje se što nalazi."
+      },
+      "appointment": {
+        "title": "Upišite prvi termin",
+        "body": "Odaberite klijenta, uslugu i vrijeme."
+      },
+      "client": {
+        "title": "Dodajte prvog klijenta",
+        "body": "Ili uvezite postojeće klijente iz Excela."
+      },
+      "hours": {
+        "title": "Provjerite radno vrijeme",
+        "body": "Prema njemu se ravnaju kalendar i online naručivanje."
+      },
+      "reminders": {
+        "title": "Upoznajte podsjetnike",
+        "body": "Klijente automatski podsjećamo na termin."
+      },
+      "team": {
+        "title": "Dodajte suradnike",
+        "body": "Ako ne radite sami, dodajte tim i njihove rasporede."
+      }
+    }
+  },
+  "staffNotLinked": {
+    "title": "Vaš račun još nije povezan s vašim rasporedom",
+    "bodyCanLink": "Zato još ne vidite svoje termine. Otvorite Zaposlenici i kod svojeg imena kliknite »Poveži moj račun s ovom osobom«.",
+    "bodyAskOwner": "Zato još ne vidite svoje termine. Zamolite vlasnika da vas poveže u izborniku Zaposlenici.",
+    "cta": "Otvori Zaposlenici"
+  }
+}

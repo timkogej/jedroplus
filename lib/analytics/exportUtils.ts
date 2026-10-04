@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import { sl } from 'date-fns/locale';
 import type { AnalyticsMetrics, ServiceChartData, EmployeeChartData, TopPerformer } from './calculations';
 
 /**
@@ -34,48 +33,84 @@ export function exportToCSV(
 }
 
 /**
+ * Labels for the analytics CSV export. Pass translated strings from the
+ * `analytics.csvExport` namespace; the Slovenian defaults keep old callers working.
+ */
+export type AnalyticsCsvLabels = Record<
+  | 'metric' | 'value' | 'totalRevenue' | 'averageBookingValue' | 'occupancyRate'
+  | 'completionRate' | 'totalAppointments' | 'completedAppointments' | 'cancelledAppointments'
+  | 'revenueGrowth' | 'bookingGrowth' | 'service' | 'staff' | 'appointmentCount' | 'revenue'
+  | 'fileMetrics' | 'fileServices' | 'fileStaff',
+  string
+>;
+
+const DEFAULT_CSV_LABELS: AnalyticsCsvLabels = {
+  metric: 'Metrika',
+  value: 'Vrednost',
+  totalRevenue: 'Skupaj Prihodki',
+  averageBookingValue: 'Povprečna Vrednost Termina',
+  occupancyRate: 'Stopnja Zasedenosti',
+  completionRate: 'Stopnja Zaključenih',
+  totalAppointments: 'Skupaj Terminov',
+  completedAppointments: 'Zaključenih Terminov',
+  cancelledAppointments: 'Odpovedanih Terminov',
+  revenueGrowth: 'Rast Prihodkov',
+  bookingGrowth: 'Rast Terminov',
+  service: 'Storitev',
+  staff: 'Osebje',
+  appointmentCount: 'Število Terminov',
+  revenue: 'Prihodki',
+  fileMetrics: 'analitika-metrike',
+  fileServices: 'analitika-storitve',
+  fileStaff: 'analitika-osebje',
+};
+
+/**
  * Export analytics report to CSV
  */
 export function exportAnalyticsToCSV(
   metrics: AnalyticsMetrics,
   services: ServiceChartData[],
   employees: EmployeeChartData[],
-  dateRange: { start: Date; end: Date }
+  dateRange: { start: Date; end: Date },
+  labels: AnalyticsCsvLabels = DEFAULT_CSV_LABELS
 ): void {
-  const dateStr = format(new Date(), 'yyyy-MM-dd', { locale: sl });
+  const L = labels;
+  const dateStr = format(new Date(), 'yyyy-MM-dd');
   const periodStr = `${format(dateRange.start, 'dd.MM.yyyy')}-${format(dateRange.end, 'dd.MM.yyyy')}`;
+  const row = (metric: string, value: string) => ({ [L.metric]: metric, [L.value]: value });
 
   // Prepare metrics data
   const metricsData = [
-    { Metrika: 'Skupaj Prihodki', Vrednost: `€${metrics.totalRevenue.toFixed(2)}` },
-    { Metrika: 'Povprečna Vrednost Termina', Vrednost: `€${metrics.averageBookingValue.toFixed(2)}` },
-    { Metrika: 'Stopnja Zasedenosti', Vrednost: `${metrics.occupancyRate.toFixed(1)}%` },
-    { Metrika: 'Stopnja Zaključenih', Vrednost: `${metrics.completionRate.toFixed(1)}%` },
-    { Metrika: 'Skupaj Terminov', Vrednost: metrics.totalAppointments.toString() },
-    { Metrika: 'Zaključenih Terminov', Vrednost: metrics.completedAppointments.toString() },
-    { Metrika: 'Odpovedanih Terminov', Vrednost: metrics.cancelledAppointments.toString() },
-    { Metrika: 'Rast Prihodkov', Vrednost: `${metrics.revenueGrowth.toFixed(1)}%` },
-    { Metrika: 'Rast Terminov', Vrednost: `${metrics.bookingGrowth.toFixed(1)}%` },
+    row(L.totalRevenue, `€${metrics.totalRevenue.toFixed(2)}`),
+    row(L.averageBookingValue, `€${metrics.averageBookingValue.toFixed(2)}`),
+    row(L.occupancyRate, `${metrics.occupancyRate.toFixed(1)}%`),
+    row(L.completionRate, `${metrics.completionRate.toFixed(1)}%`),
+    row(L.totalAppointments, metrics.totalAppointments.toString()),
+    row(L.completedAppointments, metrics.completedAppointments.toString()),
+    row(L.cancelledAppointments, metrics.cancelledAppointments.toString()),
+    row(L.revenueGrowth, `${metrics.revenueGrowth.toFixed(1)}%`),
+    row(L.bookingGrowth, `${metrics.bookingGrowth.toFixed(1)}%`),
   ];
 
   // Prepare services data
   const servicesData = services.map((s) => ({
-    Storitev: s.name,
-    'Število Terminov': s.value,
-    Prihodki: `€${s.revenue.toFixed(2)}`,
+    [L.service]: s.name,
+    [L.appointmentCount]: s.value,
+    [L.revenue]: `€${s.revenue.toFixed(2)}`,
   }));
 
   // Prepare employees data
   const employeesData = employees.map((e) => ({
-    Osebje: e.fullName,
-    'Število Terminov': e.termini,
-    Prihodki: `€${e.prihodki.toFixed(2)}`,
+    [L.staff]: e.fullName,
+    [L.appointmentCount]: e.termini,
+    [L.revenue]: `€${e.prihodki.toFixed(2)}`,
   }));
 
   // Export each section
-  exportToCSV(metricsData, `analitika-metrike-${periodStr}-${dateStr}`);
-  exportToCSV(servicesData, `analitika-storitve-${periodStr}-${dateStr}`);
-  exportToCSV(employeesData, `analitika-osebje-${periodStr}-${dateStr}`);
+  exportToCSV(metricsData, `${L.fileMetrics}-${periodStr}-${dateStr}`);
+  exportToCSV(servicesData, `${L.fileServices}-${periodStr}-${dateStr}`);
+  exportToCSV(employeesData, `${L.fileStaff}-${periodStr}-${dateStr}`);
 }
 
 /**

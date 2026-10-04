@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Check, Copy, EnvelopeSimple, WhatsappLogo, ChatText, X, Warning } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';

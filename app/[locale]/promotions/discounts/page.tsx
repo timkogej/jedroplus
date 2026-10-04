@@ -5,7 +5,8 @@ import { useFormat } from '@/hooks/useFormat';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, PencilSimple, Trash, X, MagnifyingGlass, Tag } from '@phosphor-icons/react';
 import { toast } from 'sonner';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { useCompany } from '@/app/company-context';
 import { fetchStoritve } from '@/lib/companyScope';
 import type { Storitev } from '@/types/appointments';
@@ -45,15 +46,16 @@ const DEFAULT_FORM: PopustFormData = {
   storitev_ids: [],
 };
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   if (!dateStr) return '-';
   const d = new Date(dateStr);
-  return d.toLocaleDateString('sl-SI');
+  return d.toLocaleDateString(intlLocale(locale));
 }
 
 export default function DiscountsPage() {
   const { money } = useFormat();
   const t = useTranslations('promotions');
+  const locale = useLocale();
   const tc = useTranslations('common');
   const { companyId } = useCompany();
   const [discounts, setDiscounts] = useState<Popust[]>([]);
@@ -235,13 +237,13 @@ export default function DiscountsPage() {
       id: 'from',
       header: t('discounts.table.dateFrom'),
       sortValue: (p) => new Date(p.datum_zacetek || 0).getTime(),
-      cell: (p) => <span className="tnum whitespace-nowrap text-sm text-gray-600">{formatDate(p.datum_zacetek)}</span>,
+      cell: (p) => <span className="tnum whitespace-nowrap text-sm text-gray-600">{formatDate(p.datum_zacetek, locale)}</span>,
     },
     {
       id: 'to',
       header: t('discounts.table.dateTo'),
       sortValue: (p) => new Date(p.datum_konec || 0).getTime(),
-      cell: (p) => <span className="tnum whitespace-nowrap text-sm text-gray-600">{formatDate(p.datum_konec)}</span>,
+      cell: (p) => <span className="tnum whitespace-nowrap text-sm text-gray-600">{formatDate(p.datum_konec, locale)}</span>,
     },
     {
       id: 'status',
@@ -325,7 +327,7 @@ export default function DiscountsPage() {
           title: (p) => p.naziv,
           subtitle: (p) => (
             <span className="tnum">
-              {formatDate(p.datum_zacetek)} – {formatDate(p.datum_konec)}
+              {formatDate(p.datum_zacetek, locale)} – {formatDate(p.datum_konec, locale)}
             </span>
           ),
           meta: (p) => {

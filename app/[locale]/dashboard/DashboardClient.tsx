@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useFormat } from '@/hooks/useFormat';
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   CalendarCheck,
   UsersThree,
@@ -74,7 +74,7 @@ import { useTranslations } from "next-intl";
 import FirstRunSetup from "@/components/onboarding/FirstRunSetup";
 import GettingStarted from "@/components/guide/GettingStarted";
 import StaffTourStarter from "@/components/guide/StaffTourStarter";
-import NextLink from "next/link";
+import { Link as NextLink } from "@/i18n/navigation";
 
 // ─── Podrobnosti termina ─────────────────────────────────────────────────────
 // Na telefonu list od spodaj, na namizju sredinska plošča. Skupine z
@@ -1106,7 +1106,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                   <div>
                     <p className="text-xs text-gray-500">{t('completeModal.date')}</p>
                     <p className="text-sm font-normal text-[#1A1F36]">
-                      {new Date(completeTarget.datum).toLocaleDateString('sl-SI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                      {new Date(completeTarget.datum).toLocaleDateString(intlLocale(locale), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
                 </div>

@@ -1,0 +1,71 @@
+{
+  "page": {
+    "title": "Terminanfragen",
+    "subtitle": "Prüfen Sie Anfragen Ihrer Kunden und bestätigen Sie eine genaue Uhrzeit",
+    "backLink": "Zurück zu Buchungen"
+  },
+  "filters": {
+    "all": "Alle",
+    "pending": "Offen",
+    "confirmed": "Bestätigt",
+    "rejected": "Abgelehnt"
+  },
+  "empty": {
+    "title": "Keine Anfragen",
+    "subtitle": "Neue Terminanfragen Ihrer Kunden erscheinen hier."
+  },
+  "loadError": "Terminanfragen konnten nicht geladen werden.",
+  "status": {
+    "v_pregledu": "In Prüfung",
+    "potrjeno": "Bestätigt",
+    "zavrnjeno": "Abgelehnt"
+  },
+  "delDneva": {
+    "dopoldan": "Vormittags",
+    "popoldan": "Nachmittags",
+    "vseeno": "Egal wann"
+  },
+  "card": {
+    "preferredRange": "Gewünscht: {from} – {to}",
+    "requested": "Angefragt am {date}",
+    "confirm": "Bestätigen",
+    "reject": "Ablehnen",
+    "rejectedReason": "Grund: {reason}"
+  },
+  "rejectModal": {
+    "title": "Anfrage ablehnen",
+    "subtitle": "Teilen Sie {name} mit, warum die Anfrage nicht eingeplant werden kann.",
+    "reasonLabel": "Grund",
+    "reasonPlaceholder": "z. B. im gewünschten Zeitraum keine freien Termine",
+    "reasonRequired": "Bitte geben Sie einen Grund an.",
+    "cancel": "Abbrechen",
+    "confirm": "Anfrage ablehnen",
+    "rejecting": "Wird abgelehnt...",
+    "success": "Anfrage abgelehnt.",
+    "error": "Die Anfrage konnte nicht abgelehnt werden."
+  },
+  "confirmModal": {
+    "title": "Anfrage bestätigen",
+    "subtitle": "Wählen Sie Leistung und Mitarbeiter, dann eine Uhrzeit.",
+    "steps": {
+      "service": "Leistung",
+      "employee": "Mitarbeiter",
+      "slot": "Datum & Uhrzeit"
+    },
+    "serviceLabel": "Leistung",
+    "servicePlaceholder": "Leistung wählen...",
+    "employeeLabel": "Mitarbeiter",
+    "employeePlaceholder": "Mitarbeiter wählen...",
+    "loadingSlots": "Freie Zeiten werden gesucht...",
+    "noSlots": "Im gewünschten Zeitraum sind keine Zeiten frei.",
+    "slotsError": "Freie Zeiten konnten nicht geladen werden.",
+    "back": "Zurück",
+    "next": "Weiter",
+    "confirmButton": "Termin bestätigen",
+    "confirming": "Wird bestätigt...",
+    "success": "Termin bestätigt.",
+    "error": "Der Termin konnte nicht bestätigt werden.",
+    "unavailableDay": "Nicht verfügbar",
+    "fullyBookedDay": "Ausgebucht"
+  }
+}

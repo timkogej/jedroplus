@@ -1,4 +1,29 @@
+// Client-message language as stored in "Stranke".language, "Termini".language
+// and "Podatki podjetij".language and read by n8n. These legacy codes stay in
+// the database until n8n is migrated; in new code convert at the edge with
+// toIsoLanguage() / fromIsoLanguage() and work with ISO 639-1 ('sl', 'en', …),
+// the same codes the UI locales and receptionist_settings.language use.
 export type CommunicationLanguageCode = 'slo' | 'eng' | 'de' | 'it' | 'hr';
+
+export type IsoLanguageCode = 'sl' | 'en' | 'de' | 'it' | 'hr';
+
+const TO_ISO: Record<CommunicationLanguageCode, IsoLanguageCode> = {
+  slo: 'sl',
+  eng: 'en',
+  de: 'de',
+  it: 'it',
+  hr: 'hr',
+};
+
+/** Any spelling ('slo', 'sl', 'Slovenščina', 'eng', …) → ISO 639-1. */
+export function toIsoLanguage(value: unknown, fallback: CommunicationLanguageCode = 'slo'): IsoLanguageCode {
+  return TO_ISO[normalizeCommunicationLanguage(value, fallback)];
+}
+
+/** Any spelling → the legacy code the database and n8n expect. */
+export function fromIsoLanguage(value: unknown, fallback: CommunicationLanguageCode = 'slo'): CommunicationLanguageCode {
+  return normalizeCommunicationLanguage(value, fallback);
+}
 
 export type CommunicationLanguageOption = {
   value: CommunicationLanguageCode;

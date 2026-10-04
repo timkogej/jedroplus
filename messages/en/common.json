@@ -104,5 +104,13 @@
     "copied": "Copied",
     "preparing": "Preparing...",
     "registrationInfo": "Print this QR code and put it up in your salon or practice. Clients scan it with their phone and enter their details in under a minute."
+  },
+  "placeholders": {
+    "email": "name@company.com",
+    "contactEmail": "jane@company.com",
+    "infoEmail": "info@company.com",
+    "mobile": "+44 7700 900123",
+    "landline": "+44 20 7946 0000",
+    "website": "https://www.company.com"
   }
 }

@@ -214,5 +214,8 @@
         }
       }
     }
+  },
+  "meta": {
+    "description": "Jedro+ – appointment management system"
   }
 }
