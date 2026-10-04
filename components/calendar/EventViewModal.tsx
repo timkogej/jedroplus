@@ -17,6 +17,7 @@ import {
 import type { CalendarEvent } from '@/types/events';
 import { extractFirstColorStop } from '@/lib/utils/eventColors';
 import { useTranslations } from 'next-intl';
+import { sheet } from '@/components/ui/sheetClasses';
 
 interface EventViewModalProps {
   isOpen: boolean;
@@ -82,7 +83,7 @@ function EventViewModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={(e) => e.target === e.currentTarget && handleClose()}
         >
           <motion.div
@@ -90,27 +91,23 @@ function EventViewModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-md flex flex-col rounded-2xl shadow-2xl overflow-hidden"
-            style={{ maxHeight: '90vh', padding: '2px', background: event.color || '#6D5EF7' }}
+            className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex flex-col rounded-[14px] overflow-hidden" style={{ background: '#fff', maxHeight: 'calc(90vh - 4px)' }}>
-            {/* ── Header (white) ──────────────────────────────────────────────── */}
-            <div
-              className="px-6 py-5 flex-shrink-0"
-              style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
-            >
+            {/* ── Header ──────────────────────────────────────────────────────── */}
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <Star
                     weight="fill"
-                    style={{ width: 22, height: 22, color: iconColor, flexShrink: 0 }}
+                    style={{ width: 18, height: 18, color: iconColor, flexShrink: 0 }}
                   />
                   <div className="min-w-0">
-                    <h2 className="text-lg font-semibold truncate" style={{ color: '#1A1F36' }}>
+                    <h2 className={`${sheet.title} truncate`}>
                       {event.title}
                     </h2>
-                    <p className="text-sm mt-0.5" style={{ color: '#6B7280' }}>
+                    <p className={sheet.subtitle}>
                       {formatDateRange(event.event_date, event.end_date)}
                     </p>
                   </div>
@@ -118,89 +115,72 @@ function EventViewModal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 flex-shrink-0"
+                  className={`${sheet.close} flex-shrink-0`}
                 >
-                  <X style={{ width: 20, height: 20 }} weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </button>
               </div>
             </div>
 
-            {/* ── Body (white) ────────────────────────────────────────────────── */}
-            <div
-              className="flex-1 overflow-y-auto px-6 py-5 space-y-4"
-              style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.1) transparent' }}
-            >
-              {/* Date/time row */}
-              <div className="flex items-start gap-3">
-                <CalendarBlank
-                  weight="regular"
-                  style={{ width: 18, height: 18, color: '#6B7280', flexShrink: 0, marginTop: 2 }}
-                />
-                <div>
-                  <p className="text-sm font-medium text-[#1A1F36]">
-                    {formatDateRange(event.event_date, event.end_date)}
-                  </p>
-                  {event.all_day ? (
-                    <p className="text-xs text-gray-400 mt-0.5">{t('calendarView.eventModal.fields.allDay')}</p>
-                  ) : event.start_time ? (
-                    <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                      <Clock style={{ width: 12, height: 12 }} weight="regular" />
-                      {formatTime(event.start_time)}{event.end_time ? ` – ${formatTime(event.end_time)}` : ''}
+            {/* ── Body ────────────────────────────────────────────────────────── */}
+            <div className={sheet.body}>
+              <div className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white">
+                {/* Date/time row */}
+                <div className="flex items-start gap-3 px-4 py-3">
+                  <CalendarBlank weight="regular" className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatDateRange(event.event_date, event.end_date)}
                     </p>
-                  ) : null}
+                    {event.all_day ? (
+                      <p className="text-[13px] text-gray-500 mt-0.5">{t('calendarView.eventModal.fields.allDay')}</p>
+                    ) : event.start_time ? (
+                      <p className="tnum text-[13px] text-gray-500 mt-0.5 flex items-center gap-1">
+                        <Clock className="h-3 w-3" weight="regular" />
+                        {formatTime(event.start_time)}{event.end_time ? ` – ${formatTime(event.end_time)}` : ''}
+                      </p>
+                    ) : null}
+                  </div>
                 </div>
+
+                {/* Location */}
+                {event.location && (
+                  <div className="flex items-start gap-3 px-4 py-3">
+                    <MapPin weight="regular" className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" />
+                    <p className="text-sm text-gray-900">{event.location}</p>
+                  </div>
+                )}
+
+                {/* Description */}
+                {event.description && (
+                  <div className="flex items-start gap-3 px-4 py-3">
+                    <TextAlignLeft weight="regular" className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" />
+                    <p className="text-sm text-gray-900 whitespace-pre-wrap">{event.description}</p>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {event.notes && (
+                  <div className="flex items-start gap-3 px-4 py-3">
+                    <Note weight="regular" className="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" />
+                    <p className="text-sm text-gray-500 whitespace-pre-wrap">{event.notes}</p>
+                  </div>
+                )}
               </div>
-
-              {/* Location */}
-              {event.location && (
-                <div className="flex items-start gap-3">
-                  <MapPin
-                    weight="regular"
-                    style={{ width: 18, height: 18, color: '#6B7280', flexShrink: 0, marginTop: 2 }}
-                  />
-                  <p className="text-sm text-[#1A1F36]">{event.location}</p>
-                </div>
-              )}
-
-              {/* Description */}
-              {event.description && (
-                <div className="flex items-start gap-3">
-                  <TextAlignLeft
-                    weight="regular"
-                    style={{ width: 18, height: 18, color: '#6B7280', flexShrink: 0, marginTop: 2 }}
-                  />
-                  <p className="text-sm text-[#1A1F36] whitespace-pre-wrap">{event.description}</p>
-                </div>
-              )}
-
-              {/* Notes */}
-              {event.notes && (
-                <div className="flex items-start gap-3">
-                  <Note
-                    weight="regular"
-                    style={{ width: 18, height: 18, color: '#6B7280', flexShrink: 0, marginTop: 2 }}
-                  />
-                  <p className="text-sm text-gray-500 whitespace-pre-wrap">{event.notes}</p>
-                </div>
-              )}
-
             </div>
 
             {/* ── Footer ──────────────────────────────────────────────────────── */}
-            <div
-              className="flex items-center gap-3 px-6 py-4 flex-shrink-0"
-              style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}
-            >
+            <div className={`${sheet.footer} !justify-start`}>
               {/* Delete flow */}
               {!showDeleteConfirm ? (
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={isDeleting}
-                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-red-500
-                             transition-all hover:bg-red-50 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-500
+                             transition-colors hover:bg-red-50 disabled:opacity-50"
                 >
-                  <Trash style={{ width: 16, height: 16 }} weight="bold" />
+                  <Trash className="h-4 w-4" weight="regular" />
                   {t('calendarView.eventModal.actions.delete')}
                 </button>
               ) : (
@@ -210,20 +190,20 @@ function EventViewModal({
                     type="button"
                     onClick={handleDeleteConfirm}
                     disabled={isDeleting}
-                    className="flex items-center gap-1.5 rounded-xl bg-red-50 border border-red-200 px-3 py-2
-                               text-sm font-medium text-red-600 transition-all hover:bg-red-100 disabled:opacity-50"
+                    className="flex items-center gap-1.5 rounded-xl bg-red-500 px-3 py-1.5
+                               text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                   >
                     {isDeleting ? (
-                      <SpinnerGap style={{ width: 14, height: 14 }} className="animate-spin" />
+                      <SpinnerGap className="h-3.5 w-3.5 animate-spin" />
                     ) : (
-                      <Trash style={{ width: 14, height: 14 }} weight="bold" />
+                      <Trash className="h-3.5 w-3.5" weight="bold" />
                     )}
                     {t('calendarView.eventModal.actions.confirmYes')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(false)}
-                    className="rounded-xl px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
+                    className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50"
                   >
                     {t('calendarView.absenceDetailModal.actions.confirmNo')}
                   </button>
@@ -237,18 +217,14 @@ function EventViewModal({
                   <button
                     type="button"
                     onClick={() => onEdit(event)}
-                    className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-all"
-                    style={{
-                      background: event.color || '#6D5EF7',
-                      boxShadow: `0 4px 15px ${iconColor}40`,
-                    }}
+                    className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80"
+                    style={{ background: event.color || '#6D5EF7' }}
                   >
-                    <PencilSimple style={{ width: 16, height: 16 }} weight="bold" />
+                    <PencilSimple className="h-4 w-4" weight="bold" />
                     {t('calendarView.eventModal.actions.edit')}
                   </button>
                 </>
               )}
-            </div>
             </div>
           </motion.div>
         </motion.div>

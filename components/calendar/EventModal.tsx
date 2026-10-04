@@ -9,10 +9,7 @@ import {
   SpinnerGap,
   Warning,
   Trash,
-  CalendarBlank,
-  Clock,
   MapPin,
-  TextAlignLeft,
 } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import type { CalendarEvent } from '@/types/events';
@@ -21,6 +18,7 @@ import {
   extractFirstColorStop,
 } from '@/lib/utils/eventColors';
 import { useTranslations } from 'next-intl';
+import { sheet } from '@/components/ui/sheetClasses';
 
 export interface EventFormData {
   title: string;
@@ -161,7 +159,7 @@ function EventModal({
       is_visible: isVisible,
       enable_booking: enableBooking,
     });
-  }, [validate, onSave, title, description, notes, eventDate, endDate, allDay, startTime, endTime, location, color, isVisible]);
+  }, [validate, onSave, title, description, notes, eventDate, endDate, allDay, startTime, endTime, location, color, isVisible, enableBooking]);
 
   // ── Delete ───────────────────────────────────────────────────────────────────
   const handleDeleteConfirm = useCallback(async () => {
@@ -179,10 +177,33 @@ function EventModal({
   const iconColor = extractFirstColorStop(color);
 
   const inputClass =
-    'w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-[#1A1F36] placeholder-gray-400 ' +
-    'focus:border-gray-300 focus:outline-none focus:ring-1 focus:ring-gray-200 transition-all';
+    'w-full rounded-[10px] border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 placeholder-gray-400 ' +
+    'focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25 transition-all';
 
-  const labelClass = 'text-xs font-medium text-gray-500 uppercase tracking-wider mb-1.5 block';
+  const labelClass = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500';
+
+  /** iOS vrstica s stikalom v barvi dogodka. */
+  const toggleRow = (checked: boolean, onToggle: () => void, label: string) => (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={onToggle}
+      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+    >
+      <span className="text-sm text-gray-900">{label}</span>
+      <span
+        className={`relative h-5 w-9 flex-shrink-0 rounded-full transition-all ${checked ? '' : 'bg-gray-300'}`}
+        style={checked ? { background: iconColor } : undefined}
+      >
+        <span
+          className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white shadow-sm transition-all ${
+            checked ? 'left-[18px]' : 'left-0.5'
+          }`}
+        />
+      </span>
+    </button>
+  );
 
   return (
     <AnimatePresence>
@@ -192,7 +213,7 @@ function EventModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+          className={sheet.backdrop}
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -200,27 +221,23 @@ function EventModal({
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative w-full max-w-lg flex flex-col rounded-2xl shadow-2xl overflow-hidden"
-            style={{ maxHeight: '90vh', padding: '2px', background: color }}
+            className={`${sheet.panel} sm:max-w-lg`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex flex-col rounded-[14px] overflow-hidden" style={{ background: '#fff', maxHeight: 'calc(90vh - 4px)' }}>
-            {/* ── Header (white) ───────────────────────────────────────────── */}
-            <div
-              className="px-6 py-5 flex-shrink-0"
-              style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)' }}
-            >
+            {/* ── Header ───────────────────────────────────────────────────── */}
+            <div className={sheet.header}>
+              <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <Star
                     weight="fill"
-                    style={{ width: 22, height: 22, color: iconColor, flexShrink: 0 }}
+                    style={{ width: 18, height: 18, color: iconColor, flexShrink: 0 }}
                   />
                   <div>
-                    <h2 className="text-lg font-semibold" style={{ color: '#1A1F36' }}>
+                    <h2 className={sheet.title}>
                       {mode === 'edit' ? t('calendarView.eventModal.titles.edit') : t('calendarView.eventModal.titles.create')}
                     </h2>
-                    <p className="text-sm" style={{ color: '#6B7280' }}>
+                    <p className={sheet.subtitle}>
                       {mode === 'edit' ? t('calendarView.eventModal.subtitles.edit') : t('calendarView.eventModal.subtitles.create')}
                     </p>
                   </div>
@@ -228,27 +245,23 @@ function EventModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 flex-shrink-0"
+                  className={`${sheet.close} flex-shrink-0`}
                 >
-                  <X style={{ width: 20, height: 20 }} weight="bold" />
+                  <X className="h-5 w-5" weight="regular" />
                 </button>
               </div>
             </div>
 
-            {/* ── Form (white) ─────────────────────────────────────────────── */}
+            {/* ── Form ─────────────────────────────────────────────────────── */}
             <form
               onSubmit={handleSubmit}
-              className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 space-y-5"
-              style={{ background: '#fff', scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.1) transparent' }}
+              className={`${sheet.body} overflow-x-hidden`}
             >
               {/* Errors */}
               {errors.length > 0 && (
-                <div
-                  className="rounded-xl p-4"
-                  style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}
-                >
+                <div className="rounded-xl bg-red-50 p-4">
                   <div className="flex items-start gap-3">
-                    <Warning style={{ width: 16, height: 16 }} className="text-red-500 flex-shrink-0 mt-0.5" weight="fill" />
+                    <Warning className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" weight="regular" />
                     <div className="space-y-1">
                       {errors.map((err, i) => (
                         <p key={i} className="text-sm text-red-600">{err}</p>
@@ -259,7 +272,7 @@ function EventModal({
               )}
 
               {/* Title */}
-              <div>
+              <div className={sheet.group}>
                 <label className={labelClass}>{t('calendarView.eventModal.fields.title')}</label>
                 <input
                   type="text"
@@ -270,90 +283,68 @@ function EventModal({
                 />
               </div>
 
-              {/* Date row */}
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass}>
-                    <CalendarBlank className="inline h-3 w-3 mr-1" weight="bold" />
-                    {t('calendarView.eventModal.fields.startDate')}
-                  </label>
-                  <input
-                    type="date"
-                    value={eventDate}
-                    onChange={(e) => setEventDate(e.target.value)}
-                    className={`${inputClass} max-w-full`}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>
-                    <CalendarBlank className="inline h-3 w-3 mr-1" weight="bold" />
-                    {t('calendarView.eventModal.fields.endDate')}
-                  </label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    min={eventDate}
-                    className={`${inputClass} max-w-full`}
-                  />
-                </div>
-              </div>
-
-              {/* All-day toggle */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setAllDay((prev) => !prev)}
-                  className="flex items-center gap-3 group"
-                >
-                  <div
-                    className={`relative w-10 h-5 rounded-full transition-all flex-shrink-0 ${
-                      allDay ? '' : 'bg-gray-200'
-                    }`}
-                    style={allDay ? { background: iconColor } : undefined}
-                  >
-                    <div
-                      className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-white shadow transition-all ${
-                        allDay ? 'left-5' : 'left-0.5'
-                      }`}
+              {/* Date + time */}
+              <div className="overflow-hidden rounded-xl bg-white">
+                <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+                  <div>
+                    <label className={labelClass}>
+                      {t('calendarView.eventModal.fields.startDate')}
+                    </label>
+                    <input
+                      type="date"
+                      value={eventDate}
+                      onChange={(e) => setEventDate(e.target.value)}
+                      className={`${inputClass} max-w-full`}
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-[#1A1F36] transition-colors">
-                    {t('calendarView.eventModal.fields.allDay')}
-                  </span>
-                </button>
-              </div>
-
-              {/* Time inputs */}
-              {!allDay && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className={labelClass}>
-                      <Clock className="inline h-3 w-3 mr-1" weight="bold" />
-                      {t('calendarView.eventModal.fields.startTime')}
+                      {t('calendarView.eventModal.fields.endDate')}
                     </label>
-                    <Select value={startTime} setValue={setStartTime} placeholder={t('calendarView.eventModal.fields.timePlaceholder')}>
-                      {TIME_OPTIONS.map((opt) => (
-                        <SelectOption key={opt} value={opt}>{opt}</SelectOption>
-                      ))}
-                    </Select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      <Clock className="inline h-3 w-3 mr-1" weight="bold" />
-                      {t('calendarView.eventModal.fields.endTime')}
-                    </label>
-                    <Select value={endTime} setValue={setEndTime} placeholder={t('calendarView.eventModal.fields.timePlaceholder')}>
-                      {TIME_OPTIONS.map((opt) => (
-                        <SelectOption key={opt} value={opt}>{opt}</SelectOption>
-                      ))}
-                    </Select>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      min={eventDate}
+                      className={`${inputClass} max-w-full`}
+                    />
                   </div>
                 </div>
-              )}
+
+                {/* All-day toggle */}
+                <div className="border-t border-gray-100">
+                  {toggleRow(allDay, () => setAllDay((prev) => !prev), t('calendarView.eventModal.fields.allDay'))}
+                </div>
+
+                {/* Time inputs */}
+                {!allDay && (
+                  <div className="grid grid-cols-1 gap-3 border-t border-gray-100 p-4 sm:grid-cols-2">
+                    <div>
+                      <label className={labelClass}>
+                        {t('calendarView.eventModal.fields.startTime')}
+                      </label>
+                      <Select value={startTime} setValue={setStartTime} placeholder={t('calendarView.eventModal.fields.timePlaceholder')}>
+                        {TIME_OPTIONS.map((opt) => (
+                          <SelectOption key={opt} value={opt}>{opt}</SelectOption>
+                        ))}
+                      </Select>
+                    </div>
+                    <div>
+                      <label className={labelClass}>
+                        {t('calendarView.eventModal.fields.endTime')}
+                      </label>
+                      <Select value={endTime} setValue={setEndTime} placeholder={t('calendarView.eventModal.fields.timePlaceholder')}>
+                        {TIME_OPTIONS.map((opt) => (
+                          <SelectOption key={opt} value={opt}>{opt}</SelectOption>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Color picker */}
-              <div>
+              <div className={sheet.group}>
                 <label className={labelClass}>{t('calendarView.eventModal.fields.color')}</label>
                 <div className="grid grid-cols-4 gap-2">
                   {EVENT_COLOR_PRESETS.map((preset) => {
@@ -385,114 +376,68 @@ function EventModal({
                 </div>
               </div>
 
-              {/* Description */}
-              <div>
-                <label className={labelClass}>
-                  <TextAlignLeft className="inline h-3 w-3 mr-1" weight="bold" />
-                  {t('calendarView.eventModal.fields.description')}
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder={t('calendarView.eventModal.fields.descriptionPlaceholder')}
-                  rows={2}
-                  className={`${inputClass} resize-none`}
-                />
-              </div>
+              {/* Description, notes, location */}
+              <div className={`${sheet.group} space-y-4`}>
+                <div>
+                  <label className={labelClass}>
+                    {t('calendarView.eventModal.fields.description')}
+                  </label>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder={t('calendarView.eventModal.fields.descriptionPlaceholder')}
+                    rows={2}
+                    className={`${inputClass} resize-none`}
+                  />
+                </div>
 
-              {/* Notes */}
-              <div>
-                <label className={labelClass}>{t('calendarView.eventModal.fields.notes')}</label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder={t('calendarView.eventModal.fields.notesPlaceholder')}
-                  rows={2}
-                  className={`${inputClass} resize-none`}
-                />
-              </div>
+                <div>
+                  <label className={labelClass}>{t('calendarView.eventModal.fields.notes')}</label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder={t('calendarView.eventModal.fields.notesPlaceholder')}
+                    rows={2}
+                    className={`${inputClass} resize-none`}
+                  />
+                </div>
 
-              {/* Location */}
-              <div>
-                <label className={labelClass}>
-                  <MapPin className="inline h-3 w-3 mr-1" weight="bold" />
-                  {t('calendarView.eventModal.fields.location')}
-                </label>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder={t('calendarView.eventModal.fields.locationPlaceholder')}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Visibility toggle */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setIsVisible((prev) => !prev)}
-                  className="flex items-center gap-3 group"
-                >
-                  <div
-                    className={`relative w-10 h-5 rounded-full transition-all flex-shrink-0 ${
-                      isVisible ? '' : 'bg-gray-200'
-                    }`}
-                    style={isVisible ? { background: iconColor } : undefined}
-                  >
-                    <div
-                      className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-white shadow transition-all ${
-                        isVisible ? 'left-5' : 'left-0.5'
-                      }`}
+                <div>
+                  <label className={labelClass}>
+                    {t('calendarView.eventModal.fields.location')}
+                  </label>
+                  <div className="relative">
+                    <MapPin className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
+                    <input
+                      type="text"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      placeholder={t('calendarView.eventModal.fields.locationPlaceholder')}
+                      className={`${inputClass} pl-9`}
                     />
                   </div>
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-[#1A1F36] transition-colors">
-                    {t('calendarView.eventModal.fields.visibleInCalendar')}
-                  </span>
-                </button>
+                </div>
               </div>
 
-              {/* Enable booking toggle */}
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setEnableBooking((prev) => !prev)}
-                  className="flex items-center gap-3 group"
-                >
-                  <div
-                    className={`relative w-10 h-5 rounded-full transition-all flex-shrink-0 ${
-                      enableBooking ? '' : 'bg-gray-200'
-                    }`}
-                    style={enableBooking ? { background: iconColor } : undefined}
-                  >
-                    <div
-                      className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-white shadow transition-all ${
-                        enableBooking ? 'left-5' : 'left-0.5'
-                      }`}
-                    />
-                  </div>
-                  <span className="text-sm font-medium text-gray-600 group-hover:text-[#1A1F36] transition-colors">
-                    {t('calendarView.eventModal.fields.allowBooking')}
-                  </span>
-                </button>
+              {/* Visibility + booking toggles */}
+              <div className="divide-y divide-gray-100 overflow-hidden rounded-xl bg-white">
+                {toggleRow(isVisible, () => setIsVisible((prev) => !prev), t('calendarView.eventModal.fields.visibleInCalendar'))}
+                {toggleRow(enableBooking, () => setEnableBooking((prev) => !prev), t('calendarView.eventModal.fields.allowBooking'))}
               </div>
             </form>
 
-            {/* ── Footer (white) ───────────────────────────────────────────── */}
-            <div
-              className="flex items-center gap-3 px-6 py-4 flex-shrink-0"
-              style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}
-            >
+            {/* ── Footer ───────────────────────────────────────────────────── */}
+            <div className={`${sheet.footer} !justify-start`}>
               {/* Delete button (edit mode only) */}
               {mode === 'edit' && onDelete && !showDeleteConfirm && (
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(true)}
                   disabled={isDeleting || isSaving}
-                  className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-red-500
-                             transition-all hover:bg-red-50 disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-500
+                             transition-colors hover:bg-red-50 disabled:opacity-50"
                 >
-                  <Trash style={{ width: 16, height: 16 }} weight="bold" />
+                  <Trash className="h-4 w-4" weight="regular" />
                   {t('calendarView.eventModal.actions.delete')}
                 </button>
               )}
@@ -505,20 +450,20 @@ function EventModal({
                     type="button"
                     onClick={handleDeleteConfirm}
                     disabled={isDeleting}
-                    className="flex items-center gap-1.5 rounded-xl bg-red-50 border border-red-200 px-3 py-2
-                               text-sm font-medium text-red-600 transition-all hover:bg-red-100 disabled:opacity-50"
+                    className="flex items-center gap-1.5 rounded-xl bg-red-500 px-3 py-1.5
+                               text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                   >
                     {isDeleting ? (
-                      <SpinnerGap style={{ width: 14, height: 14 }} className="animate-spin" />
+                      <SpinnerGap className="h-3.5 w-3.5 animate-spin" />
                     ) : (
-                      <Trash style={{ width: 14, height: 14 }} weight="bold" />
+                      <Trash className="h-3.5 w-3.5" weight="bold" />
                     )}
                     {t('calendarView.eventModal.actions.confirmYes')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(false)}
-                    className="rounded-xl px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#1A1F36]"
+                    className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50"
                   >
                     {t('calendarView.absenceDetailModal.actions.confirmNo')}
                   </button>
@@ -533,7 +478,7 @@ function EventModal({
                   type="button"
                   onClick={onClose}
                   disabled={isSaving}
-                  className="rounded-xl px-5 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-[#1A1F36] disabled:opacity-50"
+                  className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:opacity-50"
                 >
                   {t('calendarView.eventModal.actions.cancel')}
                 </button>
@@ -546,26 +491,22 @@ function EventModal({
                   onClick={handleSubmit}
                   disabled={isSaving}
                   className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white
-                             shadow-lg transition-all disabled:opacity-70"
-                  style={{
-                    background: color,
-                    boxShadow: `0 4px 15px ${iconColor}40`,
-                  }}
+                             shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-70"
+                  style={{ background: color }}
                 >
                   {isSaving ? (
                     <>
-                      <SpinnerGap style={{ width: 16, height: 16 }} className="animate-spin" />
+                      <SpinnerGap className="h-4 w-4 animate-spin" />
                       {t('calendarView.eventModal.actions.saving')}
                     </>
                   ) : (
                     <>
-                      <FloppyDisk style={{ width: 16, height: 16 }} weight="bold" />
+                      <FloppyDisk className="h-4 w-4" weight="bold" />
                       {mode === 'edit' ? t('calendarView.eventModal.actions.update') : t('calendarView.eventModal.actions.save')}
                     </>
                   )}
                 </button>
               )}
-            </div>
             </div>
           </motion.div>
         </motion.div>
