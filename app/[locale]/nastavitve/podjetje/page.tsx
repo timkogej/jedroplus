@@ -378,16 +378,15 @@ export default function CompanySettingsPage() {
 
         {/* Working Hours - Interval Based */}
         <SettingsSection title={t('company.workingHours.title')} description={t('company.workingHours.subtitle')}>
-          <div className="space-y-4">
-            {DAYS_OF_WEEK.map((day) => {
+          {DAYS_OF_WEEK.map((day) => {
               const dayHours = workingHours[day] || { enabled: false, intervals: [{ start: '08:00', end: '17:00' }] };
               const dayKey = DAY_KEYS[day];
 
               return (
-                <div key={day} className="border border-gray-100 rounded-2xl p-5 space-y-3">
+                <div key={day} className="space-y-3">
                   {/* Day header with enable toggle */}
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900">{tc(`daysLong.${dayKey}`)}</span>
+                    <span className="text-sm font-medium text-gray-900">{tc(`daysLong.${dayKey}`)}</span>
                     <Switch
                       checked={dayHours.enabled}
                       onChange={(enabled) => updateWorkingHours(day, { enabled })}
@@ -396,7 +395,7 @@ export default function CompanySettingsPage() {
 
                   {/* Intervals */}
                   {dayHours.enabled && (
-                    <div className="space-y-3 pt-2">
+                    <div className="space-y-2">
                       {dayHours.intervals?.map((interval, idx) => (
                         <div key={idx} className="flex items-center gap-3">
                           <div className="flex items-center gap-2 flex-1">
@@ -416,7 +415,7 @@ export default function CompanySettingsPage() {
                             <button
                               type="button"
                               onClick={() => removeInterval(day, idx)}
-                              className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -428,7 +427,7 @@ export default function CompanySettingsPage() {
                       <button
                         type="button"
                         onClick={() => addInterval(day)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-[#7C78FA] transition-opacity hover:opacity-80"
                       >
                         <Plus className="w-4 h-4" />
                         {t('company.workingHours.addInterval')}
@@ -442,7 +441,6 @@ export default function CompanySettingsPage() {
                 </div>
               );
             })}
-          </div>
         </SettingsSection>
 
         {/* Action row */}
@@ -452,7 +450,7 @@ export default function CompanySettingsPage() {
             onClick={handleSave}
             disabled={saving}
             whileTap={{ scale: 0.98 }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] active:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {saving ? (
               <>
@@ -467,7 +465,7 @@ export default function CompanySettingsPage() {
           </motion.button>
           <Link
             href="/nastavitve"
-            className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+            className="rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:text-gray-900"
           >
             {t('company.actions.cancel')}
           </Link>

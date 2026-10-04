@@ -128,8 +128,8 @@ export default function CompanyLogoSection({ initialUrl }: CompanyLogoSectionPro
         )}
 
         {opaque && url && (
-          <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
-            <Warning className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" weight="fill" />
+          <div className="flex items-start gap-2 rounded-[10px] bg-amber-50 p-3">
+            <Warning className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" weight="regular" />
             <div className="text-xs leading-5 text-amber-900">
               <p className="font-semibold">{t('opaqueTitle')}</p>
               <p className="mt-0.5">{t('opaqueBody')}</p>
@@ -159,7 +159,7 @@ export default function CompanyLogoSection({ initialUrl }: CompanyLogoSectionPro
           />
           <label
             htmlFor="company-logo-input"
-            className={`inline-flex cursor-pointer items-center gap-2 rounded-xl bg-[#0a0a0a] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#1f1f1f] ${
+            className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 ${
               busy ? 'pointer-events-none opacity-60' : ''
             }`}
           >
@@ -172,7 +172,7 @@ export default function CompanyLogoSection({ initialUrl }: CompanyLogoSectionPro
               type="button"
               onClick={remove}
               disabled={busy}
-              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
             >
               <Trash className="h-4 w-4" />
               {t('remove')}
