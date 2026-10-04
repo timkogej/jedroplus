@@ -84,7 +84,7 @@ const DEFAULT_FILTERS: Filters = {
 function AkcijaBadge({ akcija, label }: { akcija: string; label: string }) {
   const color = AKCIJA_COLORS[akcija] ?? 'bg-gray-100 text-gray-600';
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${color}`}>
       {label}
     </span>
   );
@@ -118,7 +118,7 @@ function JsonDiff({
             return (
               <div
                 key={k}
-                className={`rounded px-2 py-1 text-xs ${
+                className={`rounded-md px-2 py-1 text-xs ${
                   changed ? 'bg-red-50 text-red-700' : 'bg-gray-50 text-gray-600'
                 }`}
               >
@@ -146,7 +146,7 @@ function JsonDiff({
             return (
               <div
                 key={k}
-                className={`rounded px-2 py-1 text-xs ${
+                className={`rounded-md px-2 py-1 text-xs ${
                   changed ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-50 text-gray-600'
                 }`}
               >
@@ -201,35 +201,35 @@ function ZgodovinaCard({ row }: { row: ZgodovinaRow }) {
   const hasExtra = hasSpremembe || row['ID termina'] || row['ID stranke'];
 
   return (
-    <div className="border border-gray-100 rounded-2xl overflow-hidden bg-white transition-colors hover:border-gray-200">
-      <div className="flex items-start gap-3 p-4">
+    <div>
+      <div className="flex items-center gap-3 px-4 py-3">
         <div className="flex-1 min-w-0">
           {/* Top row: action badge + entity type + ID */}
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+          <div className="mb-1 flex flex-wrap items-center gap-1.5">
             <AkcijaBadge akcija={akcija} label={akcijLabel} />
-            <span className="text-xs text-gray-500">{tipLabel}</span>
+            <span className="text-[13px] text-gray-900">{tipLabel}</span>
             {row['ID entitete'] && (
-              <span className="text-xs text-gray-400 font-mono truncate max-w-[140px]">
+              <span className="max-w-[140px] truncate font-mono text-xs text-gray-400">
                 #{row['ID entitete']}
               </span>
             )}
           </div>
 
           {/* Second row: who + date */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+          <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] text-gray-500">
             {row.izvedel && (
-              <span className="font-medium text-gray-700 truncate max-w-[200px]">
+              <span className="max-w-[200px] truncate text-gray-700">
                 {row.izvedel}
               </span>
             )}
             {izvedalTipLabel && (
               <>
-                {row.izvedel && <span>·</span>}
+                {row.izvedel && <span className="text-gray-300">·</span>}
                 <span>{izvedalTipLabel}</span>
               </>
             )}
-            {(row.izvedel || izvedalTipLabel) && <span>·</span>}
-            <span>{formattedDate}</span>
+            {(row.izvedel || izvedalTipLabel) && <span className="text-gray-300">·</span>}
+            <span className="tnum">{formattedDate}</span>
           </div>
         </div>
 
@@ -238,17 +238,17 @@ function ZgodovinaCard({ row }: { row: ZgodovinaRow }) {
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors"
+            className="flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[13px] font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
           >
             {expanded ? (
               <>
-                <CaretUp className="w-3.5 h-3.5" />
                 {t('zgodovina.collapse')}
+                <CaretUp className="h-3.5 w-3.5" />
               </>
             ) : (
               <>
-                <CaretDown className="w-3.5 h-3.5" />
                 {t('zgodovina.expand')}
+                <CaretDown className="h-3.5 w-3.5" />
               </>
             )}
           </button>
@@ -264,7 +264,7 @@ function ZgodovinaCard({ row }: { row: ZgodovinaRow }) {
             transition={{ duration: 0.18 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4 border-t border-gray-100 pt-3 space-y-4">
+            <div className="space-y-4 px-4 pb-4 pt-1">
               {/* IDs */}
               {(row['ID termina'] || row['ID stranke']) && (
                 <div className="flex flex-wrap gap-4 text-xs text-gray-500">
@@ -286,7 +286,7 @@ function ZgodovinaCard({ row }: { row: ZgodovinaRow }) {
               {/* Diff */}
               {hasSpremembe ? (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 tracking-wide mb-2">
+                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                     {t('zgodovina.spremembe.title')}
                   </p>
                   <JsonDiff
@@ -448,9 +448,9 @@ export default function ZgodovinaPage() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl bg-amber-50 border border-amber-100 p-8 text-center"
+          className="rounded-xl bg-amber-50 p-8 text-center"
         >
-          <Warning className="w-8 h-8 text-amber-500 mx-auto mb-3" weight="fill" />
+          <Warning className="mx-auto mb-3 h-8 w-8 text-amber-500" weight="regular" />
           <h2 className="text-base font-semibold text-amber-900 mb-1">
             {t('zgodovina.noAccess.title')}
           </h2>
@@ -483,21 +483,21 @@ export default function ZgodovinaPage() {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl border border-gray-100 px-5 py-4 space-y-3"
+        className="space-y-3 rounded-xl border border-gray-100 bg-white p-4"
       >
         {/* Row 1: Tip tabs + Akcija dropdown */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Tip tabs */}
-          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
             {(['vsi', 'termini', 'stranke'] as const).map((v) => (
               <button
                 key={v}
                 type="button"
                 onClick={() => setFilters((f) => ({ ...f, tip: v }))}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                className={`rounded-[7px] px-3 py-1 text-[13px] font-medium transition-colors ${
                   filters.tip === v
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-white text-gray-900 shadow-[0_1px_2px_rgba(0,0,0,0.1)]'
+                    : 'text-gray-500 hover:text-gray-900'
                 }`}
               >
                 {t(`zgodovina.filters.${v}`)}
@@ -509,7 +509,7 @@ export default function ZgodovinaPage() {
           <select
             value={filters.akcija}
             onChange={(e) => setFilters((f) => ({ ...f, akcija: e.target.value }))}
-            className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+            className="rounded-[10px] border border-gray-200 bg-white px-3 py-1.5 text-[13px] text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
           >
             <option value="vseAkcije">{t('zgodovina.filters.vseAkcije')}</option>
             {ALL_AKCIJE.map((a) => (
@@ -523,21 +523,21 @@ export default function ZgodovinaPage() {
         {/* Row 2: Date range + search */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-500">{t('zgodovina.filters.datumOd')}</label>
+            <label className="text-[13px] text-gray-500">{t('zgodovina.filters.datumOd')}</label>
             <input
               type="date"
               value={filters.datumOd}
               onChange={(e) => setFilters((f) => ({ ...f, datumOd: e.target.value }))}
-              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+              className="rounded-[10px] border border-gray-200 bg-white px-2 py-1.5 text-[13px] text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
             />
           </div>
           <div className="flex items-center gap-2">
-            <label className="text-xs text-gray-500">{t('zgodovina.filters.datumDo')}</label>
+            <label className="text-[13px] text-gray-500">{t('zgodovina.filters.datumDo')}</label>
             <input
               type="date"
               value={filters.datumDo}
               onChange={(e) => setFilters((f) => ({ ...f, datumDo: e.target.value }))}
-              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+              className="rounded-[10px] border border-gray-200 bg-white px-2 py-1.5 text-[13px] text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
             />
           </div>
 
@@ -550,7 +550,7 @@ export default function ZgodovinaPage() {
               value={filters.search}
               onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
               onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
-              className="w-full pl-8 pr-8 py-1.5 text-xs border border-gray-200 rounded-lg text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-gray-200"
+              className="w-full rounded-[10px] border border-gray-200 bg-white py-1.5 pl-8 pr-8 text-[13px] text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
             />
             {filters.search && (
               <button
@@ -569,21 +569,21 @@ export default function ZgodovinaPage() {
           <button
             type="button"
             onClick={applyFilters}
-            className="px-4 py-1.5 text-xs font-medium bg-gray-900 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            className="rounded-xl bg-gray-900 px-4 py-1.5 text-[13px] font-medium text-white transition-colors hover:bg-gray-800"
           >
-            {t('zgodovina.filters.tip')}
+            {t('zgodovina.filters.apply')}
           </button>
           {hasActiveFilters && (
             <button
               type="button"
               onClick={resetFilters}
-              className="px-3 py-1.5 text-xs font-medium text-gray-500 border border-gray-200 rounded-lg hover:text-gray-700 hover:border-gray-300 transition-colors"
+              className="rounded-xl px-3 py-1.5 text-[13px] font-medium text-gray-500 transition-colors hover:text-gray-900"
             >
               {t('zgodovina.filters.resetFilters')}
             </button>
           )}
           {totalCount > 0 && !isLoading && (
-            <span className="text-xs text-gray-400 ml-auto">
+            <span className="tnum ml-auto text-[13px] text-gray-500">
               {totalCount} zapisov
             </span>
           )}
@@ -596,24 +596,24 @@ export default function ZgodovinaPage() {
           <GradientSpinner size={32} />
         </div>
       ) : error ? (
-        <div className="rounded-2xl bg-red-50 border border-red-100 p-6 text-center">
-          <Warning className="w-7 h-7 text-red-500 mx-auto mb-2" weight="fill" />
+        <div className="rounded-xl bg-red-50 p-6 text-center">
+          <Warning className="mx-auto mb-2 h-7 w-7 text-red-500" weight="regular" />
           <p className="text-sm text-red-700">{t('zgodovina.loadError')}</p>
         </div>
       ) : records.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl border border-gray-100 px-6 py-14 text-center"
+          className="rounded-xl border border-gray-100 bg-white px-6 py-14 text-center"
         >
-          <p className="text-sm font-medium text-gray-500">{t('zgodovina.empty.title')}</p>
-          <p className="text-xs text-gray-400 mt-1">{t('zgodovina.empty.description')}</p>
+          <p className="text-sm font-medium text-gray-900">{t('zgodovina.empty.title')}</p>
+          <p className="mt-1 text-[13px] text-gray-500">{t('zgodovina.empty.description')}</p>
         </motion.div>
       ) : (
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-2"
+          className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-white"
         >
           {records.map((row) => (
             <ZgodovinaCard key={row.id} row={row} />
@@ -628,13 +628,13 @@ export default function ZgodovinaPage() {
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-[13px] font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:pointer-events-none disabled:opacity-40"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             {t('zgodovina.pagination.previous')}
           </button>
 
-          <span className="text-xs text-gray-500">
+          <span className="tnum text-[13px] text-gray-500">
             {page + 1} {t('zgodovina.pagination.of')} {totalPages}
           </span>
 
@@ -642,7 +642,7 @@ export default function ZgodovinaPage() {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-[13px] font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:pointer-events-none disabled:opacity-40"
           >
             {t('zgodovina.pagination.next')}
             <ArrowRight className="w-3.5 h-3.5" />

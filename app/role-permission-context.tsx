@@ -23,7 +23,8 @@ interface RolePermissionContextValue {
   loading: boolean;
 }
 
-const RolePermissionContext = createContext<RolePermissionContextValue | undefined>(
+/** Izvožen samo za predogledne strani (design/**), ki podajo izmišljeno vlogo. */
+export const RolePermissionContext = createContext<RolePermissionContextValue | undefined>(
   undefined
 );
 

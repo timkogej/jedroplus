@@ -304,7 +304,8 @@
       "datumOd": "Od",
       "datumDo": "Do",
       "search": "Išči po ID stranke / termina",
-      "resetFilters": "Ponastavi"
+      "resetFilters": "Ponastavi",
+      "apply": "Uporabi"
     },
     "columns": {
       "datum": "Datum in čas",
