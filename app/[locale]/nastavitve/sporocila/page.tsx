@@ -10,8 +10,7 @@ import {
   CaretDown,
   CaretUp,
   Clock,
-  Funnel,
-  Warning,
+    Warning,
   CheckCircle,
   Hourglass,
 } from '@phosphor-icons/react';
@@ -52,30 +51,30 @@ function StatusBadge({ status }: { status: string }) {
 
   if (status === 'sent') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
-        <CheckCircle className="w-3.5 h-3.5" weight="fill" />
+      <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-emerald-50 text-emerald-700">
+        <CheckCircle className="h-3 w-3" weight="regular" />
         {t('messages.status.sent')}
       </span>
     );
   }
   if (status === 'queued') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
-        <Hourglass className="w-3.5 h-3.5" weight="fill" />
+      <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-amber-50 text-amber-700">
+        <Hourglass className="h-3 w-3" weight="regular" />
         {t('messages.status.queued')}
       </span>
     );
   }
   if (status === 'failed' || status === 'error') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
-        <Warning className="w-3.5 h-3.5" weight="fill" />
+      <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-red-50 text-red-700">
+        <Warning className="h-3 w-3" weight="regular" />
         {t('messages.status.failed')}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-gray-100 text-gray-600">
       {status}
     </span>
   );
@@ -84,22 +83,22 @@ function StatusBadge({ status }: { status: string }) {
 function ChannelBadge({ channel }: { channel: string }) {
   if (channel === 'email') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
-        <EnvelopeSimple className="w-3.5 h-3.5" weight="fill" />
+      <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-blue-50 text-blue-700">
+        <EnvelopeSimple className="h-3 w-3" weight="regular" />
         Email
       </span>
     );
   }
   if (channel === 'sms') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700">
-        <DeviceMobile className="w-3.5 h-3.5" weight="fill" />
+      <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-violet-50 text-violet-700">
+        <DeviceMobile className="h-3 w-3" weight="regular" />
         SMS
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+    <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-gray-100 text-gray-600">
       {channel}
     </span>
   );
@@ -122,20 +121,20 @@ function MessageRow({ msg }: { msg: MessageOutboxRow }) {
     : msg.entity_type;
 
   return (
-    <div className="border border-gray-100 rounded-2xl overflow-hidden bg-white transition-colors hover:border-gray-200">
-      <div className="flex items-center gap-3 p-4">
+    <div>
+      <div className="flex items-center gap-3 px-4 py-3">
         {/* Type label */}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-1.5">
+          <div className="mb-1 flex flex-wrap items-center gap-1.5">
             <span className="text-sm font-medium text-gray-900">{typeLabel}</span>
             <ChannelBadge channel={msg.channel} />
             <StatusBadge status={msg.status} />
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500 flex-wrap">
-            <span className="font-medium text-gray-700 truncate max-w-[200px]">{msg.to}</span>
-            <span>·</span>
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+          <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] text-gray-500">
+            <span className="max-w-[200px] truncate text-gray-700">{msg.to}</span>
+            <span className="text-gray-300">·</span>
+            <span className="tnum flex items-center gap-1">
+              <Clock className="h-3 w-3" />
               {formattedDate}
             </span>
           </div>
@@ -145,17 +144,17 @@ function MessageRow({ msg }: { msg: MessageOutboxRow }) {
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:border-gray-300 hover:text-gray-900 transition-colors"
+          className="flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-[13px] font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
         >
           {expanded ? (
             <>
-              <CaretUp className="w-3.5 h-3.5" />
               {t('messages.collapse')}
+              <CaretUp className="h-3.5 w-3.5" />
             </>
           ) : (
             <>
-              <CaretDown className="w-3.5 h-3.5" />
               {t('messages.expand')}
+              <CaretDown className="h-3.5 w-3.5" />
             </>
           )}
         </button>
@@ -170,19 +169,19 @@ function MessageRow({ msg }: { msg: MessageOutboxRow }) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-4 pb-4 border-t border-gray-100 pt-3 space-y-3">
+            <div className="space-y-3 px-4 pb-4 pt-1">
               {msg.channel === 'email' && msg.subject && (
                 <div>
-                  <p className="text-xs font-semibold text-gray-500 tracking-wide mb-1">{t('messages.subjectLabel')}</p>
-                  <p className="text-sm text-gray-800 bg-gray-50 rounded-lg px-3 py-2">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('messages.subjectLabel')}</p>
+                  <p className="rounded-[10px] bg-gray-50 px-3 py-2 text-sm text-gray-900">
                     {msg.subject}
                   </p>
                 </div>
               )}
               <div>
-                <p className="text-xs font-semibold text-gray-500 tracking-wide mb-1">{t('messages.bodyLabel')}</p>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('messages.bodyLabel')}</p>
                 <div
-                  className="text-sm text-gray-800 bg-gray-50 rounded-lg px-3 py-2 overflow-y-auto"
+                  className="overflow-y-auto rounded-[10px] bg-gray-50 px-3 py-2 text-sm text-gray-900"
                   style={{ maxHeight: '200px', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
                 >
                   {msg.body || <span className="text-gray-400 italic">{t('messages.noBody')}</span>}
@@ -261,17 +260,16 @@ export default function SporocilaPage() {
 
       {/* Filter bar */}
       <div className="mb-5">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <Funnel className="w-4 h-4 text-gray-400 flex-shrink-0" />
+        <div className="flex flex-wrap items-center gap-1.5">
           {FILTER_VALUES.map((value) => (
             <button
               key={value}
               type="button"
               onClick={() => setActiveFilter(value)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+              className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
                 activeFilter === value
-                  ? 'border-transparent bg-[#0a0a0a] text-white'
-                  : 'border-gray-200 text-gray-600 bg-white hover:border-gray-300 hover:text-gray-900'
+                  ? 'bg-gray-900 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {t(`messages.filters.${value}`)}
@@ -282,9 +280,9 @@ export default function SporocilaPage() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-white">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="border border-gray-100 rounded-2xl p-4 animate-pulse bg-white">
+            <div key={i} className="animate-pulse px-4 py-3">
               <div className="flex items-center gap-3">
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-100 rounded w-1/3" />
@@ -298,8 +296,8 @@ export default function SporocilaPage() {
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <EnvelopeSimple className="w-10 h-10 text-gray-300 mb-3" />
-          <p className="text-sm font-medium text-gray-600">{t('messages.empty.title')}</p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-sm font-medium text-gray-900">{t('messages.empty.title')}</p>
+          <p className="mt-1 text-[13px] text-gray-500">
             {activeFilter === 'all'
               ? t('messages.empty.all')
               : t('messages.empty.filtered')}
@@ -309,14 +307,15 @@ export default function SporocilaPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="space-y-2"
         >
-          <p className="text-xs text-gray-400 mb-3">
+          <p className="mb-1.5 px-1 text-[13px] text-gray-500">
             {t('messages.messageCount', { count: filtered.length })}
           </p>
-          {filtered.map((msg) => (
-            <MessageRow key={msg.id} msg={msg} />
-          ))}
+          <div className="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-100 bg-white">
+            {filtered.map((msg) => (
+              <MessageRow key={msg.id} msg={msg} />
+            ))}
+          </div>
         </motion.div>
       )}
     </div>
