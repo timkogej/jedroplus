@@ -12,7 +12,6 @@ export default function AuroraBackground() {
       <div className={`${styles.ribbon} ${styles.r2}`} />
       <div className={`${styles.ribbon} ${styles.r3}`} />
       <div className={`${styles.ribbon} ${styles.r4}`} />
-      <div className={styles.streaks} />
       <div className={styles.grain} />
     </div>
   );

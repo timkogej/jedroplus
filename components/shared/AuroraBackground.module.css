@@ -71,23 +71,6 @@
   animation: pulse 14s ease-in-out infinite alternate;
 }
 
-/* Tanki, svetlejši pramen — daje vtis navpičnih "žarkov" sija */
-.streaks {
-  position: absolute;
-  inset: -10% -10% 30% -10%;
-  background: repeating-linear-gradient(
-    96deg,
-    rgba(255, 255, 255, 0) 0px,
-    rgba(255, 255, 255, 0) 18px,
-    rgba(180, 200, 255, 0.07) 22px,
-    rgba(255, 255, 255, 0) 30px
-  );
-  mask-image: radial-gradient(70% 60% at 50% 30%, #000 0%, transparent 75%);
-  -webkit-mask-image: radial-gradient(70% 60% at 50% 30%, #000 0%, transparent 75%);
-  mix-blend-mode: screen;
-  animation: shimmer 18s linear infinite;
-}
-
 /* Zvezde — zelo diskretne */
 .stars {
   position: absolute;
@@ -138,11 +121,6 @@
   100% { transform: translate3d(10%, -8%, 0) scale(1.15); opacity: 0.6; }
 }
 
-@keyframes shimmer {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-120px); }
-}
-
 @keyframes twinkle {
   0% { opacity: 0.5; }
   100% { opacity: 0.9; }
@@ -150,7 +128,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ribbon,
-  .streaks,
   .stars {
     animation: none;
   }
