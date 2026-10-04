@@ -37,6 +37,20 @@ const kljuc = (v?: string | null): string =>
     .trim()
     .toLowerCase();
 
+/**
+ * CSV kot besedilo. Knjižnica xlsx bajte CSV brez BOM bere kot windows-1252,
+ * zato bi se »Šušteršič« uvozil kot »Å uÅ¡terÅ¡iÄ«. Najprej poskusimo UTF-8
+ * (izvoz večine CRM-jev, Google Sheets), sicer windows-1250 (starejši
+ * Excel na Windows s šumniki).
+ */
+function decodeCsv(bytes: Uint8Array): string {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/^﻿/, '');
+  } catch {
+    return new TextDecoder('windows-1250').decode(bytes);
+  }
+}
+
 interface ParsedRow {
   [key: string]: string;
 }
@@ -132,7 +146,10 @@ export default function CrmImportModal({
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const wb = XLSX.read(data, { type: 'array' });
+        const isCsv = /\.csv$/i.test(f.name) || f.type === 'text/csv';
+        const wb = isCsv
+          ? XLSX.read(decodeCsv(data), { type: 'string' })
+          : XLSX.read(data, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const rows = XLSX.utils.sheet_to_json<ParsedRow>(ws, { defval: '', raw: false });
         if (rows.length === 0) {
