@@ -227,7 +227,7 @@ export function SearchModal() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
+            className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-[2px]"
             onClick={closeSearch}
           />
 
@@ -239,10 +239,10 @@ export function SearchModal() {
             transition={{ duration: 0.2 }}
             className="fixed left-1/2 top-[15%] -translate-x-1/2 w-full max-w-xl z-[61] px-4"
           >
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+            <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/90 shadow-[0_30px_80px_-20px_rgba(15,15,40,0.45)] backdrop-blur-2xl">
               {/* Search input */}
-              <div className="flex items-center gap-3 px-4 py-4 border-b border-gray-100">
-                <MagnifyingGlass className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <div className="flex items-center gap-3 border-b border-gray-200/70 px-4 py-3.5">
+                <MagnifyingGlass className="h-5 w-5 flex-shrink-0 text-gray-400" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -252,25 +252,25 @@ export function SearchModal() {
                     setSelectedIndex(0);
                   }}
                   placeholder={t('search.placeholder')}
-                  className="flex-1 text-base outline-none bg-transparent placeholder:text-gray-400"
+                  className="flex-1 bg-transparent text-[17px] text-gray-900 outline-none placeholder:text-gray-400"
                 />
-                <div className="flex items-center gap-1 text-xs text-gray-400">
-                  <span className="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] font-medium">ESC</span>
+                <div className="hidden items-center gap-1 text-xs text-gray-400 sm:flex">
+                  <span className="rounded-md border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-gray-500">ESC</span>
                   <span>{t('search.escHint')}</span>
                 </div>
               </div>
 
               {/* Results */}
-              <div ref={listRef} className="max-h-[400px] overflow-y-auto p-2">
+              <div ref={listRef} className="max-h-[min(400px,60dvh)] overflow-y-auto p-2">
                 {flatItems.length === 0 ? (
                   <div className="py-12 text-center text-gray-500">
-                    <MagnifyingGlass className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <MagnifyingGlass className="mx-auto mb-3 h-9 w-9 text-gray-300" />
                     <p className="text-sm">{t('search.empty', { query })}</p>
                   </div>
                 ) : (
                   Object.entries(groupedItems).map(([category, items]) => (
-                    <div key={category} className="mb-4 last:mb-0">
-                      <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                    <div key={category} className="mb-3 last:mb-0">
+                      <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
                         {category}
                       </div>
                       {items.map((item) => {
@@ -285,29 +285,23 @@ export function SearchModal() {
                             onClick={() => handleSelect(item)}
                             onMouseEnter={() => setSelectedIndex(globalIndex)}
                             className={cn(
-                              'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left',
+                              'w-full flex items-center gap-3 rounded-[10px] px-3 py-2 text-left transition-colors',
                               isSelected
-                                ? 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-gray-900'
-                                : 'text-gray-700 hover:bg-gray-50'
+                                ? 'bg-[#7C78FA] text-white'
+                                : 'text-gray-900'
                             )}
                           >
-                            <div
-                              className={cn(
-                                'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
-                                isSelected
-                                  ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white'
-                                  : 'bg-gray-100 text-gray-500'
-                              )}
-                            >
-                              <Icon className="w-4 h-4" weight={isSelected ? 'fill' : 'regular'} />
-                            </div>
+                            <Icon
+                              className={cn('h-[18px] w-[18px] flex-shrink-0', isSelected ? 'text-white' : 'text-gray-500')}
+                              weight="regular"
+                            />
                             <div className="flex-1 min-w-0">
-                              <p className={cn('text-sm font-medium truncate', isSelected && 'font-semibold')}>
+                              <p className="truncate text-sm font-medium">
                                 {item.name}
                               </p>
                             </div>
                             {isSelected && (
-                              <ArrowRight className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                              <ArrowRight className="h-4 w-4 flex-shrink-0 text-white/80" />
                             )}
                           </button>
                         );
@@ -318,8 +312,8 @@ export function SearchModal() {
 
                 {/* Recent searches */}
                 {!query && recentSearches.length > 0 && (
-                  <div className="border-t border-gray-100 pt-2 mt-2">
-                    <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                  <div className="mt-2 border-t border-gray-200/70 pt-2">
+                    <div className="flex items-center gap-2 px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
                       <Clock className="w-3 h-3" />
                       {t('search.categories.recent')}
                     </div>
@@ -327,7 +321,7 @@ export function SearchModal() {
                       <button
                         key={idx}
                         onClick={() => setQuery(search)}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors text-left"
+                        className="flex w-full items-center gap-3 rounded-[10px] px-3 py-2 text-left text-sm text-gray-900 transition-colors hover:bg-black/[0.04]"
                       >
                         <Clock className="w-4 h-4 text-gray-400" />
                         <span>{search}</span>
@@ -338,16 +332,16 @@ export function SearchModal() {
               </div>
 
               {/* Footer */}
-              <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+              <div className="hidden border-t border-gray-200/70 px-4 py-2.5 sm:block">
                 <div className="flex items-center justify-between text-xs text-gray-400">
                   <div className="flex items-center gap-4">
                     <span className="flex items-center gap-1">
-                      <span className="px-1 py-0.5 bg-gray-200 rounded text-[10px] font-medium">↑</span>
-                      <span className="px-1 py-0.5 bg-gray-200 rounded text-[10px] font-medium">↓</span>
+                      <span className="rounded-md border border-gray-200 bg-white px-1 py-0.5 text-[10px] font-medium text-gray-500">↑</span>
+                      <span className="rounded-md border border-gray-200 bg-white px-1 py-0.5 text-[10px] font-medium text-gray-500">↓</span>
                       <span className="ml-1">{t('search.navHint')}</span>
                     </span>
                     <span className="flex items-center gap-1">
-                      <span className="px-1.5 py-0.5 bg-gray-200 rounded text-[10px] font-medium">↵</span>
+                      <span className="rounded-md border border-gray-200 bg-white px-1.5 py-0.5 text-[10px] font-medium text-gray-500">↵</span>
                       <span className="ml-1">{t('search.openHint')}</span>
                     </span>
                   </div>
