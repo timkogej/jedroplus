@@ -133,7 +133,7 @@ function FreePlanCard({
   return (
     <div className="flex flex-col rounded-xl border border-[#6D5EF7]/40 bg-white p-5 ring-1 ring-[#6D5EF7]/20">
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="text-base font-semibold text-gray-900">{t('paketi.freeCard.name')}</h3>
+        <h3 className="whitespace-nowrap text-base font-semibold text-gray-900">{t('paketi.freeCard.name')}</h3>
         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
           {t('paketi.currentBadge')}
         </span>
@@ -197,26 +197,38 @@ function PlanCard({
 
   const features = t.raw(`paketi.plans.${planKey(plan.id)}.features`) as string[];
 
+  const recommended = Boolean(plan.recommended);
+
   return (
+    // Priporočeni paket: gradientni okvir, rahlo obarvana podlaga in značka
+    // »Najbolj priljubljen« na zgornjem robu, čez okvir.
     <div
-      className={`flex flex-col rounded-xl border bg-white p-5 ${
-        isCurrent
-          ? 'border-[#6D5EF7]/40 ring-1 ring-[#6D5EF7]/20'
-          : 'border-gray-100'
+      className={`relative flex rounded-xl ${
+        recommended
+          ? 'bg-gradient-to-br from-violet-500 to-cyan-500 p-[1.5px] shadow-[0_14px_34px_-14px_rgba(124,120,250,0.55)]'
+          : ''
+      }`}
+    >
+      {recommended && (
+        <span className="absolute -top-2.5 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white shadow-sm">
+          {t('paketi.recommendedBadge')}
+        </span>
+      )}
+    <div
+      className={`flex w-full flex-col p-5 ${
+        recommended
+          ? 'rounded-[10.5px] bg-gradient-to-b from-violet-50 to-white'
+          : `rounded-xl border bg-white ${isCurrent ? 'border-[#6D5EF7]/40 ring-1 ring-[#6D5EF7]/20' : 'border-gray-100'}`
       }`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className="text-base font-semibold text-gray-900">{plan.name}</h3>
-        {isCurrent ? (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-[#6D5EF7]/10 text-[#6D5EF7]">
+        <h3 className="whitespace-nowrap text-base font-semibold text-gray-900">{plan.name}</h3>
+        {isCurrent && (
+          <span className="inline-flex flex-shrink-0 items-center rounded-full bg-[#6D5EF7]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#6D5EF7]">
             {t('paketi.currentBadge')}
           </span>
-        ) : plan.recommended ? (
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide bg-amber-50 text-amber-700">
-            {t('paketi.recommendedBadge')}
-          </span>
-        ) : null}
+        )}
       </div>
 
       {/* Price */}
@@ -288,6 +300,7 @@ function PlanCard({
           ? t('paketi.planButtons.sendInquiry')
           : t('paketi.planButtons.upgrade')}
       </button>
+    </div>
     </div>
   );
 }
@@ -508,7 +521,7 @@ export default function PaketiPage() {
 
   const [renewalDate, setRenewalDate] = useState('—');
 
-  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('annual');
 
   const [enterpriseOpen, setEnterpriseOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -842,7 +855,7 @@ export default function PaketiPage() {
           </div>
         )}
         <div
-          className={`grid grid-cols-1 gap-3 ${
+          className={`grid grid-cols-1 gap-x-3 gap-y-5 pt-2.5 ${
             currentPlanId === 'FREE' ? 'md:grid-cols-2 xl:grid-cols-4' : 'md:grid-cols-3'
           }`}
         >
