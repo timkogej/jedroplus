@@ -9,7 +9,7 @@
  * predolga.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Copy,
@@ -31,6 +31,8 @@ import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Resurs } from '@/types/resursi';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
 import { useFormat } from '@/hooks/useFormat';
+import { useCompany } from '@/app/company-context';
+import { fetchActiveResursiForTerminRow } from '@/lib/supabase/resursi';
 import { initialsStyle } from '@/components/dashboard/initialsStyle';
 import {
   Sheet,
@@ -103,7 +105,7 @@ export function AppointmentDetailModal({
 }: {
   appointment: AppointmentWithDetails;
   services: Storitev[];
-  /** Neobvezno: kjer resursi niso naloženi, se skupina preprosto ne pokaže. */
+  /** Neobvezno: kjer jih stran ne poda, okence resurse termina naloži samo. */
   terminResursiMap?: Map<number, Set<number>>;
   activeResursi?: Resurs[];
   onClose: () => void;
@@ -119,13 +121,27 @@ export function AppointmentDetailModal({
   const { money } = useFormat();
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
 
+  const { companyId } = useCompany();
+  const hasResursiProps = !!(activeResursi && terminResursiMap);
+  // Kjer stran resursov ne naloži (Termini, nadzorna plošča), jih okence
+  // prebere samo za ta termin, da so podatki povsod enaki kot v koledarju.
+  const [fetchedResursi, setFetchedResursi] = useState<Resurs[]>([]);
+  useEffect(() => {
+    if (hasResursiProps || !companyId) return;
+    let cancelled = false;
+    fetchActiveResursiForTerminRow(companyId, Number(appointment.id)).then(({ data }) => {
+      if (!cancelled) setFetchedResursi(data);
+    });
+    return () => { cancelled = true; };
+  }, [hasResursiProps, companyId, appointment.id]);
+
   const aptResursi = useMemo(() => {
-    if (!activeResursi || !terminResursiMap) return [];
+    if (!activeResursi || !terminResursiMap) return fetchedResursi;
     const aptId = Number(appointment.id);
     return activeResursi.filter((r) =>
       terminResursiMap.get(r.row_id)?.has(aptId)
     );
-  }, [appointment.id, activeResursi, terminResursiMap]);
+  }, [appointment.id, activeResursi, terminResursiMap, fetchedResursi]);
 
   const formatModalDate = (dateStr: string) => {
     const date = new Date(dateStr);

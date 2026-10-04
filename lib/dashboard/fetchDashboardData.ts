@@ -1133,6 +1133,7 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
       const clientPhone = String(pickFirst(row, ['Telefon', 'stranka_telefon', 'client_phone', 'Telefon stranke', 'Telefonska številka', 'telefon', 'phone']) ?? '');
       const clientId = String(pickFirst(row, ['ID stranke', 'stranka_id', 'client_id']) ?? '');
       const opombe = String(pickFirst(row, ['opombe', 'Opombe', 'notes']) ?? '');
+      const interneOpombe = String(pickFirst(row, ['interne_opombe', 'Interne opombe', 'internal_notes']) ?? '');
       const cena = getAppointmentTotalCena(row);
       const language = pickLanguage(row);
 
@@ -1173,7 +1174,9 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
           employeeId: staffId || undefined,
           status: 'scheduled',
           opombe: opombe || undefined,
+          interneOpombe: interneOpombe || undefined,
           cena,
+          details: extractItemDetails(row),
         },
       });
     }
