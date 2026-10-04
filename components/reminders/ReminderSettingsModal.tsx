@@ -25,6 +25,7 @@ import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/compone
 import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 const SENDING_LANGUAGES = [
   { value: 'sl', label: 'Slovenščina' },
   { value: 'en', label: 'English' },
@@ -820,9 +821,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   <button
                                     type="button"
                                     onClick={() => setSmsStoritevPred(!smsStoritevPred)}
-                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsStoritevPred ? 'bg-gray-900' : 'bg-gray-200'}`}
+                                    className={`${switchTrack} ${smsStoritevPred ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsStoritevPred ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    <span className={`${switchKnob(smsStoritevPred)}`} />
                                   </button>
                                 </div>
 
@@ -834,9 +835,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   <button
                                     type="button"
                                     onClick={() => setSmsOpombePred(!smsOpombePred)}
-                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsOpombePred ? 'bg-gray-900' : 'bg-gray-200'}`}
+                                    className={`${switchTrack} ${smsOpombePred ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsOpombePred ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    <span className={`${switchKnob(smsOpombePred)}`} />
                                   </button>
                                 </div>
 
@@ -848,9 +849,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   <button
                                     type="button"
                                     onClick={() => setSmsNavodilaPred(!smsNavodilaPred)}
-                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsNavodilaPred ? 'bg-gray-900' : 'bg-gray-200'}`}
+                                    className={`${switchTrack} ${smsNavodilaPred ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsNavodilaPred ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    <span className={`${switchKnob(smsNavodilaPred)}`} />
                                   </button>
                                 </div>
 
@@ -977,9 +978,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   <button
                                     type="button"
                                     onClick={() => setSmsStoritevPo(!smsStoritevPo)}
-                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsStoritevPo ? 'bg-gray-900' : 'bg-gray-200'}`}
+                                    className={`${switchTrack} ${smsStoritevPo ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsStoritevPo ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    <span className={`${switchKnob(smsStoritevPo)}`} />
                                   </button>
                                 </div>
 
@@ -991,9 +992,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   <button
                                     type="button"
                                     onClick={() => setSmsOpombePo(!smsOpombePo)}
-                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsOpombePo ? 'bg-gray-900' : 'bg-gray-200'}`}
+                                    className={`${switchTrack} ${smsOpombePo ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsOpombePo ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    <span className={`${switchKnob(smsOpombePo)}`} />
                                   </button>
                                 </div>
 
@@ -1005,9 +1006,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   <button
                                     type="button"
                                     onClick={() => setSmsNavodilaPo(!smsNavodilaPo)}
-                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${smsNavodilaPo ? 'bg-gray-900' : 'bg-gray-200'}`}
+                                    className={`${switchTrack} ${smsNavodilaPo ? 'bg-gray-900' : 'bg-gray-200'}`}
                                   >
-                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${smsNavodilaPo ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    <span className={`${switchKnob(smsNavodilaPo)}`} />
                                   </button>
                                 </div>
 

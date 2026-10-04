@@ -34,6 +34,7 @@ import CommunicationLanguageControl from '@/components/shared/CommunicationLangu
 import { useTranslations } from 'next-intl';
 import { checkResourceConflicts, fetchResursIdsForTerminRow, type ResourceConflict } from '@/lib/supabase/resursi';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 type ModalMode = 'view' | 'edit' | 'create';
 
 interface AppointmentModalProps {
@@ -1858,14 +1859,12 @@ function AppointmentModal({
                         setFormData((prev) => ({ ...prev, popust: undefined }));
                       }
                     }}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`${switchTrack} ${
                       hasDiscount ? 'bg-gray-900' : 'bg-gray-300'
                     }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        hasDiscount ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`${switchKnob(hasDiscount)}`}
                     />
                   </button>
                 </div>
@@ -2053,14 +2052,12 @@ function AppointmentModal({
                     aria-checked={isGhostTermin}
                     aria-labelledby="ghost-termin-label"
                     onClick={() => setIsGhostTermin(!isGhostTermin)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    className={`${switchTrack} ${
                       isGhostTermin ? 'bg-gray-900' : 'bg-gray-300'
                     }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        isGhostTermin ? 'translate-x-6' : 'translate-x-1'
-                      }`}
+                      className={`${switchKnob(isGhostTermin)}`}
                     />
                   </button>
                 </div>

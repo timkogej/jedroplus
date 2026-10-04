@@ -27,6 +27,7 @@ import { URNIK_DAYS, DEFAULT_URNIK } from '@/types/resursi';
 import type { Service } from '@/types/services';
 import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/constants/serviceGradients';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 interface ResursModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -410,12 +411,11 @@ function ResursModal({
                     role="switch"
                     aria-checked={form.prikazi_v_bookingu}
                     onClick={() => handleChange('prikazi_v_bookingu', !form.prikazi_v_bookingu)}
-                    className={`relative h-6 w-11 rounded-full transition-colors focus:outline-none
+                    className={`${switchTrack} focus:outline-none
                                ${form.prikazi_v_bookingu ? 'bg-gray-900' : 'bg-gray-200'}`}
                   >
                     <span
-                      className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform
-                                 ${form.prikazi_v_bookingu ? 'translate-x-5' : 'translate-x-0'}`}
+                      className={`${switchKnob(form.prikazi_v_bookingu)}`}
                     />
                   </button>
                 </div>

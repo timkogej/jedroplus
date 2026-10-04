@@ -214,8 +214,8 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
       onClick={onClick}
       title={collapsed ? item.name : undefined}
       className={cn(
-        'group relative flex items-center rounded-md text-sm transition-colors duration-150',
-        collapsed ? 'justify-center py-2' : 'gap-2.5 px-2 py-1.5',
+        'group relative flex items-center rounded-md text-sm transition-colors duration-150 max-md:rounded-lg max-md:text-[16px]',
+        collapsed ? 'justify-center py-2' : 'gap-2.5 px-2 py-1.5 max-md:gap-3 max-md:px-2.5 max-md:py-2.5',
         active
           ? 'font-medium text-gray-900'
           : 'text-gray-700 hover:bg-gray-100/70',
@@ -225,7 +225,7 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
       {active && (
         <motion.span
           layoutId="sidebar-active-fill"
-          className="absolute inset-0 -z-10 rounded-md bg-gray-100"
+          className="absolute inset-0 -z-10 rounded-md bg-gray-100 max-md:rounded-lg"
           transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
         />
       )}
@@ -234,7 +234,7 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
         <Icon
           weight="regular"
           className={cn(
-            'h-[18px] w-[18px] transition-colors',
+            'h-[18px] w-[18px] transition-colors max-md:h-5 max-md:w-5',
             active ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-700'
           )}
         />
@@ -609,7 +609,7 @@ export function Sidebar() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden"
+            className="fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm md:hidden"
             onClick={close}
           />
 
@@ -619,7 +619,7 @@ export function Sidebar() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="hairline-r fixed bottom-0 left-0 top-0 z-50 flex w-72 flex-col overflow-hidden bg-white shadow-xl md:hidden"
+            className="hairline-r fixed bottom-0 left-0 top-0 z-[56] flex w-[min(320px,86vw)] flex-col overflow-hidden bg-white shadow-xl md:hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 hairline-b flex-shrink-0">
@@ -627,7 +627,7 @@ export function Sidebar() {
                 <img src="/icon.png" alt="Jedro+" width={28} height={28} className="flex-shrink-0 rounded-md" />
                 <div className="flex-1 min-w-0">
                   <p className="bg-gradient-to-r from-[#7B4BEA] via-[#4C74E0] to-[#35D2D2] bg-clip-text text-lg font-bold text-transparent">Jedro+</p>
-                  <p className="text-xs text-gray-400 truncate">{companyName}</p>
+                  <p className="truncate text-[13px] text-gray-400">{companyName}</p>
                 </div>
               </div>
               <button
@@ -636,7 +636,7 @@ export function Sidebar() {
                   e.stopPropagation();
                   close();
                 }}
-                className="-mr-1.5 flex h-8 w-8 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                className="-mr-1.5 flex h-10 w-10 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 type="button"
               >
                 <X weight="regular" className="w-5 h-5" />
@@ -646,14 +646,14 @@ export function Sidebar() {
             {/* User card */}
             <div className="flex items-center gap-3 px-4 py-3.5 hairline-b flex-shrink-0">
               <div className="relative flex-shrink-0">
-                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
-                  <span className="text-xs font-medium text-gray-700">{userInitials}</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+                  <span className="text-sm font-medium text-gray-700">{userInitials}</span>
                 </div>
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
-                <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+                <p className="truncate text-[16px] font-medium text-gray-900">{userName}</p>
+                <p className="truncate text-[13px] text-gray-500">{userEmail}</p>
               </div>
             </div>
 
@@ -661,7 +661,7 @@ export function Sidebar() {
             <nav className="flex-1 overflow-y-auto py-3 px-3">
               {allSections.map((section) => (
                 <div key={section.label} className="mb-4">
-                  <h3 className="px-2 pb-1 pt-2 text-xs font-semibold uppercase tracking-[0.04em] text-gray-400">
+                  <h3 className="px-2.5 pb-1 pt-2 text-[13px] font-semibold uppercase tracking-[0.04em] text-gray-400">
                     {section.label}
                   </h3>
                   <div className="space-y-px">
@@ -686,7 +686,7 @@ export function Sidebar() {
                 href="/nastavitve"
                 onClick={close}
                 className={cn(
-                  'group relative flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors duration-150',
+                  'group relative flex items-center gap-3 rounded-lg px-2.5 py-2.5 text-[16px] transition-colors duration-150',
                   isActive('/nastavitve')
                     ? 'font-medium text-gray-900'
                     : 'text-gray-700 hover:bg-gray-100/70'
@@ -695,7 +695,7 @@ export function Sidebar() {
                 {isActive('/nastavitve') && (
                   <motion.span
                     layoutId="sidebar-active-fill-mobile"
-                    className="absolute inset-0 -z-10 rounded-md bg-gray-100"
+                    className="absolute inset-0 -z-10 rounded-lg bg-gray-100"
                     transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
                   />
                 )}
@@ -703,7 +703,7 @@ export function Sidebar() {
                   <Gear
                     weight="regular"
                     className={cn(
-                      'h-[18px] w-[18px] transition-colors',
+                      'h-5 w-5 transition-colors',
                       isActive('/nastavitve') ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-700'
                     )}
                   />
@@ -719,9 +719,9 @@ export function Sidebar() {
 
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-gray-700 transition-colors duration-150 hover:bg-gray-100/70 hover:text-gray-900"
+                className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-[16px] text-gray-700 transition-colors duration-150 hover:bg-gray-100/70 hover:text-gray-900"
               >
-                <SignOut weight="regular" className="h-[18px] w-[18px] text-gray-500" />
+                <SignOut weight="regular" className="h-5 w-5 text-gray-500" />
                 <span>{t('sidebar.items.signOut')}</span>
               </button>
             </div>

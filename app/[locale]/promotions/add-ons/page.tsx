@@ -12,6 +12,7 @@ import { MiniSwitch } from '@/components/ui/MiniSwitch';
 import { fetchStoritve } from '@/lib/companyScope';
 import type { Storitev } from '@/types/appointments';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 interface AddOn {
   id: string;
   company_id: string;
@@ -304,8 +305,8 @@ export default function AddOnsPage() {
 
                 <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-5">
                   <span className="text-sm font-medium text-gray-700">{t('addOns.modal.fields.active')}</span>
-                  <button onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))} className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.aktiven ? 'translate-x-6' : 'translate-x-1'}`} />
+                  <button onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))} className={`${switchTrack} ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}>
+                    <span className={`${switchKnob(form.aktiven)}`} />
                   </button>
                 </div>
               </div>

@@ -12,6 +12,7 @@ import type { Storitev } from '@/types/appointments';
 import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
 import { MiniSwitch } from '@/components/ui/MiniSwitch';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 interface Popust {
   id: string;
   company_id: string;
@@ -494,9 +495,9 @@ export default function DiscountsPage() {
                   <span className="text-sm font-medium text-gray-700">{t('shared.activeLabel')}</span>
                   <button
                     onClick={() => setForm((p) => ({ ...p, aktiven: !p.aktiven }))}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}
+                    className={`${switchTrack} ${form.aktiven ? 'bg-gray-900' : 'bg-gray-300'}`}
                   >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.aktiven ? 'translate-x-6' : 'translate-x-1'}`} />
+                    <span className={`${switchKnob(form.aktiven)}`} />
                   </button>
                 </div>
               </div>

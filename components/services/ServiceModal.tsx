@@ -27,6 +27,7 @@ import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/c
 import type { Resurs } from '@/types/resursi';
 import { Cube } from '@phosphor-icons/react';
 
+import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 type ModalMode = 'create' | 'edit';
 
 interface ServiceModalProps {
@@ -752,10 +753,9 @@ function ServiceModal({
                       </div>
                     </div>
                     {/* Toggle switch */}
-                    <div className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors
+                    <div className={`${switchTrack}
                                     ${formData.spletne_rezervacije ? 'bg-emerald-500' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform
-                                      ${formData.spletne_rezervacije ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                      <div className={`${switchKnob(formData.spletne_rezervacije)}`} />
                     </div>
                   </button>
 
@@ -794,10 +794,9 @@ function ServiceModal({
                           </p>
                         </div>
                       </div>
-                      <div className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors
+                      <div className={`${switchTrack}
                                       ${formData.zahteva_placilo && paymentRequirementAvailable && formData.spletne_rezervacije ? 'bg-violet-500' : 'bg-gray-200'}`}>
-                        <div className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform
-                                        ${formData.zahteva_placilo && paymentRequirementAvailable && formData.spletne_rezervacije ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                        <div className={`${switchKnob(formData.zahteva_placilo && paymentRequirementAvailable && formData.spletne_rezervacije)}`} />
                       </div>
                     </button>
 
