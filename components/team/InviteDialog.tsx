@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Check, Copy, EnvelopeSimple, WhatsappLogo, ChatText, X, Warning } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';
 import { buildInviteUrl } from '@/lib/team/invite';
+import { sheet } from '@/components/ui/sheetClasses';
 
 interface InviteDialogProps {
   open: boolean;
@@ -83,61 +84,67 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
   };
 
   const shareClass =
-    'flex h-10 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50';
+    'flex h-10 items-center justify-center gap-2 rounded-[10px] border border-gray-200 bg-white text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100';
 
   // Portal to <body> so the fixed sidebar can't sit on top of the dialog.
   return createPortal(
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+    <div className={sheet.backdrop.replace('z-50', 'z-[120]')} onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="invite-title"
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
+        className={`${sheet.panel} sm:max-w-lg`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 id="invite-title" className="text-lg font-semibold text-gray-900">{t('title')}</h2>
-            <p className="mt-1 text-sm text-gray-500">{t('subtitle')}</p>
+        <div className={sheet.header}>
+          <div className={sheet.grabber} aria-hidden="true" />
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 id="invite-title" className={sheet.title}>{t('title')}</h2>
+              <p className={sheet.subtitle}>{t('subtitle')}</p>
+            </div>
+            <button type="button" onClick={onClose} aria-label={t('close')} className={sheet.close}>
+              <X className="h-5 w-5" weight="regular" />
+            </button>
           </div>
-          <button type="button" onClick={onClose} aria-label={t('close')} className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100">
-            <X size={16} weight="bold" />
-          </button>
         </div>
 
-        <p className="mt-4 text-xs text-gray-500">
-          {maxSeats !== null ? t('seats', { used: usedSeats, total: maxSeats }) : null}
-        </p>
+        <div className={sheet.body}>
+        {maxSeats !== null && (
+          <p className="tnum px-1 text-[13px] text-gray-500">
+            {t('seats', { used: usedSeats, total: maxSeats })}
+          </p>
+        )}
 
         {seatsFull ? (
-          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
             <p className="flex items-center gap-2 font-semibold">
-              <Warning size={16} weight="fill" aria-hidden="true" />
+              <Warning size={16} weight="regular" aria-hidden="true" />
               {t('fullTitle')}
             </p>
             <p className="mt-1 leading-6">{isFree ? t('fullBodyFree') : t('fullBodyPaid')}</p>
             <p className="mt-1 text-xs text-amber-800">{t('staffStillFree')}</p>
             <Link
               href={isFree ? '/nastavitve/paketi#razpolozljivi-paketi' : '/nastavitve/addoni'}
-              className="mt-3 inline-flex rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+              className="mt-3 inline-flex rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90"
             >
               {isFree ? t('upgrade') : t('addSeats')}
             </Link>
           </div>
         ) : (
-          <div className="mt-4 space-y-5">
+          <>
             {/* Role */}
-            <fieldset>
-              <legend className="text-sm font-semibold text-gray-900">{t('roleLabel')}</legend>
-              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <fieldset className={sheet.group}>
+              <legend className="float-left mb-2 w-full text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('roleLabel')}</legend>
+              <div className="clear-both grid gap-2 sm:grid-cols-2">
                 {(['staff', 'admin'] as Role[]).map((r) => {
                   const disabled = r === 'admin' && !codes?.adminCode;
                   return (
                     <label
                       key={r}
                       htmlFor={`invite-role-${r}`}
-                      className={`cursor-pointer rounded-xl border-2 p-3 ${
-                        role === r ? 'border-violet-400 bg-violet-50/50' : 'border-gray-100'
+                      className={`cursor-pointer rounded-[10px] border p-3 transition-colors ${
+                        role === r ? 'border-violet-400 bg-violet-50/50 ring-1 ring-violet-200' : 'border-gray-200 hover:border-gray-300'
                       } ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
                     >
                       <input
@@ -159,8 +166,8 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
             </fieldset>
 
             {/* Link + share */}
-            <div>
-              <label htmlFor="invite-link" className="text-sm font-semibold text-gray-900">
+            <div className={sheet.group}>
+              <label htmlFor="invite-link" className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
                 {t('linkLabel')}
               </label>
               <div className="mt-2 flex gap-2">
@@ -169,13 +176,13 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
                   readOnly
                   value={url || t('loading')}
                   onFocus={(e) => e.currentTarget.select()}
-                  className="h-10 min-w-0 flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 text-xs text-gray-700"
+                  className="h-10 min-w-0 flex-1 rounded-[10px] border border-gray-200 bg-gray-50 px-3 text-xs text-gray-700"
                 />
                 <button
                   type="button"
                   onClick={copy}
                   disabled={!url}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-gray-900 px-3.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-50"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-[10px] bg-gradient-to-r from-violet-500 to-cyan-500 px-3.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   {copied ? <Check size={16} weight="bold" /> : <Copy size={16} />}
                   {copied ? t('copied') : t('copy')}
@@ -204,8 +211,9 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
               </div>
               <p className="mt-3 text-xs leading-5 text-gray-500">{t('privacyNote')}</p>
             </div>
-          </div>
+          </>
         )}
+        </div>
       </div>
     </div>,
     document.body

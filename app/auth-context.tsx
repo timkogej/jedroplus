@@ -13,7 +13,8 @@ type AuthContextValue = {
   signOut: () => Promise<string | null>;
 };
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+/** Izvožen samo za predogledne strani (design/**), ki podajo izmišljenega uporabnika. */
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const supabaseRef = useRef(createClient());
