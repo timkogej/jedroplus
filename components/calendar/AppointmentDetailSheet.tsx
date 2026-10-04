@@ -226,8 +226,6 @@ export function AppointmentDetailModal({
   // Cene v valuti termina (prej je bila povsod na trdo evro).
   const price = (val: number) => money(val, { currency: appointment.valuta });
   const imaPopust = popustVrednost > 0;
-  const hasAddOnPrice = !!(appointment.add_on_naziv && appointment.add_on_final_cena);
-  const showPrices = !(originalCena === 0 && !imaPopust && !hasAddOnPrice);
 
   const promotionGradient = 'linear-gradient(90deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)';
   const promoBadge = (() => {
@@ -380,7 +378,6 @@ export function AppointmentDetailModal({
         </SheetGroup>
 
         {/* Cena */}
-        {showPrices && (
           <>
             {promoBadge && (
               <div
@@ -414,12 +411,16 @@ export function AppointmentDetailModal({
                     <span className="tnum text-base font-semibold text-gray-900">{price(finalCena)}</span>
                   </SheetRow>
                 </>
-              ) : originalCena > 0 ? (
+              ) : (
                 <SheetRow
                   label={t('calendarView.detailModal.fields.price')}
-                  value={<span className="tnum font-semibold">{price(originalCena)}</span>}
+                  value={
+                    originalCena > 0
+                      ? <span className="tnum font-semibold">{price(originalCena)}</span>
+                      : <span className="text-gray-400">-</span>
+                  }
                 />
-              ) : null}
+              )}
             </SheetGroup>
 
             {/* Dodatna storitev s svojo ceno */}
@@ -454,7 +455,6 @@ export function AppointmentDetailModal({
               </SheetGroup>
             )}
           </>
-        )}
 
         {/* Resursi */}
         {aptResursi.length > 0 && (
