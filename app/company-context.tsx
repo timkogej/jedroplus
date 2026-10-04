@@ -57,8 +57,7 @@ type CompanyContextValue = {
   planCode: string;
 };
 
-/** Izvožen samo za predogledne strani (design/**), ki podajo izmišljeno podjetje. */
-export const CompanyContext = createContext<CompanyContextValue | undefined>(undefined);
+const CompanyContext = createContext<CompanyContextValue | undefined>(undefined);
 
 const STORAGE_KEY_UUID = "jedroplus_company_uuid";
 export function CompanyProvider({ children }: { children: ReactNode }) {

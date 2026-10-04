@@ -19,9 +19,6 @@ import {
 
 /*
  * Vrstica obvestila in pomožne funkcije za seznam.
- *
- * Ločeno od strani zato, da jih predogled v `app/[locale]/design` uporablja
- * iste, kot jih vidi uporabnik.
  */
 
 // ============================================================================

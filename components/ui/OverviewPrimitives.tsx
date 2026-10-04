@@ -6,9 +6,7 @@ import type { ReactNode } from 'react';
  * Gradniki za pregledne strani — Opomniki, Rezervacije in kar pride za njimi.
  *
  * Applov vzorec: naslov skupine stoji nad kartico, vrstice znotraj so ločene
- * z lasnimi črtami, ime in razlaga levo, vrednost desno. Ker jih uporabljajo
- * tudi predogledi v `app/[locale]/design`, ti kažejo res isto, kar vidi
- * uporabnik, in se ne moreta razhajati.
+ * z lasnimi črtami, ime in razlaga levo, vrednost desno.
  */
 
 const cx = (...classes: Array<string | false | null | undefined>) =>
