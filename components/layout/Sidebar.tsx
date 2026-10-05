@@ -29,6 +29,7 @@ import {
   Phone,
 } from '@phosphor-icons/react';
 import { useSidebar } from './sidebar-context';
+import { JedroLogo, JedroMark } from '@/components/brand/JedroLogo';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { useCompanyPlan } from '@/hooks/useCompanyPlan';
@@ -460,11 +461,13 @@ export function Sidebar() {
         'flex items-center hairline-b flex-shrink-0',
         isCollapsed ? 'justify-center p-4' : 'gap-3 p-5'
       )}>
-        <img src="/icon.png" alt="Jedro+" width={28} height={28} className="flex-shrink-0 rounded-md" />
-        {!isCollapsed && (
+        {isCollapsed ? (
+          // Zložena vrstica je preozka za cel logotip — ostane samo plus.
+          <JedroMark size={26} className="flex-shrink-0" />
+        ) : (
           <div className="flex-1 min-w-0">
-            <p className="truncate bg-gradient-to-r from-[#7B4BEA] via-[#4C74E0] to-[#35D2D2] bg-clip-text text-lg font-bold text-transparent">Jedro+</p>
-            <p className="text-xs text-gray-400 truncate">{companyName}</p>
+            <JedroLogo height={26} className="block" />
+            <p className="mt-1.5 text-xs text-gray-400 truncate">{companyName}</p>
           </div>
         )}
       </div>
@@ -625,10 +628,9 @@ export function Sidebar() {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 hairline-b flex-shrink-0">
               <div className="flex items-center gap-3">
-                <img src="/icon.png" alt="Jedro+" width={28} height={28} className="flex-shrink-0 rounded-md" />
                 <div className="flex-1 min-w-0">
-                  <p className="bg-gradient-to-r from-[#7B4BEA] via-[#4C74E0] to-[#35D2D2] bg-clip-text text-lg font-bold text-transparent">Jedro+</p>
-                  <p className="truncate text-[13px] text-gray-400">{companyName}</p>
+                  <JedroLogo height={26} className="block" />
+                  <p className="mt-1.5 truncate text-[13px] text-gray-400">{companyName}</p>
                 </div>
               </div>
               <button

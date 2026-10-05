@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import {
   JEDRO_CYAN,
   JEDRO_INK,
@@ -24,12 +25,14 @@ type Tone =
 const LOCKUP_ASPECT = LOCKUP_WIDTH / LOCKUP_HEIGHT;
 
 /**
- * Gradient ids are fixed rather than generated, so the components stay Server
- * Components. Two logos on one page emit the same id twice, but the two <defs>
- * are byte-identical, so the first one wins and both render correctly.
+ * Each logo gets its own gradient id (useId also works in Server Components).
+ * With one shared id the browser uses the first <defs> on the page — and when
+ * that logo is hidden (display: none, e.g. the desktop sidebar on a phone), the
+ * gradient isn't painted and the plus disappears from every other logo.
  */
-const LOCKUP_GRADIENT_ID = 'jedro-gradient-lockup';
-const MARK_GRADIENT_ID = 'jedro-gradient-mark';
+function useGradientId(prefix: string): string {
+  return `${prefix}-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+}
 
 function Gradient({ id, size, x, y }: { id: string; size: number; x: number; y: number }) {
   const v = markGradientVector(size, x, y);
@@ -63,6 +66,7 @@ export function JedroLogo({
   className,
   title = 'Jedro+',
 }: JedroLogoProps) {
+  const LOCKUP_GRADIENT_ID = useGradientId('jedro-gradient-lockup');
   const h = width ? width / LOCKUP_ASPECT : (height ?? 32);
   const w = width ?? h * LOCKUP_ASPECT;
 
@@ -111,6 +115,7 @@ export function JedroMark({
   className,
   title = 'Jedro+',
 }: JedroMarkProps) {
+  const MARK_GRADIENT_ID = useGradientId('jedro-gradient-mark');
   const fill =
     tone === 'mono' ? color : tone === 'onDark' ? '#FFFFFF' : `url(#${MARK_GRADIENT_ID})`;
 
