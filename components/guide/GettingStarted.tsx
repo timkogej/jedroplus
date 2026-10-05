@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { CheckCircle, Circle, ArrowRight, X } from '@phosphor-icons/react';
 import { useCompany } from '@/app/company-context';

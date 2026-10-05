@@ -48,7 +48,8 @@ import { useUserPersonId } from '@/hooks/useUserPersonId';
 import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
 import ExportAppointmentsModal from '@/components/appointments/ExportAppointmentsModal';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',
@@ -62,6 +63,7 @@ const DEFAULT_FILTERS: FilterState = {
 // Stats card component - Gradient border with black icon (no circle)
 function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialData | null }) {
   const t = useTranslations('appointments');
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
@@ -800,7 +802,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
               >
                 <DownloadSimple size={17} weight="regular" className="text-gray-500" />
-                <span>Izvozi</span>
+                <span>{t('page.exportButton')}</span>
               </button>
             </div>
           </motion.div>
@@ -1059,7 +1061,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                             <p className="text-sm font-semibold text-[#1A1F36]">{completeTarget.add_on_naziv}</p>
                             <span className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-500">
                               <Plus className="h-2.5 w-2.5" weight="bold" />
-                              Dodatna storitev
+                              {t('modal.price.addOnLabel')}
                             </span>
                           </div>
                         )}
@@ -1094,7 +1096,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                   <div>
                     <p className="text-xs text-gray-500">{t('completeModal.date')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
-                      {new Date(completeTarget.datum).toLocaleDateString('sl-SI', {
+                      {new Date(completeTarget.datum).toLocaleDateString(intlLocale(locale), {
                         weekday: 'long',
                         day: 'numeric',
                         month: 'long',

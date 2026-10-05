@@ -2,8 +2,10 @@
 
 import { motion, AnimatePresence } from 'motion/react';
 import { Info } from '@phosphor-icons/react';
+import { useTranslations } from 'next-intl';
 import type { AppointmentWithDetails } from '@/types/appointments';
 import { sheet } from '@/components/ui/sheetClasses';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface RescheduleNotificationModalProps {
   isOpen: boolean;
@@ -15,12 +17,6 @@ interface RescheduleNotificationModalProps {
   channel: 'sms' | 'email' | 'both';
 }
 
-const CHANNEL_LABEL: Record<'sms' | 'email' | 'both', string> = {
-  sms: 'Obvestilo bo poslano preko SMS',
-  email: 'Obvestilo bo poslano preko Email',
-  both: 'Obvestilo bo poslano preko SMS in Email',
-};
-
 export function RescheduleNotificationModal({
   isOpen,
   onClose,
@@ -30,10 +26,12 @@ export function RescheduleNotificationModal({
   newTime,
   channel,
 }: RescheduleNotificationModalProps) {
+  const t = useTranslations('appointments.rescheduleNotify');
   const formattedDate = newDate.split('-').reverse().join('.');
   const clientName = [appointment.stranka_ime, appointment.stranka_priimek].filter(Boolean).join(' ');
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -54,9 +52,9 @@ export function RescheduleNotificationModal({
             {/* Header */}
             <div className={sheet.header}>
               <div className={sheet.grabber} aria-hidden="true" />
-              <h3 className={sheet.title}>Obvestiti stranko?</h3>
+              <h3 className={sheet.title}>{t('title')}</h3>
               <p className={sheet.subtitle}>
-                Termin je bil prestavljen. Ali želite stranki poslati obvestilo?
+                {t('description')}
               </p>
             </div>
 
@@ -72,7 +70,7 @@ export function RescheduleNotificationModal({
                 {/* Channel info */}
                 <div className="flex items-center gap-2 border-t border-gray-100 px-4 py-2.5 text-[13px] text-gray-500">
                   <Info className="h-4 w-4 flex-shrink-0 text-violet-500" weight="regular" />
-                  <span>{CHANNEL_LABEL[channel]}</span>
+                  <span>{t(`channel.${channel}`)}</span>
                 </div>
               </div>
             </div>
@@ -84,7 +82,7 @@ export function RescheduleNotificationModal({
                 onClick={onClose}
                 className={sheet.cancel}
               >
-                Preskoči
+                {t('skip')}
               </button>
               <button
                 type="button"
@@ -92,12 +90,13 @@ export function RescheduleNotificationModal({
                 className={sheet.action}
                 style={{ background: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)' }}
               >
-                Pošlji obvestilo
+                {t('send')}
               </button>
             </div>
           </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }

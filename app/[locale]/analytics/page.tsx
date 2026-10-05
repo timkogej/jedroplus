@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import {
@@ -26,11 +27,19 @@ import {
   fetchEmployeeChartData,
   fetchAnalyticsMetrics,
 } from '@/lib/analytics/calculations';
-import { exportAnalyticsToCSV } from '@/lib/analytics/exportUtils';
+import { exportAnalyticsToCSV, type AnalyticsCsvLabels } from '@/lib/analytics/exportUtils';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+
+const CSV_LABEL_KEYS: (keyof AnalyticsCsvLabels)[] = [
+  'metric', 'value', 'totalRevenue', 'averageBookingValue', 'occupancyRate',
+  'completionRate', 'totalAppointments', 'completedAppointments', 'cancelledAppointments',
+  'revenueGrowth', 'bookingGrowth', 'service', 'staff', 'appointmentCount', 'revenue',
+  'fileMetrics', 'fileServices', 'fileStaff',
+];
 
 export default function AnalyticsPage() {
   const { companyId } = useCompany();
+  const tCsv = useTranslations('analytics.csvExport');
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('ta_mesec');
   const [customRange, setCustomRange] = useState<CustomRange>({ start: null, end: null });
 
@@ -50,11 +59,14 @@ export default function AnalyticsPage() {
       exportAnalyticsToCSV(metrics, services, employees, {
         start: dateRange.startDate,
         end: dateRange.endDate,
-      });
+      }, CSV_LABEL_KEYS.reduce((acc, key) => {
+        acc[key] = tCsv(key);
+        return acc;
+      }, {} as AnalyticsCsvLabels));
     } catch (error) {
       console.error('Error exporting CSV:', error);
     }
-  }, [companyId, timePeriod, customRange]);
+  }, [companyId, timePeriod, customRange, tCsv]);
 
   if (!companyId) {
     return (

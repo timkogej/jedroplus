@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Link } from '@/i18n/navigation';
 import { motion } from 'motion/react';
 import { CaretLeft, Copy, Check, Lock } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 import { QRCodeCard } from '@/components/qr/QRCodeCard';
 import {
@@ -12,6 +13,7 @@ import {
   SettingRow,
   Switch,
   Input,
+  Select,
   SaveIndicator,
 } from '@/components/settings';
 import { useCompany } from '@/app/company-context';
@@ -20,14 +22,57 @@ import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { sendWebhook, WEBHOOK_EVENTS } from '@/components/utils/webhookUtils';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
+import { COUNTRIES, CURRENCIES, listTimeZones, regionForCountry } from '@/lib/region';
+import { LEGAL_DOCS, legalPath } from '@/lib/legal/paths';
+import { saveCompanyRegion, useCompanyRegion, type RegionPatch } from '@/lib/hooks/useCompanyRegion';
 
 export default function GeneralSettingsPage() {
   const t = useTranslations('settings');
-  const { companyId } = useCompany();
+  const locale = useLocale();
+  const { companyId, reloadSettings } = useCompany();
+  const region = useCompanyRegion();
+  const [savingRegion, setSavingRegion] = useState(false);
   const { user } = useAuth();
   const { role, loading: roleLoading } = useRolePermissions();
   // Join codes grant access to the company, so only owners and admins see them.
   const canSeeJoinCodes = role === 'owner' || role === 'admin';
+  const canEditRegion = !roleLoading && (role === 'owner' || role === 'admin');
+
+  const countryOptions = useMemo(() => {
+    let names: Intl.DisplayNames | null = null;
+    try {
+      names = new Intl.DisplayNames([locale], { type: 'region' });
+    } catch {
+      names = null;
+    }
+    return COUNTRIES
+      .map((c) => ({ value: c.code, label: names?.of(c.code) ?? c.legacyName }))
+      .sort((a, b) => a.label.localeCompare(b.label, locale));
+  }, [locale]);
+  const timeZoneOptions = useMemo(
+    () => listTimeZones().map((tz) => ({ value: tz, label: tz.replace(/_/g, ' ') })),
+    []
+  );
+  const currencyOptions = useMemo(() => CURRENCIES.map((c) => ({ value: c, label: c })), []);
+
+  // A new country brings its time zone and currency along; both stay editable.
+  const updateRegion = useCallback(async (patch: RegionPatch) => {
+    const full: RegionPatch = patch.country_code
+      ? (() => {
+          const d = regionForCountry(patch.country_code);
+          return { country_code: d.countryCode, timezone: d.timezone, currency: d.currency };
+        })()
+      : patch;
+    setSavingRegion(true);
+    const error = await saveCompanyRegion(full);
+    if (error) {
+      toast.error(t('general.langRegion.saveError'));
+    } else {
+      await reloadSettings();
+      setLastSaved(new Date());
+    }
+    setSavingRegion(false);
+  }, [reloadSettings, t]);
 
   const [userName, setUserName] = useState('');
   const userEmail = user?.email || '';
@@ -243,21 +288,30 @@ export default function GeneralSettingsPage() {
           </SettingRow>
 
           <SettingRow label={t('general.langRegion.regionLabel')} description={t('general.langRegion.regionNote')}>
-            <div className="flex items-center gap-3">
-              <Input value="Ljubljana, SI" disabled className="bg-gray-50 cursor-not-allowed" />
-              <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="w-3.5 h-3.5" weight="bold" />
-              </div>
-            </div>
+            <Select
+              value={region.countryCode}
+              onChange={(value) => updateRegion({ country_code: value })}
+              options={countryOptions}
+              disabled={!canEditRegion || savingRegion}
+            />
           </SettingRow>
 
           <SettingRow label={t('general.langRegion.timezoneLabel')} description={t('general.langRegion.timezoneNote')}>
-            <div className="flex items-center gap-3">
-              <Input value="Europe/Ljubljana (CET/CEST)" disabled className="bg-gray-50 cursor-not-allowed" />
-              <div className="flex items-center gap-1 text-gray-400">
-                <Lock className="w-3.5 h-3.5" weight="bold" />
-              </div>
-            </div>
+            <Select
+              value={region.timezone}
+              onChange={(value) => updateRegion({ timezone: value })}
+              options={timeZoneOptions}
+              disabled={!canEditRegion || savingRegion}
+            />
+          </SettingRow>
+
+          <SettingRow label={t('general.langRegion.currencyLabel')} description={t('general.langRegion.currencyNote')}>
+            <Select
+              value={region.currency}
+              onChange={(value) => updateRegion({ currency: value })}
+              options={currencyOptions}
+              disabled={!canEditRegion || savingRegion}
+            />
           </SettingRow>
 
           <SettingRow label={t('general.langRegion.dateFormatLabel')} description={t('general.langRegion.dateFormatNote')}>
@@ -424,6 +478,24 @@ export default function GeneralSettingsPage() {
               {t('general.qr.caption')}
             </p>
           </div>
+        </SettingsSection>
+
+        {/* Legal documents */}
+        <SettingsSection title={t('general.legal.title')} description={t('general.legal.subtitle')}>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {LEGAL_DOCS.map((doc) => (
+              <li key={doc}>
+                <a
+                  href={legalPath(doc, locale)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-lg border border-gray-100 px-3 py-2.5 text-sm font-medium text-gray-700 hover:border-gray-200 hover:text-gray-900"
+                >
+                  {t(`general.legal.docs.${doc}`)}
+                </a>
+              </li>
+            ))}
+          </ul>
         </SettingsSection>
       </motion.div>
     </div>

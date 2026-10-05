@@ -4,9 +4,12 @@
 // A lightweight skeleton mirroring the page's rough layout (header, filter bar,
 // appointment table) so the route paints immediately instead of blank.
 
+// No translations here: loading.tsx renders before the page sets the request
+// locale, and a next-intl call at this point pins the whole request to the
+// default locale (Slovenian).
 export default function AppointmentsLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8 animate-pulse" aria-busy="true" aria-label="Nalaganje">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 animate-pulse" aria-busy="true">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

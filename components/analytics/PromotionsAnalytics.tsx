@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useFormat } from '@/hooks/useFormat';
 import { motion } from 'motion/react';
 import { Tag, Clock, Plus } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { supabase } from '@/lib/supabaseClient';
 
 interface PromoRow {
@@ -37,6 +38,7 @@ function computeSaving(row: PromoRow): number {
 export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsProps) {
   const { money } = useFormat();
   const t = useTranslations('analytics');
+  const locale = useLocale();
   const [rows, setRows] = useState<PromoRow[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -121,7 +123,7 @@ export default function PromotionsAnalytics({ companyId }: PromotionsAnalyticsPr
     return {
       year: d.getFullYear(),
       month: d.getMonth(),
-      label: d.toLocaleDateString('sl-SI', { month: 'short' }),
+      label: d.toLocaleDateString(intlLocale(locale), { month: 'short' }),
     };
   });
 

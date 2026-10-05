@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { SegmentedControl } from '@/components/settings/SegmentedControl';
 import {
@@ -19,6 +21,7 @@ import {
 // ─── Page ───────────────────────────────────────────────────────────────────
 
 export default function ReceptionistPlusPage() {
+  const t = useTranslations('receptionist');
   const [tab, setTab] = useState<TabKey>('nastavitve');
   const [provisioned, setProvisioned] = useState<boolean | null>(null);
   const [settings, setSettings] = useState<ReceptionistSettings | null>(null);
@@ -29,7 +32,7 @@ export default function ReceptionistPlusPage() {
     try {
       const res = await fetch('/api/receptionistplus/settings');
       const data = await res.json();
-      if (!data.ok) throw new Error(data.error ?? 'Napaka');
+      if (!data.ok) throw new Error(data.error ?? 'load_failed');
       setProvisioned(Boolean(data.provisioned));
       setSettings(data.settings);
     } catch (e) {
@@ -43,10 +46,12 @@ export default function ReceptionistPlusPage() {
   }, [load]);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('tab') === 'krediti') {
-      setTab('krediti');
-    }
-  }, []);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'krediti') setTab('krediti');
+    const checkout = params.get('checkout');
+    if (checkout === 'success') toast.success(t('credits.checkoutSuccess'));
+    else if (checkout === 'canceled') toast(t('credits.checkoutCanceled'));
+  }, [t]);
 
   const saveSettings = useCallback(async (patch: Partial<ReceptionistSettings>) => {
     const res = await fetch('/api/receptionistplus/settings', {
@@ -55,7 +60,7 @@ export default function ReceptionistPlusPage() {
       body: JSON.stringify(patch),
     });
     const data = await res.json();
-    if (!data.ok) throw new Error(data.error ?? 'Napaka');
+    if (!data.ok) throw new Error(data.error ?? 'save_failed');
     setSettings((s) => (s ? { ...s, ...patch } : s));
   }, []);
 
@@ -69,21 +74,21 @@ export default function ReceptionistPlusPage() {
             transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
             className="mb-6"
           >
-            <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">ReceptionistPlus</h1>
-            <p className="mt-0.5 text-base text-gray-500">Vaša AI telefonska asistentka</p>
+            <h1 className="text-2xl font-semibold text-gray-900 sm:text-3xl">{t('title')}</h1>
+            <p className="mt-0.5 text-base text-gray-500">{t('subtitle')}</p>
           </motion.div>
 
           {provisioned === null && !error ? (
             <LoadingState />
           ) : error && provisioned === null ? (
-            <ErrorState message="Napaka pri nalaganju strani." />
+            <ErrorState message={t('loadError')} />
           ) : !provisioned ? (
             <NotActivated onActivated={load} />
           ) : (
             <>
               <div className="mb-6">
                 <SegmentedControl
-                  options={TABS.map(({ key, label }) => ({ value: key, label }))}
+                  options={TABS.map(({ key, labelKey }) => ({ value: key, label: t(labelKey) }))}
                   value={tab}
                   onChange={(value) => setTab(value as TabKey)}
                 />

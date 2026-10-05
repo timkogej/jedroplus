@@ -1,5 +1,6 @@
 'use client';
 
+import { intlLocale } from '@/lib/format';
 import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -82,6 +83,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { useTranslations, useLocale } from 'next-intl';
 import { useOptionalTour } from '@/components/guide/TourProvider';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface CalendarProps {
   companyId: string;
@@ -137,7 +139,9 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const [seed] = useState<CalendarInitialData | null>(() => {
     if (!initialData) return null;
     if (initialData.companyId !== companyId) return null;
-    if (initialData.seededForDate !== new Date().toISOString().split('T')[0]) return null;
+    // The server seeds for the company's local date; the calendar shows the
+    // browser's local "today".
+    if (initialData.seededForDate !== getLocalDateKey(new Date())) return null;
     return initialData;
   });
 
@@ -855,7 +859,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     const clientId = String(appointment.stranka_id ?? '').trim();
 
     if (!clientId) {
-      setActionError('Ta termin nima povezave na stranko.');
+      setActionError(t('actionErrors.noClientLink'));
       return;
     }
 
@@ -864,18 +868,18 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     const result = await getClientById(companyId, clientId);
 
     if (result.error) {
-      setActionError('Podrobnosti stranke ni bilo mogoče naložiti.');
+      setActionError(t('actionErrors.clientLoadFailed'));
       return;
     }
 
     if (!result.data) {
-      setActionError('Stranka za ta termin ni bila najdena v tem podjetju.');
+      setActionError(t('actionErrors.clientNotFound'));
       return;
     }
 
     setDetailsClient(result.data);
     setClientDetailsOpen(true);
-  }, [companyId]);
+  }, [companyId, t]);
 
   const handleEditFromDetail = useCallback((appointment: AppointmentWithDetails) => {
     setEditingAppointment(appointment);
@@ -2344,6 +2348,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       />
 
       {/* Complete Confirmation Modal - identical to Termini */}
+      <BodyPortal>
       <AnimatePresence>
         {completeTarget && (
           <motion.div
@@ -2446,7 +2451,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                   <div>
                     <p className="text-xs text-gray-500">{t('modal.fields.date')}</p>
                     <p className="text-sm font-semibold text-[#1A1F36]">
-                      {new Date(completeTarget.datum).toLocaleDateString(locale === 'sl' ? 'sl-SI' : 'en-US', {
+                      {new Date(completeTarget.datum).toLocaleDateString(intlLocale(locale), {
                         weekday: 'long',
                         day: 'numeric',
                         month: 'long',
@@ -2525,6 +2530,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
           </motion.div>
         )}
       </AnimatePresence>
+      </BodyPortal>
 
       {/* Success Toast */}
       <AnimatePresence>
@@ -2549,6 +2555,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       </AnimatePresence>
 
       {/* Reschedule confirmation dialog */}
+      <BodyPortal>
       <AnimatePresence>
         {rescheduleConfirm && (
           <motion.div
@@ -2654,6 +2661,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
           </motion.div>
         )}
       </AnimatePresence>
+      </BodyPortal>
 
       {/* Reschedule notification modal */}
       {rescheduleNotifyTarget && (

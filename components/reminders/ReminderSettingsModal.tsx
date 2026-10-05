@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, FloppyDisk, Lock, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
@@ -24,14 +24,32 @@ import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
 import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
+import { toast } from 'sonner';
+import { EnglishVariant } from './EnglishVariant';
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
+
+// Languages reminders can be written in, each named in its own language.
 const SENDING_LANGUAGES = [
   { value: 'sl', label: 'Slovenščina' },
   { value: 'en', label: 'English' },
   { value: 'it', label: 'Italiano' },
   { value: 'de', label: 'Deutsch' },
 ];
+
+type EnglishTemplates = {
+  lastna_predloga_pred_en: string;
+  lastna_predloga_po_en: string;
+  obvestilo_prestavitev_template_sms_en: string;
+  obvestilo_prestavitev_template_email_en: string;
+};
+
+const EMPTY_ENGLISH: EnglishTemplates = {
+  lastna_predloga_pred_en: '',
+  lastna_predloga_po_en: '',
+  obvestilo_prestavitev_template_sms_en: '',
+  obvestilo_prestavitev_template_email_en: '',
+};
 
 interface ReminderSettingsModalProps {
   isOpen: boolean;
@@ -154,6 +172,13 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   const [smsIncludeNotesPo, setSmsIncludeNotesPo] = useState(false);
   const [smsTipPo, setSmsTipPo] = useState(false);
   const [smsTemplatePo, setSmsTemplatePo] = useState('');
+
+  // English variants of the custom templates, for clients who don't read the
+  // company's language. Saved separately (/api/company/message-templates).
+  const [englishTemplates, setEnglishTemplates] = useState<EnglishTemplates>(EMPTY_ENGLISH);
+  const loadedEnglishRef = useRef<EnglishTemplates>(EMPTY_ENGLISH);
+  const setEnglish = (key: keyof EnglishTemplates) => (value: string) =>
+    setEnglishTemplates((prev) => ({ ...prev, [key]: value }));
 
   // SMS sender ID (read-only from Supabase)
   const [smsSenderId, setSmsSenderId] = useState('');
@@ -314,6 +339,15 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
           setObvestiloPrestavitevChannel(rescheduleChannel === 'sms' ? 'sms' : 'email');
           setObvestiloPrestavitevTemplateSms(String(data['obvestilo_prestavitev_template_sms'] ?? ''));
           setObvestiloPrestavitevTemplateEmail(String(data['obvestilo_prestavitev_template_email'] ?? ''));
+
+          const english: EnglishTemplates = {
+            lastna_predloga_pred_en: sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_pred_en'] ?? ''))),
+            lastna_predloga_po_en: sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_po_en'] ?? ''))),
+            obvestilo_prestavitev_template_sms_en: String(data['obvestilo_prestavitev_template_sms_en'] ?? ''),
+            obvestilo_prestavitev_template_email_en: String(data['obvestilo_prestavitev_template_email_en'] ?? ''),
+          };
+          setEnglishTemplates(english);
+          loadedEnglishRef.current = english;
         }
       } catch (error) {
         console.error('Error loading reminder settings:', error);
@@ -430,6 +464,22 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
       if (!result.ok) {
         throw new Error(t('modal.saveError'));
+      }
+
+      const englishChanged = (Object.keys(englishTemplates) as (keyof EnglishTemplates)[]).some(
+        (key) => englishTemplates[key].trim() !== loadedEnglishRef.current[key].trim()
+      );
+      if (englishChanged) {
+        const res = await fetch('/api/company/message-templates', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(englishTemplates),
+        }).catch(() => null);
+        if (!res?.ok) {
+          toast.error(t('modal.englishVariant.saveError'));
+          return;
+        }
+        loadedEnglishRef.current = englishTemplates;
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -586,23 +636,23 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
                     {/* Nagovor strank */}
                     <SettingRow
-                      label="Nagovor strank"
-                      description="Ali naj se stranke v opomnikih vika ali tika."
+                      label={t('modal.general.addressingLabel')}
+                      description={t('modal.general.addressingDesc')}
                     >
                       <SegmentedControl
                         value={nagovor}
                         onChange={(v) => setNagovor(v === 'tikanje' ? 'tikanje' : 'vikanje')}
                         options={[
-                          { value: 'vikanje', label: 'Vikanje' },
-                          { value: 'tikanje', label: 'Tikanje' },
+                          { value: 'vikanje', label: t('modal.general.addressingFormal') },
+                          { value: 'tikanje', label: t('modal.general.addressingInformal') },
                         ]}
                       />
                     </SettingRow>
 
                     {/* Samodejni opomnik oznaka */}
                     <SettingRow
-                      label="Označi sporočila kot samodejni opomnik"
-                      description="Na začetku sporočila se doda oznaka, da gre za samodejni opomnik."
+                      label={t('modal.general.autoTagLabel')}
+                      description={t('modal.general.autoTagDesc')}
                     >
                       <Switch
                         checked={samodejniOpomnik}
@@ -612,8 +662,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
                     {/* Vključi izvajalca */}
                     <SettingRow
-                      label="Vključi izvajalca v opomnik"
-                      description="Če je vklopljeno, lahko opomnik omeni zaposlenega, ki bo izvedel storitev."
+                      label={t('modal.general.staffLabel')}
+                      description={t('modal.general.staffDesc')}
                     >
                       <Switch
                         checked={smsOsebaPred}
@@ -623,13 +673,13 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
                     {/* Dni pred terminom */}
                     <SettingRow
-                      label="Pošlji opomnik (dni pred terminom)"
-                      description="Koliko dni pred terminom naj se pošlje opomnik."
+                      label={t('modal.general.daysBeforeLabel')}
+                      description={t('modal.general.daysBeforeDesc')}
                     >
                       <Select
                         value={dniPrej}
                         setValue={setDniPrej}
-                        placeholder="Izberi"
+                        placeholder={t('modal.general.select')}
                       >
                         {[1, 2, 3, 4, 5, 6, 7].map((d) => (
                           <SelectOption key={d} value={String(d)}>{d}</SelectOption>
@@ -886,6 +936,15 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   varLengths={smsVarLengths}
                                 />
                                 <MessagePreview template={smsTemplatePred} companyName={previewCompanyName} />
+                                {sendingLanguage !== 'en' && (
+                                  <EnglishVariant
+                                    value={englishTemplates.lastna_predloga_pred_en}
+                                    onChange={setEnglish('lastna_predloga_pred_en')}
+                                    maxLength={155}
+                                    varLengths={smsVarLengths}
+                                    companyName={previewCompanyName}
+                                  />
+                                )}
                               </div>
                             )}
                           </div>
@@ -1043,6 +1102,15 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   varLengths={smsVarLengths}
                                 />
                                 <MessagePreview template={smsTemplatePo} companyName={previewCompanyName} />
+                                {sendingLanguage !== 'en' && (
+                                  <EnglishVariant
+                                    value={englishTemplates.lastna_predloga_po_en}
+                                    onChange={setEnglish('lastna_predloga_po_en')}
+                                    maxLength={155}
+                                    varLengths={smsVarLengths}
+                                    companyName={previewCompanyName}
+                                  />
+                                )}
                               </div>
                             )}
                           </div>
@@ -1110,12 +1178,12 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                   {/* Reschedule notification section */}
                   <div id="reminder-section-reschedule" className="scroll-mt-4" />
                   <SettingsSection
-                    title="Obvestilo ob prestavitvi termina"
-                    description="Stranka prejme obvestilo, ko ji prestavite termin."
+                    title={t('modal.reschedule.title')}
+                    description={t('modal.reschedule.desc')}
                   >
                     <SettingRow
-                      label="Omogoči obvestilo ob prestavitvi"
-                      description="Ko prestavite termin, vam sistem predlaga pošiljanje obvestila stranki."
+                      label={t('modal.reschedule.enableLabel')}
+                      description={t('modal.reschedule.enableDesc')}
                     >
                       <Switch
                         checked={obvestiloPrestavitevOmogoceno}
@@ -1126,8 +1194,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                     {obvestiloPrestavitevOmogoceno && (
                       <>
                         <SettingRow
-                          label="Način pošiljanja"
-                          description="Izberite kanal za obvestilo ob prestavitvi termina."
+                          label={t('modal.reschedule.channelLabel')}
+                          description={t('modal.reschedule.channelDesc')}
                         >
                           <div className="space-y-2">
                             <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1">
@@ -1165,36 +1233,56 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
                         {obvestiloPrestavitevChannel === 'sms' && (
                           <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">SMS predloga</label>
+                            <label className="block text-sm font-medium text-gray-700">{t('modal.reschedule.smsTemplate')}</label>
                             <TemplateEditor
                               value={obvestiloPrestavitevTemplateSms}
                               onChange={setObvestiloPrestavitevTemplateSms}
                               maxLength={155}
                               rows={4}
-                              placeholder="Pozdravljeni {{ime}}, vas termin je prestavljen na {{datum}} ob {{cas}}. {{ime_podjetja}}"
+                              placeholder={String(t.raw('modal.reschedule.smsPlaceholder'))}
                               varLengths={smsVarLengths}
                             />
                             <p className="text-xs text-gray-400">
-                              Uporabite lahko enake spremenljivke kot pri opomnikih pred in po terminu.
+                              {t('modal.reschedule.smsHint')}
                             </p>
                             <MessagePreview template={obvestiloPrestavitevTemplateSms} companyName={previewCompanyName} />
+                            {sendingLanguage !== 'en' && (
+                              <EnglishVariant
+                                value={englishTemplates.obvestilo_prestavitev_template_sms_en}
+                                onChange={setEnglish('obvestilo_prestavitev_template_sms_en')}
+                                maxLength={155}
+                                varLengths={smsVarLengths}
+                                companyName={previewCompanyName}
+                                placeholder="Hi {{ime}}, your appointment has been moved to {{datum}} at {{cas}}. {{ime_podjetja}}"
+                              />
+                            )}
                           </div>
                         )}
 
                         {obvestiloPrestavitevChannel === 'email' && (
                           <div className="space-y-2">
-                            <label className="block text-sm font-medium text-gray-700">Email predloga</label>
+                            <label className="block text-sm font-medium text-gray-700">{t('modal.reschedule.emailTemplate')}</label>
                             <TemplateEditor
                               value={obvestiloPrestavitevTemplateEmail}
                               onChange={setObvestiloPrestavitevTemplateEmail}
                               maxLength={0}
                               rows={4}
-                              placeholder="Spoštovani {{ime}}, vaš termin je bil prestavljen na {{datum}} ob {{cas}}. Lep pozdrav, {{ime_podjetja}}"
+                              placeholder={String(t.raw('modal.reschedule.emailPlaceholder'))}
                             />
                             <p className="text-xs text-gray-400">
-                              Email predloga nima omejitve znakov in podpira šumnike.
+                              {t('modal.reschedule.emailHint')}
                             </p>
                             <MessagePreview template={obvestiloPrestavitevTemplateEmail} companyName={previewCompanyName} sms={false} />
+                            {sendingLanguage !== 'en' && (
+                              <EnglishVariant
+                                value={englishTemplates.obvestilo_prestavitev_template_email_en}
+                                onChange={setEnglish('obvestilo_prestavitev_template_email_en')}
+                                maxLength={0}
+                                sms={false}
+                                companyName={previewCompanyName}
+                                placeholder="Dear {{ime}}, your appointment has been moved to {{datum}} at {{cas}}. Kind regards, {{ime_podjetja}}"
+                              />
+                            )}
                           </div>
                         )}
                       </>

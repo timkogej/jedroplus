@@ -2,9 +2,12 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from './i18n/routing';
-import { fullLocales, publicAuthPaths } from './i18n/config';
 
 const intlMiddleware = createIntlMiddleware(routing);
+
+// "/sl/…", "/en/…" — built from the configured locales so adding one is a
+// config change only.
+const LOCALE_PREFIX = new RegExp(`^/(${routing.locales.join('|')})(/|$)`);
 
 // Paths that don't require a company to be set up (without locale prefix)
 const PUBLIC_PATHS = [
@@ -34,6 +37,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // 2b. Marketing unsubscribe link — public, in the client's language
+  if (/^\/unsubscribe\/[^/]+/.test(pathname)) {
+    return NextResponse.next();
+  }
+
+  // 2c. Legal documents — public, five languages (/legal/<lang>/<doc>)
+  if (/^\/legal\//.test(pathname)) {
+    return NextResponse.next();
+  }
+
   // 3. Internal dev pages — English UI, not locale-routed
   // TODO(i18n-review): confirm if these dev pages should be removed or included in i18n
   const devPaths = ['/app', '/calendar', '/bookings', '/settings'];
@@ -59,25 +72,11 @@ export async function proxy(request: NextRequest) {
   }
 
   // 6. Determine locale and strip it for public-path matching
-  const localeMatch = pathname.match(/^\/(sl|en|hr|de|it)(\/|$)/);
-  const locale = localeMatch?.[1] ?? 'sl';
+  const localeMatch = pathname.match(LOCALE_PREFIX);
+  const locale = localeMatch?.[1] ?? routing.defaultLocale;
   const pathnameWithoutLocale = localeMatch
     ? pathname.slice(locale.length + 1) || '/'
     : pathname;
-
-  // hr/de/it so zaenkrat prevedeni le pred prijavo — drugje angleščina.
-  const isAuthPage = publicAuthPaths.some(
-    (p) => pathnameWithoutLocale === p || pathnameWithoutLocale.startsWith(p + '/')
-  );
-  if (!(fullLocales as readonly string[]).includes(locale) && !isAuthPage) {
-    const englishUrl = request.nextUrl.clone();
-    englishUrl.pathname = `/en${pathnameWithoutLocale === '/' ? '' : pathnameWithoutLocale}`;
-    const redirect = NextResponse.redirect(englishUrl);
-    for (const cookie of supabaseResponse.cookies.getAll()) {
-      if (cookie.name !== 'NEXT_LOCALE') redirect.cookies.set(cookie.name, cookie.value, cookie);
-    }
-    return redirect;
-  }
 
   if (!user || isPublicPath(pathnameWithoutLocale)) {
     return supabaseResponse;

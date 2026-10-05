@@ -16,6 +16,8 @@ interface Customer {
   tags: string[];
   /** ISO date-only strings (YYYY-MM-DD) of all appointments for date-based filtering */
   appointmentDates?: string[];
+  /** Unsubscribed from marketing: listed, never selectable. */
+  optedOut?: boolean;
 }
 
 /**
@@ -131,6 +133,7 @@ export default function CustomerList({
 
   const toggleCustomer = useCallback(
     (id: string) => {
+      if (customers.find((c) => c.id === id)?.optedOut) return;
       const next = new Set(selectedIds);
       if (next.has(id)) {
         next.delete(id);
@@ -139,11 +142,11 @@ export default function CustomerList({
       }
       onSelectionChange(next);
     },
-    [selectedIds, onSelectionChange]
+    [selectedIds, onSelectionChange, customers]
   );
 
   const selectAll = useCallback(() => {
-    const allIds = new Set(filteredCustomers.map((c) => c.id));
+    const allIds = new Set(filteredCustomers.filter((c) => !c.optedOut).map((c) => c.id));
     onSelectionChange(allIds);
   }, [filteredCustomers, onSelectionChange]);
 
@@ -151,8 +154,9 @@ export default function CustomerList({
     onSelectionChange(new Set());
   }, [onSelectionChange]);
 
-  const selectedInFiltered = filteredCustomers.filter((c) => selectedIds.has(c.id)).length;
-  const allSelected = filteredCustomers.length > 0 && selectedInFiltered === filteredCustomers.length;
+  const selectable = filteredCustomers.filter((c) => !c.optedOut);
+  const selectedInFiltered = selectable.filter((c) => selectedIds.has(c.id)).length;
+  const allSelected = selectable.length > 0 && selectedInFiltered === selectable.length;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">

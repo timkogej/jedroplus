@@ -13,7 +13,7 @@
 import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { WarningCircle } from '@phosphor-icons/react/dist/ssr';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, setRequestLocale } from 'next-intl/server';
 import AuroraBackground from '@/components/shared/AuroraBackground';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 import { JedroLogo } from '@/components/brand/JedroLogo';
@@ -28,12 +28,13 @@ export default async function ConfirmErrorPage({
   // Jezik iz naslova strani — brez tega se vnaprej zgrajena stran vedno
   // prikaže v privzeti slovenščini.
   const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations({ locale, namespace: 'auth.confirmError' });
 
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] px-4 py-16">
       <AuroraBackground />
-      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
       <div className="relative z-10 w-full max-w-[400px]">
 
         {/* Logo Jedro+ (components/brand/JedroLogo) */}

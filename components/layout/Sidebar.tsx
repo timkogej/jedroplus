@@ -1,7 +1,8 @@
 'use client';
 
+import { stripLocalePrefix } from '@/i18n/config';
 import { useRef, useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
@@ -267,7 +268,7 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
 
 export function Sidebar() {
   const pathname = usePathname();
-  const pathnameWithoutLocale = pathname.replace(/^\/(sl|en)(?=\/|$)/, '') || '/';
+  const pathnameWithoutLocale = stripLocalePrefix(pathname);
   const router = useRouter();
   const desktopNavRef = useRef<HTMLElement>(null);
   const t = useTranslations('layout');

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   CaretLeft,
@@ -14,7 +14,8 @@ import {
   CheckCircle,
   Hourglass,
 } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 
@@ -106,9 +107,10 @@ function ChannelBadge({ channel }: { channel: string }) {
 
 function MessageRow({ msg }: { msg: MessageOutboxRow }) {
   const t = useTranslations('settings');
+  const locale = useLocale();
   const [expanded, setExpanded] = useState(false);
 
-  const formattedDate = new Date(msg.sent_at).toLocaleString('sl-SI', {
+  const formattedDate = new Date(msg.sent_at).toLocaleString(intlLocale(locale), {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

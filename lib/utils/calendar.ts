@@ -52,14 +52,70 @@ const MONTHS_SHORT_EN = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
 ];
 
-// Locale-aware getters (locale: 'sl' | 'en')
-export function getDaysFull(locale: string) { return locale === 'en' ? DAYS_FULL_EN : DAYS_FULL; }
-export function getDaysShort(locale: string) { return locale === 'en' ? DAYS_SHORT_EN : DAYS_SHORT; }
-export function getDaysAbbr(locale: string) { return locale === 'en' ? DAYS_ABBR_EN : DAYS_ABBR; }
-export function getMonthsFull(locale: string) { return locale === 'en' ? MONTHS_FULL_EN : MONTHS_FULL; }
-export function getMonthsShort(locale: string) { return locale === 'en' ? MONTHS_SHORT_EN : MONTHS_SHORT; }
+// Day and month names in German
+const DAYS_FULL_DE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const DAYS_SHORT_DE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const MONTHS_FULL_DE = [
+  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+];
+const MONTHS_SHORT_DE = [
+  'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'
+];
+
+// Day and month names in Croatian
+const DAYS_FULL_HR = ['Nedjelja', 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'];
+const DAYS_SHORT_HR = ['Ned', 'Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub'];
+const DAYS_ABBR_HR = ['Ne', 'Po', 'Ut', 'Sr', 'Če', 'Pe', 'Su'];
+const MONTHS_FULL_HR = [
+  'Siječanj', 'Veljača', 'Ožujak', 'Travanj', 'Svibanj', 'Lipanj',
+  'Srpanj', 'Kolovoz', 'Rujan', 'Listopad', 'Studeni', 'Prosinac'
+];
+const MONTHS_SHORT_HR = [
+  'Sij', 'Velj', 'Ožu', 'Tra', 'Svi', 'Lip',
+  'Srp', 'Kol', 'Ruj', 'Lis', 'Stu', 'Pro'
+];
+// Croatian dates use the genitive in lowercase: "2. veljače 2026".
+const MONTHS_IN_DATE_HR = [
+  'siječnja', 'veljače', 'ožujka', 'travnja', 'svibnja', 'lipnja',
+  'srpnja', 'kolovoza', 'rujna', 'listopada', 'studenoga', 'prosinca'
+];
+
+// Day and month names in Italian (months are lowercase inside dates: "2 febbraio 2026")
+const DAYS_FULL_IT = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+const DAYS_SHORT_IT = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+const DAYS_ABBR_IT = ['Do', 'Lu', 'Ma', 'Me', 'Gi', 'Ve', 'Sa'];
+const MONTHS_FULL_IT = [
+  'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+  'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+];
+const MONTHS_SHORT_IT = [
+  'Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu',
+  'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic'
+];
+
+type Names = { daysFull: string[]; daysShort: string[]; daysAbbr: string[]; monthsFull: string[]; monthsShort: string[]; monthsInDate: string[] };
+
+const NAMES: Record<string, Names> = {
+  sl: { daysFull: DAYS_FULL, daysShort: DAYS_SHORT, daysAbbr: DAYS_ABBR, monthsFull: MONTHS_FULL, monthsShort: MONTHS_SHORT, monthsInDate: MONTHS_FULL_IN_DATE },
+  en: { daysFull: DAYS_FULL_EN, daysShort: DAYS_SHORT_EN, daysAbbr: DAYS_ABBR_EN, monthsFull: MONTHS_FULL_EN, monthsShort: MONTHS_SHORT_EN, monthsInDate: MONTHS_FULL_EN },
+  // German capitalises months inside dates too ("2. Februar").
+  de: { daysFull: DAYS_FULL_DE, daysShort: DAYS_SHORT_DE, daysAbbr: DAYS_SHORT_DE, monthsFull: MONTHS_FULL_DE, monthsShort: MONTHS_SHORT_DE, monthsInDate: MONTHS_FULL_DE },
+  hr: { daysFull: DAYS_FULL_HR, daysShort: DAYS_SHORT_HR, daysAbbr: DAYS_ABBR_HR, monthsFull: MONTHS_FULL_HR, monthsShort: MONTHS_SHORT_HR, monthsInDate: MONTHS_IN_DATE_HR },
+  it: { daysFull: DAYS_FULL_IT, daysShort: DAYS_SHORT_IT, daysAbbr: DAYS_ABBR_IT, monthsFull: MONTHS_FULL_IT, monthsShort: MONTHS_SHORT_IT, monthsInDate: MONTHS_FULL_IT.map((m) => m.toLowerCase()) },
+};
+
+const names = (locale: string): Names => NAMES[locale] ?? NAMES.en;
+
+// Locale-aware getters
+export function getDaysFull(locale: string) { return names(locale).daysFull; }
+export function getDaysShort(locale: string) { return names(locale).daysShort; }
+export function getDaysAbbr(locale: string) { return names(locale).daysAbbr; }
+export function getMonthsFull(locale: string) { return names(locale).monthsFull; }
+export function getMonthsShort(locale: string) { return names(locale).monthsShort; }
 /** Month names for use right after a day number ("2. februar"). */
-export function getMonthsInDate(locale: string) { return locale === 'en' ? MONTHS_FULL_EN : MONTHS_FULL_IN_DATE; }
+export function getMonthsInDate(locale: string) { return names(locale).monthsInDate; }
 
 // Get start of day (midnight)
 export function startOfDay(date: Date): Date {

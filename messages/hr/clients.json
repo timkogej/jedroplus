@@ -1,0 +1,235 @@
+{
+  "page": {
+    "title": "Klijenti",
+    "subtitle": "Pregledna baza vaših klijenata",
+    "newClient": "Novi klijent",
+    "searchPlaceholder": "Pretraži klijente po imenu, e-pošti ili telefonu...",
+    "showingCount": "Prikazano {shown} od {total} klijenata",
+    "disabledCreateMessage": "Vlasnik tvrtke onemogućio je dodavanje novih klijenata. Obratite mu se da vam to omogući."
+  },
+  "crm": {
+    "importCsv": "Uvezi iz CSV-a",
+    "importExcel": "Uvezi iz Excela",
+    "importOther": "Uvezi iz drugog CRM-a",
+    "exportCsv": "Izvezi u CSV",
+    "exportExcel": "Izvezi u Excel",
+    "exportPdf": "Izvezi u PDF",
+    "importButton": "Uvezi klijente",
+    "exportButton": "Izvezi klijente",
+    "comingSoon": "Uskoro dostupno"
+  },
+  "stats": {
+    "total": "Ukupno klijenata",
+    "withAppointments": "S terminima",
+    "newThisMonth": "Novih ovaj mjesec"
+  },
+  "emptyState": {
+    "noClients": "Još nemate klijenata",
+    "noClientsSubtitle": "Za upravljanje terminima i kontaktima počnite dodavanjem svojeg prvog klijenta.",
+    "addFirst": "Dodaj prvog klijenta",
+    "noResults": "Nema rezultata za \"{term}\"",
+    "noResultsSubtitle": "Pokušajte s drugim pojmom ili očistite filtar",
+    "clearSearch": "Očisti pretraživanje"
+  },
+  "errors": {
+    "loadError": "Došlo je do pogreške pri učitavanju podataka",
+    "saveError": "Došlo je do pogreške pri spremanju klijenta",
+    "deleteError": "Došlo je do pogreške pri brisanju klijenta",
+    "retry": "Pokušaj ponovno"
+  },
+  "toast": {
+    "created": "Klijent je uspješno dodan",
+    "updated": "Klijent je uspješno ažuriran",
+    "deleted": "Klijent je uspješno izbrisan"
+  },
+  "modal": {
+    "title": {
+      "create": "Novi klijent",
+      "edit": "Uredi klijenta"
+    },
+    "subtitle": {
+      "create": "Dodajte novog klijenta",
+      "edit": "Uredite podatke klijenta"
+    },
+    "fields": {
+      "firstNameRequired": "Ime *",
+      "lastNameRequired": "Prezime *",
+      "genderRequired": "Spol *",
+      "clientType": "Vrsta klijenta",
+      "emailHint": "(barem e-pošta ili telefon)",
+      "phone": "Telefon",
+      "notes": "Bilješke",
+      "notesPlaceholder": "Bilješke o klijentu...",
+      "notesHint": "Bilješke se koriste u podsjetnicima i porukama",
+      "communicationLanguage": "Jezik komunikacije",
+      "internalNotes": "Interne bilješke",
+      "internalNotesPlaceholder": "Interne bilješke (ne šalju se klijentu)..."
+    },
+    "gender": {
+      "placeholder": "Odaberite spol",
+      "male": "Muški",
+      "female": "Ženski",
+      "other": "Drugo"
+    },
+    "clientType": {
+      "placeholder": "Odaberite vrstu klijenta",
+      "nova": "Novi",
+      "redna": "Redovni",
+      "vip": "VIP",
+      "none": "/",
+      "change": "Promijeni"
+    },
+    "language": {
+      "change": "Promijeni"
+    },
+    "addInternalNotes": "+ Interne bilješke",
+    "warning": {
+      "missingEmail": "Nedostaje adresa e-pošte",
+      "missingPhone": "Nedostaje telefonski broj",
+      "missingEmailDesc": "Bez adrese e-pošte klijentu neće biti moguće slati e-poruke, račune i automatske obavijesti. To može utjecati na automatsku komunikaciju i podsjetnike putem e-pošte.",
+      "missingPhoneDesc": "Bez telefonskog broja klijentu neće biti moguće slati poruke i automatske obavijesti. To može utjecati na automatsku komunikaciju i podsjetnike putem SMS-a."
+    },
+    "actions": {
+      "cancel": "Odustani",
+      "saveAnyway": "Ipak spremi",
+      "save": "Spremi klijenta",
+      "saving": "Spremanje..."
+    },
+    "validation": {
+      "firstNameRequired": "Ime je obavezno",
+      "firstNameMinLength": "Ime mora imati najmanje 2 znaka",
+      "lastNameRequired": "Prezime je obavezno",
+      "lastNameMinLength": "Prezime mora imati najmanje 2 znaka",
+      "genderRequired": "Spol je obavezan",
+      "emailInvalid": "Nevaljana adresa e-pošte",
+      "phoneInvalid": "Nevaljan telefonski broj",
+      "notesMaxLength": "Bilješke mogu imati najviše 500 znakova",
+      "internalNotesMaxLength": "Interne bilješke mogu imati najviše 500 znakova",
+      "emailExists": "Ova se adresa e-pošte već koristi",
+      "contactRequired": "Potrebno je unijeti barem e-poštu ili telefonski broj"
+    },
+    "smsCountryNotSupported": "Na brojeve iz ove države još ne šaljemo SMS – podsjetnici će se slati e-poštom."
+  },
+  "details": {
+    "added": "Dodano:",
+    "edit": "Uredi",
+    "delete": "Izbriši",
+    "contactInfo": "Kontaktni podaci",
+    "gender": "Spol",
+    "clientType": "Vrsta klijenta",
+    "genderMale": "Muški",
+    "genderFemale": "Ženski",
+    "genderOther": "Drugo",
+    "genderUnknown": "Nije navedeno",
+    "notes": "Bilješke",
+    "internalNotes": "Interne bilješke",
+    "stats": "Statistika",
+    "statTotal": "Ukupno",
+    "statNoShow": "Nedolasci",
+    "statCancelled": "Otkazanih",
+    "appointmentHistory": "Povijest termina",
+    "newAppointment": "Novi termin",
+    "noAppointments": "Nema termina",
+    "addFirstAppointment": "Dodaj prvi termin",
+    "showingLast": "Prikazano je zadnjih 10 od ukupno {total} termina",
+    "aptNotes": "Bilješke",
+    "aptInternalNotes": "Interne bilješke",
+    "aptCompletionNotes": "Bilješke nakon završetka",
+    "finalPrice": "Konačna cijena"
+  },
+  "deleteModal": {
+    "title": "Brisanje klijenta",
+    "areYouSure": "Jeste li sigurni?",
+    "warningPrefix": "Brisanje klijenta",
+    "warningSuffix": "bit će trajno. Ova se radnja ne može poništiti.",
+    "appointmentWarningPrefix": "Ovaj klijent ima",
+    "appointmentCount": "{count, plural, one {# termin} other {# termina}}",
+    "appointmentWarningSuffix": "Termini će ostati u sustavu, ali bez poveznice s klijentom.",
+    "cancel": "Odustani",
+    "deleting": "Brisanje...",
+    "deleteButton": "Izbriši klijenta"
+  },
+  "table": {
+    "headers": {
+      "client": "Klijent",
+      "clientType": "Vrsta",
+      "phone": "Telefon",
+      "appointments": "Termini",
+      "lastInteraction": "Zadnja interakcija",
+      "actions": "Radnje"
+    },
+    "empty": {
+      "title": "Nema rezultata",
+      "message": "Nije pronađen nijedan klijent koji odgovara pretraživanju"
+    },
+    "actions": {
+      "view": "Pojedinosti",
+      "edit": "Uredi",
+      "delete": "Izbriši"
+    },
+    "pagination": {
+      "of": "od"
+    }
+  },
+  "import": {
+    "title": "Uvezi klijente",
+    "steps": {
+      "1": "Odaberite datoteku za uvoz",
+      "2": "Pregledajte podatke i povežite stupce",
+      "3": "Uvoz klijenata...",
+      "4": "Uvoz je završen"
+    },
+    "drop": "Povucite datoteku ovamo ili kliknite za odabir",
+    "supported": "Podržane vrste: .csv, .xlsx, .xls",
+    "preview": "Pregled (prvih 5 redaka)",
+    "matchColumns": "Povežite stupce",
+    "required": "(obavezno)",
+    "skip": "— preskoči —",
+    "fields": {
+      "Ime": "Ime",
+      "Priimek ali celotno ime": "Prezime ili puno ime",
+      "Email": "E-pošta",
+      "Telefon": "Telefon",
+      "Spol": "Spol",
+      "Opombe": "Bilješke",
+      "Datum vpisa": "Datum upisa"
+    },
+    "importing": "Uvoz klijenata...",
+    "mayTakeSeconds": "To može potrajati nekoliko sekundi.",
+    "done": "Uvoz je završen",
+    "newClients": "Uvezenih novih klijenata",
+    "updatedClients": "Ažuriranih klijenata",
+    "skippedClients": "Preskočenih klijenata (duplikati)",
+    "cancel": "Odustani",
+    "back": "Natrag",
+    "next": "Dalje",
+    "submit": "Uvezi",
+    "close": "Zatvori",
+    "errors": {
+      "empty": "Datoteka je prazna ili nema valjanih podataka.",
+      "read": "Pogreška pri čitanju datoteke.",
+      "noRows": "Nema redaka za uvoz. Vratite se na prethodni korak i ponovno učitajte datoteku.",
+      "unmapped": "Povežite još obavezna polja: {fields}.",
+      "failed": "Pogreška pri uvozu.",
+      "tryAgain": "{message} Pokušajte ponovno."
+    }
+  },
+  "exportSuccess": "Izvoz je uspio",
+  "exporting": "Izvoz...",
+  "exportError": "Pogreška pri izvozu",
+  "exportFile": {
+    "sheet": "Klijenti",
+    "name": "klijenti",
+    "columns": {
+      "firstName": "Ime",
+      "lastName": "Prezime",
+      "email": "E-pošta",
+      "phone": "Telefon",
+      "type": "Vrsta klijenta",
+      "language": "Jezik komunikacije",
+      "gender": "Spol",
+      "notes": "Bilješke",
+      "added": "Datum upisa"
+    }
+  }
+}

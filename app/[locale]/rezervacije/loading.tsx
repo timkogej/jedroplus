@@ -5,9 +5,12 @@
 // two info banners, two design-card sections) so the route paints immediately
 // instead of blank.
 
+// No translations here: loading.tsx renders before the page sets the request
+// locale, and a next-intl call at this point pins the whole request to the
+// default locale (Slovenian).
 export default function RezervacijeLoading() {
   return (
-    <div className="min-h-screen bg-white animate-pulse" aria-busy="true" aria-label="Nalaganje">
+    <div className="min-h-screen bg-white animate-pulse" aria-busy="true">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
         {/* Header */}
         <div className="mb-6 flex items-start justify-between gap-4">

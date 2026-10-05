@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -23,6 +23,9 @@ import {
   normalizeCommunicationLanguage,
 } from '@/lib/communicationLanguage';
 import CommunicationLanguageControl from '@/components/shared/CommunicationLanguageControl';
+import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
+import { languageFromPhone, normalizePhone, phonePlaceholder } from '@/lib/phone';
+import { smsAllowedFor } from '@/lib/sms';
 
 type ModalMode = 'create' | 'edit';
 
@@ -79,6 +82,15 @@ function ClientModal({
   const t = useTranslations('clients');
   const { companySettings } = useCompany();
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
+  const region = useCompanyRegion();
+  // Set once the user picks a language, so a phone number no longer guesses it.
+  const languageTouchedRef = useRef(false);
+
+  // Phone numbers are saved in E.164 so SMS reach clients abroad.
+  const save = useCallback(
+    (data: ClientFormData) => onSave({ ...data, telefon: normalizePhone(data.telefon, region.countryCode) }),
+    [onSave, region.countryCode]
+  );
 
   // Form state
   const [formData, setFormData] = useState<ClientFormData>({
@@ -106,6 +118,7 @@ function ClientModal({
   // Initialize form when modal opens
   useEffect(() => {
     if (isOpen) {
+      languageTouchedRef.current = false;
       if (mode === 'edit' && client) {
         // Read notes from correct database column names
         const clientRecord = client as unknown as Record<string, unknown>;
@@ -277,8 +290,8 @@ function ClientModal({
       return;
     }
 
-    await onSave(formData);
-  }, [formData, validateForm, onSave]);
+    await save(formData);
+  }, [formData, validateForm, save]);
 
   // Animation variants
   const backdropVariants = {
@@ -510,7 +523,13 @@ function ClientModal({
                       type="tel"
                       value={formData.telefon}
                       onChange={(e) => handleChange('telefon', e.target.value)}
-                      placeholder="+386 40 123 456"
+                      onBlur={(e) => {
+                        // A foreign number suggests the client's language (new clients only).
+                        if (mode !== 'create' || languageTouchedRef.current) return;
+                        const guessed = languageFromPhone(e.target.value, region.countryCode);
+                        if (guessed) setFormData((prev) => ({ ...prev, language: guessed }));
+                      }}
+                      placeholder={phonePlaceholder(region.countryCode)}
                       className={`w-full rounded-[10px] border bg-white py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400
                                  transition-all focus:outline-none focus:ring-2
                                  ${errors.telefon
@@ -524,6 +543,9 @@ function ClientModal({
                       <Warning className="h-3 w-3" weight="regular" />
                       {errors.telefon}
                     </p>
+                  )}
+                  {!errors.telefon && !smsAllowedFor(formData.telefon, region.countryCode) && (
+                    <p className="mt-1 text-xs text-amber-600">{t('modal.smsCountryNotSupported')}</p>
                   )}
                 </div>
 
@@ -608,7 +630,10 @@ function ClientModal({
                 <div className="rounded-xl bg-white p-4">
                   <CommunicationLanguageControl
                     value={formData.language}
-                    onChange={(value) => handleChange('language', value)}
+                    onChange={(value) => {
+                      languageTouchedRef.current = true;
+                      handleChange('language', value);
+                    }}
                     label={t('modal.fields.communicationLanguage')}
                     changeLabel={t('modal.language.change')}
                   />
@@ -645,7 +670,7 @@ function ClientModal({
                     </motion.button>
                     <motion.button
                       type="button"
-                      onClick={() => new Promise(resolve => setTimeout(resolve, 700)).then(() => onSave(formData))}
+                      onClick={() => new Promise(resolve => setTimeout(resolve, 700)).then(() => save(formData))}
                       disabled={isSaving}
                       whileHover={{ scale: isSaving ? 1 : 1.02 }}
                       whileTap={{ scale: isSaving ? 1 : 0.98 }}

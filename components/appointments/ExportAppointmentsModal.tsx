@@ -11,6 +11,8 @@ import {
   FunnelSimple,
 } from '@phosphor-icons/react';
 import * as XLSX from 'xlsx';
+import { useLocale, useTranslations } from 'next-intl';
+import { intlLocale } from '@/lib/format';
 import { normalizeStatus } from '@/components/appointments/StatusBadge';
 import type { AppointmentWithDetails } from '@/types/appointments';
 import { sheet } from '@/components/ui/sheetClasses';
@@ -24,23 +26,7 @@ interface ExportAppointmentsModalProps {
 
 type Preset = 'this_week' | 'this_month' | 'last_month' | 'last_30' | 'this_year' | 'all' | 'custom';
 
-const PRESETS: { key: Preset; label: string }[] = [
-  { key: 'this_week',  label: 'Ta teden' },
-  { key: 'this_month', label: 'Ta mesec' },
-  { key: 'last_month', label: 'Prejšnji mesec' },
-  { key: 'last_30',    label: 'Zadnjih 30 dni' },
-  { key: 'this_year',  label: 'Letos' },
-  { key: 'all',        label: 'Vse' },
-];
-
-const STATUS_SL: Record<string, string> = {
-  scheduled:  'Načrtovan',
-  confirmed:  'Potrjen',
-  pending:    'V obdelavi',
-  completed:  'Zaključen',
-  cancelled:  'Odpovedan',
-  no_show:    'Ni prišel',
-};
+const PRESETS: Preset[] = ['this_week', 'this_month', 'last_month', 'last_30', 'this_year', 'all'];
 
 function fmtDate(d: Date) {
   return d.toISOString().split('T')[0];
@@ -85,13 +71,15 @@ function getPresetRange(p: Preset): { from: string; to: string } {
   }
 }
 
-const DAY_SL = ['ned', 'pon', 'tor', 'sre', 'čet', 'pet', 'sob'];
 
 export default function ExportAppointmentsModal({
   isOpen,
   onClose,
   appointments,
 }: ExportAppointmentsModalProps) {
+  const t = useTranslations('appointments');
+  const ts = useTranslations('appointments.status');
+  const locale = useLocale();
   const defaultRange = getPresetRange('this_month');
 
   const [preset, setPreset]               = useState<Preset>('this_month');
@@ -168,38 +156,40 @@ export default function ExportAppointmentsModal({
 
         const statusNorm = normalizeStatus(a.status || '');
 
+        const statusLabel = statusNorm === 'no_show' ? ts('noShow') : ts(statusNorm);
+        const c = (key: string) => t(`export.columns.${key}`);
         return {
-          'Datum':         d.toLocaleDateString('sl-SI'),
-          'Dan':           DAY_SL[d.getDay()],
-          'Čas začetka':  a.cas_zacetek?.substring(0, 5) ?? '',
-          'Čas konca':    a.cas_konec?.substring(0, 5) ?? '',
-          'Stranka':       stranka,
-          'Email':         a.stranka_email ?? '',
-          'Telefon':       a.stranka_telefon ?? '',
-          'Storitev':      storitev,
-          'Zaposleni':     zaposleni,
-          'Status':        STATUS_SL[statusNorm] ?? a.status ?? '',
-          'Cena (€)':      a.cena !== null && a.cena !== undefined ? a.cena : '',
-          'Popust':        a.popust !== null && a.popust !== undefined ? a.popust : '',
-          'Končna cena (€)': a.koncna_cena !== null && a.koncna_cena !== undefined ? a.koncna_cena : '',
-          'Valuta':        a.valuta ?? 'EUR',
-          'Opombe':        a.opombe ?? '',
-          'ID termina':    a.id_termina ?? '',
-        };
+          [c('date')]:       d.toLocaleDateString(intlLocale(locale)),
+          [c('day')]:        d.toLocaleDateString(intlLocale(locale), { weekday: 'short' }),
+          [c('start')]:      a.cas_zacetek?.substring(0, 5) ?? '',
+          [c('end')]:        a.cas_konec?.substring(0, 5) ?? '',
+          [c('client')]:     stranka,
+          [c('email')]:      a.stranka_email ?? '',
+          [c('phone')]:      a.stranka_telefon ?? '',
+          [c('service')]:    storitev,
+          [c('staff')]:      zaposleni,
+          [c('status')]:     statusLabel || a.status || '',
+          [c('price')]:      a.cena !== null && a.cena !== undefined ? a.cena : '',
+          [c('discount')]:   a.popust !== null && a.popust !== undefined ? a.popust : '',
+          [c('finalPrice')]: a.koncna_cena !== null && a.koncna_cena !== undefined ? a.koncna_cena : '',
+          [c('currency')]:   a.valuta ?? 'EUR',
+          [c('notes')]:      a.opombe ?? '',
+          [c('id')]:         a.id_termina ?? '',
+        } as Record<string, string | number>;
       });
 
       const ws = XLSX.utils.json_to_sheet(rows);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Termini');
+      XLSX.utils.book_append_sheet(wb, ws, t('export.sheetName'));
 
       const colWidths = Object.keys(rows[0]).map((key) => ({
-        wch: Math.max(key.length, ...rows.map((r) => String(r[key as keyof typeof r] ?? '').length)),
+        wch: Math.max(key.length, ...rows.map((r) => String(r[key] ?? '').length)),
       }));
       ws['!cols'] = colWidths;
 
       const fromStr = from.replace(/-/g, '');
       const toStr   = to.replace(/-/g, '');
-      XLSX.writeFile(wb, `termini_${fromStr}_${toStr}.xlsx`);
+      XLSX.writeFile(wb, `${t('export.fileName')}_${fromStr}_${toStr}.xlsx`);
 
       onClose();
     } catch {
@@ -207,7 +197,7 @@ export default function ExportAppointmentsModal({
     } finally {
       setIsExporting(false);
     }
-  }, [filtered, from, to, rangeValid, isExporting, onClose]);
+  }, [filtered, from, to, rangeValid, isExporting, onClose, t, ts, locale]);
 
   const labelClass = 'mb-2 block text-[11px] font-semibold uppercase tracking-wider text-gray-500';
   const dateClass =
@@ -264,10 +254,10 @@ export default function ExportAppointmentsModal({
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className={sheet.title}>
-                    Izvozi termine
+                    {t('export.title')}
                   </h2>
                   <p className={sheet.subtitle}>
-                    Izberite obdobje in možnosti izvoza
+                    {t('export.subtitle')}
                   </p>
                 </div>
                 <motion.button
@@ -288,21 +278,21 @@ export default function ExportAppointmentsModal({
               {/* Preset chips */}
               <div className={sheet.group}>
                 <p className={labelClass}>
-                  Hitri izbor
+                  {t('export.quickPick')}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {PRESETS.map((p) => (
                     <button
-                      key={p.key}
+                      key={p}
                       type="button"
-                      onClick={() => handlePreset(p.key)}
+                      onClick={() => handlePreset(p)}
                       className={`rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-                        preset === p.key
+                        preset === p
                           ? 'bg-gray-900 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      {p.label}
+                      {t(`export.presets.${p}`)}
                     </button>
                   ))}
                 </div>
@@ -311,11 +301,11 @@ export default function ExportAppointmentsModal({
               {/* Date range */}
               <div className={sheet.group}>
                 <p className={labelClass}>
-                  Obdobje
+                  {t('export.period')}
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-[13px] text-gray-500">Datum od</label>
+                    <label className="mb-1 block text-[13px] text-gray-500">{t('export.dateFrom')}</label>
                     <div className="relative">
                       <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
                       <input
@@ -328,7 +318,7 @@ export default function ExportAppointmentsModal({
                     </div>
                   </div>
                   <div>
-                    <label className="mb-1 block text-[13px] text-gray-500">Datum do</label>
+                    <label className="mb-1 block text-[13px] text-gray-500">{t('export.dateTo')}</label>
                     <div className="relative">
                       <CalendarBlank className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" weight="regular" />
                       <input
@@ -344,7 +334,7 @@ export default function ExportAppointmentsModal({
                 {from && to && new Date(from) > new Date(to) && (
                   <p className="mt-2 flex items-center gap-1.5 text-xs text-red-500">
                     <Warning className="h-3.5 w-3.5" weight="regular" />
-                    Datum &quot;od&quot; ne sme biti poznejši od &quot;do&quot;.
+                    {t('export.rangeInvalid')}
                   </p>
                 )}
               </div>
@@ -353,11 +343,11 @@ export default function ExportAppointmentsModal({
               <div className="overflow-hidden rounded-xl bg-white">
                 <p className={`${labelClass} flex items-center gap-1.5 px-4 pt-4 !mb-1`}>
                   <FunnelSimple className="h-3.5 w-3.5" weight="regular" />
-                  Filtri
+                  {t('export.filters')}
                 </p>
                 <div className="divide-y divide-gray-100">
-                  {switchRow(onlyCompleted, setOnlyCompleted, 'Vključi samo zaključene termine')}
-                  {switchRow(excludeGhost, setExcludeGhost, 'Izključi ghost termine')}
+                  {switchRow(onlyCompleted, setOnlyCompleted, t('export.onlyCompleted'))}
+                  {switchRow(excludeGhost, setExcludeGhost, t('export.excludeGhost'))}
                 </div>
               </div>
 
@@ -370,7 +360,7 @@ export default function ExportAppointmentsModal({
                   filtered.length > 0 ? 'bg-violet-50' : 'bg-white'
                 }`}
               >
-                <span className="text-sm text-gray-600">Najdenih terminov za izvoz</span>
+                <span className="text-sm text-gray-600">{t('export.found')}</span>
                 <span
                   className={`text-lg font-semibold tabular-nums ${
                     filtered.length > 0 ? 'text-violet-600' : 'text-gray-400'
@@ -390,7 +380,7 @@ export default function ExportAppointmentsModal({
                 whileTap={{ scale: 0.98 }}
                 className={sheet.cancel}
               >
-                Prekliči
+                {t('export.cancel')}
               </motion.button>
 
               <motion.button
@@ -404,12 +394,12 @@ export default function ExportAppointmentsModal({
                 {isExporting ? (
                   <>
                     <SpinnerGap className="h-4 w-4 animate-spin" weight="bold" />
-                    Izvažam...
+                    {t('export.exporting')}
                   </>
                 ) : (
                   <>
                     <DownloadSimple className="h-4 w-4" weight="bold" />
-                    Izvozi Excel
+                    {t('export.submit')}
                   </>
                 )}
               </motion.button>

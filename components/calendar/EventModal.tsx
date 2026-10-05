@@ -19,6 +19,7 @@ import {
 } from '@/lib/utils/eventColors';
 import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 export interface EventFormData {
   title: string;
@@ -206,6 +207,7 @@ function EventModal({
   );
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -512,6 +514,7 @@ function EventModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

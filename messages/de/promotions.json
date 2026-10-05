@@ -1,0 +1,162 @@
+{
+  "layout": {
+    "title": "Aktionen",
+    "subtitle": "Rabatte, Happy Hours und Add-ons verwalten",
+    "tabs": {
+      "discounts": "Rabatte",
+      "happyHours": "Happy Hours",
+      "addOns": "Add-ons"
+    }
+  },
+  "shared": {
+    "discountType": {
+      "percentage": "Prozent (%)",
+      "fixed": "Fester Betrag (€)"
+    },
+    "serviceSearch": "Leistungen suchen...",
+    "noServices": "Keine Leistungen",
+    "activeLabel": "Aktiv",
+    "saveButton": "Speichern",
+    "createButton": "Erstellen",
+    "cancelButton": "Abbrechen",
+    "deleteButton": "Löschen",
+    "cannotUndo": "Diese Aktion kann nicht rückgängig gemacht werden.",
+    "valueUnit": {
+      "percentage": "(%)",
+      "fixed": "(€)"
+    }
+  },
+  "discounts": {
+    "search": "Rabatte suchen...",
+    "newButton": "Neuer Rabatt",
+    "table": {
+      "name": "Name",
+      "services": "Leistungen",
+      "discount": "Rabatt",
+      "dateFrom": "Von",
+      "dateTo": "Bis",
+      "status": "Status",
+      "actions": "Aktionen"
+    },
+    "empty": "Keine Rabatte. Erstellen Sie Ihren ersten!",
+    "serviceCount": "{count, plural, =1 {1 Leistung} other {{count} Leistungen}}",
+    "modal": {
+      "createTitle": "Neuer Rabatt",
+      "editTitle": "Rabatt bearbeiten",
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "z. B. Sommerrabatt",
+        "type": "Rabattart",
+        "value": "Wert {unit}",
+        "dateFrom": "Startdatum",
+        "dateTo": "Enddatum",
+        "services": "Leistungen ({count} ausgewählt)"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Rabatt löschen?"
+    },
+    "toasts": {
+      "created": "Rabatt erstellt",
+      "updated": "Rabatt aktualisiert",
+      "deleted": "Rabatt gelöscht",
+      "loadError": "Rabatte konnten nicht geladen werden",
+      "saveError": "Speichern fehlgeschlagen",
+      "deleteError": "Löschen fehlgeschlagen",
+      "updateError": "Aktualisieren fehlgeschlagen",
+      "nameRequired": "Bitte geben Sie einen Namen ein",
+      "valueRequired": "Der Wert muss größer als 0 sein",
+      "percentMax": "Der Prozentsatz darf 100 nicht überschreiten",
+      "dateOrder": "Das Enddatum muss nach dem Startdatum liegen",
+      "serviceRequired": "Wählen Sie mindestens eine Leistung aus"
+    }
+  },
+  "addOns": {
+    "count": "{count, plural, =1 {1 Add-on} other {{count} Add-ons}}",
+    "newButton": "Neues Add-on",
+    "table": {
+      "service": "Leistung",
+      "originalPrice": "Ursprünglicher Preis",
+      "discount": "Rabatt",
+      "finalPrice": "Preis mit Rabatt",
+      "status": "Status",
+      "actions": "Aktionen"
+    },
+    "empty": "Keine Add-ons. Erstellen Sie Ihr erstes!",
+    "modal": {
+      "createTitle": "Neues Add-on",
+      "editTitle": "Add-on bearbeiten",
+      "fields": {
+        "service": "Leistung",
+        "type": "Rabattart",
+        "value": "Wert",
+        "active": "Aktiv",
+        "previewTitle": "Vorschau"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Add-on löschen?"
+    },
+    "toasts": {
+      "created": "Add-on erstellt",
+      "updated": "Add-on aktualisiert",
+      "deleted": "Add-on gelöscht",
+      "loadError": "Laden fehlgeschlagen",
+      "saveError": "Speichern fehlgeschlagen",
+      "deleteError": "Löschen fehlgeschlagen",
+      "genericError": "Fehler",
+      "valueRequired": "Der Wert muss größer als 0 sein",
+      "percentMax": "Der Prozentsatz darf 100 nicht überschreiten",
+      "serviceRequired": "Wählen Sie eine Leistung aus"
+    }
+  },
+  "happyHours": {
+    "count": "{count} Happy Hours",
+    "newButton": "Neue Happy Hour",
+    "table": {
+      "name": "Name",
+      "days": "Tage",
+      "time": "Uhrzeit",
+      "discount": "Rabatt",
+      "services": "Leistungen",
+      "status": "Status",
+      "actions": "Aktionen"
+    },
+    "servicesAll": "Alle",
+    "empty": "Keine Happy Hours. Erstellen Sie Ihre erste!",
+    "modal": {
+      "createTitle": "Neue Happy Hour",
+      "editTitle": "Happy Hour bearbeiten",
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "z. B. Nachmittags-Happy-Hour",
+        "days": "Wochentage",
+        "timeFrom": "Von",
+        "timeTo": "Bis",
+        "type": "Rabattart",
+        "value": "Wert",
+        "services": "Leistungen",
+        "allServices": "Alle Leistungen"
+      }
+    },
+    "deleteConfirm": {
+      "title": "Happy Hour löschen?"
+    },
+    "toasts": {
+      "created": "Happy Hour erstellt",
+      "updated": "Happy Hour aktualisiert",
+      "deleted": "Happy Hour gelöscht",
+      "loadError": "Laden fehlgeschlagen",
+      "saveError": "Speichern fehlgeschlagen",
+      "deleteError": "Löschen fehlgeschlagen",
+      "genericError": "Fehler",
+      "nameRequired": "Bitte geben Sie einen Namen ein",
+      "dayRequired": "Wählen Sie mindestens einen Tag aus",
+      "timeRequired": "Bitte geben Sie eine Uhrzeit ein",
+      "timeOrder": "Die Endzeit muss nach der Startzeit liegen",
+      "valueRequired": "Der Wert muss größer als 0 sein",
+      "percentMax": "Der Prozentsatz darf 100 nicht überschreiten",
+      "serviceRequired": "Wählen Sie mindestens eine Leistung aus"
+    }
+  }
+}

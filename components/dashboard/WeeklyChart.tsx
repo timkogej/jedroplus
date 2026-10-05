@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -19,6 +20,16 @@ interface WeeklyChartProps {
 
 export function WeeklyChart({ data }: WeeklyChartProps) {
   const t = useTranslations('dashboard');
+  const locale = useLocale();
+  const chartData = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
+    return data.map((d) => {
+      if (typeof d.weekday !== "number") return d;
+      // 4 Jan 1970 was a Sunday, so offsetting by weekday gives the right day.
+      const label = fmt.format(new Date(Date.UTC(1970, 0, 4 + d.weekday))).replace(/\.$/, "");
+      return { ...d, day: label.charAt(0).toUpperCase() + label.slice(1) };
+    });
+  }, [data, locale]);
   const maxValue = Math.max(...data.map((d) => d.termini), 1);
 
   return (
@@ -32,7 +43,7 @@ export function WeeklyChart({ data }: WeeklyChartProps) {
       <div className="p-5">
         <div className="h-[200px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#8B5CF6" />

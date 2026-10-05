@@ -87,7 +87,10 @@
     },
     "languages": {
       "slo": "Slovenščina",
-      "eng": "English"
+      "eng": "English",
+      "de": "Nemščina",
+      "hr": "Hrvaščina",
+      "it": "Italijanščina"
     },
     "industries": {
       "hairSalons": "Frizerstvo",

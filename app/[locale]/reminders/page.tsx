@@ -19,6 +19,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { ReminderSettingsModal } from '@/components/reminders/ReminderSettingsModal';
 import { SendingStatus } from '@/components/reminders/SendingStatus';
+import { SmsLog } from '@/components/reminders/SmsLog';
 import { MessagePreview } from '@/components/reminders/MessagePreview';
 import {
   StatusPill,
@@ -534,6 +535,12 @@ export default function RemindersPage() {
                   </div>
                 </SectionPanel>
 
+
+                {canManageSettings && (
+                  <div className="mt-6">
+                    <SmsLog />
+                  </div>
+                )}
               </motion.div>
 
               <motion.div

@@ -1,0 +1,35 @@
+{
+  "page": {
+    "title": "Notifiche",
+    "subtitle": "Consulta i messaggi su prenotazioni, appuntamenti e avvisi della tua attività.",
+    "markAllRead": "Segna tutte come lette",
+    "loading": "Caricamento notifiche...",
+    "loadError": "Si è verificato un errore durante il caricamento delle notifiche",
+    "retry": "Riprova",
+    "emptyTitle": "Nessuna nuova notifica",
+    "emptySubtitle": "Quando riceverai nuove notifiche su prenotazioni o eventi importanti, compariranno qui."
+  },
+  "filters": {
+    "all": "Tutte",
+    "unread": "Non lette",
+    "reservations": "Prenotazioni",
+    "system": "Sistema"
+  },
+  "card": {
+    "open": "Apri",
+    "markRead": "Letta",
+    "archive": "Archivia"
+  },
+  "relativeTime": {
+    "justNow": "Adesso",
+    "minutesAgo": "{count, plural, one {{count} minuto fa} other {{count} minuti fa}}",
+    "hoursAgo": "{count, plural, one {{count} ora fa} other {{count} ore fa}}",
+    "yesterday": "Ieri",
+    "daysAgo": "{count, plural, one {{count} giorno fa} other {{count} giorni fa}}",
+    "weeksAgo": "{count, plural, one {{count} settimana fa} other {{count} settimane fa}}"
+  },
+  "dateLabel": {
+    "today": "Oggi",
+    "yesterday": "Ieri"
+  }
+}

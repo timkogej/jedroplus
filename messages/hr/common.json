@@ -10,25 +10,25 @@
     "confirm": "Potvrdi",
     "discard": "Poništi",
     "submit": "Pošalji",
-    "tryAgain": "Pokušaj ponovno",
+    "tryAgain": "Pokušajte ponovno",
     "viewAll": "Prikaži sve",
     "add": "Dodaj",
     "create": "Izradi",
     "update": "Ažuriraj",
-    "search": "Traži",
-    "filter": "Filtriraj",
+    "search": "Pretraživanje",
+    "filter": "Filtar",
     "export": "Izvezi",
     "import": "Uvezi",
     "copy": "Kopiraj",
     "share": "Podijeli"
   },
   "status": {
-    "active": "Aktivno",
-    "inactive": "Neaktivno",
+    "active": "Aktivan",
+    "inactive": "Neaktivan",
     "expired": "Isteklo",
     "confirmed": "Potvrđeno",
     "cancelled": "Otkazano",
-    "pending": "Na čekanju",
+    "pending": "U obradi",
     "completed": "Završeno",
     "loading": "Učitavanje...",
     "saving": "Spremanje..."
@@ -43,11 +43,11 @@
     "owner": "Vlasnik",
     "admin": "Administrator",
     "staff": "Zaposlenik",
-    "receptionist": "Recepcionar"
+    "receptionist": "Recepcija"
   },
   "errors": {
     "generic": "Došlo je do pogreške. Pokušajte ponovno.",
-    "loadFailed": "Učitavanje nije uspjelo",
+    "loadFailed": "Pogreška pri učitavanju",
     "noResults": "Nema rezultata",
     "networkError": "Problem s vezom",
     "unauthorized": "Nemate dopuštenje za ovu radnju",
@@ -78,8 +78,8 @@
     "sun": "Nedjelja"
   },
   "search": {
-    "placeholder": "Traži...",
-    "noResults": "Nema podudaranja"
+    "placeholder": "Pretraži...",
+    "noResults": "Nema pogodaka"
   },
   "divider": {
     "or": "ili"
@@ -96,5 +96,21 @@
     "thu": "Č",
     "fri": "P",
     "sat": "S"
+  },
+  "placeholders": {
+    "email": "ivan@tvrtka.hr",
+    "contactEmail": "ana@tvrtka.hr",
+    "infoEmail": "info@tvrtka.hr",
+    "mobile": "+385 91 234 5678",
+    "landline": "+385 1 234 5678",
+    "website": "https://www.tvrtka.hr"
+  },
+  "qr": {
+    "downloadPng": "Preuzmi PNG",
+    "downloadPdf": "Preuzmi PDF",
+    "copyLink": "Kopiraj poveznicu",
+    "copied": "Kopirano",
+    "preparing": "Priprema...",
+    "registrationInfo": "Ispišite ovaj QR kod i postavite ga u svoj salon ili ordinaciju. Klijenti ga skeniraju mobitelom i unesu svoje podatke za manje od minute."
   }
 }

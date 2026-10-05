@@ -1,0 +1,221 @@
+{
+  "sidebar": {
+    "sections": {
+      "main": "Glavno",
+      "ai": "AI",
+      "communication": "Komunikacija",
+      "modules": "Moduli",
+      "promotions": "Promocije",
+      "analytics": "Analitika",
+      "account": "Račun",
+      "billing": "Paketi",
+      "settings": "Postavke"
+    },
+    "items": {
+      "dashboard": "Nadzorna ploča",
+      "calendar": "Kalendar",
+      "appointments": "Termini",
+      "clients": "Klijenti",
+      "communication": "Komunikacija",
+      "reminders": "Podsjetnici",
+      "reservations": "Rezervacije",
+      "lostLeads": "Izgubljeni klijenti",
+      "receptionistPlus": "ReceptionistPlus",
+      "services": "Usluge",
+      "resources": "Resursi",
+      "staff": "Zaposlenici",
+      "promotions": "Promocije",
+      "analytics": "Analitika",
+      "billing": "Paketi",
+      "plans": "Paketi",
+      "settings": "Postavke",
+      "signOut": "Odjava",
+      "new": "Novo",
+      "newAppointment": "Novi termin",
+      "newClient": "Novi klijent",
+      "newService": "Nova usluga"
+    },
+    "tooltips": {
+      "expand": "Proširi",
+      "collapse": "Sažmi"
+    },
+    "stats": {
+      "today": "Danas",
+      "week": "Tjedan",
+      "month": "Mjesec"
+    }
+  },
+  "appbar": {
+    "home": "Početna",
+    "search": "Pretraživanje...",
+    "profile": "Moj profil",
+    "plans": "Paketi",
+    "signOut": "Odjava",
+    "aria": {
+      "openMenu": "Otvori izbornik",
+      "closeMenu": "Zatvori izbornik",
+      "search": "Pretraživanje"
+    },
+    "breadcrumbs": {
+      "dashboard": "Nadzorna ploča",
+      "calendar": "Kalendar",
+      "appointments": "Termini",
+      "clients": "Klijenti",
+      "services": "Usluge",
+      "staff": "Zaposlenici",
+      "reminders": "Podsjetnici",
+      "lostLeads": "Izgubljeni klijenti",
+      "analytics": "Analitika",
+      "asistent": "Asistent+",
+      "chatbotPlus": "Chatbot+",
+      "settings": "Postavke",
+      "billing": "Paketi",
+      "notifications": "Obavijesti",
+      "reservations": "Rezervacije",
+      "resources": "Resursi",
+      "promotions": "Promocije",
+      "communication": "Komunikacija",
+      "receptionistPlus": "Receptionist+",
+      "qrCode": "QR kod",
+      "plans": "Paketi",
+      "addons": "Dodaci",
+      "team": "Tim i pristup",
+      "company": "Tvrtka",
+      "general": "Općenito",
+      "messages": "Poruke",
+      "history": "Povijest",
+      "discounts": "Popusti",
+      "happyHours": "Happy hour",
+      "serviceAddOns": "Dodatne usluge",
+      "requests": "Zahtjevi"
+    }
+  },
+  "search": {
+    "placeholder": "Pretraži stranice, radnje...",
+    "escHint": "zatvori",
+    "navHint": "navigacija",
+    "openHint": "otvori",
+    "shortcutHint": "K za pretraživanje",
+    "categories": {
+      "pages": "Stranice",
+      "quickActions": "Brzi pristup",
+      "recent": "Nedavna pretraživanja",
+      "settings": "Postavke"
+    },
+    "empty": "Nema rezultata za \"{query}\"",
+    "items": {
+      "plans": "Paketi i plaćanja",
+      "addons": "Dodaci (SMS, korisnici)",
+      "team": "Tim i pristup",
+      "company": "Podaci o tvrtki"
+    }
+  },
+  "fallbacks": {
+    "companyName": "Moja tvrtka",
+    "userName": "Korisnik"
+  },
+  "guide": {
+    "stepOf": "Korak {current} od {total}",
+    "close": "Zatvori vodič",
+    "skip": "Preskoči",
+    "back": "Natrag",
+    "next": "Dalje",
+    "finish": "Završi",
+    "menuItem": "Vodič kroz aplikaciju",
+    "tours": {
+      "dashboard": {
+        "welcome": {
+          "title": "Dobro došli u Jedro+",
+          "body": "Za minutu ćemo vam pokazati gdje se što nalazi. Vodič možete bilo kada ponoviti u izborniku profila gore desno."
+        },
+        "newAppointment": {
+          "title": "Novi termin",
+          "body": "Najbrži put do novog termina: odaberete klijenta, uslugu i vrijeme. Klijenta možete dodati usput."
+        },
+        "calendar": {
+          "title": "Kalendar",
+          "body": "Vaš dan, tjedan ili mjesec na jednom mjestu. Kliknite slobodno polje i termin će se otvoriti za taj dan i sat."
+        },
+        "appointments": {
+          "title": "Termini",
+          "body": "Popis svih termina s pretraživanjem i filtrima. Ovdje termine i završavate kada je klijent bio kod vas."
+        },
+        "clients": {
+          "title": "Klijenti",
+          "body": "Vaša baza klijenata s poviješću posjeta i kontaktima."
+        },
+        "services": {
+          "title": "Usluge",
+          "body": "Što nudite, koliko traje i koliko košta. Iz toga se izračunavaju trajanje i cijena termina."
+        },
+        "staff": {
+          "title": "Zaposlenici",
+          "body": "Osobe koje obavljaju usluge i njihov raspored. Suradnike u aplikaciju pozivate u Postavke → Tim i pristup."
+        },
+        "reminders": {
+          "title": "Podsjetnici",
+          "body": "Automatske poruke klijentima prije i nakon termina. Manje zaboravljenih termina, bez ručnog rada."
+        },
+        "settings": {
+          "title": "Postavke",
+          "body": "Podaci o tvrtki, radno vrijeme, tim, paketi i dodaci."
+        },
+        "gettingStarted": {
+          "title": "Vaši prvi koraci",
+          "body": "Ovaj vas popis vodi kroz početak. Kada dovršite korak, sam se označi."
+        },
+        "userMenu": {
+          "title": "Vodič i jezik",
+          "body": "Ovdje možete bilo kada ponoviti ovaj vodič i promijeniti jezik aplikacije."
+        }
+      },
+      "calendar": {
+        "grid": {
+          "title": "Kliknite slobodno polje",
+          "body": "Termin se otvara s odabranim danom i satom. Šrafirani dijelovi su izvan vašeg radnog vremena."
+        },
+        "newAppointment": {
+          "title": "Ili upotrijebite gumb",
+          "body": "Novi termin možete otvoriti i ovdje, za sljedeće slobodno vrijeme."
+        },
+        "views": {
+          "title": "Dan, tjedan ili mjesec",
+          "body": "Odaberite prikaz koji vam najviše odgovara."
+        },
+        "filters": {
+          "title": "Filtri",
+          "body": "Kada je kalendar pun, prikažite samo odabrane zaposlenike ili usluge."
+        }
+      },
+      "staff": {
+        "welcome": {
+          "title": "Dobro došli u tim",
+          "body": "Ukratko ćemo vam pokazati gdje pronaći svoj raspored, termine i klijente."
+        },
+        "calendar": {
+          "title": "Vaš kalendar",
+          "body": "Ovdje vidite svoje termine po danima i tjednima. Klik na slobodno polje otvara novi termin."
+        },
+        "newAppointment": {
+          "title": "Novi termin",
+          "body": "Klijent zove ili dolazi? Termin upisujete ovdje: klijent, usluga, vrijeme."
+        },
+        "appointments": {
+          "title": "Termini",
+          "body": "Popis vaših termina. Kada je klijent bio kod vas, termin završite ovdje."
+        },
+        "clients": {
+          "title": "Klijenti",
+          "body": "Kontakti i povijest posjeta klijenata. Novog klijenta možete dodati i tijekom upisa termina."
+        },
+        "userMenu": {
+          "title": "Vodič i jezik",
+          "body": "Ovaj vodič možete bilo kada ponoviti ovdje."
+        }
+      }
+    }
+  },
+  "meta": {
+    "description": "Jedro+ – sustav za upravljanje terminima"
+  }
+}

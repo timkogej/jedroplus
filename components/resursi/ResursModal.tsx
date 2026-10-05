@@ -594,7 +594,7 @@ function ResursModal({
                   whileTap={{ scale: 0.98 }}
                   className="flex-1 rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100 sm:flex-none"
                 >
-                  Prekliči
+                  {t('deleteModal.cancel')}
                 </motion.button>
                 <motion.button
                   type="submit"

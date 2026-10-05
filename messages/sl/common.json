@@ -104,5 +104,13 @@
     "copied": "Kopirano",
     "preparing": "Pripravljam...",
     "registrationInfo": "To QR kodo lahko natisnete in jo postavite v vaš salon ali ordinacijo. Stranke jo skenirajo s telefonom in v manj kot minuti vnesejo svoje podatke."
+  },
+  "placeholders": {
+    "email": "janez@podjetje.si",
+    "contactEmail": "jana@podjetje.si",
+    "infoEmail": "info@podjetje.si",
+    "mobile": "+386 40 123 456",
+    "landline": "+386 1 234 5678",
+    "website": "https://www.podjetje.si"
   }
 }

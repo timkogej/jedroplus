@@ -1,69 +1,12 @@
 'use client';
 
-import { useLocale } from 'next-intl';
-import { useRouter, usePathname } from '@/i18n/navigation';
-import { useTransition } from 'react';
-
-const LANGUAGES = [
-  { code: 'sl', label: 'SL', name: 'Slovenščina' },
-  { code: 'en', label: 'EN', name: 'English' },
-  { code: 'hr', label: 'HR', name: 'Hrvatski' },
-  { code: 'de', label: 'DE', name: 'Deutsch' },
-  { code: 'it', label: 'IT', name: 'Italiano' },
-] as const;
-
-type LanguageCode = (typeof LANGUAGES)[number]['code'];
-
-/** Jeziki s prevedenim celotnim vmesnikom (glej i18n/config fullLocales). */
-const FULL_LANGUAGES: readonly LanguageCode[] = ['sl', 'en'];
+import LanguageSelect from './LanguageSelect';
 
 /**
- * Language switch for pages before login (login, sign-up, onboarding), where
- * the in-app switcher in the app bar isn't available. Remembers the choice in
- * the NEXT_LOCALE cookie so later visits open in the same language.
+ * Language picker for pages before login (login, sign-up, onboarding) and the
+ * general settings page. Remembers the choice in the NEXT_LOCALE cookie so
+ * later visits open in the same language.
  */
-export default function PublicLanguageToggle({
-  className = '',
-  allLanguages = false,
-}: {
-  className?: string;
-  /** Pokaži vseh pet jezikov — samo na straneh, prevedenih v vse (prijava, registracija, geslo). */
-  allLanguages?: boolean;
-}) {
-  const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
-  const [isPending, startTransition] = useTransition();
-
-  const languages = allLanguages ? LANGUAGES : LANGUAGES.filter((l) => FULL_LANGUAGES.includes(l.code));
-
-  const change = (next: LanguageCode) => {
-    if (next === locale) return;
-    document.cookie = `NEXT_LOCALE=${next};path=/;max-age=${60 * 60 * 24 * 365}`;
-    startTransition(() => router.replace(pathname, { locale: next }));
-  };
-
-  return (
-    <div
-      role="group"
-      aria-label="Jezik / Language"
-      className={`inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-xs font-semibold ${className}`}
-    >
-      {languages.map((lang) => (
-        <button
-          key={lang.code}
-          type="button"
-          onClick={() => change(lang.code)}
-          disabled={isPending}
-          aria-pressed={lang.code === locale}
-          title={lang.name}
-          className={`rounded-md px-2.5 py-1 transition-colors ${
-            lang.code === locale ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'
-          }`}
-        >
-          {lang.label}
-        </button>
-      ))}
-    </div>
-  );
+export default function PublicLanguageToggle({ className = '' }: { className?: string }) {
+  return <LanguageSelect className={className} />;
 }

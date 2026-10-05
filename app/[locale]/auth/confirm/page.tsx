@@ -60,7 +60,7 @@ function ConfirmInner() {
   return (
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[#05060f] px-4 py-16">
       <AuroraBackground />
-      <PublicLanguageToggle allLanguages className="absolute right-4 top-4 z-20" />
+      <PublicLanguageToggle className="absolute right-4 top-4 z-20" />
       <div className="relative z-10 w-full max-w-[400px]">
 
         {/* Logo Jedro+ (components/brand/JedroLogo) */}
