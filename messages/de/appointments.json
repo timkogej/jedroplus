@@ -11,6 +11,7 @@
     "title": "Termine",
     "subtitle": "Alle Termine an einem Ort verwalten",
     "newAppointment": "Neuer Termin",
+    "exportButton": "Exportieren",
     "stats": {
       "thisMonth": "Termine diesen Monat",
       "today": "Heute",

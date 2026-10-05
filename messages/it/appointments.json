@@ -11,6 +11,7 @@
     "title": "Appuntamenti",
     "subtitle": "Gestisci tutti gli appuntamenti in un unico posto",
     "newAppointment": "Nuovo appuntamento",
+    "exportButton": "Esporta",
     "stats": {
       "thisMonth": "Appuntamenti questo mese",
       "today": "Oggi",

@@ -11,6 +11,7 @@
     "title": "Appointments",
     "subtitle": "Manage all appointments in one place",
     "newAppointment": "New Appointment",
+    "exportButton": "Export",
     "stats": {
       "thisMonth": "Appointments this month",
       "today": "Today",

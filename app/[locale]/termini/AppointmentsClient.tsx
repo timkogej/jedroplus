@@ -802,7 +802,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                 className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
               >
                 <DownloadSimple size={17} weight="regular" className="text-gray-500" />
-                <span>Izvozi</span>
+                <span>{t('page.exportButton')}</span>
               </button>
             </div>
           </motion.div>

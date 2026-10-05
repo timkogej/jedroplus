@@ -11,6 +11,7 @@
     "title": "Termini",
     "subtitle": "Upravljajte vse termine na enem mestu",
     "newAppointment": "Nov termin",
+    "exportButton": "Izvozi",
     "stats": {
       "thisMonth": "Termini ta mesec",
       "today": "Danes",
