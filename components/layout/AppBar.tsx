@@ -19,6 +19,7 @@ import {
   Compass,
 } from '@phosphor-icons/react';
 import { useSidebar } from './sidebar-context';
+import { JedroLogo } from '@/components/brand/JedroLogo';
 import { useAuth } from '@/app/auth-context';
 import { useCompany } from '@/app/company-context';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -196,7 +197,7 @@ export function AppBar() {
 
           {/* Brand name — mobile only */}
           <Link href="/dashboard" className="md:hidden flex items-center">
-            <span className="bg-gradient-to-r from-[#7B4BEA] via-[#4C74E0] to-[#35D2D2] bg-clip-text text-lg font-bold text-transparent">Jedro+</span>
+            <JedroLogo height={22} className="block" />
           </Link>
 
           {/* Breadcrumbs — desktop only */}
