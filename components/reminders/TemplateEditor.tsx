@@ -21,6 +21,19 @@ export const VAR_LABEL_MAP: Record<string, string> = Object.fromEntries(
   TEMPLATE_VARS.map(v => [v.token, v.label])
 );
 
+/**
+ * Dolžina povezave, kakršna bo dejansko poslana.
+ *
+ * V bazi je shranjena s shemo (`https://portal.jedroplus.com/...`), v SMS pa gre
+ * ven brez nje — telefoni jo preberejo tudi tako, prihrani pa osem znakov.
+ * Števec mora šteti to, kar stranka dobi, sicer odsvetuje povezavo, ki bi se
+ * sicer še prilegala.
+ */
+export function linkLength(url: string | null | undefined, fallback = 30): number {
+  const brezSheme = String(url ?? '').trim().replace(/^https?:\/\//i, '');
+  return brezSheme.length || fallback;
+}
+
 // Migrate old token names when loading from DB
 export function migrateTemplate(template: string): string {
   return template
@@ -331,6 +344,17 @@ export function TemplateEditor({
   const currentLength = computeEffectiveLength(value, varLengths);
   const isOverLimit = maxLength ? currentLength > maxLength : false;
 
+  // Katere spremenljivke se sploh še prilegajo. Doslej klik na preveliko
+  // spremenljivko ni naredil ničesar in ni povedal zakaj — gumb je izgledal
+  // pokvarjen. Pri daljših predlogah je bila prva žrtev ravno povezava, ki je
+  // med vsemi najdaljša.
+  const prostoZa = (token: string): boolean => {
+    if (!maxLength) return true;
+    if (value.includes(token)) return true;   // že vstavljena, gumb ostane običajen
+    const dolzina = token in varLengths ? varLengths[token] : token.length;
+    return currentLength + dolzina <= maxLength;
+  };
+
   return (
     <div className="space-y-3">
       {/* Variable chip buttons */}
@@ -339,33 +363,63 @@ export function TemplateEditor({
           Kliknite na spremenljivko da jo dodate v besedilo:
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {TEMPLATE_VARS.map(v => (
-            <button
-              key={v.token}
-              type="button"
-              onClick={() => insertToken(v.token)}
-              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all hover:shadow-sm active:scale-95"
-              style={{
-                backgroundImage:
-                  'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                backgroundOrigin: 'padding-box, border-box',
-                backgroundClip: 'padding-box, border-box',
-                border: '1.5px solid transparent',
-              }}
-            >
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
+          {TEMPLATE_VARS.map(v => {
+            const seVeljaga = prostoZa(v.token);
+            const dolzina = v.token in varLengths ? varLengths[v.token] : v.token.length;
+            return (
+              <button
+                key={v.token}
+                type="button"
+                onClick={() => insertToken(v.token)}
+                disabled={!seVeljaga}
+                title={
+                  seVeljaga
+                    ? `${v.token} — približno ${dolzina} znakov`
+                    : `Ne prilega se: ${v.label} doda približno ${dolzina} znakov, na voljo pa jih je še ${Math.max(0, (maxLength ?? 0) - currentLength)}. Skrajšajte besedilo.`
+                }
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                  seVeljaga
+                    ? 'hover:shadow-sm active:scale-95'
+                    : 'cursor-not-allowed opacity-40'
+                }`}
+                style={
+                  seVeljaga
+                    ? {
+                        backgroundImage:
+                          'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                        backgroundOrigin: 'padding-box, border-box',
+                        backgroundClip: 'padding-box, border-box',
+                        border: '1.5px solid transparent',
+                      }
+                    : { border: '1.5px solid #E5E7EB', background: '#F9FAFB' }
+                }
               >
-                {v.label}
-              </span>
-            </button>
-          ))}
+                <span
+                  style={
+                    seVeljaga
+                      ? {
+                          background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }
+                      : { color: '#9CA3AF' }
+                  }
+                >
+                  {v.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Zakaj je kakšna spremenljivka zbledela — brez tega je videti kot okvara. */}
+        {maxLength && TEMPLATE_VARS.some(v => !prostoZa(v.token)) && (
+          <p className="mt-2 text-xs text-amber-600">
+            Zbledele spremenljivke se v to predlogo ne prilegajo več. Skrajšajte
+            besedilo, da jih boste lahko dodali.
+          </p>
+        )}
       </div>
 
       {/* Rich text editor area */}
