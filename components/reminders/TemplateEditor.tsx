@@ -17,8 +17,20 @@ export const TEMPLATE_VARS = [
   { token: '{{povezava_prenarocanje}}', label: 'Povezava za prenaročanje' },
 ] as const;
 
+/**
+ * Oznake, ki imajo smisel samo pri sporočilu PO terminu.
+ *
+ * `{{kdaj_obisk}}` se izpiše kot »danes«, »včeraj«, »v ponedeljek« ali »21. 4.«,
+ * odvisno od tega, koliko dni je minilo. Potrebna je, ker se sporočilo pošlje
+ * ob zaključku termina, ne na dan obiska — predloge z besedo »danes« so bile
+ * zato pogosto napačne.
+ */
+export const PO_TERMINU_VARS = [
+  { token: '{{kdaj_obisk}}', label: 'Kdaj je bil obisk' },
+] as const;
+
 export const VAR_LABEL_MAP: Record<string, string> = Object.fromEntries(
-  TEMPLATE_VARS.map(v => [v.token, v.label])
+  [...TEMPLATE_VARS, ...PO_TERMINU_VARS].map(v => [v.token, v.label])
 );
 
 /**
@@ -176,6 +188,8 @@ interface TemplateEditorProps {
   rows?: number;
   /** Estimated real-world character lengths per token (e.g. { '{{cas}}': 5 }) */
   varLengths?: Record<string, number>;
+  /** Oznake, ki veljajo samo za to vrsto sporočila (npr. PO_TERMINU_VARS). */
+  extraVars?: ReadonlyArray<{ token: string; label: string }>;
 }
 
 export function TemplateEditor({
@@ -185,7 +199,9 @@ export function TemplateEditor({
   placeholder = '',
   rows = 4,
   varLengths = {},
+  extraVars = [],
 }: TemplateEditorProps) {
+  const vseOznake = [...TEMPLATE_VARS, ...extraVars];
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalRef = useRef(false);
   const lastRawRef = useRef(value);
@@ -363,7 +379,7 @@ export function TemplateEditor({
           Kliknite na spremenljivko da jo dodate v besedilo:
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {TEMPLATE_VARS.map(v => {
+          {vseOznake.map(v => {
             const seVeljaga = prostoZa(v.token);
             const dolzina = v.token in varLengths ? varLengths[v.token] : v.token.length;
             return (
@@ -414,7 +430,7 @@ export function TemplateEditor({
         </div>
 
         {/* Zakaj je kakšna spremenljivka zbledela — brez tega je videti kot okvara. */}
-        {maxLength && TEMPLATE_VARS.some(v => !prostoZa(v.token)) && (
+        {maxLength && vseOznake.some(v => !prostoZa(v.token)) && (
           <p className="mt-2 text-xs text-amber-600">
             Zbledele spremenljivke se v to predlogo ne prilegajo več. Skrajšajte
             besedilo, da jih boste lahko dodali.
