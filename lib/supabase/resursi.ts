@@ -515,18 +515,39 @@ export async function deleteTerminResursi(
 // in ga preverjanje konfliktov (ki šteje prek Termini_Resursi) ni videlo.
 // Zato je logika tu, na enem mestu, in jo uporabljata obe strani.
 
-/** Poišče številčni id vrstice v Termini po besedilnem "ID termina". */
+/**
+ * Poišče številčni id vrstice v Termini.
+ *
+ * Sprejme obe obliki, ker ju klicatelja pošiljata obe: pri NOVEM terminu
+ * besedilni "ID termina", pri UREJANJU pa številčni id vrstice — v obrazcu je
+ * namreč `appointment.id`, kar je vrstični id, ker `detectBookingSchema`
+ * izbere stolpec `id` pred "ID termina". Dokler je funkcija iskala samo po
+ * besedilnem, se resursi ob urejanju termina tiho niso uskladili.
+ *
+ * Besedilni ima prednost. Prekrivanje ni mogoče: besedilni idi se začnejo pri
+ * osmih mestih, vrstični pa so trenutno štirimestni.
+ */
 async function terminRowId(
   companyId: string,
-  textTerminId: string,
+  terminId: string,
 ): Promise<number | null> {
   const { data } = await supabase
     .from('Termini')
     .select('id')
-    .eq('ID termina', textTerminId)
+    .eq('ID termina', terminId)
     .eq('ID podjetja', companyId)
     .maybeSingle();
-  return data ? Number((data as Record<string, unknown>).id) : null;
+  if (data) return Number((data as Record<string, unknown>).id);
+
+  if (!/^\d+$/.test(String(terminId))) return null;
+
+  const { data: poVrstici } = await supabase
+    .from('Termini')
+    .select('id')
+    .eq('id', Number(terminId))
+    .eq('ID podjetja', companyId)
+    .maybeSingle();
+  return poVrstici ? Number((poVrstici as Record<string, unknown>).id) : null;
 }
 
 /**
@@ -535,12 +556,13 @@ async function terminRowId(
  */
 export async function syncResursiZaTermin(
   companyId: string,
-  textTerminId: string | null | undefined,
+  terminId: string | null | undefined,
   storitveIds: (string | null | undefined)[],
 ): Promise<string | null> {
-  if (!companyId || !textTerminId) return null;
+  if (!companyId || !terminId) return null;
 
-  const rowId = await terminRowId(companyId, textTerminId);
+  // Sprejme besedilni "ID termina" (nov termin) ali vrstični id (urejanje).
+  const rowId = await terminRowId(companyId, terminId);
   if (rowId === null) return null;
 
   const ids = storitveIds.filter(Boolean) as string[];
