@@ -19,7 +19,7 @@ export interface PlanDef {
 
 export const PLANS: PlanDef[] = [
   { id: 'JEDRO_PLUS', name: 'Jedro Plus', price: { monthly: 19, annual: 15 } },
-  { id: 'JEDRO_PRO', name: 'Jedro Pro', price: { monthly: 39, annual: 31 }, recommended: true },
+  { id: 'JEDRO_PRO', name: 'Jedro Pro', price: { monthly: 35, annual: 28 }, recommended: true },
   { id: 'ENTERPRISE', name: 'Enterprise', price: null },
 ];
 

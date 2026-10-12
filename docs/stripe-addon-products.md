@@ -7,11 +7,11 @@ All products use `recurring` billing with `monthly` interval.
 
 | Key | Name | Price | Env var |
 |-----|------|-------|---------|
-| `sms-50`   | Jedro+ SMS 50   | €6.00/month  | `STRIPE_SMS_50_PRICE_ID`   |
-| `sms-100`  | Jedro+ SMS 100  | €11.00/month | `STRIPE_SMS_100_PRICE_ID`  |
-| `sms-200`  | Jedro+ SMS 200  | €20.00/month | `STRIPE_SMS_200_PRICE_ID`  |
-| `sms-500`  | Jedro+ SMS 500  | €45.00/month | `STRIPE_SMS_500_PRICE_ID`  |
-| `sms-1000` | Jedro+ SMS 1000 | €80.00/month | `STRIPE_SMS_1000_PRICE_ID` |
+| `sms-50`   | Jedro+ SMS 50   | €4.00/month  | `STRIPE_SMS_50_PRICE_ID`   |
+| `sms-100`  | Jedro+ SMS 100  | €8.00/month  | `STRIPE_SMS_100_PRICE_ID`  |
+| `sms-200`  | Jedro+ SMS 200  | €16.00/month | `STRIPE_SMS_200_PRICE_ID`  |
+| `sms-500`  | Jedro+ SMS 500  | €35.00/month | `STRIPE_SMS_500_PRICE_ID`  |
+| `sms-1000` | Jedro+ SMS 1000 | €65.00/month | `STRIPE_SMS_1000_PRICE_ID` |
 
 ## Email Addons
 
