@@ -42,7 +42,7 @@ import {
 } from '@/lib/supabase/appointments';
 import { getClientById } from '@/lib/supabase/clients';
 import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
-import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, fetchResursiForStoritve, syncTerminResursi, deleteTerminResursi } from '@/lib/supabase/resursi';
+import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, syncResursiZaTermin, sprostiResurseTermina } from '@/lib/supabase/resursi';
 import type { Resurs } from '@/types/resursi';
 import type { CalendarEvent } from '@/types/events';
 import {
@@ -1137,7 +1137,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         throw new Error(t('errors.deleteError'));
       }
 
-      await deleteTerminResursi(companyId, Number(deleteTarget.id));
+      await sprostiResurseTermina(companyId, deleteTarget.id);
 
       const [idsResult, mapResult] = await Promise.all([
         fetchTerminIdsWithResursi(companyId),
@@ -1397,37 +1397,12 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       const textTerminId = isNewAppointment ? unique8DigitId : data.id;
 
       if (textTerminId) {
-        // Fetch Termini bigint id — use maybeSingle to avoid 400 errors
-        const { data: terminRow } = await supabase
-          .from('Termini')
-          .select('id')
-          .eq('ID termina', textTerminId)
-          .eq('ID podjetja', companyId)
-          .maybeSingle();
-
-        const terminRowId = terminRow ? Number(terminRow.id) : null;
-
-        if (terminRowId) {
-          const serviceIds = [
-            data.storitev_id,
-            data.storitev_id_2,
-            data.storitev_id_3,
-          ].filter(Boolean) as string[];
-
-          if (serviceIds.length > 0) {
-            const { data: resursiData } = await fetchResursiForStoritve(
-              companyId,
-              serviceIds,
-            );
-            const resursiPairs = (resursiData ?? []).map((r) => ({
-              rowId: r.resursRowId,
-              textId: r.resursTextId,
-            }));
-            await syncTerminResursi(companyId, terminRowId, resursiPairs);
-          } else {
-            await deleteTerminResursi(companyId, terminRowId);
-          }
-        }
+        // Ista pot kot na strani Termini — logika živi v lib/supabase/resursi.
+        await syncResursiZaTermin(companyId, textTerminId, [
+          data.storitev_id,
+          data.storitev_id_2,
+          data.storitev_id_3,
+        ]);
 
         const [idsResult, mapResult] = await Promise.all([
           fetchTerminIdsWithResursi(companyId),

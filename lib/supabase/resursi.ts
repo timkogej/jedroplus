@@ -509,6 +509,74 @@ export async function deleteTerminResursi(
   return error?.message ?? null;
 }
 
+// ─── Zasedenost resursov ob shranjevanju termina ─────────────────────────────
+// Termin zasede resurse svojih storitev. Doslej je to počel SAMO koledar, zato
+// termin, ustvarjen na strani Termini, ni zasedel ničesar — ni blokiral drugih
+// in ga preverjanje konfliktov (ki šteje prek Termini_Resursi) ni videlo.
+// Zato je logika tu, na enem mestu, in jo uporabljata obe strani.
+
+/** Poišče številčni id vrstice v Termini po besedilnem "ID termina". */
+async function terminRowId(
+  companyId: string,
+  textTerminId: string,
+): Promise<number | null> {
+  const { data } = await supabase
+    .from('Termini')
+    .select('id')
+    .eq('ID termina', textTerminId)
+    .eq('ID podjetja', companyId)
+    .maybeSingle();
+  return data ? Number((data as Record<string, unknown>).id) : null;
+}
+
+/**
+ * Uskladi resurse termina z resursi njegovih storitev.
+ * Brez storitev termin ne zasede ničesar, zato se povezave pobrišejo.
+ */
+export async function syncResursiZaTermin(
+  companyId: string,
+  textTerminId: string | null | undefined,
+  storitveIds: (string | null | undefined)[],
+): Promise<string | null> {
+  if (!companyId || !textTerminId) return null;
+
+  const rowId = await terminRowId(companyId, textTerminId);
+  if (rowId === null) return null;
+
+  const ids = storitveIds.filter(Boolean) as string[];
+  if (ids.length === 0) {
+    return deleteTerminResursi(companyId, rowId);
+  }
+
+  const { data, error } = await fetchResursiForStoritve(companyId, ids);
+  if (error) return error;
+
+  return syncTerminResursi(
+    companyId,
+    rowId,
+    (data ?? []).map((r) => ({ rowId: r.resursRowId, textId: r.resursTextId })),
+  );
+}
+
+/**
+ * Sprosti vse resurse izbrisanega termina.
+ *
+ * POZOR: tu gre za ŠTEVILČNI id vrstice v Termini, ne za besedilni "ID termina".
+ * V obrazcu (AppointmentFormData) `id` pomeni besedilni ID termina, v seznamu
+ * (AppointmentWithDetails) pa id vrstice. Isto ime, dve različni stvari.
+ */
+export async function sprostiResurseTermina(
+  companyId: string,
+  terminRowIdValue: string | number | null | undefined,
+): Promise<string | null> {
+  if (!companyId || terminRowIdValue === null || terminRowIdValue === undefined) {
+    return null;
+  }
+  const rowId = Number(terminRowIdValue);
+  if (!Number.isFinite(rowId)) return null;
+  return deleteTerminResursi(companyId, rowId);
+}
+
 // ─── Fetch resource IDs for a termin ─────────────────────────────────────────
 
 export async function fetchResursiForTermin(

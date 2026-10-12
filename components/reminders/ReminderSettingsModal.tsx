@@ -21,7 +21,7 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
-import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
+import { TemplateEditor, migrateTemplate, sanitizeTemplateText, linkLength, PO_TERMINU_VARS } from '@/components/reminders/TemplateEditor';
 import { useTranslations } from 'next-intl';
 
 const SENDING_LANGUAGES = [
@@ -127,7 +127,17 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   const [samodejniOpomnik, setSamodejniOpomnik] = useState(false);
   const [smsOsebaPred, setSmsOsebaPred] = useState(false);
   const [dniPrej, setDniPrej] = useState('1');
+  // Največ toliko dni po terminu se sporočilo še pošlje; 0 = brez omejitve.
+  const [poTerminuMaxDni, setPoTerminuMaxDni] = useState('3');
   const [replyTo, setReplyTo] = useState('');
+  // Sender ID: kaj paket dovoli, kje je odobritev in kaj se dejansko pošilja.
+  const [senderDovoljen, setSenderDovoljen] = useState(false);
+  const [senderStatus, setSenderStatus] = useState('ni_zaproseno');
+  const [senderVUporabi, setSenderVUporabi] = useState<string | null>(null);
+  const [senderOpomba, setSenderOpomba] = useState<string | null>(null);
+  const [senderOsnutek, setSenderOsnutek] = useState('');
+  const [senderPosiljam, setSenderPosiljam] = useState(false);
+  const [senderNapaka, setSenderNapaka] = useState<string | null>(null);
   const [fromName, setFromName] = useState('');
   const fromEmail = 'booking@jedroplus.com'; // FIXED
   const [chanelPred, setChanelPred] = useState('email');
@@ -205,7 +215,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
     '{{ime_podjetja}}': nazivPodjetja.length || 15,
     '{{naslov}}': naslovPodjetja.length || 20,
     '{{leto}}': 4,
-    '{{povezava_prenarocanje}}': apptManagementLink.length || 30,
+    // Šteje se brez sheme — tako gre povezava tudi ven.
+    '{{povezava_prenarocanje}}': linkLength(apptManagementLink),
+    '{{kdaj_obisk}}': 12, // najdaljši izpis je "v ponedeljek"
   };
 
   // Load settings
@@ -234,6 +246,9 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
           const dniPrejNum = Number(data['dni_prej'] ?? 1);
           setDniPrej(String(dniPrejNum >= 1 && dniPrejNum <= 7 ? dniPrejNum : 1));
+
+          const maxDniNum = Number(data['po_terminu_max_dni'] ?? 3);
+          setPoTerminuMaxDni(String(Number.isFinite(maxDniNum) && maxDniNum >= 0 ? maxDniNum : 3));
           setReplyTo(String(data['reply_to'] ?? data['Reply_to'] ?? ''));
           setFromName(String(data['from_name'] ?? data['From_name'] ?? ''));
           setChanelPred(String(data['chanel_pred'] ?? data['Chanel_pred'] ?? 'email'));
@@ -286,6 +301,26 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
             setSmsSenderId(String(companiesData?.sms_sender_id ?? data['sms_sender_id'] ?? ''));
           } else {
             setSmsSenderId(String(data['sms_sender_id'] ?? ''));
+          }
+
+          // Eno vprašanje namesto štirih poizvedb; pravilo je v bazi.
+          if (companyId) {
+            const { data: stanje } = await supabaseReadOnly
+              .rpc('jp_sender_id_stanje', { company_code: companyId })
+              .maybeSingle<{
+                dovoljen: boolean;
+                ime: string | null;
+                status: string | null;
+                opomba: string | null;
+                v_uporabi: string | null;
+              }>();
+            if (stanje) {
+              setSenderDovoljen(stanje.dovoljen === true);
+              setSenderStatus(String(stanje.status ?? 'ni_zaproseno'));
+              setSenderVUporabi(stanje.v_uporabi ?? null);
+              setSenderOpomba(stanje.opomba ?? null);
+              setSenderOsnutek(String(stanje.ime ?? ''));
+            }
           }
 
           // Load company data for variable length estimation
@@ -341,6 +376,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
           'samodejni_opomnik': samodejniOpomnik,
           'sms_oseba_pred': smsOsebaPred,
           'dni_prej': Number(dniPrej),
+          'po_terminu_max_dni': Number(poTerminuMaxDni),
           'reply_to': replyTo,
           'from_name': fromName,
           'chanel_pred': chanelPred,
@@ -444,6 +480,47 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
       setSaving(false);
     }
   };
+
+  // Ime se hrani na `companies`, ne v nastavitvah podjetja, zato gre po svoji
+  // poti. Strežnik še enkrat preveri paket in vlogo — vmesniku se ne zaupa.
+  const oddajSenderId = async () => {
+    setSenderNapaka(null);
+    setSenderPosiljam(true);
+    try {
+      const { data: seja } = await supabaseReadOnly.auth.getSession();
+      const odgovor = await fetch('/api/sender-id', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(seja?.session?.access_token
+            ? { Authorization: `Bearer ${seja.session.access_token}` }
+            : {}),
+        },
+        body: JSON.stringify({ ime: senderOsnutek.trim() }),
+      });
+      const telo = await odgovor.json().catch(() => ({}));
+      if (!odgovor.ok || !telo?.ok) {
+        setSenderNapaka(String(telo?.razlog ?? 'Zahteve ni bilo mogoče oddati.'));
+        return;
+      }
+      setSenderStatus('v_obdelavi');
+      setSmsSenderId(senderOsnutek.trim());
+      // Do odobritve se pošilja naprej z Jedroplus.
+      setSenderVUporabi(null);
+      setSenderOpomba(null);
+    } catch {
+      setSenderNapaka('Zahteve ni bilo mogoče oddati.');
+    } finally {
+      setSenderPosiljam(false);
+    }
+  };
+
+  const senderOznaka = {
+    ni_zaproseno: t('modal.general.senderIdStatusNiZaproseno'),
+    v_obdelavi: t('modal.general.senderIdStatusVObdelavi'),
+    odobreno: t('modal.general.senderIdStatusOdobreno'),
+    zavrnjeno: t('modal.general.senderIdStatusZavrnjeno'),
+  }[senderStatus] ?? senderStatus;
 
   const lockedFieldClass = 'flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-sm text-gray-700';
   const innerPanelClass = 'space-y-4 rounded-2xl border border-gray-100 bg-gray-50 p-4';
@@ -671,20 +748,83 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       </div>
                     </SettingRow>
 
-                    {/* SMS Sender ID - LOCKED, read from Supabase */}
+                    {/* Ime pošiljatelja SMS — urejevalno le, če paket to dopušča */}
                     <SettingRow
                       label={t('modal.general.senderIdLabel')}
                       description={t('modal.general.senderIdDesc')}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={lockedFieldClass}>
-                          {smsSenderId || <span className="text-gray-400 font-sans">{t('modal.general.notSet')}</span>}
+                      {!senderDovoljen ? (
+                        <div className="flex items-center gap-3">
+                          <div className={lockedFieldClass}>
+                            {smsSenderId || (
+                              <span className="text-gray-400 font-sans">
+                                {t('modal.general.notSet')}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-gray-400">
+                            <Lock className="h-4 w-4" weight="bold" />
+                            <span className="text-xs">
+                              {t('modal.general.senderIdUpgrade')}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1 text-gray-400">
-                          <Lock className="h-4 w-4" weight="bold" />
-                          <span className="text-xs">{t('modal.general.locked')}</span>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <input
+                              id="sms-sender-id"
+                              type="text"
+                              value={senderOsnutek}
+                              maxLength={11}
+                              onChange={(e) => setSenderOsnutek(e.target.value)}
+                              placeholder={t('modal.general.notSet')}
+                              className="flex-1 rounded-lg border border-gray-200 bg-white p-3 font-mono text-sm text-gray-800"
+                            />
+                            <button
+                              type="button"
+                              onClick={oddajSenderId}
+                              disabled={
+                                senderPosiljam ||
+                                senderOsnutek.trim() === '' ||
+                                senderOsnutek.trim() === String(smsSenderId ?? '').trim()
+                              }
+                              className="rounded-lg bg-gray-900 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+                            >
+                              {senderPosiljam
+                                ? t('modal.general.senderIdSaving')
+                                : t('modal.general.senderIdRequest')}
+                            </button>
+                          </div>
+
+                          <p className="text-xs text-gray-500">
+                            {t('modal.general.senderIdRules')}
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-2 text-xs">
+                            <span className="rounded-full bg-gray-100 px-2 py-0.5 font-medium text-gray-700">
+                              {senderOznaka}
+                            </span>
+                            <span className="text-gray-500">
+                              {senderVUporabi
+                                ? t('modal.general.senderIdInUse', { ime: senderVUporabi })
+                                : t('modal.general.senderIdDefault')}
+                            </span>
+                          </div>
+
+                          {senderStatus === 'zavrnjeno' && senderOpomba && (
+                            <p className="text-xs text-amber-700">{senderOpomba}</p>
+                          )}
+
+                          <p className="text-xs text-gray-400">
+                            {t('modal.general.senderIdNoReply')}
+                          </p>
+
+                          {senderNapaka && (
+                            <p className="text-xs text-red-600">{senderNapaka}</p>
+                          )}
                         </div>
-                      </div>
+                      )}
                     </SettingRow>
 
                     {/* Nasveti glede na storitev */}
@@ -929,6 +1069,26 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
                     {posiljanjePo && (
                       <>
+                        {/* Sporočilo se pošlje ob zaključku termina, ne na dan
+                            obiska. Brez te meje je stranka dobila zahvalo tudi
+                            dva tedna po obisku. */}
+                        <SettingRow
+                          label="Ne pošlji, če je minilo več kot (dni)"
+                          description="Sporočilo po terminu se pošlje ob zaključku termina. Če ga zaključite pozneje, se po tem številu dni ne pošlje več. 0 pomeni brez omejitve."
+                        >
+                          <Select
+                            value={poTerminuMaxDni}
+                            setValue={setPoTerminuMaxDni}
+                            placeholder="Izberi"
+                          >
+                            {[0, 1, 2, 3, 5, 7, 14].map((d) => (
+                              <SelectOption key={d} value={String(d)}>
+                                {d === 0 ? 'Brez omejitve' : String(d)}
+                              </SelectOption>
+                            ))}
+                          </Select>
+                        </SettingRow>
+
                         <SettingRow
                           label={t('modal.after.channelLabel')}
                           description={t('modal.after.channelDesc')}
@@ -1036,6 +1196,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   placeholder={String(t.raw('modal.after.templatePlaceholder'))}
                                   rows={4}
                                   varLengths={smsVarLengths}
+                                  extraVars={PO_TERMINU_VARS}
                                 />
                                 <MessagePreview template={smsTemplatePo} companyName={previewCompanyName} />
                               </div>

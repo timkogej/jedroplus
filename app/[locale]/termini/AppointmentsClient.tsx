@@ -43,6 +43,7 @@ import {
 } from '@/lib/webhookPayloadBuilders';
 import { generateUnique8DigitId } from '@/lib/utils/uniqueIdGenerator';
 import { supabase } from '@/lib/supabaseClient';
+import { syncResursiZaTermin, sprostiResurseTermina } from '@/lib/supabase/resursi';
 import { useUserPersonId } from '@/hooks/useUserPersonId';
 import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
@@ -532,6 +533,14 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      // Termin zasede resurse svojih storitev. Doslej je to delal samo koledar,
+      // zato termin s te strani ni zasedel ničesar in ni blokiral drugih.
+      await syncResursiZaTermin(
+        companyId,
+        isNewAppointment ? unique8DigitId : data.id,
+        [data.storitev_id, data.storitev_id_2, data.storitev_id_3],
+      );
+
       await loadData();
       handleCloseModal();
     } catch (err) {
@@ -567,6 +576,9 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Izbrisan termin ne sme več držati resursov zasedenih.
+      await sprostiResurseTermina(companyId, deleteTarget.id);
 
       await loadData();
       setDeleteTarget(null);
