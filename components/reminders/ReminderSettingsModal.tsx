@@ -129,6 +129,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   const [dniPrej, setDniPrej] = useState('1');
   // Največ toliko dni po terminu se sporočilo še pošlje; 0 = brez omejitve.
   const [poTerminuMaxDni, setPoTerminuMaxDni] = useState('3');
+  // Kamor stranka odda oceno; uporablja jo oznaka {{povezava_ocena}}.
+  const [povezavaOcena, setPovezavaOcena] = useState('');
   const [replyTo, setReplyTo] = useState('');
   // Sender ID: kaj paket dovoli, kje je odobritev in kaj se dejansko pošilja.
   const [senderDovoljen, setSenderDovoljen] = useState(false);
@@ -218,6 +220,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
     // Šteje se brez sheme — tako gre povezava tudi ven.
     '{{povezava_prenarocanje}}': linkLength(apptManagementLink),
     '{{kdaj_obisk}}': 12, // najdaljši izpis je "v ponedeljek"
+    '{{povezava_ocena}}': linkLength(povezavaOcena, 35),
   };
 
   // Load settings
@@ -246,6 +249,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
           const dniPrejNum = Number(data['dni_prej'] ?? 1);
           setDniPrej(String(dniPrejNum >= 1 && dniPrejNum <= 7 ? dniPrejNum : 1));
+
+          setPovezavaOcena(String(data['povezava_ocena'] ?? ''));
 
           const maxDniNum = Number(data['po_terminu_max_dni'] ?? 3);
           setPoTerminuMaxDni(String(Number.isFinite(maxDniNum) && maxDniNum >= 0 ? maxDniNum : 3));
@@ -377,6 +382,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
           'sms_oseba_pred': smsOsebaPred,
           'dni_prej': Number(dniPrej),
           'po_terminu_max_dni': Number(poTerminuMaxDni),
+          'povezava_ocena': povezavaOcena.trim(),
           'reply_to': replyTo,
           'from_name': fromName,
           'chanel_pred': chanelPred,
@@ -1072,6 +1078,21 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                         {/* Sporočilo se pošlje ob zaključku termina, ne na dan
                             obiska. Brez te meje je stranka dobila zahvalo tudi
                             dva tedna po obisku. */}
+                        {/* Povezava za oceno — uporabi jo oznaka {{povezava_ocena}}
+                            v predlogi sporočila po terminu. */}
+                        <SettingRow
+                          label="Povezava za oceno"
+                          description="Kamor stranka odda oceno (Google, Facebook). Uporabite KRATKO obliko — dolga povezava lahko sporočilo raztegne na dva SMS. Pri Googlu jo dobite v Google Business Profile → Prosite za ocene."
+                        >
+                          <input
+                            type="url"
+                            value={povezavaOcena}
+                            onChange={(e) => setPovezavaOcena(e.target.value)}
+                            placeholder="g.page/r/.../review"
+                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                          />
+                        </SettingRow>
+
                         <SettingRow
                           label="Ne pošlji, če je minilo več kot (dni)"
                           description="Sporočilo po terminu se pošlje ob zaključku termina. Če ga zaključite pozneje, se po tem številu dni ne pošlje več. 0 pomeni brez omejitve."

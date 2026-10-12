@@ -27,6 +27,7 @@ export const TEMPLATE_VARS = [
  */
 export const PO_TERMINU_VARS = [
   { token: '{{kdaj_obisk}}', label: 'Kdaj je bil obisk' },
+  { token: '{{povezava_ocena}}', label: 'Povezava za oceno' },
 ] as const;
 
 export const VAR_LABEL_MAP: Record<string, string> = Object.fromEntries(
