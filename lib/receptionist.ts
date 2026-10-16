@@ -31,3 +31,11 @@ export const DEFAULT_RECORDING_NOTICE: Record<IsoLanguageCode, string> = {
 };
 
 export const GREETING_MAX_LENGTH = 400;
+
+// Owner's free-text instructions for the receptionist (FAQ, parking, rules).
+export const INSTRUCTIONS_MAX_LENGTH = 4000;
+
+/** E.164, the same rule as the receptionist_settings.transfer_number check. */
+export function isTransferNumber(value: string): boolean {
+  return /^\+[1-9][0-9]{6,14}$/.test(value);
+}

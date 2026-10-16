@@ -26,6 +26,7 @@ export default function ReceptionistPlusPage() {
   const [provisioned, setProvisioned] = useState<boolean | null>(null);
   const [settings, setSettings] = useState<ReceptionistSettings | null>(null);
   const [error, setError] = useState(false);
+  const [phase7, setPhase7] = useState(true);
 
   const load = useCallback(async () => {
     setError(false);
@@ -35,6 +36,7 @@ export default function ReceptionistPlusPage() {
       if (!data.ok) throw new Error(data.error ?? 'load_failed');
       setProvisioned(Boolean(data.provisioned));
       setSettings(data.settings);
+      setPhase7(data.phase7 !== false);
     } catch (e) {
       console.error('[ReceptionistPlus] load settings error:', e);
       setError(true);
@@ -95,7 +97,7 @@ export default function ReceptionistPlusPage() {
               </div>
 
               {tab === 'nastavitve' && settings && (
-                <NastavitveTab settings={settings} onSave={saveSettings} />
+                <NastavitveTab settings={settings} onSave={saveSettings} phase7={phase7} />
               )}
               {tab === 'dnevnik' && <DnevnikTab />}
               {tab === 'krediti' && <KreditiTab />}

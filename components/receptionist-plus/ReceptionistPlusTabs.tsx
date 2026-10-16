@@ -10,6 +10,7 @@ import {
   CaretDown,
   CaretUp,
   CalendarCheck,
+  PhoneCall,
   ArrowLeft,
   ArrowRight,
 } from '@phosphor-icons/react';
@@ -31,9 +32,12 @@ import {
   DEFAULT_GREETING,
   DEFAULT_RECORDING_NOTICE,
   GREETING_MAX_LENGTH,
+  INSTRUCTIONS_MAX_LENGTH,
   RECEPTIONIST_LANGUAGES,
   isReceptionistLanguage,
+  isTransferNumber,
 } from '@/lib/receptionist';
+import { formatPhone, normalizePhone, phonePlaceholder } from '@/lib/phone';
 
 // ─── Tabs ───────────────────────────────────────────────────────────────────
 
@@ -77,6 +81,14 @@ export interface ReceptionistSettings {
   /** Say the recording notice before the greeting. */
   announce_recording?: boolean;
   recording_notice_text?: string | null;
+  /** Owner's FAQ / rules; empty → the worker uses Chatbot+'s "Navodila chatbot". */
+  instructions?: string | null;
+  /** Hand the call to a person (only during opening hours). */
+  transfer_enabled?: boolean;
+  /** E.164, e.g. +38640123456. */
+  transfer_number?: string | null;
+  /** Booking confirmation by SMS instead of email. */
+  sms_confirmation?: boolean;
 }
 
 function voiceLanguage(value: string): IsoLanguageCode {
@@ -86,9 +98,12 @@ function voiceLanguage(value: string): IsoLanguageCode {
 export function NastavitveTab({
   settings,
   onSave,
+  phase7 = true,
 }: {
   settings: ReceptionistSettings;
   onSave: (patch: Partial<ReceptionistSettings>) => Promise<void>;
+  /** false until phase7_features.sql has run: instructions / transfer / SMS stay hidden. */
+  phase7?: boolean;
 }) {
   const t = useTranslations('receptionist');
   const [local, setLocal] = useState(settings);
@@ -96,6 +111,19 @@ export function NastavitveTab({
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const language = voiceLanguage(local.language);
   const announce = local.announce_recording ?? true;
+  const [transferError, setTransferError] = useState(false);
+  const { countryCode } = useCompanyRegion();
+
+  const saveTransferNumber = (value: string) => {
+    const number = normalizePhone(value, countryCode);
+    if (number && !isTransferNumber(number)) {
+      setTransferError(true);
+      return;
+    }
+    setTransferError(false);
+    setLocal((s) => ({ ...s, transfer_number: number || null }));
+    save({ transfer_number: number || null });
+  };
 
   const save = useCallback(async (patch: Partial<ReceptionistSettings>) => {
     setSaving(true);
@@ -212,6 +240,83 @@ export function NastavitveTab({
           </p>
         )}
       </SettingsSection>
+
+      {phase7 && (
+        <>
+          <SettingsSection title={t('settings.instructionsTitle')} description={t('settings.instructionsDesc')}>
+            <SettingRow label={t('settings.instructionsLabel')} fullWidth>
+              <Textarea
+                rows={6}
+                maxLength={INSTRUCTIONS_MAX_LENGTH}
+                placeholder={t('settings.instructionsPlaceholder')}
+                value={local.instructions ?? ''}
+                onChange={(e) => setLocal((s) => ({ ...s, instructions: e.target.value }))}
+                onBlur={(e) => save({ instructions: e.target.value })}
+              />
+              <p className="tnum mt-1.5 text-right text-xs text-gray-400">
+                {(local.instructions ?? '').length} / {INSTRUCTIONS_MAX_LENGTH}
+              </p>
+            </SettingRow>
+          </SettingsSection>
+
+          <SettingsSection title={t('settings.transferTitle')} description={t('settings.transferDesc')}>
+            <SettingRow label={t('settings.transferLabel')}>
+              <div className="flex justify-end sm:justify-start">
+                <Switch
+                  checked={local.transfer_enabled ?? false}
+                  onChange={(checked) => {
+                    setLocal((s) => ({ ...s, transfer_enabled: checked }));
+                    save({ transfer_enabled: checked });
+                  }}
+                  variant="brand"
+                />
+              </div>
+            </SettingRow>
+            {local.transfer_enabled && (
+              <SettingRow
+                label={t('settings.transferNumberLabel')}
+                description={t('settings.transferNumberDesc')}
+                error={
+                  transferError
+                    ? t('settings.transferNumberInvalid')
+                    : !local.transfer_number
+                      ? t('settings.transferNumberMissing')
+                      : undefined
+                }
+              >
+                <Input
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="off"
+                  placeholder={phonePlaceholder(countryCode)}
+                  error={transferError}
+                  value={local.transfer_number ?? ''}
+                  onChange={(e) => {
+                    setTransferError(false);
+                    setLocal((s) => ({ ...s, transfer_number: e.target.value }));
+                  }}
+                  onBlur={(e) => saveTransferNumber(e.target.value)}
+                />
+              </SettingRow>
+            )}
+          </SettingsSection>
+
+          <SettingsSection title={t('settings.confirmationTitle')}>
+            <SettingRow label={t('settings.smsConfirmationLabel')} description={t('settings.smsConfirmationDesc')}>
+              <div className="flex justify-end sm:justify-start">
+                <Switch
+                  checked={local.sms_confirmation ?? true}
+                  onChange={(checked) => {
+                    setLocal((s) => ({ ...s, sms_confirmation: checked }));
+                    save({ sms_confirmation: checked });
+                  }}
+                  variant="brand"
+                />
+              </div>
+            </SettingRow>
+          </SettingsSection>
+        </>
+      )}
     </div>
   );
 }
@@ -233,14 +338,21 @@ export interface ReceptionistCall {
   outcome: string;
   transcript: TranscriptMessage[] | null;
   created_termin_id: string | null;
+  /** Worker's short summary after hang-up (phase 7). */
+  summary?: string | null;
+  /** Message the caller left for the business. */
+  message?: string | null;
+  callback_requested?: boolean | null;
+  caller_phone?: string | null;
 }
 
-const OUTCOMES = ['booked', 'info_only', 'message_taken', 'abandoned', 'no_credits'];
+const OUTCOMES = ['booked', 'info_only', 'message_taken', 'transferred', 'abandoned', 'no_credits'];
 
 const OUTCOME_COLORS: Record<string, string> = {
   booked: 'bg-emerald-50 text-emerald-700',
   info_only: 'bg-blue-50 text-blue-700',
   message_taken: 'bg-amber-50 text-amber-700',
+  transferred: 'bg-violet-50 text-violet-700',
   abandoned: 'bg-gray-100 text-gray-600',
   no_credits: 'bg-red-50 text-red-700',
 };
@@ -298,6 +410,7 @@ function CallTranscript({ messages }: { messages: TranscriptMessage[] }) {
 function CallRow({ call }: { call: ReceptionistCall }) {
   const t = useTranslations('receptionist.calls');
   const locale = useLocale();
+  const { countryCode } = useCompanyRegion();
   const formatDateTime = useFormatDateTime();
   const [expanded, setExpanded] = useState(false);
   const outcomeLabel = OUTCOMES.includes(call.outcome) ? t(`outcome.${call.outcome}`) : call.outcome;
@@ -321,11 +434,25 @@ function CallRow({ call }: { call: ReceptionistCall }) {
             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${outcomeColor}`}>
               {outcomeLabel}
             </span>
+            {call.callback_requested && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+                <PhoneCall className="h-3 w-3" weight="regular" />
+                {t('callbackRequested')}
+              </span>
+            )}
           </div>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[13px] text-gray-500">
             <span className="tnum">{duration}</span>
             <span className="text-gray-300">·</span>
             <span className="tnum">{t('credits', { amount: formatCredits(call.billed_credits ?? 0, locale) })}</span>
+            {call.caller_phone && (
+              <>
+                <span className="text-gray-300">·</span>
+                <a href={`tel:${call.caller_phone}`} className="tnum text-gray-700 hover:text-gray-900 hover:underline">
+                  {formatPhone(call.caller_phone, countryCode)}
+                </a>
+              </>
+            )}
             {call.created_termin_id && (
               <>
                 <span className="text-gray-300">·</span>
@@ -349,6 +476,18 @@ function CallRow({ call }: { call: ReceptionistCall }) {
           </button>
         )}
       </div>
+
+      {(call.summary || call.message) && (
+        <div className="-mt-1 space-y-1.5 px-4 pb-3">
+          {call.summary && <p className="text-[13px] leading-snug text-gray-600">{call.summary}</p>}
+          {call.message && (
+            <p className="rounded-[10px] bg-amber-50/70 px-3 py-2 text-[13px] leading-snug text-gray-900">
+              <span className="font-medium text-amber-800">{t('messageLabel')}: </span>
+              {call.message}
+            </p>
+          )}
+        </div>
+      )}
 
       {expanded && hasTranscript && (
         <div className="px-4 pb-4 pt-1">

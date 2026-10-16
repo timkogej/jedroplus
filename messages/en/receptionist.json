@@ -26,6 +26,20 @@
     "recordingLabel": "Say the recording notice",
     "recordingTextLabel": "Notice text",
     "recordingOffWarning": "Without a notice you may not record or transcribe calls (GDPR; in Germany and Italy it's a criminal offence).",
+    "instructionsTitle": "Instructions for the assistant",
+    "instructionsDesc": "What the assistant should know beyond services and staff: FAQs, parking, payment, cancellation rules. If left empty, it uses the Chatbot+ instructions.",
+    "instructionsLabel": "Instructions",
+    "instructionsPlaceholder": "E.g.: Free parking behind the building. We accept cash or card. Cancel at least 24 hours ahead.",
+    "transferTitle": "Transfer to a person",
+    "transferDesc": "When a caller wants to speak to someone, the assistant transfers the call to your number. It only transfers during opening hours (the company schedule); outside them it offers to take a message.",
+    "transferLabel": "Allow transfer to a person",
+    "transferNumberLabel": "Transfer number",
+    "transferNumberDesc": "In international format, e.g. +38640123456.",
+    "transferNumberInvalid": "Enter the number as +38640123456.",
+    "transferNumberMissing": "Without a number the assistant won't transfer calls.",
+    "confirmationTitle": "Booking confirmation",
+    "smsConfirmationLabel": "Confirmation by SMS",
+    "smsConfirmationDesc": "The customer gets the appointment confirmation by SMS, counted against the company's SMS quota. The assistant then doesn't ask for an email. If off, it asks for an email and the confirmation goes by email.",
     "saveError": "Couldn't save. Please try again."
   },
   "languages": {
@@ -53,9 +67,12 @@
       "booked": "Booked",
       "info_only": "Information only",
       "message_taken": "Message taken",
+      "transferred": "Transferred to a person",
       "abandoned": "Hung up",
       "no_credits": "No credits"
-    }
+    },
+    "callbackRequested": "Wants a callback",
+    "messageLabel": "Message"
   },
   "credits": {
     "loadError": "Couldn't load credits.",

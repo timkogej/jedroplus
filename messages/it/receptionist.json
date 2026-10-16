@@ -26,6 +26,20 @@
     "recordingLabel": "Pronuncia l'avviso di registrazione",
     "recordingTextLabel": "Testo dell'avviso",
     "recordingOffWarning": "Senza avviso non puoi registrare né trascrivere le chiamate (GDPR; in Germania e in Italia è un reato).",
+    "instructionsTitle": "Istruzioni per l'assistente",
+    "instructionsDesc": "Ciò che l'assistente deve sapere oltre a servizi e staff: domande frequenti, parcheggio, pagamento, regole di disdetta. Se lasci vuoto, usa le istruzioni di Chatbot+.",
+    "instructionsLabel": "Istruzioni",
+    "instructionsPlaceholder": "Es.: Parcheggio gratuito dietro l'edificio. Pagamento in contanti o con carta. Disdetta almeno 24 ore prima.",
+    "transferTitle": "Trasferimento a una persona",
+    "transferDesc": "Quando chi chiama vuole parlare con qualcuno, l'assistente trasferisce la chiamata al tuo numero. Trasferisce solo durante l'orario di apertura (orario dell'azienda); fuori orario propone di lasciare un messaggio.",
+    "transferLabel": "Consenti il trasferimento",
+    "transferNumberLabel": "Numero per il trasferimento",
+    "transferNumberDesc": "In formato internazionale, es. +390212345678.",
+    "transferNumberInvalid": "Inserisci il numero nel formato +390212345678.",
+    "transferNumberMissing": "Senza numero l'assistente non trasferisce le chiamate.",
+    "confirmationTitle": "Conferma della prenotazione",
+    "smsConfirmationLabel": "Conferma via SMS",
+    "smsConfirmationDesc": "Il cliente riceve la conferma dell'appuntamento via SMS, conteggiata nella quota SMS dell'azienda. L'assistente allora non chiede l'email. Se disattivi, chiede l'email e la conferma arriva via email.",
     "saveError": "Salvataggio non riuscito. Riprova."
   },
   "languages": {
@@ -53,9 +67,12 @@
       "booked": "Prenotato",
       "info_only": "Solo informazioni",
       "message_taken": "Messaggio preso",
+      "transferred": "Trasferita a una persona",
       "abandoned": "Interrotta",
       "no_credits": "Crediti esauriti"
-    }
+    },
+    "callbackRequested": "Chiede di essere richiamato",
+    "messageLabel": "Messaggio"
   },
   "credits": {
     "loadError": "Errore durante il caricamento dei crediti.",

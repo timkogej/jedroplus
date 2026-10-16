@@ -22,6 +22,16 @@ import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } fr
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
 import { sheet } from '@/components/ui/sheetClasses';
 
+const BOOKING_WINDOW_DAYS = [7, 14, 21, 30, 60, 90, 180, 365];
+
+/** Preset windows, plus the saved value when it is not one of them. */
+function bookingWindowOptions(current: string): number[] {
+  const days = parseInt(current, 10);
+  return Number.isFinite(days) && !BOOKING_WINDOW_DAYS.includes(days)
+    ? [...BOOKING_WINDOW_DAYS, days].sort((a, b) => a - b)
+    : BOOKING_WINDOW_DAYS;
+}
+
 interface BookingSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -108,6 +118,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   // Settings from "Podatki podjetij" table
   const [bookingOmogocen, setBookingOmogocen] = useState(true);
   const [koledarUre, setKoledarUre] = useState<'15' | '30' | '60'>('30');
+  const [maxDneviRezervacija, setMaxDneviRezervacija] = useState('14');
   const [potrdiloReservation, setPotrdiloReservation] = useState(false);
   const [potrdiloChannel, setPotrdiloChannel] = useState<'sms' | 'email'>('email');
   const [potrdiloOnline, setPotrdiloOnline] = useState(false);
@@ -217,6 +228,10 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           const ureValue = String(data['koledar_ure'] ?? data['Koledar_ure'] ?? '30');
           setKoledarUre(ureValue === '60' ? '60' : ureValue === '15' ? '15' : '30');
 
+          // Booking window, read by booking-v2 init (online page and Receptionist+).
+          const maxDni = parseInt(String(data['max_dnevi_rezervacija'] ?? '14'), 10);
+          setMaxDneviRezervacija(String(Number.isFinite(maxDni) && maxDni > 0 ? maxDni : 14));
+
           const potrdiloRez = data['Potrdilo po rezervaciji'] ?? data['Potrdilo ob rezervaciji'];
           setPotrdiloReservation(potrdiloRez === true || potrdiloRez === 'true' || potrdiloRez === 'yes' || potrdiloRez === 'da');
 
@@ -295,6 +310,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         data: {
           'booking_omogocen': bookingOmogocen,
           'koledar_ure': koledarUre,
+          'max_dnevi_rezervacija': maxDneviRezervacija,
           'Potrdilo po rezervaciji': potrdiloReservation ? 'true' : 'false',
           'Potrdilo ob rezervaciji': potrdiloReservation ? 'true' : 'false',
           'potrdilo_channel': potrdiloChannel,
@@ -426,6 +442,24 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         <SelectOption value="15">{t('modal.general.interval15')}</SelectOption>
                         <SelectOption value="30">{t('modal.general.interval30')}</SelectOption>
                         <SelectOption value="60">{t('modal.general.interval60')}</SelectOption>
+                      </Select>
+                    </SettingRow>
+
+                    <SettingRow
+                      label={t('modal.general.windowLabel')}
+                      description={t('modal.general.windowDesc')}
+                    >
+                      <Select
+                        value={maxDneviRezervacija}
+                        setValue={(value) => setMaxDneviRezervacija(value)}
+                        placeholder={t('modal.general.intervalPlaceholder')}
+                        className="[&>button]:rounded-[10px]"
+                      >
+                        {bookingWindowOptions(maxDneviRezervacija).map((days) => (
+                          <SelectOption key={days} value={String(days)}>
+                            {t('modal.general.windowDays', { days })}
+                          </SelectOption>
+                        ))}
                       </Select>
                     </SettingRow>
                   </SettingsSection>

@@ -119,7 +119,10 @@
       "intervalPlaceholder": "Izberi interval",
       "interval15": "15 minut",
       "interval30": "30 minut",
-      "interval60": "60 minut (1 ura)"
+      "interval60": "60 minut (1 ura)",
+      "windowLabel": "Koliko dni vnaprej je možno rezervirati",
+      "windowDesc": "Velja za spletno rezervacijo in Receptionist+.",
+      "windowDays": "{days, plural, one {# dan} two {# dneva} few {# dni} other {# dni}}"
     },
     "payments": {
       "sectionTitle": "Spletna plačila",

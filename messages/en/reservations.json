@@ -119,7 +119,10 @@
       "intervalPlaceholder": "Select interval",
       "interval15": "15 minutes",
       "interval30": "30 minutes",
-      "interval60": "60 minutes (1 hour)"
+      "interval60": "60 minutes (1 hour)",
+      "windowLabel": "How many days ahead customers can book",
+      "windowDesc": "Applies to online booking and Receptionist+.",
+      "windowDays": "{days, plural, one {# day} other {# days}}"
     },
     "payments": {
       "sectionTitle": "Online payments",

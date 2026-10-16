@@ -119,7 +119,10 @@
       "intervalPlaceholder": "Scegli l'intervallo",
       "interval15": "15 minuti",
       "interval30": "30 minuti",
-      "interval60": "60 minuti (1 ora)"
+      "interval60": "60 minuti (1 ora)",
+      "windowLabel": "Con quanti giorni di anticipo si può prenotare",
+      "windowDesc": "Vale per la prenotazione online e Receptionist+.",
+      "windowDays": "{days, plural, one {# giorno} other {# giorni}}"
     },
     "payments": {
       "sectionTitle": "Pagamenti online",
