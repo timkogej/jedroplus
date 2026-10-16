@@ -40,14 +40,22 @@ export async function GET(request: NextRequest) {
   const from = page * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
 
-  const { data, count, error } = await admin
-    .from('receptionist_calls')
-    .select('id, started_at, ended_at, duration_sec, billed_credits, outcome, transcript, created_termin_id', {
-      count: 'exact',
-    })
-    .eq('company_slug', companySlug)
-    .order('started_at', { ascending: false })
-    .range(from, to);
+  // summary exists only after the worker's phase7_features.sql; until then
+  // the list is read without it.
+  const baseColumns =
+    'id, started_at, ended_at, duration_sec, billed_credits, outcome, transcript, created_termin_id, message, callback_requested, caller_phone';
+  const query = (columns: string) =>
+    admin
+      .from('receptionist_calls')
+      .select(columns, { count: 'exact' })
+      .eq('company_slug', companySlug)
+      .order('started_at', { ascending: false })
+      .range(from, to);
+
+  let { data, count, error } = await query(`${baseColumns}, summary`);
+  if (error?.code === '42703') {
+    ({ data, count, error } = await query(baseColumns));
+  }
 
   if (error) {
     return NextResponse.json({ ok: false, error: 'Napaka pri branju klicnega dnevnika' }, { status: 500 });

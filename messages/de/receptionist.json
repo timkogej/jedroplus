@@ -26,6 +26,20 @@
     "recordingLabel": "Hinweis auf Aufzeichnung ansagen",
     "recordingTextLabel": "Text des Hinweises",
     "recordingOffWarning": "Ohne Hinweis dürfen Anrufe nicht aufgezeichnet oder transkribiert werden (DSGVO; in Deutschland und Italien ist das strafbar).",
+    "instructionsTitle": "Anweisungen für den Assistenten",
+    "instructionsDesc": "Was der Assistent neben Leistungen und Team wissen soll: häufige Fragen, Parken, Zahlung, Stornoregeln. Bleibt das Feld leer, nutzt er die Anweisungen aus Chatbot+.",
+    "instructionsLabel": "Anweisungen",
+    "instructionsPlaceholder": "Z. B.: Kostenlose Parkplätze hinter dem Gebäude. Bar- oder Kartenzahlung. Absage mindestens 24 Stunden vorher.",
+    "transferTitle": "Weiterleitung an eine Person",
+    "transferDesc": "Möchte der Anrufer mit jemandem sprechen, verbindet der Assistent zu Ihrer Nummer. Weitergeleitet wird nur während der Öffnungszeiten (Zeitplan des Unternehmens); sonst bietet er an, eine Nachricht aufzunehmen.",
+    "transferLabel": "Weiterleitung erlauben",
+    "transferNumberLabel": "Nummer für die Weiterleitung",
+    "transferNumberDesc": "Im internationalen Format, z. B. +4930123456.",
+    "transferNumberInvalid": "Geben Sie die Nummer im Format +4930123456 ein.",
+    "transferNumberMissing": "Ohne Nummer leitet der Assistent keine Anrufe weiter.",
+    "confirmationTitle": "Buchungsbestätigung",
+    "smsConfirmationLabel": "Bestätigung per SMS",
+    "smsConfirmationDesc": "Der Kunde erhält die Terminbestätigung per SMS; sie zählt zum SMS-Kontingent des Unternehmens. Der Assistent fragt dann nicht nach der E-Mail. Ausgeschaltet fragt er nach der E-Mail und die Bestätigung geht per E-Mail.",
     "saveError": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut."
   },
   "languages": {
@@ -53,9 +67,12 @@
       "booked": "Gebucht",
       "info_only": "Nur Auskunft",
       "message_taken": "Nachricht aufgenommen",
+      "transferred": "An Person weitergeleitet",
       "abandoned": "Aufgelegt",
       "no_credits": "Keine Credits"
-    }
+    },
+    "callbackRequested": "Bittet um Rückruf",
+    "messageLabel": "Nachricht"
   },
   "credits": {
     "loadError": "Credits konnten nicht geladen werden.",

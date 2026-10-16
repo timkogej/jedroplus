@@ -26,6 +26,20 @@
     "recordingLabel": "Izgovori obavijest o snimanju",
     "recordingTextLabel": "Tekst obavijesti",
     "recordingOffWarning": "Bez obavijesti ne smijete snimati ni prepisivati pozive (GDPR; u Njemačkoj i Italiji to je kazneno djelo).",
+    "instructionsTitle": "Upute za asistenta",
+    "instructionsDesc": "Što asistent treba znati osim usluga i tima: česta pitanja, parkiranje, plaćanje, pravila otkazivanja. Ako ostavite prazno, koristi upute iz Chatbot+.",
+    "instructionsLabel": "Upute",
+    "instructionsPlaceholder": "Npr.: Besplatan parking iza zgrade. Plaćanje gotovinom ili karticom. Termin otkažite najmanje 24 sata ranije.",
+    "transferTitle": "Prijenos na osobu",
+    "transferDesc": "Kad pozivatelj želi razgovarati s osobom, asistent prebacuje poziv na vaš broj. Prenosi samo tijekom radnog vremena (raspored tvrtke); izvan njega nudi da primi poruku.",
+    "transferLabel": "Omogući prijenos na osobu",
+    "transferNumberLabel": "Broj za prijenos",
+    "transferNumberDesc": "U međunarodnom obliku, npr. +385911234567.",
+    "transferNumberInvalid": "Unesite broj u obliku +385911234567.",
+    "transferNumberMissing": "Bez broja asistent ne prenosi pozive.",
+    "confirmationTitle": "Potvrda rezervacije",
+    "smsConfirmationLabel": "Potvrda SMS-om",
+    "smsConfirmationDesc": "Klijent dobiva potvrdu termina SMS-om, koja se ubraja u SMS kvotu tvrtke. Asistent tada ne traži e-adresu. Ako isključite, traži e-adresu i potvrda ide e-poštom.",
     "saveError": "Spremanje nije uspjelo. Pokušajte ponovno."
   },
   "languages": {
@@ -53,9 +67,12 @@
       "booked": "Rezervirano",
       "info_only": "Samo informacije",
       "message_taken": "Poruka zaprimljena",
+      "transferred": "Preneseno na osobu",
       "abandoned": "Prekinuto",
       "no_credits": "Nema kredita"
-    }
+    },
+    "callbackRequested": "Traži povratni poziv",
+    "messageLabel": "Poruka"
   },
   "credits": {
     "loadError": "Pogreška pri učitavanju kredita.",

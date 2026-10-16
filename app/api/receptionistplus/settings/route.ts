@@ -7,7 +7,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
-import { GREETING_MAX_LENGTH, isReceptionistLanguage } from '@/lib/receptionist';
+import {
+  GREETING_MAX_LENGTH,
+  INSTRUCTIONS_MAX_LENGTH,
+  isReceptionistLanguage,
+  isTransferNumber,
+} from '@/lib/receptionist';
+import { normalizePhone } from '@/lib/phone';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -46,7 +52,9 @@ export async function GET(request: NextRequest) {
   const { data, error } = await admin
     .from('receptionist_settings')
     // '*': detect_caller_language / announce_recording / recording_notice_text
-    // exist only after migration 1790500000.
+    // exist only after migration 1790500000; instructions / transfer_* /
+    // sms_confirmation only after the worker's phase7_features.sql. Missing
+    // columns read as their defaults below.
     .select('*')
     .eq('company_slug', companySlug)
     .maybeSingle();
@@ -70,7 +78,16 @@ export async function GET(request: NextRequest) {
         ? true
         : Boolean(row.announce_recording),
       recording_notice_text: (row?.recording_notice_text as string | null) ?? null,
+      instructions: (row?.instructions as string | null) ?? null,
+      transfer_enabled: Boolean(row?.transfer_enabled ?? false),
+      transfer_number: (row?.transfer_number as string | null) ?? null,
+      sms_confirmation: row?.sms_confirmation === undefined || row?.sms_confirmation === null
+        ? true
+        : Boolean(row.sms_confirmation),
     },
+    // false until phase7_features.sql has run: the page then hides the
+    // instructions / transfer / SMS settings instead of failing to save them.
+    phase7: Boolean(row && 'sms_confirmation' in row),
   });
 }
 
@@ -82,11 +99,15 @@ type SettingsBody = {
   detect_caller_language?: boolean;
   announce_recording?: boolean;
   recording_notice_text?: string | null;
+  instructions?: string | null;
+  transfer_enabled?: boolean;
+  transfer_number?: string | null;
+  sms_confirmation?: boolean;
 };
 
-function optionalText(value: unknown): string | null | 'invalid' {
+function optionalText(value: unknown, maxLength = GREETING_MAX_LENGTH): string | null | 'invalid' {
   if (value === null) return null;
-  if (typeof value !== 'string' || value.length > GREETING_MAX_LENGTH) return 'invalid';
+  if (typeof value !== 'string' || value.length > maxLength) return 'invalid';
   return value.trim() || null;
 }
 
@@ -124,6 +145,26 @@ export async function PATCH(request: NextRequest) {
     }
     update[key] = text;
   }
+  if (body.instructions !== undefined) {
+    const text = optionalText(body.instructions, INSTRUCTIONS_MAX_LENGTH);
+    if (text === 'invalid') {
+      return NextResponse.json({ ok: false, error: 'invalid_instructions' }, { status: 400 });
+    }
+    update.instructions = text;
+  }
+  if (body.transfer_enabled !== undefined) update.transfer_enabled = Boolean(body.transfer_enabled);
+  if (body.transfer_number !== undefined) {
+    if (body.transfer_number === null || (typeof body.transfer_number === 'string' && !body.transfer_number.trim())) {
+      update.transfer_number = null;
+    } else {
+      const number = typeof body.transfer_number === 'string' ? normalizePhone(body.transfer_number) : '';
+      if (!isTransferNumber(number)) {
+        return NextResponse.json({ ok: false, error: 'invalid_transfer_number' }, { status: 400 });
+      }
+      update.transfer_number = number;
+    }
+  }
+  if (body.sms_confirmation !== undefined) update.sms_confirmation = Boolean(body.sms_confirmation);
 
   const { error } = await admin.from('receptionist_settings').upsert(update);
 
