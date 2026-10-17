@@ -41,6 +41,13 @@ import { formatPhone, normalizePhone, phonePlaceholder } from '@/lib/phone';
 
 // ─── Tabs ───────────────────────────────────────────────────────────────────
 
+
+// Receptionist+ does not record calls (decision 2026-10-17): the worker has no
+// recording and never announces one, so the switch would promise something
+// that doesn't happen. The setting and its API stay; flip this when recording
+// exists in receptionistplus-worker.
+const RECORDING_AVAILABLE = false;
+
 export type TabKey = 'nastavitve' | 'dnevnik' | 'krediti';
 
 /** labelKey je ključ v imenskem prostoru `receptionist`. */
@@ -209,6 +216,7 @@ export function NastavitveTab({
         </SettingRow>
       </SettingsSection>
 
+      {RECORDING_AVAILABLE && (
       <SettingsSection title={t('settings.recordingTitle')} description={t('settings.recordingDesc')}>
         <SettingRow label={t('settings.recordingLabel')}>
           <div className="flex justify-end sm:justify-start">
@@ -240,6 +248,7 @@ export function NastavitveTab({
           </p>
         )}
       </SettingsSection>
+      )}
 
       {phase7 && (
         <>
