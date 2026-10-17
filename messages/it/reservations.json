@@ -176,7 +176,8 @@
       "modeManual": "Modello personalizzato",
       "templateHint": "Modello del messaggio SMS (max 155 caratteri)",
       "templatePlaceholder": "Es.: La tua prenotazione è confermata per il {{datum}} alle {{cas}}. {{ime_podjetja}}.",
-      "noEmojiHint": "Senza emoji e caratteri speciali."
+      "noEmojiHint": "Senza emoji e caratteri speciali.",
+      "englishSaveError": "Le impostazioni sono state salvate, ma la versione inglese della conferma no. Riprova."
     },
     "policy": {
       "sectionTitle": "Regole di annullamento e spostamento",

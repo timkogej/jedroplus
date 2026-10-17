@@ -39,7 +39,7 @@
     "transferNumberMissing": "Bez broja asistent ne prenosi pozive.",
     "confirmationTitle": "Potvrda rezervacije",
     "smsConfirmationLabel": "Potvrda SMS-om",
-    "smsConfirmationDesc": "Klijent dobiva potvrdu termina SMS-om, koja se ubraja u SMS kvotu tvrtke. Asistent tada ne traži e-adresu. Ako isključite, traži e-adresu i potvrda ide e-poštom.",
+    "smsConfirmationDesc": "Klijent dobiva potvrdu termina SMS-om, koja se broji u SMS kvotu tvrtke. Tekst je vaš vlastiti predložak potvrde iz postavki rezervacija (i njegova engleska verzija), inače zadani tekst na jeziku poziva. Asistent tada ne traži e-adresu. Ako isključite ili vam ponestane SMS-ova, traži e-adresu i potvrda ide e-poštom.",
     "saveError": "Spremanje nije uspjelo. Pokušajte ponovno."
   },
   "languages": {
