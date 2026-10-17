@@ -39,7 +39,7 @@
     "transferNumberMissing": "Ohne Nummer leitet der Assistent keine Anrufe weiter.",
     "confirmationTitle": "Buchungsbestätigung",
     "smsConfirmationLabel": "Bestätigung per SMS",
-    "smsConfirmationDesc": "Der Kunde erhält die Terminbestätigung per SMS; sie zählt zum SMS-Kontingent des Unternehmens. Der Assistent fragt dann nicht nach der E-Mail. Ausgeschaltet fragt er nach der E-Mail und die Bestätigung geht per E-Mail.",
+    "smsConfirmationDesc": "Der Kunde erhält die Terminbestätigung per SMS; sie zählt zum SMS-Kontingent des Unternehmens. Der Text ist Ihre eigene Bestätigungsvorlage aus den Buchungseinstellungen (und deren englische Version), sonst ein Standardtext in der Sprache des Anrufs. Der Assistent fragt dann nicht nach einer E-Mail. Wenn Sie dies ausschalten oder keine SMS mehr übrig sind, fragt er nach einer E-Mail und die Bestätigung geht per E-Mail.",
     "saveError": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut."
   },
   "languages": {

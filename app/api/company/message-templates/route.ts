@@ -1,7 +1,7 @@
 // app/api/company/message-templates/route.ts
 //
-// English variants of the custom reminder templates. PATCH, owners and admins
-// only. The Slovenian (main) templates still save through the n8n settings
+// English variants of the custom reminder and confirmation templates. PATCH,
+// owners and admins only. The Slovenian (main) templates still save through the n8n settings
 // workflow; these columns are new, so the app writes them itself.
 // n8n sends the variant to clients whose language differs from the
 // company's (docs/multi-country-todo.md).
@@ -14,6 +14,9 @@ const ENGLISH_TEMPLATE_COLUMNS = [
   'lastna_predloga_po_en',
   'obvestilo_prestavitev_template_sms_en',
   'obvestilo_prestavitev_template_email_en',
+  // Booking confirmation SMS (BookingSettingsModal); also used by
+  // Receptionist+ for the SMS after an English phone booking.
+  'lastna_predloga_potrdilo_en',
 ] as const;
 
 const MAX_LENGTH = 2000;

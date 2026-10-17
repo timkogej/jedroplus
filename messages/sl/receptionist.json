@@ -39,7 +39,7 @@
     "transferNumberMissing": "Brez številke asistent klicev ne prenaša.",
     "confirmationTitle": "Potrdilo rezervacije",
     "smsConfirmationLabel": "Potrdilo po SMS",
-    "smsConfirmationDesc": "Stranka prejme potrdilo termina po SMS, ki se šteje v SMS kvoto podjetja. Asistent tedaj ne sprašuje za e-naslov. Če izklopite, vpraša za e-naslov in potrdilo gre po e-pošti.",
+    "smsConfirmationDesc": "Stranka prejme potrdilo termina po SMS, ki se šteje v SMS kvoto podjetja. Besedilo je vaša lastna predloga potrdila iz nastavitev rezervacij (in njena angleška različica), sicer privzeto besedilo v jeziku klica. Asistent tedaj ne sprašuje za e-naslov. Če izklopite ali vam SMS-ov zmanjka, vpraša za e-naslov in potrdilo gre po e-pošti.",
     "saveError": "Shranjevanje ni uspelo. Poskusite znova."
   },
   "languages": {

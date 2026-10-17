@@ -39,7 +39,7 @@
     "transferNumberMissing": "Senza numero l'assistente non trasferisce le chiamate.",
     "confirmationTitle": "Conferma della prenotazione",
     "smsConfirmationLabel": "Conferma via SMS",
-    "smsConfirmationDesc": "Il cliente riceve la conferma dell'appuntamento via SMS, conteggiata nella quota SMS dell'azienda. L'assistente allora non chiede l'email. Se disattivi, chiede l'email e la conferma arriva via email.",
+    "smsConfirmationDesc": "Il cliente riceve la conferma dell'appuntamento via SMS, conteggiata nella quota SMS dell'azienda. Il testo è il vostro modello di conferma dalle impostazioni delle prenotazioni (e la sua versione inglese), altrimenti un testo predefinito nella lingua della chiamata. L'assistente allora non chiede l'email. Se disattivate o gli SMS finiscono, chiede l'email e la conferma arriva via email.",
     "saveError": "Salvataggio non riuscito. Riprova."
   },
   "languages": {

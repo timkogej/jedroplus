@@ -176,7 +176,8 @@
       "modeManual": "Custom template",
       "templateHint": "SMS message template (max 155 characters)",
       "templatePlaceholder": "E.g.: Your booking is confirmed for {{datum}} at {{cas}}. {{ime_podjetja}}.",
-      "noEmojiHint": "No emojis or special characters."
+      "noEmojiHint": "No emojis or special characters.",
+      "englishSaveError": "Settings were saved, but the English version of the confirmation wasn't. Please try again."
     },
     "policy": {
       "sectionTitle": "Cancellation & rescheduling policy",

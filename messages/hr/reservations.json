@@ -176,7 +176,8 @@
       "modeManual": "Vlastiti predložak",
       "templateHint": "Predložak SMS poruke (najviše 155 znakova)",
       "templatePlaceholder": "Npr.: Vasa rezervacija je potvrdena za {{datum}} u {{cas}}. {{ime_podjetja}}.",
-      "noEmojiHint": "Bez emojija, dijakritičkih i posebnih znakova."
+      "noEmojiHint": "Bez emojija, dijakritičkih i posebnih znakova.",
+      "englishSaveError": "Postavke su spremljene, ali engleska verzija potvrde nije. Pokušajte ponovno."
     },
     "policy": {
       "sectionTitle": "Pravila otkazivanja i promjene termina",

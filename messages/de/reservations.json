@@ -176,7 +176,8 @@
       "modeManual": "Eigene Vorlage",
       "templateHint": "Vorlage für die SMS (max. 155 Zeichen)",
       "templatePlaceholder": "z. B.: Ihre Buchung am {{datum}} um {{cas}} ist bestätigt. {{ime_podjetja}}.",
-      "noEmojiHint": "Keine Emojis und keine Sonderzeichen."
+      "noEmojiHint": "Keine Emojis und keine Sonderzeichen.",
+      "englishSaveError": "Die Einstellungen wurden gespeichert, die englische Version der Bestätigung jedoch nicht. Bitte versuchen Sie es erneut."
     },
     "policy": {
       "sectionTitle": "Storno- und Umbuchungsregeln",

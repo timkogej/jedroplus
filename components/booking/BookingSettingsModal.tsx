@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, FloppyDisk, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import {
   SettingsSection,
   SettingRow,
@@ -20,6 +21,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
+import { EnglishVariant } from '@/components/reminders/EnglishVariant';
 import { sheet } from '@/components/ui/sheetClasses';
 
 const BOOKING_WINDOW_DAYS = [7, 14, 21, 30, 60, 90, 180, 365];
@@ -127,6 +129,12 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   // SMS config - confirmation ("potrdilo")
   const [smsModePotrdilo, setSmsModePotrdilo] = useState<'ai' | 'manual'>('ai');
   const [smsTemplatePotrdilo, setSmsTemplatePotrdilo] = useState('');
+  // English version of the own template, for clients (and Receptionist+
+  // callers) who don't speak the company's language. Saved separately
+  // through /api/company/message-templates, like the reminders' variants.
+  const [potrdiloEn, setPotrdiloEn] = useState('');
+  const loadedPotrdiloEnRef = useRef('');
+  const [sendingLanguage, setSendingLanguage] = useState('sl');
   const [lastnaPredlogaPotrdilo, setLastnaPredlogaPotrdilo] = useState('');
 
   // Company data for SMS variable length estimation
@@ -244,6 +252,10 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           setSmsModePotrdilo(smsTypePotrdilo === 'LP' ? 'manual' : 'ai');
           setSmsTemplatePotrdilo(sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_potrdilo'] ?? ''))));
           setLastnaPredlogaPotrdilo(sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_potrdilo'] ?? ''))));
+          const potrdiloEnLoaded = sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_potrdilo_en'] ?? '')));
+          setPotrdiloEn(potrdiloEnLoaded);
+          loadedPotrdiloEnRef.current = potrdiloEnLoaded;
+          setSendingLanguage(String(data['jezik posiljanja'] ?? data['jezik_posiljanja'] ?? 'sl'));
 
           // Company data for SMS variable length estimation
           setKompanyEmail(String(data['Kontaktni email'] ?? data['kontaktni_email'] ?? data['from_email'] ?? ''));
@@ -347,6 +359,19 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
 
       if (!result.ok) {
         throw new Error(t('modal.footer.saveError'));
+      }
+
+      if (potrdiloEn.trim() !== loadedPotrdiloEnRef.current.trim()) {
+        const res = await fetch('/api/company/message-templates', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lastna_predloga_potrdilo_en: potrdiloEn }),
+        }).catch(() => null);
+        if (!res?.ok) {
+          toast.error(t('modal.confirmations.englishSaveError'));
+          return;
+        }
+        loadedPotrdiloEnRef.current = potrdiloEn;
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -655,6 +680,16 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                                     varLengths={smsVarLengths}
                                   />
                                   <p className="text-xs text-gray-400">{t('modal.confirmations.noEmojiHint')}</p>
+                                  {sendingLanguage !== 'en' && (
+                                    <EnglishVariant
+                                      value={potrdiloEn}
+                                      onChange={setPotrdiloEn}
+                                      maxLength={155}
+                                      varLengths={smsVarLengths}
+                                      companyName={nazivPodjetja}
+                                      placeholder="Hi {{ime}}, your appointment is booked for {{datum}} at {{cas}}. {{ime_podjetja}}"
+                                    />
+                                  )}
                                 </div>
                               )}
                             </div>

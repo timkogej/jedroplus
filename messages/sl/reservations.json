@@ -176,7 +176,8 @@
       "modeManual": "Lastna predloga",
       "templateHint": "Predloga SMS sporočila (max 155 znakov)",
       "templatePlaceholder": "Npr: Vaša rezervacija je potrjena za {{datum}} ob {{cas}}. {{ime_podjetja}}.",
-      "noEmojiHint": "Brez emojijev in posebnih znakov."
+      "noEmojiHint": "Brez emojijev in posebnih znakov.",
+      "englishSaveError": "Nastavitve so shranjene, angleška različica potrdila pa ne. Poskusite znova."
     },
     "policy": {
       "sectionTitle": "Politika odpovedi in prestavitev",

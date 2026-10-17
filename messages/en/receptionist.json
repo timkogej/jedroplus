@@ -39,7 +39,7 @@
     "transferNumberMissing": "Without a number the assistant won't transfer calls.",
     "confirmationTitle": "Booking confirmation",
     "smsConfirmationLabel": "Confirmation by SMS",
-    "smsConfirmationDesc": "The customer gets the appointment confirmation by SMS, counted against the company's SMS quota. The assistant then doesn't ask for an email. If off, it asks for an email and the confirmation goes by email.",
+    "smsConfirmationDesc": "The customer gets the booking confirmation by SMS, counted against the company's SMS quota. The text is your own confirmation template from the booking settings (and its English version), otherwise a default text in the call's language. The assistant then doesn't ask for an email. If you turn this off or run out of SMS, it asks for an email and the confirmation goes by email.",
     "saveError": "Couldn't save. Please try again."
   },
   "languages": {
