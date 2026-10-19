@@ -40,7 +40,12 @@
     "confirmationTitle": "Buchungsbestätigung",
     "smsConfirmationLabel": "Bestätigung per SMS",
     "smsConfirmationDesc": "Der Kunde erhält die Terminbestätigung per SMS; sie zählt zum SMS-Kontingent des Unternehmens. Der Text ist Ihre eigene Bestätigungsvorlage aus den Buchungseinstellungen (und deren englische Version), sonst ein Standardtext in der Sprache des Anrufs. Der Assistent fragt dann nicht nach einer E-Mail. Wenn Sie dies ausschalten oder keine SMS mehr übrig sind, fragt er nach einer E-Mail und die Bestätigung geht per E-Mail.",
-    "saveError": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut."
+    "saveError": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "ownerAlertTitle": "Benachrichtigungen für Inhaber",
+    "ownerAlertDesc": "Eine SMS auf Ihr Telefon, wenn ein Anruf Ihre Aufmerksamkeit braucht: Rückrufwunsch oder Nachricht, eine nicht abgeschlossene Buchung oder ein Problem bei der Buchung. Eine SMS pro solchem Anruf, zählt zum SMS-Kontingent des Unternehmens.",
+    "ownerAlertLabel": "SMS-Benachrichtigung senden",
+    "ownerAlertPhoneLabel": "Telefon für Benachrichtigungen",
+    "ownerAlertPhoneDesc": "Wenn leer, geht die Benachrichtigung an die Kontaktnummer des Unternehmens."
   },
   "languages": {
     "sl": "Slowenisch",

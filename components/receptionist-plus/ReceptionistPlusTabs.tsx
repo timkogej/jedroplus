@@ -96,6 +96,10 @@ export interface ReceptionistSettings {
   transfer_number?: string | null;
   /** Booking confirmation by SMS instead of email. */
   sms_confirmation?: boolean;
+  /** SMS to the owner when a call needs a follow-up (callback, message, unfinished booking). */
+  owner_alert_sms?: boolean;
+  /** E.164; empty → the company's contact phone. */
+  owner_alert_phone?: string | null;
 }
 
 function voiceLanguage(value: string): IsoLanguageCode {
@@ -106,11 +110,14 @@ export function NastavitveTab({
   settings,
   onSave,
   phase7 = true,
+  phase10 = true,
 }: {
   settings: ReceptionistSettings;
   onSave: (patch: Partial<ReceptionistSettings>) => Promise<void>;
   /** false until phase7_features.sql has run: instructions / transfer / SMS stay hidden. */
   phase7?: boolean;
+  /** false until phase10_owner_alerts.sql has run: owner alerts stay hidden. */
+  phase10?: boolean;
 }) {
   const t = useTranslations('receptionist');
   const [local, setLocal] = useState(settings);
@@ -119,6 +126,7 @@ export function NastavitveTab({
   const language = voiceLanguage(local.language);
   const announce = local.announce_recording ?? true;
   const [transferError, setTransferError] = useState(false);
+  const [alertPhoneError, setAlertPhoneError] = useState(false);
   const { countryCode } = useCompanyRegion();
 
   const saveTransferNumber = (value: string) => {
@@ -130,6 +138,17 @@ export function NastavitveTab({
     setTransferError(false);
     setLocal((s) => ({ ...s, transfer_number: number || null }));
     save({ transfer_number: number || null });
+  };
+
+  const saveAlertPhone = (value: string) => {
+    const number = normalizePhone(value, countryCode);
+    if (number && !isTransferNumber(number)) {
+      setAlertPhoneError(true);
+      return;
+    }
+    setAlertPhoneError(false);
+    setLocal((s) => ({ ...s, owner_alert_phone: number || null }));
+    save({ owner_alert_phone: number || null });
   };
 
   const save = useCallback(async (patch: Partial<ReceptionistSettings>) => {
@@ -324,6 +343,44 @@ export function NastavitveTab({
               </div>
             </SettingRow>
           </SettingsSection>
+
+          {phase10 && (
+            <SettingsSection title={t('settings.ownerAlertTitle')} description={t('settings.ownerAlertDesc')}>
+              <SettingRow label={t('settings.ownerAlertLabel')}>
+                <div className="flex justify-end sm:justify-start">
+                  <Switch
+                    checked={local.owner_alert_sms ?? true}
+                    onChange={(checked) => {
+                      setLocal((s) => ({ ...s, owner_alert_sms: checked }));
+                      save({ owner_alert_sms: checked });
+                    }}
+                    variant="brand"
+                  />
+                </div>
+              </SettingRow>
+              {(local.owner_alert_sms ?? true) && (
+                <SettingRow
+                  label={t('settings.ownerAlertPhoneLabel')}
+                  description={t('settings.ownerAlertPhoneDesc')}
+                  error={alertPhoneError ? t('settings.transferNumberInvalid') : undefined}
+                >
+                  <Input
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="off"
+                    placeholder={phonePlaceholder(countryCode)}
+                    error={alertPhoneError}
+                    value={local.owner_alert_phone ?? ''}
+                    onChange={(e) => {
+                      setAlertPhoneError(false);
+                      setLocal((s) => ({ ...s, owner_alert_phone: e.target.value }));
+                    }}
+                    onBlur={(e) => saveAlertPhone(e.target.value)}
+                  />
+                </SettingRow>
+              )}
+            </SettingsSection>
+          )}
         </>
       )}
     </div>

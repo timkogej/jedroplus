@@ -40,7 +40,12 @@
     "confirmationTitle": "Conferma della prenotazione",
     "smsConfirmationLabel": "Conferma via SMS",
     "smsConfirmationDesc": "Il cliente riceve la conferma dell'appuntamento via SMS, conteggiata nella quota SMS dell'azienda. Il testo è il vostro modello di conferma dalle impostazioni delle prenotazioni (e la sua versione inglese), altrimenti un testo predefinito nella lingua della chiamata. L'assistente allora non chiede l'email. Se disattivate o gli SMS finiscono, chiede l'email e la conferma arriva via email.",
-    "saveError": "Salvataggio non riuscito. Riprova."
+    "saveError": "Salvataggio non riuscito. Riprova.",
+    "ownerAlertTitle": "Avvisi al titolare",
+    "ownerAlertDesc": "Un SMS sul vostro telefono quando una chiamata richiede attenzione: chi chiama chiede di essere richiamato o lascia un messaggio, non completa una prenotazione o la prenotazione ha un problema. Un SMS per chiamata, conteggiato nella quota SMS dell'azienda.",
+    "ownerAlertLabel": "Inviami un avviso via SMS",
+    "ownerAlertPhoneLabel": "Telefono per gli avvisi",
+    "ownerAlertPhoneDesc": "Se vuoto, l'avviso va al telefono di contatto dell'azienda."
   },
   "languages": {
     "sl": "Sloveno",

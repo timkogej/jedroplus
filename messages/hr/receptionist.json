@@ -40,7 +40,12 @@
     "confirmationTitle": "Potvrda rezervacije",
     "smsConfirmationLabel": "Potvrda SMS-om",
     "smsConfirmationDesc": "Klijent dobiva potvrdu termina SMS-om, koja se broji u SMS kvotu tvrtke. Tekst je vaš vlastiti predložak potvrde iz postavki rezervacija (i njegova engleska verzija), inače zadani tekst na jeziku poziva. Asistent tada ne traži e-adresu. Ako isključite ili vam ponestane SMS-ova, traži e-adresu i potvrda ide e-poštom.",
-    "saveError": "Spremanje nije uspjelo. Pokušajte ponovno."
+    "saveError": "Spremanje nije uspjelo. Pokušajte ponovno.",
+    "ownerAlertTitle": "Obavijesti vlasniku",
+    "ownerAlertDesc": "SMS na vaš telefon kada poziv treba vašu pažnju: pozivatelj traži povratni poziv ili ostavi poruku, ne dovrši rezervaciju ili kod rezervacije dođe do problema. Jedan SMS po takvom pozivu, broji se u SMS kvotu tvrtke.",
+    "ownerAlertLabel": "Pošalji mi SMS obavijest",
+    "ownerAlertPhoneLabel": "Telefon za obavijesti",
+    "ownerAlertPhoneDesc": "Ako je prazno, obavijest ide na kontaktni telefon tvrtke."
   },
   "languages": {
     "sl": "Slovenski",
