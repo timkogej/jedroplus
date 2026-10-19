@@ -45,7 +45,24 @@
     "ownerAlertDesc": "SMS na vaš telefon, ko klic potrebuje vašo pozornost: klicatelj prosi za povratni klic ali pusti sporočilo, ne dokonča rezervacije ali pri rezervaciji pride do težave. En SMS na tak klic, šteje se v SMS kvoto podjetja.",
     "ownerAlertLabel": "Pošlji mi SMS obvestilo",
     "ownerAlertPhoneLabel": "Telefon za obvestila",
-    "ownerAlertPhoneDesc": "Če je prazno, gre obvestilo na kontaktni telefon podjetja."
+    "ownerAlertPhoneDesc": "Če je prazno, gre obvestilo na kontaktni telefon podjetja.",
+    "instructionsSuggestButton": "Predlagaj iz spletne strani",
+    "instructionsSuggestUrlPlaceholder": "Spletna stran (prazno = stran iz podatkov podjetja)",
+    "instructionsSuggestLoading": "Berem spletno stran …",
+    "instructionsSuggestTitle": "Predlog s spletne strani. Preglejte ga; v navodila gre šele, ko kliknete Dodaj.",
+    "instructionsSuggestInsert": "Dodaj v navodila",
+    "instructionsSuggestDiscard": "Zavrzi",
+    "instructionsSuggestError": {
+      "no_website": "V podatkih podjetja ni spletne strani. Vpišite naslov zgoraj.",
+      "invalid_url": "Naslov spletne strani ni veljaven.",
+      "blocked": "Tega naslova ni mogoče brati.",
+      "unreachable": "Strani ni bilo mogoče prebrati. Navodila vpišite sami.",
+      "empty": "Na strani ni dovolj besedila. Navodila vpišite sami.",
+      "nothing_useful": "Na strani ni podatkov za navodila (npr. parkiranje, plačilo, pravila odpovedi). Vpišite jih sami.",
+      "not_configured": "Funkcija še ni nastavljena.",
+      "model_failed": "Predloga trenutno ni bilo mogoče pripraviti. Poskusite znova.",
+      "generic": "Nekaj je šlo narobe. Poskusite znova."
+    }
   },
   "languages": {
     "sl": "Slovenščina",
