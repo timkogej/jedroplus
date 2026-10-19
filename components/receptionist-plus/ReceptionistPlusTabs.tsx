@@ -106,6 +106,11 @@ function voiceLanguage(value: string): IsoLanguageCode {
   return isReceptionistLanguage(value) ? value : 'sl';
 }
 
+const SUGGEST_ERRORS = [
+  'no_website', 'invalid_url', 'blocked', 'unreachable', 'empty',
+  'nothing_useful', 'not_configured', 'model_failed', 'generic',
+];
+
 export function NastavitveTab({
   settings,
   onSave,
@@ -127,6 +132,41 @@ export function NastavitveTab({
   const announce = local.announce_recording ?? true;
   const [transferError, setTransferError] = useState(false);
   const [alertPhoneError, setAlertPhoneError] = useState(false);
+  // Draft instructions from the company website (instructions-suggest API):
+  // shown for review, added to the field only when the owner says so.
+  const [suggestUrl, setSuggestUrl] = useState('');
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestion, setSuggestion] = useState<string | null>(null);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+
+  const suggestFromWebsite = async () => {
+    setSuggesting(true);
+    setSuggestError(null);
+    setSuggestion(null);
+    try {
+      const res = await fetch('/api/receptionistplus/instructions-suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: suggestUrl.trim() || undefined }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data.ok && typeof data.suggestion === 'string') setSuggestion(data.suggestion);
+      else setSuggestError(typeof data.error === 'string' ? data.error : 'generic');
+    } catch {
+      setSuggestError('generic');
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
+  const insertSuggestion = () => {
+    if (!suggestion) return;
+    const current = (local.instructions ?? '').trim();
+    const next = (current ? `${current}\n\n${suggestion}` : suggestion).slice(0, INSTRUCTIONS_MAX_LENGTH);
+    setLocal((s) => ({ ...s, instructions: next }));
+    save({ instructions: next });
+    setSuggestion(null);
+  };
   const { countryCode } = useCompanyRegion();
 
   const saveTransferNumber = (value: string) => {
@@ -284,6 +324,55 @@ export function NastavitveTab({
               <p className="tnum mt-1.5 text-right text-xs text-gray-400">
                 {(local.instructions ?? '').length} / {INSTRUCTIONS_MAX_LENGTH}
               </p>
+              <div className="mt-3 space-y-3 rounded-xl border border-gray-100 bg-gray-50 p-3">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    type="url"
+                    inputMode="url"
+                    autoComplete="off"
+                    placeholder={t('settings.instructionsSuggestUrlPlaceholder')}
+                    value={suggestUrl}
+                    onChange={(e) => setSuggestUrl(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={suggestFromWebsite}
+                    disabled={suggesting}
+                    className="inline-flex shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-[13px] font-medium text-gray-900 transition-colors hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {suggesting ? t('settings.instructionsSuggestLoading') : t('settings.instructionsSuggestButton')}
+                  </button>
+                </div>
+                {suggestError && (
+                  <p className="text-xs text-red-600">
+                    {t(`settings.instructionsSuggestError.${SUGGEST_ERRORS.includes(suggestError) ? suggestError : 'generic'}` as never)}
+                  </p>
+                )}
+                {suggestion && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-gray-600">{t('settings.instructionsSuggestTitle')}</p>
+                    <p className="whitespace-pre-wrap rounded-lg border border-gray-200 bg-white p-3 text-[13px] text-gray-800">
+                      {suggestion}
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={insertSuggestion}
+                        className="rounded-xl bg-gray-900 px-3.5 py-1.5 text-[13px] font-medium text-white hover:bg-gray-800"
+                      >
+                        {t('settings.instructionsSuggestInsert')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSuggestion(null)}
+                        className="rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-50"
+                      >
+                        {t('settings.instructionsSuggestDiscard')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </SettingRow>
           </SettingsSection>
 

@@ -45,7 +45,24 @@
     "ownerAlertDesc": "Eine SMS auf Ihr Telefon, wenn ein Anruf Ihre Aufmerksamkeit braucht: Rückrufwunsch oder Nachricht, eine nicht abgeschlossene Buchung oder ein Problem bei der Buchung. Eine SMS pro solchem Anruf, zählt zum SMS-Kontingent des Unternehmens.",
     "ownerAlertLabel": "SMS-Benachrichtigung senden",
     "ownerAlertPhoneLabel": "Telefon für Benachrichtigungen",
-    "ownerAlertPhoneDesc": "Wenn leer, geht die Benachrichtigung an die Kontaktnummer des Unternehmens."
+    "ownerAlertPhoneDesc": "Wenn leer, geht die Benachrichtigung an die Kontaktnummer des Unternehmens.",
+    "instructionsSuggestButton": "Von der Website vorschlagen",
+    "instructionsSuggestUrlPlaceholder": "Website (leer = aus den Unternehmensdaten)",
+    "instructionsSuggestLoading": "Website wird gelesen …",
+    "instructionsSuggestTitle": "Vorschlag von der Website. Bitte prüfen; er wird erst mit Hinzufügen übernommen.",
+    "instructionsSuggestInsert": "Zu den Anweisungen hinzufügen",
+    "instructionsSuggestDiscard": "Verwerfen",
+    "instructionsSuggestError": {
+      "no_website": "In den Unternehmensdaten ist keine Website hinterlegt. Geben Sie die Adresse oben ein.",
+      "invalid_url": "Die Website-Adresse ist ungültig.",
+      "blocked": "Diese Adresse kann nicht gelesen werden.",
+      "unreachable": "Die Website konnte nicht gelesen werden. Bitte schreiben Sie die Anweisungen selbst.",
+      "empty": "Die Website enthält zu wenig Text. Bitte schreiben Sie die Anweisungen selbst.",
+      "nothing_useful": "Die Website enthält nichts für die Anweisungen (z. B. Parken, Zahlung, Stornoregeln). Bitte selbst eintragen.",
+      "not_configured": "Diese Funktion ist noch nicht eingerichtet.",
+      "model_failed": "Der Vorschlag konnte gerade nicht erstellt werden. Bitte erneut versuchen.",
+      "generic": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+    }
   },
   "languages": {
     "sl": "Slowenisch",

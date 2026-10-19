@@ -45,7 +45,24 @@
     "ownerAlertDesc": "SMS na vaš telefon kada poziv treba vašu pažnju: pozivatelj traži povratni poziv ili ostavi poruku, ne dovrši rezervaciju ili kod rezervacije dođe do problema. Jedan SMS po takvom pozivu, broji se u SMS kvotu tvrtke.",
     "ownerAlertLabel": "Pošalji mi SMS obavijest",
     "ownerAlertPhoneLabel": "Telefon za obavijesti",
-    "ownerAlertPhoneDesc": "Ako je prazno, obavijest ide na kontaktni telefon tvrtke."
+    "ownerAlertPhoneDesc": "Ako je prazno, obavijest ide na kontaktni telefon tvrtke.",
+    "instructionsSuggestButton": "Predloži s web stranice",
+    "instructionsSuggestUrlPlaceholder": "Web stranica (prazno = iz podataka tvrtke)",
+    "instructionsSuggestLoading": "Čitam web stranicu …",
+    "instructionsSuggestTitle": "Prijedlog s web stranice. Pregledajte ga; u upute ide tek kad kliknete Dodaj.",
+    "instructionsSuggestInsert": "Dodaj u upute",
+    "instructionsSuggestDiscard": "Odbaci",
+    "instructionsSuggestError": {
+      "no_website": "U podacima tvrtke nema web stranice. Upišite adresu gore.",
+      "invalid_url": "Adresa web stranice nije valjana.",
+      "blocked": "Ovu adresu nije moguće čitati.",
+      "unreachable": "Stranicu nije bilo moguće pročitati. Upute upišite sami.",
+      "empty": "Na stranici nema dovoljno teksta. Upute upišite sami.",
+      "nothing_useful": "Na stranici nema podataka za upute (npr. parkiranje, plaćanje, pravila otkazivanja). Upišite ih sami.",
+      "not_configured": "Funkcija još nije postavljena.",
+      "model_failed": "Prijedlog trenutno nije bilo moguće pripremiti. Pokušajte ponovno.",
+      "generic": "Nešto je pošlo po zlu. Pokušajte ponovno."
+    }
   },
   "languages": {
     "sl": "Slovenski",

@@ -45,7 +45,24 @@
     "ownerAlertDesc": "A text to your phone when a call needs your attention: the caller asks for a callback or leaves a message, doesn't finish a booking, or the booking runs into a problem. One SMS per such call, counted against the company's SMS quota.",
     "ownerAlertLabel": "Text me an alert",
     "ownerAlertPhoneLabel": "Alert phone",
-    "ownerAlertPhoneDesc": "If empty, the alert goes to the company's contact phone."
+    "ownerAlertPhoneDesc": "If empty, the alert goes to the company's contact phone.",
+    "instructionsSuggestButton": "Suggest from website",
+    "instructionsSuggestUrlPlaceholder": "Website (empty = the one in company details)",
+    "instructionsSuggestLoading": "Reading the website…",
+    "instructionsSuggestTitle": "Suggestion from the website. Review it; it goes into the instructions only when you click Add.",
+    "instructionsSuggestInsert": "Add to instructions",
+    "instructionsSuggestDiscard": "Discard",
+    "instructionsSuggestError": {
+      "no_website": "There is no website in the company details. Enter its address above.",
+      "invalid_url": "The website address isn't valid.",
+      "blocked": "This address can't be read.",
+      "unreachable": "The website couldn't be read. Please write the instructions yourself.",
+      "empty": "The website has too little text. Please write the instructions yourself.",
+      "nothing_useful": "The website has nothing for the instructions (e.g. parking, payment, cancellation rules). Please write them yourself.",
+      "not_configured": "This feature isn't set up yet.",
+      "model_failed": "The suggestion couldn't be prepared right now. Please try again.",
+      "generic": "Something went wrong. Please try again."
+    }
   },
   "languages": {
     "sl": "Slovenian",
