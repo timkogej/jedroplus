@@ -40,7 +40,12 @@
     "confirmationTitle": "Potrdilo rezervacije",
     "smsConfirmationLabel": "Potrdilo po SMS",
     "smsConfirmationDesc": "Stranka prejme potrdilo termina po SMS, ki se šteje v SMS kvoto podjetja. Besedilo je vaša lastna predloga potrdila iz nastavitev rezervacij (in njena angleška različica), sicer privzeto besedilo v jeziku klica. Asistent tedaj ne sprašuje za e-naslov. Če izklopite ali vam SMS-ov zmanjka, vpraša za e-naslov in potrdilo gre po e-pošti.",
-    "saveError": "Shranjevanje ni uspelo. Poskusite znova."
+    "saveError": "Shranjevanje ni uspelo. Poskusite znova.",
+    "ownerAlertTitle": "Obvestila lastniku",
+    "ownerAlertDesc": "SMS na vaš telefon, ko klic potrebuje vašo pozornost: klicatelj prosi za povratni klic ali pusti sporočilo, ne dokonča rezervacije ali pri rezervaciji pride do težave. En SMS na tak klic, šteje se v SMS kvoto podjetja.",
+    "ownerAlertLabel": "Pošlji mi SMS obvestilo",
+    "ownerAlertPhoneLabel": "Telefon za obvestila",
+    "ownerAlertPhoneDesc": "Če je prazno, gre obvestilo na kontaktni telefon podjetja."
   },
   "languages": {
     "sl": "Slovenščina",

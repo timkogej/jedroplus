@@ -40,7 +40,12 @@
     "confirmationTitle": "Booking confirmation",
     "smsConfirmationLabel": "Confirmation by SMS",
     "smsConfirmationDesc": "The customer gets the booking confirmation by SMS, counted against the company's SMS quota. The text is your own confirmation template from the booking settings (and its English version), otherwise a default text in the call's language. The assistant then doesn't ask for an email. If you turn this off or run out of SMS, it asks for an email and the confirmation goes by email.",
-    "saveError": "Couldn't save. Please try again."
+    "saveError": "Couldn't save. Please try again.",
+    "ownerAlertTitle": "Owner alerts",
+    "ownerAlertDesc": "A text to your phone when a call needs your attention: the caller asks for a callback or leaves a message, doesn't finish a booking, or the booking runs into a problem. One SMS per such call, counted against the company's SMS quota.",
+    "ownerAlertLabel": "Text me an alert",
+    "ownerAlertPhoneLabel": "Alert phone",
+    "ownerAlertPhoneDesc": "If empty, the alert goes to the company's contact phone."
   },
   "languages": {
     "sl": "Slovenian",

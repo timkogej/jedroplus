@@ -84,10 +84,16 @@ export async function GET(request: NextRequest) {
       sms_confirmation: row?.sms_confirmation === undefined || row?.sms_confirmation === null
         ? true
         : Boolean(row.sms_confirmation),
+      owner_alert_sms: row?.owner_alert_sms === undefined || row?.owner_alert_sms === null
+        ? true
+        : Boolean(row.owner_alert_sms),
+      owner_alert_phone: (row?.owner_alert_phone as string | null) ?? null,
     },
     // false until phase7_features.sql has run: the page then hides the
     // instructions / transfer / SMS settings instead of failing to save them.
     phase7: Boolean(row && 'sms_confirmation' in row),
+    // false until the worker's phase10_owner_alerts.sql has run.
+    phase10: Boolean(row && 'owner_alert_sms' in row),
   });
 }
 
@@ -103,6 +109,8 @@ type SettingsBody = {
   transfer_enabled?: boolean;
   transfer_number?: string | null;
   sms_confirmation?: boolean;
+  owner_alert_sms?: boolean;
+  owner_alert_phone?: string | null;
 };
 
 function optionalText(value: unknown, maxLength = GREETING_MAX_LENGTH): string | null | 'invalid' {
@@ -165,6 +173,18 @@ export async function PATCH(request: NextRequest) {
     }
   }
   if (body.sms_confirmation !== undefined) update.sms_confirmation = Boolean(body.sms_confirmation);
+  if (body.owner_alert_sms !== undefined) update.owner_alert_sms = Boolean(body.owner_alert_sms);
+  if (body.owner_alert_phone !== undefined) {
+    if (body.owner_alert_phone === null || (typeof body.owner_alert_phone === 'string' && !body.owner_alert_phone.trim())) {
+      update.owner_alert_phone = null;
+    } else {
+      const number = typeof body.owner_alert_phone === 'string' ? normalizePhone(body.owner_alert_phone) : '';
+      if (!isTransferNumber(number)) {
+        return NextResponse.json({ ok: false, error: 'invalid_owner_alert_phone' }, { status: 400 });
+      }
+      update.owner_alert_phone = number;
+    }
+  }
 
   const { error } = await admin.from('receptionist_settings').upsert(update);
 
