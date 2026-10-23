@@ -8,10 +8,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
 import {
+  ASSISTANT_NAME_MAX_LENGTH,
   GREETING_MAX_LENGTH,
+  GREETING_NAME_MAX_LENGTH,
   INSTRUCTIONS_MAX_LENGTH,
+  isGreetingStyle,
   isReceptionistLanguage,
   isTransferNumber,
+  parseBookingItems,
 } from '@/lib/receptionist';
 import { normalizePhone } from '@/lib/phone';
 
@@ -29,7 +33,7 @@ async function resolveCompanySlug(request: NextRequest) {
   if ('response' in authResult) return { error: authResult.response };
 
   const { user } = authResult;
-  const { uuid: companyUuid } = await resolveUserCompany(user.id);
+  const { uuid: companyUuid, textId } = await resolveUserCompany(user.id);
   if (!companyUuid) {
     return { error: NextResponse.json({ ok: false, error: 'Company ni najdena' }, { status: 400 }) };
   }
@@ -41,13 +45,17 @@ async function resolveCompanySlug(request: NextRequest) {
     return { error: NextResponse.json({ ok: false, error: 'Company slug ni najden' }, { status: 400 }) };
   }
 
-  return { companySlug, admin };
+  return { companySlug, admin, textId };
 }
 
 export async function GET(request: NextRequest) {
   const resolved = await resolveCompanySlug(request);
   if ('error' in resolved) return resolved.error;
-  const { companySlug, admin } = resolved;
+  const { companySlug, admin, textId } = resolved;
+
+  const { data: company } = textId
+    ? await admin.from('Podatki podjetij').select('"Naziv Podjetja"').eq('ID Podjetja', textId).maybeSingle()
+    : { data: null };
 
   const { data, error } = await admin
     .from('receptionist_settings')
@@ -88,12 +96,23 @@ export async function GET(request: NextRequest) {
         ? true
         : Boolean(row.owner_alert_sms),
       owner_alert_phone: (row?.owner_alert_phone as string | null) ?? null,
+      greeting_style: isGreetingStyle(row?.greeting_style)
+        ? row.greeting_style
+        : (row?.greeting_text ? 'custom' : 'classic'),
+      greeting_name: (row?.greeting_name as string | null) ?? null,
+      assistant_name: (row?.assistant_name as string | null) ?? null,
+      booking_questions: parseBookingItems(row?.booking_questions) ?? [],
+      booking_advice: parseBookingItems(row?.booking_advice) ?? [],
     },
+    // For the greeting preview: the name callers hear when greeting_name is empty.
+    company_name: ((company as Record<string, unknown> | null)?.['Naziv Podjetja'] as string | undefined) ?? '',
     // false until phase7_features.sql has run: the page then hides the
     // instructions / transfer / SMS settings instead of failing to save them.
     phase7: Boolean(row && 'sms_confirmation' in row),
     // false until the worker's phase10_owner_alerts.sql has run.
     phase10: Boolean(row && 'owner_alert_sms' in row),
+    // false until 1791400000_receptionist_pozdrav_vprasanja.sql has run.
+    phase11: Boolean(row && 'greeting_style' in row),
   });
 }
 
@@ -111,6 +130,11 @@ type SettingsBody = {
   sms_confirmation?: boolean;
   owner_alert_sms?: boolean;
   owner_alert_phone?: string | null;
+  greeting_style?: string;
+  greeting_name?: string | null;
+  assistant_name?: string | null;
+  booking_questions?: unknown;
+  booking_advice?: unknown;
 };
 
 function optionalText(value: unknown, maxLength = GREETING_MAX_LENGTH): string | null | 'invalid' {
@@ -184,6 +208,32 @@ export async function PATCH(request: NextRequest) {
       }
       update.owner_alert_phone = number;
     }
+  }
+
+  if (body.greeting_style !== undefined) {
+    if (!isGreetingStyle(body.greeting_style)) {
+      return NextResponse.json({ ok: false, error: 'invalid_greeting_style' }, { status: 400 });
+    }
+    update.greeting_style = body.greeting_style;
+  }
+  for (const [key, max] of [
+    ['greeting_name', GREETING_NAME_MAX_LENGTH],
+    ['assistant_name', ASSISTANT_NAME_MAX_LENGTH],
+  ] as const) {
+    if (body[key] === undefined) continue;
+    const text = optionalText(body[key], max);
+    if (text === 'invalid') {
+      return NextResponse.json({ ok: false, error: `invalid_${key}` }, { status: 400 });
+    }
+    update[key] = text;
+  }
+  for (const key of ['booking_questions', 'booking_advice'] as const) {
+    if (body[key] === undefined) continue;
+    const items = parseBookingItems(body[key]);
+    if (!items) {
+      return NextResponse.json({ ok: false, error: `invalid_${key}` }, { status: 400 });
+    }
+    update[key] = items;
   }
 
   const { error } = await admin.from('receptionist_settings').upsert(update);
