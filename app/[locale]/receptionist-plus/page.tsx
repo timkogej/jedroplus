@@ -28,6 +28,8 @@ export default function ReceptionistPlusPage() {
   const [error, setError] = useState(false);
   const [phase7, setPhase7] = useState(true);
   const [phase10, setPhase10] = useState(true);
+  const [phase11, setPhase11] = useState(true);
+  const [companyName, setCompanyName] = useState('');
 
   const load = useCallback(async () => {
     setError(false);
@@ -39,6 +41,8 @@ export default function ReceptionistPlusPage() {
       setSettings(data.settings);
       setPhase7(data.phase7 !== false);
       setPhase10(data.phase10 !== false);
+      setPhase11(data.phase11 !== false);
+      setCompanyName(typeof data.company_name === 'string' ? data.company_name : '');
     } catch (e) {
       console.error('[ReceptionistPlus] load settings error:', e);
       setError(true);
@@ -99,7 +103,14 @@ export default function ReceptionistPlusPage() {
               </div>
 
               {tab === 'nastavitve' && settings && (
-                <NastavitveTab settings={settings} onSave={saveSettings} phase7={phase7} phase10={phase10} />
+                <NastavitveTab
+                  settings={settings}
+                  onSave={saveSettings}
+                  phase7={phase7}
+                  phase10={phase10}
+                  phase11={phase11}
+                  companyName={companyName}
+                />
               )}
               {tab === 'dnevnik' && <DnevnikTab />}
               {tab === 'krediti' && <KreditiTab />}

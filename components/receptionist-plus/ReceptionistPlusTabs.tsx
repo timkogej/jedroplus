@@ -13,6 +13,8 @@ import {
   PhoneCall,
   ArrowLeft,
   ArrowRight,
+  Plus,
+  Trash,
 } from '@phosphor-icons/react';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useCompany } from '@/app/company-context';
@@ -29,14 +31,25 @@ import { formatMoney, intlLocale } from '@/lib/format';
 import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
 import type { IsoLanguageCode } from '@/lib/communicationLanguage';
 import {
+  ASSISTANT_NAME_MAX_LENGTH,
+  BOOKING_ITEMS_MAX,
+  BOOKING_ITEM_MAX_LENGTH,
   DEFAULT_GREETING,
   DEFAULT_RECORDING_NOTICE,
   GREETING_MAX_LENGTH,
+  GREETING_NAME_MAX_LENGTH,
+  GREETING_STYLES,
   INSTRUCTIONS_MAX_LENGTH,
   RECEPTIONIST_LANGUAGES,
+  greetingPreview,
+  isGreetingStyle,
   isReceptionistLanguage,
   isTransferNumber,
+  spokenBusinessName,
+  type BookingItem,
 } from '@/lib/receptionist';
+import { fetchServices } from '@/lib/supabase/appointments';
+import type { Storitev } from '@/types/appointments';
 import { formatPhone, normalizePhone, phonePlaceholder } from '@/lib/phone';
 
 // ─── Tabs ───────────────────────────────────────────────────────────────────
@@ -100,6 +113,16 @@ export interface ReceptionistSettings {
   owner_alert_sms?: boolean;
   /** E.164; empty → the company's contact phone. */
   owner_alert_phone?: string | null;
+  /** classic | sales | short | custom (greeting_text after the AI notice). */
+  greeting_style?: string;
+  /** Business name the greeting starts with; empty → company name without d.o.o./s.p. */
+  greeting_name?: string | null;
+  /** Optional ("Sem Ana, digitalna asistentka."). */
+  assistant_name?: string | null;
+  /** Asked before booking; answers go into the appointment note. */
+  booking_questions?: BookingItem[];
+  /** Told after booking; also answers "anything I should know before?". */
+  booking_advice?: BookingItem[];
 }
 
 function voiceLanguage(value: string): IsoLanguageCode {
@@ -116,6 +139,8 @@ export function NastavitveTab({
   onSave,
   phase7 = true,
   phase10 = true,
+  phase11 = true,
+  companyName = '',
 }: {
   settings: ReceptionistSettings;
   onSave: (patch: Partial<ReceptionistSettings>) => Promise<void>;
@@ -123,6 +148,10 @@ export function NastavitveTab({
   phase7?: boolean;
   /** false until phase10_owner_alerts.sql has run: owner alerts stay hidden. */
   phase10?: boolean;
+  /** false until 1791400000_receptionist_pozdrav_vprasanja.sql has run: greeting styles and booking questions stay hidden. */
+  phase11?: boolean;
+  /** "Naziv Podjetja", for the greeting preview. */
+  companyName?: string;
 }) {
   const t = useTranslations('receptionist');
   const [local, setLocal] = useState(settings);
@@ -204,6 +233,34 @@ export function NastavitveTab({
   }, [onSave, t]);
 
   const languageOptions = RECEPTIONIST_LANGUAGES.map((value) => ({ value, label: t(`languages.${value}`) }));
+  const greetingStyle = isGreetingStyle(local.greeting_style) ? local.greeting_style : 'classic';
+  const spokenName = spokenBusinessName(companyName);
+  const preview = greetingPreview(
+    greetingStyle,
+    language,
+    (local.greeting_name ?? '').trim() || spokenName,
+    local.assistant_name ?? '',
+    local.greeting_text ?? '',
+  );
+
+  // Services for "which service is this question for".
+  const { companyId } = useCompany();
+  const [services, setServices] = useState<Storitev[]>([]);
+  useEffect(() => {
+    if (!phase11 || !companyId) return;
+    let alive = true;
+    fetchServices(companyId).then(({ data }) => {
+      if (alive && data) setServices(data.filter((svc) => svc.status !== 'inactive'));
+    });
+    return () => {
+      alive = false;
+    };
+  }, [companyId, phase11]);
+
+  const saveItems = (key: 'booking_questions' | 'booking_advice', items: BookingItem[]) => {
+    setLocal((s) => ({ ...s, [key]: items }));
+    save({ [key]: items.filter((item) => item.text.trim()) });
+  };
 
   return (
     <div>
@@ -262,17 +319,59 @@ export function NastavitveTab({
         </SettingRow>
       </SettingsSection>
 
-      <SettingsSection title={t('settings.greetingTitle')} description={t('settings.greetingDesc')}>
-        <SettingRow label={t('settings.greetingLabel')} fullWidth>
-          <Textarea
-            rows={3}
-            maxLength={GREETING_MAX_LENGTH}
-            placeholder={DEFAULT_GREETING[language]}
-            value={local.greeting_text ?? ''}
-            onChange={(e) => setLocal((s) => ({ ...s, greeting_text: e.target.value }))}
-            onBlur={(e) => save({ greeting_text: e.target.value })}
-          />
-        </SettingRow>
+      <SettingsSection title={t('settings.greetingTitle')} description={t(phase11 ? 'settings.greetingStyleDesc' : 'settings.greetingDesc')}>
+        {phase11 && (
+          <>
+            <SettingRow label={t('settings.greetingStyleLabel')}>
+              <Select
+                value={greetingStyle}
+                onChange={(value) => {
+                  setLocal((s) => ({ ...s, greeting_style: value }));
+                  save({ greeting_style: value });
+                }}
+                options={GREETING_STYLES.map((value) => ({ value, label: t(`settings.greetingStyle.${value}`) }))}
+              />
+            </SettingRow>
+            <SettingRow label={t('settings.greetingNameLabel')} description={t('settings.greetingNameDesc')}>
+              <Input
+                maxLength={GREETING_NAME_MAX_LENGTH}
+                placeholder={spokenName}
+                value={local.greeting_name ?? ''}
+                onChange={(e) => setLocal((s) => ({ ...s, greeting_name: e.target.value }))}
+                onBlur={(e) => save({ greeting_name: e.target.value })}
+              />
+            </SettingRow>
+            {greetingStyle !== 'custom' && (
+              <SettingRow label={t('settings.assistantNameLabel')} description={t('settings.assistantNameDesc')}>
+                <Input
+                  maxLength={ASSISTANT_NAME_MAX_LENGTH}
+                  placeholder={t('settings.assistantNamePlaceholder')}
+                  value={local.assistant_name ?? ''}
+                  onChange={(e) => setLocal((s) => ({ ...s, assistant_name: e.target.value }))}
+                  onBlur={(e) => save({ assistant_name: e.target.value })}
+                />
+              </SettingRow>
+            )}
+          </>
+        )}
+        {(!phase11 || greetingStyle === 'custom') && (
+          <SettingRow label={t('settings.greetingLabel')} fullWidth>
+            <Textarea
+              rows={3}
+              maxLength={GREETING_MAX_LENGTH}
+              placeholder={DEFAULT_GREETING[language]}
+              value={local.greeting_text ?? ''}
+              onChange={(e) => setLocal((s) => ({ ...s, greeting_text: e.target.value }))}
+              onBlur={(e) => save({ greeting_text: e.target.value })}
+            />
+          </SettingRow>
+        )}
+        {phase11 && (
+          <SettingRow label={t('settings.greetingPreviewLabel')} fullWidth>
+            <p className="rounded-xl bg-gray-50 px-3.5 py-2.5 text-[13px] leading-snug text-gray-800">»{preview}«</p>
+            <p className="mt-1.5 text-xs text-gray-400">{t('settings.greetingPreviewHint')}</p>
+          </SettingRow>
+        )}
       </SettingsSection>
 
       {RECORDING_AVAILABLE && (
@@ -376,6 +475,31 @@ export function NastavitveTab({
             </SettingRow>
           </SettingsSection>
 
+          {phase11 && (
+            <SettingsSection title={t('settings.beforeBookingTitle')} description={t('settings.beforeBookingDesc')}>
+              <SettingRow label={t('settings.questionsLabel')} description={t('settings.questionsDesc')} fullWidth>
+                <BookingItemsEditor
+                  items={local.booking_questions ?? []}
+                  services={services}
+                  placeholder={t('settings.questionsPlaceholder')}
+                  addLabel={t('settings.questionsAdd')}
+                  onChange={(items) => setLocal((s) => ({ ...s, booking_questions: items }))}
+                  onSave={(items) => saveItems('booking_questions', items)}
+                />
+              </SettingRow>
+              <SettingRow label={t('settings.adviceLabel')} description={t('settings.adviceDesc')} fullWidth>
+                <BookingItemsEditor
+                  items={local.booking_advice ?? []}
+                  services={services}
+                  placeholder={t('settings.advicePlaceholder')}
+                  addLabel={t('settings.adviceAdd')}
+                  onChange={(items) => setLocal((s) => ({ ...s, booking_advice: items }))}
+                  onSave={(items) => saveItems('booking_advice', items)}
+                />
+              </SettingRow>
+            </SettingsSection>
+          )}
+
           <SettingsSection title={t('settings.transferTitle')} description={t('settings.transferDesc')}>
             <SettingRow label={t('settings.transferLabel')}>
               <div className="flex justify-end sm:justify-start">
@@ -473,6 +597,124 @@ export function NastavitveTab({
         </>
       )}
     </div>
+  );
+}
+
+/** A list of short texts, each for every service or for chosen ones. */
+function BookingItemsEditor({
+  items,
+  services,
+  placeholder,
+  addLabel,
+  onChange,
+  onSave,
+}: {
+  items: BookingItem[];
+  services: Storitev[];
+  placeholder: string;
+  addLabel: string;
+  onChange: (items: BookingItem[]) => void;
+  onSave: (items: BookingItem[]) => void;
+}) {
+  const t = useTranslations('receptionist.settings');
+  const [openScope, setOpenScope] = useState<number | null>(null);
+  const update = (index: number, patch: Partial<BookingItem>) =>
+    items.map((item, i) => (i === index ? { ...item, ...patch } : item));
+  const serviceName = (id: string) => services.find((svc) => svc.id === id)?.naziv;
+
+  return (
+    <div className="space-y-2.5">
+      {items.map((item, index) => {
+        const chosen = item.service_ids.map(serviceName).filter(Boolean);
+        return (
+          <div key={index} className="rounded-xl border border-gray-100 bg-gray-50/60 p-3">
+            <div className="flex items-start gap-2">
+              <Input
+                maxLength={BOOKING_ITEM_MAX_LENGTH}
+                placeholder={placeholder}
+                value={item.text}
+                onChange={(e) => onChange(update(index, { text: e.target.value }))}
+                onBlur={() => onSave(items)}
+              />
+              <button
+                type="button"
+                aria-label={t('itemRemove')}
+                onClick={() => onSave(items.filter((_, i) => i !== index))}
+                className="mt-0.5 flex-shrink-0 rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600"
+              >
+                <Trash className="h-4 w-4" />
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpenScope(openScope === index ? null : index)}
+              className="mt-2 inline-flex items-center gap-1 text-[13px] text-gray-500 hover:text-gray-900"
+            >
+              {item.service_ids.length === 0
+                ? t('itemAllServices')
+                : t('itemSomeServices', { names: chosen.join(', ') || '—' })}
+              {openScope === index ? <CaretUp className="h-3.5 w-3.5" /> : <CaretDown className="h-3.5 w-3.5" />}
+            </button>
+            {openScope === index && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                <ScopeChip
+                  active={item.service_ids.length === 0}
+                  label={t('itemAllServicesChip')}
+                  onClick={() => onSave(update(index, { service_ids: [] }))}
+                />
+                {services.map((svc) => {
+                  const active = item.service_ids.includes(svc.id);
+                  return (
+                    <ScopeChip
+                      key={svc.id}
+                      active={active}
+                      label={svc.naziv}
+                      onClick={() =>
+                        onSave(update(index, {
+                          service_ids: active
+                            ? item.service_ids.filter((id) => id !== svc.id)
+                            : [...item.service_ids, svc.id],
+                        }))
+                      }
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {items.length < BOOKING_ITEMS_MAX && (
+        <button
+          type="button"
+          onClick={() => {
+            onChange([...items, { text: '', service_ids: [] }]);
+            setOpenScope(null);
+          }}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3.5 py-1.5 text-[13px] font-medium text-gray-900 transition-colors hover:bg-gray-50"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          {addLabel}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ScopeChip({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`rounded-full border px-2.5 py-1 text-[12px] font-medium transition-colors ${
+        active
+          ? 'border-[#6D5EF7] bg-[#6D5EF7]/10 text-[#4B3FD1]'
+          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
