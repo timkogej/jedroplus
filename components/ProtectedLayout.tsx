@@ -19,13 +19,14 @@ import QuotaBanner from "@/components/billing/QuotaBanner";
 import { useBillingUsage } from "@/hooks/useBillingUsage";
 import { TourProvider, useOptionalTour } from "@/components/guide/TourProvider";
 import { useTranslations } from "next-intl";
+import { PwaManager } from "@/components/pwa/PwaManager";
 
 // ============================================================================
 // Inner layout that uses sidebar context
 // ============================================================================
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { isMobile, isCollapsed, setNotificationCount } = useSidebar();
+  const { isMobile, isCollapsed, notificationCount, setNotificationCount } = useSidebar();
   const { companyId, companyUuid, planCode, loading: companyLoading } = useCompany();
   const { role } = useRolePermissions();
   const pathname = usePathname();
@@ -120,6 +121,9 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       {/* Free Trial Modal */}
       {/* Never stack the sales offer on top of a guided tour. */}
       <FreeTrialModal show={showTrialModal && !tourActive && !hadTour} onDismiss={() => setShowTrialModal(false)} />
+
+      {/* Namestitev na začetni zaslon in push obvestila */}
+      <PwaManager unreadCount={notificationCount} blocked={tourActive || showTrialModal} />
     </div>
   );
 }

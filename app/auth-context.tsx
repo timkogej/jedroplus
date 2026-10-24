@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { forgetPushOnLogout } from "@/lib/pwa/push";
 
 type AuthContextValue = {
   user: User | null;
@@ -88,6 +89,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // Še s sejo: odjavi to napravo od push obvestil podjetja.
+    // Največ 3 s, da odjava nikoli ne obvisi.
+    await Promise.race([forgetPushOnLogout(), new Promise((resolve) => setTimeout(resolve, 3000))]);
     const { error } = await supabase.auth.signOut();
     return error ? error.message : null;
   };

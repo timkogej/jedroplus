@@ -1,0 +1,88 @@
+{
+  "common": {
+    "notNow": "Ne sada",
+    "close": "Zatvori",
+    "done": "Gotovo",
+    "back": "Natrag"
+  },
+  "install": {
+    "title": "Dodaj Jedro+ na početni zaslon",
+    "titleComputer": "Instaliraj Jedro+ na računalo",
+    "subtitle": "Otvara se kao prava aplikacija i odmah te obavještava o novim rezervacijama i pozivima.",
+    "benefitFast": "Otvara se jednim dodirom",
+    "benefitPush": "Obavijesti o rezervacijama i pozivima",
+    "benefitFree": "Bez App Storea i ažuriranja",
+    "installButton": "Instaliraj aplikaciju",
+    "installing": "Instaliram …",
+    "showSteps": "Prikaži korake",
+    "ios": {
+      "step1": "Dodirni <b>Dijeli</b> u traci Safarija",
+      "step1Hint": "Na iOS-u 26 Dijeli je ispod gumba ⋯",
+      "step2": "Pomakni se prema dolje i odaberi <b>Dodaj na početni zaslon</b>",
+      "step3": "Dodirni <b>Dodaj</b> gore desno",
+      "step4": "Otvori Jedro+ s početnog zaslona i uključi obavijesti",
+      "arrowHint": "Gumb Dijeli je ovdje dolje"
+    },
+    "iosOther": {
+      "title": "Otvori ovu stranicu u Safariju",
+      "body": "Na iPhoneu i iPadu Jedro+ se dodaje na početni zaslon preko Safarija. Kopiraj poveznicu, otvori Safari i zalijepi je u adresnu traku.",
+      "copy": "Kopiraj poveznicu",
+      "copied": "Poveznica je kopirana"
+    },
+    "inApp": {
+      "title": "Otvori u pregledniku",
+      "body": "Ova je stranica otvorena unutar druge aplikacije. Dodirni ⋯ ili ⋮, odaberi Otvori u pregledniku i zatim slijedi korake."
+    },
+    "iosTooOld": "Obavijesti na iPhoneu rade od iOS-a 16.4 nadalje. Ažuriraj ga u Postavke → Općenito → Ažuriranje softvera.",
+    "android": {
+      "step1": "Dodirni izbornik <b>⋮</b> gore desno",
+      "step2": "Odaberi <b>Instaliraj aplikaciju</b> ili <b>Dodaj na početni zaslon</b>",
+      "step3": "Potvrdi s <b>Instaliraj</b>",
+      "samsungStep1": "Dodirni izbornik <b>≡</b> dolje desno",
+      "samsungStep2": "Odaberi <b>Dodaj stranicu na</b> → <b>Početni zaslon</b>"
+    },
+    "desktop": {
+      "step1": "Klikni ikonu <b>Instaliraj</b> desno u adresnoj traci",
+      "step2": "Ili otvori izbornik <b>⋮</b> i odaberi <b>Instaliraj Jedro+</b>",
+      "safariStep1": "U traci izbornika odaberi <b>Datoteka</b> → <b>Dodaj u Dock</b>",
+      "safariStep2": "Potvrdi s <b>Dodaj</b>",
+      "firefox": "Firefox ne instalira web-aplikacije, ali obavijesti rade i ovdje u pregledniku."
+    },
+    "installedTitle": "Jedro+ je instaliran",
+    "installedBody": "Pronaći ćeš ga na početnom zaslonu. Uključi i obavijesti da ne propustiš nijednu rezervaciju.",
+    "alreadyInstalled": "Jedro+ je već instaliran na ovom uređaju."
+  },
+  "push": {
+    "title": "Uključi obavijesti",
+    "subtitle": "Odmah saznaj za nove rezervacije, otkazivanja i pozive koji čekaju povratni poziv.",
+    "enable": "Uključi obavijesti",
+    "enabling": "Uključujem …",
+    "enabled": "Obavijesti su uključene",
+    "enabledBody": "Sve obavijesti Jedro+ stizat će na ovaj uređaj.",
+    "denied": "Obavijesti su blokirane u pregledniku. Klikni lokot pokraj adrese, dopusti obavijesti i pokušaj ponovno.",
+    "deniedIos": "Obavijesti su isključene. Uključi ih u Postavke → Obavijesti → Jedro+.",
+    "dismissed": "Obavijesti nisu uključene. Možeš ih uključiti bilo kada u postavkama.",
+    "error": "Obavijesti nije bilo moguće uključiti. Pokušaj ponovno.",
+    "notConfigured": "Obavijesti na uređajima još nisu postavljene na poslužitelju.",
+    "unsupported": "Ovaj preglednik ne podržava obavijesti. Koristi Chrome, Edge, Firefox ili Safari.",
+    "needsInstall": "Na iPhoneu i iPadu obavijesti rade samo kad Jedro+ dodaš na početni zaslon.",
+    "testTitle": "Obavijesti Jedro+ rade",
+    "testBody": "Ovako će se prikazivati nove rezervacije, otkazivanja i pozivi."
+  },
+  "settings": {
+    "phoneLabel": "Obavijesti na ovom telefonu",
+    "computerLabel": "Obavijesti na ovom računalu",
+    "tabletLabel": "Obavijesti na ovom tabletu",
+    "note": "Svaka nova obavijest iz aplikacije stiže i kao obavijest na uređaj.",
+    "test": "Pošalji probnu obavijest",
+    "testSending": "Šaljem …",
+    "testSent": "Probna obavijest je poslana. Trebala bi se pojaviti za nekoliko sekundi.",
+    "testFailed": "Probnu obavijest nije bilo moguće poslati.",
+    "testNotSubscribed": "Ovaj uređaj više nije prijavljen. Isključi i ponovno uključi obavijesti.",
+    "showHow": "Pokaži kako",
+    "installLabel": "Aplikacija na početnom zaslonu",
+    "installNote": "Koraci za iPhone, Android i računalo.",
+    "installedNote": "Jedro+ je instaliran na ovom uređaju.",
+    "installButton": "Koraci"
+  }
+}

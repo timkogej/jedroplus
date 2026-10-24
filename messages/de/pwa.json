@@ -1,0 +1,88 @@
+{
+  "common": {
+    "notNow": "Nicht jetzt",
+    "close": "Schließen",
+    "done": "Fertig",
+    "back": "Zurück"
+  },
+  "install": {
+    "title": "Jedro+ zum Home-Bildschirm hinzufügen",
+    "titleComputer": "Jedro+ auf dem Computer installieren",
+    "subtitle": "Öffnet sich wie eine echte App und meldet neue Buchungen und Anrufe sofort.",
+    "benefitFast": "Mit einem Tippen geöffnet",
+    "benefitPush": "Mitteilungen zu Buchungen und Anrufen",
+    "benefitFree": "Kein App Store, keine Updates",
+    "installButton": "App installieren",
+    "installing": "Wird installiert …",
+    "showSteps": "Schritte anzeigen",
+    "ios": {
+      "step1": "Tippe in der Safari-Leiste auf <b>Teilen</b>",
+      "step1Hint": "Unter iOS 26 findest du Teilen unter der Taste ⋯",
+      "step2": "Scrolle nach unten und wähle <b>Zum Home-Bildschirm</b>",
+      "step3": "Tippe oben rechts auf <b>Hinzufügen</b>",
+      "step4": "Öffne Jedro+ vom Home-Bildschirm und aktiviere Mitteilungen",
+      "arrowHint": "Die Teilen-Taste ist hier unten"
+    },
+    "iosOther": {
+      "title": "Diese Seite in Safari öffnen",
+      "body": "Auf iPhone und iPad wird Jedro+ über Safari zum Home-Bildschirm hinzugefügt. Kopiere den Link, öffne Safari und füge ihn in die Adressleiste ein.",
+      "copy": "Link kopieren",
+      "copied": "Link kopiert"
+    },
+    "inApp": {
+      "title": "Im Browser öffnen",
+      "body": "Diese Seite ist in einer anderen App geöffnet. Tippe auf ⋯ oder ⋮, wähle Im Browser öffnen und folge dann den Schritten."
+    },
+    "iosTooOld": "Mitteilungen auf dem iPhone brauchen iOS 16.4 oder neuer. Aktualisiere unter Einstellungen → Allgemein → Softwareupdate.",
+    "android": {
+      "step1": "Tippe oben rechts auf das Menü <b>⋮</b>",
+      "step2": "Wähle <b>App installieren</b> oder <b>Zum Startbildschirm hinzufügen</b>",
+      "step3": "Bestätige mit <b>Installieren</b>",
+      "samsungStep1": "Tippe unten rechts auf das Menü <b>≡</b>",
+      "samsungStep2": "Wähle <b>Seite hinzufügen zu</b> → <b>Startbildschirm</b>"
+    },
+    "desktop": {
+      "step1": "Klicke rechts in der Adressleiste auf das Symbol <b>Installieren</b>",
+      "step2": "Oder öffne das Menü <b>⋮</b> und wähle <b>Jedro+ installieren</b>",
+      "safariStep1": "Wähle in der Menüleiste <b>Ablage</b> → <b>Zum Dock hinzufügen</b>",
+      "safariStep2": "Bestätige mit <b>Hinzufügen</b>",
+      "firefox": "Firefox installiert keine Web-Apps, Mitteilungen funktionieren aber direkt hier im Browser."
+    },
+    "installedTitle": "Jedro+ ist installiert",
+    "installedBody": "Du findest es auf dem Home-Bildschirm. Aktiviere auch Mitteilungen, damit du keine Buchung verpasst.",
+    "alreadyInstalled": "Jedro+ ist auf diesem Gerät bereits installiert."
+  },
+  "push": {
+    "title": "Mitteilungen aktivieren",
+    "subtitle": "Erfahre sofort von neuen Buchungen, Absagen und Anrufen, die auf einen Rückruf warten.",
+    "enable": "Mitteilungen aktivieren",
+    "enabling": "Wird aktiviert …",
+    "enabled": "Mitteilungen sind aktiviert",
+    "enabledBody": "Alle Mitteilungen von Jedro+ kommen auf dieses Gerät.",
+    "denied": "Mitteilungen sind im Browser blockiert. Klicke auf das Schloss neben der Adresse, erlaube Mitteilungen und versuche es erneut.",
+    "deniedIos": "Mitteilungen sind aus. Aktiviere sie unter Einstellungen → Mitteilungen → Jedro+.",
+    "dismissed": "Mitteilungen sind nicht aktiviert. Du kannst sie jederzeit in den Einstellungen aktivieren.",
+    "error": "Mitteilungen konnten nicht aktiviert werden. Bitte versuche es erneut.",
+    "notConfigured": "Gerätemitteilungen sind auf dem Server noch nicht eingerichtet.",
+    "unsupported": "Dieser Browser unterstützt keine Mitteilungen. Verwende Chrome, Edge, Firefox oder Safari.",
+    "needsInstall": "Auf iPhone und iPad funktionieren Mitteilungen nur, wenn Jedro+ zum Home-Bildschirm hinzugefügt ist.",
+    "testTitle": "Jedro+ Mitteilungen funktionieren",
+    "testBody": "So werden neue Buchungen, Absagen und Anrufe angezeigt."
+  },
+  "settings": {
+    "phoneLabel": "Mitteilungen auf diesem Telefon",
+    "computerLabel": "Mitteilungen auf diesem Computer",
+    "tabletLabel": "Mitteilungen auf diesem Tablet",
+    "note": "Jede neue Benachrichtigung in der App kommt auch als Mitteilung aufs Gerät.",
+    "test": "Testmitteilung senden",
+    "testSending": "Wird gesendet …",
+    "testSent": "Testmitteilung gesendet. Sie sollte in wenigen Sekunden erscheinen.",
+    "testFailed": "Die Testmitteilung konnte nicht gesendet werden.",
+    "testNotSubscribed": "Dieses Gerät ist nicht mehr angemeldet. Schalte Mitteilungen aus und wieder ein.",
+    "showHow": "Zeig mir wie",
+    "installLabel": "App auf dem Home-Bildschirm",
+    "installNote": "Schritte für iPhone, Android und Computer.",
+    "installedNote": "Jedro+ ist auf diesem Gerät installiert.",
+    "installButton": "Schritte"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "common": {
+    "notNow": "Ne zdaj",
+    "close": "Zapri",
+    "done": "Končano",
+    "back": "Nazaj"
+  },
+  "install": {
+    "title": "Dodaj Jedro+ na začetni zaslon",
+    "titleComputer": "Namesti Jedro+ na računalnik",
+    "subtitle": "Odpre se kot prava aplikacija in ti takoj sporoči nove rezervacije in klice.",
+    "benefitFast": "Odpreš ga z enim dotikom",
+    "benefitPush": "Obvestila o rezervacijah in klicih",
+    "benefitFree": "Brez App Stora in posodobitev",
+    "installButton": "Namesti aplikacijo",
+    "installing": "Nameščam …",
+    "showSteps": "Pokaži korake",
+    "ios": {
+      "step1": "Tapni <b>Deli</b> v vrstici Safarija",
+      "step1Hint": "Na iOS 26 je Deli pod gumbom ⋯",
+      "step2": "Podrsaj navzdol in izberi <b>Dodaj na začetni zaslon</b>",
+      "step3": "Tapni <b>Dodaj</b> zgoraj desno",
+      "step4": "Odpri Jedro+ z začetnega zaslona in vklopi obvestila",
+      "arrowHint": "Gumb Deli je tukaj spodaj"
+    },
+    "iosOther": {
+      "title": "Odpri to stran v Safariju",
+      "body": "Na iPhonu in iPadu se Jedro+ doda na začetni zaslon prek Safarija. Kopiraj povezavo, odpri Safari in jo prilepi v naslovno vrstico.",
+      "copy": "Kopiraj povezavo",
+      "copied": "Povezava je kopirana"
+    },
+    "inApp": {
+      "title": "Odpri v brskalniku",
+      "body": "Ta stran je odprta znotraj druge aplikacije. Tapni ⋯ ali ⋮ in izberi Odpri v brskalniku, nato sledi navodilom."
+    },
+    "iosTooOld": "Obvestila na iPhonu delujejo od iOS 16.4 naprej. Posodobi ga v Nastavitve → Splošno → Posodobitev programske opreme.",
+    "android": {
+      "step1": "Tapni meni <b>⋮</b> zgoraj desno",
+      "step2": "Izberi <b>Namesti aplikacijo</b> ali <b>Dodaj na začetni zaslon</b>",
+      "step3": "Potrdi z <b>Namesti</b>",
+      "samsungStep1": "Tapni meni <b>≡</b> spodaj desno",
+      "samsungStep2": "Izberi <b>Dodaj stran na</b> → <b>Začetni zaslon</b>"
+    },
+    "desktop": {
+      "step1": "Klikni ikono <b>Namesti</b> na desni strani naslovne vrstice",
+      "step2": "Ali odpri meni <b>⋮</b> in izberi <b>Namesti Jedro+</b>",
+      "safariStep1": "V menijski vrstici izberi <b>Datoteka</b> → <b>Dodaj v Dock</b>",
+      "safariStep2": "Potrdi z <b>Dodaj</b>",
+      "firefox": "Firefox aplikacij ne nameša. Obvestila pa delujejo tudi tukaj v brskalniku."
+    },
+    "installedTitle": "Jedro+ je nameščen",
+    "installedBody": "Najdeš ga na začetnem zaslonu. Vklopi še obvestila, da ne zamudiš nobene rezervacije.",
+    "alreadyInstalled": "Jedro+ je na tej napravi že nameščen."
+  },
+  "push": {
+    "title": "Vklopi obvestila",
+    "subtitle": "Takoj izveš za nove rezervacije, odpovedi in klice, ki čakajo na povratni klic.",
+    "enable": "Vklopi obvestila",
+    "enabling": "Vklapljam …",
+    "enabled": "Obvestila so vklopljena",
+    "enabledBody": "Na to napravo bodo prihajala vsa obvestila Jedro+.",
+    "denied": "Obvestila so v brskalniku blokirana. Klikni ključavnico ob naslovu strani, dovoli obvestila in poskusi znova.",
+    "deniedIos": "Obvestila so izklopljena. Vklopi jih v Nastavitve → Obvestila → Jedro+.",
+    "dismissed": "Obvestila niso vklopljena. Lahko jih vklopiš kadarkoli v nastavitvah.",
+    "error": "Obvestil ni bilo mogoče vklopiti. Poskusi znova.",
+    "notConfigured": "Obvestila na napravah na strežniku še niso nastavljena.",
+    "unsupported": "Ta brskalnik ne podpira obvestil. Uporabi Chrome, Edge, Firefox ali Safari.",
+    "needsInstall": "Na iPhonu in iPadu obvestila delujejo samo, ko Jedro+ dodaš na začetni zaslon.",
+    "testTitle": "Obvestila Jedro+ delujejo",
+    "testBody": "Tako bodo prikazane nove rezervacije, odpovedi in klici."
+  },
+  "settings": {
+    "phoneLabel": "Obvestila na tem telefonu",
+    "computerLabel": "Obvestila na tem računalniku",
+    "tabletLabel": "Obvestila na tej tablici",
+    "note": "Vsako novo obvestilo iz aplikacije pride tudi kot obvestilo na napravo.",
+    "test": "Pošlji testno obvestilo",
+    "testSending": "Pošiljam …",
+    "testSent": "Testno obvestilo je poslano. Prikazati bi se moralo v nekaj sekundah.",
+    "testFailed": "Testnega obvestila ni bilo mogoče poslati.",
+    "testNotSubscribed": "Ta naprava ni več prijavljena. Izklopi in znova vklopi obvestila.",
+    "showHow": "Pokaži kako",
+    "installLabel": "Aplikacija na začetnem zaslonu",
+    "installNote": "Navodila za iPhone, Android in računalnik.",
+    "installedNote": "Jedro+ je na tej napravi nameščen.",
+    "installButton": "Navodila"
+  }
+}
