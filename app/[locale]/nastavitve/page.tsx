@@ -2,20 +2,22 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Buildings, Gear, UsersThree, ChatTeardrop, Package, Stack, CaretRight, ClockCounterClockwise } from '@phosphor-icons/react';
+import { Buildings, Gear, UsersThree, ChatTeardrop, Package, Stack, CaretRight, ClockCounterClockwise, Gift, Bell } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 
-type MenuId = 'podjetje' | 'splosno' | 'clani' | 'paketi' | 'sporocila' | 'addoni' | 'zgodovina';
+type MenuId = 'podjetje' | 'splosno' | 'clani' | 'paketi' | 'sporocila' | 'addoni' | 'zgodovina' | 'zvestoba' | 'portalObvestila';
 
-const menuItems: { id: MenuId; icon: typeof Buildings; path: string; ownerOnly: boolean }[] = [
+const menuItems: { id: MenuId; icon: typeof Buildings; path: string; ownerOnly: boolean; managerOnly?: boolean }[] = [
   { id: 'podjetje', icon: Buildings,    path: '/nastavitve/podjetje', ownerOnly: false },
   { id: 'splosno',  icon: Gear,         path: '/nastavitve/splosno',  ownerOnly: false },
   { id: 'clani',    icon: UsersThree,   path: '/nastavitve/clani',    ownerOnly: true  },
   { id: 'paketi',   icon: Package,      path: '/nastavitve/paketi',   ownerOnly: true  },
   { id: 'sporocila',icon: ChatTeardrop, path: '/nastavitve/sporocila',ownerOnly: false },
+  { id: 'zvestoba', icon: Gift, path: '/nastavitve/zvestoba', ownerOnly: false, managerOnly: true },
+  { id: 'portalObvestila', icon: Bell, path: '/nastavitve/portal-obvestila', ownerOnly: false, managerOnly: true },
   { id: 'addoni',   icon: Stack,                  path: '/nastavitve/addoni',    ownerOnly: true  },
   { id: 'zgodovina', icon: ClockCounterClockwise, path: '/nastavitve/zgodovina', ownerOnly: false },
 ];
@@ -26,6 +28,8 @@ const menuKeyMap: Record<MenuId, string> = {
   clani:     'members',
   paketi:    'plans',
   sporocila: 'messages',
+  zvestoba: 'loyalty',
+  portalObvestila: 'portalAnnouncements',
   addoni:    'addons',
   zgodovina: 'history',
 };
@@ -40,9 +44,12 @@ export default function SettingsPage() {
     if (typeof window === 'undefined' || !cacheKey) return false;
     return localStorage.getItem(cacheKey) === '1';
   });
+  const [canManage, setCanManage] = useState(false);
 
   useEffect(() => {
     if (!companyUuid || !user?.id || !cacheKey) return;
+    let active = true;
+    setCanManage(false);
     // Apply cached value immediately so the correct item count shows on first render
     const cached = localStorage.getItem(cacheKey);
     if (cached !== null) setIsOwner(cached === '1');
@@ -54,13 +61,16 @@ export default function SettingsPage() {
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data }) => {
+        if (!active) return;
         const owner = data?.role === 'owner';
         setIsOwner(owner);
+        setCanManage(owner || data?.role === 'admin');
         localStorage.setItem(cacheKey, owner ? '1' : '0');
       });
+    return () => { active = false; };
   }, [companyUuid, user?.id, cacheKey]);
 
-  const visibleItems = menuItems.filter((item) => !item.ownerOnly || isOwner);
+  const visibleItems = menuItems.filter((item) => (!item.ownerOnly || isOwner) && (!item.managerOnly || canManage));
 
   return (
     <div>
