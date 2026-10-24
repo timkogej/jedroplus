@@ -3,6 +3,7 @@
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from '@/i18n/navigation';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { useFormat } from '@/hooks/useFormat';
 import { intlLocale } from '@/lib/format';
 import { motion, AnimatePresence } from 'motion/react';
@@ -152,6 +153,7 @@ function AppointmentModal({
   initialEmployeeId,
   lockEmployee = false,
 }: AppointmentModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const { money, locale } = useFormat();
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
@@ -1158,10 +1160,11 @@ function AppointmentModal({
           initial="hidden"
           animate="visible"
           exit="exit"
+          {...sheetDrag.panel}
           className="relative flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
         >
           {/* Header */}
-          <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6">
+          <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6" {...sheetDrag.handle}>
             {/* Ročica, s katero se list na telefonu prepozna kot list */}
             <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
             <div className="flex items-center justify-between">
@@ -1171,7 +1174,7 @@ function AppointmentModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                className="-m-1.5 rounded-full p-3 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
               >
                 <X className="h-5 w-5" weight="regular" />
               </button>
@@ -2105,7 +2108,7 @@ function AppointmentModal({
 
             {/* Actions */}
             {!isViewMode && (
-              <div className="glass-bar flex justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
+              <div className="glass-bar flex justify-end gap-3 border-t border-gray-200/70 px-5 pt-3.5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-3.5">
                 <motion.button
                   type="button"
                   onClick={onClose}

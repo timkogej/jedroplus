@@ -23,6 +23,8 @@ import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } fr
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
 import { EnglishVariant } from '@/components/reminders/EnglishVariant';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 const BOOKING_WINDOW_DAYS = [7, 14, 21, 30, 60, 90, 180, 365];
 
@@ -107,6 +109,7 @@ function ChannelPicker({
 }
 
 export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('reservations');
   const { companyId, companyUuid, planCode } = useCompany();
   const { user } = useAuth();
@@ -390,6 +393,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -403,11 +407,12 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            {...sheetDrag.panel}
             className={`${sheet.panel} sm:max-w-2xl`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -929,5 +934,6 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }

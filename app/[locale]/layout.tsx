@@ -28,6 +28,9 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  // Brez tega telefon za spodnji rob (home črta) javi 0 px in gumbi na dnu
+  // listov zlezejo pod črto.
+  viewportFit: 'cover',
   themeColor: '#ffffff',
 };
 

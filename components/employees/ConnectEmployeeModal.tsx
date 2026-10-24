@@ -6,6 +6,8 @@ import { X, LinkSimple, CalendarBlank, UserCircle, Check } from '@phosphor-icons
 import { useTranslations } from 'next-intl';
 import type { Employee } from '@/types/employees';
 import EmployeeAvatar from './EmployeeAvatar';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface ConnectEmployeeModalProps {
   isOpen: boolean;
@@ -25,6 +27,7 @@ export default function ConnectEmployeeModal({
   const t = useTranslations('staff');
   const tCommon = useTranslations('common');
   const [agreed, setAgreed] = useState(false);
+  const sheetDrag = useSheetDrag(() => handleClose());
 
   if (!employee) return null;
 
@@ -41,6 +44,7 @@ export default function ConnectEmployeeModal({
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <>
@@ -49,7 +53,7 @@ export default function ConnectEmployeeModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
             onClick={handleClose}
           />
 
@@ -59,11 +63,12 @@ export default function ConnectEmployeeModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed inset-0 z-50 flex items-end justify-center pointer-events-none sm:items-center sm:p-4"
+            {...sheetDrag.panel}
+            className="fixed inset-0 z-[60] flex items-end justify-center pointer-events-none sm:items-center sm:p-4"
           >
             <div className="flex max-h-[92dvh] w-full max-w-md flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl pointer-events-auto sm:max-h-[90vh] sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
               {/* Header */}
-              <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6">
+              <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6" {...sheetDrag.handle}>
                 <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -73,7 +78,7 @@ export default function ConnectEmployeeModal({
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                    className="-m-1.5 rounded-full p-3 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                   >
                     <X className="h-5 w-5" weight="regular" />
                   </button>
@@ -146,7 +151,7 @@ export default function ConnectEmployeeModal({
               </div>
 
               {/* Footer */}
-              <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
+              <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 pt-3.5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-3.5">
                 <button
                   type="button"
                   onClick={handleClose}
@@ -185,5 +190,6 @@ export default function ConnectEmployeeModal({
         </>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }

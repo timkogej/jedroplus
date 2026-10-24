@@ -28,6 +28,8 @@ import type { Service } from '@/types/services';
 import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/constants/serviceGradients';
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 interface ResursModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -58,6 +60,7 @@ function ResursModal({
   isSaving = false,
   linkedStoritevIds = [],
 }: ResursModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('resursi');
 
   const defaultForm: ResursFormData = {
@@ -174,6 +177,7 @@ function ResursModal({
   const urnik = getUrnik();
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -181,7 +185,7 @@ function ResursModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -189,11 +193,12 @@ function ResursModal({
             initial="hidden"
             animate="visible"
             exit="exit"
+            {...sheetDrag.panel}
             className="relative flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6">
+            <div className="glass-bar border-b border-gray-200/70 px-5 py-3.5 sm:px-6" {...sheetDrag.handle}>
               <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -209,7 +214,7 @@ function ResursModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className="-m-1.5 rounded-full p-3 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
                   <X className="h-5 w-5" weight="regular" />
                 </motion.button>
@@ -586,7 +591,7 @@ function ResursModal({
               </div>
 
               {/* Footer */}
-              <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
+              <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 pt-3.5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-3.5">
                 <motion.button
                   type="button"
                   onClick={onClose}
@@ -623,6 +628,7 @@ function ResursModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

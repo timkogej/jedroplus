@@ -4,6 +4,8 @@ import { memo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Trash, Spinner } from '@phosphor-icons/react';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { useTranslations } from 'next-intl';
 import type { Employee } from '@/types/employees';
 import EmployeeAvatar from './EmployeeAvatar';
@@ -21,6 +23,7 @@ function DeleteEmployeeModal({
   onClose,
   onConfirm,
 }: DeleteEmployeeModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('staff');
   const tCommon = useTranslations('common');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -39,6 +42,7 @@ function DeleteEmployeeModal({
   const fullName = `${employee.ime} ${employee.priimek}`.trim();
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -53,11 +57,12 @@ function DeleteEmployeeModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: 'spring', duration: 0.5 }}
+            {...sheetDrag.panel}
             className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <h2 className={sheet.title}>{t('deleteModal.title')}</h2>
@@ -134,6 +139,7 @@ function DeleteEmployeeModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

@@ -5,6 +5,7 @@ import { Info } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import type { AppointmentWithDetails } from '@/types/appointments';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface RescheduleNotificationModalProps {
@@ -26,6 +27,7 @@ export function RescheduleNotificationModal({
   newTime,
   channel,
 }: RescheduleNotificationModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('appointments.rescheduleNotify');
   const formattedDate = newDate.split('-').reverse().join('.');
   const clientName = [appointment.stranka_ime, appointment.stranka_priimek].filter(Boolean).join(' ');
@@ -38,7 +40,7 @@ export function RescheduleNotificationModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className={sheet.backdrop.replace('z-50', 'z-[100]')}
+          className={sheet.backdrop.replace('z-[60]', 'z-[100]')}
           onClick={onClose}
         >
           <motion.div
@@ -46,11 +48,12 @@ export function RescheduleNotificationModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}
             transition={{ type: 'spring', stiffness: 400, damping: 36 }}
+            {...sheetDrag.panel}
             className={`${sheet.panel} sm:max-w-sm`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <h3 className={sheet.title}>{t('title')}</h3>
               <p className={sheet.subtitle}>

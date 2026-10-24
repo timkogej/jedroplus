@@ -88,7 +88,7 @@ export default function InviteDialog({ open, onClose, usedSeats, maxSeats, isFre
 
   // Portal to <body> so the fixed sidebar can't sit on top of the dialog.
   return createPortal(
-    <div className={sheet.backdrop.replace('z-50', 'z-[120]')} onClick={onClose}>
+    <div className={sheet.backdrop.replace('z-[60]', 'z-[120]')} onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"

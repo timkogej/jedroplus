@@ -12,6 +12,8 @@ import { fetchCompanySlug, type ZahtevaTermina } from '@/lib/supabase/zahteveTer
 import { requestSlots, confirmRequest, type SlotAvailability } from '@/lib/bookingRequests';
 import type { Storitev, Zaposleni } from '@/types/appointments';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { RequestSummary } from './RequestSummary';
 
 interface ConfirmRequestModalProps {
@@ -23,6 +25,7 @@ interface ConfirmRequestModalProps {
 type Step = 'assign' | 'slot';
 
 export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRequestModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('zahteve-termini');
   const { companyId } = useCompany();
 
@@ -134,6 +137,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
   const labelClass = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500';
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -146,10 +150,11 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          {...sheetDrag.panel}
           className={`${sheet.panel} sm:max-w-lg`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className={sheet.header}>
+          <div className={sheet.header} {...sheetDrag.handle}>
             <div className={sheet.grabber} aria-hidden="true" />
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -289,5 +294,6 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
         </motion.div>
       </motion.div>
     </AnimatePresence>
+    </BodyPortal>
   );
 }

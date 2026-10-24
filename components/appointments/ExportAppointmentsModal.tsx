@@ -16,6 +16,8 @@ import { intlLocale } from '@/lib/format';
 import { normalizeStatus } from '@/components/appointments/StatusBadge';
 import type { AppointmentWithDetails } from '@/types/appointments';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface ExportAppointmentsModalProps {
   isOpen: boolean;
@@ -77,6 +79,7 @@ export default function ExportAppointmentsModal({
   onClose,
   appointments,
 }: ExportAppointmentsModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('appointments');
   const ts = useTranslations('appointments.status');
   const locale = useLocale();
@@ -229,13 +232,14 @@ export default function ExportAppointmentsModal({
   );
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className={sheet.backdrop.replace('z-50', 'z-[100]')}
+          className={sheet.backdrop.replace('z-[60]', 'z-[100]')}
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -245,11 +249,12 @@ export default function ExportAppointmentsModal({
               transition: { type: 'spring', stiffness: 400, damping: 36 },
             }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            {...sheetDrag.panel}
             className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -408,5 +413,6 @@ export default function ExportAppointmentsModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
