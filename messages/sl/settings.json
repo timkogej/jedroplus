@@ -23,6 +23,14 @@
         "label": "Sporočila",
         "description": "Zgodovina poslanih sporočil in opomnikov"
       },
+      "loyalty": {
+        "label": "Zvestoba",
+        "description": "Točke za opravljene obiske in nagrade za stranke"
+      },
+      "portalAnnouncements": {
+        "label": "Obvestila v portalu",
+        "description": "Objave za stranke, slike in e-poštna opozorila"
+      },
       "addons": {
         "label": "Dodatki in kvote",
         "description": "Nakup SMS, e-pošta in zaposleni addonov"
