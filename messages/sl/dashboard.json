@@ -26,7 +26,13 @@
     "title": "Naslednji termin",
     "today": "Danes",
     "tomorrow": "Jutri",
-    "empty": "Ni prihajajočih terminov"
+    "empty": "Ni prihajajočih terminov",
+    "openCalendar": "Odpri koledar",
+    "inProgress": "Poteka zdaj",
+    "now": "Zdaj",
+    "inMinutes": "Čez {minutes} min",
+    "inHours": "Čez {hours} h {minutes} min",
+    "inHoursExact": "Čez {hours} h"
   },
   "appointmentList": {
     "todayTitle": "Termini Danes",
