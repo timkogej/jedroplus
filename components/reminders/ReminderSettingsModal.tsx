@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, FloppyDisk, Lock, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
@@ -129,6 +129,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   const [dniPrej, setDniPrej] = useState('1');
   // Največ toliko dni po terminu se sporočilo še pošlje; 0 = brez omejitve.
   const [poTerminuMaxDni, setPoTerminuMaxDni] = useState('3');
+  const [autoCompleteHours, setAutoCompleteHours] = useState('0');
+  const loadedAutoCompleteHours = useRef('0');
   // Kamor stranka odda oceno; uporablja jo oznaka {{povezava_ocena}}.
   const [povezavaOcena, setPovezavaOcena] = useState('');
   const [replyTo, setReplyTo] = useState('');
@@ -254,6 +256,10 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
           const maxDniNum = Number(data['po_terminu_max_dni'] ?? 3);
           setPoTerminuMaxDni(String(Number.isFinite(maxDniNum) && maxDniNum >= 0 ? maxDniNum : 3));
+          const autoHours = Number(data['samodejni_zakljucek_ur'] ?? 0);
+          const autoValue = String([1, 2, 4].includes(autoHours) ? autoHours : 0);
+          loadedAutoCompleteHours.current = autoValue;
+          setAutoCompleteHours(autoValue);
           setReplyTo(String(data['reply_to'] ?? data['Reply_to'] ?? ''));
           setFromName(String(data['from_name'] ?? data['From_name'] ?? ''));
           setChanelPred(String(data['chanel_pred'] ?? data['Chanel_pred'] ?? 'email'));
@@ -470,6 +476,19 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
       if (!result.ok) {
         throw new Error(t('modal.saveError'));
+      }
+
+      // Written through its own route: the settings workflow does not know this column.
+      // Only when it changed, so saving other settings never depends on this route.
+      if (autoCompleteHours !== loadedAutoCompleteHours.current) {
+        const autoRes = await fetch('/api/company/auto-complete', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hours: Number(autoCompleteHours) }),
+        }).catch(() => null);
+        if (!autoRes || !autoRes.ok) {
+          throw new Error(t('modal.saveError'));
+        }
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1071,6 +1090,23 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                         checked={posiljanjePo}
                         onChange={setPosiljanjePo}
                       />
+                    </SettingRow>
+
+                    <SettingRow
+                      label="Samodejno zaključi termin"
+                      description="Termin, ki ga ne zaključite sami, se zaključi izbrano število ur po koncu. Če je sporočilo po terminu vklopljeno, ga stranka prejme ob zaključku. Starejših terminov to ne zajame — te zaključite z gumbom »Zaključi vse« v Terminih."
+                    >
+                      <Select
+                        value={autoCompleteHours}
+                        setValue={setAutoCompleteHours}
+                        placeholder="Izberi"
+                      >
+                        {[0, 1, 2, 4].map((h) => (
+                          <SelectOption key={h} value={String(h)}>
+                            {h === 0 ? 'Izklopljeno' : `${h} ${h === 1 ? 'uro' : h === 2 ? 'uri' : 'ure'} po koncu`}
+                          </SelectOption>
+                        ))}
+                      </Select>
                     </SettingRow>
 
                     {posiljanjePo && (
