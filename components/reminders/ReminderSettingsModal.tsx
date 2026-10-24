@@ -24,6 +24,8 @@ import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
 import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { toast } from 'sonner';
 import { EnglishVariant } from './EnglishVariant';
 
@@ -59,6 +61,7 @@ interface ReminderSettingsModalProps {
 }
 
 export function ReminderSettingsModal({ isOpen, onClose, initialSection }: ReminderSettingsModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   useEffect(() => {
     if (!isOpen || !initialSection || initialSection === 'general') return;
     // Settings load after opening; retry until the section is rendered.
@@ -543,6 +546,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -556,11 +560,12 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            {...sheetDrag.panel}
             className={`${sheet.panel} sm:max-w-xl`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -1328,5 +1333,6 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }

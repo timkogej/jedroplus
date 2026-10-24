@@ -4,6 +4,8 @@ import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trash, X, SpinnerGap, CalendarBlank, Clock, Briefcase, UserCircle, Plus } from '@phosphor-icons/react';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { useTranslations, useLocale } from 'next-intl';
 import { intlLocale } from '@/lib/format';
 import type { AppointmentWithDetails } from '@/types/appointments';
@@ -30,6 +32,7 @@ function DeleteConfirmation({
   isDeleting = false,
   appointment,
 }: DeleteConfirmationProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('appointments');
   const locale = useLocale();
   // Animation variants
@@ -64,6 +67,7 @@ function DeleteConfirmation({
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -79,11 +83,12 @@ function DeleteConfirmation({
             initial="hidden"
             animate="visible"
             exit="exit"
+            {...sheetDrag.panel}
             className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -219,6 +224,7 @@ function DeleteConfirmation({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

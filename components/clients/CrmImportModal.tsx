@@ -19,6 +19,8 @@ import type { Client } from '@/types/clients';
 import { useTranslations } from 'next-intl';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 /**
  * Primerjalni ključ za besedilo: male črke, brez šumnikov, brez odvečnih
@@ -152,6 +154,7 @@ export default function CrmImportModal({
   existingClients,
   onImportComplete,
 }: CrmImportModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('clients.import');
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [file, setFile] = useState<File | null>(null);
@@ -421,13 +424,14 @@ export default function CrmImportModal({
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className={sheet.backdrop.replace('z-50', 'z-[100]')}
+          className={sheet.backdrop.replace('z-[60]', 'z-[100]')}
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -435,11 +439,12 @@ export default function CrmImportModal({
             initial="hidden"
             animate="visible"
             exit="exit"
+            {...sheetDrag.panel}
             className={`${sheet.panel} sm:max-w-lg`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -727,5 +732,6 @@ export default function CrmImportModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }

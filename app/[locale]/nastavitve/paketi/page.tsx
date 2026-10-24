@@ -29,6 +29,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { getCustomerPortal, startCheckout } from '@/lib/api/billingClient';
 import { Input } from '@/components/settings';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
 
 // ─── Plan definitions ───────────────────────────────────────────────────────
 
@@ -328,6 +329,7 @@ function EnterpriseModal({
   onSuccess: () => void;
   t: ReturnType<typeof useTranslations<'billing'>>;
 }) {
+  const sheetDrag = useSheetDrag(onClose);
   const { companyId } = useCompany();
   const tCommon = useTranslations('common');
   const [form, setForm] = useState<InquiryForm>({
@@ -377,10 +379,11 @@ function EnterpriseModal({
         initial={{ opacity: 0, scale: 0.95, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 16 }}
+        {...sheetDrag.panel}
         className={`${sheet.panel} sm:max-w-lg`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={sheet.header}>
+        <div className={sheet.header} {...sheetDrag.handle}>
           <div className={sheet.grabber} aria-hidden="true" />
           <div className="flex items-start justify-between gap-4">
             <div>

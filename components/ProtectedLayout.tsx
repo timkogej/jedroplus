@@ -95,7 +95,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         <AppBar />
 
         {/* Main content with padding for app bar */}
-        <main className="flex-1 pt-14 overflow-hidden">
+        <main className="flex-1 pt-[calc(3.5rem+env(safe-area-inset-top))] overflow-hidden">
           {(role === 'owner' || role === 'admin') && <QuotaBanner />}
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div

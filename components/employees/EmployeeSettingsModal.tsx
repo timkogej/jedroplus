@@ -21,6 +21,8 @@ import type { IzmenicenUrnik, UrnikData } from '@/types/resursi';
 import { isIzmenicenUrnik } from '@/types/resursi';
 import { defaultWorkingHoursDay as defaultWorkingHours } from '@/types/settings';
 import EmployeeAvatar from './EmployeeAvatar';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 
 // Schedule with intervals support
 interface TimeInterval {
@@ -143,6 +145,7 @@ function EmployeeSettingsModal({
   onSave,
   isSaving = false,
 }: EmployeeSettingsModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('staff');
   const tCommon = useTranslations('common');
 
@@ -458,6 +461,7 @@ function EmployeeSettingsModal({
   const timeSelectClass = 'appearance-none rounded-[10px] border border-gray-200 bg-white px-3 py-2 pr-8 text-sm font-medium text-gray-900 transition-colors cursor-pointer hover:border-gray-300 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25';
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -465,7 +469,7 @@ function EmployeeSettingsModal({
           initial="hidden"
           animate="visible"
           exit="hidden"
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
@@ -473,11 +477,12 @@ function EmployeeSettingsModal({
             initial="hidden"
             animate="visible"
             exit="exit"
+            {...sheetDrag.panel}
             className="relative flex max-h-[92dvh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-[#F2F2F7] shadow-2xl sm:max-h-[90vh] sm:rounded-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="glass-bar px-5 pt-3.5 pb-3 sm:px-6">
+            <div className="glass-bar px-5 pt-3.5 pb-3 sm:px-6" {...sheetDrag.handle}>
               <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-gray-300 sm:hidden" aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -501,7 +506,7 @@ function EmployeeSettingsModal({
                   onClick={onClose}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
+                  className="-m-1.5 rounded-full p-3 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
                 >
                   <X className="h-5 w-5" weight="regular" />
                 </motion.button>
@@ -1011,7 +1016,7 @@ function EmployeeSettingsModal({
             </form>
 
             {/* Footer */}
-            <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] sm:px-6">
+            <div className="glass-bar flex flex-shrink-0 items-center justify-end gap-3 border-t border-gray-200/70 px-5 pt-3.5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:px-6 sm:pb-3.5">
               <motion.button
                 type="button"
                 onClick={onClose}
@@ -1046,6 +1051,7 @@ function EmployeeSettingsModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 
