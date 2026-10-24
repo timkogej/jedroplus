@@ -404,6 +404,25 @@
     "showingTitle": "Showing past appointments that are not closed ({count})",
     "showingBody": "For each one choose Complete, No show or Cancel. The list shrinks as you go.",
     "show": "Show them",
-    "showAll": "Show all appointments"
+    "showAll": "Show all appointments",
+    "closeAll": "Close all"
+  },
+  "bulkComplete": {
+    "title": "Close past appointments",
+    "loading": "Counting appointments …",
+    "olderBody": "{count, plural, one {# appointment from previous days will be closed.} other {# appointments from previous days will be closed.}} No message is sent to clients because of this.",
+    "todayHeading": "Appointments that already ended today",
+    "todaySend": "Close and send the after-appointment message ({count})",
+    "todaySilent": "Close without messages",
+    "todayLeave": "Leave these open for now",
+    "note": "Closed appointments count towards revenue and statistics. Mark no-shows and cancellations first, before you press Close.",
+    "cancel": "Cancel",
+    "confirm": "Close",
+    "loadError": "Could not count the appointments. Try again.",
+    "error": "Closing failed. Try again."
+  },
+  "bulk": {
+    "done": "{count, plural, one {# appointment closed} other {# appointments closed}}",
+    "partial": "Closed: {completed}. {failed} appointments could not be completed and stay open."
   }
 }
