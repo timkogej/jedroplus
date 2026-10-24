@@ -1,4 +1,5 @@
-import { fetchAllTableRows, fetchTableRows } from '@/lib/companyScope';
+import { fetchAllTableRows, fetchTableRows, getCompanyColumnForTable } from '@/lib/companyScope';
+import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { TABLES } from '@/lib/data';
 import { detectBookingSchema, pickFirst, safeDate } from '@/lib/dashboardHelpers';
 import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
@@ -464,38 +465,90 @@ export async function getClientById(
   }
 }
 
-// Check if email already exists for another client
+// "_" and "%" are wildcards in ilike, and both are common in e-mail addresses.
+const escapeLike = (value: string) => value.replace(/[\\%_]/g, (c) => `\\${c}`);
+
+// Check if email already exists for another client.
+//
+// Asks the database for that one address instead of downloading the whole
+// client table on every blur (which also stopped looking past 1000 clients).
 export async function checkEmailExists(
   companyId: string,
   email: string,
   excludeClientId?: string
 ): Promise<{ exists: boolean; error: Error | null }> {
   try {
-    const result = await fetchTableRows<Record<string, unknown>>(TABLES.clients, companyId, 1000);
+    const emailTrimmed = email.trim();
+    if (!emailTrimmed || !companyId) return { exists: false, error: null };
 
-    if (result.error) {
-      throw new Error(result.error);
-    }
+    const companyColumn = await getCompanyColumnForTable(TABLES.clients, companyId);
+    const { data, error } = await supabaseReadOnly
+      .from(TABLES.clients)
+      .select('"ID stranke"')
+      .eq(companyColumn, companyId)
+      .ilike('Email stranke', escapeLike(emailTrimmed))
+      .limit(5);
 
-    const emailLower = email.toLowerCase().trim();
+    if (error) throw new Error(error.message);
 
-    for (const row of result.data ?? []) {
-      const client = parseClient(row);
-      if (client && client.email.toLowerCase() === emailLower) {
-        if (excludeClientId && client.id === excludeClientId) {
-          continue;
-        }
-        return { exists: true, error: null };
-      }
-    }
+    const rows = (data ?? []) as unknown as Array<Record<string, unknown>>;
+    const exists = rows.some((row) => {
+      const id = String(row['ID stranke'] ?? '');
+      return !(excludeClientId && id === excludeClientId);
+    });
 
-    return { exists: false, error: null };
+    return { exists, error: null };
   } catch (err) {
     return {
       exists: false,
       error: err instanceof Error ? err : new Error('Failed to check email'),
     };
   }
+}
+
+// After a save goes through n8n the row appears a moment later. Instead of
+// guessing a delay, ask for the new client by ID until it shows up.
+export async function waitForClient(
+  companyId: string,
+  clientId: string,
+  { timeoutMs = 8000, intervalMs = 500 }: { timeoutMs?: number; intervalMs?: number } = {}
+): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  try {
+    const companyColumn = await getCompanyColumnForTable(TABLES.clients, companyId);
+    while (Date.now() < deadline) {
+      const { data, error } = await supabaseReadOnly
+        .from(TABLES.clients)
+        .select('"ID stranke"')
+        .eq(companyColumn, companyId)
+        .eq('ID stranke', clientId)
+        .limit(1);
+      if (!error && data && data.length > 0) return true;
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+  } catch {
+    // fall through: caller treats "not seen" as uncertain, not as failure
+  }
+  return false;
+}
+
+// Stats from an already-loaded client list, so the page does not have to fetch
+// every client and appointment a second time just to count them.
+export function deriveClientStats(clients: Client[]): ClientStats {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  return {
+    total: clients.length,
+    withAppointments: clients.filter(c => (c.appointment_count || 0) > 0).length,
+    newThisMonth: clients.filter(c => {
+      if (!c.created_at) return false;
+      // Use safeDate to handle various date formats (dd.mm.yyyy, ISO, etc.)
+      const parsedDate = safeDate(c.created_at);
+      if (!parsedDate) return false;
+      return parsedDate >= startOfMonth;
+    }).length,
+  };
 }
 
 // Get client statistics
@@ -510,21 +563,7 @@ export async function getClientStats(companyId: string): Promise<{
       throw result.error;
     }
 
-    const clients = result.data ?? [];
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const stats: ClientStats = {
-      total: clients.length,
-      withAppointments: clients.filter(c => (c.appointment_count || 0) > 0).length,
-      newThisMonth: clients.filter(c => {
-        if (!c.created_at) return false;
-        // Use safeDate to handle various date formats (dd.mm.yyyy, ISO, etc.)
-        const parsedDate = safeDate(c.created_at);
-        if (!parsedDate) return false;
-        return parsedDate >= startOfMonth;
-      }).length,
-    };
+    const stats = deriveClientStats(result.data ?? []);
 
     return { data: stats, error: null };
   } catch (err) {

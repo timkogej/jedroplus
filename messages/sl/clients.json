@@ -35,7 +35,13 @@
     "loadError": "Prišlo je do napake pri nalaganju podatkov",
     "saveError": "Prišlo je do napake pri shranjevanju stranke",
     "deleteError": "Prišlo je do napake pri brisanju stranke",
-    "retry": "Poskusi znova"
+    "retry": "Poskusi znova",
+    "saveUnconfirmed": "Stranka je poslana, a se še ni pojavila na seznamu. Počakajte nekaj sekund in osvežite stran, preden jo vnesete znova.",
+    "saveRateLimited": "Preveč zahtev naenkrat. Počakajte nekaj sekund in poskusite znova.",
+    "saveAuth": "Seja je potekla. Prijavite se znova in poskusite še enkrat.",
+    "saveServer": "Strežnik trenutno ne odgovarja. Stranka ni bila shranjena, poskusite čez minuto.",
+    "saveNetwork": "Ni povezave s strežnikom. Preverite internet in poskusite znova.",
+    "saveTimeout": "Strežnik se predolgo odziva. Stranka morda je shranjena, zato osvežite seznam, preden jo vnesete znova."
   },
   "toast": {
     "created": "Stranka uspešno dodana",

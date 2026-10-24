@@ -26,9 +26,10 @@ import DisabledActionModal from '@/components/DisabledActionModal';
 import type { Client, ClientFormData, ClientStats } from '@/types/clients';
 import {
   fetchClientsWithCount,
-  getClientStats,
+  deriveClientStats,
+  waitForClient,
 } from '@/lib/supabase/clients';
-import { callN8nAction } from '@/src/lib/n8nClient';
+import { callN8nAction, type N8nErrorCode } from '@/src/lib/n8nClient';
 import {
   buildClientCreateData,
   buildClientDeleteData,
@@ -176,6 +177,7 @@ export default function ClientsClient({
 
   // Skip the first client-side fetch when the server already provided data.
   const skipAutoFetch = useRef(!!initialData);
+  const saveInFlight = useRef(false);
 
   // Search state with debounce
   const [search, setSearch] = useState('');
@@ -268,17 +270,16 @@ export default function ClientsClient({
     setError(null);
 
     try {
-      const [clientsRes, statsRes] = await Promise.all([
-        fetchClientsWithCount(companyId),
-        getClientStats(companyId),
-      ]);
+      // One fetch; the stats are counted from the same list.
+      const clientsRes = await fetchClientsWithCount(companyId);
 
       if (clientsRes.error) {
         throw clientsRes.error;
       }
 
-      setClients(clientsRes.data ?? []);
-      setStats(statsRes.data);
+      const loaded = clientsRes.data ?? [];
+      setClients(loaded);
+      setStats(deriveClientStats(loaded));
     } catch (err) {
       setError(t('errors.loadError'));
     } finally {
@@ -367,7 +368,12 @@ export default function ClientsClient({
   // Save client (create or update)
   const handleSaveClient = useCallback(async (data: ClientFormData) => {
     if (!companyId) return;
+    // A second click while the first save is still in flight would create the client twice.
+    if (saveInFlight.current) return;
+    saveInFlight.current = true;
 
+    let createdClientId = '';
+    let failureCode: N8nErrorCode | undefined;
     setIsSaving(true);
     try {
       const companyColumn = await getCompanyColumnForTable(TABLES.clients, companyId);
@@ -403,6 +409,7 @@ export default function ClientsClient({
         );
 
         if (!result.ok) {
+          failureCode = result.code;
           throw new Error('update failed');
         }
 
@@ -410,6 +417,7 @@ export default function ClientsClient({
       } else {
         // Create new client with 7-digit unique ID
         const clientId = await getNextClientId(companyId);
+        createdClientId = clientId;
         const newRow = {
           'ID stranke': clientId,
           Ime: data.ime,
@@ -437,6 +445,7 @@ export default function ClientsClient({
 
         const result = await callN8nAction(payload, async () => {
           const nextId = await getNextClientId(companyId);
+          createdClientId = nextId;
           return {
             ...payload,
             data: buildClientCreateData({
@@ -449,20 +458,42 @@ export default function ClientsClient({
         });
 
         if (!result.ok) {
+          failureCode = result.code;
           throw new Error('create failed');
+        }
+
+        // Confirm the row exists before reporting success: n8n answers before the
+        // insert is always visible, and a fixed delay either wastes time or lets
+        // the list refresh without the new client (so it gets entered twice).
+        const appeared = await waitForClient(companyId, createdClientId);
+        if (!appeared) {
+          showToast(t('errors.saveUnconfirmed'), 'error');
+          closeModal();
+          loadData();
+          return;
         }
 
         showToast(t('toast.created'), 'success');
       }
 
-      // Wait for system to process
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      if (modalMode === 'edit') {
+        // Edits have no new row to look for; give n8n a moment to apply them.
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
 
       closeModal();
       loadData();
     } catch (err) {
-      showToast(t('errors.saveError'), 'error');
+      const message =
+        failureCode === 'rate_limited' ? t('errors.saveRateLimited')
+        : failureCode === 'auth' ? t('errors.saveAuth')
+        : failureCode === 'server' ? t('errors.saveServer')
+        : failureCode === 'network' ? t('errors.saveNetwork')
+        : failureCode === 'timeout' ? t('errors.saveTimeout')
+        : t('errors.saveError');
+      showToast(message, 'error');
     } finally {
+      saveInFlight.current = false;
       setIsSaving(false);
     }
   }, [

@@ -16,6 +16,26 @@ export type N8nPayload = {
 
 import { validateWebhookData } from "./webhookValidator";
 
+/** Why a call failed, so callers can say something more useful than "error". */
+export type N8nErrorCode =
+  | "rate_limited"
+  | "auth"
+  | "server"
+  | "network"
+  | "timeout"
+  | "rejected";
+
+// n8n normally answers in well under a second. Without a limit a stalled
+// server leaves the form spinning forever.
+const REQUEST_TIMEOUT_MS = 30_000;
+
+function codeForStatus(status: number): N8nErrorCode {
+  if (status === 429) return "rate_limited";
+  if (status === 401 || status === 403) return "auth";
+  if (status >= 500) return "server";
+  return "rejected";
+}
+
 export async function callN8nAction(
   payload: N8nPayload,
   retry?: () => Promise<N8nPayload>
@@ -23,6 +43,7 @@ export async function callN8nAction(
   ok: boolean;
   data?: unknown;
   error?: string;
+  code?: N8nErrorCode;
 }> {
   try {
     const normalizedPayload = {
@@ -59,11 +80,19 @@ export async function callN8nAction(
     }
 
     // ✅ Call internal API route instead of n8n directly
-    const response = await fetch(WEBHOOK_PROXY_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(normalizedPayload),
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await fetch(WEBHOOK_PROXY_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(normalizedPayload),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
 
     if (!response.ok) {
       if (retry && response.status === 409) {
@@ -76,7 +105,7 @@ export async function callN8nAction(
       } catch {
         // ignore
       }
-      return { ok: false, error: 'Prišlo je do napake' };
+      return { ok: false, error: 'Prišlo je do napake', code: codeForStatus(response.status) };
     }
     
     const text = await response.text();
@@ -102,9 +131,11 @@ export async function callN8nAction(
       return { ok: true, data: text };
     }
   } catch (error) {
+    const aborted = error instanceof DOMException && error.name === "AbortError";
     return {
       ok: false,
       error: 'Prišlo je do napake',
+      code: aborted ? "timeout" : "network",
     };
   }
 }
