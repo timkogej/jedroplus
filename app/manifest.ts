@@ -1,9 +1,15 @@
 import type { MetadataRoute } from 'next';
 
+// PWA manifest. `id` in `scope` naj ostaneta nespremenjena — po njiju brskalnik
+// prepozna že nameščeno aplikacijo.
 export default function manifest(): MetadataRoute.Manifest {
   return {
+    id: '/',
     name: 'Jedro+',
     short_name: 'Jedro+',
+    description: 'Termini, stranke in obvestila salona na enem mestu.',
+    lang: 'sl',
+    dir: 'ltr',
     icons: [
       {
         src: '/android-icon-192.png',
@@ -29,9 +35,16 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'any',
       },
     ],
-    start_url: '/',
+    start_url: '/dashboard?source=pwa',
+    scope: '/',
     display: 'standalone',
+    orientation: 'any',
     background_color: '#ffffff',
-    theme_color: '#7C78FA',
+    theme_color: '#ffffff',
+    categories: ['business', 'productivity'],
+    shortcuts: [
+      { name: 'Koledar', url: '/koledar', icons: [{ src: '/android-icon-192.png', sizes: '192x192' }] },
+      { name: 'Obvestila', url: '/obvestila', icons: [{ src: '/android-icon-192.png', sizes: '192x192' }] },
+    ],
   };
 }

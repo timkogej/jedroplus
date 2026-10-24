@@ -1,0 +1,88 @@
+{
+  "common": {
+    "notNow": "Non ora",
+    "close": "Chiudi",
+    "done": "Fine",
+    "back": "Indietro"
+  },
+  "install": {
+    "title": "Aggiungi Jedro+ alla schermata Home",
+    "titleComputer": "Installa Jedro+ sul computer",
+    "subtitle": "Si apre come una vera app e ti avvisa subito di nuove prenotazioni e chiamate.",
+    "benefitFast": "Si apre con un tocco",
+    "benefitPush": "Notifiche per prenotazioni e chiamate",
+    "benefitFree": "Niente App Store, niente aggiornamenti",
+    "installButton": "Installa app",
+    "installing": "Installazione …",
+    "showSteps": "Mostra i passaggi",
+    "ios": {
+      "step1": "Tocca <b>Condividi</b> nella barra di Safari",
+      "step1Hint": "Su iOS 26, Condividi è sotto il pulsante ⋯",
+      "step2": "Scorri in basso e scegli <b>Aggiungi alla schermata Home</b>",
+      "step3": "Tocca <b>Aggiungi</b> in alto a destra",
+      "step4": "Apri Jedro+ dalla schermata Home e attiva le notifiche",
+      "arrowHint": "Il pulsante Condividi è qui sotto"
+    },
+    "iosOther": {
+      "title": "Apri questa pagina in Safari",
+      "body": "Su iPhone e iPad Jedro+ si aggiunge alla schermata Home tramite Safari. Copia il link, apri Safari e incollalo nella barra degli indirizzi.",
+      "copy": "Copia link",
+      "copied": "Link copiato"
+    },
+    "inApp": {
+      "title": "Apri nel browser",
+      "body": "Questa pagina è aperta dentro un'altra app. Tocca ⋯ o ⋮, scegli Apri nel browser e poi segui i passaggi."
+    },
+    "iosTooOld": "Le notifiche su iPhone richiedono iOS 16.4 o successivo. Aggiornalo in Impostazioni → Generali → Aggiornamento software.",
+    "android": {
+      "step1": "Tocca il menu <b>⋮</b> in alto a destra",
+      "step2": "Scegli <b>Installa app</b> o <b>Aggiungi a schermata Home</b>",
+      "step3": "Conferma con <b>Installa</b>",
+      "samsungStep1": "Tocca il menu <b>≡</b> in basso a destra",
+      "samsungStep2": "Scegli <b>Aggiungi pagina a</b> → <b>Schermata Home</b>"
+    },
+    "desktop": {
+      "step1": "Fai clic sull'icona <b>Installa</b> a destra nella barra degli indirizzi",
+      "step2": "Oppure apri il menu <b>⋮</b> e scegli <b>Installa Jedro+</b>",
+      "safariStep1": "Nella barra dei menu scegli <b>File</b> → <b>Aggiungi al Dock</b>",
+      "safariStep2": "Conferma con <b>Aggiungi</b>",
+      "firefox": "Firefox non installa web app, ma le notifiche funzionano anche qui nel browser."
+    },
+    "installedTitle": "Jedro+ è installato",
+    "installedBody": "Lo trovi nella schermata Home. Attiva anche le notifiche per non perdere nessuna prenotazione.",
+    "alreadyInstalled": "Jedro+ è già installato su questo dispositivo."
+  },
+  "push": {
+    "title": "Attiva le notifiche",
+    "subtitle": "Scopri subito nuove prenotazioni, disdette e chiamate in attesa di essere richiamate.",
+    "enable": "Attiva le notifiche",
+    "enabling": "Attivazione …",
+    "enabled": "Le notifiche sono attive",
+    "enabledBody": "Tutte le notifiche di Jedro+ arriveranno su questo dispositivo.",
+    "denied": "Le notifiche sono bloccate nel browser. Fai clic sul lucchetto accanto all'indirizzo, consenti le notifiche e riprova.",
+    "deniedIos": "Le notifiche sono disattivate. Attivale in Impostazioni → Notifiche → Jedro+.",
+    "dismissed": "Le notifiche non sono attive. Puoi attivarle in qualsiasi momento nelle impostazioni.",
+    "error": "Impossibile attivare le notifiche. Riprova.",
+    "notConfigured": "Le notifiche sui dispositivi non sono ancora configurate sul server.",
+    "unsupported": "Questo browser non supporta le notifiche. Usa Chrome, Edge, Firefox o Safari.",
+    "needsInstall": "Su iPhone e iPad le notifiche funzionano solo dopo aver aggiunto Jedro+ alla schermata Home.",
+    "testTitle": "Le notifiche di Jedro+ funzionano",
+    "testBody": "Così appariranno nuove prenotazioni, disdette e chiamate."
+  },
+  "settings": {
+    "phoneLabel": "Notifiche su questo telefono",
+    "computerLabel": "Notifiche su questo computer",
+    "tabletLabel": "Notifiche su questo tablet",
+    "note": "Ogni nuova notifica dell'app arriva anche come notifica sul dispositivo.",
+    "test": "Invia notifica di prova",
+    "testSending": "Invio …",
+    "testSent": "Notifica di prova inviata. Dovrebbe comparire entro pochi secondi.",
+    "testFailed": "Impossibile inviare la notifica di prova.",
+    "testNotSubscribed": "Questo dispositivo non è più registrato. Disattiva e riattiva le notifiche.",
+    "showHow": "Mostrami come",
+    "installLabel": "App nella schermata Home",
+    "installNote": "Passaggi per iPhone, Android e computer.",
+    "installedNote": "Jedro+ è installato su questo dispositivo.",
+    "installButton": "Passaggi"
+  }
+}

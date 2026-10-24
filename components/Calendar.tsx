@@ -1214,6 +1214,37 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Klik na obvestilo (v aplikaciji ali push): /koledar?termin=OB-000063&datum=2026-10-21
+  // skoči na ta dan in odpre termin, ko se naloži.
+  const [pendingTerminId, setPendingTerminId] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const termin = params.get('termin');
+    const datum = params.get('datum');
+    if (!termin && !datum) return;
+    if (datum && /^\d{4}-\d{2}-\d{2}$/.test(datum)) {
+      const [y, m, d] = datum.split('-').map(Number);
+      setCurrentDate(new Date(y, m - 1, d));
+    }
+    if (termin) setPendingTerminId(termin);
+    params.delete('termin');
+    params.delete('datum');
+    const query = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+  }, []);
+  useEffect(() => {
+    if (!pendingTerminId) return;
+    const match = appointments.find((a) => a.id_termina === pendingTerminId || a.id === pendingTerminId);
+    if (match) {
+      setSelectedAppointment(match);
+      setPendingTerminId(null);
+      return;
+    }
+    // Termin je bil medtem izbrisan ali ni viden temu uporabniku — ostanemo na dnevu.
+    const timer = window.setTimeout(() => setPendingTerminId(null), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [pendingTerminId, appointments]);
+
   // First visit: a short guided tour of the calendar.
   const tour = useOptionalTour();
   useEffect(() => {
