@@ -23,6 +23,14 @@
         "label": "Messages",
         "description": "History of sent messages and reminders"
       },
+      "loyalty": {
+        "label": "Loyalty",
+        "description": "Points for completed visits and customer rewards"
+      },
+      "portalAnnouncements": {
+        "label": "Portal announcements",
+        "description": "Customer posts, images, and optional email alerts"
+      },
       "addons": {
         "label": "Addons & Quotas",
         "description": "Purchase SMS, email, and employee addons"

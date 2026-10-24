@@ -32,6 +32,7 @@ import type { Client, ClientWithAppointments, ClientAppointment } from '@/types/
 import { getClientWithAppointments } from '@/lib/supabase/clients';
 import ClientInitialsBadge from './ClientInitialsBadge';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
+import LoyaltyClientCard from './LoyaltyClientCard';
 
 interface ClientDetailsPanelProps {
   isOpen: boolean;
@@ -415,6 +416,8 @@ function ClientDetailsPanel({
                   </div>
                 </div>
               </section>
+
+              <LoyaltyClientCard customerId={client.id} />
 
               {/* Appointments history */}
               <div>
