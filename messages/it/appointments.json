@@ -417,7 +417,8 @@
     "showingTitle": "Vengono mostrati gli appuntamenti passati non completati ({count})",
     "showingBody": "Per ciascuno scegli Completa, Non presentato o Annulla. L'elenco si accorcia man mano.",
     "show": "Mostrali",
-    "showAll": "Mostra tutti gli appuntamenti"
+    "showAll": "Mostra tutti gli appuntamenti",
+    "closeAll": "Chiudi tutti"
   },
   "export": {
     "title": "Esporta appuntamenti",
@@ -484,5 +485,23 @@
     },
     "skip": "Salta",
     "send": "Invia avviso"
+  },
+  "bulkComplete": {
+    "title": "Chiudi gli appuntamenti passati",
+    "loading": "Conteggio degli appuntamenti …",
+    "olderBody": "{count, plural, one {# appuntamento dei giorni passati verrà chiuso.} other {# appuntamenti dei giorni passati verranno chiusi.}} Per questo non viene inviato alcun messaggio ai clienti.",
+    "todayHeading": "Appuntamenti già terminati oggi",
+    "todaySend": "Chiudi e invia il messaggio dopo l'appuntamento ({count})",
+    "todaySilent": "Chiudi senza messaggi",
+    "todayLeave": "Per ora lasciali aperti",
+    "note": "Gli appuntamenti chiusi contano nei ricavi e nelle statistiche. Segnala prima assenze e annullamenti, poi premi Chiudi.",
+    "cancel": "Annulla",
+    "confirm": "Chiudi",
+    "loadError": "Impossibile contare gli appuntamenti. Riprova.",
+    "error": "Chiusura non riuscita. Riprova."
+  },
+  "bulk": {
+    "done": "{count, plural, one {# appuntamento chiuso} other {# appuntamenti chiusi}}",
+    "partial": "Chiusi: {completed}. {failed} appuntamenti non sono stati chiusi e restano aperti."
   }
 }

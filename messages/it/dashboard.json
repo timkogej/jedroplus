@@ -26,7 +26,13 @@
     "title": "Prossimo appuntamento",
     "today": "Oggi",
     "tomorrow": "Domani",
-    "empty": "Nessun appuntamento in arrivo"
+    "empty": "Nessun appuntamento in arrivo",
+    "openCalendar": "Apri il calendario",
+    "inProgress": "In corso",
+    "now": "Adesso",
+    "inMinutes": "Tra {minutes} min",
+    "inHours": "Tra {hours} h {minutes} min",
+    "inHoursExact": "Tra {hours} h"
   },
   "appointmentList": {
     "todayTitle": "Appuntamenti di oggi",

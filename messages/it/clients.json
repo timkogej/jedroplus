@@ -35,7 +35,13 @@
     "loadError": "Si è verificato un errore durante il caricamento dei dati",
     "saveError": "Si è verificato un errore durante il salvataggio del cliente",
     "deleteError": "Si è verificato un errore durante l'eliminazione del cliente",
-    "retry": "Riprova"
+    "retry": "Riprova",
+    "saveUnconfirmed": "Il cliente è stato inviato ma non è ancora comparso nell'elenco. Attendi qualche secondo e aggiorna prima di inserirlo di nuovo.",
+    "saveRateLimited": "Troppe richieste contemporaneamente. Attendi qualche secondo e riprova.",
+    "saveAuth": "La sessione è scaduta. Accedi di nuovo e riprova.",
+    "saveServer": "Il server al momento non risponde. Il cliente non è stato salvato, riprova tra un minuto.",
+    "saveNetwork": "Impossibile raggiungere il server. Controlla la connessione a internet e riprova.",
+    "saveTimeout": "Il server risponde troppo lentamente. Il cliente potrebbe essere stato salvato: aggiorna l'elenco prima di inserirlo di nuovo."
   },
   "toast": {
     "created": "Cliente aggiunto",

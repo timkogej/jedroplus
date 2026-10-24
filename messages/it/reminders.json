@@ -228,7 +228,18 @@
       "staffDesc": "Se attivo, il promemoria può citare il collaboratore che eseguirà il servizio.",
       "daysBeforeLabel": "Invia il promemoria (giorni prima dell'appuntamento)",
       "daysBeforeDesc": "Quanti giorni prima dell'appuntamento inviare il promemoria.",
-      "select": "Scegli"
+      "select": "Scegli",
+      "senderIdUpgrade": "Disponibile nel piano Jedro Premium.",
+      "senderIdRules": "Massimo 11 caratteri, senza accenti, non può essere composto solo da cifre.",
+      "senderIdRequest": "Invia la richiesta",
+      "senderIdSaving": "Invio in corso …",
+      "senderIdStatusNiZaproseno": "Non richiesto",
+      "senderIdStatusVObdelavi": "In attesa di approvazione dell'operatore",
+      "senderIdStatusOdobreno": "Approvato",
+      "senderIdStatusZavrnjeno": "Rifiutato",
+      "senderIdInUse": "I messaggi vengono attualmente inviati con il nome {ime}.",
+      "senderIdDefault": "I messaggi vengono attualmente inviati con il nome Jedroplus.",
+      "senderIdNoReply": "I clienti non possono rispondere a un messaggio inviato con un nome mittente."
     },
     "before": {
       "sectionTitle": "Promemoria prima dell'appuntamento",

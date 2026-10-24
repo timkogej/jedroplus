@@ -564,22 +564,43 @@ function buildRecentActivity(bookings: Row[]): RecentActivity[] {
   return activities;
 }
 
+// Wall-clock "now" in the salon's timezone. The server runs in UTC, but Datum
+// and Čas are stored as local time, so comparing them to UTC hours would
+// skip or keep appointments up to two hours off.
+function salonNow(now: Date): { dateStr: string; timeStr: string } {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Ljubljana",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "00";
+  return {
+    dateStr: `${get("year")}-${get("month")}-${get("day")}`,
+    timeStr: `${get("hour")}:${get("minute")}`,
+  };
+}
+
+// personId null = the whole company (owner/admin dashboard).
 function buildNextPersonAppointment(
   bookings: Row[],
   maps: Maps,
-  personId: string,
+  personId: string | null,
   now: Date
 ): AppointmentItem | null {
   const { servicesMap, employeesMap, clientsMap } = maps;
-  const todayStr = format(now, "yyyy-MM-dd");
-  const currentTimeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+  const { dateStr: todayStr, timeStr: currentTimeStr } = salonNow(now);
 
   const candidates: Array<{ item: AppointmentItem; dateStr: string; timeStr: string }> = [];
 
   for (const row of bookings) {
     const schema = detectBookingSchema(row);
     const staffId = bookingStaffId(row);
-    if (staffId !== personId) continue;
+    if (personId && staffId !== personId) continue;
+    if (row["deleted_at"] || !isRecorded(row)) continue;
 
     const status = String(pickFirst(row, ["status", "Status", "stanje"]) ?? "scheduled").toLowerCase();
     if (status !== "scheduled" && !status.includes("načrtovan") && !status.includes("nacrtovan") && !status.includes("potrj") && !status.includes("confirm")) continue;
@@ -592,9 +613,12 @@ function buildNextPersonAppointment(
 
     const startTime = String(pickFirst(row, ["cas_zacetek", "Čas", "Cas", "start_time", "ura_od"]) ?? "00:00");
     const timeStr = startTime.substring(0, 5);
-    if (bookingDateStr === todayStr && timeStr < currentTimeStr) continue;
-
     const endTime = String(pickFirst(row, ["cas_konec", "Konec", "end_time", "ura_do"]) ?? "");
+    // An appointment that has started but not ended is still "next" for the desk.
+    if (bookingDateStr === todayStr) {
+      const endStr = endTime ? endTime.substring(0, 5) : timeStr;
+      if (timeStr < currentTimeStr && endStr <= currentTimeStr) continue;
+    }
     const id = schema.idField ? String(row[schema.idField] ?? "") : "";
     const serviceId = String(pickFirst(row, ["ID storitev", "ID storitve", "storitev_id", "service_id"]) ?? "");
     const serviceId2 = String(pickFirst(row, ["ID storitve 2", "service_id_2", "storitev_id_2"]) ?? "");
@@ -731,6 +755,6 @@ export async function fetchDashboardDataServer(companyId: string): Promise<Dashb
     topServices: buildTopServices(bookings, maps.servicesMap, monthStart, monthEnd),
     topEmployees: buildTopEmployees(bookings, maps.employeesMap, monthStart, monthEnd),
     recentActivity: buildRecentActivity(bookings),
-    nextPersonAppointment: personId ? buildNextPersonAppointment(bookings, maps, personId, now) : null,
+    nextPersonAppointment: buildNextPersonAppointment(bookings, maps, personId, now),
   };
 }

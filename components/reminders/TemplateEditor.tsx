@@ -20,6 +20,35 @@ export const TEMPLATE_VARS = [
   { token: '{{povezava_prenarocanje}}', key: 'rebookLink' },
 ] as const;
 
+/**
+ * Oznake, ki imajo smisel samo pri sporočilu PO terminu.
+ *
+ * `{{kdaj_obisk}}` se izpiše kot »danes«, »včeraj«, »v ponedeljek« ali »21. 4.«,
+ * odvisno od tega, koliko dni je minilo. Potrebna je, ker se sporočilo pošlje
+ * ob zaključku termina, ne na dan obiska — predloge z besedo »danes« so bile
+ * zato pogosto napačne.
+ */
+export const PO_TERMINU_VARS = [
+  { token: '{{kdaj_obisk}}', label: 'Kdaj je bil obisk' },
+  { token: '{{povezava_ocena}}', label: 'Povezava za oceno' },
+] as const;
+
+/**
+ * Dolžina povezave, kakršna bo dejansko poslana.
+ *
+ * V bazi je shranjena s shemo (`https://portal.jedroplus.com/...`), v SMS pa gre
+ * ven brez nje — telefoni jo preberejo tudi tako, prihrani pa osem znakov.
+ * Števec mora šteti to, kar stranka dobi, sicer odsvetuje povezavo, ki bi se
+ * sicer še prilegala.
+ */
+export function linkLength(url: string | null | undefined, fallback = 30): number {
+  const brezSheme = String(url ?? '').trim().replace(/^https?:\/\//i, '');
+  return brezSheme.length || fallback;
+}
+
+// Stable default, so an omitted `extraVars` does not change identity on every render.
+const NO_EXTRA_VARS: ReadonlyArray<{ token: string; label: string }> = [];
+
 // Migrate old token names when loading from DB
 export function migrateTemplate(template: string): string {
   return template
@@ -162,6 +191,8 @@ interface TemplateEditorProps {
   rows?: number;
   /** Estimated real-world character lengths per token (e.g. { '{{cas}}': 5 }) */
   varLengths?: Record<string, number>;
+  /** Oznake, ki veljajo samo za to vrsto sporočila (npr. PO_TERMINU_VARS). */
+  extraVars?: ReadonlyArray<{ token: string; label: string }>;
 }
 
 export function TemplateEditor({
@@ -171,12 +202,17 @@ export function TemplateEditor({
   placeholder = '',
   rows = 4,
   varLengths = {},
+  extraVars = NO_EXTRA_VARS,
 }: TemplateEditorProps) {
   const t = useTranslations('reminders.templateEditor');
   const labels = useMemo<Record<string, string>>(
-    () => Object.fromEntries(TEMPLATE_VARS.map((v) => [v.token, t(`vars.${v.key}`)])),
-    [t]
+    () => ({
+      ...Object.fromEntries(TEMPLATE_VARS.map((v) => [v.token, t(`vars.${v.key}`)])),
+      ...Object.fromEntries(extraVars.map((v) => [v.token, v.label])),
+    }),
+    [t, extraVars]
   );
+  const vseOznake = [...TEMPLATE_VARS, ...extraVars];
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalRef = useRef(false);
   const lastRawRef = useRef(value);
@@ -335,6 +371,17 @@ export function TemplateEditor({
   const currentLength = computeEffectiveLength(value, varLengths);
   const isOverLimit = maxLength ? currentLength > maxLength : false;
 
+  // Katere spremenljivke se sploh še prilegajo. Doslej klik na preveliko
+  // spremenljivko ni naredil ničesar in ni povedal zakaj — gumb je izgledal
+  // pokvarjen. Pri daljših predlogah je bila prva žrtev ravno povezava, ki je
+  // med vsemi najdaljša.
+  const prostoZa = (token: string): boolean => {
+    if (!maxLength) return true;
+    if (value.includes(token)) return true;   // že vstavljena, gumb ostane običajen
+    const dolzina = token in varLengths ? varLengths[token] : token.length;
+    return currentLength + dolzina <= maxLength;
+  };
+
   return (
     <div className="space-y-3">
       {/* Variable chip buttons */}
@@ -343,33 +390,63 @@ export function TemplateEditor({
           {t('clickToInsert')}
         </p>
         <div className="flex flex-wrap gap-1.5">
-          {TEMPLATE_VARS.map(v => (
-            <button
-              key={v.token}
-              type="button"
-              onClick={() => insertToken(v.token)}
-              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all hover:shadow-sm active:scale-95"
-              style={{
-                backgroundImage:
-                  'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                backgroundOrigin: 'padding-box, border-box',
-                backgroundClip: 'padding-box, border-box',
-                border: '1.5px solid transparent',
-              }}
-            >
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
+          {vseOznake.map(v => {
+            const seVeljaga = prostoZa(v.token);
+            const dolzina = v.token in varLengths ? varLengths[v.token] : v.token.length;
+            return (
+              <button
+                key={v.token}
+                type="button"
+                onClick={() => insertToken(v.token)}
+                disabled={!seVeljaga}
+                title={
+                  seVeljaga
+                    ? `${v.token} — približno ${dolzina} znakov`
+                    : `Ne prilega se: ${labels[v.token]} doda približno ${dolzina} znakov, na voljo pa jih je še ${Math.max(0, (maxLength ?? 0) - currentLength)}. Skrajšajte besedilo.`
+                }
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                  seVeljaga
+                    ? 'hover:shadow-sm active:scale-95'
+                    : 'cursor-not-allowed opacity-40'
+                }`}
+                style={
+                  seVeljaga
+                    ? {
+                        backgroundImage:
+                          'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                        backgroundOrigin: 'padding-box, border-box',
+                        backgroundClip: 'padding-box, border-box',
+                        border: '1.5px solid transparent',
+                      }
+                    : { border: '1.5px solid #E5E7EB', background: '#F9FAFB' }
+                }
               >
-                {labels[v.token]}
-              </span>
-            </button>
-          ))}
+                <span
+                  style={
+                    seVeljaga
+                      ? {
+                          background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          backgroundClip: 'text',
+                        }
+                      : { color: '#9CA3AF' }
+                  }
+                >
+                  {labels[v.token]}
+                </span>
+              </button>
+            );
+          })}
         </div>
+
+        {/* Zakaj je kakšna spremenljivka zbledela — brez tega je videti kot okvara. */}
+        {maxLength && vseOznake.some(v => !prostoZa(v.token)) && (
+          <p className="mt-2 text-xs text-amber-600">
+            Zbledele spremenljivke se v to predlogo ne prilegajo več. Skrajšajte
+            besedilo, da jih boste lahko dodali.
+          </p>
+        )}
       </div>
 
       {/* Rich text editor area */}

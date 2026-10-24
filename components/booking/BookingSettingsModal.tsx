@@ -20,7 +20,7 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
-import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
+import { TemplateEditor, migrateTemplate, sanitizeTemplateText, linkLength } from '@/components/reminders/TemplateEditor';
 import { EnglishVariant } from '@/components/reminders/EnglishVariant';
 import { sheet } from '@/components/ui/sheetClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
@@ -195,7 +195,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
     '{{ime_podjetja}}': nazivPodjetja.length || 15,
     '{{naslov}}': naslovPodjetja.length || 20,
     '{{leto}}': 4,
-    '{{povezava_prenarocanje}}': apptManagementLink.length || 30,
+    // Šteje se brez sheme — tako gre povezava tudi ven.
+    '{{povezava_prenarocanje}}': linkLength(apptManagementLink),
   };
 
   useEffect(() => {

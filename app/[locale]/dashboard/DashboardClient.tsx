@@ -36,6 +36,7 @@ import {
   WeeklyChart,
   Section,
   MetricGroup,
+  NextAppointmentCard,
 } from "@/components/dashboard";
 import { initialsStyle } from "@/components/dashboard/initialsStyle";
 import {
@@ -153,14 +154,8 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   const [actionError, setActionError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Next appointment for staff dashboard card - uses dedicated per-person query
-  const nextAppointment = useMemo(() => {
-    if (role !== 'staff' || !dashboardData) return null;
-    const apt = dashboardData.nextPersonAppointment;
-    if (!apt) return null;
-    const today = new Date().toISOString().split('T')[0];
-    return { ...apt, isToday: apt.datum === today };
-  }, [role, dashboardData]);
+  // Next appointment card: staff see their own, owners/admins the whole company's.
+  const nextAppointment = dashboardData?.nextPersonAppointment ?? null;
 
   const actor = user?.email ?? 'unknown';
   const companyPayload = useMemo(
@@ -761,65 +756,19 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
                 ]}
               />
 
-              {/* Naslednji termin */}
-              <Section className="mb-0" title={t('nextAppointment.title')}>
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
-                  className="overflow-hidden rounded-2xl border border-gray-100 bg-white"
-                >
-                  {nextAppointment ? (
-                    <button
-                      type="button"
-                      onClick={() => handleAppointmentClick(nextAppointment)}
-                      className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors hover:bg-gray-50 active:bg-gray-100"
-                    >
-                      <div className="w-12 flex-shrink-0">
-                        <div className="tnum text-base font-semibold text-gray-900">
-                          {nextAppointment.time}
-                        </div>
-                        {nextAppointment.endTime && (
-                          <div className="tnum text-xs text-gray-400">{nextAppointment.endTime}</div>
-                        )}
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-base font-medium text-gray-900">
-                          {nextAppointment.clientName}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                          <span className="truncate">{nextAppointment.serviceName}</span>
-                          {((nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0) + (nextAppointment.addOnName ? 1 : 0)) > 0 && (
-                            <span className="tnum flex-shrink-0 rounded-full bg-gray-100 px-1.5 text-xs font-medium text-gray-600">
-                              +{(nextAppointment.serviceId2 ? 1 : 0) + (nextAppointment.serviceId3 ? 1 : 0) + (nextAppointment.addOnName ? 1 : 0)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <span className="flex-shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                        {nextAppointment.isToday ? t('nextAppointment.today') : t('nextAppointment.tomorrow')}
-                      </span>
-
-                      <div
-                        className="flex h-9 w-9 flex-shrink-0 items-center justify-center text-lg font-bold"
-                        style={initialsStyle(nextAppointment.employeeColor)}
-                      >
-                        {nextAppointment.employeeInitials}
-                      </div>
-                    </button>
-                  ) : (
-                    <div className="px-5 py-10 text-center">
-                      <CalendarBlank className="mx-auto mb-2 h-6 w-6 text-gray-300" weight="regular" />
-                      <p className="text-sm text-gray-400">{t('nextAppointment.empty')}</p>
-                    </div>
-                  )}
-                </motion.div>
-              </Section>
+              <NextAppointmentCard
+                appointment={nextAppointment}
+                onSelect={handleAppointmentClick}
+                locale={locale}
+              />
             </div>
           ) : (
-            <div className="mb-10">
+            <div className="mb-10 space-y-6">
+              <NextAppointmentCard
+                appointment={nextAppointment}
+                onSelect={handleAppointmentClick}
+                locale={locale}
+              />
               <MetricGroup
                 metrics={[
                   {

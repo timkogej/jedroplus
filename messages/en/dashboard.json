@@ -26,7 +26,13 @@
     "title": "Next Appointment",
     "today": "Today",
     "tomorrow": "Tomorrow",
-    "empty": "No upcoming appointments"
+    "empty": "No upcoming appointments",
+    "openCalendar": "Open calendar",
+    "inProgress": "In progress",
+    "now": "Now",
+    "inMinutes": "In {minutes} min",
+    "inHours": "In {hours} h {minutes} min",
+    "inHoursExact": "In {hours} h"
   },
   "appointmentList": {
     "todayTitle": "Today's Appointments",

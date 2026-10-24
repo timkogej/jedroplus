@@ -7,3 +7,4 @@ export { WeeklyChart } from "./WeeklyChart";
 export { Section } from "./Section";
 export { MetricGroup, type Metric } from "./MetricGroup";
 export { initialsStyle } from "./initialsStyle";
+export { NextAppointmentCard } from "./NextAppointmentCard";

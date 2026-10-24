@@ -26,7 +26,13 @@
     "title": "Nächster Termin",
     "today": "Heute",
     "tomorrow": "Morgen",
-    "empty": "Keine anstehenden Termine"
+    "empty": "Keine anstehenden Termine",
+    "openCalendar": "Kalender öffnen",
+    "inProgress": "Läuft gerade",
+    "now": "Jetzt",
+    "inMinutes": "In {minutes} Min.",
+    "inHours": "In {hours} Std. {minutes} Min.",
+    "inHoursExact": "In {hours} Std."
   },
   "appointmentList": {
     "todayTitle": "Termine heute",

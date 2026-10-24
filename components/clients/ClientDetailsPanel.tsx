@@ -419,6 +419,8 @@ function ClientDetailsPanel({
 
               <LoyaltyClientCard customerId={client.id} />
 
+              <LoyaltyClientCard customerId={client.id} />
+
               {/* Appointments history */}
               <div>
                 <div className="mb-2 flex items-center justify-between px-1">

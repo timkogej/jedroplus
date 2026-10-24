@@ -228,7 +228,18 @@
       "staffDesc": "Wenn aktiviert, kann die Erinnerung nennen, wer die Leistung ausführt.",
       "daysBeforeLabel": "Erinnerung senden (Tage vorher)",
       "daysBeforeDesc": "Wie viele Tage vor dem Termin die Erinnerung gesendet wird.",
-      "select": "Auswählen"
+      "select": "Auswählen",
+      "senderIdUpgrade": "Verfügbar im Tarif Jedro Premium.",
+      "senderIdRules": "Höchstens 11 Zeichen, keine Umlaute oder Akzente, nicht nur Ziffern.",
+      "senderIdRequest": "Anfrage senden",
+      "senderIdSaving": "Wird gesendet …",
+      "senderIdStatusNiZaproseno": "Nicht beantragt",
+      "senderIdStatusVObdelavi": "Wartet auf Freigabe durch den Betreiber",
+      "senderIdStatusOdobreno": "Genehmigt",
+      "senderIdStatusZavrnjeno": "Abgelehnt",
+      "senderIdInUse": "Nachrichten werden derzeit unter dem Namen {ime} gesendet.",
+      "senderIdDefault": "Nachrichten werden derzeit unter dem Namen Jedroplus gesendet.",
+      "senderIdNoReply": "Auf eine Nachricht mit Absendernamen können Kunden nicht antworten."
     },
     "before": {
       "sectionTitle": "Erinnerungen vor dem Termin",

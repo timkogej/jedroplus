@@ -21,7 +21,10 @@ import type { Client } from '@/lib/supabase/clients';
 import type { Storitev, Zaposleni, AppointmentWithDetails } from '@/types/appointments';
 import { minutesToTime, parseTimeToMinutes } from '@/lib/utils/calendar';
 import { useTranslations } from 'next-intl';
-import { checkResourceConflicts, type ResourceConflictResult } from '@/lib/utils/resourceConflicts';
+// Ena sama izvedba preverjanja — prejšnja (lib/utils/resourceConflicts) je brala
+// stolpec "ID termina" iz Termini_Resursi, ki je pri 37 od 38 vrstic prazen,
+// zato je vedno javila nič konfliktov.
+import { checkResourceConflicts, type ResourceConflict } from '@/lib/supabase/resursi';
 import { useModalScrollLock } from '@/hooks/useModalScrollLock';
 
 export type ModalMode = 'view' | 'edit' | 'create';
@@ -105,7 +108,7 @@ function CalendarAppointmentModal({
 
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [conflictResult, setConflictResult] = useState<ResourceConflictResult | null>(null);
+  const [conflictResult, setConflictResult] = useState<ResourceConflict[] | null>(null);
   const conflictDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Initialize form when modal opens
@@ -169,20 +172,24 @@ function CalendarAppointmentModal({
     if (conflictDebounceRef.current) clearTimeout(conflictDebounceRef.current);
     conflictDebounceRef.current = setTimeout(async () => {
       const serviceIds = [formData.storitev_id].filter(Boolean) as string[];
-      const result = await checkResourceConflicts(
+      // Pri urejanju izvzamemo termin sam, sicer bi bil v konfliktu s sabo.
+      // Tu gre za ŠTEVILČNI id vrstice, ne za besedilni ID termina.
+      const excludeId =
+        mode === 'edit' && appointment?.id ? Number(appointment.id) : undefined;
+      const { conflicts } = await checkResourceConflicts(
         companyId,
         serviceIds,
         formData.datum,
         formData.cas_zacetek,
         formData.cas_konec,
-        formData.id,
+        excludeId,
       );
-      setConflictResult(result);
+      setConflictResult(conflicts);
     }, 300);
     return () => {
       if (conflictDebounceRef.current) clearTimeout(conflictDebounceRef.current);
     };
-  }, [companyId, formData.storitev_id, formData.datum, formData.cas_zacetek, formData.cas_konec, formData.id]);
+  }, [companyId, formData.storitev_id, formData.datum, formData.cas_zacetek, formData.cas_konec, mode, appointment]);
 
   // Calculate end time based on service duration
   const calculateEndTime = useCallback((startTime: string, durationMinutes: number): string => {
@@ -569,16 +576,16 @@ function CalendarAppointmentModal({
                 </div>
 
                 {/* Resource conflict warning (Feature 5) */}
-                {conflictResult && conflictResult.conflicts.length > 0 && (
+                {conflictResult && conflictResult.length > 0 && (
                   <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <div className="flex items-start gap-3">
                       <Warning className="h-5 w-5 flex-shrink-0 text-amber-500 mt-0.5" weight="fill" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-amber-800">⚠️ Opozorilo: Resurs zaseden</p>
                         <div className="mt-1.5 space-y-1">
-                          {conflictResult.conflicts.map((c) => (
+                          {conflictResult.map((c) => (
                             <p key={c.resursId} className="text-xs text-amber-700">
-                              <span className="font-medium">{c.resursNaziv}</span> je v tem terminu že zaseden ({c.trenutnaZasedenost}/{c.maxKapaciteta} mest zasedenih). Rezervacijo lahko vseeno shranite.
+                              <span className="font-medium">{c.naziv}</span> je v tem terminu že zaseden ({c.trenutnoZasedeno}/{c.maxKapaciteta} mest zasedenih). Rezervacijo lahko vseeno shranite.
                             </p>
                           ))}
                         </div>
@@ -588,7 +595,7 @@ function CalendarAppointmentModal({
                 )}
 
                 {/* Resource available indicator */}
-                {conflictResult && conflictResult.conflicts.length === 0 && formData.storitev_id && (
+                {conflictResult && conflictResult.length === 0 && formData.storitev_id && (
                   <div className="mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5">
                     <Cube className="h-4 w-4 text-emerald-500" weight="fill" />
                     <span className="text-xs font-medium text-emerald-700">✓ Resursi na voljo</span>

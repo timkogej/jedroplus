@@ -30,6 +30,14 @@
       "history": {
         "label": "Cronologia",
         "description": "Registro di tutte le modifiche e azioni nel sistema"
+      },
+      "loyalty": {
+        "label": "Fedeltà",
+        "description": "Punti per le visite completate e premi per i clienti"
+      },
+      "portalAnnouncements": {
+        "label": "Annunci nel portale",
+        "description": "Post per i clienti, immagini e avvisi email facoltativi"
       }
     }
   },
