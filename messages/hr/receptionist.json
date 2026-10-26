@@ -155,5 +155,51 @@
     "button": "Aktiviraj ReceptionistPlus",
     "activating": "Aktiviranje…",
     "error": "Aktivacija nije uspjela. Pokušajte ponovno."
+  },
+  "numberRequest": {
+    "title": "Telefonski broj asistentice",
+    "intro": "Asistentica se javlja na svoj telefonski broj. Pošaljite zahtjev; mi ga uredimo i javimo vam kad je spreman (obično za nekoliko dana).",
+    "start": "Zatraži broj",
+    "formDesc": "Podatke tvrtke preuzeli smo iz Jedro+; provjerite ih. Pružatelj ih traži za poslovne brojeve.",
+    "country": "Država",
+    "countries": {
+      "SI": "Slovenija",
+      "HR": "Hrvatska",
+      "AT": "Austrija",
+      "DE": "Njemačka",
+      "IT": "Italija"
+    },
+    "area": "Područje broja",
+    "areaDesc": "Neobavezno, npr. 01 Zagreb; inače prema adresi tvrtke.",
+    "areaPlaceholder": "npr. 01 Zagreb",
+    "mode": "Kako će raditi",
+    "modeForward": "Preusmjeravanje s postojećeg broja (preporučeno)",
+    "modeNew": "Novi broj za salon",
+    "modeForwardDesc": "Klijenti zovu vaš broj kao i dosad; pozive na koje se ne javite preuzima asistentica.",
+    "modeNewDesc": "Asistentica dobiva novi broj koji objavite kao broj salona.",
+    "currentPhone": "Vaš postojeći broj",
+    "phoneInvalid": "Unesite valjan telefonski broj.",
+    "privatePhone": "To je i moj privatni telefon",
+    "privatePhoneDesc": "Tada asistentica prema zadanim postavkama prima pozive samo u radno vrijeme, a privatni pozivi navečer ostaju vaši.",
+    "companyName": "Naziv tvrtke",
+    "companyAddress": "Adresa tvrtke",
+    "companyAddressDesc": "Za lokalni broj adresa mora biti u području broja.",
+    "vat": "OIB / porezni broj",
+    "note": "Napomena (neobavezno)",
+    "send": "Pošalji zahtjev",
+    "sending": "Šaljem …",
+    "cancel": "Odustani",
+    "sent": "Zahtjev je poslan. Javit ćemo vam kad broj bude spreman.",
+    "alreadyRequested": "Zahtjev je već poslan.",
+    "error": "Zahtjev nije poslan. Pokušajte ponovno.",
+    "status": {
+      "submitted": "Broj je zatražen",
+      "ordered": "Broj je naručen",
+      "active": "Vaš broj je spreman",
+      "rejected": "Zahtjev nije uspio"
+    },
+    "pendingBody": "Poslano {date}. Javit ćemo vam kad broj bude spreman, obično za nekoliko dana.",
+    "activeBody": "Asistentica se javlja na {number}.",
+    "rejected": "Prethodni zahtjev nije uspio: {reason}"
   }
 }

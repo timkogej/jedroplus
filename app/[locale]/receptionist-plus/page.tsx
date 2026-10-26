@@ -17,6 +17,7 @@ import {
   LoadingState,
   ErrorState,
 } from '@/components/receptionist-plus/ReceptionistPlusTabs';
+import { NumberRequestCard } from '@/components/receptionist-plus/NumberRequestCard';
 
 // ─── Page ───────────────────────────────────────────────────────────────────
 
@@ -102,6 +103,7 @@ export default function ReceptionistPlusPage() {
                 />
               </div>
 
+              {tab === 'nastavitve' && <NumberRequestCard />}
               {tab === 'nastavitve' && settings && (
                 <NastavitveTab
                   settings={settings}

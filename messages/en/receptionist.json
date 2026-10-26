@@ -155,5 +155,51 @@
     "button": "Activate ReceptionistPlus",
     "activating": "Activating…",
     "error": "Activation failed. Please try again."
+  },
+  "numberRequest": {
+    "title": "The assistant's phone number",
+    "intro": "The assistant answers on its own phone number. Send a request; we set it up and let you know when it's ready (usually within a few days).",
+    "start": "Request a number",
+    "formDesc": "We filled in your company details from Jedro+; please check them. The number provider needs them for business numbers.",
+    "country": "Country",
+    "countries": {
+      "SI": "Slovenia",
+      "HR": "Croatia",
+      "AT": "Austria",
+      "DE": "Germany",
+      "IT": "Italy"
+    },
+    "area": "Number area",
+    "areaDesc": "Optional, e.g. 01 Ljubljana; otherwise based on your company address.",
+    "areaPlaceholder": "e.g. 01 Ljubljana",
+    "mode": "How it will work",
+    "modeForward": "Forward from your existing number (recommended)",
+    "modeNew": "A new number for the salon",
+    "modeForwardDesc": "Customers call your number as before; calls you don't answer go to the assistant.",
+    "modeNewDesc": "The assistant gets a new number that you publish as the salon's number.",
+    "currentPhone": "Your existing number",
+    "phoneInvalid": "Enter a valid phone number.",
+    "privatePhone": "This is also my private phone",
+    "privatePhoneDesc": "Then the assistant takes calls only during opening hours by default, so private calls in the evening stay yours.",
+    "companyName": "Company name",
+    "companyAddress": "Company address",
+    "companyAddressDesc": "For a local number the address must be in the number's area.",
+    "vat": "VAT / tax number",
+    "note": "Note (optional)",
+    "send": "Send request",
+    "sending": "Sending …",
+    "cancel": "Cancel",
+    "sent": "Request sent. We'll let you know when the number is ready.",
+    "alreadyRequested": "A request has already been sent.",
+    "error": "The request couldn't be sent. Please try again.",
+    "status": {
+      "submitted": "Number requested",
+      "ordered": "Number ordered",
+      "active": "Your number is ready",
+      "rejected": "The request didn't go through"
+    },
+    "pendingBody": "Sent on {date}. We'll let you know when the number is ready, usually within a few days.",
+    "activeBody": "The assistant answers on {number}.",
+    "rejected": "The previous request didn't go through: {reason}"
   }
 }

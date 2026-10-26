@@ -155,5 +155,51 @@
     "button": "ReceptionistPlus aktivieren",
     "activating": "Wird aktiviert…",
     "error": "Die Aktivierung ist fehlgeschlagen. Bitte versuchen Sie es erneut."
+  },
+  "numberRequest": {
+    "title": "Telefonnummer der Assistentin",
+    "intro": "Die Assistentin meldet sich unter einer eigenen Telefonnummer. Senden Sie eine Anfrage; wir richten sie ein und melden uns, sobald sie bereit ist (meist innerhalb weniger Tage).",
+    "start": "Nummer anfragen",
+    "formDesc": "Ihre Firmendaten haben wir aus Jedro+ übernommen; bitte prüfen. Der Anbieter benötigt sie für Geschäftsnummern.",
+    "country": "Land",
+    "countries": {
+      "SI": "Slowenien",
+      "HR": "Kroatien",
+      "AT": "Österreich",
+      "DE": "Deutschland",
+      "IT": "Italien"
+    },
+    "area": "Vorwahlbereich",
+    "areaDesc": "Optional, z. B. 01 Wien; sonst nach Firmenadresse.",
+    "areaPlaceholder": "z. B. 01 Wien",
+    "mode": "So funktioniert es",
+    "modeForward": "Weiterleitung von Ihrer bestehenden Nummer (empfohlen)",
+    "modeNew": "Neue Nummer für den Salon",
+    "modeForwardDesc": "Kunden rufen wie bisher Ihre Nummer an; Anrufe, die Sie nicht annehmen, übernimmt die Assistentin.",
+    "modeNewDesc": "Die Assistentin bekommt eine neue Nummer, die Sie als Salonnummer veröffentlichen.",
+    "currentPhone": "Ihre bestehende Nummer",
+    "phoneInvalid": "Bitte eine gültige Telefonnummer eingeben.",
+    "privatePhone": "Das ist auch mein privates Telefon",
+    "privatePhoneDesc": "Dann nimmt die Assistentin standardmäßig nur während der Öffnungszeiten Anrufe an, private Anrufe am Abend bleiben bei Ihnen.",
+    "companyName": "Firmenname",
+    "companyAddress": "Firmenadresse",
+    "companyAddressDesc": "Für eine Ortsnummer muss die Adresse im Vorwahlbereich liegen.",
+    "vat": "Steuer-/USt-Nummer",
+    "note": "Anmerkung (optional)",
+    "send": "Anfrage senden",
+    "sending": "Wird gesendet …",
+    "cancel": "Abbrechen",
+    "sent": "Anfrage gesendet. Wir melden uns, sobald die Nummer bereit ist.",
+    "alreadyRequested": "Eine Anfrage wurde bereits gesendet.",
+    "error": "Die Anfrage konnte nicht gesendet werden. Bitte erneut versuchen.",
+    "status": {
+      "submitted": "Nummer angefragt",
+      "ordered": "Nummer bestellt",
+      "active": "Ihre Nummer ist bereit",
+      "rejected": "Die Anfrage war nicht erfolgreich"
+    },
+    "pendingBody": "Gesendet am {date}. Wir melden uns, sobald die Nummer bereit ist, meist innerhalb weniger Tage.",
+    "activeBody": "Die Assistentin meldet sich unter {number}.",
+    "rejected": "Die letzte Anfrage war nicht erfolgreich: {reason}"
   }
 }

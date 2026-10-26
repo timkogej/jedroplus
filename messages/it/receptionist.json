@@ -155,5 +155,51 @@
     "button": "Attiva ReceptionistPlus",
     "activating": "Attivazione…",
     "error": "Attivazione non riuscita. Riprova."
+  },
+  "numberRequest": {
+    "title": "Numero di telefono dell'assistente",
+    "intro": "L'assistente risponde su un proprio numero. Invii una richiesta: lo configuriamo noi e la avvisiamo quando è pronto (di solito in pochi giorni).",
+    "start": "Richiedi un numero",
+    "formDesc": "Abbiamo inserito i dati aziendali da Jedro+; li verifichi. Il fornitore li richiede per i numeri aziendali.",
+    "country": "Paese",
+    "countries": {
+      "SI": "Slovenia",
+      "HR": "Croazia",
+      "AT": "Austria",
+      "DE": "Germania",
+      "IT": "Italia"
+    },
+    "area": "Prefisso",
+    "areaDesc": "Facoltativo, ad es. 02 Milano; altrimenti in base all'indirizzo.",
+    "areaPlaceholder": "ad es. 02 Milano",
+    "mode": "Come funzionerà",
+    "modeForward": "Inoltro dal numero esistente (consigliato)",
+    "modeNew": "Un nuovo numero per il salone",
+    "modeForwardDesc": "I clienti chiamano il suo numero come sempre; le chiamate a cui non risponde passano all'assistente.",
+    "modeNewDesc": "L'assistente riceve un nuovo numero da pubblicare come numero del salone.",
+    "currentPhone": "Il suo numero attuale",
+    "phoneInvalid": "Inserisca un numero di telefono valido.",
+    "privatePhone": "È anche il mio telefono privato",
+    "privatePhoneDesc": "Allora l'assistente risponde di default solo negli orari di apertura, così le chiamate private della sera restano sue.",
+    "companyName": "Nome dell'azienda",
+    "companyAddress": "Indirizzo dell'azienda",
+    "companyAddressDesc": "Per un numero locale l'indirizzo deve trovarsi nell'area del prefisso.",
+    "vat": "Partita IVA / codice fiscale",
+    "note": "Nota (facoltativa)",
+    "send": "Invia richiesta",
+    "sending": "Invio …",
+    "cancel": "Annulla",
+    "sent": "Richiesta inviata. La avviseremo quando il numero sarà pronto.",
+    "alreadyRequested": "Una richiesta è già stata inviata.",
+    "error": "Impossibile inviare la richiesta. Riprovi.",
+    "status": {
+      "submitted": "Numero richiesto",
+      "ordered": "Numero ordinato",
+      "active": "Il suo numero è pronto",
+      "rejected": "La richiesta non è andata a buon fine"
+    },
+    "pendingBody": "Inviata il {date}. La avviseremo quando il numero sarà pronto, di solito in pochi giorni.",
+    "activeBody": "L'assistente risponde al {number}.",
+    "rejected": "La richiesta precedente non è andata a buon fine: {reason}"
   }
 }
