@@ -155,5 +155,51 @@
     "button": "Aktiviraj ReceptionistPlus",
     "activating": "Aktiviram…",
     "error": "Aktivacija ni uspela. Poskusite znova."
+  },
+  "numberRequest": {
+    "title": "Telefonska številka asistentke",
+    "intro": "Asistentka se oglaša na svoji telefonski številki. Pošljite zahtevo, mi jo uredimo in vas obvestimo, ko je pripravljena (običajno v nekaj dneh).",
+    "start": "Zahtevaj številko",
+    "formDesc": "Podatke podjetja smo izpolnili iz Jedro+; preverite jih. Ponudnik številke jih zahteva za poslovne številke.",
+    "country": "Država",
+    "countries": {
+      "SI": "Slovenija",
+      "HR": "Hrvaška",
+      "AT": "Avstrija",
+      "DE": "Nemčija",
+      "IT": "Italija"
+    },
+    "area": "Območje številke",
+    "areaDesc": "Neobvezno. Npr. 01 Ljubljana; sicer glede na naslov podjetja.",
+    "areaPlaceholder": "npr. 01 Ljubljana",
+    "mode": "Kako bo delovala",
+    "modeForward": "Preusmeritev z obstoječe številke (priporočeno)",
+    "modeNew": "Nova številka za salon",
+    "modeForwardDesc": "Stranke kličejo vašo številko kot doslej; klice, na katere se ne oglasite, prevzame asistentka.",
+    "modeNewDesc": "Asistentka dobi novo številko, ki jo objavite kot številko salona.",
+    "currentPhone": "Vaša obstoječa številka",
+    "phoneInvalid": "Vnesite veljavno telefonsko številko.",
+    "privatePhone": "To je tudi moj zasebni telefon",
+    "privatePhoneDesc": "Potem asistentka privzeto sprejema klice samo v delovnem času, da zasebni klici zvečer ostanejo vaši.",
+    "companyName": "Ime podjetja",
+    "companyAddress": "Naslov podjetja",
+    "companyAddressDesc": "Za lokalno številko mora biti naslov v območju številke.",
+    "vat": "Davčna številka",
+    "note": "Opomba (neobvezno)",
+    "send": "Pošlji zahtevo",
+    "sending": "Pošiljam …",
+    "cancel": "Prekliči",
+    "sent": "Zahteva je poslana. Obvestili vas bomo, ko bo številka pripravljena.",
+    "alreadyRequested": "Zahteva je že oddana.",
+    "error": "Zahteve ni bilo mogoče poslati. Poskusite znova.",
+    "status": {
+      "submitted": "Zahteva za številko je oddana",
+      "ordered": "Številka je naročena",
+      "active": "Številka je pripravljena",
+      "rejected": "Zahteva ni bila uspešna"
+    },
+    "pendingBody": "Oddano {date}. Obvestili vas bomo, ko bo številka pripravljena, običajno v nekaj dneh.",
+    "activeBody": "Asistentka se oglaša na {number}.",
+    "rejected": "Prejšnja zahteva ni uspela: {reason}"
   }
 }
