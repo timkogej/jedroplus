@@ -177,7 +177,20 @@
       "templateHint": "Predloga SMS sporočila (max 155 znakov)",
       "templatePlaceholder": "Npr: Vaša rezervacija je potrjena za {{datum}} ob {{cas}}. {{ime_podjetja}}.",
       "noEmojiHint": "Brez emojijev in posebnih znakov.",
-      "englishSaveError": "Nastavitve so shranjene, angleška različica potrdila pa ne. Poskusite znova."
+      "englishSaveError": "Nastavitve so shranjene, angleška različica potrdila pa ne. Poskusite znova.",
+      "email": {
+        "title": "Besedilo email potrdila",
+        "appliesTo": "Velja za potrdila po emailu, pri ročnih in spletnih rezervacijah.",
+        "aiHint": "AI vsakič sestavi novo, kratko besedilo v jeziku stranke.",
+        "subjectLabel": "Zadeva",
+        "bodyLabel": "Besedilo",
+        "bodyHint": "Enter doda novo vrstico. Datum, ura, storitev in gumb za prestavitev so v emailu prikazani tudi posebej, pod besedilom.",
+        "bodyPlaceholder": "Pozdravljeni {{ime}}, vaš termin je rezerviran za {{datum}} ob {{cas}}.",
+        "defaultSubject": "Vaš termin pri {{ime_podjetja}}",
+        "defaultBody": "Pozdravljeni {{ime}},\n\nvaš termin je rezerviran za {{datum}} ob {{cas}}.\nStoritev: {{storitev}}\n\nČe ga želite prestaviti ali odpovedati, lahko to storite tukaj: {{povezava_prenarocanje}}\n\nSe vidimo,\n{{ime_podjetja}}\n{{telefon_podjetja}}",
+        "emptyBodyWarning": "Brez besedila bo email še naprej sestavil AI.",
+        "saveError": "Nastavitve so shranjene, predloge potrdil pa ne. Poskusite znova."
+      }
     },
     "policy": {
       "sectionTitle": "Politika odpovedi in prestavitev",

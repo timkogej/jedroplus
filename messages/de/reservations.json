@@ -177,7 +177,20 @@
       "templateHint": "Vorlage für die SMS (max. 155 Zeichen)",
       "templatePlaceholder": "z. B.: Ihre Buchung am {{datum}} um {{cas}} ist bestätigt. {{ime_podjetja}}.",
       "noEmojiHint": "Keine Emojis und keine Sonderzeichen.",
-      "englishSaveError": "Die Einstellungen wurden gespeichert, die englische Version der Bestätigung jedoch nicht. Bitte versuchen Sie es erneut."
+      "englishSaveError": "Die Einstellungen wurden gespeichert, die englische Version der Bestätigung jedoch nicht. Bitte versuchen Sie es erneut.",
+      "email": {
+        "title": "Text der Bestätigungs-E-Mail",
+        "appliesTo": "Gilt für Bestätigungen per E-Mail, bei manuellen und Online-Buchungen.",
+        "aiHint": "Die KI schreibt jedes Mal einen neuen, kurzen Text in der Sprache des Kunden.",
+        "subjectLabel": "Betreff",
+        "bodyLabel": "Text",
+        "bodyHint": "Enter fügt eine neue Zeile ein. Datum, Uhrzeit, Leistung und der Button zum Verschieben werden in der E-Mail zusätzlich unter dem Text angezeigt.",
+        "bodyPlaceholder": "Hallo {{ime}}, Ihr Termin ist für {{datum}} um {{cas}} gebucht.",
+        "defaultSubject": "Ihr Termin bei {{ime_podjetja}}",
+        "defaultBody": "Hallo {{ime}},\n\nIhr Termin für {{storitev}} ist für {{datum}} um {{cas}} gebucht.\n\nWenn Sie ihn verschieben oder absagen möchten, können Sie das hier tun: {{povezava_prenarocanje}}\n\nBis bald,\n{{ime_podjetja}}\n{{telefon_podjetja}}",
+        "emptyBodyWarning": "Ohne Text schreibt weiterhin die KI die E-Mail.",
+        "saveError": "Die Einstellungen wurden gespeichert, die Bestätigungsvorlagen aber nicht. Bitte erneut versuchen."
+      }
     },
     "policy": {
       "sectionTitle": "Storno- und Umbuchungsregeln",
