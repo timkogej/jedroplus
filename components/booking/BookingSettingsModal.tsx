@@ -22,6 +22,7 @@ import { callN8nAction } from '@/src/lib/n8nClient';
 import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
 import { TemplateEditor, migrateTemplate, sanitizeTemplateText, linkLength } from '@/components/reminders/TemplateEditor';
 import { EnglishVariant } from '@/components/reminders/EnglishVariant';
+import { EmailConfirmationTemplate, type EmailTemplateValue } from '@/components/booking/EmailConfirmationTemplate';
 import { sheet } from '@/components/ui/sheetClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
@@ -139,6 +140,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const loadedPotrdiloEnRef = useRef('');
   const [sendingLanguage, setSendingLanguage] = useState('sl');
   const [lastnaPredlogaPotrdilo, setLastnaPredlogaPotrdilo] = useState('');
+
+  // Email confirmation: AI (default) or own template, for manual and online
+  // bookings. Saved through /api/company/message-templates (1792900000).
+  const [emailModePotrdilo, setEmailModePotrdilo] = useState<'ai' | 'manual'>('ai');
+  const [emailPotrdilo, setEmailPotrdilo] = useState<EmailTemplateValue>({ subject: '', body: '' });
+  const [emailPotrdiloEn, setEmailPotrdiloEn] = useState<EmailTemplateValue>({ subject: '', body: '' });
+  const loadedEmailTemplatesRef = useRef<Record<string, string>>({});
 
   // Company data for SMS variable length estimation
   const [kompanyEmail, setKompanyEmail] = useState('');
@@ -261,6 +269,24 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           loadedPotrdiloEnRef.current = potrdiloEnLoaded;
           setSendingLanguage(String(data['jezik posiljanja'] ?? data['jezik_posiljanja'] ?? 'sl'));
 
+          const emailLoaded = {
+            email_type_potrdilo: String(data['email_type_potrdilo'] ?? 'AI').toUpperCase() === 'LP' ? 'LP' : 'AI',
+            email_zadeva_potrdilo: String(data['email_zadeva_potrdilo'] ?? ''),
+            email_predloga_potrdilo: String(data['email_predloga_potrdilo'] ?? ''),
+            email_zadeva_potrdilo_en: String(data['email_zadeva_potrdilo_en'] ?? ''),
+            email_predloga_potrdilo_en: String(data['email_predloga_potrdilo_en'] ?? ''),
+          };
+          loadedEmailTemplatesRef.current = emailLoaded;
+          setEmailModePotrdilo(emailLoaded.email_type_potrdilo === 'LP' ? 'manual' : 'ai');
+          setEmailPotrdilo({
+            subject: migrateTemplate(emailLoaded.email_zadeva_potrdilo),
+            body: migrateTemplate(emailLoaded.email_predloga_potrdilo),
+          });
+          setEmailPotrdiloEn({
+            subject: migrateTemplate(emailLoaded.email_zadeva_potrdilo_en),
+            body: migrateTemplate(emailLoaded.email_predloga_potrdilo_en),
+          });
+
           // Company data for SMS variable length estimation
           setKompanyEmail(String(data['Kontaktni email'] ?? data['kontaktni_email'] ?? data['from_email'] ?? ''));
           setNazivPodjetja(String(data['Naziv podjetja'] ?? data['Naziv Podjetja'] ?? data['naziv_podjetja'] ?? ''));
@@ -365,17 +391,37 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         throw new Error(t('modal.footer.saveError'));
       }
 
+      // Columns the app writes itself (n8n's settings workflow doesn't know them).
+      const templatePatch: Record<string, string> = {};
       if (potrdiloEn.trim() !== loadedPotrdiloEnRef.current.trim()) {
+        templatePatch.lastna_predloga_potrdilo_en = potrdiloEn;
+      }
+      const emailCurrent: Record<string, string> = {
+        email_type_potrdilo: emailModePotrdilo === 'manual' ? 'LP' : 'AI',
+        email_zadeva_potrdilo: emailPotrdilo.subject,
+        email_predloga_potrdilo: emailPotrdilo.body,
+        email_zadeva_potrdilo_en: emailPotrdiloEn.subject,
+        email_predloga_potrdilo_en: emailPotrdiloEn.body,
+      };
+      for (const [column, value] of Object.entries(emailCurrent)) {
+        if (value.trim() !== (loadedEmailTemplatesRef.current[column] ?? '').trim()) templatePatch[column] = value;
+      }
+      if (Object.keys(templatePatch).length > 0) {
         const res = await fetch('/api/company/message-templates', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lastna_predloga_potrdilo_en: potrdiloEn }),
+          body: JSON.stringify(templatePatch),
         }).catch(() => null);
         if (!res?.ok) {
-          toast.error(t('modal.confirmations.englishSaveError'));
+          toast.error(
+            Object.keys(templatePatch).some((column) => column.startsWith('email_'))
+              ? t('modal.confirmations.email.saveError')
+              : t('modal.confirmations.englishSaveError'),
+          );
           return;
         }
         loadedPotrdiloEnRef.current = potrdiloEn;
+        loadedEmailTemplatesRef.current = { ...loadedEmailTemplatesRef.current, ...emailCurrent };
       }
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -746,6 +792,23 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         </motion.div>
                       )}
                     </div>
+
+                    {/* One email text for both kinds of booking */}
+                    {((potrdiloReservation && potrdiloChannel === 'email') ||
+                      (potrdiloOnline && potrdiloOnlineChannel === 'email')) && (
+                      <div className="px-4 pb-3">
+                        <EmailConfirmationTemplate
+                          mode={emailModePotrdilo}
+                          onModeChange={setEmailModePotrdilo}
+                          value={emailPotrdilo}
+                          onChange={setEmailPotrdilo}
+                          english={emailPotrdiloEn}
+                          onEnglishChange={setEmailPotrdiloEn}
+                          showEnglish={sendingLanguage !== 'en'}
+                          companyName={nazivPodjetja}
+                        />
+                      </div>
+                    )}
                   </SettingsSection>
 
                   {/* Cancellation & Rescheduling Policy */}

@@ -177,7 +177,20 @@
       "templateHint": "Predložak SMS poruke (najviše 155 znakova)",
       "templatePlaceholder": "Npr.: Vasa rezervacija je potvrdena za {{datum}} u {{cas}}. {{ime_podjetja}}.",
       "noEmojiHint": "Bez emojija, dijakritičkih i posebnih znakova.",
-      "englishSaveError": "Postavke su spremljene, ali engleska verzija potvrde nije. Pokušajte ponovno."
+      "englishSaveError": "Postavke su spremljene, ali engleska verzija potvrde nije. Pokušajte ponovno.",
+      "email": {
+        "title": "Tekst e-mail potvrde",
+        "appliesTo": "Vrijedi za potvrde e-mailom, kod ručnih i online rezervacija.",
+        "aiHint": "AI svaki put sastavi novi, kratki tekst na jeziku klijenta.",
+        "subjectLabel": "Predmet",
+        "bodyLabel": "Tekst",
+        "bodyHint": "Enter dodaje novi red. Datum, vrijeme, usluga i gumb za promjenu termina prikazani su u e-mailu i zasebno, ispod teksta.",
+        "bodyPlaceholder": "Poštovani {{ime}}, vaš termin je rezerviran za {{datum}} u {{cas}}.",
+        "defaultSubject": "Vaš termin u {{ime_podjetja}}",
+        "defaultBody": "Poštovani {{ime}},\n\nvaš termin rezerviran je za {{datum}} u {{cas}}.\nUsluga: {{storitev}}\n\nAko ga želite promijeniti ili otkazati, to možete učiniti ovdje: {{povezava_prenarocanje}}\n\nVidimo se,\n{{ime_podjetja}}\n{{telefon_podjetja}}",
+        "emptyBodyWarning": "Bez teksta e-mail će i dalje sastavljati AI.",
+        "saveError": "Postavke su spremljene, ali predlošci potvrda nisu. Pokušajte ponovno."
+      }
     },
     "policy": {
       "sectionTitle": "Pravila otkazivanja i promjene termina",

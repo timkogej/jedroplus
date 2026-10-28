@@ -158,6 +158,12 @@ export function sanitizeTemplateText(text: string): string {
   return text.replace(EMOJI_REGEX, '').replace(/[\r\n]+/g, ' ');
 }
 
+// Email bodies: line breaks and emoji are fine there; only drop \r and
+// more than one empty line in a row.
+export function sanitizeMultilineText(text: string): string {
+  return text.replace(/\r/g, '').replace(/\n{3,}/g, '\n\n');
+}
+
 // Extract raw template string from contentEditable DOM
 function extractTemplate(el: HTMLElement): string {
   let result = '';
@@ -193,6 +199,8 @@ interface TemplateEditorProps {
   varLengths?: Record<string, number>;
   /** Oznake, ki veljajo samo za to vrsto sporočila (npr. PO_TERMINU_VARS). */
   extraVars?: ReadonlyArray<{ token: string; label: string }>;
+  /** Email body: Enter adds a line break, emoji are kept. SMS stays one line. */
+  multiline?: boolean;
 }
 
 export function TemplateEditor({
@@ -203,7 +211,9 @@ export function TemplateEditor({
   rows = 4,
   varLengths = {},
   extraVars = NO_EXTRA_VARS,
+  multiline = false,
 }: TemplateEditorProps) {
+  const sanitize = multiline ? sanitizeMultilineText : sanitizeTemplateText;
   const t = useTranslations('reminders.templateEditor');
   const labels = useMemo<Record<string, string>>(
     () => ({
@@ -240,7 +250,7 @@ export function TemplateEditor({
   const handleInput = useCallback(() => {
     if (!editorRef.current) return;
     const raw = extractTemplate(editorRef.current);
-    const sanitized = sanitizeTemplateText(raw);
+    const sanitized = sanitize(raw);
     if (sanitized !== raw) {
       // Rebuild the DOM to strip emoji/newlines that slipped in (e.g. via IME or drag-drop)
       editorRef.current.innerHTML = buildHTML(sanitized, labels);
@@ -261,14 +271,19 @@ export function TemplateEditor({
     isInternalRef.current = true;
     lastRawRef.current = raw;
     onChange(raw);
-  }, [onChange, labels]);
+  }, [onChange, labels, sanitize]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (!editorRef.current) return;
       if (e.key === 'Enter') {
-        // Templates must stay on a single line
         e.preventDefault();
+        if (multiline) {
+          // A <br>, not the browser's <div>, so one Enter is one line break.
+          document.execCommand('insertLineBreak');
+          handleInput();
+        }
+        // SMS templates must stay on a single line
         return;
       }
       if (!maxLength) return;
@@ -281,14 +296,14 @@ export function TemplateEditor({
         }
       }
     },
-    [maxLength, varLengths]
+    [maxLength, varLengths, multiline, handleInput]
   );
 
   const handlePaste = useCallback(
     (e: React.ClipboardEvent) => {
       e.preventDefault();
       if (!editorRef.current) return;
-      const pasted = sanitizeTemplateText(e.clipboardData.getData('text/plain'));
+      const pasted = sanitize(e.clipboardData.getData('text/plain'));
       if (!pasted) return;
 
       const raw = extractTemplate(editorRef.current);
@@ -318,7 +333,7 @@ export function TemplateEditor({
 
       handleInput();
     },
-    [handleInput, maxLength, varLengths]
+    [handleInput, maxLength, varLengths, sanitize]
   );
 
   const insertToken = useCallback(
@@ -441,7 +456,7 @@ export function TemplateEditor({
         </div>
 
         {/* Zakaj je kakšna spremenljivka zbledela — brez tega je videti kot okvara. */}
-        {maxLength && vseOznake.some(v => !prostoZa(v.token)) && (
+        {maxLength > 0 && vseOznake.some(v => !prostoZa(v.token)) && (
           <p className="mt-2 text-xs text-amber-600">
             Zbledele spremenljivke se v to predlogo ne prilegajo več. Skrajšajte
             besedilo, da jih boste lahko dodali.
@@ -471,12 +486,17 @@ export function TemplateEditor({
               ? 'border-red-300 focus:border-red-400'
               : 'border-gray-200 focus:border-violet-300'
           }`}
-          style={{ minHeight: `${rows * 1.75}rem`, wordBreak: 'break-word' }}
+          style={{
+            minHeight: `${rows * 1.75}rem`,
+            wordBreak: 'break-word',
+            // Pasted text keeps its line breaks as \n inside text nodes.
+            ...(multiline ? { whiteSpace: 'pre-wrap' as const } : {}),
+          }}
         />
       </div>
 
       {/* Character counter */}
-      {maxLength && (
+      {maxLength > 0 && (
         <div className="flex flex-col gap-1">
           <div className="flex justify-between items-center">
             <span className="text-xs text-gray-400">
