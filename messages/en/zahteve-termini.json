@@ -26,11 +26,13 @@
     "vseeno": "Any time"
   },
   "card": {
-    "preferredRange": "Preferred: {from} – {to}",
+    "preferredRange": "Preferred: {range}",
     "requested": "Requested {date}",
     "confirm": "Confirm",
     "reject": "Reject",
-    "rejectedReason": "Reason: {reason}"
+    "rejectedReason": "Reason: {reason}",
+    "unsure": "Client is not sure – read the description",
+    "anyEmployee": "Anyone"
   },
   "rejectModal": {
     "title": "Reject request",
@@ -52,7 +54,7 @@
       "employee": "Staff member",
       "slot": "Date & time"
     },
-    "serviceLabel": "Service",
+    "serviceLabel": "Services",
     "servicePlaceholder": "Select service...",
     "employeeLabel": "Staff member",
     "employeePlaceholder": "Select staff member...",
@@ -66,6 +68,10 @@
     "success": "Appointment confirmed.",
     "error": "Failed to confirm the appointment.",
     "unavailableDay": "Unavailable",
-    "fullyBookedDay": "Fully booked"
+    "fullyBookedDay": "Fully booked",
+    "addService": "Add a service …",
+    "removeService": "Remove service",
+    "clientUnsure": "The client did not choose a service. Pick one based on the description.",
+    "clientWants": "Client would like: {name}"
   }
 }

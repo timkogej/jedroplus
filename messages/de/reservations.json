@@ -10,7 +10,8 @@
   "newDesignsBanner": "Jeden Monat neue Designs für die Buchungsseite",
   "requestsNav": {
     "title": "Terminanfragen",
-    "subtitle": "Anfragen Ihrer Kunden prüfen und bestätigen"
+    "subtitle": "Anfragen Ihrer Kunden prüfen und bestätigen",
+    "pending": "{count, plural, one {# neue Anfrage} other {# neue Anfragen}}"
   },
   "multiChannelBanner": {
     "bold": "Nutzen Sie für jeden Kanal einen eigenen Buchungslink.",
@@ -104,7 +105,11 @@
     "onlineConfirmDesc": "Bestätigung für Termine, die über die Website gebucht wurden.",
     "mainLinkDesc": "Der Link, den Sie zum Buchen mit Kunden teilen.",
     "colorsDesc": "Die Farben der Buchungsseite, die Ihre Kunden sehen.",
-    "mgmtLinkDesc": "Über diesen Link verschieben oder stornieren Kunden ihren Termin."
+    "mgmtLinkDesc": "Über diesen Link verschieben oder stornieren Kunden ihren Termin.",
+    "bookingMode": "Buchungsart",
+    "bookingModeDesc": "Wie Kunden auf Ihrer Buchungsseite buchen",
+    "modeInstant": "Sofort",
+    "modeRequest": "Anfrage"
   },
   "modal": {
     "title": "Buchungseinstellungen",
@@ -122,7 +127,14 @@
       "interval60": "60 Minuten (1 Stunde)",
       "windowLabel": "Wie viele Tage im Voraus gebucht werden kann",
       "windowDesc": "Gilt für die Online-Buchung und Receptionist+.",
-      "windowDays": "{days, plural, one {# Tag} other {# Tage}}"
+      "windowDays": "{days, plural, one {# Tag} other {# Tage}}",
+      "modeLabel": "Buchungsart",
+      "modeDesc": "Wie Kunden auf Ihrer Buchungsseite buchen.",
+      "modeInstant": "Sofortbuchung",
+      "modeInstantDesc": "Der Kunde wählt einen freien Termin und ist sofort gebucht.",
+      "modeRequest": "Anfrage",
+      "modeRequestDesc": "Der Kunde sagt, wann es passt und was er möchte. Sie wählen den Termin unter Terminanfragen.",
+      "modeSaveError": "Die Einstellungen wurden gespeichert, die Buchungsart aber nicht. Bitte erneut versuchen."
     },
     "payments": {
       "sectionTitle": "Online-Zahlungen",

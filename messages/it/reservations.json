@@ -10,7 +10,8 @@
   "newDesignsBanner": "Ogni mese nuovi design per le pagine di prenotazione",
   "requestsNav": {
     "title": "Richieste di appuntamento",
-    "subtitle": "Esamina e conferma le richieste inviate dai clienti"
+    "subtitle": "Esamina e conferma le richieste inviate dai clienti",
+    "pending": "{count, plural, one {# nuova richiesta} other {# nuove richieste}}"
   },
   "multiChannelBanner": {
     "bold": "Puoi usare ogni link di prenotazione su un canale diverso.",
@@ -104,7 +105,11 @@
     "onlineConfirmDesc": "Conferma per gli appuntamenti prenotati tramite il sito.",
     "mainLinkDesc": "Il link che condividi con i clienti per prenotare.",
     "colorsDesc": "I colori della pagina di prenotazione che vedono i tuoi clienti.",
-    "mgmtLinkDesc": "Tramite questo link i clienti spostano o annullano l'appuntamento."
+    "mgmtLinkDesc": "Tramite questo link i clienti spostano o annullano l'appuntamento.",
+    "bookingMode": "Modalità di prenotazione",
+    "bookingModeDesc": "Come i clienti prenotano sulla tua pagina",
+    "modeInstant": "Immediata",
+    "modeRequest": "Richiesta"
   },
   "modal": {
     "title": "Impostazioni prenotazioni",
@@ -122,7 +127,14 @@
       "interval60": "60 minuti (1 ora)",
       "windowLabel": "Con quanti giorni di anticipo si può prenotare",
       "windowDesc": "Vale per la prenotazione online e Receptionist+.",
-      "windowDays": "{days, plural, one {# giorno} other {# giorni}}"
+      "windowDays": "{days, plural, one {# giorno} other {# giorni}}",
+      "modeLabel": "Modalità di prenotazione",
+      "modeDesc": "Come i clienti prenotano sulla tua pagina.",
+      "modeInstant": "Prenotazione immediata",
+      "modeInstantDesc": "Il cliente sceglie un orario libero ed è subito prenotato.",
+      "modeRequest": "Richiesta",
+      "modeRequestDesc": "Il cliente indica quando gli va bene e cosa desidera. Tu scegli l'orario in Richieste di appuntamento.",
+      "modeSaveError": "Le impostazioni sono state salvate, la modalità di prenotazione no. Riprova."
     },
     "payments": {
       "sectionTitle": "Pagamenti online",

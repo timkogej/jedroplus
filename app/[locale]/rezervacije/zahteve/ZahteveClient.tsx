@@ -4,8 +4,10 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Clock, Envelope, Phone, CalendarBlank } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { ArrowLeft, Clock, Envelope, Phone, CalendarBlank, Sparkle, User } from '@phosphor-icons/react';
+import { useLocale, useTranslations } from 'next-intl';
+import { formatRequestRange } from '@/components/zahteve/format';
+import { intlLocale } from '@/lib/format';
 import { toast } from 'sonner';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
@@ -42,6 +44,7 @@ function statusBadgeClasses(status: ZahtevaTerminaStatus) {
 
 export default function ZahteveClient() {
   const t = useTranslations('zahteve-termini');
+  const locale = useLocale();
   const router = useRouter();
   const { companyId, loading: companyLoading } = useCompany();
   const { role, permissions } = useRolePermissions();
@@ -49,7 +52,8 @@ export default function ZahteveClient() {
 
   const [zahteve, setZahteve] = useState<ZahtevaTermina[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterValue>('all');
+  // Open the list on what needs an answer.
+  const [filter, setFilter] = useState<FilterValue>('v_pregledu');
   const [confirmTarget, setConfirmTarget] = useState<ZahtevaTermina | null>(null);
   const [rejectTarget, setRejectTarget] = useState<ZahtevaTermina | null>(null);
 
@@ -90,12 +94,15 @@ export default function ZahteveClient() {
     );
   }
 
-  const filteredZahteve =
-    filter === 'all' ? zahteve : zahteve.filter((z) => z.status === filter);
+  const filteredZahteve = (filter === 'all' ? zahteve : zahteve.filter((z) => z.status === filter))
+    // Waiting ones first; within a group the list is already newest first.
+    .slice()
+    .sort((a, b) => Number(b.status === 'v_pregledu') - Number(a.status === 'v_pregledu'));
+  const pendingCount = zahteve.filter((z) => z.status === 'v_pregledu').length;
 
   const filterOptions = [
     { value: 'all', label: t('filters.all') },
-    { value: 'v_pregledu', label: t('filters.pending') },
+    { value: 'v_pregledu', label: pendingCount > 0 ? `${t('filters.pending')} (${pendingCount})` : t('filters.pending') },
     { value: 'potrjeno', label: t('filters.confirmed') },
     { value: 'zavrnjeno', label: t('filters.rejected') },
   ];
@@ -198,22 +205,37 @@ export default function ZahteveClient() {
                       )}
                     </div>
 
+                    <p className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-900">
+                      <Sparkle className="h-3.5 w-3.5 text-violet-500" weight="fill" />
+                      {zahteva.storitve || t('card.unsure')}
+                    </p>
                     {zahteva.opis_zelje && (
-                      <p className="mt-3 text-sm leading-6 text-gray-700">{zahteva.opis_zelje}</p>
+                      <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-gray-700">{zahteva.opis_zelje}</p>
                     )}
 
                     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500">
                       <span className="inline-flex items-center gap-1">
                         <CalendarBlank className="h-3.5 w-3.5" weight="regular" />
                         {t('card.preferredRange', {
-                          from: zahteva.zeljeni_datum_od,
-                          to: zahteva.zeljeni_datum_do,
+                          range: formatRequestRange(zahteva.zeljeni_datum_od, zahteva.zeljeni_datum_do, locale),
                         })}
+                        {zahteva.zeljeni_cas && <span className="text-gray-400">({zahteva.zeljeni_cas})</span>}
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" weight="regular" />
                         {t(`delDneva.${zahteva.zeljeni_del_dneva}`)}
                       </span>
+                      <span className="inline-flex items-center gap-1">
+                        <User className="h-3.5 w-3.5" weight="regular" />
+                        {zahteva.zeljeni_zaposleni || t('card.anyEmployee')}
+                      </span>
+                      {zahteva.created_at && (
+                        <span className="text-gray-400">
+                          {t('card.requested', {
+                            date: new Intl.DateTimeFormat(intlLocale(locale), { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(zahteva.created_at)),
+                          })}
+                        </span>
+                      )}
                     </div>
 
                     {zahteva.status === 'zavrnjeno' && zahteva.zavrnitev_razlog && (

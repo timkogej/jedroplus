@@ -31,6 +31,7 @@ export function notificationHref(n: NotificationLinkFields): string | null {
     return query ? `/koledar?${query}` : '/koledar';
   }
 
+  if (entity === 'booking_request' || type === 'booking_request') return '/rezervacije/zahteve';
   if (entity.startsWith('receptionist')) return '/receptionist-plus';
 
   return null;
