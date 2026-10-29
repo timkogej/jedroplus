@@ -10,7 +10,8 @@
   "newDesignsBanner": "Svaki mjesec novi dizajni stranica za rezervacije",
   "requestsNav": {
     "title": "Zahtjevi za termin",
-    "subtitle": "Pregledajte i potvrdite zahtjeve koje šalju klijenti"
+    "subtitle": "Pregledajte i potvrdite zahtjeve koje šalju klijenti",
+    "pending": "{count, plural, one {# novi zahtjev} few {# nova zahtjeva} other {# novih zahtjeva}}"
   },
   "multiChannelBanner": {
     "bold": "Svaku poveznicu za rezervacije možete koristiti na drugom kanalu.",
@@ -104,7 +105,11 @@
     "onlineConfirmDesc": "Potvrda za termine rezervirane putem web stranice.",
     "mainLinkDesc": "Poveznica koju dijelite s klijentima za rezervaciju.",
     "colorsDesc": "Boje stranice za rezervaciju koju vide vaši klijenti.",
-    "mgmtLinkDesc": "Putem ove poveznice klijenti premještaju ili otkazuju termin."
+    "mgmtLinkDesc": "Putem ove poveznice klijenti premještaju ili otkazuju termin.",
+    "bookingMode": "Način rezervacije",
+    "bookingModeDesc": "Kako klijenti rezerviraju na web stranici",
+    "modeInstant": "Trenutna",
+    "modeRequest": "Upit"
   },
   "modal": {
     "title": "Postavke rezervacija",
@@ -122,7 +127,14 @@
       "interval60": "60 minuta (1 sat)",
       "windowLabel": "Koliko dana unaprijed se može rezervirati",
       "windowDesc": "Vrijedi za online rezervaciju i Receptionist+.",
-      "windowDays": "{days, plural, one {# dan} few {# dana} other {# dana}}"
+      "windowDays": "{days, plural, one {# dan} few {# dana} other {# dana}}",
+      "modeLabel": "Način rezervacije",
+      "modeDesc": "Kako klijenti rezerviraju na web stranici.",
+      "modeInstant": "Trenutna rezervacija",
+      "modeInstantDesc": "Klijent odabere slobodan termin i odmah je rezerviran.",
+      "modeRequest": "Upit",
+      "modeRequestDesc": "Klijent kaže kada mu odgovara i što želi. Vi birate termin u Zahtjevima za termin.",
+      "modeSaveError": "Postavke su spremljene, ali način rezervacije nije. Pokušajte ponovno."
     },
     "payments": {
       "sectionTitle": "Online plaćanja",

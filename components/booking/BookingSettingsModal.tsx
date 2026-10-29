@@ -123,6 +123,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
 
   // Settings from "Podatki podjetij" table
   const [bookingOmogocen, setBookingOmogocen] = useState(true);
+  // 'instant' = free times, 'request' = the client sends a request (1793000000).
+  const [bookingMode, setBookingMode] = useState<'instant' | 'request'>('instant');
+  const loadedBookingModeRef = useRef<'instant' | 'request'>('instant');
   const [koledarUre, setKoledarUre] = useState<'15' | '30' | '60'>('30');
   const [maxDneviRezervacija, setMaxDneviRezervacija] = useState('14');
   const [potrdiloReservation, setPotrdiloReservation] = useState(false);
@@ -244,6 +247,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         if (data) {
           const bookingEnabled = data['booking_omogocen'];
           setBookingOmogocen(bookingEnabled !== false && bookingEnabled !== 'false');
+          const mode = data['booking_mode'] === 'request' ? 'request' : 'instant';
+          setBookingMode(mode);
+          loadedBookingModeRef.current = mode;
 
           const ureValue = String(data['koledar_ure'] ?? data['Koledar_ure'] ?? '30');
           setKoledarUre(ureValue === '60' ? '60' : ureValue === '15' ? '15' : '30');
@@ -391,6 +397,19 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         throw new Error(t('modal.footer.saveError'));
       }
 
+      if (bookingMode !== loadedBookingModeRef.current) {
+        const res = await fetch('/api/company/booking-mode', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ booking_mode: bookingMode }),
+        }).catch(() => null);
+        if (!res?.ok) {
+          toast.error(t('modal.general.modeSaveError'));
+          return;
+        }
+        loadedBookingModeRef.current = bookingMode;
+      }
+
       // Columns the app writes itself (n8n's settings workflow doesn't know them).
       const templatePatch: Record<string, string> = {};
       if (potrdiloEn.trim() !== loadedPotrdiloEnRef.current.trim()) {
@@ -505,6 +524,42 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         onChange={setBookingOmogocen}
                       />
                     </SettingRow>
+
+                    <div className="py-1">
+                      <p className="text-sm font-medium text-gray-900">{t('modal.general.modeLabel')}</p>
+                      <p className="mt-0.5 text-[13px] text-gray-500">{t('modal.general.modeDesc')}</p>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {([
+                          { value: 'instant' as const, title: t('modal.general.modeInstant'), desc: t('modal.general.modeInstantDesc') },
+                          { value: 'request' as const, title: t('modal.general.modeRequest'), desc: t('modal.general.modeRequestDesc') },
+                        ]).map((opt) => {
+                          const active = bookingMode === opt.value;
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => setBookingMode(opt.value)}
+                              className={`rounded-xl border p-3.5 text-left transition-colors ${
+                                active ? 'border-violet-400 bg-violet-50/60 ring-1 ring-violet-300' : 'border-gray-200 hover:bg-gray-50'
+                              }`}
+                            >
+                              <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <span
+                                  className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                                    active ? 'border-violet-500 bg-violet-500' : 'border-gray-300'
+                                  }`}
+                                >
+                                  {active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                                </span>
+                                {opt.title}
+                              </span>
+                              <span className="mt-1 block text-[13px] leading-5 text-gray-500">{opt.desc}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
                     <SettingRow
                       label={t('modal.general.intervalLabel')}

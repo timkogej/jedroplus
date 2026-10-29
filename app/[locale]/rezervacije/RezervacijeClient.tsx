@@ -25,6 +25,7 @@ import { useCompany } from '@/app/company-context';
 import { isJedroProPlan } from '@/lib/onlinePayments';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
+import { countPendingZahteve } from '@/lib/supabase/zahteveTermini';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { DesignCard } from '@/components/reservations/DesignCard';
 import {
@@ -77,6 +78,19 @@ export default function RezervacijeClient({
   const [copiedDesignId, setCopiedDesignId] = useState<number | null>(null);
   const [copiedMgmt, setCopiedMgmt] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  // Requests waiting for an answer (badge on the "Zahteve za termin" card).
+  const [pendingRequests, setPendingRequests] = useState(0);
+
+  useEffect(() => {
+    if (!companyId) return;
+    let cancelled = false;
+    countPendingZahteve(companyId).then((n) => {
+      if (!cancelled) setPendingRequests(n);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [companyId]);
 
   // Fetch settings from same tables as Nastavitve > Rezervacije
   const fetchSettings = useCallback(async () => {
@@ -199,7 +213,8 @@ export default function RezervacijeClient({
             </motion.div>
           )}
 
-          {/* Zahteve za termin nav card */}
+          {/* Zahteve za termin nav card: only where requests are on, or some still wait */}
+          {(settings.bookingMode === 'request' || pendingRequests > 0) && (
           <motion.button
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -212,8 +227,17 @@ export default function RezervacijeClient({
               <p className="text-sm font-medium text-gray-900">{t('requestsNav.title')}</p>
               <p className="mt-0.5 text-[13px] text-gray-500">{t('requestsNav.subtitle')}</p>
             </div>
+            {pendingRequests > 0 && (
+              <span
+                className="tnum flex h-6 min-w-6 items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-cyan-500 px-2 text-xs font-semibold text-white"
+                aria-label={t('requestsNav.pending', { count: pendingRequests })}
+              >
+                {pendingRequests}
+              </span>
+            )}
             <CaretRight className="h-4 w-4 flex-shrink-0 text-gray-300" weight="bold" />
           </motion.button>
+          )}
 
           <div className="mb-6 grid gap-3 lg:grid-cols-[0.85fr_1.15fr]">
             <motion.div
@@ -482,6 +506,17 @@ export default function RezervacijeClient({
                 transition={{ duration: 0.28, delay: 0.08, ease: [0.32, 0.72, 0, 1] }}
               >
                 <SectionPanel title={t('settingsOverview.title')}>
+                  <SettingRow
+                    icon={<ClipboardText size={16} weight="regular" />}
+                    label={t('settingsOverview.bookingMode')}
+                    description={t('settingsOverview.bookingModeDesc')}
+                    value={
+                      <ValuePill>
+                        {settings.bookingMode === 'request' ? t('settingsOverview.modeRequest') : t('settingsOverview.modeInstant')}
+                      </ValuePill>
+                    }
+                  />
+
                   <SettingRow
                     icon={<CheckCircle size={16} weight="regular" />}
                     label={t('settingsOverview.bookingEnabled')}

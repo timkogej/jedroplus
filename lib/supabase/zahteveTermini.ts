@@ -26,8 +26,31 @@ export interface ZahtevaTermina {
   zavrnitev_razlog?: string | null;
   confirmed_termin_id?: string | null;
   language?: string | null;
+  /** What the client chose on the booking page (migration 1793000000). */
+  storitve_ids: string[];
+  /** Service names joined with " + "; empty when the client was not sure. */
+  storitve?: string | null;
+  zeljeni_zaposleni_id?: string | null;
+  zeljeni_zaposleni?: string | null;
+  /** Quick choice label, e.g. "Čim prej", "Ta teden". */
+  zeljeni_cas?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+/** text[] from Postgres, or a JSON/comma string from older rows. */
+function parseIds(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+    } catch {
+      /* not JSON */
+    }
+    return value.replace(/[{}]/g, '').split(',').map((v) => v.trim()).filter(Boolean);
+  }
+  return [];
 }
 
 function parseZahteva(row: Record<string, unknown>): ZahtevaTermina | null {
@@ -49,6 +72,11 @@ function parseZahteva(row: Record<string, unknown>): ZahtevaTermina | null {
     zavrnitev_razlog: row.zavrnitev_razlog != null ? String(row.zavrnitev_razlog) : null,
     confirmed_termin_id: row.confirmed_termin_id != null ? String(row.confirmed_termin_id) : null,
     language: row.language != null ? String(row.language) : null,
+    storitve_ids: parseIds(row.storitve_ids),
+    storitve: row.storitve != null ? String(row.storitve) : null,
+    zeljeni_zaposleni_id: row.zeljeni_zaposleni_id != null ? String(row.zeljeni_zaposleni_id) : null,
+    zeljeni_zaposleni: row.zeljeni_zaposleni != null ? String(row.zeljeni_zaposleni) : null,
+    zeljeni_cas: row.zeljeni_cas != null ? String(row.zeljeni_cas) : null,
     created_at: String(row.created_at ?? ''),
     updated_at: String(row.updated_at ?? ''),
   };
@@ -94,4 +122,11 @@ export async function fetchCompanySlug(companyId: string): Promise<string | null
     .eq('company_id', companyId)
     .maybeSingle();
   return data?.slug ? String(data.slug) : null;
+}
+
+/** How many requests still wait for the salon (badge on Rezervacije). */
+export async function countPendingZahteve(companyId: string): Promise<number> {
+  const { data, error } = await fetchZahteveTermini(companyId);
+  if (error || !data) return 0;
+  return data.filter((z) => z.status === 'v_pregledu').length;
 }

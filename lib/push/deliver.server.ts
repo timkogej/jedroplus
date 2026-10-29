@@ -96,7 +96,7 @@ export async function deliverToSubscriptions(
   };
 }
 
-const HIGH_URGENCY_TYPES = new Set(['appointment_booked', 'appointment_cancelled', 'appointment_updated']);
+const HIGH_URGENCY_TYPES = new Set(['appointment_booked', 'appointment_cancelled', 'appointment_updated', 'booking_request']);
 
 /** Pošlje push za en zapis iz notifications (po id). */
 export async function deliverNotification(notificationId: string) {

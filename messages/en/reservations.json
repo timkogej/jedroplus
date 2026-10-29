@@ -10,7 +10,8 @@
   "newDesignsBanner": "New booking page designs every month",
   "requestsNav": {
     "title": "Booking requests",
-    "subtitle": "Review and confirm requests submitted by clients"
+    "subtitle": "Review and confirm requests submitted by clients",
+    "pending": "{count, plural, one {# new request} other {# new requests}}"
   },
   "multiChannelBanner": {
     "bold": "Use each booking link on a different channel.",
@@ -104,7 +105,11 @@
     "onlineConfirmDesc": "Confirmation for appointments booked through the website.",
     "mainLinkDesc": "The link you share with clients for booking.",
     "colorsDesc": "The colours of the booking page your clients see.",
-    "mgmtLinkDesc": "Clients reschedule or cancel through this link."
+    "mgmtLinkDesc": "Clients reschedule or cancel through this link.",
+    "bookingMode": "Booking mode",
+    "bookingModeDesc": "How clients book on your booking page",
+    "modeInstant": "Instant",
+    "modeRequest": "Request"
   },
   "modal": {
     "title": "Booking settings",
@@ -122,7 +127,14 @@
       "interval60": "60 minutes (1 hour)",
       "windowLabel": "How many days ahead customers can book",
       "windowDesc": "Applies to online booking and Receptionist+.",
-      "windowDays": "{days, plural, one {# day} other {# days}}"
+      "windowDays": "{days, plural, one {# day} other {# days}}",
+      "modeLabel": "Booking mode",
+      "modeDesc": "How clients book on your booking page.",
+      "modeInstant": "Instant booking",
+      "modeInstantDesc": "The client picks a free time and it is booked right away.",
+      "modeRequest": "Request",
+      "modeRequestDesc": "The client says when suits them and what they want. You pick the time in Booking requests.",
+      "modeSaveError": "Settings were saved, but the booking mode was not. Please try again."
     },
     "payments": {
       "sectionTitle": "Online payments",

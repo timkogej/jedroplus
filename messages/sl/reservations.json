@@ -10,7 +10,8 @@
   "newDesignsBanner": "Vsak mesec novi dizajni za booking strani",
   "requestsNav": {
     "title": "Zahteve za termin",
-    "subtitle": "Preglejte in potrdite zahteve, ki jih pošljejo stranke"
+    "subtitle": "Preglejte in potrdite zahteve, ki jih pošljejo stranke",
+    "pending": "{count, plural, one {# nova zahteva} two {# novi zahtevi} few {# nove zahteve} other {# novih zahtev}}"
   },
   "multiChannelBanner": {
     "bold": "Vsak booking link lahko uporabite na drugem kanalu.",
@@ -104,7 +105,11 @@
     "onlineConfirmDesc": "Potrdilo za termine, rezervirane prek spletne strani.",
     "mainLinkDesc": "Povezava, ki jo delite strankam za rezervacijo.",
     "colorsDesc": "Barve rezervacijske strani, ki jo vidijo stranke.",
-    "mgmtLinkDesc": "Prek te povezave stranka prestavi ali odpove termin."
+    "mgmtLinkDesc": "Prek te povezave stranka prestavi ali odpove termin.",
+    "bookingMode": "Način rezervacije",
+    "bookingModeDesc": "Kako stranke rezervirajo na spletni strani",
+    "modeInstant": "Takojšnja",
+    "modeRequest": "Povpraševanje"
   },
   "modal": {
     "title": "Nastavitve rezervacij",
@@ -122,7 +127,14 @@
       "interval60": "60 minut (1 ura)",
       "windowLabel": "Koliko dni vnaprej je možno rezervirati",
       "windowDesc": "Velja za spletno rezervacijo in Receptionist+.",
-      "windowDays": "{days, plural, one {# dan} two {# dneva} few {# dni} other {# dni}}"
+      "windowDays": "{days, plural, one {# dan} two {# dneva} few {# dni} other {# dni}}",
+      "modeLabel": "Način rezervacije",
+      "modeDesc": "Kako stranke rezervirajo na spletni strani.",
+      "modeInstant": "Takojšnja rezervacija",
+      "modeInstantDesc": "Stranka izbere prost termin in je takoj rezerviran.",
+      "modeRequest": "Povpraševanje",
+      "modeRequestDesc": "Stranka pove, kdaj ji ustreza in kaj želi. Vi izberete termin v Zahtevah za termin.",
+      "modeSaveError": "Nastavitve so shranjene, način rezervacije pa ne. Poskusite znova."
     },
     "payments": {
       "sectionTitle": "Spletna plačila",

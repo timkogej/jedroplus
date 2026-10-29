@@ -11,6 +11,7 @@ import {
   CalendarCheckIcon,
   CalendarXIcon,
   CalendarDotsIcon,
+  ClipboardTextIcon,
   WarningIcon,
   WarningCircleIcon,
   InfoIcon,
@@ -55,7 +56,7 @@ export type FilterId = 'all' | 'unread' | 'reservations' | 'system';
 
 export function isReservationType(type: string): boolean {
   const t = type?.toLowerCase();
-  return t === 'appointment_booked' || t === 'appointment_cancelled' || t === 'appointment_updated';
+  return t === 'appointment_booked' || t === 'appointment_cancelled' || t === 'appointment_updated' || t === 'booking_request';
 }
 
 export function isSystemType(type: string): boolean {
@@ -77,6 +78,8 @@ export function typeIcon(type: string): { Icon: PhosphorIcon; color: string } {
       return { Icon: CalendarXIcon, color: 'text-red-500' };
     case 'appointment_updated':
       return { Icon: CalendarDotsIcon, color: 'text-blue-500' };
+    case 'booking_request':
+      return { Icon: ClipboardTextIcon, color: 'text-violet-500' };
     case 'appointment_reminder':
     case 'appointment_post':
       return { Icon: BellIcon, color: 'text-[#7C78FA]' };
