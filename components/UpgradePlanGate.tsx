@@ -10,10 +10,10 @@ import {
   CheckCircle,
   Lock,
   TrendDown,
-  Sparkle,
   type Icon,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import { useFormat } from '@/hooks/useFormat';
 import { PLAN_NAMES, type PlanCode } from '@/lib/planAccess';
 import { getPlan } from '@/lib/billing/plans';
 
@@ -24,7 +24,7 @@ interface UpgradePlanGateProps {
   pathname?: string;
 }
 
-type FeatureKey = 'reminders' | 'booking' | 'communication' | 'analytics' | 'lostLeads' | 'ai';
+type FeatureKey = 'reminders' | 'booking' | 'communication' | 'analytics' | 'lostLeads';
 
 const FEATURES: { prefix: string; key: FeatureKey; icon: Icon }[] = [
   { prefix: '/reminders', key: 'reminders', icon: Bell },
@@ -32,8 +32,6 @@ const FEATURES: { prefix: string; key: FeatureKey; icon: Icon }[] = [
   { prefix: '/komunikacija', key: 'communication', icon: ChatCircleText },
   { prefix: '/analytics', key: 'analytics', icon: ChartLine },
   { prefix: '/lost-leads', key: 'lostLeads', icon: TrendDown },
-  { prefix: '/asistent', key: 'ai', icon: Sparkle },
-  { prefix: '/chatbot-plus', key: 'ai', icon: Sparkle },
 ];
 
 /**
@@ -42,6 +40,7 @@ const FEATURES: { prefix: string; key: FeatureKey; icon: Icon }[] = [
  */
 export default function UpgradePlanGate({ requiredPlan, hideUpgradeButton, pathname = '' }: UpgradePlanGateProps) {
   const t = useTranslations('billing.upgradePlanGate');
+  const { money } = useFormat();
   const planName = PLAN_NAMES[requiredPlan] || requiredPlan;
   const plan = getPlan(requiredPlan);
   const feature = FEATURES.find((f) => pathname === f.prefix || pathname.startsWith(f.prefix + '/'));
@@ -83,7 +82,10 @@ export default function UpgradePlanGate({ requiredPlan, hideUpgradeButton, pathn
             <p className="text-sm font-semibold text-gray-900">{t('includedIn', { plan: planName })}</p>
             {plan?.price && (
               <p className="text-sm text-gray-600">
-                {t('price', { monthly: plan.price.monthly, annual: plan.price.annual })}
+                {t('price', {
+                  monthly: money(plan.price.monthly, { whole: true }),
+                  annual: money(plan.price.annual, { whole: true }),
+                })}
               </p>
             )}
           </div>

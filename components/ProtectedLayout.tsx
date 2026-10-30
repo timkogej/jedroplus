@@ -224,8 +224,6 @@ export default function ProtectedLayout({
 
       const routePermMap: { prefix: string; key: keyof StaffPermissions }[] = [
         { prefix: '/analytics', key: 'can_view_analytics' },
-        { prefix: '/asistent', key: 'can_access_asistent_plus' },
-        { prefix: '/chatbot-plus', key: 'can_access_chatbot_plus' },
         { prefix: '/komunikacija', key: 'can_access_komunikacija' },
         { prefix: '/reminders', key: 'can_access_opomniki' },
         { prefix: '/rezervacije', key: 'can_access_rezervacije' },

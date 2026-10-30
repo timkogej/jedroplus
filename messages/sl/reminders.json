@@ -229,7 +229,6 @@
       "daysBeforeLabel": "Pošlji opomnik (dni pred terminom)",
       "daysBeforeDesc": "Koliko dni pred terminom naj se pošlje opomnik.",
       "select": "Izberi",
-      "senderIdUpgrade": "Na voljo pri paketu Jedro Premium.",
       "senderIdRules": "Največ 11 znakov, brez šumnikov, ne sme biti samo številka.",
       "senderIdRequest": "Oddaj zahtevo",
       "senderIdSaving": "Pošiljam …",
@@ -239,7 +238,8 @@
       "senderIdStatusZavrnjeno": "Zavrnjeno",
       "senderIdInUse": "Trenutno se pošilja z imenom {ime}.",
       "senderIdDefault": "Trenutno se pošilja z imenom Jedroplus.",
-      "senderIdNoReply": "Na sporočilo z imenskim pošiljateljem stranka ne more odgovoriti."
+      "senderIdNoReply": "Na sporočilo z imenskim pošiljateljem stranka ne more odgovoriti.",
+      "senderIdManage": "Uredi v Dodatkih"
     },
     "before": {
       "sectionTitle": "Opomniki pred terminom",

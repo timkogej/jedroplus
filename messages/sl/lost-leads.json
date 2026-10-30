@@ -40,7 +40,7 @@
       "inactivityThresholdDesc": "Po koliko dneh brez obiska velja stranka za neaktivno.",
       "toneDesc": "Kako sporočilo zveni — bolj sproščeno ali bolj uradno.",
       "discountDesc": "Ponudba, s katero stranko povabimo nazaj.",
-      "aiInstructionsDesc": "Kaj naj Asistent+ upošteva pri pisanju sporočila."
+      "aiInstructionsDesc": "Kaj naj AI upošteva pri pisanju sporočila."
     },
     "info": {
       "title": "O izgubljenih strankah",

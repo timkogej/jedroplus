@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Link } from '@/i18n/navigation';
 import { X, SpinnerGap, FloppyDisk, Lock, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import {
@@ -826,10 +827,13 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                         <div className={lockedFieldClass}>
                           {fromEmail}
                         </div>
-                        <div className="flex items-center gap-1 text-gray-400">
-                          <Lock className="h-4 w-4" weight="bold" />
-                          <span className="text-xs">{t('modal.general.locked')}</span>
-                        </div>
+                        <Link
+                          href="/nastavitve/addoni#sender-id"
+                          onClick={onClose}
+                          className="shrink-0 text-xs font-medium text-[#6D5EF7] hover:text-[#5a4ce0]"
+                        >
+                          {t('modal.general.senderIdManage')}
+                        </Link>
                       </div>
                     </SettingRow>
 
@@ -847,12 +851,14 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1 text-gray-400">
+                          <Link
+                            href="/nastavitve/addoni#sender-id"
+                            onClick={onClose}
+                            className="flex shrink-0 items-center gap-1 text-xs font-medium text-[#6D5EF7] hover:text-[#5a4ce0]"
+                          >
                             <Lock className="h-4 w-4" weight="bold" />
-                            <span className="text-xs">
-                              {t('modal.general.senderIdUpgrade')}
-                            </span>
-                          </div>
+                            {t('modal.general.senderIdManage')}
+                          </Link>
                         </div>
                       ) : (
                         <div className="space-y-2">

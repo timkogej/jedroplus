@@ -40,7 +40,7 @@
       "inactivityThresholdDesc": "Nach wie vielen Tagen ohne Besuch ein Kunde als inaktiv gilt.",
       "toneDesc": "Wie die Nachricht klingt – lockerer oder förmlicher.",
       "discountDesc": "Das Angebot, mit dem der Kunde zurück eingeladen wird.",
-      "aiInstructionsDesc": "Was Asistent+ beim Schreiben berücksichtigen soll."
+      "aiInstructionsDesc": "Was die KI beim Schreiben berücksichtigen soll."
     },
     "info": {
       "title": "Über verlorene Kunden",

@@ -84,10 +84,6 @@ function buildNavigationSectionsPaid(t: T): NavSection[] {
       label: t('sidebar.sections.ai'),
       items: [
         { name: t('sidebar.items.receptionistPlus'), href: '/receptionist-plus', icon: Phone },
-        // Asistent+ - začasno skrito, logika ohranjena v /asistent
-        // { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'new' },
-        // Chatbot+ - začasno skrito, bo dodano kasneje
-        // { name: 'Chatbot+', href: '/chatbot-plus', icon: ChatCircleDots, badge: 'new' },
       ],
     },
     {
@@ -293,7 +289,6 @@ export function Sidebar() {
 
   // ── Incomplete settings alerts ─────────────────────────────────────────────
   const hasOpomnikiPlan = planCode === 'JEDRO_PLUS' || planCode === 'JEDRO_PRO' || planCode === 'JEDRO_PREMIUM';
-  const hasChatbotPlan = planCode === 'JEDRO_PRO' || planCode === 'JEDRO_PREMIUM';
 
   const opomniki_incomplete = hasOpomnikiPlan && (
     !String(companySettings?.['from_name'] ?? companySettings?.['From_name'] ?? '').trim() ||
@@ -317,13 +312,11 @@ export function Sidebar() {
   ].some((key) => String(companySettings?.[key] ?? '').trim());
   const rezervacije_incomplete =
     hasOpomnikiPlan && bookingEnabled && hasAnyBookingLink && !String(companySettings?.['main_booking_link'] ?? '').trim();
-  const chatbot_incomplete = hasChatbotPlan && !String(companySettings?.['chatbot_link'] ?? '').trim();
-  const any_incomplete = opomniki_incomplete || rezervacije_incomplete || chatbot_incomplete;
+  const any_incomplete = opomniki_incomplete || rezervacije_incomplete;
 
   const getAlertBadge = (href: string): boolean => {
     if (href === '/reminders') return opomniki_incomplete;
     if (href === '/rezervacije') return rezervacije_incomplete;
-    if (href === '/chatbot-plus') return chatbot_incomplete;
     return false;
   };
 
@@ -341,8 +334,6 @@ export function Sidebar() {
 
       const staffMap: Partial<Record<string, keyof StaffPermissions>> = {
         '/analytics': 'can_view_analytics',
-        '/asistent': 'can_access_asistent_plus',
-        '/chatbot-plus': 'can_access_chatbot_plus',
         '/komunikacija': 'can_access_komunikacija',
         '/reminders': 'can_access_opomniki',
         '/rezervacije': 'can_access_rezervacije',

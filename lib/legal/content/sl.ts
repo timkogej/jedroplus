@@ -43,7 +43,7 @@ export const sl: LegalContent = {
             '- spletno naročanje in samostojna registracija strank prek javne povezave;',
             '- opomniki in obvestila strankam po e-pošti in SMS;',
             '- pošiljanje novic in ponudb strankam (Komunikacija);',
-            '- Chatbot+ (AI klepet za stranke) in Receptionist+ (AI telefonska asistentka);',
+            '- Receptionist+ (AI telefonska asistentka);',
             '- spletna plačila strank prek Stripe;',
             '- analitika, promocije in izvozi.',
             'Ponudnik lahko funkcije izboljšuje, spreminja ali ukine. Bistvenih poslabšanj plačanih funkcij ne uvede med že plačanim obdobjem brez predhodnega obvestila.',
@@ -87,7 +87,7 @@ export const sl: LegalContent = {
         {
           heading: '8. Umetna inteligenca',
           blocks: [
-            'Nekatere funkcije (predlogi sporočil, Chatbot+, Receptionist+) uporabljajo jezikovne in glasovne modele zunanjih ponudnikov. Odgovori so samodejno ustvarjeni in so lahko netočni ali nepopolni. Uporabnik mora preveriti pomembne podatke (npr. termine, cene, navodila) in nastaviti funkcije tako, da strankam ne dajejo zavajajočih informacij.',
+            'Nekatere funkcije (predlogi sporočil, Receptionist+) uporabljajo jezikovne in glasovne modele zunanjih ponudnikov. Odgovori so samodejno ustvarjeni in so lahko netočni ali nepopolni. Uporabnik mora preveriti pomembne podatke (npr. termine, cene, navodila) in nastaviti funkcije tako, da strankam ne dajejo zavajajočih informacij.',
             'Ponudnik podatkov strank ne uporablja za učenje modelov in ne dovoljuje, da bi jih v ta namen uporabljali ponudniki modelov.',
           ],
         },
@@ -247,7 +247,7 @@ export const sl: LegalContent = {
         {
           heading: '3. Narava in namen obdelave',
           blocks: [
-            'Shranjevanje, organizacija, prikaz, pošiljanje sporočil (e-pošta, SMS), sprejem in prepis telefonskih klicev, priprava odgovorov z AI modeli, obdelava spletnih plačil, izvoz in izbris — za vodenje terminov in strank, opomnike, obvestila, marketinška sporočila, spletno naročanje, Chatbot+ in Receptionist+.',
+            'Shranjevanje, organizacija, prikaz, pošiljanje sporočil (e-pošta, SMS), sprejem in prepis telefonskih klicev, priprava odgovorov z AI modeli, obdelava spletnih plačil, izvoz in izbris — za vodenje terminov in strank, opomnike, obvestila, marketinška sporočila, spletno naročanje in Receptionist+.',
           ],
         },
         {
@@ -255,7 +255,6 @@ export const sl: LegalContent = {
           blocks: [
             '- Stranke uporabnika: ime, priimek, e-pošta, telefon, spol, jezik, opombe, tip stranke, zgodovina terminov, storitve, cene in popusti, stanje plačil, soglasje za obveščanje in odjava.',
             '- Klicatelji (Receptionist+): telefonska številka, posnetek in prepis pogovora, izid klica.',
-            '- Obiskovalci klepeta (Chatbot+): vsebina pogovora in podatki, ki jih vpišejo.',
             '- Zaposleni uporabnika: ime, kontakt, urnik, odsotnosti, dodeljeni termini.',
             'Posebne vrste osebnih podatkov se obdelujejo le, če jih uporabnik vnese (npr. v opombe); uporabnik zagotovi pravno podlago in jih omeji na nujno.',
           ],

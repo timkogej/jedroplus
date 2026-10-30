@@ -59,7 +59,6 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
     { name: t('sidebar.items.dashboard'), href: '/dashboard', icon: House, group: 'main' },
     { name: t('sidebar.items.calendar'), href: '/koledar', icon: CalendarBlank, group: 'main' },
     // AI
-    // Asistent+ - začasno skrito: { name: 'Asistent+', href: '/asistent', icon: Sparkle, group: 'ai' },
     // Komunikacija
     { name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell, group: 'communication' },
     { name: t('sidebar.items.lostLeads'), href: '/lost-leads', icon: TrendDown, group: 'communication' },

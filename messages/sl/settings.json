@@ -89,7 +89,7 @@
       "employeeCodeLabel": "Employee code",
       "employeeCodeNote": "Za dodajanje zaposlenih v vaše podjetje. Zaposleni vidi le svoj urnik in termine, ki so mu dodeljeni. Nima dostopa do nastavitev, analitike ali podatkov o drugih zaposlenih.",
       "slugLabel": "Slug podjetja",
-      "slugNote": "Končnica, ki se uporablja pri booking linkih in pri chatbotu na spletni strani",
+      "slugNote": "Končnica, ki se uporablja pri booking linkih",
       "disclaimer": "Kode delite le z zaupanja vrednimi osebami. Administrator ima polni dostop do sistema, zaposleni pa le do svojih terminov."
     },
     "qr": {
@@ -228,10 +228,7 @@
         "can_edit_staff": "Ureja zaposlene",
         "can_view_analytics": "Vidi analitiko",
         "can_view_zgodovina": "Vidi zgodovino (revizijsko sled)",
-        "can_access_asistent_plus": "Dostop do Asistent+",
         "can_access_komunikacija": "Dostop do Komunikacija",
-        "can_access_chatbot_plus": "Dostop do Chatbot+",
-        "can_manage_chatbot_plus_settings": "Urejanje nastavitev Chatbot+",
         "can_access_opomniki": "Dostop do Opomniki",
         "can_manage_opomniki": "Upravljanje Opomnikov",
         "can_access_rezervacije": "Dostop do Rezervacije",

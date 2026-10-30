@@ -229,7 +229,6 @@
       "daysBeforeLabel": "Pošalji podsjetnik (dana prije termina)",
       "daysBeforeDesc": "Koliko dana prije termina treba poslati podsjetnik.",
       "select": "Odaberite",
-      "senderIdUpgrade": "Dostupno u paketu Jedro Premium.",
       "senderIdRules": "Najviše 11 znakova, bez dijakritika, ne smije biti samo broj.",
       "senderIdRequest": "Pošalji zahtjev",
       "senderIdSaving": "Šaljem …",
@@ -239,7 +238,8 @@
       "senderIdStatusZavrnjeno": "Odbijeno",
       "senderIdInUse": "Poruke se trenutno šalju pod imenom {ime}.",
       "senderIdDefault": "Poruke se trenutno šalju pod imenom Jedroplus.",
-      "senderIdNoReply": "Klijenti ne mogu odgovoriti na poruku poslanu s imenom pošiljatelja."
+      "senderIdNoReply": "Klijenti ne mogu odgovoriti na poruku poslanu s imenom pošiljatelja.",
+      "senderIdManage": "Uredi u Dodacima"
     },
     "before": {
       "sectionTitle": "Podsjetnici prije termina",

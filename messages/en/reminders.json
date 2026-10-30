@@ -229,7 +229,6 @@
       "daysBeforeLabel": "Send reminder (days before)",
       "daysBeforeDesc": "How many days before the appointment the reminder is sent.",
       "select": "Select",
-      "senderIdUpgrade": "Available on the Jedro Premium plan.",
       "senderIdRules": "Up to 11 characters, no accents, cannot be only digits.",
       "senderIdRequest": "Submit request",
       "senderIdSaving": "Sending …",
@@ -239,7 +238,8 @@
       "senderIdStatusZavrnjeno": "Rejected",
       "senderIdInUse": "Messages are currently sent as {ime}.",
       "senderIdDefault": "Messages are currently sent as Jedroplus.",
-      "senderIdNoReply": "Clients cannot reply to a message sent from a name."
+      "senderIdNoReply": "Clients cannot reply to a message sent from a name.",
+      "senderIdManage": "Manage in Add-ons"
     },
     "before": {
       "sectionTitle": "Pre-appointment reminders",

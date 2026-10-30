@@ -89,7 +89,7 @@
       "employeeCodeLabel": "Codice collaboratore",
       "employeeCodeNote": "Per aggiungere collaboratori alla tua attività. Il collaboratore vede solo il proprio orario e gli appuntamenti assegnati. Non ha accesso a impostazioni, analisi o dati di altri collaboratori.",
       "slugLabel": "Slug dell'attività",
-      "slugNote": "Il suffisso usato nei link di prenotazione e nel chatbot sul sito web",
+      "slugNote": "Il suffisso usato nei link di prenotazione",
       "disclaimer": "Condividi i codici solo con persone di fiducia. L'amministratore ha accesso completo al sistema, il collaboratore solo ai propri appuntamenti."
     },
     "qr": {
@@ -228,10 +228,7 @@
         "can_edit_staff": "Modifica i collaboratori",
         "can_view_analytics": "Vede le analisi",
         "can_view_zgodovina": "Vede la cronologia (registro delle modifiche)",
-        "can_access_asistent_plus": "Accesso ad Asistent+",
         "can_access_komunikacija": "Accesso a Comunicazione",
-        "can_access_chatbot_plus": "Accesso a Chatbot+",
-        "can_manage_chatbot_plus_settings": "Modifica delle impostazioni di Chatbot+",
         "can_access_opomniki": "Accesso ai Promemoria",
         "can_manage_opomniki": "Gestione dei Promemoria",
         "can_access_rezervacije": "Accesso alle Prenotazioni",

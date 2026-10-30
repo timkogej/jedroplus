@@ -43,8 +43,7 @@
         "Email pošiljanje",
         "Celotna analitika",
         "Spletno Naročanje",
-        "Različni dizajni spletnega naročanja",
-        "Asistent+"
+        "Različni dizajni spletnega naročanja"
       ]
     },
     "jedroPro": {
@@ -52,7 +51,6 @@
       "tagline": "Vključuje AI pomočnike, vračanje izgubljenih strank in SMS opomnike.",
       "features": [
         "Vse iz Jedro Plus",
-        "Chatbot+",
         "Vračanje izgubljenih strank",
         "SMS pošiljanje",
         "Email pošiljanje",
@@ -67,8 +65,7 @@
         "Receptionist+",
         "SMS pošiljanje (višja kvota)",
         "Email pošiljanje (višja kvota)",
-        "Premium dizajn spletnega naročanja",
-        "Premium chatbot dizajn"
+        "Premium dizajn spletnega naročanja"
       ]
     },
     "enterprise": {
@@ -180,7 +177,7 @@
     "hint": "Oglejte si vse razpoložljive pakete in izberite tistega, ki vam ustreza.",
     "badge": "Paket {plan}",
     "includedIn": "Vključeno v paketu {plan}",
-    "price": "{monthly} € na mesec · {annual} € na mesec pri letnem plačilu",
+    "price": "{monthly} na mesec · {annual} na mesec pri letnem plačilu",
     "comparePlans": "Primerjaj pakete",
     "back": "Nazaj na začetek",
     "ownerOnly": "Paket lahko nadgradi lastnik računa v Nastavitve → Paketi.",
@@ -219,13 +216,6 @@
         "p1": "Samodejno zaznavanje neaktivnih strank",
         "p2": "Osebno sporočilo, ki ga sestavi AI",
         "p3": "Brez ročnega iskanja in pošiljanja"
-      },
-      "ai": {
-        "title": "AI pomočniki",
-        "lead": "Pametni pomočniki za delo s strankami in termini.",
-        "p1": "Odgovarjanje na pogosta vprašanja",
-        "p2": "Pomoč pri terminih in strankah",
-        "p3": "Prilagojeno vašemu podjetju"
       }
     }
   },
@@ -313,7 +303,7 @@
       },
       "enterprise": {
         "features": [
-          "Custom AI funkcije (chatbot, asistent, receptionist in več)",
+          "Custom AI funkcije (receptionist in več)",
           "Custom booking dizajni z obdelavo slik in naprednimi elementi",
           "Avtomatizacije poslovnih procesov po meri",
           "Neomejena email in SMS kvota",
@@ -396,7 +386,7 @@
   "addons": {
     "back": "Nastavitve",
     "title": "Dodatki in kvote",
-    "subtitle": "Dokupite SMS in e-poštna sporočila ali dodatne prijave v aplikacijo. Dodatki se zaračunajo mesečno skupaj s paketom.",
+    "subtitle": "Dokupite SMS in e-poštna sporočila, dodatne prijave v aplikacijo ali lastno ime pošiljatelja. Dodatki se zaračunajo mesečno skupaj s paketom.",
     "loadError": "Podatkov ni bilo mogoče naložiti. Osvežite stran.",
     "currentPlan": "Trenutni paket",
     "noSubscription": "Brez aktivne naročnine",
@@ -450,7 +440,12 @@
       "overTitle": "Pozor:",
       "over": "V aplikacijo {count, plural, one {je prijavljena # oseba} two {sta prijavljeni # osebi} few {so prijavljene # osebe} other {je prijavljenih # oseb}} več, kot dovoljuje nova omejitev. Pred zmanjšanjem odstranite dostop tistim, ki ga ne potrebujejo (Ekipa in dostop).",
       "updating": "Posodabljam …",
-      "update": "Shrani število prijav"
+      "update": "Shrani število prijav",
+      "free": "{free, plural, one {še # prosta prijava} two {še # prosti prijavi} few {še # proste prijave} other {še # prostih prijav}}",
+      "full": "Vse prijave so zasedene",
+      "hint": "Potrebujete več prijav? Vsaka dodatna stane {price} / mesec.",
+      "decrease": "Manj",
+      "increase": "Več"
     },
     "toast": {
       "noStripe": "Za nakup dodatkov potrebujete plačljiv paket s plačilno kartico.",
@@ -459,6 +454,51 @@
       "cancelError": "Preklic ni uspel. Poskusite znova.",
       "canceled": "Dodatek bo preklican ob koncu obračunskega obdobja."
     },
-    "fromAddonsOnly": "{count} iz dodatkov (paket ne vključuje sporočil)"
+    "fromAddonsOnly": "{count} iz dodatkov (paket ne vključuje sporočil)",
+    "sections": {
+      "messages": "Sporočila",
+      "team": "Ekipa",
+      "sender": "Pošiljatelj"
+    },
+    "senderId": {
+      "title": "Ime pošiljatelja SMS",
+      "body": "SMS-i vaših strank prihajajo z imenom vašega podjetja namesto z imenom Jedroplus. Ime registriramo pri operaterju, kar traja nekaj dni.",
+      "rowDefault": "Sporočila z imenom vašega podjetja · {price} / mesec",
+      "rowLocked": "Na voljo pri paketu Jedro Pro",
+      "rowPending": "{ime} · čaka na odobritev",
+      "status": {
+        "odobreno": "Odobreno. Sporočila se pošiljajo z imenom {ime}.",
+        "v_obdelavi": "V obdelavi. Do odobritve se sporočila pošiljajo z imenom Jedroplus.",
+        "zavrnjeno": "Zavrnjeno: {opomba}. Izberite drugo ime."
+      },
+      "chipActive": "Aktivno",
+      "chipPending": "V obdelavi",
+      "lockedPro": "Lastno ime pošiljatelja je na voljo pri paketu Jedro Pro za {price} / mesec.",
+      "upgrade": "Nadgradi na Pro",
+      "inputLabel": "Želeno ime",
+      "inputPlaceholder": "npr. SalonLuna",
+      "rules": "Največ 11 znakov, brez šumnikov, ne sme biti samo številka.",
+      "checking": "Preverjam …",
+      "free": "Ime je prosto.",
+      "checkError": "Imena ni bilo mogoče preveriti.",
+      "activate": "Aktiviraj za {price} / mesec",
+      "activating": "Aktiviram …",
+      "requestName": "Oddaj zahtevo",
+      "purchaseNote": "Znesek se sorazmerno doda k naslednjemu računu za paket. Sporočila se z novim imenom pošiljajo šele po odobritvi.",
+      "keepName": "Obdrži trenutno ime",
+      "changeName": "Spremeni ime",
+      "cancel": "Prekliči dodatek",
+      "cancelConfirm": "Res prekličem?",
+      "cancelKeep": "Ne",
+      "canceling": "Prekličujem …",
+      "cancelNote": "Preklic velja takoj, neporabljeni del meseca se vrne kot dobropis.",
+      "loadError": "Podatkov ni bilo mogoče naložiti.",
+      "submitError": "Zahteve ni bilo mogoče oddati.",
+      "cancelError": "Preklic ni uspel. Poskusite znova.",
+      "toast": {
+        "requested": "Zahteva je oddana. Ime registriramo pri operaterju.",
+        "canceled": "Dodatek je preklican."
+      }
+    }
   }
 }

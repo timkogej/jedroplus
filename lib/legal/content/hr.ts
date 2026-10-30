@@ -42,7 +42,7 @@ export const hr: LegalContent = {
             '- online naručivanje i samostalna registracija klijenata putem javne poveznice;',
             '- podsjetnici i obavijesti klijentima e-poštom i SMS-om;',
             '- slanje novosti i ponuda klijentima (Komunikacija);',
-            '- Chatbot+ (AI chat za klijente) i Receptionist+ (AI telefonska asistentica);',
+            '- Receptionist+ (AI telefonska asistentica);',
             '- online plaćanja klijenata putem Stripea;',
             '- analitika, promocije i izvozi.',
             'Pružatelj može funkcije poboljšavati, mijenjati ili ukinuti. Bitna smanjenja plaćenih funkcija ne uvodi tijekom već plaćenog razdoblja bez prethodne obavijesti.',
@@ -86,7 +86,7 @@ export const hr: LegalContent = {
         {
           heading: '8. Umjetna inteligencija',
           blocks: [
-            'Neke funkcije (prijedlozi poruka, Chatbot+, Receptionist+) koriste jezične i glasovne modele vanjskih pružatelja. Odgovori se generiraju automatski i mogu biti netočni ili nepotpuni. Korisnik mora provjeriti važne podatke (npr. termine, cijene, upute) i postaviti funkcije tako da klijente ne dovode u zabludu.',
+            'Neke funkcije (prijedlozi poruka, Receptionist+) koriste jezične i glasovne modele vanjskih pružatelja. Odgovori se generiraju automatski i mogu biti netočni ili nepotpuni. Korisnik mora provjeriti važne podatke (npr. termine, cijene, upute) i postaviti funkcije tako da klijente ne dovode u zabludu.',
             'Pružatelj ne koristi podatke klijenata za učenje modela i to ne dopušta ni pružateljima modela.',
           ],
         },
@@ -246,7 +246,7 @@ export const hr: LegalContent = {
         {
           heading: '3. Priroda i svrha obrade',
           blocks: [
-            'Pohrana, organizacija, prikaz, slanje poruka (e-pošta, SMS), primanje i prepisivanje telefonskih poziva, priprema odgovora AI modelima, obrada online plaćanja, izvoz i brisanje — za vođenje termina i klijenata, podsjetnike, obavijesti, marketinške poruke, online naručivanje, Chatbot+ i Receptionist+.',
+            'Pohrana, organizacija, prikaz, slanje poruka (e-pošta, SMS), primanje i prepisivanje telefonskih poziva, priprema odgovora AI modelima, obrada online plaćanja, izvoz i brisanje — za vođenje termina i klijenata, podsjetnike, obavijesti, marketinške poruke, online naručivanje i Receptionist+.',
           ],
         },
         {
@@ -254,7 +254,6 @@ export const hr: LegalContent = {
           blocks: [
             '- Klijenti korisnika: ime, prezime, e-pošta, telefon, spol, jezik, bilješke, vrsta klijenta, povijest termina, usluge, cijene i popusti, status plaćanja, privola za obavještavanje i odjava.',
             '- Pozivatelji (Receptionist+): broj telefona, snimka i prijepis razgovora, ishod poziva.',
-            '- Posjetitelji chata (Chatbot+): sadržaj razgovora i podaci koje unesu.',
             '- Zaposlenici korisnika: ime, kontakt, raspored, odsutnosti, dodijeljeni termini.',
             'Posebne kategorije podataka obrađuju se samo ako ih korisnik unese (npr. u bilješke); korisnik osigurava pravnu osnovu i ograničava ih na nužno.',
           ],

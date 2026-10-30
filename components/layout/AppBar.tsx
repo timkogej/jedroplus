@@ -104,8 +104,6 @@ export function AppBar() {
     '/reminders': t('appbar.breadcrumbs.reminders'),
     '/lost-leads': t('appbar.breadcrumbs.lostLeads'),
     '/analytics': t('appbar.breadcrumbs.analytics'),
-    '/asistent': t('appbar.breadcrumbs.asistent'),
-    '/chatbot-plus': t('appbar.breadcrumbs.chatbotPlus'),
     '/nastavitve': t('appbar.breadcrumbs.settings'),
     '/billing': t('appbar.breadcrumbs.billing'),
     '/obvestila': t('appbar.breadcrumbs.notifications'),

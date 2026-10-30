@@ -89,7 +89,7 @@
       "employeeCodeLabel": "Kod za zaposlenike",
       "employeeCodeNote": "Za dodavanje zaposlenika u vašu tvrtku. Zaposlenik vidi samo svoj raspored i termine koji su mu dodijeljeni. Nema pristup postavkama, analitici ni podacima o drugim zaposlenicima.",
       "slugLabel": "Slug tvrtke",
-      "slugNote": "Nastavak koji se koristi u poveznicama za rezervacije i u chatbotu na web-stranici",
+      "slugNote": "Nastavak koji se koristi u poveznicama za rezervacije",
       "disclaimer": "Kodove dijelite samo s osobama od povjerenja. Administrator ima potpuni pristup sustavu, a zaposlenik samo svojim terminima."
     },
     "qr": {
@@ -228,10 +228,7 @@
         "can_edit_staff": "Uređuje zaposlenike",
         "can_view_analytics": "Vidi analitiku",
         "can_view_zgodovina": "Vidi povijest (revizijski trag)",
-        "can_access_asistent_plus": "Pristup Asistentu+",
         "can_access_komunikacija": "Pristup Komunikaciji",
-        "can_access_chatbot_plus": "Pristup Chatbotu+",
-        "can_manage_chatbot_plus_settings": "Uređivanje postavki Chatbota+",
         "can_access_opomniki": "Pristup Podsjetnicima",
         "can_manage_opomniki": "Upravljanje Podsjetnicima",
         "can_access_rezervacije": "Pristup Rezervacijama",

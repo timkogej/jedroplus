@@ -42,7 +42,7 @@ export const de: LegalContent = {
             '- Online-Buchung und Selbstregistrierung von Kunden über einen öffentlichen Link;',
             '- Erinnerungen und Benachrichtigungen an Kunden per E-Mail und SMS;',
             '- Versand von Neuigkeiten und Angeboten an Kunden (Kommunikation);',
-            '- Chatbot+ (KI-Chat für Kunden) und Receptionist+ (KI-Telefonassistentin);',
+            '- Receptionist+ (KI-Telefonassistentin);',
             '- Online-Zahlungen von Kunden über Stripe;',
             '- Auswertungen, Aktionen und Exporte.',
             'Der Anbieter kann Funktionen verbessern, ändern oder einstellen. Wesentliche Einschränkungen bezahlter Funktionen führt er während eines bereits bezahlten Zeitraums nicht ohne vorherige Ankündigung ein.',
@@ -86,7 +86,7 @@ export const de: LegalContent = {
         {
           heading: '8. Künstliche Intelligenz',
           blocks: [
-            'Einige Funktionen (Nachrichtenvorschläge, Chatbot+, Receptionist+) nutzen Sprach- und Stimmmodelle externer Anbieter. Antworten werden automatisch erzeugt und können ungenau oder unvollständig sein. Der Nutzer muss wichtige Angaben (z. B. Termine, Preise, Hinweise) prüfen und die Funktionen so einrichten, dass Kunden nicht irregeführt werden.',
+            'Einige Funktionen (Nachrichtenvorschläge, Receptionist+) nutzen Sprach- und Stimmmodelle externer Anbieter. Antworten werden automatisch erzeugt und können ungenau oder unvollständig sein. Der Nutzer muss wichtige Angaben (z. B. Termine, Preise, Hinweise) prüfen und die Funktionen so einrichten, dass Kunden nicht irregeführt werden.',
             'Der Anbieter verwendet Kundendaten nicht zum Training von Modellen und gestattet dies auch den Modellanbietern nicht.',
           ],
         },
@@ -246,7 +246,7 @@ export const de: LegalContent = {
         {
           heading: '3. Art und Zweck der Verarbeitung',
           blocks: [
-            'Speicherung, Ordnung, Anzeige, Versand von Nachrichten (E-Mail, SMS), Annahme und Transkription von Telefonanrufen, Erstellung von Antworten mit KI-Modellen, Abwicklung von Online-Zahlungen, Export und Löschung — zur Verwaltung von Terminen und Kunden, für Erinnerungen, Benachrichtigungen, Marketingnachrichten, Online-Buchung, Chatbot+ und Receptionist+.',
+            'Speicherung, Ordnung, Anzeige, Versand von Nachrichten (E-Mail, SMS), Annahme und Transkription von Telefonanrufen, Erstellung von Antworten mit KI-Modellen, Abwicklung von Online-Zahlungen, Export und Löschung — zur Verwaltung von Terminen und Kunden, für Erinnerungen, Benachrichtigungen, Marketingnachrichten, Online-Buchung und Receptionist+.',
           ],
         },
         {
@@ -254,7 +254,6 @@ export const de: LegalContent = {
           blocks: [
             '- Kunden des Nutzers: Vor- und Nachname, E-Mail, Telefon, Geschlecht, Sprache, Notizen, Kundentyp, Terminhistorie, Leistungen, Preise und Rabatte, Zahlungsstatus, Einwilligung und Abmeldung.',
             '- Anrufer (Receptionist+): Telefonnummer, Aufzeichnung und Transkript des Gesprächs, Ergebnis des Anrufs.',
-            '- Chat-Besucher (Chatbot+): Gesprächsinhalt und eingegebene Daten.',
             '- Mitarbeitende des Nutzers: Name, Kontakt, Dienstplan, Abwesenheiten, zugewiesene Termine.',
             'Besondere Kategorien personenbezogener Daten werden nur verarbeitet, wenn der Nutzer sie erfasst (z. B. in Notizen); der Nutzer sorgt für eine Rechtsgrundlage und beschränkt sie auf das Notwendige.',
           ],
