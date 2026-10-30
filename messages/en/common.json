@@ -138,5 +138,9 @@
       "unreadable": "We can't open this image. Try a JPG or PNG photo.",
       "tooSmall": "The image is too small. Choose one at least 240 × 240 pixels."
     }
+  },
+  "questionnaire": {
+    "answersTitle": "Questionnaire",
+    "answersHint": "The client's answers when booking online"
   }
 }

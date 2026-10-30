@@ -239,6 +239,55 @@
       "save": "Save",
       "saving": "Saving...",
       "saveError": "An error occurred while saving"
+    },
+    "questionnaire": {
+      "sectionTitle": "Questionnaire before the appointment",
+      "sectionDesc": "Questions clients answer when they book online. You see the answers on the appointment.",
+      "empty": "Ask clients what you need to know before their visit. Start with a suggestion or add your own question.",
+      "add": "Add question",
+      "addOwn": "Add your own question",
+      "max": "Up to {max} questions.",
+      "untitled": "New question",
+      "required": "required",
+      "optional": "optional",
+      "scopeAll": "all services",
+      "scopeSome": "{count, plural, one {# service} other {# services}}",
+      "incomplete": "incomplete",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "edit": "Edit",
+      "questionLabel": "Question",
+      "questionPlaceholder": "e.g. Do you have any allergies?",
+      "questionEnPlaceholder": "Question in English (optional)",
+      "addEnglish": "+ Add English version",
+      "typeLabel": "Answer type",
+      "types": {
+        "besedilo": "Text",
+        "da_ne": "Yes or no",
+        "izbira": "Choice"
+      },
+      "typeHints": {
+        "besedilo": "The client answers in their own words.",
+        "da_ne": "The client picks Yes or No and can add details after Yes.",
+        "izbira": "The client picks one of your options."
+      },
+      "optionsLabel": "Options",
+      "optionPlaceholder": "Option {n}",
+      "optionEnPlaceholder": "In English",
+      "removeOption": "Remove option",
+      "addOption": "Add option",
+      "requiredLabel": "Required question",
+      "requiredDesc": "The client can't continue without an answer.",
+      "allServicesLabel": "Applies to all services",
+      "allServicesDesc": "Turn off if the question applies only to some services.",
+      "remove": "Remove question",
+      "presets": {
+        "allergies": "Do you have any allergies?",
+        "firstVisit": "Is this your first visit?",
+        "wishes": "Any special requests?"
+      },
+      "incompleteError": "Complete or remove the unfinished questions in the questionnaire.",
+      "saveError": "The questionnaire could not be saved. Please try again."
     }
   },
   "qr": {

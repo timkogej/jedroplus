@@ -39,6 +39,7 @@ import type { AppointmentWithDetails, Storitev, Zaposleni } from "@/types/appoin
 import type { Absence } from "@/lib/supabase/appointments";
 import type { CalendarEvent } from "@/types/events";
 import type { Resurs } from "@/types/resursi";
+import { parseAnswers } from '@/lib/questionnaire';
 
 type Row = Record<string, unknown>;
 type ServerClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -328,6 +329,7 @@ function buildAppointments(
       status: normalizedStatus,
       opombe: notes || undefined,
       interne_opombe: interneOpombe || undefined,
+      vprasalnik_odgovori: parseAnswers(row.vprasalnik_odgovori),
       cena: pricing.cena,
       popust: pricing.popust,
       popust_tip: pricing.popust_tip as "eur" | "percent" | null,

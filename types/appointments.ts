@@ -66,6 +66,8 @@ export interface AppointmentWithDetails {
   status: TerminStatus;
   opombe?: string;
   interne_opombe?: string;
+  /** Answers to the salon's questionnaire, from online booking (1793200000). */
+  vprasalnik_odgovori?: import('@/lib/questionnaire').Answer[];
   // Pricing fields
   cena?: number | null; // Base price
   popust?: number | null; // Discount amount

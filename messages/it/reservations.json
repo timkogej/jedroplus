@@ -239,6 +239,55 @@
       "save": "Salva",
       "saving": "Salvataggio...",
       "saveError": "Si è verificato un errore durante il salvataggio"
+    },
+    "questionnaire": {
+      "sectionTitle": "Questionario prima dell'appuntamento",
+      "sectionDesc": "Domande a cui il cliente risponde quando prenota online. Le risposte sono visibili sull'appuntamento.",
+      "empty": "Chiedete ciò che dovete sapere prima della visita. Iniziate con un suggerimento o aggiungete una domanda vostra.",
+      "add": "Aggiungi domanda",
+      "addOwn": "Aggiungi una domanda",
+      "max": "Al massimo {max} domande.",
+      "untitled": "Nuova domanda",
+      "required": "obbligatoria",
+      "optional": "facoltativa",
+      "scopeAll": "tutti i servizi",
+      "scopeSome": "{count, plural, one {# servizio} other {# servizi}}",
+      "incomplete": "incompleta",
+      "moveUp": "Sposta su",
+      "moveDown": "Sposta giù",
+      "edit": "Modifica",
+      "questionLabel": "Domanda",
+      "questionPlaceholder": "es. Ha delle allergie?",
+      "questionEnPlaceholder": "Domanda in inglese (facoltativa)",
+      "addEnglish": "+ Aggiungi versione inglese",
+      "typeLabel": "Tipo di risposta",
+      "types": {
+        "besedilo": "Testo",
+        "da_ne": "Sì o no",
+        "izbira": "Scelta"
+      },
+      "typeHints": {
+        "besedilo": "Il cliente risponde con parole sue.",
+        "da_ne": "Il cliente sceglie Sì o No e con Sì può aggiungere dettagli.",
+        "izbira": "Il cliente sceglie una delle vostre opzioni."
+      },
+      "optionsLabel": "Opzioni",
+      "optionPlaceholder": "Opzione {n}",
+      "optionEnPlaceholder": "In inglese",
+      "removeOption": "Rimuovi opzione",
+      "addOption": "Aggiungi opzione",
+      "requiredLabel": "Domanda obbligatoria",
+      "requiredDesc": "Senza risposta il cliente non può proseguire.",
+      "allServicesLabel": "Vale per tutti i servizi",
+      "allServicesDesc": "Disattivate se la domanda vale solo per alcuni servizi.",
+      "remove": "Rimuovi domanda",
+      "presets": {
+        "allergies": "Ha delle allergie?",
+        "firstVisit": "È la prima volta da noi?",
+        "wishes": "Ha richieste particolari?"
+      },
+      "incompleteError": "Completate o rimuovete le domande incomplete del questionario.",
+      "saveError": "Non è stato possibile salvare il questionario. Riprovate."
     }
   },
   "qr": {

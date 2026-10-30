@@ -44,6 +44,7 @@ import {
   SheetRow,
   SheetFooter,
 } from '@/components/ui/sheet';
+import { QuestionnaireAnswers } from '@/components/questionnaire/QuestionnaireAnswers';
 
 // Copy button component for contact info
 function CopyButton({ text, label }: { text: string; label: string }) {
@@ -119,6 +120,7 @@ export function AppointmentDetailModal({
   onOpenClientDetails?: (appointment: AppointmentWithDetails) => void | Promise<void>;
 }) {
   const t = useTranslations('appointments');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const { money } = useFormat();
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
@@ -486,6 +488,15 @@ export function AppointmentDetailModal({
             <SheetRow label={t('modal.fields.notes')}>
               <p className="whitespace-pre-wrap text-sm text-gray-700">{appointment.opombe}</p>
             </SheetRow>
+          </SheetGroup>
+        )}
+
+        {/* Odgovori na vprašalnik (spletna rezervacija) */}
+        {appointment.vprasalnik_odgovori && appointment.vprasalnik_odgovori.length > 0 && (
+          <SheetGroup label={tCommon('questionnaire.answersTitle')}>
+            <div className="px-4 py-3">
+              <QuestionnaireAnswers answers={appointment.vprasalnik_odgovori} bare />
+            </div>
           </SheetGroup>
         )}
 

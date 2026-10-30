@@ -138,5 +138,9 @@
       "unreadable": "Ovu sliku ne možemo otvoriti. Pokušaj s JPG ili PNG fotografijom.",
       "tooSmall": "Slika je premala. Odaberi barem 240 × 240 piksela."
     }
+  },
+  "questionnaire": {
+    "answersTitle": "Upitnik",
+    "answersHint": "Odgovori klijenta pri online rezervaciji"
   }
 }

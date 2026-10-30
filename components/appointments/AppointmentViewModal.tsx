@@ -22,6 +22,7 @@ import type { AppointmentWithDetails } from '@/types/appointments';
 import StatusBadge from './StatusBadge';
 import { formatCurrency, formatDiscount, computeAddOnOriginalPrice } from '@/lib/formatPromotion';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
+import { QuestionnaireAnswers } from '@/components/questionnaire/QuestionnaireAnswers';
 
 interface AppointmentViewModalProps {
   isOpen: boolean;
@@ -573,6 +574,13 @@ function AppointmentViewModal({
                 {appointment.opombe || '-'}
               </p>
             </div>
+
+            {/* Questionnaire answers (online booking) */}
+            {appointment.vprasalnik_odgovori && appointment.vprasalnik_odgovori.length > 0 && (
+              <div className="p-5 bg-white rounded-2xl border border-gray-200">
+                <QuestionnaireAnswers answers={appointment.vprasalnik_odgovori} />
+              </div>
+            )}
 
             {/* Internal Notes - always show */}
             <div className="p-5 bg-white rounded-2xl border-2 border-yellow-200">

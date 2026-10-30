@@ -239,6 +239,55 @@
       "save": "Spremi",
       "saving": "Spremanje...",
       "saveError": "Došlo je do pogreške pri spremanju"
+    },
+    "questionnaire": {
+      "sectionTitle": "Upitnik prije termina",
+      "sectionDesc": "Pitanja na koja klijent odgovara pri online rezervaciji. Odgovore vidite uz termin.",
+      "empty": "Pitajte klijenta ono što trebate znati prije posjeta. Počnite s prijedlogom ili dodajte svoje pitanje.",
+      "add": "Dodaj pitanje",
+      "addOwn": "Dodaj svoje pitanje",
+      "max": "Najviše {max} pitanja.",
+      "untitled": "Novo pitanje",
+      "required": "obavezno",
+      "optional": "neobavezno",
+      "scopeAll": "sve usluge",
+      "scopeSome": "{count, plural, one {# usluga} few {# usluge} other {# usluga}}",
+      "incomplete": "nepotpuno",
+      "moveUp": "Pomakni gore",
+      "moveDown": "Pomakni dolje",
+      "edit": "Uredi",
+      "questionLabel": "Pitanje",
+      "questionPlaceholder": "npr. Imate li kakve alergije?",
+      "questionEnPlaceholder": "Pitanje na engleskom (neobavezno)",
+      "addEnglish": "+ Dodaj englesku verziju",
+      "typeLabel": "Vrsta odgovora",
+      "types": {
+        "besedilo": "Tekst",
+        "da_ne": "Da ili ne",
+        "izbira": "Izbor"
+      },
+      "typeHints": {
+        "besedilo": "Klijent odgovara svojim riječima.",
+        "da_ne": "Klijent bira Da ili Ne i uz Da može dodati pojašnjenje.",
+        "izbira": "Klijent bira jednu od vaših mogućnosti."
+      },
+      "optionsLabel": "Mogućnosti",
+      "optionPlaceholder": "Mogućnost {n}",
+      "optionEnPlaceholder": "Na engleskom",
+      "removeOption": "Ukloni mogućnost",
+      "addOption": "Dodaj mogućnost",
+      "requiredLabel": "Obavezno pitanje",
+      "requiredDesc": "Bez odgovora klijent ne može nastaviti.",
+      "allServicesLabel": "Vrijedi za sve usluge",
+      "allServicesDesc": "Isključite ako pitanje vrijedi samo za odabrane usluge.",
+      "remove": "Ukloni pitanje",
+      "presets": {
+        "allergies": "Imate li kakve alergije?",
+        "firstVisit": "Jeste li kod nas prvi put?",
+        "wishes": "Imate li posebne želje?"
+      },
+      "incompleteError": "Dopunite ili uklonite nepotpuna pitanja u upitniku.",
+      "saveError": "Upitnik nije bilo moguće spremiti. Pokušajte ponovno."
     }
   },
   "qr": {

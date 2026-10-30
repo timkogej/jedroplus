@@ -19,6 +19,7 @@ import {
   type ZahtevaTermina,
   type ZahtevaTerminaStatus,
 } from '@/lib/supabase/zahteveTermini';
+import { QuestionnaireAnswers } from '@/components/questionnaire/QuestionnaireAnswers';
 
 const ConfirmRequestModal = dynamic(
   () => import('@/components/zahteve/ConfirmRequestModal').then((m) => m.ConfirmRequestModal),
@@ -211,6 +212,11 @@ export default function ZahteveClient() {
                     </p>
                     {zahteva.opis_zelje && (
                       <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-gray-700">{zahteva.opis_zelje}</p>
+                    )}
+                    {zahteva.vprasalnik_odgovori.length > 0 && (
+                      <div className="mt-3 rounded-lg bg-gray-50 px-3 py-2.5">
+                        <QuestionnaireAnswers answers={zahteva.vprasalnik_odgovori} />
+                      </div>
                     )}
 
                     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500">

@@ -4,6 +4,7 @@ import { CalendarBlank, Clock, EnvelopeSimple, Phone, Sparkle, User } from '@pho
 import { useLocale, useTranslations } from 'next-intl';
 import { formatRequestRange } from './format';
 import type { ZahtevaTermina } from '@/lib/supabase/zahteveTermini';
+import { QuestionnaireAnswers } from '@/components/questionnaire/QuestionnaireAnswers';
 
 /**
  * Povzetek zahteve v okencih za potrditev in zavrnitev: kdo je zahteval,
@@ -38,6 +39,11 @@ export function RequestSummary({ zahteva }: { zahteva: ZahtevaTermina }) {
         </p>
         {zahteva.opis_zelje && (
           <p className="mt-1.5 whitespace-pre-wrap text-sm leading-6 text-gray-700">{zahteva.opis_zelje}</p>
+        )}
+        {zahteva.vprasalnik_odgovori.length > 0 && (
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            <QuestionnaireAnswers answers={zahteva.vprasalnik_odgovori} />
+          </div>
         )}
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-gray-100 px-4 py-2.5 text-[13px] text-gray-500">
