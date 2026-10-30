@@ -112,5 +112,31 @@
     "copied": "Copiato",
     "preparing": "Preparazione...",
     "registrationInfo": "Stampa questo codice QR ed esponilo nel tuo salone o studio. I clienti lo scansionano con il telefono e inseriscono i propri dati in meno di un minuto."
+  },
+  "media": {
+    "serviceLabel": "Foto del servizio",
+    "serviceHint": "Appare nella pagina di prenotazione. Funziona meglio una foto luminosa del risultato o dello spazio.",
+    "staffLabel": "Foto",
+    "staffHint": "Appare al posto delle iniziali nella pagina di prenotazione.",
+    "upload": "Carica foto",
+    "replace": "Sostituisci",
+    "adjust": "Regola",
+    "remove": "Rimuovi",
+    "undo": "Annulla",
+    "pendingNew": "La nuova foto viene salvata quando salvi le modifiche.",
+    "pendingRemove": "La foto verrà rimossa quando salvi le modifiche.",
+    "cropTitle": "Regola foto",
+    "cropHint": "Trascina per spostare. Ingrandisci con due dita, la rotellina o il cursore.",
+    "zoom": "Zoom",
+    "zoomIn": "Ingrandisci",
+    "zoomOut": "Riduci",
+    "apply": "Applica",
+    "cancel": "Annulla",
+    "savedImageFailed": "Le modifiche sono salvate, ma non è stato possibile salvare la foto. Riprova.",
+    "forbidden": "Le foto possono essere modificate dal titolare, dagli admin e dal personale autorizzato.",
+    "errors": {
+      "unreadable": "Non riusciamo ad aprire questa immagine. Prova con una foto JPG o PNG.",
+      "tooSmall": "L'immagine è troppo piccola. Scegline una di almeno 240 × 240 pixel."
+    }
   }
 }

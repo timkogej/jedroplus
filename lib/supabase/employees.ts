@@ -221,6 +221,7 @@ function parseEmployee(row: Record<string, unknown>): Employee | null {
     barva: gradient, // Full CSS gradient string
     aktivna,
     opombe: schema.notesField ? String(row[schema.notesField] ?? '') || null : null,
+    slika_url: typeof row.slika_url === 'string' && row.slika_url ? row.slika_url : null,
     podjetje_id: schema.companyField ? String(row[schema.companyField] ?? '') : '',
     created_at: schema.createdAtField ? String(row[schema.createdAtField] ?? new Date().toISOString()) : new Date().toISOString(),
     updated_at: schema.updatedAtField ? String(row[schema.updatedAtField] ?? new Date().toISOString()) : new Date().toISOString(),

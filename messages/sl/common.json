@@ -112,5 +112,31 @@
     "mobile": "+386 40 123 456",
     "landline": "+386 1 234 5678",
     "website": "https://www.podjetje.si"
+  },
+  "media": {
+    "serviceLabel": "Slika storitve",
+    "serviceHint": "Pokaže se na strani za rezervacije. Najlepše deluje svetla fotografija rezultata ali prostora.",
+    "staffLabel": "Fotografija",
+    "staffHint": "Na strani za rezervacije se pokaže namesto začetnic.",
+    "upload": "Naloži sliko",
+    "replace": "Zamenjaj",
+    "adjust": "Prilagodi",
+    "remove": "Odstrani",
+    "undo": "Razveljavi",
+    "pendingNew": "Nova slika se shrani, ko shraniš spremembe.",
+    "pendingRemove": "Slika bo odstranjena, ko shraniš spremembe.",
+    "cropTitle": "Prilagodi sliko",
+    "cropHint": "Povleci za premik. Povečaj s prsti, kolescem ali drsnikom.",
+    "zoom": "Povečava",
+    "zoomIn": "Povečaj",
+    "zoomOut": "Pomanjšaj",
+    "apply": "Uporabi",
+    "cancel": "Prekliči",
+    "savedImageFailed": "Spremembe so shranjene, slike pa ni bilo mogoče shraniti. Poskusi znova.",
+    "forbidden": "Slike lahko spreminjajo lastnik, admin in osebje z dovoljenjem za urejanje.",
+    "errors": {
+      "unreadable": "Te slike ne moremo odpreti. Poskusi s fotografijo JPG ali PNG.",
+      "tooSmall": "Slika je premajhna. Izberi sliko, veliko vsaj 240 × 240 pik."
+    }
   }
 }

@@ -58,11 +58,25 @@ function ServiceCard({
       {/* Barvna ploščica nosi barvo storitve — enaka kot prej, le v obliki
           ikone aplikacije namesto traku čez vrh kartice. */}
       <div className="flex items-start gap-3">
-        <div
-          className="h-11 w-11 flex-shrink-0 rounded-[12px]"
-          style={{ background: displayGradient }}
-          aria-hidden="true"
-        />
+        {service.slika_url ? (
+          // Photo with a thin ring in the service colour.
+          <div className="h-11 w-11 flex-shrink-0 rounded-[12px] p-[2px]" style={{ background: displayGradient }} aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={service.slika_url}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full rounded-[10px] bg-white object-cover"
+            />
+          </div>
+        ) : (
+          <div
+            className="h-11 w-11 flex-shrink-0 rounded-[12px]"
+            style={{ background: displayGradient }}
+            aria-hidden="true"
+          />
+        )}
         <div className="min-w-0 flex-1">
           <h3 className="line-clamp-1 text-[15px] font-semibold text-gray-900">
             {service.naziv}

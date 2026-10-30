@@ -84,6 +84,7 @@ function DeleteEmployeeModal({
                   firstName={employee.ime}
                   lastName={employee.priimek}
                   gradient={employee.barva}
+                  photoUrl={employee.slika_url}
                   size="md"
                 />
                 <div className="min-w-0">

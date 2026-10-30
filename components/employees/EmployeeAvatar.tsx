@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { getDefaultGradient, isValidGradient } from '@/lib/constants/gradients';
 
 type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
@@ -11,6 +11,8 @@ interface EmployeeAvatarProps {
   gradient: string; // Full CSS gradient string from "Barva" column
   size?: AvatarSize;
   className?: string;
+  /** Photo ("Osebe".slika_url); initials are shown without one. */
+  photoUrl?: string | null;
 }
 
 const sizeClasses: Record<AvatarSize, string> = {
@@ -28,7 +30,10 @@ function EmployeeAvatar({
   gradient,
   size = 'md',
   className = '',
+  photoUrl = null,
 }: EmployeeAvatarProps) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const showPhoto = Boolean(photoUrl) && failedUrl !== photoUrl;
   const firstInitial = firstName?.[0]?.toUpperCase() || '';
   const lastInitial = lastName?.[0]?.toUpperCase() || '';
   const initials = `${firstInitial}${lastInitial}` || '?';
@@ -67,6 +72,18 @@ function EmployeeAvatar({
           zIndex: 1,
         }}
       />
+      {showPhoto && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={photoUrl!}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailedUrl(photoUrl)}
+          className="absolute inset-0 h-full w-full rounded-full object-cover"
+          style={{ zIndex: 2 }}
+        />
+      )}
       {/* Gradient initials */}
       <span
         className="font-bold relative"

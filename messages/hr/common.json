@@ -112,5 +112,31 @@
     "copied": "Kopirano",
     "preparing": "Priprema...",
     "registrationInfo": "Ispišite ovaj QR kod i postavite ga u svoj salon ili ordinaciju. Klijenti ga skeniraju mobitelom i unesu svoje podatke za manje od minute."
+  },
+  "media": {
+    "serviceLabel": "Slika usluge",
+    "serviceHint": "Prikazuje se na stranici za rezervacije. Najbolje izgleda svijetla fotografija rezultata ili prostora.",
+    "staffLabel": "Fotografija",
+    "staffHint": "Na stranici za rezervacije prikazuje se umjesto inicijala.",
+    "upload": "Učitaj sliku",
+    "replace": "Zamijeni",
+    "adjust": "Prilagodi",
+    "remove": "Ukloni",
+    "undo": "Poništi",
+    "pendingNew": "Nova slika sprema se kad spremiš promjene.",
+    "pendingRemove": "Slika će biti uklonjena kad spremiš promjene.",
+    "cropTitle": "Prilagodi sliku",
+    "cropHint": "Povuci za pomicanje. Uvećaj prstima, kotačićem ili klizačem.",
+    "zoom": "Uvećanje",
+    "zoomIn": "Uvećaj",
+    "zoomOut": "Umanji",
+    "apply": "Primijeni",
+    "cancel": "Odustani",
+    "savedImageFailed": "Promjene su spremljene, ali sliku nije bilo moguće spremiti. Pokušaj ponovno.",
+    "forbidden": "Slike mogu mijenjati vlasnik, admin i osoblje s dopuštenjem za uređivanje.",
+    "errors": {
+      "unreadable": "Ovu sliku ne možemo otvoriti. Pokušaj s JPG ili PNG fotografijom.",
+      "tooSmall": "Slika je premala. Odaberi barem 240 × 240 piksela."
+    }
   }
 }
