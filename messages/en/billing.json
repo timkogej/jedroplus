@@ -65,8 +65,7 @@
         "Receptionist+",
         "SMS sending (higher quota)",
         "Email sending (higher quota)",
-        "Premium online booking design",
-        "Premium chatbot design"
+        "Premium online booking design"
       ]
     },
     "enterprise": {
@@ -304,7 +303,7 @@
       },
       "enterprise": {
         "features": [
-          "Custom AI features (chatbot, assistant, receptionist and more)",
+          "Custom AI features (receptionist and more)",
           "Custom booking designs with image processing and advanced elements",
           "Business process automations tailored to you",
           "Unlimited email and SMS quota",

@@ -65,8 +65,7 @@
         "Receptionist+",
         "SMS-Versand (höheres Kontingent)",
         "E-Mail-Versand (höheres Kontingent)",
-        "Premium-Design für die Online-Buchung",
-        "Premium-Design für den Chatbot"
+        "Premium-Design für die Online-Buchung"
       ]
     },
     "enterprise": {
@@ -304,7 +303,7 @@
       },
       "enterprise": {
         "features": [
-          "Eigene KI-Funktionen (Chatbot, Assistent, Rezeptionistin u. v. m.)",
+          "Eigene KI-Funktionen (Rezeptionistin u. v. m.)",
           "Eigene Buchungsdesigns mit Bildbearbeitung und erweiterten Elementen",
           "Automatisierung von Geschäftsprozessen nach Maß",
           "Unbegrenztes E-Mail- und SMS-Kontingent",

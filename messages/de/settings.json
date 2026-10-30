@@ -81,7 +81,7 @@
       "employeeCodeLabel": "Mitarbeiter-Code",
       "employeeCodeNote": "Zum Hinzufügen von Mitarbeitern. Mitarbeiter sehen nur ihre eigenen Arbeitszeiten und zugewiesenen Termine – ohne Zugriff auf Einstellungen, Auswertungen oder Daten anderer Mitarbeiter.",
       "slugLabel": "Kurzname des Unternehmens",
-      "slugNote": "Die Endung in Buchungslinks und für den Chatbot auf Ihrer Website",
+      "slugNote": "Die Endung in Buchungslinks",
       "disclaimer": "Geben Sie Codes nur an vertrauenswürdige Personen weiter. Administratoren haben vollen Zugriff; Mitarbeiter sehen nur ihre eigenen Termine."
     },
     "qr": {

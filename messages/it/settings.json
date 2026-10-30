@@ -81,7 +81,7 @@
       "employeeCodeLabel": "Codice collaboratore",
       "employeeCodeNote": "Per aggiungere collaboratori alla tua attività. Il collaboratore vede solo il proprio orario e gli appuntamenti assegnati. Non ha accesso a impostazioni, analisi o dati di altri collaboratori.",
       "slugLabel": "Slug dell'attività",
-      "slugNote": "Il suffisso usato nei link di prenotazione e nel chatbot sul sito web",
+      "slugNote": "Il suffisso usato nei link di prenotazione",
       "disclaimer": "Condividi i codici solo con persone di fiducia. L'amministratore ha accesso completo al sistema, il collaboratore solo ai propri appuntamenti."
     },
     "qr": {

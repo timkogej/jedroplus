@@ -81,7 +81,7 @@
       "employeeCodeLabel": "Employee code",
       "employeeCodeNote": "For adding staff to your company. Staff can only view their own schedule and assigned appointments. They have no access to settings, analytics, or other staff data.",
       "slugLabel": "Company slug",
-      "slugNote": "The suffix used in booking links and the chatbot on your website",
+      "slugNote": "The suffix used in booking links",
       "disclaimer": "Share codes only with trusted people. Administrators have full system access; staff only have access to their own appointments."
     },
     "qr": {

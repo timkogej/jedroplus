@@ -42,7 +42,7 @@ export const en: LegalContent = {
             '- online booking and client self-registration through a public link;',
             '- reminders and notices to clients by email and SMS;',
             '- sending news and offers to clients (Communication);',
-            '- Chatbot+ (AI chat for clients) and Receptionist+ (AI phone assistant);',
+            '- Receptionist+ (AI phone assistant);',
             '- online payments from clients through Stripe;',
             '- analytics, promotions and exports.',
             'The Provider may improve, change or discontinue features. It will not materially reduce paid features during an already paid period without prior notice.',
@@ -86,7 +86,7 @@ export const en: LegalContent = {
         {
           heading: '8. Artificial intelligence',
           blocks: [
-            'Some features (message suggestions, Chatbot+, Receptionist+) use language and voice models from third-party providers. Answers are generated automatically and may be inaccurate or incomplete. The User must check important information (e.g. appointments, prices, instructions) and set up the features so that they do not mislead clients.',
+            'Some features (message suggestions, Receptionist+) use language and voice models from third-party providers. Answers are generated automatically and may be inaccurate or incomplete. The User must check important information (e.g. appointments, prices, instructions) and set up the features so that they do not mislead clients.',
             'The Provider does not use client data to train models and does not allow model providers to do so.',
           ],
         },
@@ -246,7 +246,7 @@ export const en: LegalContent = {
         {
           heading: '3. Nature and purpose of processing',
           blocks: [
-            'Storage, organisation, display, sending messages (email, SMS), answering and transcribing phone calls, preparing answers with AI models, processing online payments, export and deletion — for managing appointments and clients, reminders, notices, marketing messages, online booking, Chatbot+ and Receptionist+.',
+            'Storage, organisation, display, sending messages (email, SMS), answering and transcribing phone calls, preparing answers with AI models, processing online payments, export and deletion — for managing appointments and clients, reminders, notices, marketing messages, online booking and Receptionist+.',
           ],
         },
         {
@@ -254,7 +254,6 @@ export const en: LegalContent = {
           blocks: [
             "- The User's clients: first and last name, email, phone, gender, language, notes, client type, appointment history, services, prices and discounts, payment status, marketing consent and unsubscribes.",
             '- Callers (Receptionist+): phone number, call recording and transcript, call outcome.',
-            '- Chat visitors (Chatbot+): conversation content and data they enter.',
             "- The User's staff: name, contact, schedule, absences, assigned appointments.",
             'Special categories of data are processed only if the User enters them (e.g. in notes); the User ensures a legal basis and limits them to what is necessary.',
           ],

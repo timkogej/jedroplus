@@ -81,7 +81,7 @@
       "employeeCodeLabel": "Kod za zaposlenike",
       "employeeCodeNote": "Za dodavanje zaposlenika u vašu tvrtku. Zaposlenik vidi samo svoj raspored i termine koji su mu dodijeljeni. Nema pristup postavkama, analitici ni podacima o drugim zaposlenicima.",
       "slugLabel": "Slug tvrtke",
-      "slugNote": "Nastavak koji se koristi u poveznicama za rezervacije i u chatbotu na web-stranici",
+      "slugNote": "Nastavak koji se koristi u poveznicama za rezervacije",
       "disclaimer": "Kodove dijelite samo s osobama od povjerenja. Administrator ima potpuni pristup sustavu, a zaposlenik samo svojim terminima."
     },
     "qr": {

@@ -39,6 +39,7 @@ type Kontekst = {
   uuid: string;
   textId: string;
   userId: string;
+  email: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   admin: SupabaseClient<any, 'public', any>;
 };
@@ -91,7 +92,32 @@ async function pripravi(request: NextRequest): Promise<Kontekst | NextResponse> 
     );
   }
 
-  return { uuid, textId, userId: auth.user.id, admin };
+  return { uuid, textId, userId: auth.user.id, email: auth.user.email ?? '', admin };
+}
+
+/**
+ * Obvestilo ekipi: ime je treba ročno registrirati pri BulkGate. Gre po isti poti
+ * kot povpraševanja za Enterprise (n8n pošlje e-pošto na info@), zato ne potrebuje
+ * novega poteka. Ne čaka in ne sme zrušiti zahteve.
+ */
+function obvestiTim(sporocilo: string, kontekst: Kontekst): void {
+  const url = 'https://n8n.jedroplus.com/webhook/enterprise-inquiry';
+  void fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(process.env.N8N_WEBHOOK_API_KEY ? { 'X-API-Key': process.env.N8N_WEBHOOK_API_KEY } : {}),
+    },
+    body: JSON.stringify({
+      to: process.env.ENTERPRISE_INQUIRY_EMAIL ?? 'info@jedroplus.com',
+      name: `Sender ID · ${kontekst.textId}`,
+      email: kontekst.email || 'info@jedroplus.com',
+      phone: null,
+      message: sporocilo,
+      company_id: kontekst.textId,
+      receivedAt: new Date().toISOString(),
+    }),
+  }).catch((e) => console.warn('[sender-id] obvestilo ekipi ni uspelo:', e));
 }
 
 type Stanje = {
@@ -271,6 +297,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  obvestiTim(
+    `Nova zahteva za ime pošiljatelja SMS: "${ime}" (država ${drzava}). Podjetje ${textId}. ` +
+      `Registriraj ga pri BulkGate, nato v tabeli companies nastavi sms_sender_id_status na 'odobreno' ali 'zavrnjeno'.` +
+      (itemId ? ' Dodatek je bil pravkar kupljen.' : ' Dodatek je že plačan (sprememba imena).'),
+    kontekst
+  );
+
   return NextResponse.json({
     ok: true,
     status: 'v_obdelavi',
@@ -323,6 +356,11 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
+
+  obvestiTim(
+    `Preklic dodatka za ime pošiljatelja SMS. Podjetje ${kontekst.textId}. Ime ni več v uporabi; po potrebi ga odjavi pri BulkGate.`,
+    kontekst
+  );
 
   return NextResponse.json({ ok: true });
 }

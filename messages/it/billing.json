@@ -65,8 +65,7 @@
         "Receptionist+",
         "Invio di SMS (quota superiore)",
         "Invio di email (quota superiore)",
-        "Design premium per le prenotazioni online",
-        "Design premium del chatbot"
+        "Design premium per le prenotazioni online"
       ]
     },
     "enterprise": {
@@ -304,7 +303,7 @@
       },
       "enterprise": {
         "features": [
-          "Funzioni IA su misura (chatbot, assistente, receptionist e altro)",
+          "Funzioni IA su misura (receptionist e altro)",
           "Design di prenotazione su misura con elaborazione immagini ed elementi avanzati",
           "Automazione dei processi aziendali su misura",
           "Quota email e SMS illimitata",

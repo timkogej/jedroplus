@@ -65,8 +65,7 @@
         "Receptionist+",
         "Slanje SMS-a (viša kvota)",
         "Slanje e-pošte (viša kvota)",
-        "Premium dizajn online naručivanja",
-        "Premium dizajn chatbota"
+        "Premium dizajn online naručivanja"
       ]
     },
     "enterprise": {
@@ -304,7 +303,7 @@
       },
       "enterprise": {
         "features": [
-          "AI funkcije po mjeri (chatbot, asistent, recepcionar i više)",
+          "AI funkcije po mjeri (recepcionar i više)",
           "Dizajni za rezervacije po mjeri s obradom slika i naprednim elementima",
           "Automatizacija poslovnih procesa po mjeri",
           "Neograničena kvota e-pošte i SMS-a",

@@ -81,7 +81,7 @@
       "employeeCodeLabel": "Employee code",
       "employeeCodeNote": "Za dodajanje zaposlenih v vaše podjetje. Zaposleni vidi le svoj urnik in termine, ki so mu dodeljeni. Nima dostopa do nastavitev, analitike ali podatkov o drugih zaposlenih.",
       "slugLabel": "Slug podjetja",
-      "slugNote": "Končnica, ki se uporablja pri booking linkih in pri chatbotu na spletni strani",
+      "slugNote": "Končnica, ki se uporablja pri booking linkih",
       "disclaimer": "Kode delite le z zaupanja vrednimi osebami. Administrator ima polni dostop do sistema, zaposleni pa le do svojih terminov."
     },
     "qr": {
