@@ -228,7 +228,8 @@
       "staffDesc": "Wenn aktiviert, kann die Erinnerung nennen, wer die Leistung ausführt.",
       "daysBeforeLabel": "Erinnerung senden (Tage vorher)",
       "daysBeforeDesc": "Wie viele Tage vor dem Termin die Erinnerung gesendet wird.",
-      "select": "Auswählen"
+      "select": "Auswählen",
+      "senderIdManage": "In den Zusatzoptionen verwalten"
     },
     "before": {
       "sectionTitle": "Erinnerungen vor dem Termin",

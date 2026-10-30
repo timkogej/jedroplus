@@ -57,10 +57,7 @@ interface StaffPermissions {
   // Analitika
   can_view_analytics: boolean;
   // Moduli
-  can_access_asistent_plus: boolean;
   can_access_komunikacija: boolean;
-  can_access_chatbot_plus: boolean;
-  can_manage_chatbot_plus_settings: boolean;
   can_access_opomniki: boolean;
   can_manage_opomniki: boolean;
   can_access_rezervacije: boolean;
@@ -126,10 +123,7 @@ const permissionSections: {
   {
     sectionKey: 'moduli',
     keys: [
-      { key: 'can_access_asistent_plus' },
       { key: 'can_access_komunikacija' },
-      { key: 'can_access_chatbot_plus' },
-      { key: 'can_manage_chatbot_plus_settings' },
       { key: 'can_access_opomniki' },
       { key: 'can_manage_opomniki' },
       { key: 'can_access_rezervacije' },

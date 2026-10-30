@@ -40,7 +40,7 @@
       "inactivityThresholdDesc": "Dopo quanti giorni senza visita un cliente è considerato inattivo.",
       "toneDesc": "Come suona il messaggio: più informale o più formale.",
       "discountDesc": "L'offerta con cui il cliente viene invitato a tornare.",
-      "aiInstructionsDesc": "Ciò di cui Asistent+ deve tenere conto quando scrive."
+      "aiInstructionsDesc": "Ciò di cui l'IA deve tenere conto quando scrive."
     },
     "info": {
       "title": "Informazioni sui clienti persi",

@@ -43,8 +43,7 @@
         "E-Mail-Versand",
         "Vollständige Auswertungen",
         "Online-Buchung",
-        "Mehrere Designs für die Online-Buchung",
-        "Asistent+"
+        "Mehrere Designs für die Online-Buchung"
       ]
     },
     "jedroPro": {
@@ -52,7 +51,6 @@
       "tagline": "Mit KI-Assistenten, Rückgewinnung verlorener Kunden und SMS-Erinnerungen.",
       "features": [
         "Alles aus Jedro Plus",
-        "Chatbot+",
         "Verlorene Kunden zurückgewinnen",
         "SMS-Versand",
         "E-Mail-Versand",
@@ -180,7 +178,7 @@
     "hint": "Sehen Sie sich alle Pakete an und wählen Sie das passende.",
     "badge": "Paket {plan}",
     "includedIn": "Enthalten in {plan}",
-    "price": "{monthly} €/Monat · {annual} €/Monat bei jährlicher Zahlung",
+    "price": "{monthly}/Monat · {annual}/Monat bei jährlicher Zahlung",
     "comparePlans": "Pakete vergleichen",
     "back": "Zurück zur Übersicht",
     "ownerOnly": "Der Inhaber des Kontos kann unter Einstellungen → Pakete upgraden.",
@@ -219,13 +217,6 @@
         "p1": "Automatische Erkennung inaktiver Kunden",
         "p2": "Persönliche Nachricht von der KI",
         "p3": "Kein manuelles Suchen oder Senden"
-      },
-      "ai": {
-        "title": "KI-Assistenten",
-        "lead": "Intelligente Assistenten für die Arbeit mit Kunden und Terminen.",
-        "p1": "Antworten auf häufige Fragen",
-        "p2": "Hilfe bei Terminen und Kunden",
-        "p3": "Auf Ihr Unternehmen zugeschnitten"
       }
     }
   },
@@ -396,7 +387,7 @@
   "addons": {
     "back": "Einstellungen",
     "title": "Add-ons & Kontingente",
-    "subtitle": "Buchen Sie zusätzliche SMS- und E-Mail-Nachrichten oder weitere App-Logins hinzu. Add-ons werden monatlich zusammen mit Ihrem Paket abgerechnet.",
+    "subtitle": "Buche zusätzliche SMS und E-Mails, weitere App-Zugänge oder einen eigenen Absendernamen. Zusatzoptionen werden monatlich mit dem Tarif abgerechnet.",
     "loadError": "Die Daten konnten nicht geladen werden. Laden Sie die Seite neu.",
     "currentPlan": "Aktuelles Paket",
     "noSubscription": "Kein aktives Abonnement",
@@ -450,7 +441,12 @@
       "overTitle": "Achtung:",
       "over": "{count, plural, one {# Person mehr ist} other {# Personen mehr sind}} angemeldet, als das neue Limit erlaubt. Entfernen Sie zuerst den Zugriff für Personen, die ihn nicht brauchen (Team & Zugriff).",
       "updating": "Wird aktualisiert …",
-      "update": "Anzahl der Logins speichern"
+      "update": "Anzahl der Logins speichern",
+      "free": "{free, plural, one {# Zugang frei} other {# Zugänge frei}}",
+      "full": "Alle Zugänge sind belegt",
+      "hint": "Mehr Zugänge nötig? Jeder weitere kostet {price} / Monat.",
+      "decrease": "Weniger",
+      "increase": "Mehr"
     },
     "toast": {
       "noStripe": "Für Add-ons benötigen Sie ein kostenpflichtiges Paket mit Zahlungskarte.",
@@ -459,6 +455,51 @@
       "cancelError": "Die Kündigung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "canceled": "Das Add-on wird zum Ende des Abrechnungszeitraums gekündigt."
     },
-    "fromAddonsOnly": "{count} aus Add-ons (Ihr Paket enthält keine)"
+    "fromAddonsOnly": "{count} aus Add-ons (Ihr Paket enthält keine)",
+    "sections": {
+      "messages": "Nachrichten",
+      "team": "Team",
+      "sender": "Absender"
+    },
+    "senderId": {
+      "title": "SMS-Absendername",
+      "body": "Deine Kundschaft erhält SMS mit dem Namen deines Unternehmens statt Jedroplus. Wir registrieren den Namen beim Netzbetreiber, das dauert einige Tage.",
+      "rowDefault": "Nachrichten unter deinem Firmennamen · {price} / Monat",
+      "rowLocked": "Verfügbar im Tarif Jedro Pro",
+      "rowPending": "{ime} · wartet auf Freigabe",
+      "status": {
+        "odobreno": "Freigegeben. Nachrichten werden als {ime} gesendet.",
+        "v_obdelavi": "In Bearbeitung. Bis zur Freigabe werden Nachrichten als Jedroplus gesendet.",
+        "zavrnjeno": "Abgelehnt: {opomba}. Wähle einen anderen Namen."
+      },
+      "chipActive": "Aktiv",
+      "chipPending": "In Bearbeitung",
+      "lockedPro": "Ein eigener Absendername ist im Tarif Jedro Pro für {price} / Monat verfügbar.",
+      "upgrade": "Auf Pro upgraden",
+      "inputLabel": "Gewünschter Name",
+      "inputPlaceholder": "z. B. SalonLuna",
+      "rules": "Höchstens 11 Zeichen, keine Umlaute, nicht nur Ziffern.",
+      "checking": "Wird geprüft …",
+      "free": "Der Name ist frei.",
+      "checkError": "Der Name konnte nicht geprüft werden.",
+      "activate": "Für {price} / Monat aktivieren",
+      "activating": "Wird aktiviert …",
+      "requestName": "Anfrage senden",
+      "purchaseNote": "Der Betrag wird anteilig zur nächsten Tarifrechnung addiert. Nachrichten gehen erst nach der Freigabe unter dem neuen Namen raus.",
+      "keepName": "Aktuellen Namen behalten",
+      "changeName": "Namen ändern",
+      "cancel": "Zusatzoption kündigen",
+      "cancelConfirm": "Wirklich kündigen?",
+      "cancelKeep": "Nein",
+      "canceling": "Wird gekündigt …",
+      "cancelNote": "Die Kündigung gilt sofort, der ungenutzte Teil des Monats wird gutgeschrieben.",
+      "loadError": "Die Daten konnten nicht geladen werden.",
+      "submitError": "Die Anfrage konnte nicht gesendet werden.",
+      "cancelError": "Kündigung fehlgeschlagen. Bitte erneut versuchen.",
+      "toast": {
+        "requested": "Anfrage gesendet. Wir registrieren den Namen beim Netzbetreiber.",
+        "canceled": "Zusatzoption gekündigt."
+      }
+    }
   }
 }

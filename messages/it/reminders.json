@@ -228,7 +228,8 @@
       "staffDesc": "Se attivo, il promemoria può citare il collaboratore che eseguirà il servizio.",
       "daysBeforeLabel": "Invia il promemoria (giorni prima dell'appuntamento)",
       "daysBeforeDesc": "Quanti giorni prima dell'appuntamento inviare il promemoria.",
-      "select": "Scegli"
+      "select": "Scegli",
+      "senderIdManage": "Gestisci nei componenti aggiuntivi"
     },
     "before": {
       "sectionTitle": "Promemoria prima dell'appuntamento",

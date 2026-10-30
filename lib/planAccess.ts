@@ -30,11 +30,9 @@ export const ROUTE_MIN_PLAN: Record<string, PlanCode> = {
   '/analytics': 'JEDRO_PLUS',
   '/komunikacija': 'JEDRO_PLUS',
   '/rezervacije': 'JEDRO_PLUS',
-  '/asistent': 'JEDRO_PLUS',
   '/reminders': 'JEDRO_PLUS',
   // JEDRO_PRO
   '/lost-leads': 'JEDRO_PRO',
-  '/chatbot-plus': 'JEDRO_PRO',
 
   // Note: /receptionist-plus is intentionally NOT plan-gated — access is
   // entitlement-based (has the company been provisioned with ReceptionistPlus?),

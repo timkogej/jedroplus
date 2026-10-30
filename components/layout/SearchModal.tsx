@@ -78,7 +78,6 @@ export function SearchModal() {
     { id: 'reminders', name: t('sidebar.items.reminders'), href: '/reminders', icon: Bell, category: t('search.categories.pages'), keywords: ['notifications', 'alerts', 'obvestila'] },
     { id: 'lost-leads', name: t('sidebar.items.lostLeads'), href: '/lost-leads', icon: TrendDown, category: t('search.categories.pages'), keywords: ['leads', 'izgubljeni', 'lost leads'] },
     { id: 'analytics', name: t('sidebar.items.analytics'), href: '/analytics', icon: ChartLine, category: t('search.categories.pages'), keywords: ['reports', 'statistics', 'poročila'] },
-    // Asistent+ - začasno skrito: { id: 'asistent', name: 'Asistent+', href: '/asistent', icon: Sparkle, category: t('search.categories.pages'), keywords: ['ai', 'assistant', 'help'] },
     { id: 'nastavitve', name: t('sidebar.items.settings'), href: '/nastavitve', icon: Gear, category: t('search.categories.pages'), keywords: ['settings', 'preferences', 'config'] },
     { id: 'rezervacije', name: t('sidebar.items.reservations'), href: '/rezervacije', icon: CalendarCheck, category: t('search.categories.pages'), keywords: ['booking', 'online', 'spletno naročanje', 'povezava'] },
     { id: 'paketi', name: t('search.items.plans'), href: '/nastavitve/paketi', icon: CreditCard, category: t('search.categories.settings'), keywords: ['plan', 'naročnina', 'subscription', 'plačilo', 'račun', 'billing', 'cena'] },

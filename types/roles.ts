@@ -26,10 +26,7 @@ export interface StaffPermissions {
   // Analitika
   can_view_analytics: boolean;
   // Moduli
-  can_access_asistent_plus: boolean;
   can_access_komunikacija: boolean;
-  can_access_chatbot_plus: boolean;
-  can_manage_chatbot_plus_settings: boolean;
   can_access_opomniki: boolean;
   can_manage_opomniki: boolean;
   can_access_rezervacije: boolean;

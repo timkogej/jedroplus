@@ -40,7 +40,7 @@
       "inactivityThresholdDesc": "After how many days without a visit a client counts as inactive.",
       "toneDesc": "How the message sounds — more relaxed or more formal.",
       "discountDesc": "The offer used to invite the client back.",
-      "aiInstructionsDesc": "What Asistent+ should take into account when writing."
+      "aiInstructionsDesc": "What the AI should take into account when writing."
     },
     "info": {
       "title": "About Lost Clients",

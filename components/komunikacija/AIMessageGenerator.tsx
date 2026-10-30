@@ -87,18 +87,7 @@ export default function AIMessageGenerator({
       >
         <MagicWand className="h-5 w-5 flex-shrink-0 text-[#7C78FA]" weight="regular" />
         <span className="min-w-0 flex-1">
-          {/* Asistent+ je ime izdelka, zato obdrži gradient znamke. */}
-          <span
-            className="block text-[15px] font-semibold"
-            style={{
-              backgroundImage: 'linear-gradient(135deg, #8B5CF6 0%, #3B82F6 50%, #06B6D4 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              width: 'fit-content',
-            }}
-          >
-            Asistent+
-          </span>
+          <span className="block text-[15px] font-semibold text-gray-900">{t('ai.title')}</span>
           <span className="mt-0.5 block text-[13px] text-gray-500">{t('ai.subtitle')}</span>
         </span>
         <CaretDown

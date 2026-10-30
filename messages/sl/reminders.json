@@ -228,7 +228,8 @@
       "staffDesc": "Če je vklopljeno, lahko opomnik omeni zaposlenega, ki bo izvedel storitev.",
       "daysBeforeLabel": "Pošlji opomnik (dni pred terminom)",
       "daysBeforeDesc": "Koliko dni pred terminom naj se pošlje opomnik.",
-      "select": "Izberi"
+      "select": "Izberi",
+      "senderIdManage": "Uredi v Dodatkih"
     },
     "before": {
       "sectionTitle": "Opomniki pred terminom",

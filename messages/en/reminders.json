@@ -228,7 +228,8 @@
       "staffDesc": "When on, the reminder can mention who will perform the service.",
       "daysBeforeLabel": "Send reminder (days before)",
       "daysBeforeDesc": "How many days before the appointment the reminder is sent.",
-      "select": "Select"
+      "select": "Select",
+      "senderIdManage": "Manage in Add-ons"
     },
     "before": {
       "sectionTitle": "Pre-appointment reminders",

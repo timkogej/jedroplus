@@ -228,7 +228,8 @@
       "staffDesc": "Ako je uključeno, podsjetnik može spomenuti zaposlenika koji će obaviti uslugu.",
       "daysBeforeLabel": "Pošalji podsjetnik (dana prije termina)",
       "daysBeforeDesc": "Koliko dana prije termina treba poslati podsjetnik.",
-      "select": "Odaberite"
+      "select": "Odaberite",
+      "senderIdManage": "Uredi u Dodacima"
     },
     "before": {
       "sectionTitle": "Podsjetnici prije termina",

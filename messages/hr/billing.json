@@ -43,8 +43,7 @@
         "Slanje e-pošte",
         "Cjelovita analitika",
         "Online naručivanje",
-        "Različiti dizajni online naručivanja",
-        "Asistent+"
+        "Različiti dizajni online naručivanja"
       ]
     },
     "jedroPro": {
@@ -52,7 +51,6 @@
       "tagline": "Uključuje AI pomoćnike, vraćanje izgubljenih klijenata i SMS podsjetnike.",
       "features": [
         "Sve iz paketa Jedro Plus",
-        "Chatbot+",
         "Vraćanje izgubljenih klijenata",
         "Slanje SMS-a",
         "Slanje e-pošte",
@@ -180,7 +178,7 @@
     "hint": "Pogledajte sve dostupne pakete i odaberite onaj koji vam odgovara.",
     "badge": "Paket {plan}",
     "includedIn": "Uključeno u paket {plan}",
-    "price": "{monthly} € mjesečno · {annual} € mjesečno uz godišnje plaćanje",
+    "price": "{monthly} mjesečno · {annual} mjesečno uz godišnje plaćanje",
     "comparePlans": "Usporedi pakete",
     "back": "Natrag na početak",
     "ownerOnly": "Paket može nadograditi vlasnik računa u Postavke → Paketi.",
@@ -219,13 +217,6 @@
         "p1": "Automatsko prepoznavanje neaktivnih klijenata",
         "p2": "Osobna poruka koju sastavlja AI",
         "p3": "Bez ručnog traženja i slanja"
-      },
-      "ai": {
-        "title": "AI pomoćnici",
-        "lead": "Pametni pomoćnici za rad s klijentima i terminima.",
-        "p1": "Odgovaranje na česta pitanja",
-        "p2": "Pomoć s terminima i klijentima",
-        "p3": "Prilagođeno vašoj tvrtki"
       }
     }
   },
@@ -396,7 +387,7 @@
   "addons": {
     "back": "Postavke",
     "title": "Dodaci i kvote",
-    "subtitle": "Dokupite SMS poruke i poruke e-pošte ili dodatne prijave u aplikaciju. Dodaci se naplaćuju mjesečno zajedno s paketom.",
+    "subtitle": "Dokupite SMS i e-mail poruke, dodatne prijave u aplikaciju ili vlastito ime pošiljatelja. Dodaci se naplaćuju mjesečno zajedno s paketom.",
     "loadError": "Podatke nije bilo moguće učitati. Osvježite stranicu.",
     "currentPlan": "Trenutačni paket",
     "noSubscription": "Nema aktivne pretplate",
@@ -450,7 +441,12 @@
       "overTitle": "Pozor:",
       "over": "U aplikaciji {count, plural, one {je prijavljena # osoba} few {su prijavljene # osobe} other {je prijavljeno # osoba}} više nego što dopušta novo ograničenje. Prije smanjenja uklonite pristup onima kojima nije potreban (Tim i pristup).",
       "updating": "Ažuriranje …",
-      "update": "Spremi broj prijava"
+      "update": "Spremi broj prijava",
+      "free": "{free, plural, one {# slobodna prijava} few {# slobodne prijave} other {# slobodnih prijava}}",
+      "full": "Sve su prijave zauzete",
+      "hint": "Trebate više prijava? Svaka dodatna košta {price} / mjesec.",
+      "decrease": "Manje",
+      "increase": "Više"
     },
     "toast": {
       "noStripe": "Za kupnju dodataka trebate plaćeni paket s platnom karticom.",
@@ -459,6 +455,51 @@
       "cancelError": "Otkazivanje nije uspjelo. Pokušajte ponovno.",
       "canceled": "Dodatak će biti otkazan na kraju obračunskog razdoblja."
     },
-    "fromAddonsOnly": "{count} iz dodataka (paket ne uključuje poruke)"
+    "fromAddonsOnly": "{count} iz dodataka (paket ne uključuje poruke)",
+    "sections": {
+      "messages": "Poruke",
+      "team": "Tim",
+      "sender": "Pošiljatelj"
+    },
+    "senderId": {
+      "title": "Ime pošiljatelja SMS-a",
+      "body": "SMS-ovi vaših klijenata stižu s imenom vašeg poduzeća umjesto Jedroplus. Ime registriramo kod operatera, što traje nekoliko dana.",
+      "rowDefault": "Poruke s imenom vašeg poduzeća · {price} / mjesec",
+      "rowLocked": "Dostupno uz paket Jedro Pro",
+      "rowPending": "{ime} · čeka odobrenje",
+      "status": {
+        "odobreno": "Odobreno. Poruke se šalju s imenom {ime}.",
+        "v_obdelavi": "U obradi. Do odobrenja se poruke šalju s imenom Jedroplus.",
+        "zavrnjeno": "Odbijeno: {opomba}. Odaberite drugo ime."
+      },
+      "chipActive": "Aktivno",
+      "chipPending": "U obradi",
+      "lockedPro": "Vlastito ime pošiljatelja dostupno je uz paket Jedro Pro za {price} / mjesec.",
+      "upgrade": "Nadogradi na Pro",
+      "inputLabel": "Željeno ime",
+      "inputPlaceholder": "npr. SalonLuna",
+      "rules": "Najviše 11 znakova, bez dijakritika, ne smije biti samo broj.",
+      "checking": "Provjeravam …",
+      "free": "Ime je slobodno.",
+      "checkError": "Ime nije bilo moguće provjeriti.",
+      "activate": "Aktiviraj za {price} / mjesec",
+      "activating": "Aktiviram …",
+      "requestName": "Pošalji zahtjev",
+      "purchaseNote": "Iznos se razmjerno dodaje na sljedeći račun za paket. Poruke se s novim imenom šalju tek nakon odobrenja.",
+      "keepName": "Zadrži trenutno ime",
+      "changeName": "Promijeni ime",
+      "cancel": "Otkaži dodatak",
+      "cancelConfirm": "Stvarno otkazati?",
+      "cancelKeep": "Ne",
+      "canceling": "Otkazujem …",
+      "cancelNote": "Otkaz vrijedi odmah, neiskorišteni dio mjeseca vraća se kao odobrenje.",
+      "loadError": "Podatke nije bilo moguće učitati.",
+      "submitError": "Zahtjev nije bilo moguće poslati.",
+      "cancelError": "Otkaz nije uspio. Pokušajte ponovno.",
+      "toast": {
+        "requested": "Zahtjev je poslan. Ime registriramo kod operatera.",
+        "canceled": "Dodatak je otkazan."
+      }
+    }
   }
 }

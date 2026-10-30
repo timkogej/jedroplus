@@ -40,7 +40,7 @@
       "inactivityThresholdDesc": "Nakon koliko dana bez posjeta se klijent smatra neaktivnim.",
       "toneDesc": "Kako poruka zvuči – opuštenije ili službenije.",
       "discountDesc": "Ponuda kojom se klijent poziva da se vrati.",
-      "aiInstructionsDesc": "Što Asistent+ treba uzeti u obzir pri pisanju."
+      "aiInstructionsDesc": "Što AI treba uzeti u obzir pri pisanju."
     },
     "info": {
       "title": "O izgubljenim klijentima",

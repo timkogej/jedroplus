@@ -43,8 +43,7 @@
         "Email sending",
         "Full analytics",
         "Online booking",
-        "Multiple online booking designs",
-        "Assistant+"
+        "Multiple online booking designs"
       ]
     },
     "jedroPro": {
@@ -52,7 +51,6 @@
       "tagline": "Includes AI assistants, win-back of lost clients and SMS reminders.",
       "features": [
         "Everything in Jedro Plus",
-        "Chatbot+",
         "Win back lost clients",
         "SMS sending",
         "Email sending",
@@ -180,7 +178,7 @@
     "hint": "Browse all available plans and choose the one that fits you best.",
     "badge": "{plan} plan",
     "includedIn": "Included in {plan}",
-    "price": "€{monthly}/month · €{annual}/month billed yearly",
+    "price": "{monthly}/month · {annual}/month billed yearly",
     "comparePlans": "Compare plans",
     "back": "Back to dashboard",
     "ownerOnly": "The account owner can upgrade in Settings → Plans.",
@@ -219,13 +217,6 @@
         "p1": "Automatic detection of inactive clients",
         "p2": "A personal message written by AI",
         "p3": "No manual searching or sending"
-      },
-      "ai": {
-        "title": "AI assistants",
-        "lead": "Smart assistants for working with clients and appointments.",
-        "p1": "Answers to common questions",
-        "p2": "Help with appointments and clients",
-        "p3": "Tailored to your business"
       }
     }
   },
@@ -396,7 +387,7 @@
   "addons": {
     "back": "Settings",
     "title": "Add-ons & limits",
-    "subtitle": "Buy extra SMS and email messages or extra app logins. Add-ons are billed monthly together with your plan.",
+    "subtitle": "Buy extra SMS and e-mail messages, more app logins or your own sender name. Add-ons are billed monthly together with your plan.",
     "loadError": "Couldn't load the data. Refresh the page.",
     "currentPlan": "Current plan",
     "noSubscription": "No active subscription",
@@ -450,7 +441,12 @@
       "overTitle": "Heads up:",
       "over": "{count, plural, one {# more person is} other {# more people are}} logged in than the new limit allows. Remove access for anyone who doesn't need it (Team & access) before lowering it.",
       "updating": "Updating …",
-      "update": "Save number of logins"
+      "update": "Save number of logins",
+      "free": "{free, plural, one {# login free} other {# logins free}}",
+      "full": "All logins are in use",
+      "hint": "Need more logins? Each extra one costs {price} / month.",
+      "decrease": "Fewer",
+      "increase": "More"
     },
     "toast": {
       "noStripe": "You need a paid plan with a payment card to buy add-ons.",
@@ -459,6 +455,51 @@
       "cancelError": "Cancellation failed. Please try again.",
       "canceled": "The add-on will be canceled at the end of the billing period."
     },
-    "fromAddonsOnly": "{count} from add-ons (your plan includes none)"
+    "fromAddonsOnly": "{count} from add-ons (your plan includes none)",
+    "sections": {
+      "messages": "Messages",
+      "team": "Team",
+      "sender": "Sender"
+    },
+    "senderId": {
+      "title": "SMS sender name",
+      "body": "Your clients receive SMS with your business name instead of Jedroplus. We register the name with the carrier, which takes a few days.",
+      "rowDefault": "Messages sent under your business name · {price} / month",
+      "rowLocked": "Available on Jedro Pro",
+      "rowPending": "{ime} · awaiting approval",
+      "status": {
+        "odobreno": "Approved. Messages are sent as {ime}.",
+        "v_obdelavi": "In progress. Until approved, messages are sent as Jedroplus.",
+        "zavrnjeno": "Rejected: {opomba}. Please choose another name."
+      },
+      "chipActive": "Active",
+      "chipPending": "In progress",
+      "lockedPro": "A custom sender name is available on Jedro Pro for {price} / month.",
+      "upgrade": "Upgrade to Pro",
+      "inputLabel": "Desired name",
+      "inputPlaceholder": "e.g. SalonLuna",
+      "rules": "Up to 11 characters, no accents, not only digits.",
+      "checking": "Checking …",
+      "free": "This name is available.",
+      "checkError": "The name could not be checked.",
+      "activate": "Activate for {price} / month",
+      "activating": "Activating …",
+      "requestName": "Submit request",
+      "purchaseNote": "The amount is added pro rata to your next plan invoice. Messages go out under the new name only after approval.",
+      "keepName": "Keep current name",
+      "changeName": "Change name",
+      "cancel": "Cancel add-on",
+      "cancelConfirm": "Cancel for sure?",
+      "cancelKeep": "No",
+      "canceling": "Canceling …",
+      "cancelNote": "Cancellation takes effect immediately; the unused part of the month is credited.",
+      "loadError": "Could not load the data.",
+      "submitError": "The request could not be submitted.",
+      "cancelError": "Cancellation failed. Please try again.",
+      "toast": {
+        "requested": "Request submitted. We register the name with the carrier.",
+        "canceled": "Add-on canceled."
+      }
+    }
   }
 }
