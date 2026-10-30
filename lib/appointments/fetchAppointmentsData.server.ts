@@ -35,6 +35,7 @@ import {
   extractAddOnFields,
 } from "@/lib/supabase/appointments";
 import type { AppointmentWithDetails, Storitev, Zaposleni } from "@/types/appointments";
+import { parseAnswers } from '@/lib/questionnaire';
 
 type Row = Record<string, unknown>;
 type ServerClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -359,6 +360,7 @@ function buildAppointments(
       status: normalizedStatus,
       opombe: notes || undefined,
       interne_opombe: interneOpombe || undefined,
+      vprasalnik_odgovori: parseAnswers(row.vprasalnik_odgovori),
       cena: pricing.cena,
       popust: pricing.popust,
       popust_tip: pricing.popust_tip as "eur" | "percent" | null,

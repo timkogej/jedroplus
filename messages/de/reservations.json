@@ -239,6 +239,55 @@
       "save": "Speichern",
       "saving": "Wird gespeichert...",
       "saveError": "Beim Speichern ist ein Fehler aufgetreten"
+    },
+    "questionnaire": {
+      "sectionTitle": "Fragebogen vor dem Termin",
+      "sectionDesc": "Fragen, die Kunden bei der Online-Buchung beantworten. Die Antworten sehen Sie beim Termin.",
+      "empty": "Fragen Sie, was Sie vor dem Besuch wissen müssen. Beginnen Sie mit einem Vorschlag oder fügen Sie eine eigene Frage hinzu.",
+      "add": "Frage hinzufügen",
+      "addOwn": "Eigene Frage hinzufügen",
+      "max": "Höchstens {max} Fragen.",
+      "untitled": "Neue Frage",
+      "required": "Pflicht",
+      "optional": "optional",
+      "scopeAll": "alle Leistungen",
+      "scopeSome": "{count, plural, one {# Leistung} other {# Leistungen}}",
+      "incomplete": "unvollständig",
+      "moveUp": "Nach oben",
+      "moveDown": "Nach unten",
+      "edit": "Bearbeiten",
+      "questionLabel": "Frage",
+      "questionPlaceholder": "z. B. Haben Sie Allergien?",
+      "questionEnPlaceholder": "Frage auf Englisch (optional)",
+      "addEnglish": "+ Englische Version hinzufügen",
+      "typeLabel": "Antwortart",
+      "types": {
+        "besedilo": "Text",
+        "da_ne": "Ja oder Nein",
+        "izbira": "Auswahl"
+      },
+      "typeHints": {
+        "besedilo": "Der Kunde antwortet in eigenen Worten.",
+        "da_ne": "Der Kunde wählt Ja oder Nein und kann bei Ja etwas ergänzen.",
+        "izbira": "Der Kunde wählt eine Ihrer Optionen."
+      },
+      "optionsLabel": "Optionen",
+      "optionPlaceholder": "Option {n}",
+      "optionEnPlaceholder": "Auf Englisch",
+      "removeOption": "Option entfernen",
+      "addOption": "Option hinzufügen",
+      "requiredLabel": "Pflichtfrage",
+      "requiredDesc": "Ohne Antwort kann der Kunde nicht fortfahren.",
+      "allServicesLabel": "Gilt für alle Leistungen",
+      "allServicesDesc": "Ausschalten, wenn die Frage nur für bestimmte Leistungen gilt.",
+      "remove": "Frage entfernen",
+      "presets": {
+        "allergies": "Haben Sie Allergien?",
+        "firstVisit": "Sind Sie zum ersten Mal bei uns?",
+        "wishes": "Haben Sie besondere Wünsche?"
+      },
+      "incompleteError": "Vervollständigen oder entfernen Sie unvollständige Fragen im Fragebogen.",
+      "saveError": "Der Fragebogen konnte nicht gespeichert werden. Bitte erneut versuchen."
     }
   },
   "qr": {

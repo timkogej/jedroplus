@@ -138,5 +138,9 @@
       "unreadable": "Dieses Bild können wir nicht öffnen. Versuche ein JPG- oder PNG-Foto.",
       "tooSmall": "Das Bild ist zu klein. Wähle mindestens 240 × 240 Pixel."
     }
+  },
+  "questionnaire": {
+    "answersTitle": "Fragebogen",
+    "answersHint": "Antworten des Kunden bei der Online-Buchung"
   }
 }

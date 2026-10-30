@@ -26,6 +26,9 @@ import { EmailConfirmationTemplate, type EmailTemplateValue } from '@/components
 import { sheet } from '@/components/ui/sheetClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import { QuestionnaireEditor } from '@/components/booking/QuestionnaireEditor';
+import { sanitizeQuestions, type Question } from '@/lib/questionnaire';
+import { fetchServices } from '@/lib/supabase/services';
 
 const BOOKING_WINDOW_DAYS = [7, 14, 21, 30, 60, 90, 180, 365];
 
@@ -126,6 +129,10 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   // 'instant' = free times, 'request' = the client sends a request (1793000000).
   const [bookingMode, setBookingMode] = useState<'instant' | 'request'>('instant');
   const loadedBookingModeRef = useRef<'instant' | 'request'>('instant');
+  // Questionnaire before the appointment (1793200000); saved through our own route.
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const loadedQuestionsRef = useRef('[]');
+  const [serviceOptions, setServiceOptions] = useState<{ id: string; naziv: string }[]>([]);
   const [koledarUre, setKoledarUre] = useState<'15' | '30' | '60'>('30');
   const [maxDneviRezervacija, setMaxDneviRezervacija] = useState('14');
   const [potrdiloReservation, setPotrdiloReservation] = useState(false);
@@ -235,6 +242,20 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
     };
   }, [companyUuid, isOpen]);
 
+  // Services for "Velja za" in the questionnaire.
+  useEffect(() => {
+    if (!isOpen || !companyId) return;
+    let cancelled = false;
+    fetchServices(companyId).then(({ data }) => {
+      if (!cancelled && data) {
+        setServiceOptions(data.filter((s) => s.aktivna).map((s) => ({ id: s.id, naziv: s.naziv })));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [companyId, isOpen]);
+
   // Load settings
   useEffect(() => {
     async function loadSettings() {
@@ -250,6 +271,10 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           const mode = data['booking_mode'] === 'request' ? 'request' : 'instant';
           setBookingMode(mode);
           loadedBookingModeRef.current = mode;
+
+          const loadedQuestions = sanitizeQuestions(data['vprasalnik']) ?? [];
+          setQuestions(loadedQuestions);
+          loadedQuestionsRef.current = JSON.stringify(loadedQuestions);
 
           const ureValue = String(data['koledar_ure'] ?? data['Koledar_ure'] ?? '30');
           setKoledarUre(ureValue === '60' ? '60' : ureValue === '15' ? '15' : '30');
@@ -343,6 +368,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
 
   const handleSave = async () => {
     if (!companyId) return;
+    const incomplete = questions.some(
+      (q) => !q.vprasanje.trim() || (q.tip === 'izbira' && (q.moznosti ?? []).filter((o) => o.trim()).length < 2)
+    );
+    if (incomplete) {
+      toast.error(t('modal.questionnaire.incompleteError'));
+      return;
+    }
     setSaving(true);
 
     try {
@@ -408,6 +440,19 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           return;
         }
         loadedBookingModeRef.current = bookingMode;
+      }
+
+      if (JSON.stringify(questions) !== loadedQuestionsRef.current) {
+        const res = await fetch('/api/company/questionnaire', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ questions }),
+        }).catch(() => null);
+        if (!res?.ok) {
+          toast.error(t('modal.questionnaire.saveError'));
+          return;
+        }
+        loadedQuestionsRef.current = JSON.stringify(questions);
       }
 
       // Columns the app writes itself (n8n's settings workflow doesn't know them).
@@ -907,6 +952,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         <SelectOption value="14">{t('modal.policy.day14')}</SelectOption>
                       </Select>
                     </SettingRow>
+                  </SettingsSection>
+
+                  {/* Questionnaire before the appointment */}
+                  <SettingsSection title={t('modal.questionnaire.sectionTitle')} description={t('modal.questionnaire.sectionDesc')}>
+                    <QuestionnaireEditor questions={questions} onChange={setQuestions} services={serviceOptions} />
                   </SettingsSection>
 
                   {/* Booking Page Colors */}

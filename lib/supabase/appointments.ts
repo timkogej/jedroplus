@@ -5,6 +5,7 @@ import { detectBookingSchema, pickFirst } from '@/lib/dashboardHelpers';
 import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import { supabase } from '@/lib/supabaseClient';
+import { parseAnswers } from '@/lib/questionnaire';
 
 // If the 'absences' table doesn't exist skip future queries to avoid repeated 400 errors.
 let absencesTableMissing = false;
@@ -504,6 +505,7 @@ export async function fetchAppointmentsForMonth(
         status: normalizedStatus,
         opombe: notes || undefined,
         interne_opombe: interneOpombe || undefined,
+        vprasalnik_odgovori: parseAnswers(row.vprasalnik_odgovori),
         cena: pricing.cena,
         popust: pricing.popust,
         popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,
@@ -752,6 +754,7 @@ export async function fetchAppointmentById(
       status: normalizedStatus,
       opombe: notes || undefined,
       interne_opombe: interneOpombe || undefined,
+      vprasalnik_odgovori: parseAnswers(booking.vprasalnik_odgovori),
       cena: pricing.cena,
       popust: pricing.popust,
       popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,
@@ -963,6 +966,7 @@ export async function fetchAllAppointments(
         status: normalizedStatus,
         opombe: notes || undefined,
         interne_opombe: interneOpombe || undefined,
+        vprasalnik_odgovori: parseAnswers(row.vprasalnik_odgovori),
         cena: pricing.cena,
         popust: pricing.popust,
         popust_tip: pricing.popust_tip as 'eur' | 'percent' | null,

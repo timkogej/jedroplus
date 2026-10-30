@@ -239,6 +239,55 @@
       "save": "Shrani",
       "saving": "Shranjujem...",
       "saveError": "Prišlo je do napake pri shranjevanju"
+    },
+    "questionnaire": {
+      "sectionTitle": "Vprašalnik pred terminom",
+      "sectionDesc": "Vprašanja, na katera stranka odgovori ob spletni rezervaciji. Odgovore vidite pri terminu.",
+      "empty": "Vprašajte stranko, kar morate vedeti pred obiskom. Začnite s predlogom ali dodajte svoje vprašanje.",
+      "add": "Dodaj vprašanje",
+      "addOwn": "Dodaj svoje vprašanje",
+      "max": "Največ {max} vprašanj.",
+      "untitled": "Novo vprašanje",
+      "required": "obvezno",
+      "optional": "neobvezno",
+      "scopeAll": "vse storitve",
+      "scopeSome": "{count, plural, one {# storitev} two {# storitvi} few {# storitve} other {# storitev}}",
+      "incomplete": "nepopolno",
+      "moveUp": "Premakni gor",
+      "moveDown": "Premakni dol",
+      "edit": "Uredi",
+      "questionLabel": "Vprašanje",
+      "questionPlaceholder": "npr. Ali imate kakšne alergije?",
+      "questionEnPlaceholder": "Vprašanje v angleščini (neobvezno)",
+      "addEnglish": "+ Dodaj angleško različico",
+      "typeLabel": "Vrsta odgovora",
+      "types": {
+        "besedilo": "Besedilo",
+        "da_ne": "Da ali ne",
+        "izbira": "Izbira"
+      },
+      "typeHints": {
+        "besedilo": "Stranka napiše odgovor s svojimi besedami.",
+        "da_ne": "Stranka izbere Da ali Ne. Ob Da lahko doda pojasnilo.",
+        "izbira": "Stranka izbere eno od vaših možnosti."
+      },
+      "optionsLabel": "Možnosti",
+      "optionPlaceholder": "Možnost {n}",
+      "optionEnPlaceholder": "V angleščini",
+      "removeOption": "Odstrani možnost",
+      "addOption": "Dodaj možnost",
+      "requiredLabel": "Obvezno vprašanje",
+      "requiredDesc": "Brez odgovora stranka ne more nadaljevati.",
+      "allServicesLabel": "Velja za vse storitve",
+      "allServicesDesc": "Izklopite, če vprašanje velja le za izbrane storitve.",
+      "remove": "Odstrani vprašanje",
+      "presets": {
+        "allergies": "Ali imate kakšne alergije?",
+        "firstVisit": "Ali ste pri nas prvič?",
+        "wishes": "Imate posebne želje?"
+      },
+      "incompleteError": "Dopolnite ali odstranite nepopolna vprašanja v vprašalniku.",
+      "saveError": "Vprašalnika ni bilo mogoče shraniti. Poskusite znova."
     }
   },
   "qr": {

@@ -138,5 +138,9 @@
       "unreadable": "Te slike ne moremo odpreti. Poskusi s fotografijo JPG ali PNG.",
       "tooSmall": "Slika je premajhna. Izberi sliko, veliko vsaj 240 × 240 pik."
     }
+  },
+  "questionnaire": {
+    "answersTitle": "Vprašalnik",
+    "answersHint": "Odgovori stranke ob spletni rezervaciji"
   }
 }

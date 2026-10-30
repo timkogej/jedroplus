@@ -7,6 +7,7 @@
 
 import { fetchTableRows } from '@/lib/companyScope';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
+import { parseAnswers, type Answer } from '@/lib/questionnaire';
 
 export type ZahtevaTerminaStatus = 'v_pregledu' | 'potrjeno' | 'zavrnjeno';
 export type ZeljeniDelDneva = 'dopoldan' | 'popoldan' | 'vseeno';
@@ -28,6 +29,8 @@ export interface ZahtevaTermina {
   language?: string | null;
   /** What the client chose on the booking page (migration 1793000000). */
   storitve_ids: string[];
+  /** Answers to the questionnaire (1793200000). */
+  vprasalnik_odgovori: Answer[];
   /** Service names joined with " + "; empty when the client was not sure. */
   storitve?: string | null;
   zeljeni_zaposleni_id?: string | null;
@@ -64,6 +67,7 @@ function parseZahteva(row: Record<string, unknown>): ZahtevaTermina | null {
     email: String(row.email ?? ''),
     telefon: String(row.telefon ?? ''),
     opis_zelje: String(row.opis_zelje ?? ''),
+    vprasalnik_odgovori: parseAnswers(row.vprasalnik_odgovori),
     spol: row.spol != null ? String(row.spol) : null,
     zeljeni_datum_od: String(row.zeljeni_datum_od ?? ''),
     zeljeni_datum_do: String(row.zeljeni_datum_do ?? ''),
