@@ -112,5 +112,31 @@
     "copied": "Kopiert",
     "preparing": "Wird vorbereitet...",
     "registrationInfo": "Drucken Sie diesen QR-Code aus und stellen Sie ihn in Ihrem Salon oder Ihrer Praxis auf. Kunden scannen ihn mit dem Handy und geben ihre Daten in weniger als einer Minute ein."
+  },
+  "media": {
+    "serviceLabel": "Foto der Leistung",
+    "serviceHint": "Wird auf der Buchungsseite angezeigt. Ein helles Foto des Ergebnisses oder des Raums wirkt am besten.",
+    "staffLabel": "Foto",
+    "staffHint": "Wird auf der Buchungsseite statt der Initialen angezeigt.",
+    "upload": "Foto hochladen",
+    "replace": "Ersetzen",
+    "adjust": "Anpassen",
+    "remove": "Entfernen",
+    "undo": "Rückgängig",
+    "pendingNew": "Das neue Foto wird gespeichert, wenn du die Änderungen speicherst.",
+    "pendingRemove": "Das Foto wird entfernt, wenn du die Änderungen speicherst.",
+    "cropTitle": "Foto anpassen",
+    "cropHint": "Ziehen zum Verschieben. Zoomen mit zwei Fingern, Mausrad oder Regler.",
+    "zoom": "Zoom",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern",
+    "apply": "Übernehmen",
+    "cancel": "Abbrechen",
+    "savedImageFailed": "Die Änderungen sind gespeichert, das Foto konnte aber nicht gespeichert werden. Bitte erneut versuchen.",
+    "forbidden": "Fotos können Inhaber, Admins und Mitarbeitende mit Bearbeitungsrecht ändern.",
+    "errors": {
+      "unreadable": "Dieses Bild können wir nicht öffnen. Versuche ein JPG- oder PNG-Foto.",
+      "tooSmall": "Das Bild ist zu klein. Wähle mindestens 240 × 240 Pixel."
+    }
   }
 }

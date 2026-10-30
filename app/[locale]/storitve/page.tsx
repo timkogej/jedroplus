@@ -33,6 +33,8 @@ import {
 import { fetchActiveResursi, fetchStoritveResursi, syncStoritevResursi } from '@/lib/supabase/resursi';
 import type { Resurs, StoritevResurs } from '@/types/resursi';
 import { callN8nAction } from '@/src/lib/n8nClient';
+import { saveEntityImage } from '@/lib/media/entityImage';
+import type { ImageChange } from '@/components/media/ImageField';
 import {
   buildServiceCreateData,
   buildServiceUpdateData,
@@ -155,6 +157,7 @@ export default function StoritvePage() {
   const { companyId, companyUuid, companySettings, planCode, loading: companyLoading } = useCompany();
   const { user } = useAuth();
   const t = useTranslations('services');
+  const tCommon = useTranslations('common');
 
   // Data states
   const [services, setServices] = useState<Service[]>([]);
@@ -291,6 +294,12 @@ export default function StoritvePage() {
     loadData();
   }, [loadData]);
 
+  // Stable list, so the open modal does not reset its form on every render.
+  const existingCategories = useMemo(
+    () => [...new Set(services.map((s) => s.kategorija).filter((c): c is string => Boolean(c)))],
+    [services]
+  );
+
   // Filter services by search and active status
   const filteredServices = useMemo(() => {
     let result = services;
@@ -369,10 +378,11 @@ export default function StoritvePage() {
   }, []);
 
   // Save service (create or update)
-  const handleSaveService = useCallback(async (data: ServiceFormData) => {
+  const handleSaveService = useCallback(async (data: ServiceFormData, image: ImageChange) => {
     if (!companyId) return;
 
     setIsSaving(true);
+    let imageResult: Awaited<ReturnType<typeof saveEntityImage>> = null;
     try {
       const companyColumn = await getCompanyColumnForTable(TABLES.services, companyId);
       const zahtevaPlacilo = paymentRequirementAvailable && data.spletne_rezervacije
@@ -419,7 +429,8 @@ export default function StoritvePage() {
         }
 
         await syncStoritevResursi(companyId, selectedService.id, pendingResursiIds);
-        showToast(t('toasts.updated'), 'success');
+        imageResult = await saveEntityImage('service', { id: selectedService.id }, image);
+        if (!imageResult || imageResult.ok) showToast(t('toasts.updated'), 'success');
       } else {
         // Create new service
         const serviceId = await getNextServiceId(companyId);
@@ -459,8 +470,10 @@ export default function StoritvePage() {
           })
         );
 
+        let createdServiceId = serviceId;
         const result = await callN8nAction(payload, async () => {
           const nextId = await getNextServiceId(companyId);
+          createdServiceId = nextId;
           return {
             ...payload,
             data: buildServiceCreateData({
@@ -480,7 +493,15 @@ export default function StoritvePage() {
         if (pendingResursiIds.length > 0) {
           await syncStoritevResursi(companyId, serviceId, pendingResursiIds);
         }
-        showToast(t('toasts.created'), 'success');
+        imageResult = await saveEntityImage('service', { ref: createdServiceId }, image);
+        if (!imageResult || imageResult.ok) showToast(t('toasts.created'), 'success');
+      }
+
+      if (imageResult && !imageResult.ok) {
+        showToast(
+          imageResult.error === 'Forbidden' ? tCommon('media.forbidden') : tCommon('media.savedImageFailed'),
+          'error'
+        );
       }
 
       closeModal();
@@ -501,6 +522,7 @@ export default function StoritvePage() {
     closeModal,
     loadData,
     t,
+    tCommon,
     services,
     pendingResursiIds,
     paymentRequirementAvailable,
@@ -738,7 +760,7 @@ export default function StoritvePage() {
         onSave={handleSaveService}
         isSaving={isSaving}
         currency={defaultCurrency}
-        existingCategories={[...new Set(services.map(s => s.kategorija).filter((c): c is string => Boolean(c)))]}
+        existingCategories={existingCategories}
         availableResursi={availableResursi}
         linkedResursiIds={pendingResursiIds}
         onLinkedResursiChange={setPendingResursiIds}

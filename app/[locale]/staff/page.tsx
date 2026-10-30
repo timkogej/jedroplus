@@ -41,6 +41,8 @@ import { defaultWorkingHoursDay } from '@/types/settings';
 import type { WorkingHoursDay, TimeInterval } from '@/types/settings';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
+import { saveEntityImage } from '@/lib/media/entityImage';
+import type { ImageChange } from '@/components/media/ImageField';
 import {
   buildPartnerActivityData,
   buildPartnerCreateData,
@@ -147,6 +149,7 @@ export default function OsebjePage() {
   const { companyId, companyUuid, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
   const t = useTranslations('staff');
+  const tCommon = useTranslations('common');
 
   // Data states
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -313,10 +316,11 @@ export default function OsebjePage() {
   }, [employees, searchQuery, statusFilter, canViewAllStaff, rolePersonId]);
 
   // Handle save (create/update)
-  const handleSave = async (data: EmployeeFormData) => {
+  const handleSave = async (data: EmployeeFormData, image: ImageChange) => {
     if (!companyId) return;
 
     setIsSaving(true);
+    let imageResult: Awaited<ReturnType<typeof saveEntityImage>> = null;
     try {
       const rowData = buildEmployeeRow(data, columns, selectedEmployee?.aktivna ?? true);
 
@@ -355,7 +359,8 @@ export default function OsebjePage() {
           return;
         }
 
-        setToast({ message: t('toasts.updated'), type: 'success' });
+        imageResult = await saveEntityImage('staff', { id: selectedEmployee.id }, image);
+        if (!imageResult || imageResult.ok) setToast({ message: t('toasts.updated'), type: 'success' });
       } else {
         // Create new employee with 7-digit unique ID
         const personType = data.pozicija || 'Ekipa';
@@ -407,7 +412,15 @@ export default function OsebjePage() {
           return;
         }
 
-        setToast({ message: t('toasts.created'), type: 'success' });
+        imageResult = await saveEntityImage('staff', { ref: staffId }, image);
+        if (!imageResult || imageResult.ok) setToast({ message: t('toasts.created'), type: 'success' });
+      }
+
+      if (imageResult && !imageResult.ok) {
+        setToast({
+          message: imageResult.error === 'Forbidden' ? tCommon('media.forbidden') : tCommon('media.savedImageFailed'),
+          type: 'error',
+        });
       }
 
       // Wait 1 second for system to process

@@ -21,6 +21,7 @@ import GradientSelector from './GradientSelector';
 import EmployeeAvatar from './EmployeeAvatar';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import ImageField, { KEEP_IMAGE, type ImageChange } from '@/components/media/ImageField';
 
 type ModalMode = 'create' | 'edit';
 
@@ -30,7 +31,8 @@ interface EmployeeModalProps {
   employee?: Employee | null;
   mode: ModalMode;
   companyId: string;
-  onSave: (data: EmployeeFormData) => Promise<void>;
+  /** `image`: what to do with the photo; the page saves it after the person. */
+  onSave: (data: EmployeeFormData, image: ImageChange) => Promise<void>;
   isSaving?: boolean;
 }
 
@@ -76,6 +78,7 @@ function EmployeeModal({
   const [errors, setErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
+  const [image, setImage] = useState<ImageChange>(KEEP_IMAGE);
 
   // Initialize form when modal opens
   useEffect(() => {
@@ -103,8 +106,12 @@ function EmployeeModal({
       }
       setErrors({});
       setEmailExists(false);
+      setImage(KEEP_IMAGE);
     }
   }, [isOpen, mode, employee, defaultGradient]);
+
+  const currentPhoto = mode === 'edit' ? employee?.slika_url ?? null : null;
+  const shownPhoto = image.type === 'set' ? image.previewUrl : image.type === 'remove' ? null : currentPhoto;
 
   // Validate individual field
   const validateField = useCallback((name: keyof EmployeeFormData, value: unknown): string => {
@@ -208,8 +215,8 @@ function EmployeeModal({
 
     if (!validateForm()) return;
 
-    await onSave(formData);
-  }, [formData, validateForm, onSave]);
+    await onSave(formData, image);
+  }, [formData, validateForm, onSave, image]);
 
   // Animation variants
   const backdropVariants = {
@@ -260,6 +267,7 @@ function EmployeeModal({
                     lastName={formData.priimek || '?'}
                     gradient={formData.barva}
                     size="md"
+                    photoUrl={shownPhoto}
                   />
                   <div>
                     <h2 className="text-[17px] font-semibold text-gray-900">
@@ -427,6 +435,25 @@ function EmployeeModal({
                     </div>
                   </div>
 
+                  {/* Photo on the booking page */}
+                  <ImageField
+                    shape="round"
+                    label={tCommon('media.staffLabel')}
+                    hint={tCommon('media.staffHint')}
+                    currentUrl={currentPhoto}
+                    value={image}
+                    onChange={setImage}
+                    disabled={isSaving}
+                    fallback={
+                      <EmployeeAvatar
+                        firstName={formData.ime || '?'}
+                        lastName={formData.priimek || '?'}
+                        gradient={formData.barva}
+                        size="lg"
+                      />
+                    }
+                  />
+
                   {/* Gradient selector */}
                   <div className="rounded-xl bg-white p-4">
                     <div className="mb-4 flex items-center gap-3">
@@ -435,6 +462,7 @@ function EmployeeModal({
                         lastName={formData.priimek || '?'}
                         gradient={formData.barva}
                         size="md"
+                        photoUrl={shownPhoto}
                       />
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">

@@ -18,6 +18,7 @@ export interface Service {
   aktivna: boolean;
   spletne_rezervacije: boolean; // whether this service can be booked online
   zahteva_placilo: boolean; // whether online booking requires payment for this service
+  slika_url: string | null; // photo on the booking page ("Storitve".slika_url)
   podjetje_id: string;
   created_at: string;
   updated_at: string;

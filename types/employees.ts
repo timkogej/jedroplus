@@ -33,6 +33,7 @@ export interface Employee {
   barva: string; // Full gradient CSS string e.g. "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)"
   aktivna: boolean;
   opombe?: string | null;
+  slika_url?: string | null; // photo on the booking page ("Osebe".slika_url)
   podjetje_id: string;
   created_at: string;
   updated_at: string;

@@ -30,6 +30,8 @@ import { Cube } from '@phosphor-icons/react';
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import ImageField, { KEEP_IMAGE, type ImageChange } from '@/components/media/ImageField';
+import { ImageSquare } from '@phosphor-icons/react';
 type ModalMode = 'create' | 'edit';
 
 interface ServiceModalProps {
@@ -37,7 +39,8 @@ interface ServiceModalProps {
   onClose: () => void;
   service?: Service | null;
   mode: ModalMode;
-  onSave: (data: ServiceFormData) => Promise<void>;
+  /** `image`: what to do with the photo; the page saves it after the service. */
+  onSave: (data: ServiceFormData, image: ImageChange) => Promise<void>;
   isSaving?: boolean;
   currency?: string; // from company settings
   existingCategories?: string[]; // existing categories from database for suggestions
@@ -91,6 +94,7 @@ function ServiceModal({
     zahteva_placilo: false,
   });
 
+  const [image, setImage] = useState<ImageChange>(KEEP_IMAGE);
   const [customDuration, setCustomDuration] = useState(false);
   const [customCategory, setCustomCategory] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof ServiceFormData, string>>>({});
@@ -160,6 +164,12 @@ function ServiceModal({
       setSelectedResursiIds(linkedResursiIds);
     }
   }, [isOpen, mode, service, existingCategories, linkedResursiIds, paymentRequirementAvailable, defaultCurrency]);
+
+  // Start without a pending photo each time the modal opens. Kept apart from
+  // the form reset above, which also runs when the page passes new props.
+  useEffect(() => {
+    if (isOpen) setImage(KEEP_IMAGE);
+  }, [isOpen, mode, service?.id]);
 
   useEffect(() => {
     if (!paymentRequirementAvailable || !formData.spletne_rezervacije) {
@@ -255,8 +265,8 @@ function ServiceModal({
       zahteva_placilo: paymentRequirementAvailable && formData.spletne_rezervacije
         ? formData.zahteva_placilo
         : false,
-    });
-  }, [formData, validateForm, onSave, paymentRequirementAvailable]);
+    }, image);
+  }, [formData, validateForm, onSave, paymentRequirementAvailable, image]);
 
   // Animation variants
   const backdropVariants = {
@@ -444,6 +454,22 @@ function ServiceModal({
                     )}
                   </div>
                 </div>
+
+                {/* Photo on the booking page */}
+                <ImageField
+                  shape="wide"
+                  label={tCommon('media.serviceLabel')}
+                  hint={tCommon('media.serviceHint')}
+                  currentUrl={mode === 'edit' ? service?.slika_url : null}
+                  value={image}
+                  onChange={setImage}
+                  disabled={isSaving}
+                  fallback={
+                    <div className="flex h-full w-full items-center justify-center" style={{ background: formData.barva }}>
+                      <ImageSquare className="h-7 w-7 text-white/90" weight="duotone" />
+                    </div>
+                  }
+                />
 
                 {/* Gradient Color Selector with Pagination */}
                 <div className="rounded-xl bg-white p-4">

@@ -112,5 +112,31 @@
     "mobile": "+44 7700 900123",
     "landline": "+44 20 7946 0000",
     "website": "https://www.company.com"
+  },
+  "media": {
+    "serviceLabel": "Service photo",
+    "serviceHint": "Shown on the booking page. A bright photo of the result or the space works best.",
+    "staffLabel": "Photo",
+    "staffHint": "Shown instead of initials on the booking page.",
+    "upload": "Upload photo",
+    "replace": "Replace",
+    "adjust": "Adjust",
+    "remove": "Remove",
+    "undo": "Undo",
+    "pendingNew": "The new photo is saved when you save your changes.",
+    "pendingRemove": "The photo will be removed when you save your changes.",
+    "cropTitle": "Adjust photo",
+    "cropHint": "Drag to move. Zoom with two fingers, the scroll wheel or the slider.",
+    "zoom": "Zoom",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "savedImageFailed": "Your changes are saved, but the photo could not be saved. Please try again.",
+    "forbidden": "Photos can be changed by the owner, admins and staff allowed to edit.",
+    "errors": {
+      "unreadable": "We can't open this image. Try a JPG or PNG photo.",
+      "tooSmall": "The image is too small. Choose one at least 240 × 240 pixels."
+    }
   }
 }
