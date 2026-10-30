@@ -35,7 +35,13 @@
     "loadError": "An error occurred while loading data",
     "saveError": "An error occurred while saving the client",
     "deleteError": "An error occurred while deleting the client",
-    "retry": "Try again"
+    "retry": "Try again",
+    "saveUnconfirmed": "The client was sent but has not appeared in the list yet. Wait a few seconds and refresh before entering it again.",
+    "saveRateLimited": "Too many requests at once. Wait a few seconds and try again.",
+    "saveAuth": "Your session has expired. Sign in again and retry.",
+    "saveServer": "The server is not responding right now. The client was not saved, try again in a minute.",
+    "saveNetwork": "Cannot reach the server. Check your internet connection and try again.",
+    "saveTimeout": "The server is taking too long to respond. The client may have been saved, so refresh the list before entering it again."
   },
   "toast": {
     "created": "Client added successfully",

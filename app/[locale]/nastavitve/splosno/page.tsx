@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
 import { QRCodeCard } from '@/components/qr/QRCodeCard';
+import { PushSettings } from '@/components/pwa/PushSettings';
 import {
   SettingsSection,
   SettingRow,
@@ -330,6 +331,8 @@ export default function GeneralSettingsPage() {
           description={t('general.notifications.subtitle')}
           footnote={t('general.notifications.transactionalNote')}
         >
+          <PushSettings />
+
           <SettingRow
             label={t('general.notifications.emailLabel')}
             description={t('general.notifications.emailNote')}

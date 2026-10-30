@@ -29,13 +29,15 @@ interface MessagePreviewProps {
   companyName?: string;
   /** Show SMS length/parts and the special-character warning. */
   sms?: boolean;
+  /** Email subject; when given, the preview is drawn as an email, not a bubble. */
+  subject?: string;
 }
 
 /**
  * Renders a reminder template the way a client would receive it, with sample
  * data in place of {{variables}}, as a message bubble.
  */
-export function MessagePreview({ template, companyName, sms = true }: MessagePreviewProps) {
+export function MessagePreview({ template, companyName, sms = true, subject }: MessagePreviewProps) {
   const t = useTranslations('reminders.preview');
   const locale = useLocale();
 
@@ -57,19 +59,33 @@ export function MessagePreview({ template, companyName, sms = true }: MessagePre
   };
 
   const migrated = migrateTemplate(template || '');
-  const unknown = Array.from(new Set(migrated.match(/\{\{[^}]*\}\}/g) ?? [])).filter((token) => !(token in sample));
-  const text = migrated.replace(/\{\{[a-z_]+\}\}/g, (token) => sample[token] ?? token);
+  const migratedSubject = migrateTemplate(subject || '');
+  const unknown = Array.from(new Set(`${migratedSubject} ${migrated}`.match(/\{\{[^}]*\}\}/g) ?? [])).filter(
+    (token) => !(token in sample),
+  );
+  const fill = (value: string) => value.replace(/\{\{[a-z_]+\}\}/g, (token) => sample[token] ?? token);
+  const text = fill(migrated);
   if (!text.trim()) return null;
+  const isEmail = subject !== undefined;
   const stats = smsStats(text);
 
   return (
     <div className="space-y-2" aria-label={t('label')}>
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">{t('label')}</p>
-      <div className="rounded-2xl bg-gray-100 p-3">
-        <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-sm leading-6 text-gray-900 shadow-sm">
-          <p className="whitespace-pre-wrap break-words">{text}</p>
+      {isEmail ? (
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+          <p className="border-b border-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-900 break-words">
+            {fill(migratedSubject).trim() || '—'}
+          </p>
+          <p className="whitespace-pre-wrap break-words px-4 py-3 text-sm leading-6 text-gray-800">{text}</p>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-2xl bg-gray-100 p-3">
+          <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 text-sm leading-6 text-gray-900 shadow-sm">
+            <p className="whitespace-pre-wrap break-words">{text}</p>
+          </div>
+        </div>
+      )}
       {unknown.length > 0 && (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-xs leading-5 text-red-700">
           {t('unknownVars', { tokens: unknown.join(', ') })}

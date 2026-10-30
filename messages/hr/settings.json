@@ -30,6 +30,14 @@
       "history": {
         "label": "Povijest",
         "description": "Revizijski trag svih promjena i radnji u sustavu"
+      },
+      "loyalty": {
+        "label": "Vjernost",
+        "description": "Bodovi za obavljene posjete i nagrade za klijente"
+      },
+      "portalAnnouncements": {
+        "label": "Obavijesti u portalu",
+        "description": "Objave za klijente, slike i neobavezna e-mail upozorenja"
       }
     }
   },

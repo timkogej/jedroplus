@@ -35,7 +35,13 @@
     "loadError": "Beim Laden der Daten ist ein Fehler aufgetreten",
     "saveError": "Beim Speichern des Kunden ist ein Fehler aufgetreten",
     "deleteError": "Beim Löschen des Kunden ist ein Fehler aufgetreten",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "saveUnconfirmed": "Der Kunde wurde gesendet, erscheint aber noch nicht in der Liste. Warten Sie einige Sekunden und aktualisieren Sie, bevor Sie ihn erneut eingeben.",
+    "saveRateLimited": "Zu viele Anfragen auf einmal. Warten Sie einige Sekunden und versuchen Sie es erneut.",
+    "saveAuth": "Ihre Sitzung ist abgelaufen. Melden Sie sich erneut an und versuchen Sie es noch einmal.",
+    "saveServer": "Der Server antwortet derzeit nicht. Der Kunde wurde nicht gespeichert, versuchen Sie es in einer Minute erneut.",
+    "saveNetwork": "Keine Verbindung zum Server. Prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+    "saveTimeout": "Der Server antwortet zu langsam. Der Kunde wurde möglicherweise gespeichert – aktualisieren Sie die Liste, bevor Sie ihn erneut eingeben."
   },
   "toast": {
     "created": "Kunde angelegt",

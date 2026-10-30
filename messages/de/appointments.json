@@ -417,7 +417,8 @@
     "showingTitle": "Vergangene, nicht abgeschlossene Termine ({count})",
     "showingBody": "Wählen Sie bei jedem „Abschließen“, „Nicht erschienen“ oder „Stornieren“. Die Liste wird dabei kürzer.",
     "show": "Anzeigen",
-    "showAll": "Alle Termine anzeigen"
+    "showAll": "Alle Termine anzeigen",
+    "closeAll": "Alle abschließen"
   },
   "export": {
     "title": "Termine exportieren",
@@ -484,5 +485,23 @@
     },
     "skip": "Überspringen",
     "send": "Benachrichtigung senden"
+  },
+  "bulkComplete": {
+    "title": "Vergangene Termine abschließen",
+    "loading": "Termine werden gezählt …",
+    "olderBody": "{count, plural, one {# Termin aus vergangenen Tagen wird abgeschlossen.} other {# Termine aus vergangenen Tagen werden abgeschlossen.}} Deswegen wird keine Nachricht an Kunden gesendet.",
+    "todayHeading": "Termine, die heute bereits beendet sind",
+    "todaySend": "Abschließen und Nachricht nach dem Termin senden ({count})",
+    "todaySilent": "Ohne Nachrichten abschließen",
+    "todayLeave": "Diese vorerst offen lassen",
+    "note": "Abgeschlossene Termine zählen zu Umsatz und Statistik. Markieren Sie Nichterscheinen und Absagen zuerst, bevor Sie auf Abschließen klicken.",
+    "cancel": "Abbrechen",
+    "confirm": "Abschließen",
+    "loadError": "Die Termine konnten nicht gezählt werden. Versuchen Sie es erneut.",
+    "error": "Das Abschließen ist fehlgeschlagen. Versuchen Sie es erneut."
+  },
+  "bulk": {
+    "done": "{count, plural, one {# Termin abgeschlossen} other {# Termine abgeschlossen}}",
+    "partial": "Abgeschlossen: {completed}. {failed} Termine konnten nicht abgeschlossen werden und bleiben offen."
   }
 }

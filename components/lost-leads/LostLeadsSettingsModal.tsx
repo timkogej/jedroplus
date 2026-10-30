@@ -16,6 +16,8 @@ import { Select, SelectOption } from '@/components/ui/animated-select';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { buildLostLeadsSettingsData, getPodatkiPodjetja } from '@/lib/webhookPayloadBuilders';
@@ -26,6 +28,7 @@ interface LostLeadsSettingsModalProps {
 }
 
 export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('lost-leads');
   const { companyId } = useCompany();
   const { user } = useAuth();
@@ -147,6 +150,7 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -160,11 +164,12 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            {...sheetDrag.panel}
             className={`${sheet.panel} sm:max-w-3xl`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 flex-1">
@@ -366,5 +371,6 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }

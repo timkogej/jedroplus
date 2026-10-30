@@ -10,7 +10,8 @@
   "newDesignsBanner": "New booking page designs every month",
   "requestsNav": {
     "title": "Booking requests",
-    "subtitle": "Review and confirm requests submitted by clients"
+    "subtitle": "Review and confirm requests submitted by clients",
+    "pending": "{count, plural, one {# new request} other {# new requests}}"
   },
   "multiChannelBanner": {
     "bold": "Use each booking link on a different channel.",
@@ -104,7 +105,11 @@
     "onlineConfirmDesc": "Confirmation for appointments booked through the website.",
     "mainLinkDesc": "The link you share with clients for booking.",
     "colorsDesc": "The colours of the booking page your clients see.",
-    "mgmtLinkDesc": "Clients reschedule or cancel through this link."
+    "mgmtLinkDesc": "Clients reschedule or cancel through this link.",
+    "bookingMode": "Booking mode",
+    "bookingModeDesc": "How clients book on your booking page",
+    "modeInstant": "Instant",
+    "modeRequest": "Request"
   },
   "modal": {
     "title": "Booking settings",
@@ -119,7 +124,17 @@
       "intervalPlaceholder": "Select interval",
       "interval15": "15 minutes",
       "interval30": "30 minutes",
-      "interval60": "60 minutes (1 hour)"
+      "interval60": "60 minutes (1 hour)",
+      "windowLabel": "How many days ahead customers can book",
+      "windowDesc": "Applies to online booking and Receptionist+.",
+      "windowDays": "{days, plural, one {# day} other {# days}}",
+      "modeLabel": "Booking mode",
+      "modeDesc": "How clients book on your booking page.",
+      "modeInstant": "Instant booking",
+      "modeInstantDesc": "The client picks a free time and it is booked right away.",
+      "modeRequest": "Request",
+      "modeRequestDesc": "The client says when suits them and what they want. You pick the time in Booking requests.",
+      "modeSaveError": "Settings were saved, but the booking mode was not. Please try again."
     },
     "payments": {
       "sectionTitle": "Online payments",
@@ -173,7 +188,21 @@
       "modeManual": "Custom template",
       "templateHint": "SMS message template (max 155 characters)",
       "templatePlaceholder": "E.g.: Your booking is confirmed for {{datum}} at {{cas}}. {{ime_podjetja}}.",
-      "noEmojiHint": "No emojis or special characters."
+      "noEmojiHint": "No emojis or special characters.",
+      "englishSaveError": "Settings were saved, but the English version of the confirmation wasn't. Please try again.",
+      "email": {
+        "title": "Confirmation email text",
+        "appliesTo": "Applies to email confirmations for manual and online bookings.",
+        "aiHint": "AI writes a new, short text each time, in the client's language.",
+        "subjectLabel": "Subject",
+        "bodyLabel": "Text",
+        "bodyHint": "Enter adds a new line. Date, time, service and the reschedule button are also shown separately in the email, below the text.",
+        "bodyPlaceholder": "Hi {{ime}}, your appointment is booked for {{datum}} at {{cas}}.",
+        "defaultSubject": "Your appointment at {{ime_podjetja}}",
+        "defaultBody": "Hi {{ime}},\n\nyour appointment for {{storitev}} is booked for {{datum}} at {{cas}}.\n\nIf you need to reschedule or cancel, you can do it here: {{povezava_prenarocanje}}\n\nSee you soon,\n{{ime_podjetja}}\n{{telefon_podjetja}}",
+        "emptyBodyWarning": "Without text, AI will keep writing the email.",
+        "saveError": "Settings were saved, but the confirmation templates were not. Please try again."
+      }
     },
     "policy": {
       "sectionTitle": "Cancellation & rescheduling policy",

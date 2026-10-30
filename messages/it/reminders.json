@@ -229,6 +229,16 @@
       "daysBeforeLabel": "Invia il promemoria (giorni prima dell'appuntamento)",
       "daysBeforeDesc": "Quanti giorni prima dell'appuntamento inviare il promemoria.",
       "select": "Scegli",
+      "senderIdRules": "Massimo 11 caratteri, senza accenti, non può essere composto solo da cifre.",
+      "senderIdRequest": "Invia la richiesta",
+      "senderIdSaving": "Invio in corso …",
+      "senderIdStatusNiZaproseno": "Non richiesto",
+      "senderIdStatusVObdelavi": "In attesa di approvazione dell'operatore",
+      "senderIdStatusOdobreno": "Approvato",
+      "senderIdStatusZavrnjeno": "Rifiutato",
+      "senderIdInUse": "I messaggi vengono attualmente inviati con il nome {ime}.",
+      "senderIdDefault": "I messaggi vengono attualmente inviati con il nome Jedroplus.",
+      "senderIdNoReply": "I clienti non possono rispondere a un messaggio inviato con un nome mittente.",
       "senderIdManage": "Gestisci nei componenti aggiuntivi"
     },
     "before": {

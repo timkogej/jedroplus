@@ -10,7 +10,8 @@
   "newDesignsBanner": "Vsak mesec novi dizajni za booking strani",
   "requestsNav": {
     "title": "Zahteve za termin",
-    "subtitle": "Preglejte in potrdite zahteve, ki jih pošljejo stranke"
+    "subtitle": "Preglejte in potrdite zahteve, ki jih pošljejo stranke",
+    "pending": "{count, plural, one {# nova zahteva} two {# novi zahtevi} few {# nove zahteve} other {# novih zahtev}}"
   },
   "multiChannelBanner": {
     "bold": "Vsak booking link lahko uporabite na drugem kanalu.",
@@ -104,7 +105,11 @@
     "onlineConfirmDesc": "Potrdilo za termine, rezervirane prek spletne strani.",
     "mainLinkDesc": "Povezava, ki jo delite strankam za rezervacijo.",
     "colorsDesc": "Barve rezervacijske strani, ki jo vidijo stranke.",
-    "mgmtLinkDesc": "Prek te povezave stranka prestavi ali odpove termin."
+    "mgmtLinkDesc": "Prek te povezave stranka prestavi ali odpove termin.",
+    "bookingMode": "Način rezervacije",
+    "bookingModeDesc": "Kako stranke rezervirajo na spletni strani",
+    "modeInstant": "Takojšnja",
+    "modeRequest": "Povpraševanje"
   },
   "modal": {
     "title": "Nastavitve rezervacij",
@@ -119,7 +124,17 @@
       "intervalPlaceholder": "Izberi interval",
       "interval15": "15 minut",
       "interval30": "30 minut",
-      "interval60": "60 minut (1 ura)"
+      "interval60": "60 minut (1 ura)",
+      "windowLabel": "Koliko dni vnaprej je možno rezervirati",
+      "windowDesc": "Velja za spletno rezervacijo in Receptionist+.",
+      "windowDays": "{days, plural, one {# dan} two {# dneva} few {# dni} other {# dni}}",
+      "modeLabel": "Način rezervacije",
+      "modeDesc": "Kako stranke rezervirajo na spletni strani.",
+      "modeInstant": "Takojšnja rezervacija",
+      "modeInstantDesc": "Stranka izbere prost termin in je takoj rezerviran.",
+      "modeRequest": "Povpraševanje",
+      "modeRequestDesc": "Stranka pove, kdaj ji ustreza in kaj želi. Vi izberete termin v Zahtevah za termin.",
+      "modeSaveError": "Nastavitve so shranjene, način rezervacije pa ne. Poskusite znova."
     },
     "payments": {
       "sectionTitle": "Spletna plačila",
@@ -173,7 +188,21 @@
       "modeManual": "Lastna predloga",
       "templateHint": "Predloga SMS sporočila (max 155 znakov)",
       "templatePlaceholder": "Npr: Vaša rezervacija je potrjena za {{datum}} ob {{cas}}. {{ime_podjetja}}.",
-      "noEmojiHint": "Brez emojijev in posebnih znakov."
+      "noEmojiHint": "Brez emojijev in posebnih znakov.",
+      "englishSaveError": "Nastavitve so shranjene, angleška različica potrdila pa ne. Poskusite znova.",
+      "email": {
+        "title": "Besedilo email potrdila",
+        "appliesTo": "Velja za potrdila po emailu, pri ročnih in spletnih rezervacijah.",
+        "aiHint": "AI vsakič sestavi novo, kratko besedilo v jeziku stranke.",
+        "subjectLabel": "Zadeva",
+        "bodyLabel": "Besedilo",
+        "bodyHint": "Enter doda novo vrstico. Datum, ura, storitev in gumb za prestavitev so v emailu prikazani tudi posebej, pod besedilom.",
+        "bodyPlaceholder": "Pozdravljeni {{ime}}, vaš termin je rezerviran za {{datum}} ob {{cas}}.",
+        "defaultSubject": "Vaš termin pri {{ime_podjetja}}",
+        "defaultBody": "Pozdravljeni {{ime}},\n\nvaš termin je rezerviran za {{datum}} ob {{cas}}.\nStoritev: {{storitev}}\n\nČe ga želite prestaviti ali odpovedati, lahko to storite tukaj: {{povezava_prenarocanje}}\n\nSe vidimo,\n{{ime_podjetja}}\n{{telefon_podjetja}}",
+        "emptyBodyWarning": "Brez besedila bo email še naprej sestavil AI.",
+        "saveError": "Nastavitve so shranjene, predloge potrdil pa ne. Poskusite znova."
+      }
     },
     "policy": {
       "sectionTitle": "Politika odpovedi in prestavitev",

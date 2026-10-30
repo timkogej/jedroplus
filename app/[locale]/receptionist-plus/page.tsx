@@ -17,6 +17,7 @@ import {
   LoadingState,
   ErrorState,
 } from '@/components/receptionist-plus/ReceptionistPlusTabs';
+import { NumberRequestCard } from '@/components/receptionist-plus/NumberRequestCard';
 
 // ─── Page ───────────────────────────────────────────────────────────────────
 
@@ -26,6 +27,10 @@ export default function ReceptionistPlusPage() {
   const [provisioned, setProvisioned] = useState<boolean | null>(null);
   const [settings, setSettings] = useState<ReceptionistSettings | null>(null);
   const [error, setError] = useState(false);
+  const [phase7, setPhase7] = useState(true);
+  const [phase10, setPhase10] = useState(true);
+  const [phase11, setPhase11] = useState(true);
+  const [companyName, setCompanyName] = useState('');
 
   const load = useCallback(async () => {
     setError(false);
@@ -35,6 +40,10 @@ export default function ReceptionistPlusPage() {
       if (!data.ok) throw new Error(data.error ?? 'load_failed');
       setProvisioned(Boolean(data.provisioned));
       setSettings(data.settings);
+      setPhase7(data.phase7 !== false);
+      setPhase10(data.phase10 !== false);
+      setPhase11(data.phase11 !== false);
+      setCompanyName(typeof data.company_name === 'string' ? data.company_name : '');
     } catch (e) {
       console.error('[ReceptionistPlus] load settings error:', e);
       setError(true);
@@ -94,8 +103,16 @@ export default function ReceptionistPlusPage() {
                 />
               </div>
 
+              {tab === 'nastavitve' && <NumberRequestCard />}
               {tab === 'nastavitve' && settings && (
-                <NastavitveTab settings={settings} onSave={saveSettings} />
+                <NastavitveTab
+                  settings={settings}
+                  onSave={saveSettings}
+                  phase7={phase7}
+                  phase10={phase10}
+                  phase11={phase11}
+                  companyName={companyName}
+                />
               )}
               {tab === 'dnevnik' && <DnevnikTab />}
               {tab === 'krediti' && <KreditiTab />}

@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { humanizeDates } from '@/lib/format';
+import { notificationHref } from '@/lib/notifications/href';
 import {
   BellIcon,
   CheckCircleIcon,
@@ -10,6 +11,7 @@ import {
   CalendarCheckIcon,
   CalendarXIcon,
   CalendarDotsIcon,
+  ClipboardTextIcon,
   WarningIcon,
   WarningCircleIcon,
   InfoIcon,
@@ -54,7 +56,7 @@ export type FilterId = 'all' | 'unread' | 'reservations' | 'system';
 
 export function isReservationType(type: string): boolean {
   const t = type?.toLowerCase();
-  return t === 'appointment_booked' || t === 'appointment_cancelled' || t === 'appointment_updated';
+  return t === 'appointment_booked' || t === 'appointment_cancelled' || t === 'appointment_updated' || t === 'booking_request';
 }
 
 export function isSystemType(type: string): boolean {
@@ -76,6 +78,8 @@ export function typeIcon(type: string): { Icon: PhosphorIcon; color: string } {
       return { Icon: CalendarXIcon, color: 'text-red-500' };
     case 'appointment_updated':
       return { Icon: CalendarDotsIcon, color: 'text-blue-500' };
+    case 'booking_request':
+      return { Icon: ClipboardTextIcon, color: 'text-violet-500' };
     case 'appointment_reminder':
     case 'appointment_post':
       return { Icon: BellIcon, color: 'text-[#7C78FA]' };
@@ -166,7 +170,9 @@ export const NotificationCard = ({ notification, onMarkRead, onArchive }: Notifi
   const locale = useLocale();
   const isUnread = !notification.is_read;
   const { Icon, color } = typeIcon(notification.type);
-  const isInteractive = isUnread || Boolean(notification.action_url);
+  // Nova rezervacija iz n8n nima action_url — povezavo na termin izpeljemo.
+  const href = notificationHref(notification);
+  const isInteractive = isUnread || Boolean(href);
 
   // Pod glavo dneva bi bil datum odveč: v zadnji uri relativno ("pred 5
   // min"), sicer ura.
@@ -178,21 +184,21 @@ export const NotificationCard = ({ notification, onMarkRead, onArchive }: Notifi
   const handleOpen = () => {
     if (!isInteractive) return;
     if (isUnread) onMarkRead(notification.id);
-    if (!notification.action_url) return;
+    if (!href) return;
 
-    if (/^https?:\/\//.test(notification.action_url)) {
-      window.location.assign(notification.action_url);
+    if (/^https?:\/\//.test(href)) {
+      window.location.assign(href);
       return;
     }
 
-    router.push(notification.action_url);
+    router.push(href);
   };
 
   return (
     <div
-      role={notification.action_url ? 'link' : isUnread ? 'button' : undefined}
+      role={href ? 'link' : isUnread ? 'button' : undefined}
       tabIndex={isInteractive ? 0 : undefined}
-      title={notification.action_url ? t('card.open') : undefined}
+      title={href ? t('card.open') : undefined}
       className={[
         'group/notification relative flex items-start gap-3 py-3.5 pl-7 pr-4 transition-colors duration-150',
         isInteractive ? 'cursor-pointer hover:bg-gray-50' : 'cursor-default',
@@ -230,7 +236,7 @@ export const NotificationCard = ({ notification, onMarkRead, onArchive }: Notifi
           <div className="relative flex-shrink-0">
             <span className="tnum flex items-center gap-0.5 whitespace-nowrap pt-0.5 text-[13px] text-gray-400 transition-opacity duration-150 sm:group-hover/notification:opacity-0 sm:group-focus-within/notification:opacity-0">
               {when}
-              {notification.action_url && (
+              {href && (
                 <CaretRightIcon size={13} weight="bold" className="text-gray-300" aria-hidden="true" />
               )}
             </span>

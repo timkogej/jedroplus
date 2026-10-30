@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBillingUsage } from '@/hooks/useBillingUsage';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, FloppyDisk, EnvelopeSimple, DeviceMobile, ArrowRight } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 import {
   SettingsSection,
   SettingRow,
@@ -19,8 +20,22 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
-import { TemplateEditor, migrateTemplate, sanitizeTemplateText } from '@/components/reminders/TemplateEditor';
+import { TemplateEditor, migrateTemplate, sanitizeTemplateText, linkLength } from '@/components/reminders/TemplateEditor';
+import { EnglishVariant } from '@/components/reminders/EnglishVariant';
+import { EmailConfirmationTemplate, type EmailTemplateValue } from '@/components/booking/EmailConfirmationTemplate';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
+
+const BOOKING_WINDOW_DAYS = [7, 14, 21, 30, 60, 90, 180, 365];
+
+/** Preset windows, plus the saved value when it is not one of them. */
+function bookingWindowOptions(current: string): number[] {
+  const days = parseInt(current, 10);
+  return Number.isFinite(days) && !BOOKING_WINDOW_DAYS.includes(days)
+    ? [...BOOKING_WINDOW_DAYS, days].sort((a, b) => a - b)
+    : BOOKING_WINDOW_DAYS;
+}
 
 interface BookingSettingsModalProps {
   isOpen: boolean;
@@ -95,6 +110,7 @@ function ChannelPicker({
 }
 
 export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('reservations');
   const { companyId, companyUuid, planCode } = useCompany();
   const { user } = useAuth();
@@ -107,7 +123,11 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
 
   // Settings from "Podatki podjetij" table
   const [bookingOmogocen, setBookingOmogocen] = useState(true);
+  // 'instant' = free times, 'request' = the client sends a request (1793000000).
+  const [bookingMode, setBookingMode] = useState<'instant' | 'request'>('instant');
+  const loadedBookingModeRef = useRef<'instant' | 'request'>('instant');
   const [koledarUre, setKoledarUre] = useState<'15' | '30' | '60'>('30');
+  const [maxDneviRezervacija, setMaxDneviRezervacija] = useState('14');
   const [potrdiloReservation, setPotrdiloReservation] = useState(false);
   const [potrdiloChannel, setPotrdiloChannel] = useState<'sms' | 'email'>('email');
   const [potrdiloOnline, setPotrdiloOnline] = useState(false);
@@ -116,7 +136,20 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   // SMS config - confirmation ("potrdilo")
   const [smsModePotrdilo, setSmsModePotrdilo] = useState<'ai' | 'manual'>('ai');
   const [smsTemplatePotrdilo, setSmsTemplatePotrdilo] = useState('');
+  // English version of the own template, for clients (and Receptionist+
+  // callers) who don't speak the company's language. Saved separately
+  // through /api/company/message-templates, like the reminders' variants.
+  const [potrdiloEn, setPotrdiloEn] = useState('');
+  const loadedPotrdiloEnRef = useRef('');
+  const [sendingLanguage, setSendingLanguage] = useState('sl');
   const [lastnaPredlogaPotrdilo, setLastnaPredlogaPotrdilo] = useState('');
+
+  // Email confirmation: AI (default) or own template, for manual and online
+  // bookings. Saved through /api/company/message-templates (1792900000).
+  const [emailModePotrdilo, setEmailModePotrdilo] = useState<'ai' | 'manual'>('ai');
+  const [emailPotrdilo, setEmailPotrdilo] = useState<EmailTemplateValue>({ subject: '', body: '' });
+  const [emailPotrdiloEn, setEmailPotrdiloEn] = useState<EmailTemplateValue>({ subject: '', body: '' });
+  const loadedEmailTemplatesRef = useRef<Record<string, string>>({});
 
   // Company data for SMS variable length estimation
   const [kompanyEmail, setKompanyEmail] = useState('');
@@ -173,7 +206,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
     '{{ime_podjetja}}': nazivPodjetja.length || 15,
     '{{naslov}}': naslovPodjetja.length || 20,
     '{{leto}}': 4,
-    '{{povezava_prenarocanje}}': apptManagementLink.length || 30,
+    // Šteje se brez sheme — tako gre povezava tudi ven.
+    '{{povezava_prenarocanje}}': linkLength(apptManagementLink),
   };
 
   useEffect(() => {
@@ -213,9 +247,16 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         if (data) {
           const bookingEnabled = data['booking_omogocen'];
           setBookingOmogocen(bookingEnabled !== false && bookingEnabled !== 'false');
+          const mode = data['booking_mode'] === 'request' ? 'request' : 'instant';
+          setBookingMode(mode);
+          loadedBookingModeRef.current = mode;
 
           const ureValue = String(data['koledar_ure'] ?? data['Koledar_ure'] ?? '30');
           setKoledarUre(ureValue === '60' ? '60' : ureValue === '15' ? '15' : '30');
+
+          // Booking window, read by booking-v2 init (online page and Receptionist+).
+          const maxDni = parseInt(String(data['max_dnevi_rezervacija'] ?? '14'), 10);
+          setMaxDneviRezervacija(String(Number.isFinite(maxDni) && maxDni > 0 ? maxDni : 14));
 
           const potrdiloRez = data['Potrdilo po rezervaciji'] ?? data['Potrdilo ob rezervaciji'];
           setPotrdiloReservation(potrdiloRez === true || potrdiloRez === 'true' || potrdiloRez === 'yes' || potrdiloRez === 'da');
@@ -229,6 +270,28 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           setSmsModePotrdilo(smsTypePotrdilo === 'LP' ? 'manual' : 'ai');
           setSmsTemplatePotrdilo(sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_potrdilo'] ?? ''))));
           setLastnaPredlogaPotrdilo(sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_potrdilo'] ?? ''))));
+          const potrdiloEnLoaded = sanitizeTemplateText(migrateTemplate(String(data['lastna_predloga_potrdilo_en'] ?? '')));
+          setPotrdiloEn(potrdiloEnLoaded);
+          loadedPotrdiloEnRef.current = potrdiloEnLoaded;
+          setSendingLanguage(String(data['jezik posiljanja'] ?? data['jezik_posiljanja'] ?? 'sl'));
+
+          const emailLoaded = {
+            email_type_potrdilo: String(data['email_type_potrdilo'] ?? 'AI').toUpperCase() === 'LP' ? 'LP' : 'AI',
+            email_zadeva_potrdilo: String(data['email_zadeva_potrdilo'] ?? ''),
+            email_predloga_potrdilo: String(data['email_predloga_potrdilo'] ?? ''),
+            email_zadeva_potrdilo_en: String(data['email_zadeva_potrdilo_en'] ?? ''),
+            email_predloga_potrdilo_en: String(data['email_predloga_potrdilo_en'] ?? ''),
+          };
+          loadedEmailTemplatesRef.current = emailLoaded;
+          setEmailModePotrdilo(emailLoaded.email_type_potrdilo === 'LP' ? 'manual' : 'ai');
+          setEmailPotrdilo({
+            subject: migrateTemplate(emailLoaded.email_zadeva_potrdilo),
+            body: migrateTemplate(emailLoaded.email_predloga_potrdilo),
+          });
+          setEmailPotrdiloEn({
+            subject: migrateTemplate(emailLoaded.email_zadeva_potrdilo_en),
+            body: migrateTemplate(emailLoaded.email_predloga_potrdilo_en),
+          });
 
           // Company data for SMS variable length estimation
           setKompanyEmail(String(data['Kontaktni email'] ?? data['kontaktni_email'] ?? data['from_email'] ?? ''));
@@ -295,6 +358,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         data: {
           'booking_omogocen': bookingOmogocen,
           'koledar_ure': koledarUre,
+          'max_dnevi_rezervacija': maxDneviRezervacija,
           'Potrdilo po rezervaciji': potrdiloReservation ? 'true' : 'false',
           'Potrdilo ob rezervaciji': potrdiloReservation ? 'true' : 'false',
           'potrdilo_channel': potrdiloChannel,
@@ -333,6 +397,52 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         throw new Error(t('modal.footer.saveError'));
       }
 
+      if (bookingMode !== loadedBookingModeRef.current) {
+        const res = await fetch('/api/company/booking-mode', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ booking_mode: bookingMode }),
+        }).catch(() => null);
+        if (!res?.ok) {
+          toast.error(t('modal.general.modeSaveError'));
+          return;
+        }
+        loadedBookingModeRef.current = bookingMode;
+      }
+
+      // Columns the app writes itself (n8n's settings workflow doesn't know them).
+      const templatePatch: Record<string, string> = {};
+      if (potrdiloEn.trim() !== loadedPotrdiloEnRef.current.trim()) {
+        templatePatch.lastna_predloga_potrdilo_en = potrdiloEn;
+      }
+      const emailCurrent: Record<string, string> = {
+        email_type_potrdilo: emailModePotrdilo === 'manual' ? 'LP' : 'AI',
+        email_zadeva_potrdilo: emailPotrdilo.subject,
+        email_predloga_potrdilo: emailPotrdilo.body,
+        email_zadeva_potrdilo_en: emailPotrdiloEn.subject,
+        email_predloga_potrdilo_en: emailPotrdiloEn.body,
+      };
+      for (const [column, value] of Object.entries(emailCurrent)) {
+        if (value.trim() !== (loadedEmailTemplatesRef.current[column] ?? '').trim()) templatePatch[column] = value;
+      }
+      if (Object.keys(templatePatch).length > 0) {
+        const res = await fetch('/api/company/message-templates', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(templatePatch),
+        }).catch(() => null);
+        if (!res?.ok) {
+          toast.error(
+            Object.keys(templatePatch).some((column) => column.startsWith('email_'))
+              ? t('modal.confirmations.email.saveError')
+              : t('modal.confirmations.englishSaveError'),
+          );
+          return;
+        }
+        loadedPotrdiloEnRef.current = potrdiloEn;
+        loadedEmailTemplatesRef.current = { ...loadedEmailTemplatesRef.current, ...emailCurrent };
+      }
+
       await new Promise(resolve => setTimeout(resolve, 1000));
       setLastSaved(new Date());
 
@@ -349,6 +459,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -362,11 +473,12 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            {...sheetDrag.panel}
             className={`${sheet.panel} sm:max-w-2xl`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -413,6 +525,42 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                       />
                     </SettingRow>
 
+                    <div className="py-1">
+                      <p className="text-sm font-medium text-gray-900">{t('modal.general.modeLabel')}</p>
+                      <p className="mt-0.5 text-[13px] text-gray-500">{t('modal.general.modeDesc')}</p>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        {([
+                          { value: 'instant' as const, title: t('modal.general.modeInstant'), desc: t('modal.general.modeInstantDesc') },
+                          { value: 'request' as const, title: t('modal.general.modeRequest'), desc: t('modal.general.modeRequestDesc') },
+                        ]).map((opt) => {
+                          const active = bookingMode === opt.value;
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => setBookingMode(opt.value)}
+                              className={`rounded-xl border p-3.5 text-left transition-colors ${
+                                active ? 'border-violet-400 bg-violet-50/60 ring-1 ring-violet-300' : 'border-gray-200 hover:bg-gray-50'
+                              }`}
+                            >
+                              <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <span
+                                  className={`flex h-4 w-4 items-center justify-center rounded-full border ${
+                                    active ? 'border-violet-500 bg-violet-500' : 'border-gray-300'
+                                  }`}
+                                >
+                                  {active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                                </span>
+                                {opt.title}
+                              </span>
+                              <span className="mt-1 block text-[13px] leading-5 text-gray-500">{opt.desc}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     <SettingRow
                       label={t('modal.general.intervalLabel')}
                       description={t('modal.general.intervalDesc')}
@@ -426,6 +574,24 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         <SelectOption value="15">{t('modal.general.interval15')}</SelectOption>
                         <SelectOption value="30">{t('modal.general.interval30')}</SelectOption>
                         <SelectOption value="60">{t('modal.general.interval60')}</SelectOption>
+                      </Select>
+                    </SettingRow>
+
+                    <SettingRow
+                      label={t('modal.general.windowLabel')}
+                      description={t('modal.general.windowDesc')}
+                    >
+                      <Select
+                        value={maxDneviRezervacija}
+                        setValue={(value) => setMaxDneviRezervacija(value)}
+                        placeholder={t('modal.general.intervalPlaceholder')}
+                        className="[&>button]:rounded-[10px]"
+                      >
+                        {bookingWindowOptions(maxDneviRezervacija).map((days) => (
+                          <SelectOption key={days} value={String(days)}>
+                            {t('modal.general.windowDays', { days })}
+                          </SelectOption>
+                        ))}
                       </Select>
                     </SettingRow>
                   </SettingsSection>
@@ -621,6 +787,16 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                                     varLengths={smsVarLengths}
                                   />
                                   <p className="text-xs text-gray-400">{t('modal.confirmations.noEmojiHint')}</p>
+                                  {sendingLanguage !== 'en' && (
+                                    <EnglishVariant
+                                      value={potrdiloEn}
+                                      onChange={setPotrdiloEn}
+                                      maxLength={155}
+                                      varLengths={smsVarLengths}
+                                      companyName={nazivPodjetja}
+                                      placeholder="Hi {{ime}}, your appointment is booked for {{datum}} at {{cas}}. {{ime_podjetja}}"
+                                    />
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -671,6 +847,23 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                         </motion.div>
                       )}
                     </div>
+
+                    {/* One email text for both kinds of booking */}
+                    {((potrdiloReservation && potrdiloChannel === 'email') ||
+                      (potrdiloOnline && potrdiloOnlineChannel === 'email')) && (
+                      <div className="px-4 pb-3">
+                        <EmailConfirmationTemplate
+                          mode={emailModePotrdilo}
+                          onModeChange={setEmailModePotrdilo}
+                          value={emailPotrdilo}
+                          onChange={setEmailPotrdilo}
+                          english={emailPotrdiloEn}
+                          onEnglishChange={setEmailPotrdiloEn}
+                          showEnglish={sendingLanguage !== 'en'}
+                          companyName={nazivPodjetja}
+                        />
+                      </div>
+                    )}
                   </SettingsSection>
 
                   {/* Cancellation & Rescheduling Policy */}
@@ -860,5 +1053,6 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }

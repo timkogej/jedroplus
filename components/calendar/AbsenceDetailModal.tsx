@@ -19,6 +19,7 @@ import type { Zaposleni } from '@/types/appointments';
 import { useTranslations, useLocale } from 'next-intl';
 import { intlLocale } from '@/lib/format';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
 
 interface AbsenceDetailModalProps {
@@ -84,6 +85,7 @@ function AbsenceDetailModal({
   isDeleting = false,
   isSaving = false,
 }: AbsenceDetailModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('appointments');
   const locale = useLocale();
 
@@ -180,11 +182,12 @@ function AbsenceDetailModal({
             initial="hidden"
             animate="visible"
             exit="exit"
+            {...sheetDrag.panel}
             className={`${sheet.panel} sm:max-w-sm`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">

@@ -4,6 +4,8 @@ import { memo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Trash, SpinnerGap } from '@phosphor-icons/react';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { useTranslations } from 'next-intl';
 import type { Resurs } from '@/types/resursi';
 
@@ -23,11 +25,13 @@ const modalVariants = {
 };
 
 function DeleteResursModal({ isOpen, onClose, resurs, onConfirm, isDeleting = false }: DeleteResursModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('resursi');
 
   if (!resurs) return null;
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -43,11 +47,12 @@ function DeleteResursModal({ isOpen, onClose, resurs, onConfirm, isDeleting = fa
             initial="hidden"
             animate="visible"
             exit="exit"
+            {...sheetDrag.panel}
             className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <h2 className={sheet.title}>{t('deleteModal.title')}</h2>
@@ -113,6 +118,7 @@ function DeleteResursModal({ isOpen, onClose, resurs, onConfirm, isDeleting = fa
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

@@ -11,6 +11,8 @@ import {
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import type { Service } from '@/types/services';
 import { generateGradient } from '@/lib/utils/colors';
 import { isGradient, DEFAULT_SERVICE_GRADIENT } from '@/lib/constants/serviceGradients';
@@ -34,6 +36,7 @@ function DeleteServiceModal({
   onDeactivate,
   isDeleting = false,
 }: DeleteServiceModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('services');
   const tCommon = useTranslations('common');
   const hasAppointments = appointmentCount > 0;
@@ -63,6 +66,7 @@ function DeleteServiceModal({
       : DEFAULT_SERVICE_GRADIENT;
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -78,11 +82,12 @@ function DeleteServiceModal({
             initial="hidden"
             animate="visible"
             exit="exit"
+            {...sheetDrag.panel}
             className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <h2 className={sheet.title}>
@@ -189,6 +194,7 @@ function DeleteServiceModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

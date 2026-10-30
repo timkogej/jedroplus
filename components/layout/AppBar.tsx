@@ -153,7 +153,7 @@ export function AppBar() {
   return (
     <header
       style={{ left: leftOffset }}
-      className="glass-bar hairline-b fixed top-0 right-0 z-50 h-14 transition-all duration-300"
+      className="glass-bar hairline-b fixed top-0 right-0 z-50 h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] transition-all duration-300"
     >
       <div className="h-full px-4 md:px-5 flex items-center justify-between gap-4">
 

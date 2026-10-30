@@ -2,6 +2,7 @@
 
 import { memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import {
   MagnifyingGlass,
   Plus,
@@ -98,7 +99,10 @@ function CalendarSidebar({
 
   return (
     <>
-      {/* Sidebar overlay - slides in/out from right */}
+      {/* Sidebar overlay - slides in/out from right.
+          V portalu, ker je koledar v svojem sloju (isolate) in bi ga sicer
+          prekrila zgornja vrstica aplikacije. */}
+      <BodyPortal>
       <AnimatePresence>
         {isOpen && (
           <>
@@ -108,7 +112,7 @@ function CalendarSidebar({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               style={{ pointerEvents: isOpen ? 'auto' : 'none' }}
-              className="fixed inset-0 bg-black/20 z-40"
+              className="fixed inset-0 bg-black/20 z-[60]"
               onClick={onToggle}
             />
 
@@ -118,7 +122,7 @@ function CalendarSidebar({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50 overflow-y-auto"
+              className="fixed right-0 top-0 z-[61] h-[100dvh] w-80 max-w-[88vw] overflow-y-auto overscroll-contain bg-white pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] shadow-2xl"
             >
               <div className="p-5 space-y-5">
               {/* Action buttons */}
@@ -552,6 +556,7 @@ function CalendarSidebar({
           </>
         )}
       </AnimatePresence>
+      </BodyPortal>
     </>
   );
 }

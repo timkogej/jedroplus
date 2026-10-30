@@ -43,7 +43,7 @@ import {
 } from '@/lib/supabase/appointments';
 import { getClientById } from '@/lib/supabase/clients';
 import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
-import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, fetchResursiForStoritve, syncTerminResursi, deleteTerminResursi } from '@/lib/supabase/resursi';
+import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, syncResursiZaTermin, sprostiResurseTermina } from '@/lib/supabase/resursi';
 import type { Resurs } from '@/types/resursi';
 import type { CalendarEvent } from '@/types/events';
 import {
@@ -1141,7 +1141,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         throw new Error(t('errors.deleteError'));
       }
 
-      await deleteTerminResursi(companyId, Number(deleteTarget.id));
+      await sprostiResurseTermina(companyId, deleteTarget.id);
 
       const [idsResult, mapResult] = await Promise.all([
         fetchTerminIdsWithResursi(companyId),
@@ -1213,6 +1213,37 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     // Run once on arrival only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Klik na obvestilo (v aplikaciji ali push): /koledar?termin=OB-000063&datum=2026-10-21
+  // skoči na ta dan in odpre termin, ko se naloži.
+  const [pendingTerminId, setPendingTerminId] = useState<string | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const termin = params.get('termin');
+    const datum = params.get('datum');
+    if (!termin && !datum) return;
+    if (datum && /^\d{4}-\d{2}-\d{2}$/.test(datum)) {
+      const [y, m, d] = datum.split('-').map(Number);
+      setCurrentDate(new Date(y, m - 1, d));
+    }
+    if (termin) setPendingTerminId(termin);
+    params.delete('termin');
+    params.delete('datum');
+    const query = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+  }, []);
+  useEffect(() => {
+    if (!pendingTerminId) return;
+    const match = appointments.find((a) => a.id_termina === pendingTerminId || a.id === pendingTerminId);
+    if (match) {
+      setSelectedAppointment(match);
+      setPendingTerminId(null);
+      return;
+    }
+    // Termin je bil medtem izbrisan ali ni viden temu uporabniku — ostanemo na dnevu.
+    const timer = window.setTimeout(() => setPendingTerminId(null), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [pendingTerminId, appointments]);
 
   // First visit: a short guided tour of the calendar.
   const tour = useOptionalTour();
@@ -1401,37 +1432,12 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       const textTerminId = isNewAppointment ? unique8DigitId : data.id;
 
       if (textTerminId) {
-        // Fetch Termini bigint id — use maybeSingle to avoid 400 errors
-        const { data: terminRow } = await supabase
-          .from('Termini')
-          .select('id')
-          .eq('ID termina', textTerminId)
-          .eq('ID podjetja', companyId)
-          .maybeSingle();
-
-        const terminRowId = terminRow ? Number(terminRow.id) : null;
-
-        if (terminRowId) {
-          const serviceIds = [
-            data.storitev_id,
-            data.storitev_id_2,
-            data.storitev_id_3,
-          ].filter(Boolean) as string[];
-
-          if (serviceIds.length > 0) {
-            const { data: resursiData } = await fetchResursiForStoritve(
-              companyId,
-              serviceIds,
-            );
-            const resursiPairs = (resursiData ?? []).map((r) => ({
-              rowId: r.resursRowId,
-              textId: r.resursTextId,
-            }));
-            await syncTerminResursi(companyId, terminRowId, resursiPairs);
-          } else {
-            await deleteTerminResursi(companyId, terminRowId);
-          }
-        }
+        // Ista pot kot na strani Termini — logika živi v lib/supabase/resursi.
+        await syncResursiZaTermin(companyId, textTerminId, [
+          data.storitev_id,
+          data.storitev_id_2,
+          data.storitev_id_3,
+        ]);
 
         const [idsResult, mapResult] = await Promise.all([
           fetchTerminIdsWithResursi(companyId),

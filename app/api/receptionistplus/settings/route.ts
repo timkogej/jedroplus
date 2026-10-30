@@ -7,7 +7,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
-import { GREETING_MAX_LENGTH, isReceptionistLanguage } from '@/lib/receptionist';
+import {
+  ASSISTANT_NAME_MAX_LENGTH,
+  GREETING_MAX_LENGTH,
+  GREETING_NAME_MAX_LENGTH,
+  INSTRUCTIONS_MAX_LENGTH,
+  isGreetingStyle,
+  isReceptionistLanguage,
+  isTransferNumber,
+  parseBookingItems,
+} from '@/lib/receptionist';
+import { normalizePhone } from '@/lib/phone';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -23,7 +33,7 @@ async function resolveCompanySlug(request: NextRequest) {
   if ('response' in authResult) return { error: authResult.response };
 
   const { user } = authResult;
-  const { uuid: companyUuid } = await resolveUserCompany(user.id);
+  const { uuid: companyUuid, textId } = await resolveUserCompany(user.id);
   if (!companyUuid) {
     return { error: NextResponse.json({ ok: false, error: 'Company ni najdena' }, { status: 400 }) };
   }
@@ -35,18 +45,24 @@ async function resolveCompanySlug(request: NextRequest) {
     return { error: NextResponse.json({ ok: false, error: 'Company slug ni najden' }, { status: 400 }) };
   }
 
-  return { companySlug, admin };
+  return { companySlug, admin, textId };
 }
 
 export async function GET(request: NextRequest) {
   const resolved = await resolveCompanySlug(request);
   if ('error' in resolved) return resolved.error;
-  const { companySlug, admin } = resolved;
+  const { companySlug, admin, textId } = resolved;
+
+  const { data: company } = textId
+    ? await admin.from('Podatki podjetij').select('"Naziv Podjetja"').eq('ID Podjetja', textId).maybeSingle()
+    : { data: null };
 
   const { data, error } = await admin
     .from('receptionist_settings')
     // '*': detect_caller_language / announce_recording / recording_notice_text
-    // exist only after migration 1790500000.
+    // exist only after migration 1790500000; instructions / transfer_* /
+    // sms_confirmation only after the worker's phase7_features.sql. Missing
+    // columns read as their defaults below.
     .select('*')
     .eq('company_slug', companySlug)
     .maybeSingle();
@@ -70,7 +86,33 @@ export async function GET(request: NextRequest) {
         ? true
         : Boolean(row.announce_recording),
       recording_notice_text: (row?.recording_notice_text as string | null) ?? null,
+      instructions: (row?.instructions as string | null) ?? null,
+      transfer_enabled: Boolean(row?.transfer_enabled ?? false),
+      transfer_number: (row?.transfer_number as string | null) ?? null,
+      sms_confirmation: row?.sms_confirmation === undefined || row?.sms_confirmation === null
+        ? true
+        : Boolean(row.sms_confirmation),
+      owner_alert_sms: row?.owner_alert_sms === undefined || row?.owner_alert_sms === null
+        ? true
+        : Boolean(row.owner_alert_sms),
+      owner_alert_phone: (row?.owner_alert_phone as string | null) ?? null,
+      greeting_style: isGreetingStyle(row?.greeting_style)
+        ? row.greeting_style
+        : (row?.greeting_text ? 'custom' : 'classic'),
+      greeting_name: (row?.greeting_name as string | null) ?? null,
+      assistant_name: (row?.assistant_name as string | null) ?? null,
+      booking_questions: parseBookingItems(row?.booking_questions) ?? [],
+      booking_advice: parseBookingItems(row?.booking_advice) ?? [],
     },
+    // For the greeting preview: the name callers hear when greeting_name is empty.
+    company_name: ((company as Record<string, unknown> | null)?.['Naziv Podjetja'] as string | undefined) ?? '',
+    // false until phase7_features.sql has run: the page then hides the
+    // instructions / transfer / SMS settings instead of failing to save them.
+    phase7: Boolean(row && 'sms_confirmation' in row),
+    // false until the worker's phase10_owner_alerts.sql has run.
+    phase10: Boolean(row && 'owner_alert_sms' in row),
+    // false until 1791400000_receptionist_pozdrav_vprasanja.sql has run.
+    phase11: Boolean(row && 'greeting_style' in row),
   });
 }
 
@@ -82,11 +124,22 @@ type SettingsBody = {
   detect_caller_language?: boolean;
   announce_recording?: boolean;
   recording_notice_text?: string | null;
+  instructions?: string | null;
+  transfer_enabled?: boolean;
+  transfer_number?: string | null;
+  sms_confirmation?: boolean;
+  owner_alert_sms?: boolean;
+  owner_alert_phone?: string | null;
+  greeting_style?: string;
+  greeting_name?: string | null;
+  assistant_name?: string | null;
+  booking_questions?: unknown;
+  booking_advice?: unknown;
 };
 
-function optionalText(value: unknown): string | null | 'invalid' {
+function optionalText(value: unknown, maxLength = GREETING_MAX_LENGTH): string | null | 'invalid' {
   if (value === null) return null;
-  if (typeof value !== 'string' || value.length > GREETING_MAX_LENGTH) return 'invalid';
+  if (typeof value !== 'string' || value.length > maxLength) return 'invalid';
   return value.trim() || null;
 }
 
@@ -123,6 +176,64 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ ok: false, error: `invalid_${key}` }, { status: 400 });
     }
     update[key] = text;
+  }
+  if (body.instructions !== undefined) {
+    const text = optionalText(body.instructions, INSTRUCTIONS_MAX_LENGTH);
+    if (text === 'invalid') {
+      return NextResponse.json({ ok: false, error: 'invalid_instructions' }, { status: 400 });
+    }
+    update.instructions = text;
+  }
+  if (body.transfer_enabled !== undefined) update.transfer_enabled = Boolean(body.transfer_enabled);
+  if (body.transfer_number !== undefined) {
+    if (body.transfer_number === null || (typeof body.transfer_number === 'string' && !body.transfer_number.trim())) {
+      update.transfer_number = null;
+    } else {
+      const number = typeof body.transfer_number === 'string' ? normalizePhone(body.transfer_number) : '';
+      if (!isTransferNumber(number)) {
+        return NextResponse.json({ ok: false, error: 'invalid_transfer_number' }, { status: 400 });
+      }
+      update.transfer_number = number;
+    }
+  }
+  if (body.sms_confirmation !== undefined) update.sms_confirmation = Boolean(body.sms_confirmation);
+  if (body.owner_alert_sms !== undefined) update.owner_alert_sms = Boolean(body.owner_alert_sms);
+  if (body.owner_alert_phone !== undefined) {
+    if (body.owner_alert_phone === null || (typeof body.owner_alert_phone === 'string' && !body.owner_alert_phone.trim())) {
+      update.owner_alert_phone = null;
+    } else {
+      const number = typeof body.owner_alert_phone === 'string' ? normalizePhone(body.owner_alert_phone) : '';
+      if (!isTransferNumber(number)) {
+        return NextResponse.json({ ok: false, error: 'invalid_owner_alert_phone' }, { status: 400 });
+      }
+      update.owner_alert_phone = number;
+    }
+  }
+
+  if (body.greeting_style !== undefined) {
+    if (!isGreetingStyle(body.greeting_style)) {
+      return NextResponse.json({ ok: false, error: 'invalid_greeting_style' }, { status: 400 });
+    }
+    update.greeting_style = body.greeting_style;
+  }
+  for (const [key, max] of [
+    ['greeting_name', GREETING_NAME_MAX_LENGTH],
+    ['assistant_name', ASSISTANT_NAME_MAX_LENGTH],
+  ] as const) {
+    if (body[key] === undefined) continue;
+    const text = optionalText(body[key], max);
+    if (text === 'invalid') {
+      return NextResponse.json({ ok: false, error: `invalid_${key}` }, { status: 400 });
+    }
+    update[key] = text;
+  }
+  for (const key of ['booking_questions', 'booking_advice'] as const) {
+    if (body[key] === undefined) continue;
+    const items = parseBookingItems(body[key]);
+    if (!items) {
+      return NextResponse.json({ ok: false, error: `invalid_${key}` }, { status: 400 });
+    }
+    update[key] = items;
   }
 
   const { error } = await admin.from('receptionist_settings').upsert(update);

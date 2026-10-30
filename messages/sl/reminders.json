@@ -229,6 +229,16 @@
       "daysBeforeLabel": "Pošlji opomnik (dni pred terminom)",
       "daysBeforeDesc": "Koliko dni pred terminom naj se pošlje opomnik.",
       "select": "Izberi",
+      "senderIdRules": "Največ 11 znakov, brez šumnikov, ne sme biti samo številka.",
+      "senderIdRequest": "Oddaj zahtevo",
+      "senderIdSaving": "Pošiljam …",
+      "senderIdStatusNiZaproseno": "Ni zaprošeno",
+      "senderIdStatusVObdelavi": "V obdelavi pri operaterju",
+      "senderIdStatusOdobreno": "Odobreno",
+      "senderIdStatusZavrnjeno": "Zavrnjeno",
+      "senderIdInUse": "Trenutno se pošilja z imenom {ime}.",
+      "senderIdDefault": "Trenutno se pošilja z imenom Jedroplus.",
+      "senderIdNoReply": "Na sporočilo z imenskim pošiljateljem stranka ne more odgovoriti.",
       "senderIdManage": "Uredi v Dodatkih"
     },
     "before": {

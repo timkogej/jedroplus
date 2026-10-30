@@ -1,7 +1,8 @@
 // app/api/company/message-templates/route.ts
 //
-// English variants of the custom reminder templates. PATCH, owners and admins
-// only. The Slovenian (main) templates still save through the n8n settings
+// English variants of the custom reminder and confirmation templates, and the
+// own booking-confirmation email template (subject + body). PATCH, owners and
+// admins only. The Slovenian (main) templates still save through the n8n settings
 // workflow; these columns are new, so the app writes them itself.
 // n8n sends the variant to clients whose language differs from the
 // company's (docs/multi-country-todo.md).
@@ -14,9 +15,25 @@ const ENGLISH_TEMPLATE_COLUMNS = [
   'lastna_predloga_po_en',
   'obvestilo_prestavitev_template_sms_en',
   'obvestilo_prestavitev_template_email_en',
+  // Booking confirmation SMS (BookingSettingsModal); also used by
+  // Receptionist+ for the SMS after an English phone booking.
+  'lastna_predloga_potrdilo_en',
+  // Booking confirmation EMAIL (BookingSettingsModal → EmailConfirmationTemplate),
+  // read by n8n "Email predloga - potrdilo" (migration 1792900000).
+  'email_zadeva_potrdilo',
+  'email_predloga_potrdilo',
+  'email_zadeva_potrdilo_en',
+  'email_predloga_potrdilo_en',
 ] as const;
 
 const MAX_LENGTH = 2000;
+// An email body is longer than an SMS; a subject is one short line.
+const MAX_LENGTH_BY_COLUMN: Partial<Record<(typeof ENGLISH_TEMPLATE_COLUMNS)[number], number>> = {
+  email_predloga_potrdilo: 5000,
+  email_predloga_potrdilo_en: 5000,
+  email_zadeva_potrdilo: 200,
+  email_zadeva_potrdilo_en: 200,
+};
 
 export async function PATCH(request: NextRequest) {
   const access = await requireOwnerOrAdmin(request);
@@ -29,6 +46,15 @@ export async function PATCH(request: NextRequest) {
   }
 
   const update: Record<string, string | null> = {};
+
+  // 'AI' = OpenAI writes the email (default), 'LP' = the company's own template.
+  if ('email_type_potrdilo' in body) {
+    const type = body.email_type_potrdilo;
+    if (type !== 'AI' && type !== 'LP') {
+      return NextResponse.json({ ok: false, error: 'invalid_value', column: 'email_type_potrdilo' }, { status: 400 });
+    }
+    update.email_type_potrdilo = type;
+  }
   for (const column of ENGLISH_TEMPLATE_COLUMNS) {
     if (!(column in body)) continue;
     const value = body[column];
@@ -36,7 +62,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ ok: false, error: 'invalid_value', column }, { status: 400 });
     }
     const text = (value ?? '').trim();
-    if (text.length > MAX_LENGTH) {
+    if (text.length > (MAX_LENGTH_BY_COLUMN[column] ?? MAX_LENGTH)) {
       return NextResponse.json({ ok: false, error: 'too_long', column }, { status: 400 });
     }
     update[column] = text || null;

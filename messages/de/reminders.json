@@ -229,6 +229,16 @@
       "daysBeforeLabel": "Erinnerung senden (Tage vorher)",
       "daysBeforeDesc": "Wie viele Tage vor dem Termin die Erinnerung gesendet wird.",
       "select": "Auswählen",
+      "senderIdRules": "Höchstens 11 Zeichen, keine Umlaute oder Akzente, nicht nur Ziffern.",
+      "senderIdRequest": "Anfrage senden",
+      "senderIdSaving": "Wird gesendet …",
+      "senderIdStatusNiZaproseno": "Nicht beantragt",
+      "senderIdStatusVObdelavi": "Wartet auf Freigabe durch den Betreiber",
+      "senderIdStatusOdobreno": "Genehmigt",
+      "senderIdStatusZavrnjeno": "Abgelehnt",
+      "senderIdInUse": "Nachrichten werden derzeit unter dem Namen {ime} gesendet.",
+      "senderIdDefault": "Nachrichten werden derzeit unter dem Namen Jedroplus gesendet.",
+      "senderIdNoReply": "Auf eine Nachricht mit Absendernamen können Kunden nicht antworten.",
       "senderIdManage": "In den Zusatzoptionen verwalten"
     },
     "before": {

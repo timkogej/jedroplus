@@ -30,6 +30,14 @@
       "history": {
         "label": "Verlauf",
         "description": "Protokoll aller Änderungen und Aktionen im System"
+      },
+      "loyalty": {
+        "label": "Treueprogramm",
+        "description": "Punkte für abgeschlossene Besuche und Prämien für Kunden"
+      },
+      "portalAnnouncements": {
+        "label": "Portal-Mitteilungen",
+        "description": "Beiträge für Kunden, Bilder und optionale E-Mail-Hinweise"
       }
     }
   },

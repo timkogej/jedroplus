@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
+import { PwaBoot } from '@/components/pwa/PwaBoot';
 
 // Apple naprave dobijo pravo SF Pro prek -apple-system v --font-sans
 // (app/globals.css); Inter je fallback za vse ostale platforme.
@@ -27,6 +28,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  // Brez tega telefon za spodnji rob (home črta) javi 0 px in gumbi na dnu
+  // listov zlezejo pod črto.
+  viewportFit: 'cover',
+  themeColor: '#ffffff',
 };
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -45,6 +50,9 @@ export async function generateMetadata({
     ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
     title: 'Jedro+',
     description,
+    applicationName: 'Jedro+',
+    // iPhone/iPad: z začetnega zaslona se odpre kot aplikacija (brez Safarija).
+    appleWebApp: { capable: true, title: 'Jedro+', statusBarStyle: 'default' },
     openGraph: {
       title: 'Jedro+',
       description,
@@ -88,6 +96,7 @@ export default async function LocaleLayout({
       <body className={`${playfair.variable} antialiased`}>
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Providers>{children}</Providers>
+          <PwaBoot />
         </NextIntlClientProvider>
       </body>
     </html>

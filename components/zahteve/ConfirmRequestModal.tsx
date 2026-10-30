@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, SpinnerGap, CheckCircle } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import { useCompany } from '@/app/company-context';
@@ -12,7 +12,13 @@ import { fetchCompanySlug, type ZahtevaTermina } from '@/lib/supabase/zahteveTer
 import { requestSlots, confirmRequest, type SlotAvailability } from '@/lib/bookingRequests';
 import type { Storitev, Zaposleni } from '@/types/appointments';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { RequestSummary } from './RequestSummary';
+import { formatRequestDay } from './format';
+
+/** Same limit as the booking page. */
+const MAX_SERVICES = 3;
 
 interface ConfirmRequestModalProps {
   zahteva: ZahtevaTermina;
@@ -23,7 +29,9 @@ interface ConfirmRequestModalProps {
 type Step = 'assign' | 'slot';
 
 export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRequestModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('zahteve-termini');
+  const locale = useLocale();
   const { companyId } = useCompany();
 
   const [services, setServices] = useState<Storitev[]>([]);
@@ -31,7 +39,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
   const [companySlug, setCompanySlug] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
 
-  const [serviceId, setServiceId] = useState('');
+  const [serviceIds, setServiceIds] = useState<string[]>([]);
   const [employeeId, setEmployeeId] = useState('');
   const [step, setStep] = useState<Step>('assign');
 
@@ -54,20 +62,31 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
         fetchCompanySlug(companyId),
       ]);
       if (cancelled) return;
-      setServices(servicesRes.data ?? []);
-      setEmployees(employeesRes.data ?? []);
+      const loadedServices = servicesRes.data ?? [];
+      const loadedEmployees = employeesRes.data ?? [];
+      setServices(loadedServices);
+      setEmployees(loadedEmployees);
       setCompanySlug(slug);
+      // Start from what the client chose on the booking page.
+      const wanted = zahteva.storitve_ids.filter((id) => loadedServices.some((sv) => sv.id === id));
+      setServiceIds(wanted.slice(0, MAX_SERVICES));
+      if (zahteva.zeljeni_zaposleni_id && loadedEmployees.some((e) => e.id === zahteva.zeljeni_zaposleni_id)) {
+        setEmployeeId(zahteva.zeljeni_zaposleni_id);
+      }
       setLoadingData(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [companyId]);
+  }, [companyId, zahteva.storitve_ids, zahteva.zeljeni_zaposleni_id]);
 
+  // People who do every chosen service.
   const availableEmployees = useMemo(() => {
-    if (!serviceId) return employees;
-    return employees.filter((e) => !e.storitve || e.storitve.length === 0 || e.storitve.includes(serviceId));
-  }, [employees, serviceId]);
+    if (serviceIds.length === 0) return employees;
+    return employees.filter(
+      (e) => !e.storitve || e.storitve.length === 0 || serviceIds.every((id) => e.storitve!.includes(id)),
+    );
+  }, [employees, serviceIds]);
 
   useEffect(() => {
     if (employeeId && !availableEmployees.some((e) => e.id === employeeId)) {
@@ -76,7 +95,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
   }, [availableEmployees, employeeId]);
 
   const loadSlots = async () => {
-    if (!companySlug || !employeeId || !serviceId) return;
+    if (!companySlug || !employeeId || serviceIds.length === 0) return;
     setStep('slot');
     setLoadingSlots(true);
     setSlotsError(false);
@@ -86,7 +105,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
       const result = await requestSlots({
         companySlug,
         employeeId,
-        serviceIds: [serviceId],
+        serviceIds,
         dateFrom: zahteva.zeljeni_datum_od,
         dateTo: zahteva.zeljeni_datum_do,
         delDneva: zahteva.zeljeni_del_dneva,
@@ -110,7 +129,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
       const result = await confirmRequest({
         requestId: zahteva.id,
         employeeId,
-        serviceIds: [serviceId],
+        serviceIds,
         date: selectedDate,
         time: selectedTime,
       });
@@ -134,6 +153,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
   const labelClass = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500';
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -146,10 +166,11 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          {...sheetDrag.panel}
           className={`${sheet.panel} sm:max-w-lg`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className={sheet.header}>
+          <div className={sheet.header} {...sheetDrag.handle}>
             <div className={sheet.grabber} aria-hidden="true" />
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -175,13 +196,44 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
                   <label className={labelClass}>
                     {t('confirmModal.serviceLabel')}
                   </label>
-                  <Select value={serviceId} setValue={setServiceId} placeholder={t('confirmModal.servicePlaceholder')}>
-                    {services.map((service) => (
-                      <SelectOption key={service.id} value={service.id}>
-                        {service.naziv}
-                      </SelectOption>
-                    ))}
-                  </Select>
+                  {serviceIds.length > 0 && (
+                    <div className="mb-2 flex flex-wrap gap-1.5">
+                      {serviceIds.map((id) => (
+                        <span
+                          key={id}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 py-1 pl-3 pr-1.5 text-sm font-medium text-violet-700"
+                        >
+                          {services.find((sv) => sv.id === id)?.naziv ?? id}
+                          <button
+                            type="button"
+                            aria-label={t('confirmModal.removeService')}
+                            onClick={() => setServiceIds((ids) => ids.filter((x) => x !== id))}
+                            className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-violet-100"
+                          >
+                            <X className="h-3 w-3" weight="bold" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {serviceIds.length < MAX_SERVICES && (
+                    <Select
+                      value=""
+                      setValue={(id) => id && setServiceIds((ids) => (ids.includes(id) ? ids : [...ids, id]))}
+                      placeholder={serviceIds.length === 0 ? t('confirmModal.servicePlaceholder') : t('confirmModal.addService')}
+                    >
+                      {services
+                        .filter((service) => !serviceIds.includes(service.id))
+                        .map((service) => (
+                          <SelectOption key={service.id} value={service.id}>
+                            {service.naziv}
+                          </SelectOption>
+                        ))}
+                    </Select>
+                  )}
+                  {!zahteva.storitve && (
+                    <p className="mt-1.5 text-xs text-amber-700">{t('confirmModal.clientUnsure')}</p>
+                  )}
                 </div>
 
                 <div>
@@ -192,7 +244,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
                     value={employeeId}
                     setValue={setEmployeeId}
                     placeholder={t('confirmModal.employeePlaceholder')}
-                    disabled={!serviceId}
+                    disabled={serviceIds.length === 0}
                   >
                     {availableEmployees.map((employee) => (
                       <SelectOption key={employee.id} value={employee.id}>
@@ -200,6 +252,11 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
                       </SelectOption>
                     ))}
                   </Select>
+                  {zahteva.zeljeni_zaposleni && (
+                    <p className="mt-1.5 text-xs text-gray-500">
+                      {t('confirmModal.clientWants', { name: zahteva.zeljeni_zaposleni })}
+                    </p>
+                  )}
                 </div>
               </div>
             ) : (
@@ -218,7 +275,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
                     {dateEntries.map(([date, times]) => (
                       <div key={date}>
                         <p className={`${labelClass} tnum`}>
-                          {date}
+                          {formatRequestDay(date, locale)}
                         </p>
                         <div className="flex flex-wrap gap-1.5">
                           {times.map((time) => {
@@ -261,7 +318,7 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
             {step === 'assign' ? (
               <button
                 onClick={loadSlots}
-                disabled={!serviceId || !employeeId || !companySlug}
+                disabled={serviceIds.length === 0 || !employeeId || !companySlug}
                 className={`${sheet.action} bg-gradient-to-r from-violet-500 to-cyan-500 disabled:cursor-not-allowed disabled:opacity-40`}
               >
                 {t('confirmModal.next')}
@@ -289,5 +346,6 @@ export function ConfirmRequestModal({ zahteva, onClose, onConfirmed }: ConfirmRe
         </motion.div>
       </motion.div>
     </AnimatePresence>
+    </BodyPortal>
   );
 }

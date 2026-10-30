@@ -35,7 +35,13 @@
     "loadError": "Došlo je do pogreške pri učitavanju podataka",
     "saveError": "Došlo je do pogreške pri spremanju klijenta",
     "deleteError": "Došlo je do pogreške pri brisanju klijenta",
-    "retry": "Pokušaj ponovno"
+    "retry": "Pokušaj ponovno",
+    "saveUnconfirmed": "Klijent je poslan, ali se još nije pojavio na popisu. Pričekajte nekoliko sekundi i osvježite stranicu prije ponovnog unosa.",
+    "saveRateLimited": "Previše zahtjeva odjednom. Pričekajte nekoliko sekundi i pokušajte ponovno.",
+    "saveAuth": "Vaša je sesija istekla. Prijavite se ponovno i pokušajte opet.",
+    "saveServer": "Poslužitelj trenutno ne odgovara. Klijent nije spremljen, pokušajte za minutu.",
+    "saveNetwork": "Nema veze s poslužiteljem. Provjerite internetsku vezu i pokušajte ponovno.",
+    "saveTimeout": "Poslužitelj prespor odgovara. Klijent je možda spremljen, pa osvježite popis prije ponovnog unosa."
   },
   "toast": {
     "created": "Klijent je uspješno dodan",

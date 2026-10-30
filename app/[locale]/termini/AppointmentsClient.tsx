@@ -18,6 +18,7 @@ import {
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
+import BulkCompleteModal from '@/components/appointments/BulkCompleteModal';
 import AppointmentFilters, { type FilterState } from '@/components/appointments/AppointmentFilters';
 import AppointmentTable from '@/components/appointments/AppointmentTable';
 import { MetricGroup } from '@/components/dashboard';
@@ -44,6 +45,7 @@ import {
 } from '@/lib/webhookPayloadBuilders';
 import { generateUnique8DigitId } from '@/lib/utils/uniqueIdGenerator';
 import { supabase } from '@/lib/supabaseClient';
+import { syncResursiZaTermin, sprostiResurseTermina } from '@/lib/supabase/resursi';
 import { useUserPersonId } from '@/hooks/useUserPersonId';
 import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
@@ -115,6 +117,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
   // Complete confirmation state
   const [completeTarget, setCompleteTarget] = useState<AppointmentWithDetails | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [completionNotes, setCompletionNotes] = useState('');
 
   // Action error
@@ -537,6 +540,14 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      // Termin zasede resurse svojih storitev. Doslej je to delal samo koledar,
+      // zato termin s te strani ni zasedel ničesar in ni blokiral drugih.
+      await syncResursiZaTermin(
+        companyId,
+        isNewAppointment ? unique8DigitId : data.id,
+        [data.storitev_id, data.storitev_id_2, data.storitev_id_3],
+      );
+
       await loadData();
       handleCloseModal();
     } catch (err) {
@@ -572,6 +583,9 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
       // Wait 1 second for system to process
       await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Izbrisan termin ne sme več držati resursov zasedenih.
+      await sprostiResurseTermina(companyId, deleteTarget.id);
 
       await loadData();
       setDeleteTarget(null);
@@ -676,6 +690,46 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
     }
   };
 
+  // One completion through the normal flow (n8n sets the status and sends the
+  // after-appointment message). Shared by the single-appointment dialog and the
+  // bulk close for today's visits.
+  const sendCompletion = async (target: AppointmentWithDetails, notes: string | null) => {
+    if (!companyId) throw new Error('no company');
+    // Get customer appointments count for webhook
+    const customerAppointmentsCount = await getCustomerAppointmentsCount(
+      companyId,
+      target.stranka_id || target.stranka_ime
+    );
+
+    // Build the updated booking row with status changed to Zaključen and completion notes
+    const bookingRowUpdated = {
+      ...target,
+      status: 'Zaključen',
+      booking_id: target.id,
+      appointment_id: target.id,
+      opombe: notes,
+      completion_notes: notes,
+    };
+
+    const result = await callN8nAction(
+      buildPayload(
+        'ZAKLJUCITEV_TERMINA',
+        'appointments',
+        buildBookingCompleteData({
+          companyId,
+          userEmail: actor,
+          companyProfile: companyPayload,
+          bookingRowUpdated,
+          customerAppointmentsCount,
+        })
+      )
+    );
+
+    if (!result.ok) {
+      throw new Error(t('errors.completeError'));
+    }
+  };
+
   const handleConfirmComplete = async () => {
     if (!companyId || !completeTarget) return;
 
@@ -684,40 +738,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
     try {
       const trimmedNotes = completionNotes.trim();
-      const completionNotesValue = trimmedNotes.length > 0 ? trimmedNotes : null;
-      // Get customer appointments count for webhook
-      const customerAppointmentsCount = await getCustomerAppointmentsCount(
-        companyId,
-        completeTarget.stranka_id || completeTarget.stranka_ime
-      );
-
-      // Build the updated booking row with status changed to Zaključen and completion notes
-      const bookingRowUpdated = {
-        ...completeTarget,
-        status: 'Zaključen',
-        booking_id: completeTarget.id,
-        appointment_id: completeTarget.id,
-        opombe: completionNotesValue,
-        completion_notes: completionNotesValue,
-      };
-
-      const result = await callN8nAction(
-        buildPayload(
-          'ZAKLJUCITEV_TERMINA',
-          'appointments',
-          buildBookingCompleteData({
-            companyId,
-            userEmail: actor,
-            companyProfile: companyPayload,
-            bookingRowUpdated,
-            customerAppointmentsCount,
-          })
-        )
-      );
-
-      if (!result.ok) {
-        throw new Error(t('errors.completeError'));
-      }
+      await sendCompletion(completeTarget, trimmedNotes.length > 0 ? trimmedNotes : null);
 
       setSuccessMessage(t('toast.completed'));
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -733,6 +754,47 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
     } finally {
       setIsCompleting(false);
     }
+  };
+
+  // Today's visits that are over and still open. Unlike older history these are
+  // closed through the normal flow when the owner wants the clients thanked.
+  const endedTodayOpen = useMemo(() => {
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const nowStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    return appointments.filter((apt) => {
+      if (!apt.datum || String(apt.datum).slice(0, 10) !== todayStr) return false;
+      if (apt.belezi_termin === false) return false;
+      const status = normalizeStatus(apt.status || 'scheduled');
+      if (status !== 'scheduled' && status !== 'confirmed' && status !== 'pending') return false;
+      const end = String(apt.cas_konec || apt.cas_zacetek || '').slice(0, 5);
+      return !!end && end <= nowStr;
+    });
+  }, [appointments]);
+
+  const handleBulkCompleteToday = async (): Promise<{ failed: number }> => {
+    let failed = 0;
+    for (const apt of endedTodayOpen) {
+      try {
+        await sendCompletion(apt, null);
+      } catch {
+        failed += 1;
+      }
+    }
+    return { failed };
+  };
+
+  const handleBulkDone = async ({ completed, failed }: { completed: number; failed: number }) => {
+    setBulkOpen(false);
+    if (failed > 0) {
+      setActionError(t('bulk.partial', { completed, failed }));
+    } else {
+      setSuccessMessage(t('bulk.done', { count: completed }));
+      setTimeout(() => setSuccessMessage(null), 4000);
+    }
+    // Give n8n a moment to write the today's completions before reloading.
+    await new Promise((resolve) => setTimeout(resolve, endedTodayOpen.length > 0 ? 1500 : 300));
+    await loadData();
   };
 
   const dismissError = () => {
@@ -868,15 +930,35 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowPastOpen((v) => !v)}
-                className="flex-shrink-0 rounded-lg bg-gray-900 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 active:bg-gray-700"
-              >
-                {showPastOpen ? t('pastOpen.showAll') : t('pastOpen.show')}
-              </button>
+              <div className="flex flex-shrink-0 items-center gap-2">
+                {role !== 'staff' && (
+                  <button
+                    type="button"
+                    onClick={() => setBulkOpen(true)}
+                    className="rounded-lg border border-gray-300 bg-white px-3.5 py-1.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
+                  >
+                    {t('pastOpen.closeAll')}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowPastOpen((v) => !v)}
+                  className="rounded-lg bg-gray-900 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800 active:bg-gray-700"
+                >
+                  {showPastOpen ? t('pastOpen.showAll') : t('pastOpen.show')}
+                </button>
+              </div>
             </div>
           )}
+
+          <BulkCompleteModal
+            isOpen={bulkOpen}
+            companyId={companyId}
+            endedToday={endedTodayOpen.length}
+            onCompleteWithMessage={handleBulkCompleteToday}
+            onClose={() => setBulkOpen(false)}
+            onDone={handleBulkDone}
+          />
 
           {/* Filters */}
           <motion.div

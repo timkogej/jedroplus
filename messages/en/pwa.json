@@ -1,0 +1,88 @@
+{
+  "common": {
+    "notNow": "Not now",
+    "close": "Close",
+    "done": "Done",
+    "back": "Back"
+  },
+  "install": {
+    "title": "Add Jedro+ to your Home Screen",
+    "titleComputer": "Install Jedro+ on your computer",
+    "subtitle": "It opens like a real app and tells you about new bookings and calls right away.",
+    "benefitFast": "Opens with one tap",
+    "benefitPush": "Notifications for bookings and calls",
+    "benefitFree": "No App Store, no updates",
+    "installButton": "Install app",
+    "installing": "Installing …",
+    "showSteps": "Show steps",
+    "ios": {
+      "step1": "Tap <b>Share</b> in the Safari toolbar",
+      "step1Hint": "On iOS 26, Share is under the ⋯ button",
+      "step2": "Scroll down and choose <b>Add to Home Screen</b>",
+      "step3": "Tap <b>Add</b> in the top right",
+      "step4": "Open Jedro+ from your Home Screen and turn on notifications",
+      "arrowHint": "The Share button is down here"
+    },
+    "iosOther": {
+      "title": "Open this page in Safari",
+      "body": "On iPhone and iPad, Jedro+ is added to the Home Screen through Safari. Copy the link, open Safari and paste it into the address bar.",
+      "copy": "Copy link",
+      "copied": "Link copied"
+    },
+    "inApp": {
+      "title": "Open in your browser",
+      "body": "This page is open inside another app. Tap ⋯ or ⋮, choose Open in browser, then follow the steps."
+    },
+    "iosTooOld": "Notifications on iPhone need iOS 16.4 or later. Update it in Settings → General → Software Update.",
+    "android": {
+      "step1": "Tap the <b>⋮</b> menu in the top right",
+      "step2": "Choose <b>Install app</b> or <b>Add to Home screen</b>",
+      "step3": "Confirm with <b>Install</b>",
+      "samsungStep1": "Tap the <b>≡</b> menu in the bottom right",
+      "samsungStep2": "Choose <b>Add page to</b> → <b>Home screen</b>"
+    },
+    "desktop": {
+      "step1": "Click the <b>Install</b> icon on the right of the address bar",
+      "step2": "Or open the <b>⋮</b> menu and choose <b>Install Jedro+</b>",
+      "safariStep1": "In the menu bar, choose <b>File</b> → <b>Add to Dock</b>",
+      "safariStep2": "Confirm with <b>Add</b>",
+      "firefox": "Firefox doesn't install web apps, but notifications work right here in the browser."
+    },
+    "installedTitle": "Jedro+ is installed",
+    "installedBody": "You'll find it on your Home Screen. Turn on notifications too so you never miss a booking.",
+    "alreadyInstalled": "Jedro+ is already installed on this device."
+  },
+  "push": {
+    "title": "Turn on notifications",
+    "subtitle": "Know right away about new bookings, cancellations and calls waiting for a callback.",
+    "enable": "Turn on notifications",
+    "enabling": "Turning on …",
+    "enabled": "Notifications are on",
+    "enabledBody": "All Jedro+ notifications will come to this device.",
+    "denied": "Notifications are blocked in your browser. Click the lock next to the address, allow notifications and try again.",
+    "deniedIos": "Notifications are off. Turn them on in Settings → Notifications → Jedro+.",
+    "dismissed": "Notifications are not on. You can turn them on any time in settings.",
+    "error": "Couldn't turn on notifications. Please try again.",
+    "notConfigured": "Device notifications aren't set up on the server yet.",
+    "unsupported": "This browser doesn't support notifications. Use Chrome, Edge, Firefox or Safari.",
+    "needsInstall": "On iPhone and iPad, notifications only work once Jedro+ is added to the Home Screen.",
+    "testTitle": "Jedro+ notifications work",
+    "testBody": "This is how new bookings, cancellations and calls will appear."
+  },
+  "settings": {
+    "phoneLabel": "Notifications on this phone",
+    "computerLabel": "Notifications on this computer",
+    "tabletLabel": "Notifications on this tablet",
+    "note": "Every new notification in the app also arrives as a notification on the device.",
+    "test": "Send test notification",
+    "testSending": "Sending …",
+    "testSent": "Test notification sent. It should appear within a few seconds.",
+    "testFailed": "Couldn't send the test notification.",
+    "testNotSubscribed": "This device is no longer registered. Turn notifications off and on again.",
+    "showHow": "Show me how",
+    "installLabel": "App on the Home Screen",
+    "installNote": "Steps for iPhone, Android and computer.",
+    "installedNote": "Jedro+ is installed on this device.",
+    "installButton": "Steps"
+  }
+}

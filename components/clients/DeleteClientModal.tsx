@@ -5,6 +5,8 @@ import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trash, X, SpinnerGap, CalendarBlank } from '@phosphor-icons/react';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import type { Client } from '@/types/clients';
 import ClientInitialsBadge from './ClientInitialsBadge';
 
@@ -24,6 +26,7 @@ function DeleteClientModal({
   onConfirm,
   isDeleting = false,
 }: DeleteClientModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   // Animation variants
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -48,6 +51,7 @@ function DeleteClientModal({
   const appointmentCount = client.appointment_count || 0;
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -63,11 +67,12 @@ function DeleteClientModal({
             initial="hidden"
             animate="visible"
             exit="exit"
+            {...sheetDrag.panel}
             className={sheet.panel}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={sheet.header}>
+            <div className={sheet.header} {...sheetDrag.handle}>
               <div className={sheet.grabber} aria-hidden="true" />
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -160,6 +165,7 @@ function DeleteClientModal({
         </motion.div>
       )}
     </AnimatePresence>
+    </BodyPortal>
   );
 }
 

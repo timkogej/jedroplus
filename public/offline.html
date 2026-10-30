@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Jedro+</title>
+<style>
+  :root { color-scheme: light; }
+  html, body { margin: 0; height: 100%; background: #fff; }
+  body {
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", Roboto, sans-serif;
+    color: #111827; text-align: center; box-sizing: border-box;
+  }
+  main { max-width: 320px; }
+  img { width: 56px; height: 56px; border-radius: 13px; }
+  h1 { font-size: 20px; font-weight: 600; margin: 20px 0 6px; letter-spacing: -0.01em; }
+  p { margin: 0 0 24px; color: #6b7280; }
+  button {
+    appearance: none; border: 0; border-radius: 12px; padding: 11px 22px; cursor: pointer;
+    font: inherit; font-weight: 600; color: #fff;
+    background: linear-gradient(135deg, #7C78FA 0%, #35E3DB 100%);
+  }
+</style>
+</head>
+<body>
+<main>
+  <img src="/android-icon-192.png" alt="Jedro+">
+  <h1 id="t">Ni povezave</h1>
+  <p id="b">Jedro+ potrebuje internet. Ko se povezava vrne, se stran naloži sama.</p>
+  <button id="r" type="button" onclick="location.reload()">Poskusi znova</button>
+</main>
+<script>
+  (function () {
+    var T = {
+      en: ['No connection', 'Jedro+ needs the internet. The page reloads as soon as you are back online.', 'Try again'],
+      de: ['Keine Verbindung', 'Jedro+ braucht Internet. Sobald die Verbindung zurück ist, lädt die Seite neu.', 'Erneut versuchen'],
+      hr: ['Nema veze', 'Jedro+ treba internet. Kad se veza vrati, stranica će se sama učitati.', 'Pokušaj ponovno'],
+      it: ['Nessuna connessione', 'Jedro+ ha bisogno di internet. La pagina si ricarica appena torni online.', 'Riprova']
+    };
+    var lang = (location.pathname.split('/')[1] || navigator.language || 'sl').slice(0, 2).toLowerCase();
+    var s = T[lang];
+    if (s) {
+      document.documentElement.lang = lang;
+      document.getElementById('t').textContent = s[0];
+      document.getElementById('b').textContent = s[1];
+      document.getElementById('r').textContent = s[2];
+    }
+    window.addEventListener('online', function () { location.reload(); });
+  })();
+</script>
+</body>
+</html>

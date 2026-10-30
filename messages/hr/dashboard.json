@@ -26,7 +26,13 @@
     "title": "Sljedeći termin",
     "today": "Danas",
     "tomorrow": "Sutra",
-    "empty": "Nema nadolazećih termina"
+    "empty": "Nema nadolazećih termina",
+    "openCalendar": "Otvori kalendar",
+    "inProgress": "U tijeku",
+    "now": "Sada",
+    "inMinutes": "Za {minutes} min",
+    "inHours": "Za {hours} h {minutes} min",
+    "inHoursExact": "Za {hours} h"
   },
   "appointmentList": {
     "todayTitle": "Termini danas",

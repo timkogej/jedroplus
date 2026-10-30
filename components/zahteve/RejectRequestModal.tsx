@@ -9,6 +9,8 @@ import { Textarea } from '@/components/settings';
 import { rejectRequest } from '@/lib/bookingRequests';
 import type { ZahtevaTermina } from '@/lib/supabase/zahteveTermini';
 import { sheet } from '@/components/ui/sheetClasses';
+import { useSheetDrag } from '@/components/ui/useSheetDrag';
+import { BodyPortal } from '@/components/ui/BodyPortal';
 import { RequestSummary } from './RequestSummary';
 
 interface RejectRequestModalProps {
@@ -18,6 +20,7 @@ interface RejectRequestModalProps {
 }
 
 export function RejectRequestModal({ zahteva, onClose, onRejected }: RejectRequestModalProps) {
+  const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('zahteve-termini');
   const [razlog, setRazlog] = useState('');
   const [error, setError] = useState(false);
@@ -45,6 +48,7 @@ export function RejectRequestModal({ zahteva, onClose, onRejected }: RejectReque
   };
 
   return (
+    <BodyPortal>
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -57,10 +61,11 @@ export function RejectRequestModal({ zahteva, onClose, onRejected }: RejectReque
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          {...sheetDrag.panel}
           className={sheet.panel}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className={sheet.header}>
+          <div className={sheet.header} {...sheetDrag.handle}>
             <div className={sheet.grabber} aria-hidden="true" />
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -126,5 +131,6 @@ export function RejectRequestModal({ zahteva, onClose, onRejected }: RejectReque
         </motion.div>
       </motion.div>
     </AnimatePresence>
+    </BodyPortal>
   );
 }

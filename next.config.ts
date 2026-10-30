@@ -103,6 +103,17 @@ const nextConfig: NextConfig = {
         headers: embeddableHeaders,
       },
 
+      // Service worker (PWA, push obvestila): vedno sveža različica, sicer
+      // brskalnik do 24 ur drži staro.
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+
       // 🔒 Vse ostale poti - stroga varnost
       {
         source: "/:path*",

@@ -1051,7 +1051,7 @@ async function fetchRecentActivity(companyId: string): Promise<RecentActivity[]>
 }
 
 // Fetch the next upcoming appointment for a specific person (across all future dates)
-async function fetchNextPersonAppointment(companyId: string, personId: string): Promise<AppointmentItem | null> {
+async function fetchNextPersonAppointment(companyId: string, personId: string | null): Promise<AppointmentItem | null> {
   const now = new Date();
   const todayStr = format(now, "yyyy-MM-dd");
   const currentTimeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -1094,7 +1094,7 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
 
       // Get staff ID and check it matches our person
       const staffId = String(pickFirst(row, ['ID Osebe', 'ID osebe', 'ID osebja', 'oseba_id', 'person_id']) ?? '');
-      if (staffId !== personId) continue;
+      if (personId && staffId !== personId) continue;
 
       // Only scheduled appointments
       const status = String(pickFirst(row, ['status', 'Status', 'stanje']) ?? 'scheduled').toLowerCase();
@@ -1124,10 +1124,13 @@ async function fetchNextPersonAppointment(companyId: string, personId: string): 
       const startTime = String(pickFirst(row, ['cas_zacetek', 'Čas', 'Cas', 'start_time', 'ura_od']) ?? '00:00');
       const timeStr = startTime.substring(0, 5);
 
-      // If today, must be upcoming (time >= now)
-      if (bookingDateStr === todayStr && timeStr < currentTimeStr) continue;
-
       const endTime = String(pickFirst(row, ['cas_konec', 'Konec', 'end_time', 'ura_do']) ?? '');
+
+      // If today, must be upcoming or still running
+      if (bookingDateStr === todayStr) {
+        const endStr = endTime ? endTime.substring(0, 5) : timeStr;
+        if (timeStr < currentTimeStr && endStr <= currentTimeStr) continue;
+      }
       const id = schema.idField ? String(row[schema.idField] ?? '') : '';
       const serviceId = String(pickFirst(row, ['ID storitev', 'ID storitve', 'storitev_id', 'service_id']) ?? '');
       const serviceId2 = String(pickFirst(row, ['ID storitve 2', 'service_id_2', 'storitev_id_2']) ?? '');
@@ -1220,7 +1223,7 @@ export async function fetchDashboardData(companyId: string, personId?: string | 
     fetchTopServices(companyId),
     fetchTopEmployees(companyId),
     fetchRecentActivity(companyId),
-    personId ? fetchNextPersonAppointment(companyId, personId) : Promise.resolve(null),
+    fetchNextPersonAppointment(companyId, personId ?? null),
   ]);
 
   return {

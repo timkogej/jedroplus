@@ -417,7 +417,8 @@
     "showingTitle": "Prikazani so pretekli nezaključeni termini ({count})",
     "showingBody": "Pri vsakem izberite Zaključi, Ni prišel ali Odpovej. Seznam se sproti skrajša.",
     "show": "Pokaži jih",
-    "showAll": "Pokaži vse termine"
+    "showAll": "Pokaži vse termine",
+    "closeAll": "Zaključi vse"
   },
   "export": {
     "title": "Izvozi termine",
@@ -484,5 +485,23 @@
     },
     "skip": "Preskoči",
     "send": "Pošlji obvestilo"
+  },
+  "bulkComplete": {
+    "title": "Zaključi pretekle termine",
+    "loading": "Štejem termine …",
+    "olderBody": "{count, plural, one {# termin iz preteklih dni bo zaključen.} two {# termina iz preteklih dni bosta zaključena.} few {# termini iz preteklih dni bodo zaključeni.} other {# terminov iz preteklih dni bo zaključenih.}} Strankam se zaradi tega ne pošlje nobeno sporočilo.",
+    "todayHeading": "Termini, ki so se danes že končali",
+    "todaySend": "Zaključi in pošlji sporočilo po terminu ({count})",
+    "todaySilent": "Zaključi brez sporočil",
+    "todayLeave": "Teh zdaj ne zaključi",
+    "note": "Zaključeni termini se štejejo v prihodek in statistiko. »Ni prišel« in odpovedane termine označite posebej, preden pritisnete Zaključi.",
+    "cancel": "Prekliči",
+    "confirm": "Zaključi",
+    "loadError": "Terminov ni bilo mogoče prešteti. Poskusite znova.",
+    "error": "Zaključevanje ni uspelo. Poskusite znova."
+  },
+  "bulk": {
+    "done": "{count, plural, one {# termin zaključen} two {# termina zaključena} few {# termini zaključeni} other {# terminov zaključenih}}",
+    "partial": "Zaključenih: {completed}. Pri {failed} terminih sporočila ni bilo mogoče poslati, zato ostanejo odprti."
   }
 }
