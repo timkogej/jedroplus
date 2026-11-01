@@ -34,6 +34,7 @@ import { fetchActiveResursi, fetchStoritveResursi, syncStoritevResursi } from '@
 import type { Resurs, StoritevResurs } from '@/types/resursi';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { saveEntityImage } from '@/lib/media/entityImage';
+import { saveEntityLocations } from '@/lib/hooks/useLocations';
 import type { ImageChange } from '@/components/media/ImageField';
 import {
   buildServiceCreateData,
@@ -378,11 +379,12 @@ export default function StoritvePage() {
   }, []);
 
   // Save service (create or update)
-  const handleSaveService = useCallback(async (data: ServiceFormData, image: ImageChange) => {
+  const handleSaveService = useCallback(async (data: ServiceFormData, image: ImageChange, locationIds: string[] | null) => {
     if (!companyId) return;
 
     setIsSaving(true);
     let imageResult: Awaited<ReturnType<typeof saveEntityImage>> = null;
+    let locationsSaved = true;
     try {
       const companyColumn = await getCompanyColumnForTable(TABLES.services, companyId);
       const zahtevaPlacilo = paymentRequirementAvailable && data.spletne_rezervacije
@@ -430,6 +432,7 @@ export default function StoritvePage() {
 
         await syncStoritevResursi(companyId, selectedService.id, pendingResursiIds);
         imageResult = await saveEntityImage('service', { id: selectedService.id }, image);
+        locationsSaved = await saveEntityLocations('service', { id: selectedService.id }, locationIds);
         if (!imageResult || imageResult.ok) showToast(t('toasts.updated'), 'success');
       } else {
         // Create new service
@@ -494,10 +497,13 @@ export default function StoritvePage() {
           await syncStoritevResursi(companyId, serviceId, pendingResursiIds);
         }
         imageResult = await saveEntityImage('service', { ref: createdServiceId }, image);
+        locationsSaved = await saveEntityLocations('service', { ref: createdServiceId }, locationIds);
         if (!imageResult || imageResult.ok) showToast(t('toasts.created'), 'success');
       }
 
-      if (imageResult && !imageResult.ok) {
+      if (!locationsSaved) {
+        showToast(t('toasts.errorSave'), 'error');
+      } else if (imageResult && !imageResult.ok) {
         showToast(
           imageResult.error === 'Forbidden' ? tCommon('media.forbidden') : tCommon('media.savedImageFailed'),
           'error'

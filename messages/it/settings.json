@@ -38,6 +38,10 @@
       "portalAnnouncements": {
         "label": "Annunci nel portale",
         "description": "Post per i clienti, immagini e avvisi email facoltativi"
+      },
+      "locations": {
+        "label": "Sedi",
+        "description": "Filiali, indirizzi e orari di apertura"
       }
     }
   },
@@ -400,5 +404,44 @@
     "copy": "Copia link",
     "copied": "Copiato ✓",
     "info": "Puoi stampare questo codice QR ed esporlo nel tuo salone o studio. I clienti lo scansionano con il telefono e in meno di un minuto inseriscono i propri dati."
+  },
+  "locations": {
+    "title": "Sedi",
+    "subtitle": "Le filiali della tua azienda. La sede principale è quella predefinita per i nuovi appuntamenti.",
+    "back": "Impostazioni",
+    "loading": "Caricamento...",
+    "loadError": "Impossibile caricare le sedi.",
+    "usage": "{active} di {max} sedi",
+    "add": "Aggiungi sede",
+    "limitReached": "Hai raggiunto il numero di sedi incluso nel piano ({max}). Puoi acquistarne altre tra i componenti aggiuntivi.",
+    "addons": "Componenti aggiuntivi",
+    "main": "Principale",
+    "archivedBadge": "Archiviata",
+    "edit": "Modifica",
+    "save": "Salva",
+    "saving": "Salvataggio...",
+    "cancel": "Annulla",
+    "makeMain": "Imposta come principale",
+    "archive": "Archivia",
+    "restore": "Ripristina",
+    "newTitle": "Nuova sede",
+    "fieldName": "Nome della sede",
+    "fieldAddress": "Indirizzo",
+    "fieldPhone": "Telefono",
+    "fieldEmail": "E-mail della sede",
+    "fieldReview": "Link per la recensione",
+    "fieldTravel": "Tempo di viaggio verso questa sede (minuti)",
+    "fieldTravelHelp": "Facoltativo. Chi lavora in più sedi lo stesso giorno ha bisogno di questo tempo tra gli appuntamenti.",
+    "confirmArchive": "Archiviare la sede «{name}»? Non sarà più disponibile per nuovi appuntamenti; i dati esistenti vengono conservati.",
+    "errLimit": "Il limite di sedi è stato raggiunto.",
+    "errUpcoming": "Questa sede non può essere archiviata: ha ancora {count} appuntamenti futuri.",
+    "errMain": "La sede principale non può essere archiviata. Imposta prima un'altra sede principale.",
+    "errName": "Inserisci il nome della sede.",
+    "errSave": "Salvataggio non riuscito. Riprova.",
+    "fieldHours": "Orari di apertura",
+    "pickerStaff": "Lavora presso",
+    "pickerService": "Offerto presso",
+    "pickerStaffHelp": "La persona è prenotabile solo nelle sedi selezionate. Ne serve almeno una.",
+    "pickerServiceHelp": "Se tutte le sedi sono selezionate, il servizio vale anche per le sedi aggiunte in seguito."
   }
 }

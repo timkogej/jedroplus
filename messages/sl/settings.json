@@ -38,6 +38,10 @@
       "history": {
         "label": "Zgodovina",
         "description": "Revizijska sled vseh sprememb in dejanj v sistemu"
+      },
+      "locations": {
+        "label": "Lokacije",
+        "description": "Poslovalnice, naslovi in odpiralni čas"
       }
     }
   },
@@ -400,5 +404,44 @@
     "copy": "Kopiraj povezavo",
     "copied": "Kopirano ✓",
     "info": "To QR kodo lahko natisnete in jo postavite v vaš salon ali ordinacijo. Stranke jo skenirajo s telefonom in v manj kot minuti vnesejo svoje podatke."
+  },
+  "locations": {
+    "title": "Lokacije",
+    "subtitle": "Poslovalnice vašega podjetja. Glavna lokacija je privzeta za nove termine.",
+    "back": "Nastavitve",
+    "loading": "Nalagam...",
+    "loadError": "Lokacij ni bilo mogoče naložiti.",
+    "usage": "{active} od {max} lokacij",
+    "add": "Dodaj lokacijo",
+    "limitReached": "Dosegli ste število lokacij, vključenih v paket ({max}). Dodatne lokacije lahko dokupite med dodatki.",
+    "addons": "Dodatki",
+    "main": "Glavna",
+    "archivedBadge": "Arhivirana",
+    "edit": "Uredi",
+    "save": "Shrani",
+    "saving": "Shranjujem...",
+    "cancel": "Prekliči",
+    "makeMain": "Nastavi kot glavno",
+    "archive": "Arhiviraj",
+    "restore": "Obnovi",
+    "newTitle": "Nova lokacija",
+    "fieldName": "Ime lokacije",
+    "fieldAddress": "Naslov",
+    "fieldPhone": "Telefon",
+    "fieldEmail": "E-pošta lokacije",
+    "fieldReview": "Povezava za oceno",
+    "fieldTravel": "Čas poti do te lokacije (minute)",
+    "fieldTravelHelp": "Neobvezno. Zaposleni, ki isti dan dela na več lokacijah, potrebuje ta čas med terminoma.",
+    "confirmArchive": "Arhiviram lokacijo »{name}«? Ne bo več na voljo za nove termine, obstoječi podatki ostanejo.",
+    "errLimit": "Omejitev števila lokacij je dosežena.",
+    "errUpcoming": "Lokacije ni mogoče arhivirati: ima še {count} prihodnjih terminov.",
+    "errMain": "Glavne lokacije ni mogoče arhivirati. Najprej določite drugo glavno lokacijo.",
+    "errName": "Vnesite ime lokacije.",
+    "errSave": "Shranjevanje ni uspelo. Poskusite znova.",
+    "fieldHours": "Odpiralni čas",
+    "pickerStaff": "Lokacije dela",
+    "pickerService": "Kje se storitev izvaja",
+    "pickerStaffHelp": "Zaposleni je za rezervacije na voljo samo na izbranih lokacijah. Vsaj ena mora biti izbrana.",
+    "pickerServiceHelp": "Če so izbrane vse lokacije, velja storitev tudi za lokacije, ki jih dodate kasneje."
   }
 }

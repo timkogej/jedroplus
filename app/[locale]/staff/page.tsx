@@ -43,6 +43,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { saveEntityImage } from '@/lib/media/entityImage';
 import type { ImageChange } from '@/components/media/ImageField';
+import { saveEntityLocations } from '@/lib/hooks/useLocations';
 import {
   buildPartnerActivityData,
   buildPartnerCreateData,
@@ -316,11 +317,12 @@ export default function OsebjePage() {
   }, [employees, searchQuery, statusFilter, canViewAllStaff, rolePersonId]);
 
   // Handle save (create/update)
-  const handleSave = async (data: EmployeeFormData, image: ImageChange) => {
+  const handleSave = async (data: EmployeeFormData, image: ImageChange, locationIds: string[] | null) => {
     if (!companyId) return;
 
     setIsSaving(true);
     let imageResult: Awaited<ReturnType<typeof saveEntityImage>> = null;
+    let locationsSaved = true;
     try {
       const rowData = buildEmployeeRow(data, columns, selectedEmployee?.aktivna ?? true);
 
@@ -360,6 +362,7 @@ export default function OsebjePage() {
         }
 
         imageResult = await saveEntityImage('staff', { id: selectedEmployee.id }, image);
+        locationsSaved = await saveEntityLocations('staff', { id: selectedEmployee.id }, locationIds);
         if (!imageResult || imageResult.ok) setToast({ message: t('toasts.updated'), type: 'success' });
       } else {
         // Create new employee with 7-digit unique ID
@@ -413,10 +416,13 @@ export default function OsebjePage() {
         }
 
         imageResult = await saveEntityImage('staff', { ref: staffId }, image);
+        locationsSaved = await saveEntityLocations('staff', { ref: staffId }, locationIds);
         if (!imageResult || imageResult.ok) setToast({ message: t('toasts.created'), type: 'success' });
       }
 
-      if (imageResult && !imageResult.ok) {
+      if (!locationsSaved) {
+        setToast({ message: t('toasts.errorSave'), type: 'error' });
+      } else if (imageResult && !imageResult.ok) {
         setToast({
           message: imageResult.error === 'Forbidden' ? tCommon('media.forbidden') : tCommon('media.savedImageFailed'),
           type: 'error',

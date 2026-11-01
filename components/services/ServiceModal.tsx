@@ -31,6 +31,8 @@ import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
 import ImageField, { KEEP_IMAGE, type ImageChange } from '@/components/media/ImageField';
+import { LocationPicker } from '@/components/locations/LocationPicker';
+import { useEntityLocations } from '@/lib/hooks/useLocations';
 import { ImageSquare } from '@phosphor-icons/react';
 type ModalMode = 'create' | 'edit';
 
@@ -40,7 +42,8 @@ interface ServiceModalProps {
   service?: Service | null;
   mode: ModalMode;
   /** `image`: what to do with the photo; the page saves it after the service. */
-  onSave: (data: ServiceFormData, image: ImageChange) => Promise<void>;
+  /** `locations`: chosen location ids, or null when the company has one location. */
+  onSave: (data: ServiceFormData, image: ImageChange, locations: string[] | null) => Promise<void>;
   isSaving?: boolean;
   currency?: string; // from company settings
   existingCategories?: string[]; // existing categories from database for suggestions
@@ -95,6 +98,7 @@ function ServiceModal({
   });
 
   const [image, setImage] = useState<ImageChange>(KEEP_IMAGE);
+  const loc = useEntityLocations('service', mode === 'edit' && service ? service.id : null, isOpen);
   const [customDuration, setCustomDuration] = useState(false);
   const [customCategory, setCustomCategory] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof ServiceFormData, string>>>({});
@@ -265,8 +269,8 @@ function ServiceModal({
       zahteva_placilo: paymentRequirementAvailable && formData.spletne_rezervacije
         ? formData.zahteva_placilo
         : false,
-    }, image);
-  }, [formData, validateForm, onSave, paymentRequirementAvailable, image]);
+    }, image, loc.ids);
+  }, [formData, validateForm, onSave, paymentRequirementAvailable, image, loc.ids]);
 
   // Animation variants
   const backdropVariants = {
@@ -454,6 +458,10 @@ function ServiceModal({
                     )}
                   </div>
                 </div>
+
+                {loc.multi && loc.ids && (
+                  <LocationPicker kind="service" locations={loc.locations} value={loc.ids} onChange={loc.setIds} />
+                )}
 
                 {/* Photo on the booking page */}
                 <ImageField

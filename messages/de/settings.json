@@ -38,6 +38,10 @@
       "portalAnnouncements": {
         "label": "Portal-Mitteilungen",
         "description": "Beiträge für Kunden, Bilder und optionale E-Mail-Hinweise"
+      },
+      "locations": {
+        "label": "Standorte",
+        "description": "Filialen, Adressen und Öffnungszeiten"
       }
     }
   },
@@ -400,5 +404,44 @@
     "copy": "Link kopieren",
     "copied": "Kopiert ✓",
     "info": "Drucken Sie diesen QR-Code aus und stellen Sie ihn in Ihrem Salon oder Ihrer Praxis auf. Kunden scannen ihn mit dem Handy und tragen ihre Daten in weniger als einer Minute ein."
+  },
+  "locations": {
+    "title": "Standorte",
+    "subtitle": "Die Filialen Ihres Unternehmens. Der Hauptstandort ist der Standard für neue Termine.",
+    "back": "Einstellungen",
+    "loading": "Wird geladen...",
+    "loadError": "Standorte konnten nicht geladen werden.",
+    "usage": "{active} von {max} Standorten",
+    "add": "Standort hinzufügen",
+    "limitReached": "Sie haben die im Tarif enthaltene Anzahl an Standorten ({max}) erreicht. Weitere Standorte können Sie unter Add-ons dazubuchen.",
+    "addons": "Add-ons",
+    "main": "Haupt",
+    "archivedBadge": "Archiviert",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "cancel": "Abbrechen",
+    "makeMain": "Als Hauptstandort festlegen",
+    "archive": "Archivieren",
+    "restore": "Wiederherstellen",
+    "newTitle": "Neuer Standort",
+    "fieldName": "Name des Standorts",
+    "fieldAddress": "Adresse",
+    "fieldPhone": "Telefon",
+    "fieldEmail": "E-Mail des Standorts",
+    "fieldReview": "Bewertungslink",
+    "fieldTravel": "Fahrzeit zu diesem Standort (Minuten)",
+    "fieldTravelHelp": "Optional. Wer am selben Tag an mehreren Standorten arbeitet, braucht diese Zeit zwischen den Terminen.",
+    "confirmArchive": "Standort „{name}“ archivieren? Er steht für neue Termine nicht mehr zur Verfügung, vorhandene Daten bleiben erhalten.",
+    "errLimit": "Die Standortgrenze ist erreicht.",
+    "errUpcoming": "Dieser Standort kann nicht archiviert werden: Er hat noch {count} kommende Termine.",
+    "errMain": "Der Hauptstandort kann nicht archiviert werden. Legen Sie zuerst einen anderen Hauptstandort fest.",
+    "errName": "Geben Sie einen Standortnamen ein.",
+    "errSave": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "fieldHours": "Öffnungszeiten",
+    "pickerStaff": "Arbeitet an",
+    "pickerService": "Angeboten an",
+    "pickerStaffHelp": "Die Person ist nur an den ausgewählten Standorten buchbar. Mindestens einer muss ausgewählt sein.",
+    "pickerServiceHelp": "Sind alle Standorte ausgewählt, gilt die Leistung auch für später hinzugefügte Standorte."
   }
 }
