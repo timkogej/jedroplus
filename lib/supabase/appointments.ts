@@ -117,6 +117,7 @@ export function parseService(row: Record<string, unknown>): Storitev | null {
     skupni_cas: skupni_cas && skupni_cas > 0 ? skupni_cas : undefined,
     cena: cena !== null && !isNaN(cena) ? cena : null,
     status: schema.statusField ? String(row[schema.statusField] ?? '') || null : null,
+    ref: row['ID storitve'] ? String(row['ID storitve']) : undefined,
   };
 }
 
@@ -157,6 +158,7 @@ export function parseStaff(row: Record<string, unknown>): (Zaposleni & { initial
     initials: existingInitials || getInitials(ime, priimek),
     barva: barva || undefined,
     storitve,
+    ref: row['ID osebe'] ? String(row['ID osebe']) : undefined,
   };
 }
 

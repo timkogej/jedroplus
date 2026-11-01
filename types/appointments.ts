@@ -32,6 +32,8 @@ export interface Storitev {
   skupni_cas?: number; // Total time including buffers (optional for backward compat)
   cena?: number | null; // Price (optional for backward compat)
   status?: string | null; // e.g. 'active' | 'inactive'
+  /** Text "ID storitve", used by location links (id may be the row id). */
+  ref?: string;
 }
 
 export interface Zaposleni {
@@ -41,6 +43,8 @@ export interface Zaposleni {
   email: string;
   barva?: string; // Full gradient CSS string e.g. "linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)"
   storitve?: string[] | null; // Array of service IDs this employee can perform (null = all services)
+  /** Text "ID osebe", used by location links (id may be the row id). */
+  ref?: string;
 }
 
 // Combined appointment with related data for display

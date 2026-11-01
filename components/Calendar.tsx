@@ -100,7 +100,7 @@ interface CalendarProps {
 
 function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) {
   const t = useTranslations('appointments');
-  const { matchesLocation } = useLocationScope();
+  const { matchesLocation, personAtSelected, serviceAtSelected } = useLocationScope();
   const locale = useLocale();
   const { companySettings } = useCompany();
   const { user } = useAuth();
@@ -642,6 +642,16 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       setIsEventDeleting(false);
     }
   }, [editingEvent, companyId, actor, loadEvents, handleCloseEventModal, t]);
+
+  // Team and services offered at the selected location (all when none is selected).
+  const visibleEmployees = useMemo(
+    () => employees.filter((e) => personAtSelected(e.ref)),
+    [employees, personAtSelected]
+  );
+  const visibleServices = useMemo(
+    () => services.filter((sv) => serviceAtSelected(sv.ref)),
+    [services, serviceAtSelected]
+  );
 
   // Filter appointments
   const filteredAppointments = useMemo(() => {
@@ -2235,8 +2245,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         onNewAppointment={handleNewAppointment}
         onNewEvent={handleOpenEventModal}
         onAbsence={handleOpenAbsenceModal}
-        services={services}
-        employees={employees}
+        services={visibleServices}
+        employees={visibleEmployees}
         selectedEmployeeId={selectedEmployeeId}
         onEmployeeFilterChange={setSelectedEmployeeId}
         restrictedToEmployeeId={staffViewOwnOnly && rolePersonId ? rolePersonId : undefined}
@@ -2291,8 +2301,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         onClose={handleCloseModal}
         appointment={editingAppointment}
         mode={modalMode}
-        services={services}
-        employees={employees}
+        services={modalMode === 'edit' ? services : visibleServices}
+        employees={modalMode === 'edit' ? employees : visibleEmployees}
         onSave={handleSaveAppointment}
         isSaving={isSaving}
         initialDate={newAppointmentInitials.date}
@@ -2305,7 +2315,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       <AbsenceModal
         isOpen={isAbsenceModalOpen}
         onClose={handleCloseAbsenceModal}
-        employees={employees}
+        employees={visibleEmployees}
         onSave={handleSaveAbsence}
         isSaving={isSaving}
       />

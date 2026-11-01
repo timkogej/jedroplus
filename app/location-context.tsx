@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useCompany } from "./company-context";
 import { useLocations } from "@/lib/hooks/useLocations";
+import { supabaseReadOnly } from "@/src/lib/supabaseReadOnly";
 import type { Location } from "@/types/locations";
 
 type LocationContextValue = {
@@ -18,6 +19,10 @@ type LocationContextValue = {
    * A row without a location counts as the main one (same as the database default).
    */
   matchesLocation: (lokacijaId: string | null | undefined) => boolean;
+  /** Whether a team member ("ID osebe") works at the selected location. Unknown people count as yes. */
+  personAtSelected: (osebaRef: string | null | undefined) => boolean;
+  /** Whether a service ("ID storitve") is offered at the selected location. No links = everywhere. */
+  serviceAtSelected: (storitevRef: string | null | undefined) => boolean;
 };
 
 const LocationContext = createContext<LocationContextValue | undefined>(undefined);
@@ -28,6 +33,32 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const { companyId } = useCompany();
   const { locations, multi } = useLocations();
   const [stored, setStored] = useState<string | null>(null);
+  const [personLinks, setPersonLinks] = useState<Map<string, Set<string>>>(new Map());
+  const [serviceLinks, setServiceLinks] = useState<Map<string, Set<string>>>(new Map());
+
+  // Who works where and what is offered where; only needed with several locations.
+  useEffect(() => {
+    if (!companyId || !multi) { setPersonLinks(new Map()); setServiceLinks(new Map()); return; }
+    let active = true;
+    const group = (rows: Record<string, unknown>[] | null, idColumn: string) => {
+      const map = new Map<string, Set<string>>();
+      for (const r of rows ?? []) {
+        const key = String(r[idColumn]);
+        if (!map.has(key)) map.set(key, new Set());
+        map.get(key)!.add(String(r.lokacija_id));
+      }
+      return map;
+    };
+    Promise.all([
+      supabaseReadOnly.from("Osebe_Lokacije").select('"ID osebe", lokacija_id').eq("ID podjetja", companyId),
+      supabaseReadOnly.from("Storitve_Lokacije").select('"ID storitve", lokacija_id').eq("ID podjetja", companyId),
+    ]).then(([p, sv]) => {
+      if (!active) return;
+      setPersonLinks(group(p.data as unknown as Record<string, unknown>[] | null, "ID osebe"));
+      setServiceLinks(group(sv.data as unknown as Record<string, unknown>[] | null, "ID storitve"));
+    });
+    return () => { active = false; };
+  }, [companyId, multi]);
 
   useEffect(() => {
     if (!companyId) { setStored(null); return; }
@@ -63,9 +94,27 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     [selectedLocationId, mainId]
   );
 
+  const personAtSelected = useCallback(
+    (osebaRef: string | null | undefined) => {
+      if (selectedLocationId === null || !osebaRef) return true;
+      const links = personLinks.get(osebaRef);
+      return !links || links.has(selectedLocationId);
+    },
+    [selectedLocationId, personLinks]
+  );
+
+  const serviceAtSelected = useCallback(
+    (storitevRef: string | null | undefined) => {
+      if (selectedLocationId === null || !storitevRef) return true;
+      const links = serviceLinks.get(storitevRef);
+      return !links || links.has(selectedLocationId);
+    },
+    [selectedLocationId, serviceLinks]
+  );
+
   const value = useMemo(
-    () => ({ locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation }),
-    [locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation]
+    () => ({ locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation, personAtSelected, serviceAtSelected }),
+    [locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation, personAtSelected, serviceAtSelected]
   );
 
   return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
