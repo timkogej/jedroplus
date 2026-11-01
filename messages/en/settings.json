@@ -442,6 +442,8 @@
     "pickerStaff": "Works at",
     "pickerService": "Offered at",
     "pickerStaffHelp": "The team member can be booked only at the selected locations. At least one must be selected.",
-    "pickerServiceHelp": "If all locations are selected, the service is also offered at locations you add later."
+    "pickerServiceHelp": "If all locations are selected, the service is also offered at locations you add later.",
+    "switcherLabel": "Location",
+    "allLocations": "All locations"
   }
 }

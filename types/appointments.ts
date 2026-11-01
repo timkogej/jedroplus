@@ -83,6 +83,8 @@ export interface AppointmentWithDetails {
   add_on_final_cena?: string | null;
   valuta?: string | null;
   // Ghost termin fields
+  /** Location of the appointment ("Termini".lokacija_id); the database fills in the main one when missing. */
+  lokacija_id?: string | null;
   belezi_termin?: boolean; // false = ghost termin (excluded from analytics/history)
   deleted_at?: string | null; // set when ghost termin is soft-deleted after completion
   id_termina?: string; // text "ID termina" column value (e.g. "T-12345678"), distinct from bigint `id`

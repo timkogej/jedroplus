@@ -442,6 +442,8 @@
     "pickerStaff": "Lavora presso",
     "pickerService": "Offerto presso",
     "pickerStaffHelp": "La persona è prenotabile solo nelle sedi selezionate. Ne serve almeno una.",
-    "pickerServiceHelp": "Se tutte le sedi sono selezionate, il servizio vale anche per le sedi aggiunte in seguito."
+    "pickerServiceHelp": "Se tutte le sedi sono selezionate, il servizio vale anche per le sedi aggiunte in seguito.",
+    "switcherLabel": "Sede",
+    "allLocations": "Tutte le sedi"
   }
 }

@@ -23,6 +23,7 @@ import { JedroLogo } from '@/components/brand/JedroLogo';
 import { useAuth } from '@/app/auth-context';
 import { useCompany } from '@/app/company-context';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { LocationSwitcher } from '@/components/locations/LocationSwitcher';
 import { useOptionalTour } from '@/components/guide/TourProvider';
 import { useRolePermissions } from '@/app/role-permission-context';
 
@@ -229,6 +230,8 @@ export function AppBar() {
 
         {/* Right: search, bell, settings, profile */}
         <div className="flex flex-shrink-0 items-center gap-1">
+
+          <LocationSwitcher />
 
           {/* Search bar — desktop */}
           <button

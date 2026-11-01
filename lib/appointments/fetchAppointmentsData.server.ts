@@ -374,6 +374,7 @@ function buildAppointments(
       add_on_final_cena: addOn.add_on_final_cena,
       valuta: addOn.valuta,
       belezi_termin,
+      lokacija_id: row['lokacija_id'] ? String(row['lokacija_id']) : null,
       deleted_at,
       storitev: serviceData,
       storitev_2: storitev2,

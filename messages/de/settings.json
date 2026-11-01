@@ -442,6 +442,8 @@
     "pickerStaff": "Arbeitet an",
     "pickerService": "Angeboten an",
     "pickerStaffHelp": "Die Person ist nur an den ausgewählten Standorten buchbar. Mindestens einer muss ausgewählt sein.",
-    "pickerServiceHelp": "Sind alle Standorte ausgewählt, gilt die Leistung auch für später hinzugefügte Standorte."
+    "pickerServiceHelp": "Sind alle Standorte ausgewählt, gilt die Leistung auch für später hinzugefügte Standorte.",
+    "switcherLabel": "Standort",
+    "allLocations": "Alle Standorte"
   }
 }

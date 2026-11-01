@@ -442,6 +442,8 @@
     "pickerStaff": "Lokacije dela",
     "pickerService": "Kje se storitev izvaja",
     "pickerStaffHelp": "Zaposleni je za rezervacije na voljo samo na izbranih lokacijah. Vsaj ena mora biti izbrana.",
-    "pickerServiceHelp": "Če so izbrane vse lokacije, velja storitev tudi za lokacije, ki jih dodate kasneje."
+    "pickerServiceHelp": "Če so izbrane vse lokacije, velja storitev tudi za lokacije, ki jih dodate kasneje.",
+    "switcherLabel": "Lokacija",
+    "allLocations": "Vse lokacije"
   }
 }
