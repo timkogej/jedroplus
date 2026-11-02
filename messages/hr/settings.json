@@ -279,6 +279,15 @@
       "emailSubject": "Pozivnica u tim {company}",
       "message": "Pozdrav! Pozivam vas u tim {company} u aplikaciji Jedro+. Otvorite poveznicu i izradite račun: {url}",
       "privacyNote": "Poveznica sadrži kod za pridruživanje. Pošaljite je samo osobi koju pozivate."
+    },
+    "locations": {
+      "label": "Lokacije",
+      "all": "Sve lokacije",
+      "edit": "Uredi",
+      "save": "Spremi",
+      "cancel": "Odustani",
+      "help": "Član će vidjeti i uređivati samo odabrane lokacije. Ako odabereš sve, nema ograničenja.",
+      "saveError": "Spremanje nije uspjelo. Pokušaj ponovno."
     }
   },
   "messages": {

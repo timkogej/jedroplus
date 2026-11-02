@@ -279,6 +279,15 @@
       "emailSubject": "Invito nel team {company}",
       "message": "Ciao! Ti invito nel team {company} sull'app Jedro+. Apri il link e crea un account: {url}",
       "privacyNote": "Il link contiene il codice di accesso. Invialo solo alla persona che stai invitando."
+    },
+    "locations": {
+      "label": "Sedi",
+      "all": "Tutte le sedi",
+      "edit": "Modifica",
+      "save": "Salva",
+      "cancel": "Annulla",
+      "help": "Il membro vedrà e gestirà solo le sedi selezionate. Selezionandole tutte non c'è alcuna restrizione.",
+      "saveError": "Salvataggio non riuscito. Riprova."
     }
   },
   "messages": {

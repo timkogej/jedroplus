@@ -17,6 +17,8 @@ import { callN8nAction } from '@/src/lib/n8nClient';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useMarkVisited } from '@/hooks/useMarkVisited';
 import InviteDialog from '@/components/team/InviteDialog';
+import { MemberLocations } from '@/components/locations/MemberLocations';
+import { useLocations } from '@/lib/hooks/useLocations';
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -211,6 +213,8 @@ export default function ClaniPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState(false);
   const [error, setError] = useState(false);
+  const { locations, multi } = useLocations();
+  const [locAccess, setLocAccess] = useState<Record<string, string[]>>({});
 
   // ── Fetch members + current user role ──
 
@@ -280,6 +284,28 @@ export default function ClaniPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Which locations each member is limited to (only with several locations).
+  useEffect(() => {
+    if (!multi || currentRole !== 'owner') return;
+    let active = true;
+    fetch('/api/locations/members', { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json: { ok?: boolean; access?: Record<string, string[]> }) => {
+        if (active && json.ok) setLocAccess(json.access ?? {});
+      })
+      .catch(() => { /* the line just shows "all locations" */ });
+    return () => { active = false; };
+  }, [multi, currentRole]);
+
+  const handleLocationsSaved = useCallback((userId: string, ids: string[] | null) => {
+    setLocAccess((prev) => {
+      const next = { ...prev };
+      if (ids) next[userId] = ids;
+      else delete next[userId];
+      return next;
+    });
+  }, []);
 
   // ── Toggle (local state only — save on button click) ──
 
@@ -474,7 +500,7 @@ export default function ClaniPage() {
         ) : (
           <ul className="divide-y divide-gray-100">
             {members.map((member) => (
-              <li key={member.id} className="flex items-center gap-4 px-4 py-3">
+              <li key={member.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
                     {member.display_name || member.user_id}
@@ -484,6 +510,16 @@ export default function ClaniPage() {
                   )}
                 </div>
                 <RoleBadge role={member.role} />
+                {multi && member.role !== 'owner' && (
+                  <div className="w-full">
+                    <MemberLocations
+                      userId={member.user_id}
+                      locations={locations}
+                      value={locAccess[member.user_id] ?? null}
+                      onSaved={handleLocationsSaved}
+                    />
+                  </div>
+                )}
               </li>
             ))}
           </ul>

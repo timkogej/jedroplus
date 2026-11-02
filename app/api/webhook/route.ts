@@ -7,7 +7,9 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
-import { requireCompanyAccess } from "@/lib/auth/apiAuth";
+import { requireCompanyAccess, resolveUserCompany } from "@/lib/auth/apiAuth";
+import { adminClient } from "@/lib/auth/ownerAccess";
+import { allowedLocationIds, fillSoleLocation, locationViolation } from "@/lib/auth/locationAccess";
 
 const DEFAULT_WEBHOOK_URL = "https://n8n.jedroplus.com/webhook/main_povezava";
 const RESCHEDULE_NOTIFICATION_WEBHOOK_URL =
@@ -66,6 +68,25 @@ export async function POST(request: NextRequest) {
     const access = await requireCompanyAccess(request, companyId);
     if ("response" in access) return access.response;
     const actor = access.user.email ?? access.user.id;
+
+    // Members limited to some locations may not touch the others. Members
+    // without a limit (the norm, and every single-location company) pass.
+    try {
+      const { uuid: companyUuid, textId } = await resolveUserCompany(access.user.id);
+      if (companyUuid && textId) {
+        const admin = adminClient();
+        const allowed = await allowedLocationIds(admin, access.user.id, companyUuid);
+        if (allowed) {
+          fillSoleLocation(allowed, payload);
+          const reason = await locationViolation(admin, allowed, textId, payload);
+          if (reason) {
+            return NextResponse.json({ ok: false, error: reason }, { status: 403 });
+          }
+        }
+      }
+    } catch (locationError) {
+      console.error("[api/webhook] location check skipped:", locationError);
+    }
 
     // Normaliziraj payload
     const normalizedPayload = {
