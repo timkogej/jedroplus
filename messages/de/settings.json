@@ -279,6 +279,15 @@
       "emailSubject": "Einladung zu {company}",
       "message": "Hallo! Ich lade dich zu {company} bei Jedro+ ein. Öffne den Link und erstelle ein Konto: {url}",
       "privacyNote": "Der Link enthält den Beitrittscode. Senden Sie ihn nur an die Person, die Sie einladen."
+    },
+    "locations": {
+      "label": "Standorte",
+      "all": "Alle Standorte",
+      "edit": "Bearbeiten",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "help": "Das Mitglied sieht und verwaltet nur die ausgewählten Standorte. Wenn alle ausgewählt sind, gibt es keine Einschränkung.",
+      "saveError": "Speichern fehlgeschlagen. Bitte erneut versuchen."
     }
   },
   "messages": {

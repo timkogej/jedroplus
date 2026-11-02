@@ -279,6 +279,15 @@
       "emailSubject": "Povabilo v ekipo {company}",
       "message": "Pozdravljeni! Vabim vas v ekipo {company} v aplikaciji Jedro+. Odprite povezavo in ustvarite račun: {url}",
       "privacyNote": "Povezava vsebuje kodo za pridružitev. Pošljite jo samo osebi, ki jo vabite."
+    },
+    "locations": {
+      "label": "Lokacije",
+      "all": "Vse lokacije",
+      "edit": "Uredi",
+      "save": "Shrani",
+      "cancel": "Prekliči",
+      "help": "Član bo videl in urejal samo izbrane lokacije. Če izbereš vse, nima omejitve.",
+      "saveError": "Shranjevanje ni uspelo. Poskusi znova."
     }
   },
   "messages": {

@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
 import { requireCompanyAccess, resolveUserCompany } from "@/lib/auth/apiAuth";
 import { adminClient } from "@/lib/auth/ownerAccess";
-import { allowedLocationIds, locationViolation } from "@/lib/auth/locationAccess";
+import { allowedLocationIds, fillSoleLocation, locationViolation } from "@/lib/auth/locationAccess";
 
 const DEFAULT_WEBHOOK_URL = "https://n8n.jedroplus.com/webhook/main_povezava";
 const RESCHEDULE_NOTIFICATION_WEBHOOK_URL =
@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
         const admin = adminClient();
         const allowed = await allowedLocationIds(admin, access.user.id, companyUuid);
         if (allowed) {
+          fillSoleLocation(allowed, payload);
           const reason = await locationViolation(admin, allowed, textId, payload);
           if (reason) {
             return NextResponse.json({ ok: false, error: reason }, { status: 403 });

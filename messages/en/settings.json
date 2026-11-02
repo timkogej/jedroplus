@@ -279,6 +279,15 @@
       "emailSubject": "Invitation to join {company}",
       "message": "Hi! I'm inviting you to join {company} on Jedro+. Open the link and create an account: {url}",
       "privacyNote": "The link contains the join code. Only send it to the person you're inviting."
+    },
+    "locations": {
+      "label": "Locations",
+      "all": "All locations",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "help": "The member will only see and manage the selected locations. Selecting all means no restriction.",
+      "saveError": "Could not save. Please try again."
     }
   },
   "messages": {

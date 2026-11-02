@@ -56,6 +56,22 @@ export async function allowedLocationIds(
   return new Set(rows.map((row) => String(row.lokacija_id)));
 }
 
+/**
+ * A member limited to exactly one location creates appointments there without
+ * the interface having to say so (quick booking and other forms never send a
+ * location). Fills it in so the server does not default to the main location.
+ * Returns true when it set the location.
+ */
+export function fillSoleLocation(allowed: Set<string>, payload: Json): boolean {
+  const event = typeof payload.event === 'string' ? payload.event.toUpperCase() : '';
+  if (!CREATE_EVENTS.has(event) || allowed.size !== 1 || !isObject(payload.data)) return false;
+  const named = new Set<string>();
+  collect(payload, LOCATION_KEYS, named);
+  if (named.size > 0) return false;
+  payload.data = { ...payload.data, lokacija_id: [...allowed][0] };
+  return true;
+}
+
 /** Every value stored under one of `keys`, anywhere in the payload (depth-limited). */
 function collect(value: unknown, keys: Set<string>, found: Set<string>, depth = 0): void {
   if (depth > 5) return;
