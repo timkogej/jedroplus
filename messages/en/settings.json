@@ -38,6 +38,10 @@
       "history": {
         "label": "History",
         "description": "Audit trail of all changes and actions in the system"
+      },
+      "locations": {
+        "label": "Locations",
+        "description": "Branches, addresses and opening hours"
       }
     }
   },
@@ -400,5 +404,46 @@
     "copy": "Copy link",
     "copied": "Copied ✓",
     "info": "Print this QR code and put it up in your salon or practice. Clients scan it with their phone and enter their details in under a minute."
+  },
+  "locations": {
+    "title": "Locations",
+    "subtitle": "Your company's branches. The main location is the default for new appointments.",
+    "back": "Settings",
+    "loading": "Loading...",
+    "loadError": "Could not load locations.",
+    "usage": "{active} of {max} locations",
+    "add": "Add location",
+    "limitReached": "You have reached the number of locations included in your plan ({max}). You can buy more under Add-ons.",
+    "addons": "Add-ons",
+    "main": "Main",
+    "archivedBadge": "Archived",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "makeMain": "Make main",
+    "archive": "Archive",
+    "restore": "Restore",
+    "newTitle": "New location",
+    "fieldName": "Location name",
+    "fieldAddress": "Address",
+    "fieldPhone": "Phone",
+    "fieldEmail": "Location email",
+    "fieldReview": "Review link",
+    "fieldTravel": "Travel time to this location (minutes)",
+    "fieldTravelHelp": "Optional. A team member who works at several locations on the same day needs this time between appointments.",
+    "confirmArchive": "Archive the location \"{name}\"? It will no longer be available for new appointments; existing data is kept.",
+    "errLimit": "The location limit has been reached.",
+    "errUpcoming": "This location cannot be archived: it still has {count} upcoming appointments.",
+    "errMain": "The main location cannot be archived. Choose another main location first.",
+    "errName": "Enter a location name.",
+    "errSave": "Could not save. Please try again.",
+    "fieldHours": "Opening hours",
+    "pickerStaff": "Works at",
+    "pickerService": "Offered at",
+    "pickerStaffHelp": "The team member can be booked only at the selected locations. At least one must be selected.",
+    "pickerServiceHelp": "If all locations are selected, the service is also offered at locations you add later.",
+    "switcherLabel": "Location",
+    "allLocations": "All locations"
   }
 }

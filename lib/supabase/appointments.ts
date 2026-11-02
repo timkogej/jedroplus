@@ -117,6 +117,7 @@ export function parseService(row: Record<string, unknown>): Storitev | null {
     skupni_cas: skupni_cas && skupni_cas > 0 ? skupni_cas : undefined,
     cena: cena !== null && !isNaN(cena) ? cena : null,
     status: schema.statusField ? String(row[schema.statusField] ?? '') || null : null,
+    ref: row['ID storitve'] ? String(row['ID storitve']) : undefined,
   };
 }
 
@@ -157,6 +158,7 @@ export function parseStaff(row: Record<string, unknown>): (Zaposleni & { initial
     initials: existingInitials || getInitials(ime, priimek),
     barva: barva || undefined,
     storitve,
+    ref: row['ID osebe'] ? String(row['ID osebe']) : undefined,
   };
 }
 
@@ -519,6 +521,7 @@ export async function fetchAppointmentsForMonth(
         add_on_final_cena: addOn.add_on_final_cena,
         valuta: addOn.valuta,
         belezi_termin,
+        lokacija_id: row['lokacija_id'] ? String(row['lokacija_id']) : null,
         deleted_at,
         storitev: serviceData,
         storitev_2: storitev2,
@@ -980,6 +983,7 @@ export async function fetchAllAppointments(
         add_on_final_cena: addOn.add_on_final_cena,
         valuta: addOn.valuta,
         belezi_termin,
+        lokacija_id: row['lokacija_id'] ? String(row['lokacija_id']) : null,
         deleted_at,
         storitev: serviceData,
         storitev_2: storitev2,

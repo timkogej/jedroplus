@@ -16,6 +16,7 @@ import {
   ListChecks,
 } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
+import { useLocationScope } from '@/app/location-context';
 import type { CalendarInitialData } from '@/lib/calendar/fetchCalendarData.server';
 import type { Client } from '@/types/clients';
 import type { ViewMode } from '@/lib/utils/calendar';
@@ -99,6 +100,7 @@ interface CalendarProps {
 
 function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) {
   const t = useTranslations('appointments');
+  const { matchesLocation, personAtSelected, serviceAtSelected } = useLocationScope();
   const locale = useLocale();
   const { companySettings } = useCompany();
   const { user } = useAuth();
@@ -641,11 +643,21 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     }
   }, [editingEvent, companyId, actor, loadEvents, handleCloseEventModal, t]);
 
+  // Team and services offered at the selected location (all when none is selected).
+  const visibleEmployees = useMemo(
+    () => employees.filter((e) => personAtSelected(e.ref)),
+    [employees, personAtSelected]
+  );
+  const visibleServices = useMemo(
+    () => services.filter((sv) => serviceAtSelected(sv.ref)),
+    [services, serviceAtSelected]
+  );
+
   // Filter appointments
   const filteredAppointments = useMemo(() => {
     // Always exclude cancelled appointments and soft-deleted ghost termini
     let filtered = appointments.filter(
-      (a) => a.status !== 'cancelled' && a.status !== 'Odpovedan' && !a.deleted_at
+      (a) => a.status !== 'cancelled' && a.status !== 'Odpovedan' && !a.deleted_at && matchesLocation(a.lokacija_id)
     );
 
     // RBAC: staff with view-own-only restriction sees only their appointments
@@ -676,7 +688,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     }
 
     return filtered;
-  }, [appointments, selectedEmployeeId, selectedServiceId, selectedResursId, terminResursiMap, searchQuery, staffViewOwnOnly, rolePersonId]);
+  }, [appointments, selectedEmployeeId, selectedServiceId, selectedResursId, terminResursiMap, searchQuery, staffViewOwnOnly, rolePersonId, matchesLocation]);
 
   // Filter absences by selected employee (same logic as appointments)
   const filteredAbsences = useMemo(() => {
@@ -2233,8 +2245,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         onNewAppointment={handleNewAppointment}
         onNewEvent={handleOpenEventModal}
         onAbsence={handleOpenAbsenceModal}
-        services={services}
-        employees={employees}
+        services={visibleServices}
+        employees={visibleEmployees}
         selectedEmployeeId={selectedEmployeeId}
         onEmployeeFilterChange={setSelectedEmployeeId}
         restrictedToEmployeeId={staffViewOwnOnly && rolePersonId ? rolePersonId : undefined}
@@ -2303,7 +2315,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       <AbsenceModal
         isOpen={isAbsenceModalOpen}
         onClose={handleCloseAbsenceModal}
-        employees={employees}
+        employees={visibleEmployees}
         onSave={handleSaveAbsence}
         isSaving={isSaving}
       />

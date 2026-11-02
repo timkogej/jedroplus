@@ -22,6 +22,8 @@ import EmployeeAvatar from './EmployeeAvatar';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
 import ImageField, { KEEP_IMAGE, type ImageChange } from '@/components/media/ImageField';
+import { LocationPicker } from '@/components/locations/LocationPicker';
+import { useEntityLocations } from '@/lib/hooks/useLocations';
 
 type ModalMode = 'create' | 'edit';
 
@@ -32,7 +34,8 @@ interface EmployeeModalProps {
   mode: ModalMode;
   companyId: string;
   /** `image`: what to do with the photo; the page saves it after the person. */
-  onSave: (data: EmployeeFormData, image: ImageChange) => Promise<void>;
+  /** `locations`: chosen location ids, or null when the company has one location. */
+  onSave: (data: EmployeeFormData, image: ImageChange, locations: string[] | null) => Promise<void>;
   isSaving?: boolean;
 }
 
@@ -79,6 +82,7 @@ function EmployeeModal({
   const [emailChecking, setEmailChecking] = useState(false);
   const [emailExists, setEmailExists] = useState(false);
   const [image, setImage] = useState<ImageChange>(KEEP_IMAGE);
+  const loc = useEntityLocations('staff', mode === 'edit' && employee ? employee.id : null, isOpen);
 
   // Initialize form when modal opens
   useEffect(() => {
@@ -215,8 +219,8 @@ function EmployeeModal({
 
     if (!validateForm()) return;
 
-    await onSave(formData, image);
-  }, [formData, validateForm, onSave, image]);
+    await onSave(formData, image, loc.ids);
+  }, [formData, validateForm, onSave, image, loc.ids]);
 
   // Animation variants
   const backdropVariants = {
@@ -434,6 +438,10 @@ function EmployeeModal({
                       </div>
                     </div>
                   </div>
+
+                  {loc.multi && loc.ids && (
+                    <LocationPicker kind="staff" locations={loc.locations} value={loc.ids} onChange={loc.setIds} />
+                  )}
 
                   {/* Photo on the booking page */}
                   <ImageField

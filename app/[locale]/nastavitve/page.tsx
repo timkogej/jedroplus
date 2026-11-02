@@ -2,16 +2,17 @@
 
 import { Link } from '@/i18n/navigation';
 import { useState, useEffect } from 'react';
-import { Buildings, Gear, UsersThree, ChatTeardrop, Package, Stack, CaretRight, ClockCounterClockwise, Gift, Bell } from '@phosphor-icons/react';
+import { MapPin, Buildings, Gear, UsersThree, ChatTeardrop, Package, Stack, CaretRight, ClockCounterClockwise, Gift, Bell } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
 
-type MenuId = 'podjetje' | 'splosno' | 'clani' | 'paketi' | 'sporocila' | 'addoni' | 'zgodovina' | 'zvestoba' | 'portalObvestila';
+type MenuId = 'podjetje' | 'lokacije' | 'splosno' | 'clani' | 'paketi' | 'sporocila' | 'addoni' | 'zgodovina' | 'zvestoba' | 'portalObvestila';
 
 const menuItems: { id: MenuId; icon: typeof Buildings; path: string; ownerOnly: boolean; managerOnly?: boolean }[] = [
   { id: 'podjetje', icon: Buildings,    path: '/nastavitve/podjetje', ownerOnly: false },
+  { id: 'lokacije', icon: MapPin,      path: '/nastavitve/lokacije', ownerOnly: false, managerOnly: true },
   { id: 'splosno',  icon: Gear,         path: '/nastavitve/splosno',  ownerOnly: false },
   { id: 'clani',    icon: UsersThree,   path: '/nastavitve/clani',    ownerOnly: true  },
   { id: 'paketi',   icon: Package,      path: '/nastavitve/paketi',   ownerOnly: true  },
@@ -24,6 +25,7 @@ const menuItems: { id: MenuId; icon: typeof Buildings; path: string; ownerOnly: 
 
 const menuKeyMap: Record<MenuId, string> = {
   podjetje:  'company',
+  lokacije:  'locations',
   splosno:   'general',
   clani:     'members',
   paketi:    'plans',
@@ -45,6 +47,9 @@ export default function SettingsPage() {
     return localStorage.getItem(cacheKey) === '1';
   });
   const [canManage, setCanManage] = useState(false);
+  // Locations are only offered when the plan allows more than one, so a
+  // single-location company sees the same menu as before.
+  const [multiLocation, setMultiLocation] = useState(false);
 
   useEffect(() => {
     if (!companyUuid || !user?.id || !cacheKey) return;
@@ -70,7 +75,21 @@ export default function SettingsPage() {
     return () => { active = false; };
   }, [companyUuid, user?.id, cacheKey]);
 
-  const visibleItems = menuItems.filter((item) => (!item.ownerOnly || isOwner) && (!item.managerOnly || canManage));
+  useEffect(() => {
+    if (!canManage) { setMultiLocation(false); return; }
+    let active = true;
+    fetch('/api/locations', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { max?: number; locations?: unknown[] } | null) => {
+        if (active && data) setMultiLocation((data.max ?? 1) > 1 || (data.locations?.length ?? 0) > 1);
+      })
+      .catch(() => { /* menu entry simply stays hidden */ });
+    return () => { active = false; };
+  }, [canManage]);
+
+  const visibleItems = menuItems.filter(
+    (item) => (!item.ownerOnly || isOwner) && (!item.managerOnly || canManage) && (item.id !== 'lokacije' || multiLocation)
+  );
 
   return (
     <div>

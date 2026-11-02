@@ -90,7 +90,8 @@
       "notes": "Note",
       "internalNotes": "Note interne",
       "communicationLanguage": "Lingua di comunicazione",
-      "phone": "Telefono"
+      "phone": "Telefono",
+      "location": "Sede"
     },
     "placeholders": {
       "service": "Seleziona un servizio",

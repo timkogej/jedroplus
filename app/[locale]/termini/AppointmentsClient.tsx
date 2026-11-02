@@ -33,6 +33,7 @@ import {
   fetchEmployees,
 } from '@/lib/supabase/appointments';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
+import { useLocationScope } from '@/app/location-context';
 import type { AppointmentsInitialData } from '@/lib/appointments/fetchAppointmentsData.server';
 import { loadAppointmentsFrom } from './actions';
 import { callN8nAction } from '@/src/lib/n8nClient';
@@ -65,6 +66,7 @@ const DEFAULT_FILTERS: FilterState = {
 // Stats card component - Gradient border with black icon (no circle)
 function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialData | null }) {
   const t = useTranslations('appointments');
+  const { matchesLocation } = useLocationScope();
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -286,6 +288,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
   // Filter appointments
   const filteredAppointments = useMemo(() => {
     return appointments.filter((apt) => {
+      if (!matchesLocation(apt.lokacija_id)) return false;
       if (showPastOpen && !pastOpenIds.has(apt.id)) return false;
       // Staff view restriction: only show own appointments when required
       if (staffViewOwnOnly && apt.zaposleni_id !== rolePersonId) return false;
@@ -341,7 +344,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
 
       return true;
     });
-  }, [appointments, filters, staffViewOwnOnly, rolePersonId, showPastOpen, pastOpenIds]);
+  }, [appointments, filters, staffViewOwnOnly, rolePersonId, showPastOpen, pastOpenIds, matchesLocation]);
 
   // Handlers
   // Ogled odpre isto okence kot v Koledarju in na nadzorni plošči — z vsemi

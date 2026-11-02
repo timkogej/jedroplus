@@ -90,7 +90,8 @@
       "notes": "Notizen",
       "internalNotes": "Interne Notizen",
       "communicationLanguage": "Sprache für Nachrichten",
-      "phone": "Telefon"
+      "phone": "Telefon",
+      "location": "Standort"
     },
     "placeholders": {
       "service": "Leistung wählen",

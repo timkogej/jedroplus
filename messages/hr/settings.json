@@ -38,6 +38,10 @@
       "portalAnnouncements": {
         "label": "Obavijesti u portalu",
         "description": "Objave za klijente, slike i neobavezna e-mail upozorenja"
+      },
+      "locations": {
+        "label": "Lokacije",
+        "description": "Poslovnice, adrese i radno vrijeme"
       }
     }
   },
@@ -400,5 +404,46 @@
     "copy": "Kopiraj poveznicu",
     "copied": "Kopirano ✓",
     "info": "Ovaj QR kod možete ispisati i postaviti u svoj salon ili ordinaciju. Klijenti ga skeniraju telefonom i za manje od minute unesu svoje podatke."
+  },
+  "locations": {
+    "title": "Lokacije",
+    "subtitle": "Poslovnice vaše tvrtke. Glavna lokacija zadana je za nove termine.",
+    "back": "Postavke",
+    "loading": "Učitavanje...",
+    "loadError": "Lokacije nije bilo moguće učitati.",
+    "usage": "{active} od {max} lokacija",
+    "add": "Dodaj lokaciju",
+    "limitReached": "Dosegnuli ste broj lokacija uključenih u paket ({max}). Dodatne lokacije možete dokupiti među dodacima.",
+    "addons": "Dodaci",
+    "main": "Glavna",
+    "archivedBadge": "Arhivirana",
+    "edit": "Uredi",
+    "save": "Spremi",
+    "saving": "Spremanje...",
+    "cancel": "Odustani",
+    "makeMain": "Postavi kao glavnu",
+    "archive": "Arhiviraj",
+    "restore": "Vrati",
+    "newTitle": "Nova lokacija",
+    "fieldName": "Naziv lokacije",
+    "fieldAddress": "Adresa",
+    "fieldPhone": "Telefon",
+    "fieldEmail": "E-pošta lokacije",
+    "fieldReview": "Poveznica za ocjenu",
+    "fieldTravel": "Vrijeme putovanja do ove lokacije (minute)",
+    "fieldTravelHelp": "Neobavezno. Zaposlenik koji isti dan radi na više lokacija treba to vrijeme između termina.",
+    "confirmArchive": "Arhivirati lokaciju »{name}«? Više neće biti dostupna za nove termine, postojeći podaci ostaju.",
+    "errLimit": "Dosegnuto je ograničenje broja lokacija.",
+    "errUpcoming": "Lokaciju nije moguće arhivirati: ima još {count} nadolazećih termina.",
+    "errMain": "Glavnu lokaciju nije moguće arhivirati. Prvo odredite drugu glavnu lokaciju.",
+    "errName": "Unesite naziv lokacije.",
+    "errSave": "Spremanje nije uspjelo. Pokušajte ponovno.",
+    "fieldHours": "Radno vrijeme",
+    "pickerStaff": "Radi na lokacijama",
+    "pickerService": "Gdje se usluga pruža",
+    "pickerStaffHelp": "Zaposlenik se može rezervirati samo na odabranim lokacijama. Barem jedna mora biti odabrana.",
+    "pickerServiceHelp": "Ako su odabrane sve lokacije, usluga vrijedi i za lokacije koje dodate kasnije.",
+    "switcherLabel": "Lokacija",
+    "allLocations": "Sve lokacije"
   }
 }

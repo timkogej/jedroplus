@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { AuthProvider } from "./auth-context";
 import { CompanyProvider } from "./company-context";
+import { LocationProvider } from "./location-context";
 import { RolePermissionProvider } from "./role-permission-context";
 import { Toaster } from "sonner";
 
@@ -14,9 +15,11 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <CompanyProvider>
       <AuthProvider>
+        <LocationProvider>
         <RolePermissionProvider>
           {children}
         </RolePermissionProvider>
+        </LocationProvider>
         <Toaster
           position="top-center"
           toastOptions={{
