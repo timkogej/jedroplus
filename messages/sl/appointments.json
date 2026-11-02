@@ -90,7 +90,8 @@
       "notes": "Opombe",
       "internalNotes": "Interne opombe",
       "communicationLanguage": "Jezik komunikacije",
-      "phone": "Telefon"
+      "phone": "Telefon",
+      "location": "Lokacija"
     },
     "placeholders": {
       "service": "Izberi storitev",

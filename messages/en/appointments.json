@@ -90,7 +90,8 @@
       "notes": "Notes",
       "internalNotes": "Internal Notes",
       "communicationLanguage": "Communication language",
-      "phone": "Phone"
+      "phone": "Phone",
+      "location": "Location"
     },
     "placeholders": {
       "service": "Select service",

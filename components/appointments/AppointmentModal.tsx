@@ -17,6 +17,7 @@ import type { Client } from '@/lib/supabase/clients';
 import type { ClientFormData } from '@/types/clients';
 import { useCompany } from '@/app/company-context';
 import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
+import { useLocationScope } from '@/app/location-context';
 import { useAuth } from '@/app/auth-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { useModalScrollLock } from '@/hooks/useModalScrollLock';
@@ -67,6 +68,8 @@ export interface AppointmentFormData {
   stranka_email?: string;
   stranka_telefon?: string;
   language?: CommunicationLanguageCode;
+  /** Location of the appointment; null/undefined = the database picks the main one. */
+  lokacija_id?: string | null;
   storitev_id: string;
   storitev_id_2?: string; // Second service ID (optional)
   storitev_id_3?: string; // Third service ID (optional)
@@ -144,8 +147,8 @@ function AppointmentModal({
   onClose,
   appointment,
   mode,
-  services,
-  employees,
+  services: allServices,
+  employees: allEmployees,
   onSave,
   isSaving = false,
   initialDate,
@@ -189,6 +192,44 @@ function AppointmentModal({
     koncna_cena: undefined,
     valuta: defaultCurrency,
   });
+
+  // Locations: with several, the form picks one and offers only the team and
+  // services of that location (what is already chosen on the appointment stays).
+  const { locations, multi, selectedLocationId, personAtLocation, serviceAtLocation } = useLocationScope();
+  const mainLocationId = useMemo(() => locations.find((l) => l.je_glavna)?.id ?? null, [locations]);
+
+  useEffect(() => {
+    if (!isOpen || !multi || formData.lokacija_id) return;
+    setFormData((prev) => (prev.lokacija_id ? prev : {
+      ...prev,
+      lokacija_id: (appointment?.lokacija_id ?? selectedLocationId ?? mainLocationId) || null,
+    }));
+  }, [isOpen, multi, formData.lokacija_id, appointment?.lokacija_id, selectedLocationId, mainLocationId]);
+
+  const employees = useMemo(
+    () => !multi || !formData.lokacija_id
+      ? allEmployees
+      : allEmployees.filter((e) => e.id === formData.zaposleni_id || personAtLocation(e.ref, formData.lokacija_id)),
+    [allEmployees, multi, formData.lokacija_id, formData.zaposleni_id, personAtLocation]
+  );
+  const services = useMemo(() => {
+    if (!multi || !formData.lokacija_id) return allServices;
+    const chosen = [formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3];
+    return allServices.filter((sv) => chosen.includes(sv.id) || serviceAtLocation(sv.ref, formData.lokacija_id));
+  }, [allServices, multi, formData.lokacija_id, formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3, serviceAtLocation]);
+
+  const handleLocationChange = useCallback((lokacijaId: string) => {
+    setFormData((prev) => {
+      const next = { ...prev, lokacija_id: lokacijaId };
+      const person = allEmployees.find((e) => e.id === prev.zaposleni_id);
+      if (person && !personAtLocation(person.ref, lokacijaId)) next.zaposleni_id = '';
+      for (const key of ['storitev_id', 'storitev_id_2', 'storitev_id_3'] as const) {
+        const svc = allServices.find((sv) => sv.id === prev[key]);
+        if (svc && !serviceAtLocation(svc.ref, lokacijaId)) next[key] = '';
+      }
+      return next;
+    });
+  }, [allEmployees, allServices, personAtLocation, serviceAtLocation]);
 
   // Track how many service selectors to show (1-3)
   const [serviceCount, setServiceCount] = useState(1);
@@ -1259,6 +1300,28 @@ function AppointmentModal({
                 </>
               )}
             </div>
+
+            {/* Location — only with several locations */}
+            {multi && (
+              <div className={sectionClass}>
+                <label className={labelClass}>{t('modal.fields.location')}</label>
+                {isViewMode ? (
+                  <p className="text-sm font-medium text-gray-900">
+                    {locations.find((l) => l.id === formData.lokacija_id)?.naziv ?? ''}
+                  </p>
+                ) : (
+                  <Select
+                    value={formData.lokacija_id ?? ''}
+                    setValue={handleLocationChange}
+                    placeholder={t('modal.fields.location')}
+                  >
+                    {locations.map((l) => (
+                      <SelectOption key={l.id} value={l.id}>{l.naziv}</SelectOption>
+                    ))}
+                  </Select>
+                )}
+              </div>
+            )}
 
             {/* Service - Second field (supports up to 3 services) */}
             <div className={`${sectionClass} space-y-3`}>

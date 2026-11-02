@@ -2301,8 +2301,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         onClose={handleCloseModal}
         appointment={editingAppointment}
         mode={modalMode}
-        services={modalMode === 'edit' ? services : visibleServices}
-        employees={modalMode === 'edit' ? employees : visibleEmployees}
+        services={services}
+        employees={employees}
         onSave={handleSaveAppointment}
         isSaving={isSaving}
         initialDate={newAppointmentInitials.date}

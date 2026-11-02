@@ -66,7 +66,7 @@ const DEFAULT_FILTERS: FilterState = {
 // Stats card component - Gradient border with black icon (no circle)
 function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialData | null }) {
   const t = useTranslations('appointments');
-  const { matchesLocation, personAtSelected, serviceAtSelected } = useLocationScope();
+  const { matchesLocation } = useLocationScope();
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1032,8 +1032,8 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
         onClose={handleCloseModal}
         appointment={selectedAppointment}
         mode={modalMode}
-        services={modalMode === 'edit' ? services : services.filter((sv) => serviceAtSelected(sv.ref))}
-        employees={modalMode === 'edit' ? employees : employees.filter((e) => personAtSelected(e.ref))}
+        services={services}
+        employees={employees}
         onSave={handleSave}
         isSaving={isSaving}
         initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : undefined}

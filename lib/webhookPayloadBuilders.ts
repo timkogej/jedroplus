@@ -686,6 +686,7 @@ export function buildEnhancedAppointmentData({
     add_on_popust_tip?: string | null;
     add_on_final_cena?: string | null;
     belezi_termin?: boolean; // false = ghost termin
+    lokacija_id?: string | null; // location of the appointment; empty = main
   };
   serviceDetails: {
     id: string;
@@ -818,6 +819,7 @@ export function buildEnhancedAppointmentData({
       end_at: endAt,
       // Other info
       location_id: null,
+      lokacija_id: appointmentData.lokacija_id ?? null,
       status: appointmentData.status,
       // CRITICAL PRICE FIELDS - Required for n8n webhook
       cena: basePrice, // Base price from form

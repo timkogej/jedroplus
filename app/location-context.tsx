@@ -23,6 +23,9 @@ type LocationContextValue = {
   personAtSelected: (osebaRef: string | null | undefined) => boolean;
   /** Whether a service ("ID storitve") is offered at the selected location. No links = everywhere. */
   serviceAtSelected: (storitevRef: string | null | undefined) => boolean;
+  /** Same as personAtSelected, for an explicit location (e.g. the one chosen in a form). */
+  personAtLocation: (osebaRef: string | null | undefined, lokacijaId: string | null | undefined) => boolean;
+  serviceAtLocation: (storitevRef: string | null | undefined, lokacijaId: string | null | undefined) => boolean;
 };
 
 const LocationContext = createContext<LocationContextValue | undefined>(undefined);
@@ -112,9 +115,31 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     [selectedLocationId, serviceLinks]
   );
 
+  const personAtLocation = useCallback(
+    (osebaRef: string | null | undefined, lokacijaId: string | null | undefined) => {
+      if (!lokacijaId || !osebaRef) return true;
+      const links = personLinks.get(osebaRef);
+      return !links || links.has(lokacijaId);
+    },
+    [personLinks]
+  );
+
+  const serviceAtLocation = useCallback(
+    (storitevRef: string | null | undefined, lokacijaId: string | null | undefined) => {
+      if (!lokacijaId || !storitevRef) return true;
+      const links = serviceLinks.get(storitevRef);
+      return !links || links.has(lokacijaId);
+    },
+    [serviceLinks]
+  );
+
   const value = useMemo(
-    () => ({ locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation, personAtSelected, serviceAtSelected }),
-    [locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation, personAtSelected, serviceAtSelected]
+    () => ({
+      locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation,
+      personAtSelected, serviceAtSelected, personAtLocation, serviceAtLocation,
+    }),
+    [locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation,
+      personAtSelected, serviceAtSelected, personAtLocation, serviceAtLocation]
   );
 
   return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
