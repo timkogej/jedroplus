@@ -10,14 +10,23 @@ export function LocationSwitcher() {
   const { locations, multi, selectedLocationId, setSelectedLocationId } = useLocationScope();
   if (!multi) return null;
 
+  const current = locations.find((l) => l.id === selectedLocationId)?.naziv ?? t('allLocations');
+  const filtered = selectedLocationId !== null;
+
+  // Icon only, like the other buttons in the bar. The real <select> sits invisibly
+  // on top, so it opens the native picker (a sheet on phones) and stays accessible.
   return (
-    <label className="mr-1 flex h-8 items-center gap-1.5 rounded-lg bg-gray-50 px-2 text-sm text-gray-600 transition-colors hover:bg-gray-100">
-      <MapPin weight="regular" className="h-4 w-4 flex-shrink-0 text-gray-400" aria-hidden="true" />
-      <span className="sr-only">{t('switcherLabel')}</span>
+    <label
+      title={current}
+      className="relative flex h-8 w-8 flex-shrink-0 cursor-pointer items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200"
+    >
+      <MapPin weight={filtered ? 'fill' : 'regular'} className={`h-5 w-5 ${filtered ? 'text-violet-600' : ''}`} aria-hidden="true" />
+      <span className="sr-only">{t('switcherLabel')}: {current}</span>
       <select
         value={selectedLocationId ?? ''}
         onChange={(e) => setSelectedLocationId(e.target.value || null)}
-        className="max-w-[140px] cursor-pointer truncate bg-transparent text-sm font-medium text-gray-800 outline-none"
+        aria-label={t('switcherLabel')}
+        className="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
       >
         <option value="">{t('allLocations')}</option>
         {locations.map((l) => (
