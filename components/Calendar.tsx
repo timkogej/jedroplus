@@ -100,7 +100,7 @@ interface CalendarProps {
 
 function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) {
   const t = useTranslations('appointments');
-  const { matchesLocation, personAtSelected, serviceAtSelected } = useLocationScope();
+  const { matchesLocation, personAtSelected, serviceAtSelected, selectedLocationId } = useLocationScope();
   const locale = useLocale();
   const { companySettings } = useCompany();
   const { user } = useAuth();
@@ -595,6 +595,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         status: isEdit ? (editingEvent!.status || 'active') : 'active',
         is_visible: data.is_visible,
         enable_booking: data.enable_booking,
+        lokacija_id: data.lokacija_id,
         created_by: isEdit ? (editingEvent!.created_by ?? actor) : actor,
         updated_by: actor,
       };
@@ -654,6 +655,12 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   );
 
   // Filter appointments
+  // An event without a location applies to every location.
+  const visibleEvents = useMemo(
+    () => events.filter((ev) => !selectedLocationId || !ev.lokacija_id || ev.lokacija_id === selectedLocationId),
+    [events, selectedLocationId]
+  );
+
   const filteredAppointments = useMemo(() => {
     // Always exclude cancelled appointments and soft-deleted ghost termini
     let filtered = appointments.filter(
@@ -2118,7 +2125,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                   currentDate={currentDate}
                   appointments={filteredAppointments}
                   absences={filteredAbsences}
-                  events={events}
+                  events={visibleEvents}
                   services={services}
                   onAppointmentClick={handleAppointmentClick}
                   onEventClick={handleEventClick}
@@ -2157,7 +2164,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                       currentDate={currentDate}
                       appointments={filteredAppointments}
                       absences={filteredAbsences}
-                      events={events}
+                      events={visibleEvents}
                       services={services}
                       onAppointmentClick={handleAppointmentClick}
                       onEventClick={handleEventClick}
@@ -2178,7 +2185,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                   currentDate={currentDate}
                   appointments={filteredAppointments}
                   absences={filteredAbsences}
-                  events={events}
+                  events={visibleEvents}
                   services={services}
                   onAppointmentClick={handleAppointmentClick}
                   onEventClick={handleEventClick}
@@ -2215,7 +2222,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                         currentDate={currentDate}
                         appointments={filteredAppointments}
                         absences={filteredAbsences}
-                        events={events}
+                        events={visibleEvents}
                         services={services}
                         onAppointmentClick={handleAppointmentClick}
                         onEventClick={handleEventClick}
