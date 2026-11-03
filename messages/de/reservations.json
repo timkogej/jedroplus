@@ -64,18 +64,22 @@
       "name": "Casino",
       "subtitle": "Glamourös und aufregend",
       "description": "Exklusives Casino-Design mit glamouröser Atmosphäre, funkelnden Akzenten und dynamischen Elementen. Perfekt für alle, die aus der Terminbuchung ein unvergessliches Erlebnis machen möchten."
-    }
+    },
+    "mainBadge": "Hauptdesign"
   },
   "customCta": {
     "text": "Sie möchten ein Buchungssystem, das genau auf Ihr Unternehmen zugeschnitten ist?",
     "linkText": "Schreiben Sie uns an info@jedroplus.com"
   },
   "mainLink": {
-    "title": "Haupt-Buchungslink",
-    "subtitle": "Kunden wählen selbst eine Leistung und einen freien Termin. Fügen Sie den Link auf Ihrer Website, bei Instagram oder Google ein; wir verwenden ihn auch in Nachrichten. Um Kundendaten ohne Buchung zu erfassen, nutzen Sie den QR-Code unter Einstellungen → Allgemein.",
+    "title": "Buchungslink",
+    "subtitle": "Geben Sie diesen Link Ihren Kunden: auf Ihrer Website, bei Instagram, Google oder in Nachrichten. Er öffnet das unten gewählte Design; beim Wechsel des Designs muss der Link nicht geändert werden.",
     "copy": "Kopieren",
     "copied": "Kopiert",
-    "qrButton": "Code drucken"
+    "qrButton": "Code drucken",
+    "designLabel": "Welches Design sich öffnet",
+    "saveError": "Das Design konnte nicht gespeichert werden.",
+    "locked": "Dieses Design gehört zum Pro-Paket."
   },
   "mgmtLink": {
     "title": "Link zum Umbuchen & Stornieren",

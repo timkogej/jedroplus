@@ -182,6 +182,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const [bookingLink3, setBookingLink3] = useState('');
   const [bookingLink4, setBookingLink4] = useState('');
   const [bookingLink5, setBookingLink5] = useState('');
+  const [bookingLink6, setBookingLink6] = useState('');
   const [mainBookingLink, setMainBookingLink] = useState('');
 
   const [saving, setSaving] = useState(false);
@@ -194,12 +195,12 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
   const bookingLinkOptions = [
     { value: bookingLink1, label: t('modal.mainLink.classic') },
     { value: bookingLink2, label: t('modal.mainLink.modern') },
-    { value: bookingLink3, label: t('modal.mainLink.minimal') },
+    { value: bookingLink3, label: t('designs.elegant.name') },
     { value: bookingLink4, label: t('modal.mainLink.seasonal') },
     { value: bookingLink5, label: t('modal.mainLink.magazine') },
+    { value: bookingLink6, label: t('designs.casino.name') },
   ].filter((option) => option.value.trim());
   const hasBookingLinkOptions = bookingLinkOptions.length > 0;
-  const needsMainBookingLink = hasBookingLinkOptions && !mainBookingLink.trim();
 
   // Variable estimated lengths for SMS character counting
   const smsVarLengths: Record<string, number> = {
@@ -346,11 +347,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
           const bl3 = String(data['booking_link_3'] ?? data['Booking_link_3'] ?? '');
           const bl4 = String(data['booking_link_4'] ?? data['Booking_link_4'] ?? '');
           const bl5 = String(data['booking_link_5'] ?? data['Booking_link_5'] ?? '');
+          const bl6 = String(data['booking_link_6'] ?? data['Booking_link_6'] ?? '');
           setBookingLink1(bl1);
           setBookingLink2(bl2);
           setBookingLink3(bl3);
           setBookingLink4(bl4);
           setBookingLink5(bl5);
+          setBookingLink6(bl6);
           setMainBookingLink(String(data['main_booking_link'] ?? ''));
 
           setCancelApptDays(String(data['cancel_appt_days'] ?? '1'));
@@ -715,18 +718,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                   {/* Main Booking Link */}
                   <SettingsSection title={t('modal.mainLink.sectionTitle')} description={t('modal.mainLink.sectionDesc')}>
                     <SettingRow
-                      label={(
-                        <span className="inline-flex items-center gap-2">
-                          {t('modal.mainLink.selectLabel')}
-                          {needsMainBookingLink && (
-                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-orange-500 text-[9px] font-bold leading-none text-white">
-                              !
-                            </span>
-                          )}
-                        </span>
-                      )}
+                      label={t('modal.mainLink.selectLabel')}
                       description={t('modal.mainLink.selectDesc')}
-                      error={needsMainBookingLink ? t('modal.mainLink.missingRequired') : undefined}
                     >
                       <Select
                         value={mainBookingLink}

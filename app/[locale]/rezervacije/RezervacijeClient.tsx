@@ -13,12 +13,12 @@ import {
   ArrowSquareOut,
   Check,
   Link,
-  Warning,
   ClipboardText,
   CaretRight,
   Lock,
   QrCode,
 } from '@phosphor-icons/react';
+import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
@@ -39,6 +39,13 @@ import {
   StatusPill,
   ValuePill,
 } from '@/components/ui/OverviewPrimitives';
+import {
+  DESIGN_KEYS,
+  PRO_DESIGN_KEYS,
+  designKeyFromLink,
+  shortBookingLink,
+  type DesignKey,
+} from '@/lib/reservations/mainLink';
 import {
   DEFAULT_RESERVATION_SETTINGS,
   parseReservationSettings,
@@ -138,6 +145,33 @@ export default function RezervacijeClient({
     setTimeout(() => setCopiedDesignId(null), 2000);
   };
 
+  // The short link booking.jedroplus.com/<slug> opens the design picked here.
+  const shortLink = shortBookingLink(settings.slug);
+  const designUnlocked = (key: DesignKey) => !PRO_DESIGN_KEYS.includes(key) || proDesignsUnlocked;
+  const pickedDesign = designKeyFromLink(settings.mainBookingLink);
+  // A Pro design the plan does not include is shown as classic, as the booking site does.
+  const mainDesign: DesignKey = designUnlocked(pickedDesign) ? pickedDesign : 'classic';
+  const [savingDesign, setSavingDesign] = useState<DesignKey | null>(null);
+
+  const pickMainDesign = async (key: DesignKey) => {
+    if (key === mainDesign || savingDesign) return;
+    setSavingDesign(key);
+    try {
+      const res = await fetch('/api/company/main-design', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ design: key }),
+      });
+      const data = (await res.json().catch(() => null)) as { ok?: boolean; main_booking_link?: string } | null;
+      if (!res.ok || !data?.ok || !data.main_booking_link) throw new Error('save_failed');
+      setSettings((prev) => ({ ...prev, mainBookingLink: data.main_booking_link as string }));
+    } catch {
+      toast.error(t('mainLink.saveError'));
+    } finally {
+      setSavingDesign(null);
+    }
+  };
+
   if (companyLoading || !companyId) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-white">
@@ -146,18 +180,6 @@ export default function RezervacijeClient({
     );
   }
 
-  const availableBookingLinks = [
-    settings.bookingLink1,
-    settings.bookingLink2,
-    settings.bookingLink3,
-    settings.bookingLink4,
-    settings.bookingLink5,
-    settings.bookingLink6,
-  ].filter((link) => String(link).trim());
-  const hasBookingLinksAvailable = availableBookingLinks.length > 0;
-  const hasMainBookingLink = Boolean(settings.mainBookingLink.trim());
-  const hasIncompleteSettings =
-    !loading && settings.bookingOmogocen && hasBookingLinksAvailable && !hasMainBookingLink;
   return (
     <ProtectedLayout>
       <main className="min-h-screen bg-white">
@@ -184,34 +206,9 @@ export default function RezervacijeClient({
               >
                 <Gear size={17} weight="regular" className="text-gray-500" />
                 {t('modal.title')}
-                {hasIncompleteSettings && (
-                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-amber-500 text-[9px] font-bold leading-none text-white">!</span>
-                )}
               </button>
             )}
           </motion.div>
-
-          {/* Incomplete settings banner */}
-          {hasIncompleteSettings && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 flex items-center gap-3 rounded-xl border border-amber-100 bg-amber-50 p-4"
-            >
-              <Warning size={18} weight="regular" className="flex-shrink-0 text-amber-600" />
-              <p className="flex-1 text-sm font-medium text-amber-900">
-                {t('incompleteBanner.message')}
-              </p>
-              {canManageSettings && (
-                <button
-                  onClick={() => setShowSettingsModal(true)}
-                  className="flex-shrink-0 text-xs font-semibold text-amber-900 underline underline-offset-4 transition hover:text-amber-700"
-                >
-                  {t('incompleteBanner.openButton')}
-                </button>
-              )}
-            </motion.div>
-          )}
 
           {/* Zahteve za termin nav card: only where requests are on, or some still wait */}
           {(settings.bookingMode === 'request' || pendingRequests > 0) && (
@@ -270,6 +267,88 @@ export default function RezervacijeClient({
             </div>
           ) : (
             <>
+              {/* Main booking link: one short link, the design behind it is picked here */}
+              {shortLink && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
+                  className="mb-6 rounded-xl border border-gray-100 bg-white p-5"
+                >
+                  <div className="mb-1 flex items-center gap-2">
+                    <Link className="h-5 w-5 text-gray-400" weight="regular" />
+                    <h2 className="text-[15px] font-semibold text-gray-900">{t('mainLink.title')}</h2>
+                  </div>
+                  <p className="mb-3 text-[13px] text-gray-500">{t('mainLink.subtitle')}</p>
+                  <div className="flex flex-col gap-2 rounded-xl bg-gray-50 p-3 sm:flex-row sm:items-center">
+                    <a
+                      href={shortLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="min-w-0 flex-1 truncate text-sm text-[#7C78FA] transition-opacity hover:opacity-70"
+                    >
+                      {shortLink}
+                    </a>
+                    <div className="flex flex-shrink-0 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(shortLink, -1)}
+                        className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs transition-colors hover:bg-gray-100"
+                      >
+                        {copiedDesignId === -1 ? (
+                          <><Check className="h-3 w-3 text-green-500" weight="bold" /><span className="text-green-600">{t('mainLink.copied')}</span></>
+                        ) : (
+                          <><Copy className="h-3 w-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('mainLink.copy')}</span></>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => router.push('/qr-koda')}
+                        className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs transition-colors hover:bg-gray-100"
+                      >
+                        <QrCode className="h-3 w-3 text-gray-500" weight="regular" />
+                        <span className="text-gray-600">{t('mainLink.qrButton')}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => window.open(shortLink, '_blank')}
+                        aria-label={t('mainLink.title')}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-sm transition-opacity hover:opacity-90"
+                      >
+                        <ArrowSquareOut className="h-3.5 w-3.5" weight="bold" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="mb-2 mt-4 text-[13px] font-medium text-gray-900">{t('mainLink.designLabel')}</p>
+                  <div role="radiogroup" aria-label={t('mainLink.designLabel')} className="flex flex-wrap gap-2">
+                    {DESIGN_KEYS.map((key) => {
+                      const unlocked = designUnlocked(key);
+                      const selected = key === mainDesign;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          disabled={!canManageSettings || !unlocked || savingDesign !== null}
+                          title={unlocked ? undefined : t('mainLink.locked')}
+                          onClick={() => pickMainDesign(key)}
+                          className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors disabled:cursor-not-allowed ${
+                            selected
+                              ? 'border-gray-900 bg-gray-900 text-white'
+                              : 'border-gray-200 bg-white text-gray-900 hover:bg-gray-50 disabled:opacity-45'
+                          }`}
+                        >
+                          {!unlocked && <Lock className="h-3.5 w-3.5" weight="bold" aria-hidden="true" />}
+                          {t(`designs.${key}.name`)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+
               {/* Standard Booking Pages */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -300,6 +379,7 @@ export default function RezervacijeClient({
                       isCopied={copiedDesignId === design.id}
                       onCopy={copyToClipboard}
                       designUrl={getDesignLink(design)}
+                      isMain={design.designKey === mainDesign}
                     />
                   ))}
                 </div>
@@ -353,6 +433,7 @@ export default function RezervacijeClient({
                       isCopied={copiedDesignId === design.id}
                       onCopy={copyToClipboard}
                       designUrl={getDesignLink(design)}
+                      isMain={design.designKey === mainDesign}
                     />
                   ))}
                 </div>
@@ -376,71 +457,6 @@ export default function RezervacijeClient({
                   </a>
                 </p>
               </motion.div>
-
-              {/* Main Booking Link */}
-              {hasMainBookingLink && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
-                  className="mb-6 rounded-xl border border-gray-100 bg-white p-5"
-                >
-                  <div className="mb-1 flex items-center gap-2">
-                    <Link className="h-5 w-5 text-gray-400" weight="regular" />
-                    <h2 className="text-[15px] font-semibold text-gray-900">{t('mainLink.title')}</h2>
-                  </div>
-                  <p className="mb-3 text-[13px] text-gray-500">
-                    {t('mainLink.subtitle')}
-                  </p>
-                  <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-3">
-                    <div className="flex-1 min-w-0">
-                      <a
-                        href={settings.mainBookingLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block truncate text-sm text-[#7C78FA] transition-opacity hover:opacity-70"
-                      >
-                        {settings.mainBookingLink}
-                      </a>
-                    </div>
-                    <div className="flex gap-1.5 flex-shrink-0">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => {
-                          navigator.clipboard.writeText(settings.mainBookingLink);
-                          setCopiedDesignId(-1);
-                          setTimeout(() => setCopiedDesignId(null), 2000);
-                        }}
-                        className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs transition-colors hover:bg-gray-100"
-                      >
-                        {copiedDesignId === -1 ? (
-                          <><Check className="w-3 h-3 text-green-500" weight="bold" /><span className="text-green-600">{t('mainLink.copied')}</span></>
-                        ) : (
-                          <><Copy className="w-3 h-3 text-gray-500" weight="regular" /><span className="text-gray-600">{t('mainLink.copy')}</span></>
-                        )}
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => router.push('/qr-koda')}
-                        className="flex h-8 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs transition-colors hover:bg-gray-100"
-                      >
-                        <QrCode className="w-3 h-3 text-gray-500" weight="regular" />
-                        <span className="text-gray-600">{t('mainLink.qrButton')}</span>
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => window.open(settings.mainBookingLink, '_blank')}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-sm transition-opacity hover:opacity-90"
-                      >
-                        <ArrowSquareOut className="w-3.5 h-3.5" weight="bold" />
-                      </motion.button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
 
               {/* Appointment Management Link */}
               {settings.apptManagementLink && (
@@ -593,18 +609,12 @@ export default function RezervacijeClient({
                     </div>
                   )}
 
-                  {(hasBookingLinksAvailable || hasMainBookingLink) && (
+                  {shortLink && (
                     <SettingRow
                       icon={<Link size={16} weight="regular" />}
                       label={t('settingsOverview.mainLinkLabel')}
                       description={t('settingsOverview.mainLinkDesc')}
-                      value={
-                        hasMainBookingLink ? (
-                          <ValuePill tone="blue">{t('settingsOverview.linkSet')}</ValuePill>
-                        ) : (
-                          <ValuePill tone="amber">{t('settingsOverview.notConfigured')}</ValuePill>
-                        )
-                      }
+                      value={<ValuePill tone="blue">{t(`designs.${mainDesign}.name`)}</ValuePill>}
                     />
                   )}
 
