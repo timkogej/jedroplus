@@ -30,6 +30,8 @@ import { SERVICE_GRADIENTS, DEFAULT_SERVICE_GRADIENT, isGradient } from '@/lib/c
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import { Select, SelectOption } from '@/components/ui/animated-select';
+import { useLocationScope } from '@/app/location-context';
 interface ResursModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -62,6 +64,9 @@ function ResursModal({
 }: ResursModalProps) {
   const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('resursi');
+  const tLoc = useTranslations('settings.locations');
+  const { locations, multi, selectedLocationId } = useLocationScope();
+  const startLocationId = selectedLocationId ?? locations.find((l) => l.je_glavna)?.id ?? null;
 
   const defaultForm: ResursFormData = {
     naziv: '',
@@ -74,6 +79,7 @@ function ResursModal({
     urnik: null,
     status: 'active',
     storitve_ids: [],
+    lokacija_id: null,
   };
 
   const [form, setForm] = useState<ResursFormData>(defaultForm);
@@ -99,10 +105,11 @@ function ResursModal({
         urnik: resurs.urnik,
         status: resurs.status,
         storitve_ids: linkedStoritevIds,
+        lokacija_id: resurs.lokacija_id ?? null,
       });
       setUseCustomSchedule(resurs.urnik !== null);
     } else {
-      setForm({ ...defaultForm, storitve_ids: linkedStoritevIds });
+      setForm({ ...defaultForm, storitve_ids: linkedStoritevIds, lokacija_id: multi ? startLocationId : null });
       setUseCustomSchedule(false);
     }
     setErrors({});
@@ -250,6 +257,24 @@ function ResursModal({
                     </p>
                   )}
                 </div>
+
+                {/* Location — only with several locations */}
+                {multi && (
+                  <div className="rounded-xl bg-white p-4">
+                    <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                      {tLoc('switcherLabel')}
+                    </label>
+                    <Select
+                      value={form.lokacija_id ?? ''}
+                      setValue={(v) => handleChange('lokacija_id', v || null)}
+                      placeholder={tLoc('switcherLabel')}
+                    >
+                      {locations.map((l) => (
+                        <SelectOption key={l.id} value={l.id}>{l.naziv}</SelectOption>
+                      ))}
+                    </Select>
+                  </div>
+                )}
 
                 {/* Booking naziv */}
                 <div className="rounded-xl bg-white p-4">

@@ -17,6 +17,7 @@ import {
 import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
+import { useLocationScope } from '@/app/location-context';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { MetricGroup } from '@/components/dashboard';
 import type { Resurs, ResursFormData, StoritevResurs } from '@/types/resursi';
@@ -121,6 +122,7 @@ export default function ResursiPage() {
   const router = useRouter();
   const { companyId, loading: companyLoading } = useCompany();
   const t = useTranslations('resursi');
+  const { matchesLocation } = useLocationScope();
 
   // Data
   const [resursi, setResursi] = useState<Resurs[]>([]);
@@ -208,16 +210,19 @@ export default function ResursiPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  // Resources of the chosen location (all of them when none is chosen).
+  const scoped = useMemo(() => resursi.filter((r) => matchesLocation(r.lokacija_id)), [resursi, matchesLocation]);
+
   // Filtered list
   const filteredResursi = useMemo(() => {
-    let list = resursi;
+    let list = scoped;
     if (!showInactive) list = list.filter((r) => r.status === 'active');
     if (debouncedSearch.trim()) {
       const q = debouncedSearch.toLowerCase();
       list = list.filter((r) => r.naziv.toLowerCase().includes(q) || (r.opis ?? '').toLowerCase().includes(q));
     }
     return list;
-  }, [resursi, showInactive, debouncedSearch]);
+  }, [scoped, showInactive, debouncedSearch]);
 
   // Modal open/close
   const openCreateModal = useCallback(() => {
@@ -277,6 +282,7 @@ export default function ResursiPage() {
         urnik: r.urnik,
         status: newStatus,
         storitve_ids: links.filter((l) => l.id_resursa === r.id).map((l) => l.id_storitve),
+        lokacija_id: r.lokacija_id ?? null,
       }, r.id);
       if (result.error) throw new Error(result.error);
     } catch {
@@ -314,10 +320,10 @@ export default function ResursiPage() {
 
   // Stats
   const totalCapacity = useMemo(() =>
-    resursi.filter((r) => r.status === 'active').reduce((s, r) => s + r.kolicina * r.kapaciteta, 0),
-  [resursi]);
+    scoped.filter((r) => r.status === 'active').reduce((s, r) => s + r.kolicina * r.kapaciteta, 0),
+  [scoped]);
 
-  const activeCount = resursi.filter((r) => r.status === 'active').length;
+  const activeCount = scoped.filter((r) => r.status === 'active').length;
 
   if (companyLoading || !companyId) {
     return (
@@ -354,11 +360,11 @@ export default function ResursiPage() {
           </motion.div>
 
           {/* Povzetek — ena kartica z lasnimi črtami, kot drugod */}
-          {resursi.length > 0 && (
+          {scoped.length > 0 && (
             <div className="mb-8">
               <MetricGroup
                 metrics={[
-                  { label: t('stats.total'), value: resursi.length, icon: Cube },
+                  { label: t('stats.total'), value: scoped.length, icon: Cube },
                   { label: t('stats.active'), value: activeCount, icon: CheckCircle },
                   { label: t('stats.totalCapacity'), value: totalCapacity, icon: Users },
                 ]}
@@ -408,7 +414,7 @@ export default function ResursiPage() {
           {/* Results count */}
           {debouncedSearch && filteredResursi.length > 0 && (
             <p className="mb-4 text-sm text-gray-500">
-              {t('page.resultsCount', { current: filteredResursi.length, total: resursi.length })}
+              {t('page.resultsCount', { current: filteredResursi.length, total: scoped.length })}
             </p>
           )}
 
@@ -430,7 +436,7 @@ export default function ResursiPage() {
           {/* Content */}
           {isLoading ? (
             <ResursGrid resursi={[]} onEdit={() => {}} onDelete={() => {}} onToggleActive={() => {}} isLoading />
-          ) : resursi.length === 0 ? (
+          ) : scoped.length === 0 ? (
             <EmptyState onCreate={openCreateModal} />
           ) : filteredResursi.length === 0 && debouncedSearch ? (
             <SearchEmptyState searchTerm={debouncedSearch} onClear={() => setSearch('')} />

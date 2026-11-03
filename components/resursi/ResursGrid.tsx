@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import type { Resurs } from '@/types/resursi';
+import { useLocationScope } from '@/app/location-context';
 import ResursCard, { ResursCardSkeleton } from './ResursCard';
 
 interface ResursGridProps {
@@ -13,6 +14,7 @@ interface ResursGridProps {
 }
 
 function ResursGrid({ resursi, onEdit, onDelete, onToggleActive, isLoading = false }: ResursGridProps) {
+  const { locations, multi, selectedLocationId } = useLocationScope();
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -29,6 +31,7 @@ function ResursGrid({ resursi, onEdit, onDelete, onToggleActive, isLoading = fal
         <ResursCard
           key={r.id}
           resurs={r}
+          locationName={multi && selectedLocationId === null ? locations.find((l) => l.id === r.lokacija_id)?.naziv : undefined}
           onEdit={onEdit}
           onDelete={onDelete}
           onToggleActive={onToggleActive}

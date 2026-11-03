@@ -45,6 +45,7 @@ function parseResurs(row: Record<string, unknown>): Resurs | null {
     status,
     barva: String(row['Barva'] ?? 'linear-gradient(135deg, #06B6D4 0%, #3B82F6 50%, #8B5CF6 100%)'),
     podjetje_id: String(row['ID podjetja'] ?? ''),
+    lokacija_id: row['lokacija_id'] ? String(row['lokacija_id']) : null,
     created_at: String(row['created_at'] ?? new Date().toISOString()),
     skupna_kapaciteta: kolicina * kapaciteta,
   };
@@ -245,6 +246,7 @@ export async function fetchStoritveResursi(companyId: string): Promise<{
 export async function fetchResursiForStoritve(
   companyId: string,
   storitveIds: string[],
+  lokacijaId?: string | null,
 ): Promise<{ data: Array<{ resursRowId: number; resursTextId: string }>; error: string | null }> {
   if (!companyId || storitveIds.length === 0) return { data: [], error: null };
 
@@ -296,6 +298,23 @@ export async function fetchResursiForStoritve(
     unique.set(`${resursRowId}:${item.resursTextId}`, { resursRowId, resursTextId: item.resursTextId });
   }
 
+  // A service may be linked to resources of several locations; an appointment
+  // only occupies the ones at its own location.
+  if (lokacijaId && unique.size > 0) {
+    const { data: places, error: placesErr } = await supabase
+      .from(TABLE_RESURSI)
+      .select('id, lokacija_id')
+      .eq('ID podjetja', companyId)
+      .in('id', [...unique.values()].map((r) => r.resursRowId));
+    if (placesErr) return { data: [], error: placesErr.message };
+    const here = new Set(
+      ((places ?? []) as Record<string, unknown>[])
+        .filter((r) => String(r['lokacija_id'] ?? '') === lokacijaId)
+        .map((r) => Number(r['id']))
+    );
+    return { data: [...unique.values()].filter((r) => here.has(r.resursRowId)), error: null };
+  }
+
   return { data: [...unique.values()], error: null };
 }
 
@@ -322,6 +341,8 @@ export async function saveResurs(
     'Prikazi v bookingu': formData.prikazi_v_bookingu ? 'true' : 'false',
     'Urnik': formData.urnik ? JSON.stringify(formData.urnik) : null,
     'Status': formData.status,
+    // Without a location the database default (main location) applies / the old one stays.
+    ...(formData.lokacija_id ? { lokacija_id: formData.lokacija_id } : {}),
   };
 
   if (existingId) {
@@ -570,7 +591,16 @@ export async function syncResursiZaTermin(
     return deleteTerminResursi(companyId, rowId);
   }
 
-  const { data, error } = await fetchResursiForStoritve(companyId, ids);
+  // The appointment's location decides which linked resources it occupies.
+  const { data: terminRow } = await supabase
+    .from('Termini')
+    .select('lokacija_id')
+    .eq('id', rowId)
+    .eq('ID podjetja', companyId)
+    .maybeSingle();
+  const lokacijaId = (terminRow as Record<string, unknown> | null)?.['lokacija_id'];
+
+  const { data, error } = await fetchResursiForStoritve(companyId, ids, lokacijaId ? String(lokacijaId) : null);
   if (error) return error;
 
   return syncTerminResursi(
@@ -715,6 +745,7 @@ export async function checkResourceConflicts(
   casZacetek: string,
   casKonec: string,
   excludeTerminId?: number,
+  lokacijaId?: string | null,
 ): Promise<{ conflicts: ResourceConflict[]; error: string | null }> {
   if (!companyId || serviceIds.length === 0 || !datum || !casZacetek || !casKonec) {
     return { conflicts: [], error: null };
@@ -723,6 +754,7 @@ export async function checkResourceConflicts(
   const { data: resursiData, error: resursiErr } = await fetchResursiForStoritve(
     companyId,
     serviceIds,
+    lokacijaId,
   );
   if (resursiErr || !resursiData?.length) return { conflicts: [], error: resursiErr };
 

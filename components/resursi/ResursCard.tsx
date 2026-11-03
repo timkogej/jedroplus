@@ -19,9 +19,11 @@ interface ResursCardProps {
   onDelete: (r: Resurs) => void;
   onToggleActive: (r: Resurs) => void;
   index?: number;
+  /** Shown when the list spans several locations. */
+  locationName?: string;
 }
 
-function ResursCard({ resurs, onEdit, onDelete, onToggleActive, index = 0 }: ResursCardProps) {
+function ResursCard({ resurs, onEdit, onDelete, onToggleActive, index = 0, locationName }: ResursCardProps) {
   const t = useTranslations('resursi');
 
   const displayGradient = isGradient(resurs.barva) ? resurs.barva : DEFAULT_SERVICE_GRADIENT;
@@ -49,6 +51,7 @@ function ResursCard({ resurs, onEdit, onDelete, onToggleActive, index = 0 }: Res
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="line-clamp-1 text-[15px] font-semibold text-gray-900">{resurs.naziv}</h3>
+          {locationName && <p className="line-clamp-1 text-xs text-gray-500">{locationName}</p>}
           <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
             <span className="tnum inline-flex items-center gap-1.5">
               <Cube className="h-4 w-4 text-gray-400" weight="regular" />

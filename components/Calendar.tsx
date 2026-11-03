@@ -655,6 +655,12 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   );
 
   // Filter appointments
+  // Resources of the chosen location only.
+  const visibleResursi = useMemo(
+    () => activeResursi.filter((r) => matchesLocation(r.lokacija_id)),
+    [activeResursi, matchesLocation]
+  );
+
   // An event without a location applies to every location.
   const visibleEvents = useMemo(
     () => events.filter((ev) => !selectedLocationId || !ev.lokacija_id || ev.lokacija_id === selectedLocationId),
@@ -2259,7 +2265,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         restrictedToEmployeeId={staffViewOwnOnly && rolePersonId ? rolePersonId : undefined}
         selectedServiceId={selectedServiceId}
         onServiceFilterChange={setSelectedServiceId}
-        availableResursi={activeResursi}
+        availableResursi={visibleResursi}
         selectedResursId={selectedResursId}
         onResursFilterChange={setSelectedResursId}
         searchQuery={searchQuery}
@@ -2282,7 +2288,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
               appointment={selectedAppointment}
               services={services}
               terminResursiMap={terminResursiMap}
-              activeResursi={activeResursi}
+              activeResursi={visibleResursi}
               onClose={handleCloseDetailModal}
               onEdit={aptEditable ? handleEditFromDetail : undefined}
               onComplete={aptEditable ? handleCompleteAppointment : undefined}
