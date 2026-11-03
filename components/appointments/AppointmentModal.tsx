@@ -195,7 +195,7 @@ function AppointmentModal({
 
   // Locations: with several, the form picks one and offers only the team and
   // services of that location (what is already chosen on the appointment stays).
-  const { locations, multi, selectedLocationId, personAtLocation, serviceAtLocation } = useLocationScope();
+  const { locations, multi, selectedLocationId, personAtLocation, serviceAtLocation, locationsOfPerson } = useLocationScope();
   const mainLocationId = useMemo(() => locations.find((l) => l.je_glavna)?.id ?? null, [locations]);
 
   useEffect(() => {
@@ -205,6 +205,21 @@ function AppointmentModal({
       lokacija_id: (appointment?.lokacija_id ?? selectedLocationId ?? mainLocationId) || null,
     }));
   }, [isOpen, multi, formData.lokacija_id, appointment?.lokacija_id, selectedLocationId, mainLocationId]);
+
+  // A person who works at one location only fixes the appointment's location:
+  // the field is filled in and hidden. With several, only their locations are offered.
+  const pickableLocations = useMemo(() => {
+    if (!multi || !formData.zaposleni_id) return locations;
+    const ids = locationsOfPerson(allEmployees.find((e) => e.id === formData.zaposleni_id)?.ref);
+    const own = ids ? locations.filter((l) => ids.includes(l.id)) : locations;
+    return own.length > 0 ? own : locations;
+  }, [multi, locations, formData.zaposleni_id, allEmployees, locationsOfPerson]);
+  const soleLocationId = pickableLocations.length === 1 ? pickableLocations[0].id : null;
+
+  useEffect(() => {
+    if (!isOpen || !multi || mode === 'view' || !soleLocationId) return;
+    setFormData((prev) => (prev.lokacija_id === soleLocationId ? prev : { ...prev, lokacija_id: soleLocationId }));
+  }, [isOpen, multi, mode, soleLocationId]);
 
   const employees = useMemo(
     () => !multi || !formData.lokacija_id
@@ -344,6 +359,7 @@ function AppointmentModal({
         add_on_trajanje: appointment.add_on_trajanje ?? null,
         stevilo_storitev: count,
         zaposleni_id: appointment.zaposleni_id || appointment.zaposleni?.id || '',
+        lokacija_id: appointment.lokacija_id ?? null,
         status: appointment.status || 'scheduled',
         opombe: appointment.opombe || '',
         internal_opombe: internalNotes,
@@ -376,8 +392,8 @@ function AppointmentModal({
       // Set defaults for new appointment
       const now = new Date();
       // Auto-select employee: prefer initialEmployeeId (staff pre-fill), then user's linked employee (personId), then auto-select when only one exists
-      const personEmployee = personId ? (employees.find(e => e.id === personId)?.id ?? '') : '';
-      const autoEmployee = initialEmployeeId || personEmployee || (employees.length === 1 ? employees[0].id : '');
+      const personEmployee = personId ? (allEmployees.find(e => e.id === personId)?.id ?? '') : '';
+      const autoEmployee = initialEmployeeId || personEmployee || (allEmployees.length === 1 ? allEmployees[0].id : '');
       setFormData({
         datum: initialDate || now.toISOString().split('T')[0],
         cas_zacetek: initialStartTime || '09:00',
@@ -428,7 +444,7 @@ function AppointmentModal({
     } else {
       setIsGhostTermin(false);
     }
-  }, [appointment, mode, employees, initialDate, initialStartTime, initialEmployeeId, personId, defaultLanguage, defaultCurrency]);
+  }, [appointment, mode, allEmployees, initialDate, initialStartTime, initialEmployeeId, personId, defaultLanguage, defaultCurrency]);
 
   // Track if end time was manually set by user
   const [endTimeManuallySet, setEndTimeManuallySet] = useState(false);
@@ -1096,7 +1112,7 @@ function AppointmentModal({
   if (!isOpen) return null;
 
   // If in create/edit mode and no services or no employees — show navigation prompt
-  if (mode !== 'view' && (services.length === 0 || employees.length === 0)) {
+  if (mode !== 'view' && (allServices.length === 0 || allEmployees.length === 0)) {
     return (
       <BodyPortal>
       <AnimatePresence>
@@ -1302,7 +1318,7 @@ function AppointmentModal({
             </div>
 
             {/* Location — only with several locations */}
-            {multi && (
+            {multi && (isViewMode || !soleLocationId) && (
               <div className={sectionClass}>
                 <label className={labelClass}>{t('modal.fields.location')}</label>
                 {isViewMode ? (
@@ -1315,7 +1331,7 @@ function AppointmentModal({
                     setValue={handleLocationChange}
                     placeholder={t('modal.fields.location')}
                   >
-                    {locations.map((l) => (
+                    {pickableLocations.map((l) => (
                       <SelectOption key={l.id} value={l.id}>{l.naziv}</SelectOption>
                     ))}
                   </Select>

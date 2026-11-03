@@ -26,6 +26,8 @@ type LocationContextValue = {
   /** Same as personAtSelected, for an explicit location (e.g. the one chosen in a form). */
   personAtLocation: (osebaRef: string | null | undefined, lokacijaId: string | null | undefined) => boolean;
   serviceAtLocation: (storitevRef: string | null | undefined, lokacijaId: string | null | undefined) => boolean;
+  /** Ids of the locations a team member works at; null when unknown (no links = every location). */
+  locationsOfPerson: (osebaRef: string | null | undefined) => string[] | null;
 };
 
 const LocationContext = createContext<LocationContextValue | undefined>(undefined);
@@ -133,13 +135,22 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     [serviceLinks]
   );
 
+  const locationsOfPerson = useCallback(
+    (osebaRef: string | null | undefined) => {
+      if (!osebaRef) return null;
+      const links = personLinks.get(osebaRef);
+      return links ? Array.from(links) : null;
+    },
+    [personLinks]
+  );
+
   const value = useMemo(
     () => ({
       locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation,
-      personAtSelected, serviceAtSelected, personAtLocation, serviceAtLocation,
+      personAtSelected, serviceAtSelected, personAtLocation, serviceAtLocation, locationsOfPerson,
     }),
     [locations, multi, selectedLocationId, setSelectedLocationId, matchesLocation,
-      personAtSelected, serviceAtSelected, personAtLocation, serviceAtLocation]
+      personAtSelected, serviceAtSelected, personAtLocation, serviceAtLocation, locationsOfPerson]
   );
 
   return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
