@@ -21,6 +21,7 @@ Najmanjša sprememba z največjim učinkom.
 |---|---|
 | `Zapiši nov termin` | dodaj polje `lokacija_id` iz `podatkiTermina.lokacija_id` (prazno = `null`) |
 | `Posodobi termin` | isto; pri prestavitvi se lokacija sme spremeniti samo, če je `lokacija_id` v zahtevi |
+| ustvarjanje in posodobitev dogodka (`USTVARI_DOGODEK`, `POSODOBI_DOGODEK`) | dodaj polje `lokacija_id` v zapis `events` (prazno = `null` = velja za vse lokacije); aplikacija ga že pošilja kot polje najvišje ravni |
 | ustvarjanje in posodobitev zaposlenega / vira / storitve | `lokacija_id` ni potreben, povezave piše `/api/locations/assign` |
 | veje za sporočila (`Get company`, `Get company sms`, `Company`, `... - potrdilo`) | naslov in telefon iz lokacije termina (glej C) |
 

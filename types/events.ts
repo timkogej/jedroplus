@@ -23,4 +23,6 @@ export interface CalendarEvent {
   created_at?: string | null;
   updated_at?: string | null;
   enable_booking?: boolean | string | null;
+  /** Salon location; null/absent = applies to all locations. */
+  lokacija_id?: string | null;
 }

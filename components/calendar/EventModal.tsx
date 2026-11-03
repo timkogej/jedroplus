@@ -12,6 +12,7 @@ import {
   MapPin,
 } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
+import { useLocationScope } from '@/app/location-context';
 import type { CalendarEvent } from '@/types/events';
 import {
   EVENT_COLOR_PRESETS,
@@ -35,6 +36,8 @@ export interface EventFormData {
   color: string;
   is_visible: boolean;
   enable_booking: boolean;
+  /** Salon location the event applies to; null = all locations. */
+  lokacija_id: string | null;
 }
 
 interface EventModalProps {
@@ -73,6 +76,8 @@ function EventModal({
 }: EventModalProps) {
   const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('appointments');
+  const tLoc = useTranslations('settings.locations');
+  const { locations, multi } = useLocationScope();
   const today = new Date().toISOString().split('T')[0];
 
   // ── Form state ──────────────────────────────────────────────────────────────
@@ -88,6 +93,7 @@ function EventModal({
   const [color, setColor] = useState(DEFAULT_COLOR);
   const [isVisible, setIsVisible] = useState(true);
   const [enableBooking, setEnableBooking] = useState(true);
+  const [lokacijaId, setLokacijaId] = useState<string | null>(null);
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [errors, setErrors] = useState<string[]>([]);
@@ -110,6 +116,7 @@ function EventModal({
         setIsVisible(event.is_visible);
         const eb = event.enable_booking;
         setEnableBooking(eb === true || eb === 'true' || eb === 'TRUE');
+        setLokacijaId(event.lokacija_id ?? null);
       } else {
         setTitle('');
         setDescription('');
@@ -123,6 +130,7 @@ function EventModal({
         setColor(DEFAULT_COLOR);
         setIsVisible(true);
         setEnableBooking(true);
+        setLokacijaId(null);
       }
       setErrors([]);
       setShowDeleteConfirm(false);
@@ -161,8 +169,9 @@ function EventModal({
       color,
       is_visible: isVisible,
       enable_booking: enableBooking,
+      lokacija_id: multi ? lokacijaId : null,
     });
-  }, [validate, onSave, title, description, notes, eventDate, endDate, allDay, startTime, endTime, location, color, isVisible, enableBooking]);
+  }, [validate, onSave, title, description, notes, eventDate, endDate, allDay, startTime, endTime, location, color, isVisible, enableBooking, multi, lokacijaId]);
 
   // ── Delete ───────────────────────────────────────────────────────────────────
   const handleDeleteConfirm = useCallback(async () => {
@@ -383,6 +392,22 @@ function EventModal({
 
               {/* Description, notes, location */}
               <div className={`${sheet.group} space-y-4`}>
+                {multi && (
+                  <div>
+                    <label className={labelClass}>{tLoc('switcherLabel')}</label>
+                    <Select
+                      value={lokacijaId ?? ''}
+                      setValue={(v) => setLokacijaId(v || null)}
+                      placeholder={tLoc('allLocations')}
+                    >
+                      <SelectOption value="">{tLoc('allLocations')}</SelectOption>
+                      {locations.map((l) => (
+                        <SelectOption key={l.id} value={l.id}>{l.naziv}</SelectOption>
+                      ))}
+                    </Select>
+                  </div>
+                )}
+
                 <div>
                   <label className={labelClass}>
                     {t('calendarView.eventModal.fields.description')}
