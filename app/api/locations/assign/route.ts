@@ -59,23 +59,41 @@ async function authorize(request: NextRequest, kind: Kind, write: boolean) {
   return allowed ? { textId, admin } : { response: fail('Forbidden', 403) };
 }
 
-/** "ID osebe" / "ID storitve" of a row, by row id or by text ref (retried: n8n writes the row). */
+/**
+ * "ID osebe" / "ID storitve" of a row. `id` is what the forms hold: usually the
+ * row id, but a form may also hold the text id itself, so both are tried (the
+ * text id first, which is unambiguous). `ref` is the text id of a row n8n has
+ * just written, so it is retried until the row appears.
+ */
 async function findEntityId(
   admin: Admin, kind: Kind, textId: string, id: unknown, ref: unknown
 ): Promise<string | null> {
   const target = TARGETS[kind];
-  const rowId = typeof id === 'string' && /^\d+$/.test(id) ? Number(id) : null;
+  const idText = (typeof id === 'string' || typeof id === 'number') && String(id).trim() ? String(id).trim() : null;
   const refText = typeof ref === 'string' && ref.trim() ? ref.trim() : null;
-  if (rowId == null && !refText) return null;
-  const attempts = rowId != null ? 1 : 6;
-  for (let attempt = 0; attempt < attempts; attempt++) {
+  if (!idText && !refText) return null;
+
+  const lookup = async (column: string, value: string | number): Promise<string | null> => {
     // The column name has a space; postgrest-js drops unquoted spaces from select().
-    let q = admin.from(target.table).select(`"${target.refColumn}"`).eq('ID podjetja', textId).limit(1);
-    q = rowId != null ? q.eq('id', rowId) : q.eq(target.refColumn, refText as string);
-    const { data } = await q;
+    const { data } = await admin.from(target.table).select(`"${target.refColumn}"`)
+      .eq('ID podjetja', textId).eq(column, value).limit(1);
     const found = (data?.[0] as unknown as Record<string, unknown> | undefined)?.[target.refColumn];
-    if (typeof found === 'string') return found;
-    if (attempt < attempts - 1) await new Promise((r) => setTimeout(r, 700));
+    return typeof found === 'string' ? found : null;
+  };
+
+  if (idText) {
+    const byText = await lookup(target.refColumn, idText);
+    if (byText) return byText;
+    if (/^\d+$/.test(idText)) {
+      const byRow = await lookup('id', Number(idText));
+      if (byRow) return byRow;
+    }
+    if (!refText) return null;
+  }
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const found = await lookup(target.refColumn, refText as string);
+    if (found) return found;
+    if (attempt < 5) await new Promise((r) => setTimeout(r, 700));
   }
   return null;
 }
