@@ -69,7 +69,8 @@ async function findEntityId(
   if (rowId == null && !refText) return null;
   const attempts = rowId != null ? 1 : 6;
   for (let attempt = 0; attempt < attempts; attempt++) {
-    let q = admin.from(target.table).select(target.refColumn).eq('ID podjetja', textId).limit(1);
+    // The column name has a space; postgrest-js drops unquoted spaces from select().
+    let q = admin.from(target.table).select(`"${target.refColumn}"`).eq('ID podjetja', textId).limit(1);
     q = rowId != null ? q.eq('id', rowId) : q.eq(target.refColumn, refText as string);
     const { data } = await q;
     const found = (data?.[0] as unknown as Record<string, unknown> | undefined)?.[target.refColumn];
