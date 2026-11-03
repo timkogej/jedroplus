@@ -4,15 +4,14 @@
  * QR kode podjetja.
  *
  * Dve različni stvari, ki sta se prej mešali:
- *   • rezervacija termina → `main_booking_link` (ena sama, podjetje jo izbere
- *     med šestimi videzi v nastavitvah rezervacij),
+ *   • rezervacija termina → kratka povezava `booking.jedroplus.com/<slug>`,
+ *     ki odpre glavni dizajn (podjetje ga izbere na strani Rezervacije),
  *   • vpis nove stranke → `client.jedroplus.com/<slug>` (obrazec s podatki,
  *     termina ne rezervira).
  *
- * Povezav za rezervacijo je v bazi šest, ena za vsak videz strani. QR koda
- * namenoma kaže samo na glavno: šest kod na pultu nihče ne bere, in če
- * podjetje kasneje zamenja videz, ostane natisnjena koda prava, ker se
- * zamenja samo vrednost `main_booking_link`.
+ * QR koda namenoma kaže samo na kratko povezavo: šest kod na pultu nihče
+ * ne bere, in če podjetje kasneje zamenja videz, ostane natisnjena koda
+ * prava, ker se zamenja samo glavni dizajn (`main_booking_link`).
  */
 
 import { useState, useEffect } from 'react';
@@ -34,6 +33,7 @@ import {
 } from '@/components/qr/QrPlakat';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { parseReservationSettings } from '@/lib/reservations/reservationSettings';
+import { shortBookingLink } from '@/lib/reservations/mainLink';
 
 const VIDEZI: PlakatVidez[] = ['cisti', 'barve', 'eleganten', 'temen'];
 
@@ -64,7 +64,8 @@ export default function QrKodaPage() {
         const nastavitve = parseReservationSettings(data);
         setSlug(String(data?.['slug'] ?? ''));
         setNaziv(String(data?.['Naziv Podjetja'] ?? ''));
-        setBookingLink(nastavitve.mainBookingLink.trim());
+        // Kratka povezava odpre izbrani dizajn; natisnjena koda ostane prava tudi ob menjavi dizajna.
+        setBookingLink(shortBookingLink(nastavitve.slug) || nastavitve.mainBookingLink.trim());
         setBarve({
           primary: nastavitve.primaryColor,
           bgFrom: nastavitve.bgFromColor,

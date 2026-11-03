@@ -14,6 +14,8 @@ interface DesignCardProps {
   onCopy: (url: string, id: number) => void;
   /** Prazen niz pomeni, da povezava za ta dizajn ni nastavljena. */
   designUrl: string;
+  /** Design that opens at the company's short booking link. */
+  isMain?: boolean;
 }
 
 /**
@@ -23,7 +25,7 @@ interface DesignCardProps {
  * njegovi slogi ne poenotujejo z aplikacijo — to je vzorec tega, kar bo videla
  * stranka. Poenoten je samo okvir okoli njega.
  */
-export function DesignCard({ design, locked = false, isCopied, onCopy, designUrl }: DesignCardProps) {
+export function DesignCard({ design, locked = false, isCopied, onCopy, designUrl, isMain = false }: DesignCardProps) {
   const t = useTranslations('reservations');
   const designName = t(`designs.${design.designKey}.name`);
   const url = locked ? '' : designUrl;
@@ -53,6 +55,14 @@ export function DesignCard({ design, locked = false, isCopied, onCopy, designUrl
             >
               {String(design.id).padStart(2, '0')}
             </span>
+            {isMain && !locked && (
+              <span
+                className="ml-2 flex h-7 items-center rounded-md border px-2 text-[11px] font-semibold"
+                style={design.badgeStyle}
+              >
+                {t('designs.mainBadge')}
+              </span>
+            )}
           </div>
 
           <div>

@@ -64,18 +64,22 @@
       "name": "Casino",
       "subtitle": "Glamour ed emozionante",
       "description": "Esclusivo design in stile casinò con atmosfera glamour, accenti scintillanti ed elementi visivi dinamici. Perfetto per chi vuole trasformare la prenotazione in un'esperienza indimenticabile."
-    }
+    },
+    "mainBadge": "Principale"
   },
   "customCta": {
     "text": "Vuoi un sistema di prenotazione su misura per la tua attività?",
     "linkText": "Scrivici a info@jedroplus.com"
   },
   "mainLink": {
-    "title": "Link principale per le prenotazioni",
-    "subtitle": "Il cliente sceglie da solo il servizio e l'orario libero. Aggiungilo al sito web, a Instagram o a Google; lo inviamo anche nei messaggi. Per raccogliere i dati dei clienti senza appuntamento c'è il codice QR in Impostazioni → Generale.",
+    "title": "Link per le prenotazioni",
+    "subtitle": "Dai questo link ai clienti: sul sito, su Instagram, Google o nei messaggi. Apre il design scelto qui sotto e il link non cambia quando cambi design.",
     "copy": "Copia",
     "copied": "Copiato",
-    "qrButton": "Stampa il codice"
+    "qrButton": "Stampa il codice",
+    "designLabel": "Quale design si apre",
+    "saveError": "Impossibile salvare il design.",
+    "locked": "Questo design fa parte del piano Pro."
   },
   "mgmtLink": {
     "title": "Link per spostare o annullare gli appuntamenti",

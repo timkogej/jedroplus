@@ -28,6 +28,8 @@ export interface ReservationSettings {
   bookingLink6: string;
   apptManagementLink: string;
   mainBookingLink: string;
+  /** Company slug, the path of the short booking link. */
+  slug: string;
   /** 'instant' = clients book a free time, 'request' = they send a request. */
   bookingMode: 'instant' | 'request';
 }
@@ -51,6 +53,7 @@ export const DEFAULT_RESERVATION_SETTINGS: ReservationSettings = {
   bookingLink6: "",
   apptManagementLink: "",
   mainBookingLink: "",
+  slug: "",
   bookingMode: "instant",
 };
 
@@ -107,6 +110,7 @@ export function parseReservationSettings(podatkiRow: Row): ReservationSettings {
     bookingLink6: String(podatkiRow?.["booking_link_6"] ?? podatkiRow?.["Booking_link_6"] ?? ""),
     apptManagementLink: String(podatkiRow?.["appt_management_link"] ?? ""),
     mainBookingLink: String(podatkiRow?.["main_booking_link"] ?? ""),
+    slug: String(podatkiRow?.["slug"] ?? ""),
     bookingMode: podatkiRow?.["booking_mode"] === "request" ? "request" : "instant",
   };
 }

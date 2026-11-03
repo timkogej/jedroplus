@@ -299,30 +299,11 @@ export function Sidebar() {
     !String(companySettings?.['from_name'] ?? companySettings?.['From_name'] ?? '').trim() ||
     !String(companySettings?.['reply_to'] ?? companySettings?.['reply_to_email'] ?? '').trim()
   );
-  const bookingEnabledValue = companySettings?.['booking_omogocen'] ?? companySettings?.['Booking_omogocen'];
-  const bookingEnabled = bookingEnabledValue !== false && bookingEnabledValue !== 'false';
-  const hasAnyBookingLink = [
-    'booking_link_1',
-    'Booking_link_1',
-    'booking_link_2',
-    'Booking_link_2',
-    'booking_link_3',
-    'Booking_link_3',
-    'booking_link_4',
-    'Booking_link_4',
-    'booking_link_5',
-    'Booking_link_5',
-    'booking_link_6',
-    'Booking_link_6',
-  ].some((key) => String(companySettings?.[key] ?? '').trim());
-  const rezervacije_incomplete =
-    hasOpomnikiPlan && bookingEnabled && hasAnyBookingLink && !String(companySettings?.['main_booking_link'] ?? '').trim();
   const chatbot_incomplete = hasChatbotPlan && !String(companySettings?.['chatbot_link'] ?? '').trim();
-  const any_incomplete = opomniki_incomplete || rezervacije_incomplete || chatbot_incomplete;
+  const any_incomplete = opomniki_incomplete || chatbot_incomplete;
 
   const getAlertBadge = (href: string): boolean => {
     if (href === '/reminders') return opomniki_incomplete;
-    if (href === '/rezervacije') return rezervacije_incomplete;
     if (href === '/chatbot-plus') return chatbot_incomplete;
     return false;
   };

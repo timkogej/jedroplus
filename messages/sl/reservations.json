@@ -64,18 +64,22 @@
       "name": "Casino",
       "subtitle": "Glamurozen in razburljiv",
       "description": "Ekskluziven kazino dizajn z glamurozno atmosfero, bleščečimi akcenti in dinamičnimi vizualnimi elementi. Popoln za tiste, ki želijo rezervacijo terminov spremeniti v nepozabno izkušnjo."
-    }
+    },
+    "mainBadge": "Glavni"
   },
   "customCta": {
     "text": "Želite prilagojen booking sistem prav za vaše podjetje?",
     "linkText": "Pišite nam na info@jedroplus.com"
   },
   "mainLink": {
-    "title": "Glavna povezava za naročanje",
-    "subtitle": "Stranka izbere storitev in prost termin sama. Dodajte jo na spletno stran, Instagram ali Google, pošljemo jo tudi v sporočilih. Za tisk na pult uporabite QR kodo.",
+    "title": "Povezava za rezervacije",
+    "subtitle": "To povezavo dajte strankam: na spletno stran, Instagram, Google ali v sporočila. Odpre dizajn, ki ga izberete spodaj, povezave pa ob zamenjavi dizajna ni treba spreminjati.",
     "copy": "Kopiraj",
     "copied": "Kopirano",
-    "qrButton": "Kodo za tisk"
+    "qrButton": "Kodo za tisk",
+    "designLabel": "Kateri dizajn se odpre",
+    "saveError": "Dizajna ni bilo mogoče shraniti.",
+    "locked": "Dizajn je del paketa Pro."
   },
   "mgmtLink": {
     "title": "Link za prenaročanje in odpoved terminov",

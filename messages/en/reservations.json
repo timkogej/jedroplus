@@ -64,18 +64,22 @@
       "name": "Casino",
       "subtitle": "Glamorous and exciting",
       "description": "Exclusive casino design with a glamorous atmosphere, sparkling accents, and dynamic visual elements. Perfect for those who want to turn appointment booking into an unforgettable experience."
-    }
+    },
+    "mainBadge": "Main"
   },
   "customCta": {
     "text": "Want a custom booking system tailored to your business?",
     "linkText": "Write to us at info@jedroplus.com"
   },
   "mainLink": {
-    "title": "Main booking link",
-    "subtitle": "The client picks a service and a free slot themselves. Add it to your website, Instagram or Google — we also send it in messages. For the counter, use the QR code.",
+    "title": "Booking link",
+    "subtitle": "Give this link to clients: on your website, Instagram, Google or in messages. It opens the design you pick below, and the link does not change when you switch design.",
     "copy": "Copy",
     "copied": "Copied",
-    "qrButton": "Print code"
+    "qrButton": "Print code",
+    "designLabel": "Which design opens",
+    "saveError": "The design could not be saved.",
+    "locked": "This design is part of the Pro plan."
   },
   "mgmtLink": {
     "title": "Rescheduling & cancellation link",
