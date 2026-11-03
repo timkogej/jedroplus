@@ -92,7 +92,7 @@ export default function RezervacijeClient({
     if (!companyId) return;
     let cancelled = false;
     countPendingZahteve(companyId).then((n) => {
-      if (!cancelled) setPendingRequests(n);
+      if (!cancelled && n !== null) setPendingRequests(n);
     });
     return () => {
       cancelled = true;

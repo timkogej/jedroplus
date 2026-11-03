@@ -33,6 +33,9 @@ interface SidebarContextValue {
   toggleNotifications: () => void;
   notificationCount: number;
   setNotificationCount: (count: number) => void;
+  /** Requests waiting for an answer (badge on Rezervacije). */
+  pendingRequestCount: number;
+  setPendingRequestCount: (count: number) => void;
 }
 
 // ============================================================================
@@ -63,6 +66,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [pendingRequestCount, setPendingRequestCount] = useState(0);
 
   // -------------------------------------------------------------------------
   // Detect mobile/desktop
@@ -172,6 +176,8 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       toggleNotifications,
       notificationCount,
       setNotificationCount,
+      pendingRequestCount,
+      setPendingRequestCount,
     }),
     [
       isOpen,
@@ -190,6 +196,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
       closeNotifications,
       toggleNotifications,
       notificationCount,
+      pendingRequestCount,
     ]
   );
 
