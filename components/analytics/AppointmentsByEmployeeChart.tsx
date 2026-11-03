@@ -13,6 +13,7 @@ import {
   getDateRangeForPeriod,
 } from '@/lib/analytics/dateUtils';
 import { parseLinearGradient, getSvgGradientCoords } from '@/components/analytics/gradientUtils';
+import { useLocationScope } from '@/app/location-context';
 
 interface AppointmentsByEmployeeChartProps {
   companyId: string;
@@ -27,6 +28,7 @@ function AppointmentsByEmployeeChart({
 }: AppointmentsByEmployeeChartProps) {
   const { money } = useFormat();
   const t = useTranslations('analytics');
+  const { selectedLocationId } = useLocationScope();
   const [chartData, setChartData] = useState<EmployeeChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const gradientIdPrefix = useId().replace(/:/g, '');
@@ -36,7 +38,7 @@ function AppointmentsByEmployeeChart({
       setIsLoading(true);
       try {
         const dateRange = getDateRangeForPeriod(timePeriod, customRange);
-        const data = await fetchEmployeeChartData(companyId, dateRange);
+        const data = await fetchEmployeeChartData(companyId, dateRange, selectedLocationId);
         console.log('[EmployeeChart] Data received:', data);
         setChartData(data);
       } catch (error) {
@@ -49,7 +51,7 @@ function AppointmentsByEmployeeChart({
     if (companyId) {
       fetchData();
     }
-  }, [companyId, timePeriod, customRange]);
+  }, [companyId, timePeriod, customRange, selectedLocationId]);
 
   // Transform data for pie chart
   const pieData = chartData.slice(0, 8).map((e) => ({

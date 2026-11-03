@@ -47,6 +47,7 @@ import {
 import { supabase } from "@/lib/supabaseClient";
 import { format } from "date-fns";
 import { intlLocale } from "@/lib/format";
+import { useLocationScope } from "@/app/location-context";
 import AppointmentModal, { type AppointmentFormData } from "@/components/appointments/AppointmentModal";
 import DeleteConfirmation from "@/components/appointments/DeleteConfirmation";
 import ClientModal from "@/components/clients/ClientModal";
@@ -93,6 +94,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading, reloadSettings } = useCompany();
   const { user, loading: authLoading } = useAuth();
+  const { selectedLocationId } = useLocationScope();
   const userPersonId = useUserPersonId(user?.id);
   const { role, personId: rolePersonId, permissions, loading: roleLoading } = useRolePermissions();
   // Staff only see colleagues' stats when allowed to see all appointments.
@@ -243,7 +245,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDashboardData(companyId, effectivePersonId);
+      const data = await fetchDashboardData(companyId, effectivePersonId, selectedLocationId);
       setDashboardData(data);
     } catch (err) {
       console.error("Error loading dashboard data:", err);
@@ -251,12 +253,14 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     } finally {
       setLoading(false);
     }
-  }, [companyId, userPersonId, roleLoading, role, permissions, rolePersonId]);
+  }, [companyId, userPersonId, roleLoading, role, permissions, rolePersonId, selectedLocationId]);
 
   useEffect(() => {
+    // The server data covers every location; a chosen location needs its own fetch.
+    if (selectedLocationId) skipAutoFetch.current = false;
     if (skipAutoFetch.current) return; // server already provided initialData
     loadDashboard();
-  }, [loadDashboard]);
+  }, [loadDashboard, selectedLocationId]);
 
   // ── Load services & employees for modals ─────────────────────────────────
   useEffect(() => {

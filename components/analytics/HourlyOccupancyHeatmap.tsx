@@ -4,6 +4,7 @@ import { memo, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import ChartCard from './ChartCard';
 import { fetchHeatmapData, type HeatmapData } from '@/lib/analytics/calculations';
+import { useLocationScope } from '@/app/location-context';
 import {
   type TimePeriod,
   type CustomRange,
@@ -40,6 +41,7 @@ function HourlyOccupancyHeatmap({
   customRange,
 }: HourlyOccupancyHeatmapProps) {
   const t = useTranslations('analytics');
+  const { selectedLocationId } = useLocationScope();
   const tCommon = useTranslations('common');
   const [heatmapData, setHeatmapData] = useState<HeatmapData>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +57,7 @@ function HourlyOccupancyHeatmap({
       setIsLoading(true);
       try {
         const dateRange = getDateRangeForPeriod(timePeriod, customRange);
-        const data = await fetchHeatmapData(companyId, dateRange);
+        const data = await fetchHeatmapData(companyId, dateRange, selectedLocationId);
         setHeatmapData(data);
       } catch (error) {
         console.error('Error fetching heatmap data:', error);
@@ -67,7 +69,7 @@ function HourlyOccupancyHeatmap({
     if (companyId) {
       fetchData();
     }
-  }, [companyId, timePeriod, customRange]);
+  }, [companyId, timePeriod, customRange, selectedLocationId]);
 
   return (
     <ChartCard
