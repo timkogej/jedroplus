@@ -47,6 +47,7 @@ export interface Resurs {
   status: 'active' | 'inactive';
   barva: string;        // gradient CSS string
   podjetje_id: string;  // "ID podjetja"
+  lokacija_id?: string | null; // location the resource belongs to
   created_at: string;
   // Computed / joined fields
   storitve?: StoritevResursLink[];
@@ -82,6 +83,8 @@ export interface ResursFormData {
   urnik: UrnikData | null;
   status: 'active' | 'inactive';
   storitve_ids: string[];
+  /** Location of the resource; empty/absent = the database picks the main one. */
+  lokacija_id?: string | null;
 }
 
 export interface IzmenicenUrnik {

@@ -13,6 +13,7 @@ import {
   getDateRangeForPeriod,
 } from '@/lib/analytics/dateUtils';
 import { parseLinearGradient, getSvgGradientCoords } from '@/components/analytics/gradientUtils';
+import { useLocationScope } from '@/app/location-context';
 
 interface AppointmentsByServiceChartProps {
   companyId: string;
@@ -27,6 +28,7 @@ function AppointmentsByServiceChart({
 }: AppointmentsByServiceChartProps) {
   const { money } = useFormat();
   const t = useTranslations('analytics');
+  const { selectedLocationId } = useLocationScope();
   const [chartData, setChartData] = useState<ServiceChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const gradientIdPrefix = useId().replace(/:/g, '');
@@ -36,7 +38,7 @@ function AppointmentsByServiceChart({
       setIsLoading(true);
       try {
         const dateRange = getDateRangeForPeriod(timePeriod, customRange);
-        const data = await fetchServiceChartData(companyId, dateRange);
+        const data = await fetchServiceChartData(companyId, dateRange, selectedLocationId);
         console.log('[ServiceChart] Data received:', data);
         setChartData(data);
       } catch (error) {
@@ -49,7 +51,7 @@ function AppointmentsByServiceChart({
     if (companyId) {
       fetchData();
     }
-  }, [companyId, timePeriod, customRange]);
+  }, [companyId, timePeriod, customRange, selectedLocationId]);
 
   const total = chartData.reduce((sum, item) => sum + item.value, 0);
   const slices = chartData.map((entry, index) => {

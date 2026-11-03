@@ -29,6 +29,7 @@ import {
 } from '@/lib/analytics/calculations';
 import { exportAnalyticsToCSV, type AnalyticsCsvLabels } from '@/lib/analytics/exportUtils';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
+import { useLocationScope } from '@/app/location-context';
 
 const CSV_LABEL_KEYS: (keyof AnalyticsCsvLabels)[] = [
   'metric', 'value', 'totalRevenue', 'averageBookingValue', 'occupancyRate',
@@ -39,6 +40,7 @@ const CSV_LABEL_KEYS: (keyof AnalyticsCsvLabels)[] = [
 
 export default function AnalyticsPage() {
   const { companyId } = useCompany();
+  const { selectedLocationId } = useLocationScope();
   const tCsv = useTranslations('analytics.csvExport');
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('ta_mesec');
   const [customRange, setCustomRange] = useState<CustomRange>({ start: null, end: null });
@@ -51,9 +53,9 @@ export default function AnalyticsPage() {
       const previousRange = getPreviousPeriodRange(timePeriod, dateRange);
 
       const [metrics, services, employees] = await Promise.all([
-        fetchAnalyticsMetrics(companyId, dateRange, previousRange),
-        fetchServiceChartData(companyId, dateRange),
-        fetchEmployeeChartData(companyId, dateRange),
+        fetchAnalyticsMetrics(companyId, dateRange, previousRange, selectedLocationId),
+        fetchServiceChartData(companyId, dateRange, selectedLocationId),
+        fetchEmployeeChartData(companyId, dateRange, selectedLocationId),
       ]);
 
       exportAnalyticsToCSV(metrics, services, employees, {
@@ -66,7 +68,7 @@ export default function AnalyticsPage() {
     } catch (error) {
       console.error('Error exporting CSV:', error);
     }
-  }, [companyId, timePeriod, customRange, tCsv]);
+  }, [companyId, timePeriod, customRange, tCsv, selectedLocationId]);
 
   if (!companyId) {
     return (

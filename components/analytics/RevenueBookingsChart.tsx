@@ -16,6 +16,7 @@ import {
 import { fetchRevenueChartData, type ChartDataPoint } from '@/lib/analytics/calculations';
 import ChartCard from './ChartCard';
 import { AXIS, GRID, TOOLTIP, NO_ANIM, BRAND } from './chartTheme';
+import { useLocationScope } from '@/app/location-context';
 import {
   type TimePeriod,
   type CustomRange,
@@ -31,6 +32,7 @@ interface RevenueBookingsChartProps {
 function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBookingsChartProps) {
   const { money } = useFormat();
   const t = useTranslations('analytics');
+  const { selectedLocationId } = useLocationScope();
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -39,7 +41,7 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
       setIsLoading(true);
       try {
         const dateRange = getDateRangeForPeriod(timePeriod, customRange);
-        const data = await fetchRevenueChartData(companyId, dateRange);
+        const data = await fetchRevenueChartData(companyId, dateRange, selectedLocationId);
         setChartData(data);
       } catch (error) {
         console.error('Error fetching chart data:', error);
@@ -51,7 +53,7 @@ function RevenueBookingsChart({ companyId, timePeriod, customRange }: RevenueBoo
     if (companyId) {
       fetchData();
     }
-  }, [companyId, timePeriod, customRange]);
+  }, [companyId, timePeriod, customRange, selectedLocationId]);
 
   const revenueLegend = t('revenueChart.revenueLegend');
   const appointmentsLegend = t('revenueChart.appointmentsLegend');

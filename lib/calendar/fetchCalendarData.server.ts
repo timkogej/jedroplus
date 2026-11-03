@@ -524,6 +524,7 @@ function parseResurs(row: Row): Resurs | null {
     status,
     barva: String(row["Barva"] ?? "linear-gradient(135deg, #06B6D4 0%, #3B82F6 50%, #8B5CF6 100%)"),
     podjetje_id: String(row["ID podjetja"] ?? ""),
+    lokacija_id: row["lokacija_id"] ? String(row["lokacija_id"]) : null,
     created_at: String(row["created_at"] ?? new Date().toISOString()),
     skupna_kapaciteta: kolicina * kapaciteta,
   } as Resurs;

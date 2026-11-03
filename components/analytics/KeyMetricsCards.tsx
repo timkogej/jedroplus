@@ -5,6 +5,7 @@ import { useFormat } from '@/hooks/useFormat';
 import { TrendUp, CurrencyEur, Clock, CheckCircle } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { MetricGroup } from '@/components/dashboard';
+import { useLocationScope } from '@/app/location-context';
 import {
   fetchAnalyticsMetrics,
   type AnalyticsMetrics,
@@ -25,6 +26,7 @@ interface KeyMetricsCardsProps {
 function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCardsProps) {
   const { money } = useFormat();
   const t = useTranslations('analytics');
+  const { selectedLocationId } = useLocationScope();
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -34,7 +36,7 @@ function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCards
       try {
         const dateRange = getDateRangeForPeriod(timePeriod, customRange);
         const previousRange = getPreviousPeriodRange(timePeriod, dateRange);
-        const data = await fetchAnalyticsMetrics(companyId, dateRange, previousRange);
+        const data = await fetchAnalyticsMetrics(companyId, dateRange, previousRange, selectedLocationId);
         setMetrics(data);
       } catch (error) {
         console.error('Error fetching metrics:', error);
@@ -46,7 +48,7 @@ function KeyMetricsCards({ companyId, timePeriod, customRange }: KeyMetricsCards
     if (companyId) {
       fetchData();
     }
-  }, [companyId, timePeriod, customRange]);
+  }, [companyId, timePeriod, customRange, selectedLocationId]);
 
   return (
     <div className="mb-6">

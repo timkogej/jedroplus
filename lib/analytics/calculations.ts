@@ -176,19 +176,26 @@ function isPending(status: string): boolean {
 }
 
 /**
+ * Appointment rows, narrowed to one location when given (null = every location).
+ * The database always sets a location on a row.
+ */
+async function fetchBookingRows(companyId: string, limit: number, lokacijaId?: string | null) {
+  const res = await fetchTableRows<Record<string, unknown>>(TABLES.bookings, companyId, limit);
+  if (!lokacijaId || !res.data) return res;
+  return { ...res, data: res.data.filter((row) => row['lokacija_id'] === lokacijaId) };
+}
+
+/**
  * Fetch and calculate analytics metrics
  */
 export async function fetchAnalyticsMetrics(
   companyId: string,
   dateRange: DateRange,
-  previousRange?: DateRange
+  previousRange?: DateRange,
+  lokacijaId?: string | null
 ): Promise<AnalyticsMetrics> {
   // Fetch appointments
-  const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.bookings,
-    companyId,
-    5000
-  );
+  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
 
   // Fetch services for pricing
   const servicesResult = await fetchTableRows<Record<string, unknown>>(
@@ -285,13 +292,10 @@ export async function fetchAnalyticsMetrics(
  */
 export async function fetchRevenueChartData(
   companyId: string,
-  dateRange: DateRange
+  dateRange: DateRange,
+  lokacijaId?: string | null
 ): Promise<ChartDataPoint[]> {
-  const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.bookings,
-    companyId,
-    5000
-  );
+  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
 
   const servicesResult = await fetchTableRows<Record<string, unknown>>(
     TABLES.services,
@@ -342,18 +346,15 @@ export async function fetchRevenueChartData(
  */
 export async function fetchServiceChartData(
   companyId: string,
-  dateRange: DateRange
+  dateRange: DateRange,
+  lokacijaId?: string | null
 ): Promise<ServiceChartData[]> {
   console.log('[Analytics] Fetching service chart data for period:', {
     start: dateRange.startDate.toISOString(),
     end: dateRange.endDate.toISOString(),
   });
 
-  const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.bookings,
-    companyId,
-    5000
-  );
+  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
 
   const servicesResult = await fetchTableRows<Record<string, unknown>>(
     TABLES.services,
@@ -476,18 +477,15 @@ export async function fetchServiceChartData(
  */
 export async function fetchEmployeeChartData(
   companyId: string,
-  dateRange: DateRange
+  dateRange: DateRange,
+  lokacijaId?: string | null
 ): Promise<EmployeeChartData[]> {
   console.log('[Analytics] Fetching employee chart data for period:', {
     start: dateRange.startDate.toISOString(),
     end: dateRange.endDate.toISOString(),
   });
 
-  const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.bookings,
-    companyId,
-    5000
-  );
+  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
 
   const employeesResult = await fetchTableRows<Record<string, unknown>>(
     TABLES.staff,
@@ -610,13 +608,10 @@ function parseTimeToMinutes(timeStr: string): number {
  */
 export async function fetchHeatmapData(
   companyId: string,
-  dateRange: DateRange
+  dateRange: DateRange,
+  lokacijaId?: string | null
 ): Promise<HeatmapData> {
-  const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.bookings,
-    companyId,
-    5000
-  );
+  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
 
   // Accumulate minutes per (dayOfWeek, hour) slot
   const gridMinutes: { [key: string]: number } = {};
@@ -677,18 +672,15 @@ export async function fetchHeatmapData(
  */
 export async function fetchHourlyOccupancyData(
   companyId: string,
-  dateRange: DateRange
+  dateRange: DateRange,
+  lokacijaId?: string | null
 ): Promise<HourlyOccupancyData[]> {
   console.log('[Analytics] Fetching hourly occupancy data for period:', {
     start: dateRange.startDate.toISOString(),
     end: dateRange.endDate.toISOString(),
   });
 
-  const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.bookings,
-    companyId,
-    5000
-  );
+  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
 
   // Count appointments by hour
   const hourCounts = new Map<number, number>();
@@ -808,15 +800,16 @@ export async function fetchClientGrowthData(
  */
 export async function fetchTopPerformers(
   companyId: string,
-  dateRange: DateRange
+  dateRange: DateRange,
+  lokacijaId?: string | null
 ): Promise<{ services: TopPerformer[]; employees: TopPerformer[] }> {
   console.log('[Analytics] Fetching top performers for period:', {
     start: dateRange.startDate.toISOString(),
     end: dateRange.endDate.toISOString(),
   });
 
-  const serviceData = await fetchServiceChartData(companyId, dateRange);
-  const employeeData = await fetchEmployeeChartData(companyId, dateRange);
+  const serviceData = await fetchServiceChartData(companyId, dateRange, lokacijaId);
+  const employeeData = await fetchEmployeeChartData(companyId, dateRange, lokacijaId);
 
   const topServices: TopPerformer[] = serviceData.slice(0, 5).map((s) => ({
     name: s.name,
@@ -856,18 +849,15 @@ export async function fetchTopPerformers(
  */
 export async function fetchRetentionData(
   companyId: string,
-  dateRange: DateRange
+  dateRange: DateRange,
+  lokacijaId?: string | null
 ): Promise<{ retention: RetentionData; statuses: StatusData[] }> {
   console.log('[Analytics] Fetching retention data for period:', {
     start: dateRange.startDate.toISOString(),
     end: dateRange.endDate.toISOString(),
   });
 
-  const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.bookings,
-    companyId,
-    5000
-  );
+  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
 
   const clientsResult = await fetchTableRows<Record<string, unknown>>(
     TABLES.clients,
@@ -981,15 +971,12 @@ export async function fetchRetentionData(
  * Shows how many clients have 1, 3, or 5+ appointments
  */
 export async function fetchClientAppointmentDistribution(
-  companyId: string
+  companyId: string,
+  lokacijaId?: string | null
 ): Promise<ClientAppointmentDistribution> {
   console.log('[Analytics] Fetching client appointment distribution');
 
-  const appointmentsResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.bookings,
-    companyId,
-    10000
-  );
+  const appointmentsResult = await fetchBookingRows(companyId, 10000, lokacijaId);
 
   const clientsResult = await fetchTableRows<Record<string, unknown>>(
     TABLES.clients,

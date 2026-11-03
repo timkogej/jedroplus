@@ -5,6 +5,7 @@ import { Trophy, Medal, Star } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import ChartCard from './ChartCard';
 import { fetchTopPerformers, type TopPerformer } from '@/lib/analytics/calculations';
+import { useLocationScope } from '@/app/location-context';
 import {
   type TimePeriod,
   type CustomRange,
@@ -32,6 +33,7 @@ function getRankBadge(index: number): React.ReactNode {
 
 function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformersTableProps) {
   const t = useTranslations('analytics');
+  const { selectedLocationId } = useLocationScope();
   const [topServices, setTopServices] = useState<TopPerformer[]>([]);
   const [topEmployees, setTopEmployees] = useState<TopPerformer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +43,7 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
       setIsLoading(true);
       try {
         const dateRange = getDateRangeForPeriod(timePeriod, customRange);
-        const data = await fetchTopPerformers(companyId, dateRange);
+        const data = await fetchTopPerformers(companyId, dateRange, selectedLocationId);
         console.log('[TopPerformers] Data received:', data);
         setTopServices(data.services);
         setTopEmployees(data.employees);
@@ -55,7 +57,7 @@ function TopPerformersTable({ companyId, timePeriod, customRange }: TopPerformer
     if (companyId) {
       fetchData();
     }
-  }, [companyId, timePeriod, customRange]);
+  }, [companyId, timePeriod, customRange, selectedLocationId]);
 
   return (
     <ChartCard title={t('topPerformers.title')} isLoading={isLoading} height={220}>

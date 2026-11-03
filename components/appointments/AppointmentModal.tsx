@@ -686,6 +686,7 @@ function AppointmentModal({
         formData.cas_zacetek,
         formData.cas_konec,
         excludeId,
+        formData.lokacija_id,
       );
       // Hide conflicts for resources this appointment already occupies (edit mode)
       setResourceConflicts(conflicts.filter((c) => !ownResursIds.has(c.resursId)));
@@ -699,6 +700,7 @@ function AppointmentModal({
     formData.datum,
     formData.cas_zacetek,
     formData.cas_konec,
+    formData.lokacija_id,
     companyId,
     mode,
     appointment,

@@ -6,6 +6,7 @@ import { CalendarCheck, Star, Trophy } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import ChartCard from './ChartCard';
 import { NO_ANIM } from './chartTheme';
+import { useLocationScope } from '@/app/location-context';
 import {
   fetchRetentionData,
   fetchClientAppointmentDistribution,
@@ -38,6 +39,7 @@ function RetentionCancellationAnalysis({
   customRange,
 }: RetentionCancellationAnalysisProps) {
   const t = useTranslations('analytics');
+  const { selectedLocationId } = useLocationScope();
   const [distributionData, setDistributionData] = useState<ClientAppointmentDistribution>({
     totalClients: 0,
     clientsWithOneAppointment: 0,
@@ -53,8 +55,8 @@ function RetentionCancellationAnalysis({
       try {
         const dateRange = getDateRangeForPeriod(timePeriod, customRange);
         const [retentionResult, distributionResult] = await Promise.all([
-          fetchRetentionData(companyId, dateRange),
-          fetchClientAppointmentDistribution(companyId),
+          fetchRetentionData(companyId, dateRange, selectedLocationId),
+          fetchClientAppointmentDistribution(companyId, selectedLocationId),
         ]);
         console.log('[RetentionAnalysis] Data received:', { retentionResult, distributionResult });
         setStatusData(retentionResult.statuses);
@@ -69,7 +71,7 @@ function RetentionCancellationAnalysis({
     if (companyId) {
       fetchData();
     }
-  }, [companyId, timePeriod, customRange]);
+  }, [companyId, timePeriod, customRange, selectedLocationId]);
 
   const totalStatuses = statusData.reduce((sum, d) => sum + d.value, 0);
 
