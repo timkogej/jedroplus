@@ -206,8 +206,8 @@ function AppointmentModal({
     }));
   }, [isOpen, multi, formData.lokacija_id, appointment?.lokacija_id, selectedLocationId, mainLocationId]);
 
-  // A person who works at one location only fixes the appointment's location:
-  // the field is filled in and hidden. With several, only their locations are offered.
+  // Choosing a person who works at one location only fills that location in
+  // (the field stays visible and can still be changed).
   const pickableLocations = useMemo(() => {
     if (!multi || !formData.zaposleni_id) return locations;
     const ids = locationsOfPerson(allEmployees.find((e) => e.id === formData.zaposleni_id)?.ref);
@@ -1318,7 +1318,7 @@ function AppointmentModal({
             </div>
 
             {/* Location — only with several locations */}
-            {multi && (isViewMode || !soleLocationId) && (
+            {multi && (
               <div className={sectionClass}>
                 <label className={labelClass}>{t('modal.fields.location')}</label>
                 {isViewMode ? (
@@ -1331,7 +1331,7 @@ function AppointmentModal({
                     setValue={handleLocationChange}
                     placeholder={t('modal.fields.location')}
                   >
-                    {pickableLocations.map((l) => (
+                    {locations.map((l) => (
                       <SelectOption key={l.id} value={l.id}>{l.naziv}</SelectOption>
                     ))}
                   </Select>
