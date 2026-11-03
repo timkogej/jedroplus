@@ -1112,7 +1112,7 @@ function AppointmentModal({
   if (!isOpen) return null;
 
   // If in create/edit mode and no services or no employees — show navigation prompt
-  if (mode !== 'view' && (services.length === 0 || employees.length === 0)) {
+  if (mode !== 'view' && (allServices.length === 0 || allEmployees.length === 0)) {
     return (
       <BodyPortal>
       <AnimatePresence>
