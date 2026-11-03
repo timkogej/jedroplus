@@ -201,11 +201,13 @@ interface NavItemProps {
   active: boolean;
   locked: boolean;
   hasAlert: boolean;
+  /** Number shown as a pill (e.g. requests waiting for an answer); 0 or empty hides it. */
+  count?: number;
   collapsed?: boolean;
   onClick?: () => void;
 }
 
-function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: NavItemProps) {
+function NavItemLink({ item, active, locked, hasAlert, count = 0, collapsed, onClick }: NavItemProps) {
   const t = useTranslations('layout');
   const Icon = item.icon;
   return (
@@ -243,6 +245,14 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
         {collapsed && hasAlert && (
           <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-amber-500 rounded-full" />
         )}
+        {collapsed && !locked && count > 0 && (
+          <span
+            aria-hidden="true"
+            className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#6D5EF7] px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-white"
+          >
+            {count > 99 ? '99+' : count}
+          </span>
+        )}
       </div>
 
       {!collapsed && (
@@ -250,6 +260,14 @@ function NavItemLink({ item, active, locked, hasAlert, collapsed, onClick }: Nav
           <span className="truncate flex-1">{item.name}</span>
           {locked ? (
             <Lock weight="regular" className="ml-auto w-3.5 h-3.5 text-gray-400" />
+          ) : count > 0 ? (
+            <span
+              role="status"
+              aria-label={t('sidebar.pendingRequests', { count })}
+              className="ml-auto flex h-5 min-w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#6D5EF7] px-1.5 text-[11px] font-semibold leading-none text-white"
+            >
+              {count > 99 ? '99+' : count}
+            </span>
           ) : hasAlert ? (
             <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
           ) : item.badge === 'new' ? (
@@ -274,7 +292,7 @@ export function Sidebar() {
   const desktopNavRef = useRef<HTMLElement>(null);
   const t = useTranslations('layout');
 
-  const { isOpen, isMobile, close, isCollapsed, toggleCollapse } = useSidebar();
+  const { isOpen, isMobile, close, isCollapsed, toggleCollapse, pendingRequestCount } = useSidebar();
 
   const { companySettings } = useCompany();
   const { user, signOut } = useAuth();
@@ -493,6 +511,7 @@ export function Sidebar() {
                   active={isActive(item.href)}
                   locked={isLocked(item.href)}
                   hasAlert={getAlertBadge(item.href)}
+                  count={item.href === '/rezervacije' ? pendingRequestCount : 0}
                   collapsed={isCollapsed}
                 />
               ))}
@@ -656,6 +675,7 @@ export function Sidebar() {
                         active={isActive(item.href)}
                         locked={isLocked(item.href)}
                         hasAlert={getAlertBadge(item.href)}
+                        count={item.href === '/rezervacije' ? pendingRequestCount : 0}
                         onClick={close}
                       />
                     ))}

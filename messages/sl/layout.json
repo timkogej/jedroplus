@@ -43,7 +43,8 @@
       "today": "Danes",
       "week": "Teden",
       "month": "Mesec"
-    }
+    },
+    "pendingRequests": "{count, plural, one {# zahteva čaka na odgovor} two {# zahtevi čakata na odgovor} few {# zahteve čakajo na odgovor} other {# zahtev čaka na odgovor}}"
   },
   "appbar": {
     "home": "Domov",

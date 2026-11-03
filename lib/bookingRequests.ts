@@ -1,3 +1,4 @@
+import { notifyZahteveChanged } from '@/lib/supabase/zahteveTermini';
 // lib/bookingRequests.ts
 //
 // Client wrapper for the n8n booking-v2 webhook's request-based booking
@@ -72,12 +73,12 @@ export function confirmRequest(params: {
   time: string;
   resursiIds?: string[];
 }): Promise<RequestConfirmResult> {
-  return postBookingV2<RequestConfirmResult>({ action: 'request-confirm', ...params });
+  return postBookingV2<RequestConfirmResult>({ action: 'request-confirm', ...params }).finally(notifyZahteveChanged);
 }
 
 export function rejectRequest(params: {
   requestId: string;
   razlog: string;
 }): Promise<RequestRejectResult> {
-  return postBookingV2<RequestRejectResult>({ action: 'request-reject', ...params });
+  return postBookingV2<RequestRejectResult>({ action: 'request-reject', ...params }).finally(notifyZahteveChanged);
 }

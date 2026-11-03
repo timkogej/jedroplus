@@ -5,7 +5,7 @@
 // lib/supabase/appointments.ts: company-scoped read via fetchTableRows
 // (supabaseReadOnly under the hood), never a direct write from the browser.
 
-import { fetchTableRows } from '@/lib/companyScope';
+import { fetchTableRows, getCompanyColumnForTable } from '@/lib/companyScope';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
 import { parseAnswers, type Answer } from '@/lib/questionnaire';
 
@@ -128,9 +128,31 @@ export async function fetchCompanySlug(companyId: string): Promise<string | null
   return data?.slug ? String(data.slug) : null;
 }
 
-/** How many requests still wait for the salon (badge on Rezervacije). */
-export async function countPendingZahteve(companyId: string): Promise<number> {
-  const { data, error } = await fetchZahteveTermini(companyId);
-  if (error || !data) return 0;
-  return data.filter((z) => z.status === 'v_pregledu').length;
+/** Fired when a request was confirmed or rejected, so the sidebar badge updates at once. */
+export const ZAHTEVE_CHANGED_EVENT = 'jp:zahteve-changed';
+
+export function notifyZahteveChanged(): void {
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event(ZAHTEVE_CHANGED_EVENT));
+}
+
+/**
+ * How many requests still wait for the salon (badge on Rezervacije). A head
+ * count: no rows are downloaded, so it is cheap enough to ask every half minute.
+ * Returns null when the count could not be read, so the caller keeps the number
+ * it already shows instead of falling back to zero.
+ */
+export async function countPendingZahteve(companyId: string): Promise<number | null> {
+  if (!companyId || companyId.trim() === '') return 0;
+  try {
+    const column = await getCompanyColumnForTable('zahteve_termini', companyId);
+    const { count, error } = await supabaseReadOnly
+      .from('zahteve_termini')
+      .select('id', { count: 'exact', head: true })
+      .eq(column, companyId)
+      .eq('status', 'v_pregledu');
+    if (error) return null;
+    return count ?? 0;
+  } catch {
+    return null;
+  }
 }

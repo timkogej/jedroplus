@@ -20,13 +20,14 @@ import { useBillingUsage } from "@/hooks/useBillingUsage";
 import { TourProvider, useOptionalTour } from "@/components/guide/TourProvider";
 import { useTranslations } from "next-intl";
 import { PwaManager } from "@/components/pwa/PwaManager";
+import { ZAHTEVE_CHANGED_EVENT, countPendingZahteve } from "@/lib/supabase/zahteveTermini";
 
 // ============================================================================
 // Inner layout that uses sidebar context
 // ============================================================================
 
 function LayoutContent({ children }: { children: React.ReactNode }) {
-  const { isMobile, isCollapsed, notificationCount, setNotificationCount } = useSidebar();
+  const { isMobile, isCollapsed, notificationCount, setNotificationCount, setPendingRequestCount } = useSidebar();
   const { companyId, companyUuid, planCode, loading: companyLoading } = useCompany();
   const { role } = useRolePermissions();
   const pathname = usePathname();
@@ -80,6 +81,35 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     const interval = setInterval(fetchCount, 60_000);
     return () => clearInterval(interval);
   }, [companyUuid, setNotificationCount]);
+
+  // Requests waiting for the salon: counted on load, every 30 s while the tab is
+  // visible, when the tab comes back, on every page change and right after a
+  // request is confirmed or rejected.
+  useEffect(() => {
+    if (!companyId) return;
+    let cancelled = false;
+
+    const refresh = async () => {
+      const count = await countPendingZahteve(companyId);
+      if (!cancelled && count !== null) setPendingRequestCount(count);
+    };
+    const refreshIfVisible = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+
+    refresh();
+    const interval = setInterval(refreshIfVisible, 30_000);
+    document.addEventListener('visibilitychange', refreshIfVisible);
+    window.addEventListener('focus', refreshIfVisible);
+    window.addEventListener(ZAHTEVE_CHANGED_EVENT, refresh);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', refreshIfVisible);
+      window.removeEventListener('focus', refreshIfVisible);
+      window.removeEventListener(ZAHTEVE_CHANGED_EVENT, refresh);
+    };
+  }, [companyId, pathname, setPendingRequestCount]);
 
   return (
     <div className="min-h-screen bg-white">

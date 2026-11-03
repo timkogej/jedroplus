@@ -43,7 +43,8 @@
       "today": "Today",
       "week": "Week",
       "month": "Month"
-    }
+    },
+    "pendingRequests": "{count, plural, one {# request waiting for an answer} other {# requests waiting for an answer}}"
   },
   "appbar": {
     "home": "Home",

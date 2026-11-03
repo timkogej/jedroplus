@@ -43,7 +43,8 @@
       "today": "Oggi",
       "week": "Settimana",
       "month": "Mese"
-    }
+    },
+    "pendingRequests": "{count, plural, one {# richiesta in attesa di risposta} other {# richieste in attesa di risposta}}"
   },
   "appbar": {
     "home": "Home",
