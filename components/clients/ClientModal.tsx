@@ -675,7 +675,7 @@ function ClientModal({
                     </motion.button>
                     <motion.button
                       type="button"
-                      onClick={() => new Promise(resolve => setTimeout(resolve, 700)).then(() => save(formData))}
+                      onClick={() => save(formData)}
                       disabled={isSaving}
                       whileHover={{ scale: isSaving ? 1 : 1.02 }}
                       whileTap={{ scale: isSaving ? 1 : 0.98 }}

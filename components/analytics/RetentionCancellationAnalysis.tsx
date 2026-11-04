@@ -131,6 +131,7 @@ function RetentionCancellationAnalysis({
             <ResponsiveContainer width="100%" height={180}>
               <PieChart>
                 <Pie
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   data={statusData as any[]}
                   cx="50%"
                   cy="50%"

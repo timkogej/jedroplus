@@ -31,6 +31,7 @@ import { Link } from '@/i18n/navigation';
 import { EnglishVariant } from './EnglishVariant';
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
+import { companySettingsKey, readRow, waitForRowChanged } from '@/lib/confirmWrite';
 
 // Languages reminders can be written in, each named in its own language.
 const SENDING_LANGUAGES = [
@@ -512,6 +513,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
         },
       };
 
+      const settingsBefore = companyId ? await readRow(companySettingsKey(companyId)) : null;
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
@@ -547,7 +549,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
         }
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for the saved settings to land instead of a fixed pause.
+      if (companyId) await waitForRowChanged(companySettingsKey(companyId), settingsBefore, { timeoutMs: 4000 });
       setLastSaved(new Date());
 
       // Close modal after 0.8s delay and refresh page
@@ -581,7 +584,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
       });
       const telo = await odgovor.json().catch(() => ({}));
       if (!odgovor.ok || !telo?.ok) {
-        setSenderNapaka(String(telo?.razlog ?? 'Zahteve ni bilo mogoče oddati.'));
+        setSenderNapaka(String(telo?.razlog ?? t('senderRequestError')));
         return;
       }
       setSenderStatus('v_obdelavi');
@@ -590,7 +593,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
       setSenderVUporabi(null);
       setSenderOpomba(null);
     } catch {
-      setSenderNapaka('Zahteve ni bilo mogoče oddati.');
+      setSenderNapaka(t('senderRequestError'));
     } finally {
       setSenderPosiljam(false);
     }

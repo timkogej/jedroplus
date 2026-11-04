@@ -236,6 +236,7 @@ export function Select({
           <div className="max-h-60 overflow-y-auto p-1.5">
             {React.Children.map(children, (child, index) => {
               if (React.isValidElement(child) && child.type === SelectOption) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 return React.cloneElement(child, { _index: index } as any);
               }
               return child;

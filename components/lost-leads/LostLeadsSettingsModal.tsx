@@ -21,6 +21,7 @@ import { BodyPortal } from '@/components/ui/BodyPortal';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { buildLostLeadsSettingsData, getPodatkiPodjetja } from '@/lib/webhookPayloadBuilders';
+import { companySettingsKey, readRow, waitForRowChanged } from '@/lib/confirmWrite';
 
 interface LostLeadsSettingsModalProps {
   isOpen: boolean;
@@ -124,13 +125,15 @@ export function LostLeadsSettingsModal({ isOpen, onClose }: LostLeadsSettingsMod
         }),
       };
 
+      const settingsBefore = companyId ? await readRow(companySettingsKey(companyId)) : null;
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
         throw new Error(t('modal.saveError'));
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for the saved settings to land instead of a fixed pause.
+      if (companyId) await waitForRowChanged(companySettingsKey(companyId), settingsBefore, { timeoutMs: 4000 });
       setLastSaved(new Date());
 
       // Close modal after 0.8s delay and refresh page

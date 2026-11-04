@@ -237,5 +237,18 @@
       "notes": "Opombe",
       "added": "Datum vpisa"
     }
+  },
+  "loyaltyCard": {
+    "title": "Kartica zvestobe",
+    "loading": "Nalagam …",
+    "visits": "opravljenih obiskov",
+    "points": "razpoložljivih točk",
+    "pointsFor": "{threshold} točk za {reward}",
+    "redeem": "Unovči nagrado",
+    "redeeming": "Unovčujem …",
+    "confirm": "Unovčim nagrado »{reward}« za {threshold} točk?",
+    "redeemed": "Nagrada je unovčena.",
+    "loadError": "Točk ni bilo mogoče naložiti.",
+    "redeemError": "Nagrade ni bilo mogoče unovčiti. Osvežite kartico in poskusite znova."
   }
 }

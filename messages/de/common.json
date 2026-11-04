@@ -51,7 +51,8 @@
     "noResults": "Keine Ergebnisse",
     "networkError": "Verbindungsproblem",
     "unauthorized": "Sie haben keine Berechtigung für diese Aktion",
-    "fillAllFields": "Bitte füllen Sie alle Felder aus"
+    "fillAllFields": "Bitte füllen Sie alle Felder aus",
+    "writeUnconfirmed": "Die Änderung wurde gesendet, ist aber noch nicht bestätigt. Warten Sie einige Sekunden und laden Sie die Seite neu, bevor Sie es erneut versuchen."
   },
   "time": {
     "today": "Heute",
@@ -142,5 +143,44 @@
   "questionnaire": {
     "answersTitle": "Fragebogen",
     "answersHint": "Antworten des Kunden bei der Online-Buchung"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "body": "Der Link ist vielleicht veraltet oder die Seite wurde verschoben.",
+    "home": "Zum Dashboard"
+  },
+  "errorPage": {
+    "title": "Etwas ist schiefgelaufen",
+    "body": "Die Seite wurde nicht vollständig geladen. Ihre Daten sind sicher – bitte versuchen Sie es erneut.",
+    "retry": "Erneut versuchen",
+    "home": "Zum Dashboard"
+  },
+  "apiErrors": {
+    "tooManyRequests": "Zu viele Anfragen. Bitte warten Sie einen Moment.",
+    "noCompany": "Ihr Konto ist mit keinem Unternehmen verknüpft.",
+    "badRequest": "Die Anfrage konnte nicht gelesen werden.",
+    "senderNameInvalid": "Der Absendername darf höchstens 11 Zeichen haben, keine Sonderzeichen (č, š, ž) enthalten und nicht nur aus Ziffern bestehen.",
+    "ownerOrAdminOnly": "Nur der Inhaber oder ein Administrator kann dies ändern.",
+    "statusCheckFailed": "Der Status konnte nicht geprüft werden.",
+    "senderIdPlan": "Ein eigener Absendername ist im Paket Jedro Premium verfügbar.",
+    "requestSaveFailed": "Die Anfrage konnte nicht gespeichert werden.",
+    "senderRequested": "Anfrage gesendet. Bis zur Freigabe werden Nachrichten mit dem Namen Jedroplus gesendet.",
+    "testOwnerOnly": "Nur der Inhaber oder ein Administrator kann eine Testnachricht senden.",
+    "invalidInput": "Ungültige Anfrage.",
+    "templateEmpty": "Die Vorlage ist leer – geben Sie zuerst einen Text ein.",
+    "testFailed": "Der Test konnte nicht gesendet werden. Versuchen Sie es in einigen Minuten erneut.",
+    "noActiveSubscription": "Kein aktives Abonnement gefunden.",
+    "notStripeManaged": "Das Abonnement wird nicht über Stripe verwaltet, daher ist kein Kauf möglich.",
+    "quantityRange": "Die Menge muss zwischen 0 und 20 liegen.",
+    "locationsInUse": "Sie haben mehr aktive Standorte, als Ihr Paket umfasst. Wählen Sie zuerst, welche Sie behalten.",
+    "trialCreditsFailed": "Die Testguthaben konnten nicht erfasst werden.",
+    "invalidSmsPack": "Ungültiges SMS-Paket.",
+    "invalidEmailPack": "Ungültiges E-Mail-Paket.",
+    "pricesNotConfigured": "Preise sind nicht eingerichtet. Bitte wenden Sie sich an den Administrator.",
+    "companyNotFound": "Unternehmen nicht gefunden.",
+    "locationsOwnerOnly": "Nur der Inhaber kann zusätzliche Standorte kaufen.",
+    "locationsPlan": "Zusätzliche Standorte sind im Paket Pro verfügbar.",
+    "locationQuantityRange": "Die Menge muss zwischen 1 und {max} liegen.",
+    "locationsOverQuantity": "Sie haben mehr aktive Standorte, als diese Menge erlaubt. Archivieren Sie zuerst die überzähligen."
   }
 }

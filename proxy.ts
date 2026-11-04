@@ -50,11 +50,19 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 3. Internal dev pages — English UI, not locale-routed
-  // TODO(i18n-review): confirm if these dev pages should be removed or included in i18n
-  const devPaths = ['/app', '/calendar', '/bookings', '/settings'];
-  if (devPaths.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
-    return NextResponse.next();
+  // 3. Old pages from before the current app (untranslated, blank when signed
+  // out): send them to the page that replaced each one.
+  const LEGACY_REDIRECTS: Record<string, string> = {
+    '/app': '/dashboard',
+    '/calendar': '/koledar',
+    '/bookings': '/termini',
+    '/settings': '/nastavitve',
+  };
+  const legacy = Object.keys(LEGACY_REDIRECTS).find((p) => pathname === p || pathname.startsWith(p + '/'));
+  if (legacy) {
+    const target = request.nextUrl.clone();
+    target.pathname = LEGACY_REDIRECTS[legacy];
+    return NextResponse.redirect(target);
   }
 
   // 4. Run i18n middleware — handles locale detection, URL prefix, NEXT_LOCALE cookie

@@ -30,6 +30,7 @@ import { BodyPortal } from '@/components/ui/BodyPortal';
 import { QuestionnaireEditor } from '@/components/booking/QuestionnaireEditor';
 import { sanitizeQuestions, type Question } from '@/lib/questionnaire';
 import { fetchServices } from '@/lib/supabase/services';
+import { companySettingsKey, readRow, waitForRowChanged } from '@/lib/confirmWrite';
 
 const BOOKING_WINDOW_DAYS = [7, 14, 21, 30, 60, 90, 180, 365];
 
@@ -427,11 +428,16 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         },
       };
 
+      const settingsBefore = companyId ? await readRow(companySettingsKey(companyId)) : null;
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
         throw new Error(t('modal.footer.saveError'));
       }
+
+      // Wait for n8n's part to land before the app writes its own columns, so
+      // the reload below shows everything (and the waits don't mix them up).
+      if (companyId) await waitForRowChanged(companySettingsKey(companyId), settingsBefore, { timeoutMs: 4000 });
 
       if (bookingMode !== loadedBookingModeRef.current) {
         const res = await fetch('/api/company/booking-mode', {
@@ -492,7 +498,6 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
         loadedEmailTemplatesRef.current = { ...loadedEmailTemplatesRef.current, ...emailCurrent };
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
       setLastSaved(new Date());
 
       // Close modal after 0.8s delay and refresh page

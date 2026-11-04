@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireCompanyAccess } from '@/lib/auth/apiAuth';
+import { MAX_EXTRA_LOCATIONS } from '@/lib/billing/locationAddon';
+import { isCompanyOwner, loadLocationBilling } from '@/lib/billing/locationBilling.server';
+import { apiMessages } from '@/lib/api/apiMessages';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -27,12 +30,13 @@ const EMAIL_PACKAGES = {
 
 type PurchaseBody = {
   company_id: string;
-  addon_type: 'sms' | 'email' | 'employees';
+  addon_type: 'sms' | 'email' | 'employees' | 'locations';
   package_key?: string;
   quantity?: number;
 };
 
 export async function POST(request: NextRequest) {
+  const tApi = await apiMessages(request);
   if (!serviceRoleKey) {
     return NextResponse.json({ success: false, message: 'Service role key not configured' }, { status: 500 });
   }
@@ -50,7 +54,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, message: 'company_id and addon_type are required' }, { status: 400 });
   }
 
-  if (!['sms', 'email', 'employees'].includes(addon_type)) {
+  if (!['sms', 'email', 'employees', 'locations'].includes(addon_type)) {
     return NextResponse.json({ success: false, message: 'Invalid addon_type' }, { status: 400 });
   }
 
@@ -69,12 +73,12 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!sub) {
-    return NextResponse.json({ success: false, message: 'Aktivna naročnina ni najdena' }, { status: 400 });
+    return NextResponse.json({ success: false, message: tApi('noActiveSubscription') }, { status: 400 });
   }
 
   if (!sub.provider_subscription_id) {
     return NextResponse.json(
-      { success: false, message: 'Naročnina ni upravljana prek Stripe — nakup ni možen' },
+      { success: false, message: tApi('notStripeManaged') },
       { status: 400 }
     );
   }
@@ -83,12 +87,12 @@ export async function POST(request: NextRequest) {
 
   if (addon_type === 'sms') {
     if (!package_key || !(package_key in SMS_PACKAGES)) {
-      return NextResponse.json({ success: false, message: 'Neveljaven paket SMS' }, { status: 400 });
+      return NextResponse.json({ success: false, message: tApi('invalidSmsPack') }, { status: 400 });
     }
     const pkg = SMS_PACKAGES[package_key as keyof typeof SMS_PACKAGES];
     if (!pkg.priceId) {
       return NextResponse.json(
-        { success: false, message: 'Cene niso konfigurirane. Kontaktirajte administratorja.' },
+        { success: false, message: tApi('pricesNotConfigured') },
         { status: 503 }
       );
     }
@@ -104,12 +108,12 @@ export async function POST(request: NextRequest) {
     };
   } else if (addon_type === 'email') {
     if (!package_key || !(package_key in EMAIL_PACKAGES)) {
-      return NextResponse.json({ success: false, message: 'Neveljaven paket email' }, { status: 400 });
+      return NextResponse.json({ success: false, message: tApi('invalidEmailPack') }, { status: 400 });
     }
     const pkg = EMAIL_PACKAGES[package_key as keyof typeof EMAIL_PACKAGES];
     if (!pkg.priceId) {
       return NextResponse.json(
-        { success: false, message: 'Cene niso konfigurirane. Kontaktirajte administratorja.' },
+        { success: false, message: tApi('pricesNotConfigured') },
         { status: 503 }
       );
     }
@@ -123,16 +127,54 @@ export async function POST(request: NextRequest) {
       addon_quantity: pkg.quantity,
       existing_stripe_item_id: sub.email_addon_stripe_item_id ?? null,
     };
+  } else if (addon_type === 'locations') {
+    // Extra locations: quantity-based like extra team members, owner only.
+    const fail = (code: string, message: string, status: number) =>
+      NextResponse.json({ success: false, code, message }, { status });
+
+    const billing = await loadLocationBilling(admin, company_id);
+    if (!billing) return fail('not_found', tApi('companyNotFound'), 404);
+    if (!(await isCompanyOwner(admin, billing.companyUuid, authResult.user.id))) {
+      return fail('owner_only', tApi('locationsOwnerOnly'), 403);
+    }
+    if (!billing.eligible) {
+      return fail('plan_not_eligible', tApi('locationsPlan'), 403);
+    }
+    const locationQty = Number(quantity);
+    if (!Number.isInteger(locationQty) || locationQty < 1 || locationQty > MAX_EXTRA_LOCATIONS) {
+      return fail('invalid_quantity', tApi('locationQuantityRange', { max: MAX_EXTRA_LOCATIONS }), 400);
+    }
+    if (billing.included + locationQty < billing.active) {
+      return fail(
+        'locations_in_use',
+        tApi('locationsOverQuantity'),
+        409
+      );
+    }
+    const locationPriceId = process.env.STRIPE_LOCATION_PRICE_ID;
+    if (!locationPriceId) {
+      return fail('not_configured', tApi('pricesNotConfigured'), 503);
+    }
+
+    n8nPayload = {
+      company_id,
+      addon_type: 'locations',
+      stripe_subscription_id: sub.provider_subscription_id,
+      subscription_db_id: sub.id,
+      stripe_price_id: locationPriceId,
+      quantity: locationQty,
+      existing_stripe_item_id: billing.stripeItemId,
+    };
   } else {
     // employees
     const employeeQty = quantity ?? 0;
     if (employeeQty < 0 || employeeQty > 20) {
-      return NextResponse.json({ success: false, message: 'Količina mora biti med 0 in 20' }, { status: 400 });
+      return NextResponse.json({ success: false, message: tApi('quantityRange') }, { status: 400 });
     }
     const employeePriceId = process.env.STRIPE_EMPLOYEE_PRICE_ID;
     if (!employeePriceId) {
       return NextResponse.json(
-        { success: false, message: 'Cene niso konfigurirane. Kontaktirajte administratorja.' },
+        { success: false, message: tApi('pricesNotConfigured') },
         { status: 503 }
       );
     }
@@ -167,6 +209,21 @@ export async function POST(request: NextRequest) {
     if (!n8nRes.ok || n8nData.success === false) {
       const msg = n8nData.message ?? 'Napaka pri obdelavi addonov';
       return NextResponse.json({ success: false, message: msg }, { status: 502 });
+    }
+
+    if (addon_type === 'locations') {
+      // n8n writes this too; doing it here as well keeps the limit right even if
+      // that branch of the workflow does not (the write is the same either way).
+      const billing = await loadLocationBilling(admin, company_id);
+      if (billing) {
+        await admin.from('company_location_limits').upsert({
+          company_id: billing.companyUuid,
+          extra_locations: Number(quantity),
+          stripe_subscription_item_id: n8nData.stripe_item_id ?? billing.stripeItemId,
+          cancel_at_period_end: false,
+          updated_at: new Date().toISOString(),
+        });
+      }
     }
 
     return NextResponse.json({ success: true, ...n8nData });

@@ -24,6 +24,7 @@ import CompanyLogoSection from '@/components/settings/CompanyLogoSection';
 import BrandColorsSection from '@/components/settings/BrandColorsSection';
 import { VatVerify } from '@/components/settings/VatVerify';
 import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
+import { companySettingsKey, readRow, waitForRowChanged } from '@/lib/confirmWrite';
 
 const DAYS_OF_WEEK = [
   'Ponedeljek',
@@ -194,14 +195,15 @@ export default function CompanySettingsPage() {
         },
       };
 
+      const settingsBefore = companyId ? await readRow(companySettingsKey(companyId)) : null;
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
         throw new Error('Failed to save company data');
       }
 
-      // Wait 1 second for system to process
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for the saved settings to land instead of a fixed pause.
+      if (companyId) await waitForRowChanged(companySettingsKey(companyId), settingsBefore, { timeoutMs: 4000 });
 
       setLastSaved(new Date());
       setSaveSuccess(true);

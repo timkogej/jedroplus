@@ -51,7 +51,8 @@
     "noResults": "No results",
     "networkError": "Connection issue",
     "unauthorized": "You don't have permission for this action",
-    "fillAllFields": "Fill in all fields"
+    "fillAllFields": "Fill in all fields",
+    "writeUnconfirmed": "The change was sent but is not confirmed yet. Wait a few seconds and refresh the page before trying again."
   },
   "time": {
     "today": "Today",
@@ -142,5 +143,44 @@
   "questionnaire": {
     "answersTitle": "Questionnaire",
     "answersHint": "The client's answers when booking online"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The link may be out of date, or the page has moved.",
+    "home": "Go to dashboard"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "body": "The page didn't finish loading. Your data is safe — please try again.",
+    "retry": "Try again",
+    "home": "Go to dashboard"
+  },
+  "apiErrors": {
+    "tooManyRequests": "Too many requests. Please wait a moment.",
+    "noCompany": "Your account is not linked to a company.",
+    "badRequest": "The request could not be read.",
+    "senderNameInvalid": "The sender name can have at most 11 characters, no special letters (č, š, ž), and cannot be only a number.",
+    "ownerOrAdminOnly": "Only the owner or an administrator can change this.",
+    "statusCheckFailed": "The status could not be checked.",
+    "senderIdPlan": "A custom sender name is available with the Jedro Premium plan.",
+    "requestSaveFailed": "The request could not be saved.",
+    "senderRequested": "Request submitted. Until it is approved, messages are sent as Jedroplus.",
+    "testOwnerOnly": "Only the owner or an administrator can send a test message.",
+    "invalidInput": "Invalid request.",
+    "templateEmpty": "The template is empty — enter some text first.",
+    "testFailed": "The test could not be sent. Try again in a few minutes.",
+    "noActiveSubscription": "No active subscription was found.",
+    "notStripeManaged": "The subscription is not managed through Stripe, so a purchase is not possible.",
+    "quantityRange": "The quantity must be between 0 and 20.",
+    "locationsInUse": "You have more active locations than your plan includes. First choose which ones to keep.",
+    "trialCreditsFailed": "The trial credits could not be recorded.",
+    "invalidSmsPack": "Invalid SMS pack.",
+    "invalidEmailPack": "Invalid email pack.",
+    "pricesNotConfigured": "Prices are not set up. Please contact the administrator.",
+    "companyNotFound": "Company not found.",
+    "locationsOwnerOnly": "Only the owner can buy extra locations.",
+    "locationsPlan": "Extra locations are available with the Pro plan.",
+    "locationQuantityRange": "The quantity must be between 1 and {max}.",
+    "locationsOverQuantity": "You have more active locations than this quantity allows. Archive the extra ones first."
   }
 }

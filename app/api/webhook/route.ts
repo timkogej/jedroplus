@@ -10,6 +10,7 @@ import { rateLimit } from "@/lib/rateLimit";
 import { requireCompanyAccess, resolveUserCompany } from "@/lib/auth/apiAuth";
 import { adminClient } from "@/lib/auth/ownerAccess";
 import { allowedLocationIds, fillSoleLocation, locationViolation } from "@/lib/auth/locationAccess";
+import { apiMessages } from '@/lib/api/apiMessages';
 
 const DEFAULT_WEBHOOK_URL = "https://n8n.jedroplus.com/webhook/main_povezava";
 const RESCHEDULE_NOTIFICATION_WEBHOOK_URL =
@@ -28,6 +29,7 @@ function getWebhookUrl(event: unknown) {
 }
 
 export async function POST(request: NextRequest) {
+  const tApi = await apiMessages(request);
   try {
     // ✅ KORAK 1: Rate limiting
     const { success, limit, remaining, reset } = await rateLimit(request, "webhook");
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           ok: false,
-          error: "Preveč zahtev. Počakajte trenutek.",
+          error: tApi('tooManyRequests'),
           retryAfter: Math.ceil((reset - Date.now()) / 1000),
         },
         {

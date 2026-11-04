@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { rateLimit } from '@/lib/rateLimit';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { apiMessages } from '@/lib/api/apiMessages';
 
 /** BulkGate: največ 11 znakov, brez šumnikov, ne sama številka. */
 function imeJeVeljavno(ime: string): boolean {
@@ -26,13 +27,14 @@ function imeJeVeljavno(ime: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  const tApi = await apiMessages(request);
   const { success, reset } = await rateLimit(request, 'auth');
   if (!success) {
     return NextResponse.json(
       {
         ok: false,
         koda: 'prevec_zahtev',
-        razlog: 'Preveč zahtev. Počakajte trenutek.',
+        razlog: tApi('tooManyRequests'),
         retryAfter: Math.ceil((reset - Date.now()) / 1000),
       },
       { status: 429 }
@@ -45,7 +47,7 @@ export async function POST(request: NextRequest) {
   const { uuid, textId } = await resolveUserCompany(auth.user.id);
   if (!uuid || !textId) {
     return NextResponse.json(
-      { ok: false, koda: 'ni_podjetja', razlog: 'Vaš račun ni povezan s podjetjem.' },
+      { ok: false, koda: 'ni_podjetja', razlog: tApi('noCompany') },
       { status: 403 }
     );
   }
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
     ime = String(body?.ime ?? '').trim();
   } catch {
     return NextResponse.json(
-      { ok: false, koda: 'neveljavna_zahteva', razlog: 'Zahteve ni bilo mogoče prebrati.' },
+      { ok: false, koda: 'neveljavna_zahteva', razlog: tApi('badRequest') },
       { status: 400 }
     );
   }
@@ -67,7 +69,7 @@ export async function POST(request: NextRequest) {
         ok: false,
         koda: 'neveljavno_ime',
         razlog:
-          'Ime pošiljatelja sme imeti največ 11 znakov, brez šumnikov, in ne sme biti samo številka.',
+          tApi('senderNameInvalid'),
       },
       { status: 400 }
     );
@@ -90,7 +92,7 @@ export async function POST(request: NextRequest) {
   const role = String(member?.role ?? '').toLowerCase();
   if (role !== 'owner' && role !== 'admin') {
     return NextResponse.json(
-      { ok: false, koda: 'ni_pravic', razlog: 'To lahko spremeni le lastnik ali administrator.' },
+      { ok: false, koda: 'ni_pravic', razlog: tApi('ownerOrAdminOnly') },
       { status: 403 }
     );
   }
@@ -102,7 +104,7 @@ export async function POST(request: NextRequest) {
 
   if (stanjeErr) {
     return NextResponse.json(
-      { ok: false, koda: 'napaka', razlog: 'Stanja ni bilo mogoče preveriti.' },
+      { ok: false, koda: 'napaka', razlog: tApi('statusCheckFailed') },
       { status: 500 }
     );
   }
@@ -112,7 +114,7 @@ export async function POST(request: NextRequest) {
       {
         ok: false,
         koda: 'paket_ne_dovoli',
-        razlog: 'Lastno ime pošiljatelja je na voljo pri paketu Jedro Premium.',
+        razlog: tApi('senderIdPlan'),
       },
       { status: 403 }
     );
@@ -141,7 +143,7 @@ export async function POST(request: NextRequest) {
 
   if (updErr) {
     return NextResponse.json(
-      { ok: false, koda: 'napaka', razlog: 'Zahteve ni bilo mogoče shraniti.' },
+      { ok: false, koda: 'napaka', razlog: tApi('requestSaveFailed') },
       { status: 500 }
     );
   }
@@ -152,6 +154,6 @@ export async function POST(request: NextRequest) {
     ime,
     drzava,
     razlog:
-      'Zahteva je oddana. Do odobritve se sporočila pošiljajo z imenom Jedroplus.',
+      tApi('senderRequested'),
   });
 }

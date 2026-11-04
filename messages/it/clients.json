@@ -237,5 +237,18 @@
       "notes": "Note",
       "added": "Data di registrazione"
     }
+  },
+  "loyaltyCard": {
+    "title": "Carta fedeltà",
+    "loading": "Caricamento…",
+    "visits": "visite completate",
+    "points": "punti disponibili",
+    "pointsFor": "{threshold} punti per {reward}",
+    "redeem": "Riscatta premio",
+    "redeeming": "Riscatto in corso…",
+    "confirm": "Riscattare il premio «{reward}» per {threshold} punti?",
+    "redeemed": "Premio riscattato.",
+    "loadError": "Impossibile caricare i punti fedeltà.",
+    "redeemError": "Impossibile riscattare il premio. Aggiorna la scheda e riprova."
   }
 }

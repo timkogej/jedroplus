@@ -8,6 +8,7 @@ import { requireCompanyAccess } from "@/lib/auth/apiAuth";
 import { createClient } from "@supabase/supabase-js";
 import { canReceiveMarketing } from "@/lib/marketingConsent";
 import { unsubscribeUrl } from "@/lib/unsubscribe";
+import { apiMessages } from '@/lib/api/apiMessages';
 
 export const maxDuration = 60;
 
@@ -82,6 +83,7 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ action: string }> }
 ) {
+  const tApi = await apiMessages(request);
   try {
     const { action } = await params;
 
@@ -99,7 +101,7 @@ export async function POST(
       return NextResponse.json(
         {
           ok: false,
-          error: "Preveč zahtev. Počakajte trenutek.",
+          error: tApi('tooManyRequests'),
           retryAfter: Math.ceil((reset - Date.now()) / 1000),
         },
         {

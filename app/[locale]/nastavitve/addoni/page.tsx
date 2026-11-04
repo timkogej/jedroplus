@@ -15,6 +15,7 @@ import { useCompany } from '@/app/company-context';
 import { fetchBillingStatus } from '@/hooks/useBillingUsage';
 import { computeBillingUsage, FREE_TRIAL, type BillingUsage } from '@/lib/billing/usage';
 import { useFormat } from '@/hooks/useFormat';
+import { LOCATION_PRICE_EUR, MAX_EXTRA_LOCATIONS } from '@/lib/billing/locationAddon';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -56,6 +57,16 @@ type EmployeeLimitsData = {
   included_users: number;
   extra_users: number;
   max_users: number;
+  stripe_subscription_item_id: string | null;
+  cancel_at_period_end: boolean;
+};
+
+type LocationLimitsData = {
+  included: number;
+  extra: number;
+  allowed: number;
+  active: number;
+  eligible: boolean;
   stripe_subscription_item_id: string | null;
   cancel_at_period_end: boolean;
 };
@@ -646,6 +657,181 @@ function EmployeesCard({
   );
 }
 
+// ─── LocationsCard ────────────────────────────────────────────────────────────
+
+type LocationsCardProps = {
+  limits: LocationLimitsData;
+  extraLocations: number;
+  onExtraChange: (n: number) => void;
+  onUpdate: () => void;
+  onCancel: () => void;
+  purchasing: boolean;
+  canceling: boolean;
+  disabled: boolean;
+};
+
+function LocationsCard({
+  limits,
+  extraLocations,
+  onExtraChange,
+  onUpdate,
+  onCancel,
+  purchasing,
+  canceling,
+  disabled,
+}: LocationsCardProps) {
+  const t = useTranslations('billing.addons.locations');
+  const tAddons = useTranslations('billing.addons');
+  const f = useFormat();
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const { included, extra, active, eligible, stripe_subscription_item_id: stripeItemId, cancel_at_period_end: cancelAtPeriodEnd } = limits;
+  const noChange = extraLocations === extra;
+  const projectedMax = included + extraLocations;
+  const overQuota = active > projectedMax;
+  const sliderPercent = (extraLocations / MAX_EXTRA_LOCATIONS) * 100;
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white">
+      <div className="p-5 pb-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold tracking-tight text-gray-900">{t('title')}</h3>
+            <p className="mt-0.5 text-xs text-gray-500">{t('body')}</p>
+          </div>
+          <span className="inline-flex shrink-0 items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium tabular-nums text-gray-700">
+            {active} / {included + extra}
+          </span>
+        </div>
+
+        <div className="mt-5 grid grid-cols-3 gap-2">
+          <div className="rounded-[10px] bg-gray-50 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t('inPlan')}</p>
+            <p className="mt-1 text-sm font-semibold tabular-nums text-gray-900">{included}</p>
+          </div>
+          <div className="rounded-[10px] bg-gray-50 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t('extra')}</p>
+            <p className={`mt-1 text-sm font-semibold tabular-nums ${extraLocations > 0 ? 'text-[#6D5EF7]' : 'text-gray-900'}`}>
+              {extraLocations}
+            </p>
+          </div>
+          <div className="rounded-[10px] bg-gray-50 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">{t('total')}</p>
+            <p className="mt-1 text-sm font-semibold tabular-nums text-gray-900">{projectedMax}</p>
+          </div>
+        </div>
+      </div>
+
+      {!eligible ? (
+        <div className="border-t border-gray-100 p-5 pt-4">
+          <p className="text-sm text-gray-600">{t('proOnly')}</p>
+          <Link href="/nastavitve/paketi" className="mt-2 inline-block text-sm font-medium text-gray-900 underline">
+            {t('seePlans')}
+          </Link>
+        </div>
+      ) : (
+        <>
+          {stripeItemId && (
+            <div className="mx-5 mb-5 flex flex-wrap items-center gap-2 rounded-[10px] bg-gray-50 p-3">
+              {cancelAtPeriodEnd ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                  <Warning className="w-3 h-3" weight="bold" />
+                  {tAddons('cancelScheduled')}
+                </span>
+              ) : (
+                <>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[#6D5EF7]/10 px-2.5 py-1 text-xs font-semibold text-[#6D5EF7]">
+                    <Check className="w-3 h-3" weight="bold" />
+                    {t('activeAddon', { count: extra, price: f.money(extra * LOCATION_PRICE_EUR) })}
+                  </span>
+                  <CancelButton
+                    confirming={confirmCancel}
+                    setConfirming={setConfirmCancel}
+                    onCancel={onCancel}
+                    canceling={canceling}
+                    disabled={disabled}
+                  />
+                </>
+              )}
+            </div>
+          )}
+
+          <div className="border-t border-gray-100 p-5 pt-4">
+            <div className="mb-3 flex items-center justify-between">
+              <label htmlFor="extra-locations" className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">{t('sliderLabel')}</label>
+              <span className="text-lg font-semibold tabular-nums text-[#6D5EF7]">{extraLocations}</span>
+            </div>
+            <div className="rounded-[10px] bg-gray-50 px-4 py-4">
+              <input
+                id="extra-locations"
+                type="range"
+                min={0}
+                max={MAX_EXTRA_LOCATIONS}
+                step={1}
+                value={extraLocations}
+                onChange={(e) => onExtraChange(Number(e.target.value))}
+                disabled={disabled}
+                className={RANGE_INPUT_CLASS}
+                style={{
+                  accentColor: '#6D5EF7',
+                  background: `linear-gradient(to right, #6D5EF7 0%, #2F80ED ${sliderPercent / 2}%, #2AD4C5 ${sliderPercent}%, #e5e7eb ${sliderPercent}%, #e5e7eb 100%)`,
+                }}
+              />
+              <div className="mt-2 flex items-center justify-between text-[10px] font-medium text-gray-400">
+                <span>0</span>
+                <span>{MAX_EXTRA_LOCATIONS}</span>
+              </div>
+            </div>
+
+            <p className="mt-3 text-xs text-gray-500">
+              {t('summary', { total: projectedMax, included, extra: extraLocations })}
+            </p>
+
+            {extraLocations > 0 && (
+              <p className="mt-1 text-xs font-semibold text-[#6D5EF7]">
+                {t('cost', {
+                  price: f.money(extraLocations * LOCATION_PRICE_EUR),
+                  unit: f.money(LOCATION_PRICE_EUR),
+                })}
+              </p>
+            )}
+
+            {extraLocations === 0 && stripeItemId && !cancelAtPeriodEnd && (
+              <p className="mt-1 text-xs text-amber-600">{t('removeNote')}</p>
+            )}
+
+            {overQuota && (
+              <div className="mt-4 flex items-start gap-2 rounded-[10px] bg-amber-50 p-3">
+                <Warning className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" weight="regular" />
+                <p className="text-xs text-amber-700">
+                  <span className="font-semibold">{t('overTitle')}</span>{' '}
+                  {t('over', { count: active - projectedMax })}{' '}
+                  <Link href="/nastavitve/lokacije" className="font-medium underline">{t('openLocations')}</Link>
+                </p>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={onUpdate}
+              disabled={noChange || disabled || purchasing || canceling || overQuota}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-40"
+            >
+              {purchasing ? (
+                <>
+                  <SpinnerGap className="w-4 h-4 animate-spin" weight="bold" />
+                  {t('updating')}
+                </>
+              ) : (
+                t('update')
+              )}
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AddoniPage() {
@@ -662,6 +848,8 @@ export default function AddoniPage() {
   const [selectedSmsPackage, setSelectedSmsPackage] = useState<string | null>(null);
   const [selectedEmailPackage, setSelectedEmailPackage] = useState<string | null>(null);
   const [extraEmployees, setExtraEmployees] = useState(0);
+  const [locationLimits, setLocationLimits] = useState<LocationLimitsData | null>(null);
+  const [extraLocations, setExtraLocations] = useState(0);
 
   const [purchasingActions, setPurchasingActions] = useState<Set<string>>(new Set());
 
@@ -694,6 +882,7 @@ export default function AddoniPage() {
         smsUsage: UsageData | null;
         emailUsage: UsageData | null;
         employeeLimits: EmployeeLimitsData | null;
+        locationLimits?: LocationLimitsData | null;
         memberCount?: number;
       } | null;
       if (!data) throw new Error('status unavailable');
@@ -704,6 +893,8 @@ export default function AddoniPage() {
       // Seats count people with a login, not calendar staff.
       setActiveEmployeeCount(data.memberCount ?? 0);
       setExtraEmployees(data.employeeLimits?.extra_users ?? 0);
+      setLocationLimits(data.locationLimits ?? null);
+      setExtraLocations(data.locationLimits?.extra ?? 0);
     } catch {
       showToast(t('loadError'), 'error');
     } finally {
@@ -727,8 +918,18 @@ export default function AddoniPage() {
   const maxEmployees = includedEmployees + (employeeLimits?.extra_users ?? 0);
   const hasStripeSubscription = !!subscription?.provider_subscription_id;
 
+  // Location add-on errors come with a code, so the text follows the user's language.
+  const errorText = (data: { code?: string; message?: string }): string | undefined => {
+    switch (data.code) {
+      case 'locations_in_use': return t('locations.errInUse');
+      case 'plan_not_eligible': return t('locations.errPlan');
+      case 'owner_only': return t('locations.errOwner');
+      default: return data.message;
+    }
+  };
+
   const handlePurchase = async (
-    addonType: 'sms' | 'email' | 'employees',
+    addonType: 'sms' | 'email' | 'employees' | 'locations',
     packageKey?: string,
     quantity?: number
   ) => {
@@ -744,7 +945,7 @@ export default function AddoniPage() {
         body: JSON.stringify({ company_id: companyUuid, addon_type: addonType, package_key: packageKey, quantity }),
       });
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message ?? t('toast.purchaseError'));
+      if (!res.ok || !data.success) throw new Error(errorText(data) ?? t('toast.purchaseError'));
       showToast(t('toast.purchased'));
       setSelectedSmsPackage(null);
       setSelectedEmailPackage(null);
@@ -758,7 +959,7 @@ export default function AddoniPage() {
     await fetchData();
   };
 
-  const handleCancel = async (addonType: 'sms' | 'email' | 'employees') => {
+  const handleCancel = async (addonType: 'sms' | 'email' | 'employees' | 'locations') => {
     const key = `cancel-${addonType}`;
     startAction(key);
     try {
@@ -768,7 +969,7 @@ export default function AddoniPage() {
         body: JSON.stringify({ company_id: companyUuid, addon_type: addonType }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message ?? t('toast.cancelError'));
+      if (!res.ok) throw new Error(errorText(data) ?? t('toast.cancelError'));
       showToast(t('toast.canceled'));
     } catch (e: unknown) {
       showToast((e instanceof Error ? e.message : null) || t('toast.cancelError'), 'error');
@@ -903,6 +1104,28 @@ export default function AddoniPage() {
               disabled={!hasStripeSubscription}
             />
           </motion.div>
+
+          {/* Extra locations */}
+          {locationLimits && (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: 0.25 }}
+            >
+              <LocationsCard
+                limits={locationLimits}
+                extraLocations={extraLocations}
+                onExtraChange={setExtraLocations}
+                onUpdate={() =>
+                  extraLocations === 0 ? handleCancel('locations') : handlePurchase('locations', undefined, extraLocations)
+                }
+                onCancel={() => handleCancel('locations')}
+                purchasing={purchasingActions.has('locations')}
+                canceling={purchasingActions.has('cancel-locations')}
+                disabled={!hasStripeSubscription}
+              />
+            </motion.div>
+          )}
         </div>
       )}
 

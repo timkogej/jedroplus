@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requireCompanyAccess } from '@/lib/auth/apiAuth';
 import { computeBillingUsage, NEAR_LIMIT_PERCENT } from '@/lib/billing/usage';
 import { notifyOwnerInBackground } from '@/lib/email/notifyOwner';
+import { loadLocationBilling } from '@/lib/billing/locationBilling.server';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -99,11 +100,22 @@ export async function GET(request: NextRequest) {
       .eq('ID podjetja', company_id)
       .eq('Status', 'active');
 
+    const locationBilling = await loadLocationBilling(admin, company_id);
+
     const payload = {
       subscription,
       smsUsage,
       emailUsage,
       employeeLimits,
+      locationLimits: locationBilling && {
+        included: locationBilling.included,
+        extra: locationBilling.extra,
+        allowed: locationBilling.allowed,
+        active: locationBilling.active,
+        eligible: locationBilling.eligible,
+        stripe_subscription_item_id: locationBilling.stripeItemId,
+        cancel_at_period_end: locationBilling.cancelAtPeriodEnd,
+      },
       activeEmployeeCount: activeEmployeeCount ?? 0,
       memberCount: memberCount ?? 0,
     };

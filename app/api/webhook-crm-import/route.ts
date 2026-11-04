@@ -6,11 +6,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rateLimit";
 import { requireCompanyAccess } from "@/lib/auth/apiAuth";
+import { apiMessages } from '@/lib/api/apiMessages';
 
 const CRM_IMPORT_WEBHOOK_URL = "https://n8n.jedroplus.com/webhook/uvoz-crm";
 const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 
 export async function POST(request: NextRequest) {
+  const tApi = await apiMessages(request);
   try {
     // ✅ KORAK 1: Rate limiting
     const { success, reset } = await rateLimit(request, "webhook");
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           ok: false,
-          error: "Preveč zahtev. Počakajte trenutek.",
+          error: tApi('tooManyRequests'),
           retryAfter: Math.ceil((reset - Date.now()) / 1000),
         },
         { status: 429, headers: { "Retry-After": Math.ceil((reset - Date.now()) / 1000).toString() } }

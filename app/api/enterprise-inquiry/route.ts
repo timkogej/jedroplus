@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { rateLimit } from '@/lib/rateLimit';
 import { sanitizeInput, isHoneypotFilled } from '@/lib/validation/publicForm';
+import { apiMessages } from '@/lib/api/apiMessages';
 
 // Enterprise inquiries are forwarded to n8n, which emails them to the team.
 // The n8n workflow must exist at N8N_ENTERPRISE_WEBHOOK: Webhook (POST, header
@@ -21,12 +22,13 @@ const inquirySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const tApi = await apiMessages(request);
   const { success, limit, reset } = await rateLimit(request, 'auth');
   if (!success) {
     return NextResponse.json(
       {
         ok: false,
-        error: 'Preveč zahtev. Počakajte trenutek.',
+        error: tApi('tooManyRequests'),
         retryAfter: Math.ceil((reset - Date.now()) / 1000),
       },
       {

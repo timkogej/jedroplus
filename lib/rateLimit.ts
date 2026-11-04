@@ -17,12 +17,16 @@ const redis = UPSTASH_CONFIGURED
   : null;
 
 // Različni rate limiterji za različne namene
+// If Redis does not answer in time the request goes through (the library's
+// default wait is 5 s, which would slow every save when Redis is down).
+const LIMIT_TIMEOUT_MS = 1000;
+
 export const rateLimiters = UPSTASH_CONFIGURED && redis
   ? {
-      api: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, "10 s"), analytics: true, prefix: "ratelimit:api" }),
-      webhook: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(50, "10 s"), analytics: true, prefix: "ratelimit:webhook" }),
-      auth: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60 s"), analytics: true, prefix: "ratelimit:auth" }),
-      ai: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), analytics: true, prefix: "ratelimit:ai" }),
+      api: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(100, "10 s"), analytics: true, timeout: LIMIT_TIMEOUT_MS, prefix: "ratelimit:api" }),
+      webhook: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(50, "10 s"), analytics: true, timeout: LIMIT_TIMEOUT_MS, prefix: "ratelimit:webhook" }),
+      auth: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60 s"), analytics: true, timeout: LIMIT_TIMEOUT_MS, prefix: "ratelimit:auth" }),
+      ai: new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), analytics: true, timeout: LIMIT_TIMEOUT_MS, prefix: "ratelimit:ai" }),
     }
   : null;
 

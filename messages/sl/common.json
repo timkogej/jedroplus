@@ -51,7 +51,8 @@
     "noResults": "Ni rezultatov",
     "networkError": "Težave s povezavo",
     "unauthorized": "Nimate dovoljenja za to akcijo",
-    "fillAllFields": "Izpolnite vsa polja"
+    "fillAllFields": "Izpolnite vsa polja",
+    "writeUnconfirmed": "Sprememba je poslana, a v sistemu še ni potrjena. Počakajte nekaj sekund in osvežite stran, preden jo ponovite."
   },
   "time": {
     "today": "Danes",
@@ -142,5 +143,44 @@
   "questionnaire": {
     "answersTitle": "Vprašalnik",
     "answersHint": "Odgovori stranke ob spletni rezervaciji"
+  },
+  "notFound": {
+    "title": "Te strani ni",
+    "body": "Povezava je morda zastarela ali pa je stran premaknjena.",
+    "home": "Na nadzorno ploščo"
+  },
+  "errorPage": {
+    "title": "Nekaj je šlo narobe",
+    "body": "Stran se ni naložila do konca. Vaši podatki so varni — poskusite znova.",
+    "retry": "Poskusi znova",
+    "home": "Na nadzorno ploščo"
+  },
+  "apiErrors": {
+    "tooManyRequests": "Preveč zahtev. Počakajte trenutek.",
+    "noCompany": "Vaš račun ni povezan s podjetjem.",
+    "badRequest": "Zahteve ni bilo mogoče prebrati.",
+    "senderNameInvalid": "Ime pošiljatelja sme imeti največ 11 znakov, brez šumnikov, in ne sme biti samo številka.",
+    "ownerOrAdminOnly": "To lahko spremeni le lastnik ali administrator.",
+    "statusCheckFailed": "Stanja ni bilo mogoče preveriti.",
+    "senderIdPlan": "Lastno ime pošiljatelja je na voljo pri paketu Jedro Premium.",
+    "requestSaveFailed": "Zahteve ni bilo mogoče shraniti.",
+    "senderRequested": "Zahteva je oddana. Do odobritve se sporočila pošiljajo z imenom Jedroplus.",
+    "testOwnerOnly": "Preizkusno sporočilo lahko pošlje lastnik ali skrbnik.",
+    "invalidInput": "Neveljavna zahteva.",
+    "templateEmpty": "Predloga je prazna — najprej vpišite besedilo.",
+    "testFailed": "Preizkusa ni bilo mogoče poslati. Poskusite čez nekaj minut.",
+    "noActiveSubscription": "Aktivna naročnina ni najdena.",
+    "notStripeManaged": "Naročnina ni upravljana prek Stripa, zato nakup ni mogoč.",
+    "quantityRange": "Količina mora biti med 0 in 20.",
+    "locationsInUse": "Imate več aktivnih lokacij, kot jih vključuje paket. Najprej izberite, katere obdržite.",
+    "trialCreditsFailed": "Preizkusnih kreditov ni bilo mogoče zabeležiti.",
+    "invalidSmsPack": "Neveljaven paket SMS.",
+    "invalidEmailPack": "Neveljaven paket e-pošte.",
+    "pricesNotConfigured": "Cene niso nastavljene. Obrnite se na administratorja.",
+    "companyNotFound": "Podjetje ni najdeno.",
+    "locationsOwnerOnly": "Dodatne lokacije lahko kupi samo lastnik.",
+    "locationsPlan": "Dodatne lokacije so na voljo v paketu Pro.",
+    "locationQuantityRange": "Količina mora biti med 1 in {max}.",
+    "locationsOverQuantity": "Imate več aktivnih lokacij, kot jih dovoljuje ta količina. Najprej arhivirajte odvečne."
   }
 }

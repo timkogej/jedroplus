@@ -378,7 +378,9 @@
     "clickToInsert": "Clicca su una variabile per inserirla nel testo:",
     "estimatedLength": "Numero stimato di caratteri (le variabili vengono conteggiate in base al valore reale)",
     "tooLong": "Il messaggio è troppo lungo!",
-    "tooLongBody": "Il modello supera i {max} caratteri. Accorcia una parte del testo."
+    "tooLongBody": "Il modello supera i {max} caratteri. Accorcia una parte del testo.",
+    "tokenLength": "{token} — circa {length} caratteri",
+    "tokenTooLong": "Non ci sta: {label} aggiunge circa {length} caratteri, ma ne restano solo {left}. Accorcia il testo."
   },
   "test": {
     "buttonSms": "Invia un SMS di prova",
@@ -388,5 +390,6 @@
     "sent": "Inviato a {recipient}. Controlla che suoni come desideri.",
     "unknownVars": "L'invio non riconosce queste variabili, quindi sono rimaste invariate: {tokens}.",
     "failed": "Non è stato possibile inviare il test. Riprova tra qualche minuto."
-  }
+  },
+  "senderRequestError": "Non è stato possibile inviare la richiesta."
 }

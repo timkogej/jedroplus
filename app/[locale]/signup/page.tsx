@@ -64,7 +64,7 @@ export default function SignupPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 8) {
       toast.error(t('errors.passwordTooShort'));
       return;
     }

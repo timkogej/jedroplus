@@ -378,7 +378,9 @@
     "clickToInsert": "Kliknite na varijablu da je dodate u tekst:",
     "estimatedLength": "Procijenjeni broj znakova (varijable se broje prema stvarnoj vrijednosti)",
     "tooLong": "Poruka je predugačka!",
-    "tooLongBody": "Predložak premašuje {max} znakova. Skratite dio teksta."
+    "tooLongBody": "Predložak premašuje {max} znakova. Skratite dio teksta.",
+    "tokenLength": "{token} — otprilike {length} znakova",
+    "tokenTooLong": "Ne stane: {label} dodaje otprilike {length} znakova, a preostalo ih je još {left}. Skratite tekst."
   },
   "test": {
     "buttonSms": "Pošalji probni SMS",
@@ -388,5 +390,6 @@
     "sent": "Poslano na {recipient}. Provjerite zvuči li onako kako želite.",
     "unknownVars": "Slanje ne prepoznaje ove varijable pa su ostale nepromijenjene: {tokens}.",
     "failed": "Probna poruka nije poslana. Pokušajte ponovno za nekoliko minuta."
-  }
+  },
+  "senderRequestError": "Zahtjev nije bilo moguće poslati."
 }

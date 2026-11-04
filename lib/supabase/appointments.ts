@@ -1018,15 +1018,13 @@ export async function fetchAbsences(
   }
 
   try {
-    console.log('[fetchAbsences] Fetching absences for company_id:', companyId);
-
-    let { data: absencesData, error: absencesError } = await supabase
+    const absencesResult = await supabase
       .from('absences')
       .select('*')
       .eq('company_id', companyId)
       .eq('status', 'CONFIRMED');
-
-    console.log('[fetchAbsences] Query result - error:', absencesError, 'data count:', absencesData?.length ?? 0);
+    let absencesData = absencesResult.data;
+    const absencesError = absencesResult.error;
 
     if (absencesError) {
       if (absencesError.code === '42P01' || absencesError.message?.includes('relation "absences" does not exist')) {
@@ -1072,7 +1070,6 @@ export async function fetchAbsences(
       console.warn('[fetchAbsences] Could not fetch employee names from Osebe:', staffError);
     }
 
-    console.log('[fetchAbsences] Raw absences data:', absencesData?.length ?? 0, 'records');
 
     const absences: Absence[] = (absencesData || []).map((row: Record<string, unknown>) => {
       const employeeId = row.employee_id ? String(row.employee_id) : undefined;
@@ -1101,7 +1098,6 @@ export async function fetchAbsences(
       };
     });
 
-    console.log('[fetchAbsences] Parsed absences:', absences);
     return { data: absences, error: null };
   } catch (err) {
     console.error('Error fetching absences:', err);

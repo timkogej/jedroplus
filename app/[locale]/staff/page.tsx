@@ -17,6 +17,7 @@ import {
   CalendarCheck,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
+import { readRow, waitForRowChanged, waitForRowCreated, waitForRowDeleted, type RowKey } from '@/lib/confirmWrite';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { useAuth } from '@/app/auth-context';
@@ -323,6 +324,9 @@ export default function OsebjePage() {
     setIsSaving(true);
     let imageResult: Awaited<ReturnType<typeof saveEntityImage>> = null;
     let locationsSaved = true;
+    let savedKey: RowKey | null = null;
+    let savedIsNew = false;
+    let savedBefore: Record<string, unknown> | null | undefined = null;
     try {
       const rowData = buildEmployeeRow(data, columns, selectedEmployee?.aktivna ?? true);
 
@@ -342,6 +346,9 @@ export default function OsebjePage() {
           'ID osebe': identifier.value, // ID osebe (person identifier)
           employee_id: identifier.value, // Explicit employee_id
         };
+
+        savedKey = { table: 'Osebe', column: 'id', value: selectedEmployee.id };
+        savedBefore = await readRow(savedKey);
 
         const result = await callN8nAction(
           buildPayload(
@@ -369,6 +376,8 @@ export default function OsebjePage() {
         const personType = data.pozicija || 'Ekipa';
         const personHumanId = await getNextPersonHumanId(companyId, personType);
         const staffId = await getNextStaffId(companyId);
+        savedKey = { table: 'Osebe', column: 'ID osebe', value: staffId };
+        savedIsNew = true;
 
         // Add default schedule from company and all services
         const defaultUrnik = companySchedule;
@@ -429,8 +438,14 @@ export default function OsebjePage() {
         });
       }
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for the write itself instead of a fixed pause. An edit that changed
+      // nothing never changes the row, hence its shorter limit.
+      if (savedKey) {
+        const confirmed = savedIsNew
+          ? await waitForRowCreated(savedKey)
+          : (await waitForRowChanged(savedKey, savedBefore, { timeoutMs: 4000 }), true);
+        if (!confirmed) setToast({ message: tCommon('errors.writeUnconfirmed'), type: 'error' });
+      }
 
       setIsModalOpen(false);
       setSelectedEmployee(null);
@@ -472,10 +487,12 @@ export default function OsebjePage() {
         return;
       }
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      setToast({ message: t('toasts.deleted'), type: 'success' });
+      const deleted = await waitForRowDeleted({ table: 'Osebe', column: 'id', value: selectedEmployee.id });
+      setToast(
+        deleted
+          ? { message: t('toasts.deleted'), type: 'success' }
+          : { message: tCommon('errors.writeUnconfirmed'), type: 'error' }
+      );
       setIsDeleteModalOpen(false);
       setSelectedEmployee(null);
       loadEmployees();
@@ -601,6 +618,9 @@ export default function OsebjePage() {
         return;
       }
 
+      const settingsKey: RowKey = { table: 'Osebe', column: 'id', value: selectedEmployee.id };
+      const settingsBefore = await readRow(settingsKey);
+
       // Build row data with schedule and services
       const rowData = buildEmployeeRow(
         {
@@ -652,8 +672,8 @@ export default function OsebjePage() {
 
       setToast({ message: t('toasts.settingsSaved'), type: 'success' });
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for the change to land (none at all if nothing was changed).
+      await waitForRowChanged(settingsKey, settingsBefore, { timeoutMs: 4000 });
 
       setIsSettingsModalOpen(false);
       setSelectedEmployee(null);

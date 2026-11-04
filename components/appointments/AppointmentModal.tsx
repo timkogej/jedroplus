@@ -41,6 +41,7 @@ import { useTranslations } from 'next-intl';
 import { checkResourceConflicts, fetchResursIdsForTerminRow, type ResourceConflict } from '@/lib/supabase/resursi';
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
+import { waitForClient } from '@/lib/supabase/clients';
 type ModalMode = 'view' | 'edit' | 'create';
 
 interface AppointmentModalProps {
@@ -962,6 +963,8 @@ function AppointmentModal({
 
       // Create new client with 7-digit unique ID (same as Stranke page)
       const clientId = await getNextClientId(companyId);
+      // The id actually saved: a retry after a duplicate id sends a new one.
+      let createdClientId = clientId;
       const clientType = data.tip_stranke || null;
       const newRow: Record<string, unknown> = {
         'ID stranke': clientId,
@@ -996,6 +999,7 @@ function AppointmentModal({
       // Send to same n8n endpoint with retry logic for duplicate IDs
       const result = await callN8nAction(payload, async () => {
         const nextId = await getNextClientId(companyId);
+        createdClientId = nextId;
         return {
           ...payload,
           data: buildClientCreateData({
@@ -1014,12 +1018,12 @@ function AppointmentModal({
       // Close client modal
       setShowClientModal(false);
 
-      // Wait 0.8 seconds for system to process
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Wait until the client exists, so the appointment links to a real row.
+      await waitForClient(companyId, createdClientId);
 
       // Auto-select the newly created client in the appointment form
       const newClient: Client = {
-        id: clientId,
+        id: createdClientId,
         ime: data.ime,
         priimek: data.priimek,
         email: data.email,
@@ -1030,7 +1034,7 @@ function AppointmentModal({
       setSelectedClient(newClient);
       setFormData((prev) => ({
         ...prev,
-        stranka_id: clientId,
+        stranka_id: createdClientId,
         stranka_ime: `${data.ime} ${data.priimek}`.trim(),
         stranka_email: data.email,
         stranka_telefon: data.telefon,

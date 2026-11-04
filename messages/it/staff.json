@@ -144,5 +144,6 @@
   },
   "gradientSelector": {
     "description": "Questo colore verrà usato per le iniziali nel calendario e nei profili"
-  }
+  },
+  "cycleStartMustBeMonday": "La data selezionata deve essere un lunedì."
 }

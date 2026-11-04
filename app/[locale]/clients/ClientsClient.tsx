@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
+import { readRow, waitForRowChanged, waitForRowDeleted, type RowKey } from '@/lib/confirmWrite';
 import { intlLocale } from '@/lib/format';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -160,6 +161,7 @@ export default function ClientsClient({
 }) {
   const router = useRouter();
   const t = useTranslations('clients');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const { companyId, companySettings, loading: companyLoading } = useCompany();
   const { user } = useAuth();
@@ -378,6 +380,8 @@ export default function ClientsClient({
 
     let createdClientId = '';
     let failureCode: N8nErrorCode | undefined;
+    let editedKey: RowKey | null = null;
+    let editedBefore: Record<string, unknown> | null | undefined = null;
     setIsSaving(true);
     try {
       const companyColumn = await getCompanyColumnForTable(TABLES.clients, companyId);
@@ -398,6 +402,10 @@ export default function ClientsClient({
           'Interne opombe': data.interne_opombe,
           [companyColumn]: companyId,
         };
+
+        // The edit is confirmed when the row has changed from how it is now.
+        editedKey = { table: TABLES.clients, column: 'ID stranke', value: selectedClient.id };
+        editedBefore = await readRow(editedKey);
 
         const result = await callN8nAction(
           buildPayload(
@@ -480,9 +488,10 @@ export default function ClientsClient({
         showToast(t('toast.created'), 'success');
       }
 
-      if (modalMode === 'edit') {
-        // Edits have no new row to look for; give n8n a moment to apply them.
-        await new Promise((resolve) => setTimeout(resolve, 800));
+      if (editedKey) {
+        // Wait for the change to land (an edit that changed nothing never
+        // changes the row, hence the shorter limit).
+        await waitForRowChanged(editedKey, editedBefore, { timeoutMs: 4000 });
       }
 
       closeModal();
@@ -535,8 +544,13 @@ export default function ClientsClient({
         throw new Error('delete failed');
       }
 
-      // Wait for system to process
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const deleted = await waitForRowDeleted({ table: TABLES.clients, column: 'ID stranke', value: deleteClient.id });
+      if (!deleted) {
+        showToast(tCommon('errors.writeUnconfirmed'), 'error');
+        closeDeleteModal();
+        loadData({ silent: true });
+        return;
+      }
 
       showToast(t('toast.deleted'), 'success');
       closeDeleteModal();
@@ -546,7 +560,7 @@ export default function ClientsClient({
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, deleteClient, actor, companyPayload, buildPayload, showToast, closeDeleteModal, loadData]);
+  }, [companyId, deleteClient, actor, companyPayload, buildPayload, showToast, closeDeleteModal, loadData, tCommon]);
 
   // Export clients to Excel (XLSX)
   const handleExportXlsx = useCallback(async () => {
