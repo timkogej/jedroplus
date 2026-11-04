@@ -7,8 +7,14 @@ Pro paket vključuje 3 lokacije. Dodatne lokacije so količinski dodatek
 
 1. Product: **Dodatna lokacija**, cena **9,90 € / mesec**, recurring, per unit (quantity), enaka valuta kot ostali paketi.
 2. Skopiraj `price_...` ID.
-3. Vercel → Environment Variables: `STRIPE_LOCATION_PRICE_ID=price_...` (Production), nato redeploy.
-   Brez te spremenljivke nakup vrne `not_configured` (503).
+3. Ista cena še letno (isti produkt, drug interval). Stripe dovoli en obračunski
+   interval na naročnino, zato Next prebere naročnino in pošlje n8n mesečno ali
+   letno ceno (`stripe_price_id`). n8n ničesar ne izbira.
+4. Vercel → Environment Variables (Production), nato redeploy:
+   - `STRIPE_LOCATION_PRICE_ID=price_1UY9JNPyaWggoyrRtEQxt5t2` (mesečno)
+   - `STRIPE_LOCATION_PRICE_ID_YEARLY=price_1UY9ScPyaWggoyrRplYDy0Ge` (letno)
+
+   Brez ustrezne spremenljivke nakup vrne `not_configured` (503).
 
 ## 2. n8n: `addon-purchase` (nova veja `addon_type = 'locations'`)
 
