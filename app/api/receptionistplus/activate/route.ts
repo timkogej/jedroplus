@@ -12,6 +12,7 @@ import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
 import { getCompanyCommunicationLanguage, toIsoLanguage } from '@/lib/communicationLanguage';
 import { isReceptionistLanguage } from '@/lib/receptionist';
+import { apiMessages } from '@/lib/api/apiMessages';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -25,6 +26,7 @@ function adminClient() {
 }
 
 export async function POST(request: NextRequest) {
+  const tApi = await apiMessages(request);
   const authResult = await authenticateRequest(request);
   if ('response' in authResult) return authResult.response;
 
@@ -122,7 +124,7 @@ export async function POST(request: NextRequest) {
   });
 
   if (txError) {
-    return NextResponse.json({ ok: false, error: 'Napaka pri beleženju preizkusnih kreditov' }, { status: 500 });
+    return NextResponse.json({ ok: false, error: tApi('trialCreditsFailed') }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, trialGranted: true });

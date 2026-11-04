@@ -85,7 +85,7 @@ function ResetPasswordForm() {
       return;
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       setFormError(t('errors.passwordTooShort'));
       return;
     }

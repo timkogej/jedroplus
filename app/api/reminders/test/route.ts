@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { rateLimit } from '@/lib/rateLimit';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { apiMessages } from '@/lib/api/apiMessages';
 
 const N8N_TEST_WEBHOOK =
   process.env.N8N_TEST_MESSAGE_URL ?? 'https://n8n.jedroplus.com/webhook/test-message';
@@ -18,13 +19,14 @@ const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 const MAX_TEMPLATE = 2000;
 
 export async function POST(request: NextRequest) {
+  const tApi = await apiMessages(request);
   const { success, reset } = await rateLimit(request, 'auth');
   if (!success) {
     return NextResponse.json(
       {
         ok: false,
         koda: 'prevec_zahtev',
-        razlog: 'Preveč zahtev. Počakajte trenutek.',
+        razlog: tApi('tooManyRequests'),
         retryAfter: Math.ceil((reset - Date.now()) / 1000),
       },
       { status: 429 }
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
   const { uuid, textId } = await resolveUserCompany(auth.user.id);
   if (!uuid || !textId) {
     return NextResponse.json(
-      { ok: false, koda: 'ni_podjetja', razlog: 'Vaš račun ni povezan s podjetjem.' },
+      { ok: false, koda: 'ni_podjetja', razlog: tApi('noCompany') },
       { status: 403 }
     );
   }
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
       {
         ok: false,
         koda: 'ni_pravic',
-        razlog: 'Preizkusno sporočilo lahko pošlje lastnik ali skrbnik.',
+        razlog: tApi('testOwnerOnly'),
       },
       { status: 403 }
     );
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
     body = (await request.json()) as typeof body;
   } catch {
     return NextResponse.json(
-      { ok: false, koda: 'neveljaven_vhod', razlog: 'Neveljavna zahteva.' },
+      { ok: false, koda: 'neveljaven_vhod', razlog: tApi('invalidInput') },
       { status: 400 }
     );
   }
@@ -84,7 +86,7 @@ export async function POST(request: NextRequest) {
       {
         ok: false,
         koda: 'prazna_predloga',
-        razlog: 'Predloga je prazna — najprej vpišite besedilo.',
+        razlog: tApi('templateEmpty'),
       },
       { status: 400 }
     );
@@ -108,7 +110,7 @@ export async function POST(request: NextRequest) {
         {
           ok: false,
           koda: 'napaka_streznika',
-          razlog: 'Preizkusa ni bilo mogoče poslati. Poskusite čez nekaj minut.',
+          razlog: tApi('testFailed'),
         },
         { status: 502 }
       );
@@ -123,7 +125,7 @@ export async function POST(request: NextRequest) {
       {
         ok: false,
         koda: 'napaka_streznika',
-        razlog: 'Preizkusa ni bilo mogoče poslati. Poskusite čez nekaj minut.',
+        razlog: tApi('testFailed'),
       },
       { status: 502 }
     );

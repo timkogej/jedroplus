@@ -5,6 +5,7 @@ import { sanitizeInput, isHoneypotFilled } from '@/lib/validation/publicForm'
 import { createClient } from '@supabase/supabase-js'
 import { resolveCompanyRegion } from '@/lib/region'
 import { normalizePhone } from '@/lib/phone'
+import { apiMessages } from '@/lib/api/apiMessages'
 
 const N8N_WEBHOOK = 'https://n8n.jedroplus.com/webhook/client-registration'
 
@@ -41,12 +42,13 @@ async function companyCountry(companyId: string): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
+  const tApi = await apiMessages(req);
   const { success, limit, reset } = await rateLimit(req, 'auth')
   if (!success) {
     return NextResponse.json(
       {
         ok: false,
-        error: 'Preveč zahtev. Počakajte trenutek.',
+        error: tApi('tooManyRequests'),
         retryAfter: Math.ceil((reset - Date.now()) / 1000),
       },
       {
