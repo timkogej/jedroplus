@@ -50,9 +50,16 @@ import { syncResursiZaTermin, sprostiResurseTermina } from '@/lib/supabase/resur
 import { useUserPersonId } from '@/hooks/useUserPersonId';
 import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
-import ExportAppointmentsModal from '@/components/appointments/ExportAppointmentsModal';
+import dynamic from 'next/dynamic';
 import { useTranslations, useLocale } from 'next-intl';
 import { intlLocale } from '@/lib/format';
+
+// Loaded on first open: it brings the Excel library, which the list itself
+// never needs.
+const ExportAppointmentsModal = dynamic(
+  () => import('@/components/appointments/ExportAppointmentsModal'),
+  { ssr: false }
+);
 
 const DEFAULT_FILTERS: FilterState = {
   search: '',

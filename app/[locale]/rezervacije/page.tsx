@@ -8,15 +8,12 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { fetchReservationSettingsServer } from "@/lib/reservations/fetchReservationSettings.server";
 import RezervacijeClient from "./RezervacijeClient";
+import { getServerUser } from "@/lib/auth/serverUser";
 
 export default async function RezervacijePage() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();

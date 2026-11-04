@@ -195,15 +195,22 @@ export async function fetchClientsWithCount(companyId: string): Promise<{
   error: Error | null;
 }> {
   try {
-    // Fetch clients
-    const clientsResult = await fetchAllTableRows<Record<string, unknown>>(TABLES.clients, companyId, CLIENT_ORDER_CANDIDATES);
+    // Clients and appointments at the same time. Appointments are only counted
+    // per client, so only the client id column is downloaded (whole rows were
+    // ~50 columns each and grew with every booking).
+    const [clientsResult, countedAppointments] = await Promise.all([
+      fetchAllTableRows<Record<string, unknown>>(TABLES.clients, companyId, CLIENT_ORDER_CANDIDATES),
+      fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId, undefined, undefined, '"ID stranke"'),
+    ]);
 
     if (clientsResult.error) {
       throw new Error(clientsResult.error);
     }
 
-    // Fetch appointments to count per client
-    const appointmentsResult = await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId);
+    // Older schemas may name the column differently: fall back to whole rows.
+    const appointmentsResult = countedAppointments.error
+      ? await fetchAllTableRows<Record<string, unknown>>(TABLES.bookings, companyId)
+      : countedAppointments;
 
     // Build a map of client ID to appointment count
     const appointmentCounts = new Map<string, number>();

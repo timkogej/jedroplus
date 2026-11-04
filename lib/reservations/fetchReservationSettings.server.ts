@@ -11,12 +11,12 @@
 // identical. The cookie session is used only to gate access.
 
 import "server-only";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { loadCompanyRow } from "@/lib/settingsStore";
 import {
   parseReservationSettings,
   type ReservationSettings,
 } from "@/lib/reservations/reservationSettings";
+import { getServerUser } from "@/lib/auth/serverUser";
 
 /**
  * Loads the Rezervacije page's initial settings server-side for the given
@@ -28,10 +28,7 @@ export async function fetchReservationSettingsServer(
 ): Promise<ReservationSettings | null> {
   if (!companyId || companyId.trim() === "") return null;
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) return null;
 
   try {

@@ -38,6 +38,7 @@ import {
 import type { AppointmentWithDetails, Storitev, Zaposleni } from "@/types/appointments";
 import type { Absence } from "@/lib/supabase/appointments";
 import type { CalendarEvent } from "@/types/events";
+import { getServerUser } from "@/lib/auth/serverUser";
 import type { Resurs } from "@/types/resursi";
 import { parseAnswers } from '@/lib/questionnaire';
 
@@ -619,9 +620,7 @@ export async function fetchCalendarDataServer(companyId: string): Promise<Calend
   if (!companyId || companyId.trim() === "") return null;
 
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) return null;
 
   const { ownOnly, personId } = await resolveViewScope(supabase, user.id);

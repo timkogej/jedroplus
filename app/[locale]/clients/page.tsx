@@ -7,15 +7,12 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { fetchClientsDataServer } from "@/lib/clients/fetchClientsData.server";
 import ClientsClient from "./ClientsClient";
+import { getServerUser } from "@/lib/auth/serverUser";
 
 export default async function ClientsPage() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();

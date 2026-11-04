@@ -220,7 +220,9 @@ export async function fetchAllTableRows<T>(
   tableName: string,
   companyId: string,
   orderByCandidates?: string[],
-  pageSize = DEFAULT_PAGE_SIZE
+  pageSize = DEFAULT_PAGE_SIZE,
+  // Only these columns, when the caller does not need whole rows (e.g. counting).
+  columns = "*"
 ): Promise<CompanyScopedResult<T>> {
   if (!companyId || companyId.trim() === "") {
     return { data: [], error: null };
@@ -248,7 +250,7 @@ export async function fetchAllTableRows<T>(
       const to = from + normalizedPageSize - 1;
       let query = supabaseReadOnly
         .from(tableName)
-        .select("*")
+        .select(columns)
         .eq(companyColumn, companyId);
 
       if (orderColumn) {

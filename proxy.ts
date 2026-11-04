@@ -9,6 +9,9 @@ const intlMiddleware = createIntlMiddleware(routing);
 // config change only.
 const LOCALE_PREFIX = new RegExp(`^/(${routing.locales.join('|')})(/|$)`);
 
+// Holds the id of a user already known to have a company (see step 7).
+const HAS_COMPANY_COOKIE = 'jp_has_company';
+
 // Paths that don't require a company to be set up (without locale prefix)
 const PUBLIC_PATHS = [
   '/login',
@@ -82,7 +85,13 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // 7. Check if the authenticated user has a company assigned
+  // 7. Check if the authenticated user has a company assigned. The answer is
+  // remembered per user for a few hours, so ordinary page changes skip this
+  // database round trip.
+  if (request.cookies.get(HAS_COMPANY_COOKIE)?.value === user.id) {
+    return supabaseResponse;
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('default_company_id')
@@ -93,6 +102,16 @@ export async function proxy(request: NextRequest) {
     const onboardingUrl = request.nextUrl.clone();
     onboardingUrl.pathname = `/${locale}/onboarding`;
     return NextResponse.redirect(onboardingUrl);
+  }
+
+  if (profile?.default_company_id) {
+    supabaseResponse.cookies.set(HAS_COMPANY_COOKIE, user.id, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 12,
+    });
   }
 
   return supabaseResponse;

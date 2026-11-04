@@ -21,6 +21,7 @@ import { safeDate } from "@/lib/dashboardHelpers";
 import { parseClient } from "@/lib/supabase/clients";
 import { TABLES } from "@/lib/data";
 import type { Client, ClientStats } from "@/types/clients";
+import { getServerUser } from "@/lib/auth/serverUser";
 
 type Row = Record<string, unknown>;
 type ServerClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -48,7 +49,8 @@ async function fetchTableOnce(
   supabase: ServerClient,
   tableName: string,
   companyId: string,
-  orderColumn?: string
+  orderColumn?: string,
+  columns = "*"
 ): Promise<Row[]> {
   for (const col of COMPANY_COLUMN_CANDIDATES) {
     const rows: Row[] = [];
@@ -57,7 +59,7 @@ async function fetchTableOnce(
     for (let from = 0; ; from += 1000) {
       let query = supabase
         .from(tableName)
-        .select("*")
+        .select(columns)
         .eq(col, companyId);
 
       if (orderColumn) {
@@ -73,7 +75,7 @@ async function fetchTableOnce(
       }
 
       columnExists = true;
-      const page = (data as Row[] | null) ?? [];
+      const page = (data as unknown as Row[] | null) ?? [];
       rows.push(...page);
 
       if (page.length < 1000) return rows;
@@ -138,16 +140,19 @@ export async function fetchClientsDataServer(companyId: string): Promise<Clients
   if (!companyId || companyId.trim() === "") return null;
 
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) return null;
 
   // Single fetch per table, shared across the list + stats (was 2x each before).
-  const [clientRows, bookingRows] = await Promise.all([
+  // Appointments are only counted per client, so only the client id column is
+  // downloaded; whole rows are the fallback for an older schema.
+  const [clientRows, countedBookingRows] = await Promise.all([
     fetchTableOnce(supabase, TABLES.clients, companyId),
-    fetchTableOnce(supabase, TABLES.bookings, companyId, "Datum"),
+    fetchTableOnce(supabase, TABLES.bookings, companyId, undefined, '"ID stranke"'),
   ]);
+  const bookingRows = countedBookingRows.length > 0
+    ? countedBookingRows
+    : await fetchTableOnce(supabase, TABLES.bookings, companyId);
 
   const clients = buildClients(clientRows, bookingRows);
   return { clients, stats: buildStats(clients) };

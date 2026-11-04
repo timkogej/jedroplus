@@ -265,10 +265,12 @@ export default function ClientsClient({
   }, [importDropdownOpen, exportDropdownOpen]);
 
   // Load data
-  const loadData = useCallback(async () => {
+  // `silent` refreshes in the background after a save or delete, so the list
+  // stays on screen instead of flashing to the loading skeleton.
+  const loadData = useCallback(async (options?: { silent?: boolean }) => {
     if (!companyId) return;
 
-    setIsLoading(true);
+    if (!options?.silent) setIsLoading(true);
     setError(null);
 
     try {
@@ -471,7 +473,7 @@ export default function ClientsClient({
         if (!appeared) {
           showToast(t('errors.saveUnconfirmed'), 'error');
           closeModal();
-          loadData();
+          loadData({ silent: true });
           return;
         }
 
@@ -484,7 +486,7 @@ export default function ClientsClient({
       }
 
       closeModal();
-      loadData();
+      loadData({ silent: true });
     } catch (err) {
       const message =
         failureCode === 'rate_limited' ? t('errors.saveRateLimited')
@@ -538,7 +540,7 @@ export default function ClientsClient({
 
       showToast(t('toast.deleted'), 'success');
       closeDeleteModal();
-      loadData();
+      loadData({ silent: true });
     } catch (err) {
       showToast(t('errors.deleteError'), 'error');
     } finally {
@@ -807,7 +809,7 @@ export default function ClientsClient({
               <p className="text-sm font-medium text-red-700">{error}</p>
               <button
                 type="button"
-                onClick={loadData}
+                onClick={() => loadData()}
                 className="ml-auto text-sm font-medium text-red-600 hover:text-red-700"
               >
                 {t('errors.retry')}
