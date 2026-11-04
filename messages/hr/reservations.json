@@ -236,7 +236,9 @@
       "bgToLabel": "Gradijent pozadine (kraj)",
       "bgToDesc": "Završna boja gradijenta pozadine",
       "previewLabel": "Pregled pozadine:",
-      "previewButton": "Pregled gumba"
+      "previewButton": "Pregled gumba",
+      "managedDesc": "Boje su zajedničke za rezervacije i emailove. Postavite ih jednom.",
+      "managedLink": "Uredi boje tvrtke"
     },
     "footer": {
       "close": "Zatvori",

@@ -176,6 +176,25 @@
       "invalid": "This number isn't in the EU VAT register.",
       "badFormat": "That doesn't look like a VAT number (e.g. DE123456789).",
       "unavailable": "The EU register isn't responding. Please try again later."
+    },
+    "brandColors": {
+      "title": "Company colours",
+      "subtitle": "Two colours you set once. They are used on your booking pages and in every email to your clients.",
+      "primaryLabel": "Main colour",
+      "primaryDesc": "Buttons and highlights",
+      "secondLabel": "Second colour",
+      "secondDesc": "Accent line, tags and extra highlights",
+      "previewTitle": "How your email will look",
+      "previewHeading": "Appointment confirmed",
+      "previewTag": "Confirmed",
+      "previewLink": "Add to calendar",
+      "previewButton": "Change appointment",
+      "tooLight": "The main colour is almost white, so it cannot be used as a button in emails. We will use a dark colour instead. Pick a darker one.",
+      "invalid": "Enter a colour like #RRGGBB.",
+      "saveError": "The colours could not be saved. Please try again.",
+      "save": "Save colours",
+      "saved": "Saved",
+      "usedIn": "Text colour on buttons is chosen automatically so it is always readable."
     }
   },
   "members": {

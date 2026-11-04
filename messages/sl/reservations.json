@@ -236,7 +236,9 @@
       "bgToLabel": "Ozadje gradient (konec)",
       "bgToDesc": "Končna barva gradient ozadja",
       "previewLabel": "Predogled ozadja:",
-      "previewButton": "Predogled gumba"
+      "previewButton": "Predogled gumba",
+      "managedDesc": "Barve so skupne za rezervacije in emaile. Nastavite jih enkrat.",
+      "managedLink": "Uredi barve podjetja"
     },
     "footer": {
       "close": "Zapri",

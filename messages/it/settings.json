@@ -176,6 +176,25 @@
       "invalid": "Il numero non risulta nel registro dei soggetti IVA dell'UE.",
       "badFormat": "Il formato non è valido per una partita IVA (es. IT12345678901).",
       "unavailable": "Il registro UE al momento non risponde. Riprova più tardi."
+    },
+    "brandColors": {
+      "title": "Colori dell'attività",
+      "subtitle": "Due colori da impostare una volta sola. Vengono usati nelle pagine di prenotazione e in tutte le email ai clienti.",
+      "primaryLabel": "Colore principale",
+      "primaryDesc": "Pulsanti ed evidenziazioni",
+      "secondLabel": "Secondo colore",
+      "secondDesc": "Linea, etichette e altre evidenziazioni",
+      "previewTitle": "Ecco come apparirà l'email",
+      "previewHeading": "Appuntamento confermato",
+      "previewTag": "Confermato",
+      "previewLink": "Aggiungi al calendario",
+      "previewButton": "Modifica appuntamento",
+      "tooLight": "Il colore principale è quasi bianco e non può essere usato come pulsante nelle email. Useremo un colore scuro. Scegline uno più scuro.",
+      "invalid": "Inserisci un colore come #RRGGBB.",
+      "saveError": "Impossibile salvare i colori. Riprova.",
+      "save": "Salva i colori",
+      "saved": "Salvato",
+      "usedIn": "Il colore del testo sui pulsanti viene scelto automaticamente per essere sempre leggibile."
     }
   },
   "members": {

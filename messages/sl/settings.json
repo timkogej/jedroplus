@@ -176,6 +176,25 @@
       "invalid": "Številka ni vpisana v register DDV zavezancev EU.",
       "badFormat": "Oblika ni prava za DDV številko (npr. SI12345678).",
       "unavailable": "Register EU trenutno ne odgovarja. Poskusite znova pozneje."
+    },
+    "brandColors": {
+      "title": "Barve podjetja",
+      "subtitle": "Dve barvi, ki jih nastavite enkrat. Uporabijo se na straneh za naročanje in v vseh emailih strankam.",
+      "primaryLabel": "Glavna barva",
+      "primaryDesc": "Gumbi in poudarki",
+      "secondLabel": "Druga barva",
+      "secondDesc": "Črta, oznake in dodatni poudarki",
+      "previewTitle": "Tako bo videti email",
+      "previewHeading": "Termin je potrjen",
+      "previewTag": "Potrjeno",
+      "previewLink": "Dodaj v koledar",
+      "previewButton": "Uredi termin",
+      "tooLight": "Glavna barva je skoraj bela, zato je v emailih ne moremo uporabiti kot gumb. Uporabili bomo temno barvo. Izberite temnejšo.",
+      "invalid": "Vnesite barvo v obliki #RRGGBB.",
+      "saveError": "Barv ni bilo mogoče shraniti. Poskusite znova.",
+      "save": "Shrani barve",
+      "saved": "Shranjeno",
+      "usedIn": "Barvo besedila na gumbih izberemo samodejno, da je vedno berljiva."
     }
   },
   "members": {

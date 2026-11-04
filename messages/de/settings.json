@@ -176,6 +176,25 @@
       "invalid": "Diese Nummer ist nicht im EU-Umsatzsteuerregister eingetragen.",
       "badFormat": "Das sieht nicht nach einer USt-IdNr. aus (z. B. DE123456789).",
       "unavailable": "Das EU-Register antwortet gerade nicht. Bitte versuchen Sie es später erneut."
+    },
+    "brandColors": {
+      "title": "Firmenfarben",
+      "subtitle": "Zwei Farben, die Sie einmal festlegen. Sie gelten auf Ihren Buchungsseiten und in allen E-Mails an Ihre Kunden.",
+      "primaryLabel": "Hauptfarbe",
+      "primaryDesc": "Buttons und Hervorhebungen",
+      "secondLabel": "Zweite Farbe",
+      "secondDesc": "Akzentlinie, Labels und weitere Hervorhebungen",
+      "previewTitle": "So sieht Ihre E-Mail aus",
+      "previewHeading": "Termin bestätigt",
+      "previewTag": "Bestätigt",
+      "previewLink": "Zum Kalender hinzufügen",
+      "previewButton": "Termin ändern",
+      "tooLight": "Die Hauptfarbe ist fast weiß und kann in E-Mails nicht als Button verwendet werden. Wir nehmen stattdessen eine dunkle Farbe. Wählen Sie eine dunklere.",
+      "invalid": "Geben Sie eine Farbe wie #RRGGBB ein.",
+      "saveError": "Die Farben konnten nicht gespeichert werden. Bitte erneut versuchen.",
+      "save": "Farben speichern",
+      "saved": "Gespeichert",
+      "usedIn": "Die Textfarbe auf Buttons wird automatisch gewählt, damit sie immer lesbar ist."
     }
   },
   "members": {

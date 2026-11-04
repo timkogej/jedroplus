@@ -236,7 +236,9 @@
       "bgToLabel": "Background gradient (end)",
       "bgToDesc": "Ending color of the background gradient",
       "previewLabel": "Background preview:",
-      "previewButton": "Button preview"
+      "previewButton": "Button preview",
+      "managedDesc": "One set of colours for bookings and emails. Set them once.",
+      "managedLink": "Edit company colours"
     },
     "footer": {
       "close": "Close",
