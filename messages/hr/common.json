@@ -51,7 +51,8 @@
     "noResults": "Nema rezultata",
     "networkError": "Problem s vezom",
     "unauthorized": "Nemate dopuštenje za ovu radnju",
-    "fillAllFields": "Ispunite sva polja"
+    "fillAllFields": "Ispunite sva polja",
+    "writeUnconfirmed": "Promjena je poslana, ali još nije potvrđena. Pričekajte nekoliko sekundi i osvježite stranicu prije ponovnog pokušaja."
   },
   "time": {
     "today": "Danas",

@@ -52,6 +52,15 @@ import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
 import dynamic from 'next/dynamic';
 import { useTranslations, useLocale } from 'next-intl';
+import {
+  readRow,
+  terminByCode,
+  terminById,
+  waitForRowChanged,
+  waitForRowCreated,
+  waitForRowDeleted,
+  waitForRowValue,
+} from '@/lib/confirmWrite';
 import { intlLocale } from '@/lib/format';
 
 // Loaded on first open: it brings the Excel library, which the list itself
@@ -73,6 +82,7 @@ const DEFAULT_FILTERS: FilterState = {
 // Stats card component - Gradient border with black icon (no circle)
 function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialData | null }) {
   const t = useTranslations('appointments');
+  const tCommon = useTranslations('common');
   const { matchesLocation } = useLocationScope();
   const locale = useLocale();
   const router = useRouter();
@@ -163,10 +173,12 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
   }, [companyId, companyLoading, router]);
 
   // Load data
-  const loadData = useCallback(async () => {
+  // `silent` refreshes after a save, delete or status change, so the list stays
+  // on screen instead of flashing to the loading skeleton.
+  const loadData = useCallback(async (options?: { silent?: boolean }) => {
     if (!companyId) return;
 
-    setIsLoading(true);
+    if (!options?.silent) setIsLoading(true);
     setError(null);
 
     try {
@@ -539,6 +551,9 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
         unique8DigitId,
       });
 
+      // An edit is confirmed when the row has changed from how it is now.
+      const before = !isNewAppointment && data.id ? await readRow(terminById(data.id)) : null;
+
       const result = await callN8nAction(
         buildPayload(event, 'appointments', enhancedData)
       );
@@ -547,8 +562,11 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
         throw new Error(t('errors.saveError'));
       }
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for the write itself (resources below need the row to exist). An
+      // edit that changed nothing never changes the row, so it is not reported.
+      const confirmed = isNewAppointment && unique8DigitId
+        ? await waitForRowCreated(terminByCode(unique8DigitId))
+        : (await waitForRowChanged(terminById(data.id!), before, { timeoutMs: 4000 }), true);
 
       // Termin zasede resurse svojih storitev. Doslej je to delal samo koledar,
       // zato termin s te strani ni zasedel ničesar in ni blokiral drugih.
@@ -558,8 +576,9 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
         [data.storitev_id, data.storitev_id_2, data.storitev_id_3],
       );
 
-      await loadData();
+      await loadData({ silent: true });
       handleCloseModal();
+      if (!confirmed) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       setActionError(t('errors.saveError'));
     } finally {
@@ -591,14 +610,14 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
         throw new Error(t('errors.deleteError'));
       }
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const deleted = await waitForRowDeleted(terminById(deleteTarget.id));
 
       // Izbrisan termin ne sme več držati resursov zasedenih.
       await sprostiResurseTermina(companyId, deleteTarget.id);
 
-      await loadData();
+      await loadData({ silent: true });
       setDeleteTarget(null);
+      if (!deleted) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       setActionError(t('errors.deleteError'));
     } finally {
@@ -643,11 +662,13 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
         throw new Error(t('errors.noShowError'));
       }
 
-      setSuccessMessage(t('toast.noShow'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      await loadData();
+      if (await waitForRowValue(terminById(appointment.id), 'Status', 'no_show')) {
+        setSuccessMessage(t('toast.noShow'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
+      await loadData({ silent: true });
     } catch (err) {
       setActionError(t('errors.noShowError'));
     } finally {
@@ -688,11 +709,13 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
         throw new Error(t('errors.cancelError'));
       }
 
-      setSuccessMessage(t('toast.cancelled'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      await loadData();
+      if (await waitForRowValue(terminById(appointment.id), 'Status', 'cancelled')) {
+        setSuccessMessage(t('toast.cancelled'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
+      await loadData({ silent: true });
     } catch (err) {
       setActionError(t('errors.cancelError'));
     } finally {
@@ -753,12 +776,19 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
       setSuccessMessage(t('toast.completed'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
-      // Wait 1.5 seconds for system to process completion
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      await loadData();
+      // n8n marks the appointment completed only after it has prepared the
+      // thank-you message, which can take several seconds. Show it completed
+      // now, close the dialog, and refresh once the database has it.
+      const completedId = completeTarget.id;
+      setAppointments((prev) =>
+        prev.map((a) => (a.id === completedId ? { ...a, status: 'completed' as AppointmentWithDetails['status'] } : a))
+      );
       setCompleteTarget(null);
       setCompletionNotes(''); // Reset notes after completion
+      void waitForRowValue(terminById(completedId), 'Status', 'completed', { timeoutMs: 20000 }).then((ok) => {
+        if (!ok) setActionError(tCommon('errors.writeUnconfirmed'));
+        return loadData({ silent: true });
+      });
     } catch (err) {
       setActionError(t('errors.completeError'));
     } finally {
@@ -804,7 +834,7 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
     }
     // Give n8n a moment to write the today's completions before reloading.
     await new Promise((resolve) => setTimeout(resolve, endedTodayOpen.length > 0 ? 1500 : 300));
-    await loadData();
+    await loadData({ silent: true });
   };
 
   const dismissError = () => {

@@ -51,7 +51,8 @@
     "noResults": "Keine Ergebnisse",
     "networkError": "Verbindungsproblem",
     "unauthorized": "Sie haben keine Berechtigung für diese Aktion",
-    "fillAllFields": "Bitte füllen Sie alle Felder aus"
+    "fillAllFields": "Bitte füllen Sie alle Felder aus",
+    "writeUnconfirmed": "Die Änderung wurde gesendet, ist aber noch nicht bestätigt. Warten Sie einige Sekunden und laden Sie die Seite neu, bevor Sie es erneut versuchen."
   },
   "time": {
     "today": "Heute",

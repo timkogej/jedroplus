@@ -51,7 +51,8 @@
     "noResults": "Ni rezultatov",
     "networkError": "Težave s povezavo",
     "unauthorized": "Nimate dovoljenja za to akcijo",
-    "fillAllFields": "Izpolnite vsa polja"
+    "fillAllFields": "Izpolnite vsa polja",
+    "writeUnconfirmed": "Sprememba je poslana, a v sistemu še ni potrjena. Počakajte nekaj sekund in osvežite stran, preden jo ponovite."
   },
   "time": {
     "today": "Danes",

@@ -51,7 +51,8 @@
     "noResults": "No results",
     "networkError": "Connection issue",
     "unauthorized": "You don't have permission for this action",
-    "fillAllFields": "Fill in all fields"
+    "fillAllFields": "Fill in all fields",
+    "writeUnconfirmed": "The change was sent but is not confirmed yet. Wait a few seconds and refresh the page before trying again."
   },
   "time": {
     "today": "Today",

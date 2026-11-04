@@ -83,6 +83,16 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { useTranslations, useLocale } from 'next-intl';
+import {
+  readRow,
+  type RowKey,
+  terminByCode,
+  terminById,
+  waitForRowChanged,
+  waitForRowCreated,
+  waitForRowDeleted,
+  waitForRowValue,
+} from '@/lib/confirmWrite';
 import { useOptionalTour } from '@/components/guide/TourProvider';
 import { BodyPortal } from '@/components/ui/BodyPortal';
 
@@ -98,8 +108,12 @@ interface CalendarProps {
 // Podrobnosti termina živijo v svoji datoteki — Calendar.tsx je že brez njih
 // čez 2700 vrstic, poleg tega je tako modal mogoče odpreti tudi drugje.
 
+// A calendar event row by its id.
+const eventKey = (id: string | number): RowKey => ({ table: 'events', column: 'id', value: id });
+
 function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) {
   const t = useTranslations('appointments');
+  const tCommon = useTranslations('common');
   const { matchesLocation, personAtSelected, serviceAtSelected, selectedLocationId } = useLocationScope();
   const locale = useLocale();
   const { companySettings } = useCompany();
@@ -562,9 +576,10 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       };
       const result = await sendEventWebhook(payload);
       if (!result.ok) throw new Error(t('calendarView.errors.eventDelete'));
-      await new Promise((r) => setTimeout(r, 800));
+      const deleted = await waitForRowDeleted(eventKey(viewingEvent.id));
       await loadEvents();
       handleCloseEventViewModal();
+      if (!deleted) setActionError(tCommon('errors.writeUnconfirmed'));
       setSuccessMessage(t('calendarView.toast.eventDeleted'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
@@ -572,7 +587,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     } finally {
       setIsEventDeleting(false);
     }
-  }, [viewingEvent, companyId, actor, loadEvents, handleCloseEventViewModal, t]);
+  }, [viewingEvent, companyId, actor, loadEvents, handleCloseEventViewModal, t, tCommon]);
 
   const handleSaveEvent = useCallback(async (data: EventFormData) => {
     setIsSaving(true);
@@ -600,11 +615,17 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         updated_by: actor,
       };
 
+      const before = isEdit ? await readRow(eventKey(editingEvent!.id)) : null;
+
       const result = await sendEventWebhook(payload);
       if (!result.ok) throw new Error(t('calendarView.errors.eventSave'));
 
-      // Give n8n a moment to write to Supabase before re-fetching
-      await new Promise((r) => setTimeout(r, 800));
+      if (isEdit) {
+        await waitForRowChanged(eventKey(editingEvent!.id), before, { timeoutMs: 4000 });
+      } else {
+        // A new event has no id yet to look for: give n8n a moment to write it.
+        await new Promise((r) => setTimeout(r, 800));
+      }
       await loadEvents();
       handleCloseEventModal();
       setSuccessMessage(isEdit ? t('calendarView.toast.eventUpdated') : t('calendarView.toast.eventCreated'));
@@ -632,9 +653,10 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       const result = await sendEventWebhook(payload);
       if (!result.ok) throw new Error(t('calendarView.errors.eventDelete'));
 
-      await new Promise((r) => setTimeout(r, 800));
+      const deleted = await waitForRowDeleted(eventKey(editingEvent.id));
       await loadEvents();
       handleCloseEventModal();
+      if (!deleted) setActionError(tCommon('errors.writeUnconfirmed'));
       setSuccessMessage(t('calendarView.toast.eventDeleted'));
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
@@ -642,7 +664,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     } finally {
       setIsEventDeleting(false);
     }
-  }, [editingEvent, companyId, actor, loadEvents, handleCloseEventModal, t]);
+  }, [editingEvent, companyId, actor, loadEvents, handleCloseEventModal, t, tCommon]);
 
   // Team and services offered at the selected location (all when none is selected).
   const visibleEmployees = useMemo(
@@ -1037,18 +1059,25 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       setSuccessMessage(t('toast.completed'));
       setTimeout(() => setSuccessMessage(null), 3000);
 
-      // Wait 1.5 seconds for system to process completion
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      await loadAppointments();
+      // n8n marks the appointment completed only after it has prepared the
+      // thank-you message, which can take several seconds. Show it completed
+      // now, close the dialog, and refresh once the database has it.
+      const completedId = completeTarget.id;
+      setAppointments((prev) =>
+        prev.map((a) => (a.id === completedId ? { ...a, status: 'completed' as AppointmentWithDetails['status'] } : a))
+      );
       setCompleteTarget(null);
       setCompletionNotes('');
+      void waitForRowValue(terminById(completedId), 'Status', 'completed', { timeoutMs: 20000 }).then((ok) => {
+        if (!ok) setActionError(tCommon('errors.writeUnconfirmed'));
+        return loadAppointments();
+      });
     } catch (err) {
       setActionError(t('errors.completeError'));
     } finally {
       setIsCompleting(false);
     }
-  }, [completeTarget, completionNotes, companyId, actor, role, companyPayload, buildPayload, loadAppointments, t]);
+  }, [completeTarget, completionNotes, companyId, actor, role, companyPayload, buildPayload, loadAppointments, t, tCommon]);
 
   const handleNoShowAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
     setSelectedAppointment(null); // Close detail modal first (like Termini)
@@ -1081,17 +1110,19 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         throw new Error(t('errors.noShowError'));
       }
 
-      setSuccessMessage(t('toast.noShow'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      if (await waitForRowValue(terminById(appointment.id), 'Status', 'no_show')) {
+        setSuccessMessage(t('toast.noShow'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
       await loadAppointments();
     } catch (err) {
       setActionError(t('errors.noShowError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t, tCommon]);
 
   const handleCancelAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
     setSelectedAppointment(null); // Close detail modal first (like Termini)
@@ -1124,17 +1155,19 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         throw new Error(t('errors.cancelError'));
       }
 
-      setSuccessMessage(t('toast.cancelled'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      if (await waitForRowValue(terminById(appointment.id), 'Status', 'cancelled')) {
+        setSuccessMessage(t('toast.cancelled'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
       await loadAppointments();
     } catch (err) {
       setActionError(t('errors.cancelError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t, tCommon]);
 
   // Delete handler - opens DeleteConfirmation dialog (identical to Termini)
   const handleDeleteAppointment = useCallback((appointment: AppointmentWithDetails) => {
@@ -1175,17 +1208,17 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       if (idsResult.data) setTerminIdsWithResursi(idsResult.data);
       if (mapResult.data) setTerminResursiMap(mapResult.data);
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const deleted = await waitForRowDeleted(terminById(deleteTarget.id));
 
       await loadAppointments();
       setDeleteTarget(null);
+      if (!deleted) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       setActionError(t('errors.deleteError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [deleteTarget, companyId, actor, companyPayload, buildPayload, loadAppointments, t]);
+  }, [deleteTarget, companyId, actor, companyPayload, buildPayload, loadAppointments, t, tCommon]);
 
   // Modal handlers
   const handleNewAppointment = useCallback(() => {
@@ -1443,6 +1476,9 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         unique8DigitId,
       });
 
+      // An edit is confirmed when the row has changed from how it is now.
+      const before = !isNewAppointment && data.id ? await readRow(terminById(data.id)) : null;
+
       const result = await callN8nAction(
         buildPayload(event, 'appointments', enhancedData)
       );
@@ -1451,8 +1487,12 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         throw new Error(t('errors.saveError'));
       }
 
-      // Wait 1 second for system to process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for the write itself (resources below need the row to exist).
+      // An edit that changed nothing never changes the row, so it is not
+      // reported as unconfirmed.
+      const confirmed = isNewAppointment && unique8DigitId
+        ? await waitForRowCreated(terminByCode(unique8DigitId))
+        : (await waitForRowChanged(terminById(data.id!), before, { timeoutMs: 4000 }), true);
 
       const textTerminId = isNewAppointment ? unique8DigitId : data.id;
 
@@ -1502,12 +1542,13 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       }
 
       handleCloseModal();
+      if (!confirmed) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       setActionError(t('errors.saveError'));
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal, editingAppointment, companySettings, t]);
+  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal, editingAppointment, companySettings, t, tCommon]);
 
   // Drag-and-drop reschedule: callback from WeekView/DayView
   const handleAppointmentDropped = useCallback((
@@ -1601,6 +1642,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         clientDetails: null,
       });
 
+      const before = await readRow(terminById(appointment.id));
+
       const result = await callN8nAction(
         buildPayload('POSODOBITEV_TERMINA', 'appointments', enhancedData)
       );
@@ -1609,10 +1652,15 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         throw new Error(t('calendarView.errors.reschedule'));
       }
 
-      setSuccessMessage(t('calendarView.toast.appointmentRescheduled'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // A move always changes date or time, so a row that stays the same
+      // means the save did not go through.
+      const moved = await waitForRowChanged(terminById(appointment.id), before);
+      if (moved) {
+        setSuccessMessage(t('calendarView.toast.appointmentRescheduled'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
       await loadAppointments();
 
       if (companySettings?.obvestilo_prestavitev_omogoceno === true) {
@@ -1632,7 +1680,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, companySettings, t]);
+  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, companySettings, t, tCommon]);
 
   const handleConfirmReschedule = useCallback(async () => {
     if (!rescheduleConfirm) return;
@@ -1920,14 +1968,15 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       });
       if (!result.ok) throw new Error(t('calendarView.errors.absenceDelete'));
       handleAbsenceDetailClose();
-      await new Promise((r) => setTimeout(r, 700));
+      const deleted = await waitForRowDeleted({ table: 'absences', column: 'id', value: absence.id });
       await refreshAbsences();
+      if (!deleted) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       console.error('Error deleting absence:', err);
     } finally {
       setIsAbsenceDeleting(false);
     }
-  }, [companyId, actor, refreshAbsences, handleAbsenceDetailClose]);
+  }, [companyId, actor, refreshAbsences, handleAbsenceDetailClose, t, tCommon]);
 
   const handleAbsenceEdit = useCallback(async (absence: Absence, data: AbsenceEditData) => {
     setIsSaving(true);

@@ -73,6 +73,17 @@ import { TABLES } from "@/lib/data";
 import { useUserPersonId } from "@/hooks/useUserPersonId";
 import { useRolePermissions } from "@/app/role-permission-context";
 import { useTranslations } from "next-intl";
+import {
+  readRow,
+  terminByCode,
+  terminById,
+  waitForRowChanged,
+  waitForRowCreated,
+  waitForRowDeleted,
+  waitForRowValue,
+} from "@/lib/confirmWrite";
+import { syncResursiZaTermin, sprostiResurseTermina } from "@/lib/supabase/resursi";
+import { waitForClient } from "@/lib/supabase/clients";
 import FirstRunSetup from "@/components/onboarding/FirstRunSetup";
 import GettingStarted from "@/components/guide/GettingStarted";
 import StaffTourStarter from "@/components/guide/StaffTourStarter";
@@ -91,6 +102,7 @@ import { Link as NextLink } from "@/i18n/navigation";
 export default function DashboardClient({ initialData }: { initialData: DashboardData | null }) {
   const { money, locale } = useFormat();
   const t = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const { companyId, companySettings, loading: companyLoading, reloadSettings } = useCompany();
   const { user, loading: authLoading } = useAuth();
@@ -428,12 +440,32 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         unique8DigitId,
       });
 
+      // An edit is confirmed when the row has changed from how it is now.
+      const before = !isNew && data.id ? await readRow(terminById(data.id)) : null;
+
       const result = await callN8nAction(buildPayload(event, 'appointments', enhancedData));
       if (!result.ok) throw new Error('Prišlo je do napake pri shranjevanju termina.');
 
-      setSuccessMessage(isNew ? t('toast.appointmentAdded') : t('toast.appointmentUpdated'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for the write itself. An edit that changed nothing never changes
+      // the row, so it is not reported as unconfirmed.
+      const confirmed = isNew && unique8DigitId
+        ? await waitForRowCreated(terminByCode(unique8DigitId))
+        : (await waitForRowChanged(terminById(data.id!), before, { timeoutMs: 4000 }), true);
+
+      // The appointment occupies its services' resources, as from the calendar
+      // and the Termini page (this was missing here).
+      await syncResursiZaTermin(
+        companyId,
+        isNew ? unique8DigitId : data.id,
+        [data.storitev_id, data.storitev_id_2, data.storitev_id_3],
+      );
+
+      if (confirmed) {
+        setSuccessMessage(isNew ? t('toast.appointmentAdded') : t('toast.appointmentUpdated'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
       await loadDashboard();
 
       if (isNew) {
@@ -446,7 +478,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     } finally {
       setter(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, services, employees, loadDashboard]);
+  }, [companyId, actor, companyPayload, buildPayload, services, employees, loadDashboard, t, tCommon]);
 
   // ── Complete appointment ─────────────────────────────────────────────────
   const handleCompleteAppointment = useCallback((appointment: AppointmentWithDetails) => {
@@ -467,16 +499,21 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
       if (!result.ok) throw new Error('Prišlo je do napake pri zaključevanju termina.');
       setSuccessMessage(t('toast.appointmentCompleted'));
       setTimeout(() => setSuccessMessage(null), 3000);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      await loadDashboard();
+      // n8n marks it completed only after preparing the thank-you message
+      // (several seconds): close now, refresh when the database has it.
+      const completedId = completeTarget.id;
       setCompleteTarget(null);
       setCompletionNotes('');
+      void waitForRowValue(terminById(completedId), 'Status', 'completed', { timeoutMs: 20000 }).then((ok) => {
+        if (!ok) setActionError(tCommon('errors.writeUnconfirmed'));
+        return loadDashboard();
+      });
     } catch (err) {
       setActionError(t('toast.completeError'));
     } finally {
       setIsCompleting(false);
     }
-  }, [completeTarget, completionNotes, companyId, actor, companyPayload, buildPayload, loadDashboard]);
+  }, [completeTarget, completionNotes, companyId, actor, companyPayload, buildPayload, loadDashboard, t, tCommon]);
 
   // ── No Show ──────────────────────────────────────────────────────────────
   const handleNoShowAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
@@ -493,16 +530,19 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         datum: appointment.datum, cas_zacetek: appointment.cas_zacetek,
       }));
       if (!result.ok) throw new Error('Prišlo je do napake pri označevanju kot No Show.');
-      setSuccessMessage(t('toast.appointmentNoShow'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (await waitForRowValue(terminById(appointment.id), 'Status', 'no_show')) {
+        setSuccessMessage(t('toast.appointmentNoShow'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
       await loadDashboard();
     } catch (err) {
       setActionError(t('toast.noShowError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadDashboard]);
+  }, [companyId, actor, companyPayload, buildPayload, loadDashboard, t, tCommon]);
 
   // ── Cancel appointment ───────────────────────────────────────────────────
   const handleCancelAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
@@ -519,16 +559,19 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         datum: appointment.datum, cas_zacetek: appointment.cas_zacetek,
       }));
       if (!result.ok) throw new Error('Prišlo je do napake pri odpovedi termina.');
-      setSuccessMessage(t('toast.appointmentCancelled'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (await waitForRowValue(terminById(appointment.id), 'Status', 'cancelled')) {
+        setSuccessMessage(t('toast.appointmentCancelled'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
       await loadDashboard();
     } catch (err) {
       setActionError(t('toast.cancelError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadDashboard]);
+  }, [companyId, actor, companyPayload, buildPayload, loadDashboard, t, tCommon]);
 
   // ── Delete appointment ───────────────────────────────────────────────────
   const handleDeleteAppointment = useCallback((appointment: AppointmentWithDetails) => {
@@ -543,15 +586,18 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     try {
       const result = await callN8nAction(buildPayload('IZBRIS_TERMINA', 'appointments', buildBookingDeleteData({ companyId, userEmail: actor, companyProfile: companyPayload, appointmentId: deleteTarget.id })));
       if (!result.ok) throw new Error('Prišlo je do napake pri brisanju termina.');
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const deleted = await waitForRowDeleted(terminById(deleteTarget.id));
+      // A deleted appointment must not keep its resources occupied.
+      await sprostiResurseTermina(companyId, deleteTarget.id);
       await loadDashboard();
       setDeleteTarget(null);
+      if (!deleted) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       setActionError(t('toast.deleteError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [deleteTarget, companyId, actor, companyPayload, buildPayload, loadDashboard]);
+  }, [deleteTarget, companyId, actor, companyPayload, buildPayload, loadDashboard, t, tCommon]);
 
   // ── Save new client ──────────────────────────────────────────────────────
   const handleSaveNewClient = useCallback(async (data: ClientFormData) => {
@@ -570,15 +616,21 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
         Opombe: data.opombe, 'Interne opombe': data.interne_opombe,
         [companyColumn]: companyId,
       };
+      let createdClientId = clientId;
       const payload = buildPayload('NOVA_STRANKA', 'clients', buildClientCreateData({ companyId, userEmail: actor, companyProfile: companyPayload, clientRow: newRow }));
       const result = await callN8nAction(payload, async () => {
         const nextId = await getNextClientId(companyId);
+        createdClientId = nextId;
         return { ...payload, data: buildClientCreateData({ companyId, userEmail: actor, companyProfile: companyPayload, clientRow: { ...newRow, 'ID stranke': nextId } }) };
       });
       if (!result.ok) throw new Error('Prišlo je do napake pri ustvarjanju stranke.');
-      setSuccessMessage(t('toast.clientAdded'));
-      setTimeout(() => setSuccessMessage(null), 3000);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Confirm the client exists before reporting success, so it is not entered twice.
+      if (await waitForClient(companyId, createdClientId)) {
+        setSuccessMessage(t('toast.clientAdded'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
       setShowNewClientModal(false);
       await loadDashboard();
     } catch (err) {
@@ -586,7 +638,7 @@ export default function DashboardClient({ initialData }: { initialData: Dashboar
     } finally {
       setIsNewClientSaving(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadDashboard]);
+  }, [companyId, actor, companyPayload, buildPayload, loadDashboard, t, tCommon]);
 
   // ── User display name ────────────────────────────────────────────────────
   const displayName = useMemo(() => {
