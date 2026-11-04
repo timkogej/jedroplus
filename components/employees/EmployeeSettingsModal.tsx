@@ -665,7 +665,7 @@ function EmployeeSettingsModal({
                                 className="rounded-[10px] border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25"
                               />
                               {zacetekCikla && new Date(zacetekCikla).getDay() !== 1 && (
-                                <p className="text-xs text-red-500 mt-1">Izbrani datum mora biti ponedeljek.</p>
+                                <p className="text-xs text-red-500 mt-1">{t('cycleStartMustBeMonday')}</p>
                               )}
                             </div>
                           </div>

@@ -144,5 +144,6 @@
   },
   "gradientSelector": {
     "description": "Ta barva bo uporabljena za začetnice na koledarju in profilih"
-  }
+  },
+  "cycleStartMustBeMonday": "Izbrani datum mora biti ponedeljek."
 }

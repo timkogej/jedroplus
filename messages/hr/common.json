@@ -143,5 +143,16 @@
   "questionnaire": {
     "answersTitle": "Upitnik",
     "answersHint": "Odgovori klijenta pri online rezervaciji"
+  },
+  "notFound": {
+    "title": "Stranica ne postoji",
+    "body": "Poveznica je možda zastarjela ili je stranica premještena.",
+    "home": "Na nadzornu ploču"
+  },
+  "errorPage": {
+    "title": "Nešto je pošlo po zlu",
+    "body": "Stranica se nije do kraja učitala. Vaši su podaci sigurni — pokušajte ponovno.",
+    "retry": "Pokušaj ponovno",
+    "home": "Na nadzornu ploču"
   }
 }

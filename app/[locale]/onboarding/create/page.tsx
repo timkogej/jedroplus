@@ -283,6 +283,13 @@ export default function CreateCompanyPage() {
 
   const [loading, setLoading] = useState(false);
   const [createdCompanyPublicId, setCreatedCompanyPublicId] = useState('');
+  // Profile link, time zone and currency are saved right after creation; the
+  // move to the dashboard waits for them (a page change would cut them off).
+  const setupDoneRef = useRef<Promise<unknown>>(Promise.resolve());
+  const goToDashboard = async () => {
+    await setupDoneRef.current;
+    window.location.href = `/${locale}/dashboard`;
+  };
   const [showConfetti, setShowConfetti] = useState(false);
 
   const TOTAL_STEPS = 5;
@@ -385,21 +392,20 @@ export default function CreateCompanyPage() {
           localStorage.setItem(STORAGE_KEY_UUID, companyUUID);
           document.cookie = `company_id=${publicId}; path=/; max-age=31536000`;
 
-          supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user) {
-              supabase.from('profiles').update({ default_company_id: companyUUID }).eq('id', user.id)
-                .then(({ error }) => {
-                  if (error) console.warn('[CreateCompany] Profile update failed:', error.message);
-                });
-            }
-          });
+          const profileDone = (async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { error } = await supabase.from('profiles').update({ default_company_id: companyUUID }).eq('id', user.id);
+            if (error) console.warn('[CreateCompany] Profile update failed:', error.message);
+          })().catch(() => {});
 
           // Country → time zone + currency. n8n only stores the country name;
           // the "Podatki podjetij" row can appear a moment later, so retry.
           const chosenCountry = findCountry(country);
+          let regionDone: Promise<unknown> = Promise.resolve();
           if (chosenCountry) {
             const d = regionForCountry(chosenCountry.code);
-            void (async () => {
+            regionDone = (async () => {
               for (let attempt = 0; attempt < 4; attempt++) {
                 if (attempt > 0) await new Promise(r => setTimeout(r, attempt * 1500));
                 const error = await saveCompanyRegion({
@@ -410,8 +416,12 @@ export default function CreateCompanyPage() {
                 if (!error) return;
               }
               console.warn('[CreateCompany] Saving region failed; falling back to country name');
-            })();
+            })().catch(() => {});
           }
+          setupDoneRef.current = Promise.race([
+            Promise.all([profileDone, regionDone]),
+            new Promise((r) => setTimeout(r, 8000)),
+          ]);
 
           // The dashboard creates these through the normal n8n flows once the
           // company is loaded (see components/onboarding/FirstRunSetup).
@@ -443,9 +453,9 @@ export default function CreateCompanyPage() {
           setCreatedCompanyPublicId(publicId);
           setShowConfetti(true);
           toast.success(t('create.toasts.success'));
-          setTimeout(() => {
-            window.location.href = `/${locale}/dashboard`;
-          }, 1500);
+          // Let the confetti play, then continue once the setup above is saved.
+          await new Promise((r) => setTimeout(r, 1500));
+          await goToDashboard();
         } else {
           toast.error(t('create.toasts.errorLoad'));
           setLoading(false);
@@ -475,7 +485,7 @@ export default function CreateCompanyPage() {
             <h2 className="mb-2 text-[26px] font-semibold tracking-tight text-gray-900">{t('create.success.title')}</h2>
             <p className="mb-8 text-[15px] text-gray-500">{t('create.success.subtitle')}</p>
             <button
-              onClick={() => (window.location.href = '/dashboard')}
+              onClick={() => void goToDashboard()}
               className="h-11 w-full rounded-xl font-medium text-white shadow-sm transition-opacity duration-200 hover:opacity-90 active:opacity-80"
               style={{ background: 'linear-gradient(to right, #8B5CF6, #06B6D4)' }}
             >

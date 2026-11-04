@@ -385,6 +385,9 @@
     "clickToInsert": "Click a variable to add it to the text:",
     "estimatedLength": "Estimated length (variables count as their real value)",
     "tooLong": "The message is too long!",
-    "tooLongBody": "The template exceeds {max} characters. Shorten the text."
-  }
+    "tooLongBody": "The template exceeds {max} characters. Shorten the text.",
+    "tokenLength": "{token} — about {length} characters",
+    "tokenTooLong": "Doesn't fit: {label} adds about {length} characters, but only {left} are left. Shorten the text."
+  },
+  "senderRequestError": "The request could not be submitted."
 }

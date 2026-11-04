@@ -143,5 +143,16 @@
   "questionnaire": {
     "answersTitle": "Questionnaire",
     "answersHint": "The client's answers when booking online"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The link may be out of date, or the page has moved.",
+    "home": "Go to dashboard"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "body": "The page didn't finish loading. Your data is safe — please try again.",
+    "retry": "Try again",
+    "home": "Go to dashboard"
   }
 }

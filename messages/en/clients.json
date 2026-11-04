@@ -237,5 +237,18 @@
       "notes": "Notes",
       "added": "Date added"
     }
+  },
+  "loyaltyCard": {
+    "title": "Loyalty card",
+    "loading": "Loading…",
+    "visits": "completed visits",
+    "points": "available points",
+    "pointsFor": "{threshold} points for {reward}",
+    "redeem": "Redeem reward",
+    "redeeming": "Redeeming…",
+    "confirm": "Redeem “{reward}” for {threshold} points?",
+    "redeemed": "Reward redeemed.",
+    "loadError": "Could not load loyalty points.",
+    "redeemError": "Could not redeem reward. Refresh the card and try again."
   }
 }

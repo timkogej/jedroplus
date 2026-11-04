@@ -143,5 +143,16 @@
   "questionnaire": {
     "answersTitle": "Vprašalnik",
     "answersHint": "Odgovori stranke ob spletni rezervaciji"
+  },
+  "notFound": {
+    "title": "Te strani ni",
+    "body": "Povezava je morda zastarela ali pa je stran premaknjena.",
+    "home": "Na nadzorno ploščo"
+  },
+  "errorPage": {
+    "title": "Nekaj je šlo narobe",
+    "body": "Stran se ni naložila do konca. Vaši podatki so varni — poskusite znova.",
+    "retry": "Poskusi znova",
+    "home": "Na nadzorno ploščo"
   }
 }

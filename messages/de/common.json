@@ -143,5 +143,16 @@
   "questionnaire": {
     "answersTitle": "Fragebogen",
     "answersHint": "Antworten des Kunden bei der Online-Buchung"
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "body": "Der Link ist vielleicht veraltet oder die Seite wurde verschoben.",
+    "home": "Zum Dashboard"
+  },
+  "errorPage": {
+    "title": "Etwas ist schiefgelaufen",
+    "body": "Die Seite wurde nicht vollständig geladen. Ihre Daten sind sicher – bitte versuchen Sie es erneut.",
+    "retry": "Erneut versuchen",
+    "home": "Zum Dashboard"
   }
 }

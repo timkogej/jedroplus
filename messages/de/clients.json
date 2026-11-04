@@ -237,5 +237,18 @@
       "notes": "Notizen",
       "added": "Angelegt am"
     }
+  },
+  "loyaltyCard": {
+    "title": "Treuekarte",
+    "loading": "Wird geladen …",
+    "visits": "abgeschlossene Besuche",
+    "points": "verfügbare Punkte",
+    "pointsFor": "{threshold} Punkte für {reward}",
+    "redeem": "Prämie einlösen",
+    "redeeming": "Wird eingelöst …",
+    "confirm": "Prämie „{reward}“ für {threshold} Punkte einlösen?",
+    "redeemed": "Prämie eingelöst.",
+    "loadError": "Treuepunkte konnten nicht geladen werden.",
+    "redeemError": "Prämie konnte nicht eingelöst werden. Aktualisieren Sie die Karte und versuchen Sie es erneut."
   }
 }

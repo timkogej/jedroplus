@@ -416,8 +416,8 @@ export function TemplateEditor({
                 disabled={!seVeljaga}
                 title={
                   seVeljaga
-                    ? `${v.token} — približno ${dolzina} znakov`
-                    : `Ne prilega se: ${labels[v.token]} doda približno ${dolzina} znakov, na voljo pa jih je še ${Math.max(0, (maxLength ?? 0) - currentLength)}. Skrajšajte besedilo.`
+                    ? t('tokenLength', { token: v.token, length: dolzina })
+                    : t('tokenTooLong', { label: labels[v.token], length: dolzina, left: Math.max(0, (maxLength ?? 0) - currentLength) })
                 }
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
                   seVeljaga

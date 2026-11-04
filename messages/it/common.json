@@ -143,5 +143,16 @@
   "questionnaire": {
     "answersTitle": "Questionario",
     "answersHint": "Risposte del cliente alla prenotazione online"
+  },
+  "notFound": {
+    "title": "Pagina non trovata",
+    "body": "Il link potrebbe essere obsoleto o la pagina è stata spostata.",
+    "home": "Vai alla dashboard"
+  },
+  "errorPage": {
+    "title": "Qualcosa è andato storto",
+    "body": "La pagina non si è caricata completamente. I tuoi dati sono al sicuro: riprova.",
+    "retry": "Riprova",
+    "home": "Vai alla dashboard"
   }
 }

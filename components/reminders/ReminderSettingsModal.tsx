@@ -583,7 +583,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
       });
       const telo = await odgovor.json().catch(() => ({}));
       if (!odgovor.ok || !telo?.ok) {
-        setSenderNapaka(String(telo?.razlog ?? 'Zahteve ni bilo mogoče oddati.'));
+        setSenderNapaka(String(telo?.razlog ?? t('senderRequestError')));
         return;
       }
       setSenderStatus('v_obdelavi');
@@ -592,7 +592,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
       setSenderVUporabi(null);
       setSenderOpomba(null);
     } catch {
-      setSenderNapaka('Zahteve ni bilo mogoče oddati.');
+      setSenderNapaka(t('senderRequestError'));
     } finally {
       setSenderPosiljam(false);
     }

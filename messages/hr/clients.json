@@ -237,5 +237,18 @@
       "notes": "Bilješke",
       "added": "Datum upisa"
     }
+  },
+  "loyaltyCard": {
+    "title": "Kartica vjernosti",
+    "loading": "Učitavanje…",
+    "visits": "obavljenih posjeta",
+    "points": "dostupnih bodova",
+    "pointsFor": "{threshold} bodova za {reward}",
+    "redeem": "Iskoristi nagradu",
+    "redeeming": "Iskorištavanje…",
+    "confirm": "Iskoristiti nagradu „{reward}” za {threshold} bodova?",
+    "redeemed": "Nagrada je iskorištena.",
+    "loadError": "Bodove nije bilo moguće učitati.",
+    "redeemError": "Nagradu nije bilo moguće iskoristiti. Osvježite karticu i pokušajte ponovno."
   }
 }

@@ -376,7 +376,9 @@
     "clickToInsert": "Klicken Sie auf eine Variable, um sie einzufügen:",
     "estimatedLength": "Geschätzte Länge (Variablen zählen mit ihrem tatsächlichen Wert)",
     "tooLong": "Die Nachricht ist zu lang!",
-    "tooLongBody": "Die Vorlage überschreitet {max} Zeichen. Kürzen Sie den Text."
+    "tooLongBody": "Die Vorlage überschreitet {max} Zeichen. Kürzen Sie den Text.",
+    "tokenLength": "{token} — etwa {length} Zeichen",
+    "tokenTooLong": "Passt nicht: {label} fügt etwa {length} Zeichen hinzu, verfügbar sind nur noch {left}. Kürzen Sie den Text."
   },
   "test": {
     "buttonSms": "Test-SMS senden",
@@ -386,5 +388,6 @@
     "sent": "An {recipient} gesendet. Prüfen Sie, ob alles so klingt, wie Sie möchten.",
     "unknownVars": "Der Versand kennt diese Variablen nicht, daher blieben sie unverändert: {tokens}.",
     "failed": "Der Test konnte nicht gesendet werden. Bitte versuchen Sie es in ein paar Minuten erneut."
-  }
+  },
+  "senderRequestError": "Die Anfrage konnte nicht gesendet werden."
 }

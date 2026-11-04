@@ -385,6 +385,9 @@
     "clickToInsert": "Kliknite na spremenljivko, da jo dodate v besedilo:",
     "estimatedLength": "Ocenjeno število znakov (spremenljivke se štejejo glede na dejansko vrednost)",
     "tooLong": "Sporočilo je predolgo!",
-    "tooLongBody": "Predloga presega {max} znakov. Skrajšajte del besedila."
-  }
+    "tooLongBody": "Predloga presega {max} znakov. Skrajšajte del besedila.",
+    "tokenLength": "{token} — približno {length} znakov",
+    "tokenTooLong": "Ne prilega se: {label} doda približno {length} znakov, na voljo pa jih je še {left}. Skrajšajte besedilo."
+  },
+  "senderRequestError": "Zahteve ni bilo mogoče oddati."
 }
