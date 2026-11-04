@@ -459,6 +459,28 @@
       "cancelError": "Cancellation failed. Please try again.",
       "canceled": "The add-on will be canceled at the end of the billing period."
     },
-    "fromAddonsOnly": "{count} from add-ons (your plan includes none)"
+    "fromAddonsOnly": "{count} from add-ons (your plan includes none)",
+    "locations": {
+      "title": "Extra locations",
+      "body": "Jedro Pro includes 3 locations. If you need more, you can add them.",
+      "inPlan": "In plan",
+      "extra": "Extra",
+      "total": "Total",
+      "activeAddon": "+{count, plural, one {# extra location} other {# extra locations}} · {price} / month",
+      "sliderLabel": "Extra locations",
+      "summary": "{total, plural, one {# location} other {# locations}} in total ({included} in plan + {extra} extra)",
+      "cost": "{price} / month ({unit} per location)",
+      "removeNote": "On confirmation the add-on will be cancelled at the end of the billing period.",
+      "overTitle": "Heads up:",
+      "over": "{count, plural, one {# location is} other {# locations are}} active beyond the new amount. Choose which ones to keep first.",
+      "openLocations": "Open locations",
+      "updating": "Updating…",
+      "update": "Save number of locations",
+      "proOnly": "Extra locations are available on Jedro Pro (3 locations included).",
+      "seePlans": "See plans",
+      "errInUse": "You have more active locations than this amount allows. Archive the surplus first in Settings → Locations.",
+      "errPlan": "Extra locations are available on Jedro Pro.",
+      "errOwner": "Only the owner can change extra locations."
+    }
   }
 }

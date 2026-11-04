@@ -459,6 +459,28 @@
       "cancelError": "Otkazivanje nije uspjelo. Pokušajte ponovno.",
       "canceled": "Dodatak će biti otkazan na kraju obračunskog razdoblja."
     },
-    "fromAddonsOnly": "{count} iz dodataka (paket ne uključuje poruke)"
+    "fromAddonsOnly": "{count} iz dodataka (paket ne uključuje poruke)",
+    "locations": {
+      "title": "Dodatne lokacije",
+      "body": "Jedro Pro uključuje 3 lokacije. Ako trebate više, možete ih dokupiti.",
+      "inPlan": "U paketu",
+      "extra": "Dodatne",
+      "total": "Ukupno",
+      "activeAddon": "+{count, plural, one {# dodatna lokacija} few {# dodatne lokacije} other {# dodatnih lokacija}} · {price} / mjesec",
+      "sliderLabel": "Dodatne lokacije",
+      "summary": "Ukupno {total, plural, one {# lokacija} few {# lokacije} other {# lokacija}} (u paketu {included} + {extra} dodatnih)",
+      "cost": "{price} / mjesec ({unit} po lokaciji)",
+      "removeNote": "Nakon potvrde dodatak će biti otkazan na kraju obračunskog razdoblja.",
+      "overTitle": "Pozor:",
+      "over": "Aktivno je {count, plural, one {# lokacija} few {# lokacije} other {# lokacija}} više nego što dopušta nova količina. Prvo odaberite koje zadržavate.",
+      "openLocations": "Otvori lokacije",
+      "updating": "Ažuriram …",
+      "update": "Spremi broj lokacija",
+      "proOnly": "Dodatne lokacije dostupne su u paketu Jedro Pro (uključuje 3 lokacije).",
+      "seePlans": "Pogledaj pakete",
+      "errInUse": "Imate više aktivnih lokacija nego što ova količina dopušta. Prvo arhivirajte višak u Postavke → Lokacije.",
+      "errPlan": "Dodatne lokacije dostupne su u paketu Jedro Pro.",
+      "errOwner": "Dodatne lokacije može mijenjati samo vlasnik."
+    }
   }
 }

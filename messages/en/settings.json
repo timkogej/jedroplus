@@ -453,7 +453,20 @@
     "pickerStaffHelp": "The team member can be booked only at the selected locations. At least one must be selected.",
     "pickerServiceHelp": "If all locations are selected, the service is also offered at locations you add later.",
     "switcherLabel": "Location",
-    "allLocations": "All locations"
+    "allLocations": "All locations",
+    "reduce": {
+      "title": "Choose the locations to keep (up to {allowed})",
+      "help": "The others will be archived: hidden and closed to new appointments. Nothing is deleted, and you can restore them when the limit allows.",
+      "mainTag": "Main",
+      "willArchive": "Will be archived: {names}",
+      "confirm": "Archive {count, plural, one {# location} other {# locations}}",
+      "cancel": "Cancel",
+      "errSave": "Saving failed. Please try again.",
+      "errUpcoming": "“{name}” can't be archived: it still has {count} upcoming appointments. Move or cancel them first.",
+      "overTitle": "{active} locations are active, the plan allows {max}.",
+      "overBody": "Choose which locations to keep. Adding new locations and restoring archived ones is blocked until you reduce the number.",
+      "choose": "Choose locations"
+    }
   },
   "loyaltyPage": {
     "back": "Settings",

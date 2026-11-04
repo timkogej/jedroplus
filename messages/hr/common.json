@@ -154,5 +154,33 @@
     "body": "Stranica se nije do kraja učitala. Vaši su podaci sigurni — pokušajte ponovno.",
     "retry": "Pokušaj ponovno",
     "home": "Na nadzornu ploču"
+  },
+  "apiErrors": {
+    "tooManyRequests": "Previše zahtjeva. Pričekajte trenutak.",
+    "noCompany": "Vaš račun nije povezan s tvrtkom.",
+    "badRequest": "Zahtjev nije bilo moguće pročitati.",
+    "senderNameInvalid": "Ime pošiljatelja smije imati najviše 11 znakova, bez dijakritičkih znakova i ne smije biti samo broj.",
+    "ownerOrAdminOnly": "Ovo može promijeniti samo vlasnik ili administrator.",
+    "statusCheckFailed": "Stanje nije bilo moguće provjeriti.",
+    "senderIdPlan": "Vlastito ime pošiljatelja dostupno je u paketu Jedro Premium.",
+    "requestSaveFailed": "Zahtjev nije bilo moguće spremiti.",
+    "senderRequested": "Zahtjev je poslan. Do odobrenja poruke se šalju s imenom Jedroplus.",
+    "testOwnerOnly": "Probnu poruku može poslati samo vlasnik ili administrator.",
+    "invalidInput": "Nevažeći zahtjev.",
+    "templateEmpty": "Predložak je prazan — najprije upišite tekst.",
+    "testFailed": "Probu nije bilo moguće poslati. Pokušajte za nekoliko minuta.",
+    "noActiveSubscription": "Aktivna pretplata nije pronađena.",
+    "notStripeManaged": "Pretplata se ne upravlja putem Stripea pa kupnja nije moguća.",
+    "quantityRange": "Količina mora biti između 0 i 20.",
+    "locationsInUse": "Imate više aktivnih lokacija nego što paket uključuje. Najprije odaberite koje zadržavate.",
+    "trialCreditsFailed": "Probne kredite nije bilo moguće zabilježiti.",
+    "invalidSmsPack": "Nevažeći SMS paket.",
+    "invalidEmailPack": "Nevažeći paket e-pošte.",
+    "pricesNotConfigured": "Cijene nisu postavljene. Obratite se administratoru.",
+    "companyNotFound": "Tvrtka nije pronađena.",
+    "locationsOwnerOnly": "Dodatne lokacije može kupiti samo vlasnik.",
+    "locationsPlan": "Dodatne lokacije dostupne su u paketu Pro.",
+    "locationQuantityRange": "Količina mora biti između 1 i {max}.",
+    "locationsOverQuantity": "Imate više aktivnih lokacija nego što ova količina dopušta. Najprije arhivirajte suvišne."
   }
 }

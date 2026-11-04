@@ -453,7 +453,20 @@
     "pickerStaffHelp": "Zaposleni je za rezervacije na voljo samo na izbranih lokacijah. Vsaj ena mora biti izbrana.",
     "pickerServiceHelp": "Če so izbrane vse lokacije, velja storitev tudi za lokacije, ki jih dodate kasneje.",
     "switcherLabel": "Lokacija",
-    "allLocations": "Vse lokacije"
+    "allLocations": "Vse lokacije",
+    "reduce": {
+      "title": "Izberite lokacije, ki jih obdržite (največ {allowed})",
+      "help": "Ostale bodo arhivirane: skrite in brez novih terminov. Nič se ne izbriše, ob višji omejitvi jih lahko obnovite.",
+      "mainTag": "Glavna",
+      "willArchive": "Arhivirano bo: {names}",
+      "confirm": "Arhiviraj {count, plural, one {# lokacijo} two {# lokaciji} few {# lokacije} other {# lokacij}}",
+      "cancel": "Prekliči",
+      "errSave": "Shranjevanje ni uspelo. Poskusite znova.",
+      "errUpcoming": "Lokacije »{name}« ni mogoče arhivirati: ima še {count} prihodnjih terminov. Termine premaknite ali odpovejte.",
+      "overTitle": "Aktivnih je {active} lokacij, paket dovoljuje {max}.",
+      "overBody": "Izberite, katere lokacije obdržite. Nove lokacije in obnavljanje arhiviranih so blokirani, dokler ne zmanjšate števila.",
+      "choose": "Izberi lokacije"
+    }
   },
   "loyaltyPage": {
     "back": "Nastavitve",

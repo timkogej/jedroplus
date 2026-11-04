@@ -459,6 +459,28 @@
       "cancelError": "Annullamento non riuscito. Riprova.",
       "canceled": "Il componente aggiuntivo verrà annullato alla fine del periodo di fatturazione."
     },
-    "fromAddonsOnly": "{count} dai componenti aggiuntivi (il piano non include messaggi)"
+    "fromAddonsOnly": "{count} dai componenti aggiuntivi (il piano non include messaggi)",
+    "locations": {
+      "title": "Sedi aggiuntive",
+      "body": "Jedro Pro include 3 sedi. Se ne servono di più, puoi aggiungerle.",
+      "inPlan": "Nel piano",
+      "extra": "Aggiuntive",
+      "total": "Totale",
+      "activeAddon": "+{count, plural, one {# sede aggiuntiva} other {# sedi aggiuntive}} · {price} / mese",
+      "sliderLabel": "Sedi aggiuntive",
+      "summary": "{total, plural, one {# sede} other {# sedi}} in totale ({included} nel piano + {extra} aggiuntive)",
+      "cost": "{price} / mese ({unit} per sede)",
+      "removeNote": "Alla conferma il componente aggiuntivo verrà annullato a fine periodo di fatturazione.",
+      "overTitle": "Attenzione:",
+      "over": "{count, plural, one {# sede è attiva} other {# sedi sono attive}} oltre la nuova quantità. Scegli prima quali mantenere.",
+      "openLocations": "Apri le sedi",
+      "updating": "Aggiornamento…",
+      "update": "Salva il numero di sedi",
+      "proOnly": "Le sedi aggiuntive sono disponibili con Jedro Pro (3 sedi incluse).",
+      "seePlans": "Vedi i piani",
+      "errInUse": "Hai più sedi attive di quante ne consenta questa quantità. Archivia prima quelle in eccesso in Impostazioni → Sedi.",
+      "errPlan": "Le sedi aggiuntive sono disponibili con Jedro Pro.",
+      "errOwner": "Solo il titolare può modificare le sedi aggiuntive."
+    }
   }
 }

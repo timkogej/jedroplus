@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireCompanyAccess } from '@/lib/auth/apiAuth';
+import { isCompanyOwner, loadLocationBilling } from '@/lib/billing/locationBilling.server';
+import { apiMessages } from '@/lib/api/apiMessages';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -12,10 +14,11 @@ const N8N_API_KEY = process.env.N8N_WEBHOOK_API_KEY;
 
 type CancelBody = {
   company_id: string;
-  addon_type: 'sms' | 'email' | 'employees';
+  addon_type: 'sms' | 'email' | 'employees' | 'locations';
 };
 
 export async function POST(request: NextRequest) {
+  const tApi = await apiMessages(request);
   if (!serviceRoleKey) {
     return NextResponse.json({ success: false, message: 'Service role key not configured' }, { status: 500 });
   }
@@ -33,7 +36,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, message: 'company_id and addon_type are required' }, { status: 400 });
   }
 
-  if (!['sms', 'email', 'employees'].includes(addon_type)) {
+  if (!['sms', 'email', 'employees', 'locations'].includes(addon_type)) {
     return NextResponse.json({ success: false, message: 'Invalid addon_type' }, { status: 400 });
   }
 
@@ -52,7 +55,7 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
 
   if (!sub) {
-    return NextResponse.json({ success: false, message: 'Aktivna naročnina ni najdena' }, { status: 400 });
+    return NextResponse.json({ success: false, message: tApi('noActiveSubscription') }, { status: 400 });
   }
 
   let stripeItemId: string | null = null;
@@ -61,6 +64,29 @@ export async function POST(request: NextRequest) {
     stripeItemId = sub.sms_addon_stripe_item_id;
   } else if (addon_type === 'email') {
     stripeItemId = sub.email_addon_stripe_item_id;
+  } else if (addon_type === 'locations') {
+    const billing = await loadLocationBilling(admin, company_id);
+    if (!billing) {
+      return NextResponse.json({ success: false, code: 'not_found', message: 'Podjetje ni najdeno' }, { status: 404 });
+    }
+    if (!(await isCompanyOwner(admin, billing.companyUuid, authResult.user.id))) {
+      return NextResponse.json(
+        { success: false, code: 'owner_only', message: 'Dodatne lokacije lahko odpove samo lastnik' },
+        { status: 403 }
+      );
+    }
+    // The owner chooses which locations stay before the add-on ends.
+    if (billing.active > billing.included) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'locations_in_use',
+          message: tApi('locationsInUse'),
+        },
+        { status: 409 }
+      );
+    }
+    stripeItemId = billing.stripeItemId;
   } else {
     const { data: limits } = await admin
       .from('company_user_limits')
@@ -109,6 +135,11 @@ export async function POST(request: NextRequest) {
       .from('company_subscriptions')
       .update({ email_addon_cancel_at_period_end: true })
       .eq('id', sub.id);
+  } else if (addon_type === 'locations') {
+    await admin
+      .from('company_location_limits')
+      .update({ cancel_at_period_end: true, updated_at: new Date().toISOString() })
+      .eq('company_id', (await loadLocationBilling(admin, company_id))?.companyUuid ?? company_id);
   } else {
     await admin
       .from('company_user_limits')

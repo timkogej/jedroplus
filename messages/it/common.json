@@ -154,5 +154,33 @@
     "body": "La pagina non si è caricata completamente. I tuoi dati sono al sicuro: riprova.",
     "retry": "Riprova",
     "home": "Vai alla dashboard"
+  },
+  "apiErrors": {
+    "tooManyRequests": "Troppe richieste. Attendi un momento.",
+    "noCompany": "Il tuo account non è collegato a un’azienda.",
+    "badRequest": "Impossibile leggere la richiesta.",
+    "senderNameInvalid": "Il nome del mittente può avere al massimo 11 caratteri, senza lettere accentate (č, š, ž), e non può essere solo un numero.",
+    "ownerOrAdminOnly": "Solo il titolare o un amministratore può modificarlo.",
+    "statusCheckFailed": "Impossibile verificare lo stato.",
+    "senderIdPlan": "Un nome mittente personalizzato è disponibile con il piano Jedro Premium.",
+    "requestSaveFailed": "Impossibile salvare la richiesta.",
+    "senderRequested": "Richiesta inviata. Fino all’approvazione i messaggi vengono inviati come Jedroplus.",
+    "testOwnerOnly": "Solo il titolare o un amministratore può inviare un messaggio di prova.",
+    "invalidInput": "Richiesta non valida.",
+    "templateEmpty": "Il modello è vuoto: inserisci prima un testo.",
+    "testFailed": "Impossibile inviare la prova. Riprova tra qualche minuto.",
+    "noActiveSubscription": "Nessun abbonamento attivo trovato.",
+    "notStripeManaged": "L’abbonamento non è gestito tramite Stripe, quindi l’acquisto non è possibile.",
+    "quantityRange": "La quantità deve essere compresa tra 0 e 20.",
+    "locationsInUse": "Hai più sedi attive di quelle incluse nel piano. Scegli prima quali mantenere.",
+    "trialCreditsFailed": "Impossibile registrare i crediti di prova.",
+    "invalidSmsPack": "Pacchetto SMS non valido.",
+    "invalidEmailPack": "Pacchetto e-mail non valido.",
+    "pricesNotConfigured": "I prezzi non sono configurati. Contatta l’amministratore.",
+    "companyNotFound": "Azienda non trovata.",
+    "locationsOwnerOnly": "Solo il titolare può acquistare sedi aggiuntive.",
+    "locationsPlan": "Le sedi aggiuntive sono disponibili con il piano Pro.",
+    "locationQuantityRange": "La quantità deve essere compresa tra 1 e {max}.",
+    "locationsOverQuantity": "Hai più sedi attive di quante ne consenta questa quantità. Archivia prima quelle in eccesso."
   }
 }

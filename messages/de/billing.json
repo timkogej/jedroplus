@@ -459,6 +459,28 @@
       "cancelError": "Die Kündigung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "canceled": "Das Add-on wird zum Ende des Abrechnungszeitraums gekündigt."
     },
-    "fromAddonsOnly": "{count} aus Add-ons (Ihr Paket enthält keine)"
+    "fromAddonsOnly": "{count} aus Add-ons (Ihr Paket enthält keine)",
+    "locations": {
+      "title": "Zusätzliche Standorte",
+      "body": "Jedro Pro enthält 3 Standorte. Brauchen Sie mehr, können Sie weitere hinzubuchen.",
+      "inPlan": "Im Paket",
+      "extra": "Zusätzlich",
+      "total": "Gesamt",
+      "activeAddon": "+{count, plural, one {# zusätzlicher Standort} other {# zusätzliche Standorte}} · {price} / Monat",
+      "sliderLabel": "Zusätzliche Standorte",
+      "summary": "Insgesamt {total, plural, one {# Standort} other {# Standorte}} ({included} im Paket + {extra} zusätzlich)",
+      "cost": "{price} / Monat ({unit} pro Standort)",
+      "removeNote": "Nach Bestätigung wird das Add-on zum Ende des Abrechnungszeitraums gekündigt.",
+      "overTitle": "Achtung:",
+      "over": "{count, plural, one {# Standort ist} other {# Standorte sind}} über der neuen Anzahl aktiv. Wählen Sie zuerst, welche Sie behalten.",
+      "openLocations": "Standorte öffnen",
+      "updating": "Wird aktualisiert …",
+      "update": "Anzahl der Standorte speichern",
+      "proOnly": "Zusätzliche Standorte sind mit Jedro Pro verfügbar (3 Standorte inklusive).",
+      "seePlans": "Pakete ansehen",
+      "errInUse": "Sie haben mehr aktive Standorte, als diese Anzahl erlaubt. Archivieren Sie zuerst die überzähligen unter Einstellungen → Standorte.",
+      "errPlan": "Zusätzliche Standorte sind mit Jedro Pro verfügbar.",
+      "errOwner": "Nur der Inhaber kann zusätzliche Standorte ändern."
+    }
   }
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { ReduceLocations } from '@/components/locations/ReduceLocations';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
@@ -64,6 +65,9 @@ export default function LocationsSettingsPage() {
 
   const active = locations.filter((l) => l.status === 'active').length;
   const atLimit = active >= max;
+  // After a downgrade (or a cancelled add-on) more can be active than the plan allows.
+  const overLimit = active > max;
+  const [reducing, setReducing] = useState(false);
 
   const errorText = (code: string | undefined, count?: number) => {
     switch (code) {
@@ -218,6 +222,28 @@ export default function LocationsSettingsPage() {
               {t('limitReached', { max })}{' '}
               <Link href="/nastavitve/addoni" className="font-medium text-gray-900 underline">{t('addons')}</Link>
             </p>
+          )}
+          {overLimit && (
+            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+              <p className="text-sm font-semibold text-gray-900">{t('reduce.overTitle', { active, max })}</p>
+              <p className="mt-1 text-xs text-gray-600">{t('reduce.overBody')}</p>
+              {!reducing && (
+                <button type="button" onClick={() => setReducing(true)}
+                  className="mt-3 rounded-lg bg-gray-900 px-3.5 py-2 text-sm font-medium text-white">
+                  {t('reduce.choose')}
+                </button>
+              )}
+            </div>
+          )}
+          {overLimit && reducing && (
+            <div className="mt-3">
+              <ReduceLocations
+                locations={locations.filter((l) => l.status === 'active')}
+                allowed={max}
+                onDone={() => { setReducing(false); void load(); }}
+                onCancel={() => setReducing(false)}
+              />
+            </div>
           )}
           {message && <p role="status" className="mt-3 text-sm text-gray-600">{message}</p>}
 

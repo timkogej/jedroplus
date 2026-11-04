@@ -453,7 +453,20 @@
     "pickerStaffHelp": "La persona è prenotabile solo nelle sedi selezionate. Ne serve almeno una.",
     "pickerServiceHelp": "Se tutte le sedi sono selezionate, il servizio vale anche per le sedi aggiunte in seguito.",
     "switcherLabel": "Sede",
-    "allLocations": "Tutte le sedi"
+    "allLocations": "Tutte le sedi",
+    "reduce": {
+      "title": "Scegli le sedi da mantenere (al massimo {allowed})",
+      "help": "Le altre verranno archiviate: nascoste e chiuse a nuovi appuntamenti. Non viene cancellato nulla e potrai ripristinarle quando il limite lo consente.",
+      "mainTag": "Principale",
+      "willArchive": "Verranno archiviate: {names}",
+      "confirm": "Archivia {count, plural, one {# sede} other {# sedi}}",
+      "cancel": "Annulla",
+      "errSave": "Salvataggio non riuscito. Riprova.",
+      "errUpcoming": "Non è possibile archiviare «{name}»: ha ancora {count} appuntamenti futuri. Spostali o annullali prima.",
+      "overTitle": "Le sedi attive sono {active}, il piano ne consente {max}.",
+      "overBody": "Scegli quali sedi mantenere. Aggiungere nuove sedi e ripristinare quelle archiviate è bloccato finché non riduci il numero.",
+      "choose": "Scegli le sedi"
+    }
   },
   "loyaltyPage": {
     "back": "Impostazioni",

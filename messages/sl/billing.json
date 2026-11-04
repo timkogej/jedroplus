@@ -459,6 +459,28 @@
       "cancelError": "Preklic ni uspel. Poskusite znova.",
       "canceled": "Dodatek bo preklican ob koncu obračunskega obdobja."
     },
-    "fromAddonsOnly": "{count} iz dodatkov (paket ne vključuje sporočil)"
+    "fromAddonsOnly": "{count} iz dodatkov (paket ne vključuje sporočil)",
+    "locations": {
+      "title": "Dodatne lokacije",
+      "body": "Jedro Pro vključuje 3 lokacije. Če jih potrebujete več, jih lahko dokupite.",
+      "inPlan": "V paketu",
+      "extra": "Dodatne",
+      "total": "Skupaj",
+      "activeAddon": "+{count, plural, one {# dodatna lokacija} two {# dodatni lokaciji} few {# dodatne lokacije} other {# dodatnih lokacij}} · {price} / mesec",
+      "sliderLabel": "Dodatne lokacije",
+      "summary": "Skupaj {total, plural, one {# lokacija} two {# lokaciji} few {# lokacije} other {# lokacij}} (v paketu {included} + {extra} dodatnih)",
+      "cost": "{price} / mesec ({unit} na lokacijo)",
+      "removeNote": "Ob potrditvi bo dodatek preklican ob koncu obračunskega obdobja.",
+      "overTitle": "Pozor:",
+      "over": "Aktivnih je {count, plural, one {# lokacija} two {# lokaciji} few {# lokacije} other {# lokacij}} več, kot dovoljuje nova količina. Najprej izberite, katere obdržite.",
+      "openLocations": "Odpri lokacije",
+      "updating": "Posodabljam …",
+      "update": "Shrani število lokacij",
+      "proOnly": "Dodatne lokacije so na voljo v paketu Jedro Pro (vključuje 3 lokacije).",
+      "seePlans": "Poglej pakete",
+      "errInUse": "Imate več aktivnih lokacij, kot jih dovoljuje ta količina. Najprej arhivirajte odvečne v Nastavitve → Lokacije.",
+      "errPlan": "Dodatne lokacije so na voljo v paketu Jedro Pro.",
+      "errOwner": "Dodatne lokacije lahko spreminja samo lastnik."
+    }
   }
 }

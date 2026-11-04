@@ -453,7 +453,20 @@
     "pickerStaffHelp": "Die Person ist nur an den ausgewählten Standorten buchbar. Mindestens einer muss ausgewählt sein.",
     "pickerServiceHelp": "Sind alle Standorte ausgewählt, gilt die Leistung auch für später hinzugefügte Standorte.",
     "switcherLabel": "Standort",
-    "allLocations": "Alle Standorte"
+    "allLocations": "Alle Standorte",
+    "reduce": {
+      "title": "Wählen Sie die Standorte, die Sie behalten (höchstens {allowed})",
+      "help": "Die übrigen werden archiviert: ausgeblendet und ohne neue Termine. Nichts wird gelöscht, und Sie können sie wiederherstellen, sobald das Limit es erlaubt.",
+      "mainTag": "Haupt",
+      "willArchive": "Wird archiviert: {names}",
+      "confirm": "{count, plural, one {# Standort} other {# Standorte}} archivieren",
+      "cancel": "Abbrechen",
+      "errSave": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "errUpcoming": "„{name}“ kann nicht archiviert werden: Es gibt noch {count} bevorstehende Termine. Verschieben oder stornieren Sie diese zuerst.",
+      "overTitle": "{active} Standorte sind aktiv, das Paket erlaubt {max}.",
+      "overBody": "Wählen Sie, welche Standorte Sie behalten. Neue Standorte und das Wiederherstellen archivierter sind gesperrt, bis Sie die Anzahl verringern.",
+      "choose": "Standorte wählen"
+    }
   },
   "loyaltyPage": {
     "back": "Einstellungen",
