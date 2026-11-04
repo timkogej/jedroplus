@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requireCompanyAccess } from '@/lib/auth/apiAuth';
 import { MAX_EXTRA_LOCATIONS } from '@/lib/billing/locationAddon';
 import { isCompanyOwner, loadLocationBilling } from '@/lib/billing/locationBilling.server';
+import { stripe } from '@/lib/receptionistPlusStripe';
 import { apiMessages } from '@/lib/api/apiMessages';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -151,7 +152,19 @@ export async function POST(request: NextRequest) {
         409
       );
     }
-    const locationPriceId = process.env.STRIPE_LOCATION_PRICE_ID;
+    // Stripe only allows one billing interval per subscription, so a company on a
+    // yearly plan gets the yearly price of the add-on, a monthly one the monthly price.
+    let yearly = false;
+    try {
+      const stripeSub = await stripe.subscriptions.retrieve(sub.provider_subscription_id);
+      yearly = stripeSub.items.data.some((item) => item.price.recurring?.interval === 'year');
+    } catch (err) {
+      console.error('[addons/purchase] could not read Stripe subscription:', err);
+      return fail('stripe_unavailable', tApi('pricesNotConfigured'), 502);
+    }
+    const locationPriceId = yearly
+      ? process.env.STRIPE_LOCATION_PRICE_ID_YEARLY
+      : process.env.STRIPE_LOCATION_PRICE_ID;
     if (!locationPriceId) {
       return fail('not_configured', tApi('pricesNotConfigured'), 503);
     }
