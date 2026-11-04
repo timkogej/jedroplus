@@ -25,10 +25,13 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh session — do not add logic between createServerClient and getUser
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Refresh session — do not add logic between createServerClient and this
+  // call. getClaims() verifies the token locally with the project's signing
+  // keys (no round trip to Supabase on every page change) and still refreshes
+  // an expired session.
+  const { data } = await supabase.auth.getClaims();
+  const sub = data?.claims?.sub;
+  const user = sub ? { id: sub } : null;
 
   return { supabaseResponse, user, supabase };
 }
