@@ -73,7 +73,8 @@ export function AppBar() {
   const { user, signOut } = useAuth();
   const { companySettings, switchCompany } = useCompany();
 
-  const leftOffset = isMobile ? 0 : isCollapsed ? 64 : 240;
+  // Desktop sidebar offset from CSS breakpoints (see ProtectedLayout).
+  const leftOffset = isCollapsed ? 'md:left-16' : 'md:left-60';
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -155,8 +156,7 @@ export function AppBar() {
 
   return (
     <header
-      style={{ left: leftOffset }}
-      className="glass-bar hairline-b fixed top-0 right-0 z-50 h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] transition-all duration-300"
+      className={`glass-bar hairline-b fixed top-0 right-0 left-0 z-50 h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] md:transition-[left] md:duration-300 ${leftOffset}`}
     >
       <div className="h-full px-4 md:px-5 flex items-center justify-between gap-4">
 
