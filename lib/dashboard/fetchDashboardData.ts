@@ -232,7 +232,6 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
   const today = new Date();
   const todayStr = format(today, "yyyy-MM-dd");
 
-  console.log('[Dashboard] Fetching today appointments for date:', todayStr);
 
   try {
     // Use fetchTableRows which properly handles company column detection
@@ -383,7 +382,6 @@ async function fetchTodayAppointments(companyId: string, personId?: string | nul
     // Sort by time
     todayAppointments.sort((a, b) => a.time.localeCompare(b.time));
 
-    console.log(`[Dashboard] Found ${todayAppointments.length} appointments for today`);
     return todayAppointments;
   } catch (err) {
     console.error('[Dashboard] Error in fetchTodayAppointments:', err);
@@ -396,7 +394,6 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
   const tomorrow = addDays(new Date(), 1);
   const tomorrowStr = format(tomorrow, "yyyy-MM-dd");
 
-  console.log('[Dashboard] Fetching tomorrow appointments for date:', tomorrowStr);
 
   try {
     // Use fetchTableRows which properly handles company column detection
@@ -546,7 +543,6 @@ async function fetchTomorrowAppointments(companyId: string, personId?: string | 
     // Sort by time
     tomorrowAppointments.sort((a, b) => a.time.localeCompare(b.time));
 
-    console.log(`[Dashboard] Found ${tomorrowAppointments.length} appointments for tomorrow`);
     return tomorrowAppointments;
   } catch (err) {
     console.error('[Dashboard] Error in fetchTomorrowAppointments:', err);
@@ -561,11 +557,6 @@ async function fetchStats(companyId: string, personId?: string | null, lokacijaI
   const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
   const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
 
-  console.log('[Dashboard] Fetching stats with dates:', {
-    today: todayStr,
-    monthStart,
-    monthEnd,
-  });
 
   try {
     // Fetch all data using fetchTableRows which handles company column detection
@@ -657,7 +648,6 @@ async function fetchStats(companyId: string, personId?: string | null, lokacijaI
       }
     }
 
-    console.log('[Dashboard] Stats:', { todayCount, activeCount, newClientsCount, revenueThisMonth });
 
     return {
       todayAppointments: todayCount,
@@ -690,10 +680,6 @@ async function fetchWeeklyChart(companyId: string, personId?: string | null, lok
   const startDateStr = format(startDate, "yyyy-MM-dd");
   const endDateStr = format(today, "yyyy-MM-dd");
 
-  console.log('[Dashboard] Fetching weekly chart data:', {
-    startDate: startDateStr,
-    endDate: endDateStr,
-  });
 
   try {
     // Fetch all bookings using fetchTableRows
@@ -738,7 +724,6 @@ async function fetchWeeklyChart(companyId: string, personId?: string | null, lok
       }
     }
 
-    console.log('[Dashboard] Counts by date:', countsByDate);
 
     // Build week data array (from 6 days ago to today)
     for (let i = 6; i >= 0; i--) {
@@ -753,7 +738,6 @@ async function fetchWeeklyChart(companyId: string, personId?: string | null, lok
         termini: count,
       });
 
-      console.log(`[Dashboard] ${dateStr} (${dayNames[date.getDay()]}): ${count} appointments`);
     }
 
     return weekData;

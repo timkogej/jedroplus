@@ -20,6 +20,7 @@ import { callN8nAction } from '@/src/lib/n8nClient';
 import { supabaseReadOnly as supabase } from '@/src/lib/supabaseReadOnly';
 import type { ChatbotDesign } from '@/types/settings';
 import { defaultChatbotDesign } from '@/types/settings';
+import { companySettingsKey, readRow, waitForRowChanged } from '@/lib/confirmWrite';
 
 const CHATBOT_LANGUAGES = [
   { value: 'sl', label: 'Slovenscina' },
@@ -181,13 +182,15 @@ export function ChatbotSettingsModal({ isOpen, onClose }: ChatbotSettingsModalPr
         },
       };
 
+      const settingsBefore = companyId ? await readRow(companySettingsKey(companyId)) : null;
       const result = await callN8nAction(webhookPayload);
 
       if (!result.ok) {
         throw new Error('Prišlo je do napake pri shranjevanju');
       }
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait for the saved settings to land instead of a fixed pause.
+      if (companyId) await waitForRowChanged(companySettingsKey(companyId), settingsBefore, { timeoutMs: 4000 });
       setLastSaved(new Date());
 
       // Close modal after 0.8s delay and refresh page

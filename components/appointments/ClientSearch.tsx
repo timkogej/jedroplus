@@ -275,7 +275,7 @@ function ClientSearch({
                       </>
                     ) : query.trim() && !isLoading ? (
                       <div className="px-3 py-4 text-center">
-                        <p className="text-sm text-gray-500">Ni rezultatov za "{query}"</p>
+                        <p className="text-sm text-gray-500">Ni rezultatov za &quot;{query}&quot;</p>
                         {onCreateNew && (
                           <button
                             type="button"

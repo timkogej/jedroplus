@@ -100,3 +100,59 @@ export const terminById = (id: string | number): RowKey => ({ table: 'Termini', 
 
 /** An appointment row by its 8-digit `ID termina` (known before it is created). */
 export const terminByCode = (code: string): RowKey => ({ table: 'Termini', column: 'ID termina', value: code });
+
+/**
+ * Newest `created_at` among the company's rows, read just before a create is
+ * sent. Null when the company has none yet, undefined on a read error.
+ * Comparing with the database's own timestamps keeps this independent of the
+ * device clock.
+ */
+export async function latestCreatedAt(
+  table: string,
+  companyColumn: string,
+  companyId: string
+): Promise<string | null | undefined> {
+  const { data, error } = await supabaseReadOnly
+    .from(table)
+    .select('created_at')
+    .eq(companyColumn, companyId)
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (error) return undefined;
+  const rows = (data ?? []) as Row[];
+  return rows[0] ? String(rows[0].created_at) : null;
+}
+
+/**
+ * Waits until the company has a row newer than `since` — for creates whose id
+ * is only assigned by the database. Without a usable snapshot it falls back to
+ * a short pause, as before.
+ */
+export async function waitForNewRowSince(
+  table: string,
+  companyColumn: string,
+  companyId: string,
+  since: string | null | undefined,
+  { timeoutMs = DEFAULT_TIMEOUT_MS, intervalMs = DEFAULT_INTERVAL_MS }: WaitOptions = {}
+): Promise<boolean> {
+  if (since === undefined) {
+    await sleep(800);
+    return true;
+  }
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    await sleep(intervalMs);
+    let query = supabaseReadOnly.from(table).select('created_at').eq(companyColumn, companyId);
+    if (since) query = query.gt('created_at', since);
+    const { data, error } = await query.limit(1);
+    if (!error && (data ?? []).length > 0) return true;
+  }
+  return false;
+}
+
+/** The company's settings row ("Podatki podjetij"), which the settings dialogs save. */
+export const companySettingsKey = (companyId: string): RowKey => ({
+  table: 'Podatki podjetij',
+  column: 'ID Podjetja',
+  value: companyId,
+});

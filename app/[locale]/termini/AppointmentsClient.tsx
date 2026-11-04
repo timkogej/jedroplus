@@ -408,7 +408,6 @@ function TerminiPageInner({ initialData }: { initialData: AppointmentsInitialDat
       let unique8DigitId: string | undefined;
       if (isNewAppointment) {
         unique8DigitId = await generateUnique8DigitId('Termini', 'id');
-        console.log('Generated unique 8-digit appointment ID:', unique8DigitId);
       }
 
       // Look up full service details for all services

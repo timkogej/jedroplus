@@ -747,7 +747,7 @@ export function AssistantChat({
       const chatInstructions = companySettings?.['chat_instructions'] || '';
       const chatTone = companySettings?.['chat_tone'] || 'prijazen in profesionalen';
 
-      let contextData: Record<string, unknown> = {};
+      const contextData: Record<string, unknown> = {};
       const lowerMessage = userMessage.toLowerCase();
 
       if (

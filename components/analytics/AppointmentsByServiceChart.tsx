@@ -105,6 +105,7 @@ function AppointmentsByServiceChart({
                 })}
               </defs>
               <Pie
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 data={slices as any[]}
                 cx="50%"
                 cy="50%"

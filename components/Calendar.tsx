@@ -84,6 +84,7 @@ import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { useTranslations, useLocale } from 'next-intl';
 import {
+  latestCreatedAt,
   readRow,
   type RowKey,
   terminByCode,
@@ -91,6 +92,7 @@ import {
   waitForRowChanged,
   waitForRowCreated,
   waitForRowDeleted,
+  waitForNewRowSince,
   waitForRowValue,
 } from '@/lib/confirmWrite';
 import { useOptionalTour } from '@/components/guide/TourProvider';
@@ -384,7 +386,6 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         setEmployees(employeesResult.data);
       }
       if (absencesResult.data) {
-        console.log('[Calendar] Loaded absences:', absencesResult.data.length, absencesResult.data);
         setAbsences(absencesResult.data);
       }
       if (resursiIdsResult.data) {
@@ -616,20 +617,24 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       };
 
       const before = isEdit ? await readRow(eventKey(editingEvent!.id)) : null;
+      // A new event gets its id from the database, so look for a row newer
+      // than the company's newest one now.
+      const newestBefore = isEdit ? undefined : await latestCreatedAt('events', 'company_id', companyId);
 
       const result = await sendEventWebhook(payload);
       if (!result.ok) throw new Error(t('calendarView.errors.eventSave'));
 
-      if (isEdit) {
-        await waitForRowChanged(eventKey(editingEvent!.id), before, { timeoutMs: 4000 });
-      } else {
-        // A new event has no id yet to look for: give n8n a moment to write it.
-        await new Promise((r) => setTimeout(r, 800));
-      }
+      const confirmed = isEdit
+        ? (await waitForRowChanged(eventKey(editingEvent!.id), before, { timeoutMs: 4000 }), true)
+        : await waitForNewRowSince('events', 'company_id', companyId, newestBefore);
       await loadEvents();
       handleCloseEventModal();
-      setSuccessMessage(isEdit ? t('calendarView.toast.eventUpdated') : t('calendarView.toast.eventCreated'));
-      setTimeout(() => setSuccessMessage(null), 3000);
+      if (confirmed) {
+        setSuccessMessage(isEdit ? t('calendarView.toast.eventUpdated') : t('calendarView.toast.eventCreated'));
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setActionError(tCommon('errors.writeUnconfirmed'));
+      }
     } catch (err) {
       setActionError(t('calendarView.errors.eventSave'));
     } finally {
@@ -945,12 +950,6 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const handleConfirmComplete = useCallback(async () => {
     if (!completeTarget) return;
 
-    console.log('[handleConfirmComplete] appointment:', {
-      id: completeTarget.id,
-      belezi_termin: completeTarget.belezi_termin,
-      deleted_at: completeTarget.deleted_at,
-      stranka_ime: completeTarget.stranka_ime,
-    });
 
     setIsCompleting(true);
     setActionError(null);
@@ -994,16 +993,6 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       // Log zakljucen for all completions
       if (companyId && completeTarget.id) {
         const idTerminaForZakljucen = completeTarget.id_termina ?? completeTarget.id;
-        console.log('[logZgodovina] zakljucen params:', {
-          idPodjetja: companyId,
-          tipEntitete: 'termin',
-          idEntitete: idTerminaForZakljucen,
-          akcija: 'zakljucen',
-          izvedel: actor,
-          izvedel_tip: role,
-          idTermina: idTerminaForZakljucen,
-          idStranke: completeTarget.stranka_id,
-        });
         logZgodovina({
           idPodjetja: companyId,
           tipEntitete: 'termin',
@@ -1018,7 +1007,6 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
 
       // Ghost termin: soft-delete after successful completion
       if (completeTarget.belezi_termin === false && companyId) {
-        console.log('[handleConfirmComplete] ghost termin detected — id (bigint):', completeTarget.id, '| ID termina (text):', completeTarget.id_termina);
         try {
           const { error: deleteError } = await supabase
             .from('Termini')
@@ -1031,16 +1019,6 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
           }
 
           const idTerminaForLog = completeTarget.id_termina ?? completeTarget.id;
-          console.log('[logZgodovina] izbrisan (ghost) params:', {
-            idPodjetja: companyId,
-            tipEntitete: 'termin',
-            idEntitete: idTerminaForLog,
-            akcija: 'izbrisan',
-            izvedel: actor,
-            izvedel_tip: role,
-            idTermina: idTerminaForLog,
-            idStranke: completeTarget.stranka_id,
-          });
           logZgodovina({
             idPodjetja: companyId,
             tipEntitete: 'termin',
@@ -1519,14 +1497,6 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         const normalizedEditingCas = editingAppointment.cas_zacetek?.substring(0, 5) ?? '';
         const dateChanged = data.datum !== normalizedEditingDatum;
         const timeChanged = data.cas_zacetek !== normalizedEditingCas;
-        console.log('[reschedule check]', {
-          formDatum: data.datum,
-          editingDatum: editingAppointment.datum,
-          formCas: data.cas_zacetek,
-          editingCas: editingAppointment.cas_zacetek,
-          dateChanged,
-          timeChanged,
-        });
         if (dateChanged || timeChanged) {
           const rawChannel = companySettings?.obvestilo_prestavitev_channel ?? companySettings?.channel ?? companySettings?.chanel_pred ?? 'email';
           const channel = rawChannel === 'sms' || rawChannel === 'both' ? rawChannel : 'email';
@@ -1900,6 +1870,10 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     setIsSaving(true);
 
     try {
+      // The new absence gets its id from the database: look for a row newer
+      // than the company's newest one now.
+      const newestBefore = await latestCreatedAt('absences', 'company_id', companyId);
+
       const result = await callN8nAction({
         event: 'ODSOTNOST',
         entity: 'absence',
@@ -1925,15 +1899,17 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       }
 
       handleCloseAbsenceModal();
-      // 0.7s delay before refresh (n8n needs time to write)
-      await new Promise((r) => setTimeout(r, 700));
+      const created = await waitForNewRowSince('absences', 'company_id', companyId, newestBefore);
       await refreshAbsences();
+      if (!created) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       console.error('Error saving absence:', err);
+      // Previously only logged: the owner saw nothing when it failed.
+      setActionError(t('calendarView.errors.absenceSave'));
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, handleCloseAbsenceModal, refreshAbsences]);
+  }, [companyId, actor, companyPayload, handleCloseAbsenceModal, refreshAbsences, t, tCommon]);
 
   // Handle absence detail modal
   const handleAbsenceClick = useCallback((absence: Absence) => {
@@ -1973,6 +1949,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       if (!deleted) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       console.error('Error deleting absence:', err);
+      setActionError(t('calendarView.errors.absenceDelete'));
     } finally {
       setIsAbsenceDeleting(false);
     }
@@ -1981,6 +1958,9 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const handleAbsenceEdit = useCallback(async (absence: Absence, data: AbsenceEditData) => {
     setIsSaving(true);
     try {
+      const absenceKey: RowKey = { table: 'absences', column: 'id', value: absence.id };
+      const before = await readRow(absenceKey);
+
       const result = await callN8nAction({
         event: 'UREDI_ODSOTNOST',
         entity: 'absence',
@@ -2003,14 +1983,16 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       });
       if (!result.ok) throw new Error(t('calendarView.errors.absenceEdit'));
       handleAbsenceDetailClose();
-      await new Promise((r) => setTimeout(r, 700));
+      // Wait for the change to land (none at all if nothing was changed).
+      await waitForRowChanged(absenceKey, before, { timeoutMs: 4000 });
       await refreshAbsences();
     } catch (err) {
       console.error('Error editing absence:', err);
+      setActionError(t('calendarView.errors.absenceEdit'));
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, refreshAbsences, handleAbsenceDetailClose]);
+  }, [companyId, actor, refreshAbsences, handleAbsenceDetailClose, t]);
 
   // Header title: always "Month Year" (Apple Calendar style – date strip shows specific day)
   const headerTitle = useMemo(() => {
