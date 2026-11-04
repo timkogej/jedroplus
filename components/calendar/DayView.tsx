@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocationScope } from '@/app/location-context';
 import { memo, useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { CalendarBlank } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Zaposleni, Storitev } from '@/types/appointments';
@@ -125,6 +126,14 @@ function calculateAppointmentLayout(appointments: AppointmentWithDetails[]): Map
 }
 
 function DayView({ currentDate, appointments, absences = [], events = [], services = [], onAppointmentClick, onEventClick, onAbsenceClick, employees = [], onGridSlotClick, companySchedule, showAllDays = true, isMobile = false, onAppointmentReschedule, appointmentsWithResursi }: DayViewProps) {
+  // With "all locations" chosen, each column also says where the person works.
+  const { locations, multi, selectedLocationId, locationsOfPerson } = useLocationScope();
+  const locationLabel = (osebaRef: string | null | undefined): string | null => {
+    if (!multi || selectedLocationId) return null;
+    const ids = locationsOfPerson(osebaRef);
+    if (!ids || ids.length >= locations.length) return null;
+    return locations.filter((l) => ids.includes(l.id)).map((l) => l.naziv).join(', ');
+  };
   const t = useTranslations('appointments');
   const locale = useLocale();
 
@@ -425,6 +434,11 @@ function DayView({ currentDate, appointments, absences = [], events = [], servic
                   </span>
                   <CalendarBlank className="h-3.5 w-3.5 text-gray-400" />
                 </div>
+                {locationLabel(employee.ref) && (
+                  <span className="mt-0.5 max-w-full truncate px-1.5 text-[10px] leading-3 text-gray-400">
+                    {locationLabel(employee.ref)}
+                  </span>
+                )}
               </div>
             ))}
           </div>

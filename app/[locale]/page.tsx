@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
+import { getServerUser } from "@/lib/auth/serverUser";
 
 export default async function LocaleHome({
   params,
@@ -9,10 +9,7 @@ export default async function LocaleHome({
 }) {
   const { locale } = await params;
 
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
 
   if (!user) {
     redirect(`/${locale}/login`);

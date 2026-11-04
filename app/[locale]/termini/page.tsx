@@ -8,15 +8,12 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import { fetchAppointmentsDataServer } from "@/lib/appointments/fetchAppointmentsData.server";
 import AppointmentsClient from "./AppointmentsClient";
+import { getServerUser } from "@/lib/auth/serverUser";
 
 export default async function AppointmentsPage() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();

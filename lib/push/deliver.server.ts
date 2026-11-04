@@ -12,6 +12,7 @@ import 'server-only';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { humanizeDates } from '@/lib/format';
 import { safeNotificationHref } from '@/lib/notifications/href';
+import { appendLocation, appointmentRefOf, type AppointmentNotificationRef } from '@/lib/notifications/location';
 import { sendPush, type SendResult } from '@/lib/push/webPush.server';
 
 export interface PushSubscriptionRow {
@@ -96,6 +97,40 @@ export async function deliverToSubscriptions(
   };
 }
 
+/**
+ * Name of the location of the appointment a notification is about, only when
+ * the company has several active locations (otherwise null: nothing changes).
+ */
+async function appointmentLocationName(
+  admin: ReturnType<typeof pushAdmin>,
+  companyUuid: string,
+  n: AppointmentNotificationRef
+): Promise<string | null> {
+  const ref = appointmentRefOf(n);
+  if (!ref) return null;
+  try {
+    const { data: company } = await admin.from('companies').select('company_id').eq('id', companyUuid).maybeSingle();
+    const textId = (company?.company_id as string | undefined) ?? null;
+    if (!textId) return null;
+
+    const { data: locations } = await admin
+      .from('Lokacije').select('id, naziv').eq('ID podjetja', textId).eq('status', 'active');
+    if (!locations || locations.length < 2) return null;
+
+    let { data: rows } = await admin
+      .from('Termini').select('lokacija_id').eq('ID podjetja', textId).eq('ID termina', ref).limit(1);
+    if ((!rows || rows.length === 0) && /^\d+$/.test(ref)) {
+      ({ data: rows } = await admin
+        .from('Termini').select('lokacija_id').eq('ID podjetja', textId).eq('id', Number(ref)).limit(1));
+    }
+    const lokacijaId = rows?.[0]?.lokacija_id as string | undefined;
+    return locations.find((l) => l.id === lokacijaId)?.naziv ?? null;
+  } catch (err) {
+    console.error('[push] location lookup failed:', err);
+    return null;
+  }
+}
+
 const HIGH_URGENCY_TYPES = new Set(['appointment_booked', 'appointment_cancelled', 'appointment_updated', 'booking_request']);
 
 /** Pošlje push za en zapis iz notifications (po id). */
@@ -138,6 +173,7 @@ export async function deliverNotification(notificationId: string) {
     .eq('is_archived', false);
 
   const url = safeNotificationHref(n);
+  const locationName = await appointmentLocationName(admin, String(n.company_id), n);
   const type = String(n.type ?? 'info');
   const summary = await deliverToSubscriptions(
     admin,
@@ -146,7 +182,7 @@ export async function deliverNotification(notificationId: string) {
       const locale = sub.locale ?? 'sl';
       return {
         title: clip(humanizeDates(String(n.title ?? 'Jedro+'), locale), 120),
-        body: clip(humanizeDates(String(n.body ?? ''), locale), 600),
+        body: clip(appendLocation(humanizeDates(String(n.body ?? ''), locale), locationName), 600),
         url,
         tag: `n-${n.id}`,
         type,

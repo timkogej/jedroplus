@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { humanizeDates } from '@/lib/format';
 import { notificationHref } from '@/lib/notifications/href';
+import { appendLocation } from '@/lib/notifications/location';
 import {
   BellIcon,
   CheckCircleIcon,
@@ -162,9 +163,11 @@ interface NotificationCardProps {
   notification: Notification;
   onMarkRead: (id: string) => void;
   onArchive: (id: string) => void;
+  /** Location of the appointment, set only with several locations. */
+  locationName?: string | null;
 }
 
-export const NotificationCard = ({ notification, onMarkRead, onArchive }: NotificationCardProps) => {
+export const NotificationCard = ({ notification, onMarkRead, onArchive, locationName }: NotificationCardProps) => {
   const router = useRouter();
   const t = useTranslations('notifications');
   const locale = useLocale();
@@ -272,7 +275,7 @@ export const NotificationCard = ({ notification, onMarkRead, onArchive }: Notifi
         </div>
 
         <p className={`mt-0.5 text-sm leading-relaxed ${isUnread ? 'text-gray-600' : 'text-gray-500'}`}>
-          {humanizeDates(notification.body, locale)}
+          {appendLocation(humanizeDates(notification.body, locale), locationName)}
         </p>
 
         {/* Na telefonu ni prehoda z miško, zato so akcije tu vedno vidne */}

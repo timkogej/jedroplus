@@ -7,14 +7,11 @@
 // rest of this app's company-scoped tables.
 
 import { redirect } from "next/navigation";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import ZahteveClient from "./ZahteveClient";
+import { getServerUser } from "@/lib/auth/serverUser";
 
 export default async function ZahteveTerminaPage() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) redirect("/login");
 
   return <ZahteveClient />;

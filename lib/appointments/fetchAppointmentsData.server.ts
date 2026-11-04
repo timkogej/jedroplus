@@ -36,6 +36,7 @@ import {
 } from "@/lib/supabase/appointments";
 import type { AppointmentWithDetails, Storitev, Zaposleni } from "@/types/appointments";
 import { parseAnswers } from '@/lib/questionnaire';
+import { getServerUser } from "@/lib/auth/serverUser";
 
 type Row = Record<string, unknown>;
 type ServerClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -424,9 +425,7 @@ export async function fetchAppointmentsDataServer(
   if (!companyId || companyId.trim() === "") return null;
 
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) return null;
 
   const { ownOnly, personId } = await resolveViewScope(supabase, user.id);

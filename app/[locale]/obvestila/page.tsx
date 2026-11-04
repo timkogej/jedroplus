@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BellSlashIcon, ChecksIcon, WarningCircleIcon } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
+import { useLocationScope } from '@/app/location-context';
+import { appointmentRefOf } from '@/lib/notifications/location';
 import { supabase } from '@/lib/supabaseClient';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { useTranslations, useLocale } from 'next-intl';
@@ -28,7 +30,9 @@ export default function ObvestilaPage() {
   const router = useRouter();
   const t = useTranslations('notifications');
   const locale = useLocale();
-  const { companyUuid, loading: companyLoading } = useCompany();
+  const { companyUuid, companyId, loading: companyLoading } = useCompany();
+  const { locations, multi } = useLocationScope();
+  const [locationByNotification, setLocationByNotification] = useState<Record<string, string>>({});
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +45,44 @@ export default function ObvestilaPage() {
       router.replace('/onboarding');
     }
   }, [companyUuid, companyLoading, router]);
+
+  // With several locations, booking notifications also say where. The text is
+  // written elsewhere, so the location of each appointment is looked up here.
+  useEffect(() => {
+    if (!multi || !companyId || notifications.length === 0) { setLocationByNotification({}); return; }
+    const refs = new Map<string, string>(); // appointment ref -> notification id
+    for (const n of notifications) {
+      const ref = appointmentRefOf(n);
+      if (ref) refs.set(ref, n.id);
+    }
+    if (refs.size === 0) { setLocationByNotification({}); return; }
+    let active = true;
+    const all = [...refs.keys()];
+    const numeric = all.filter((r) => /^\d+$/.test(r)).map(Number);
+    Promise.all([
+      supabase.from('Termini').select('id, "ID termina", lokacija_id').eq('ID podjetja', companyId).in('ID termina', all),
+      numeric.length
+        ? supabase.from('Termini').select('id, "ID termina", lokacija_id').eq('ID podjetja', companyId).in('id', numeric)
+        : Promise.resolve({ data: [] as Record<string, unknown>[] }),
+    ]).then(([byText, byRow]) => {
+      if (!active) return;
+      const place = new Map<string, string>(); // appointment ref -> location name
+      const name = (id: unknown) => locations.find((l) => l.id === id)?.naziv;
+      for (const row of [...(byText.data ?? []), ...(byRow.data ?? [])] as Record<string, unknown>[]) {
+        const n = name(row.lokacija_id);
+        if (!n) continue;
+        place.set(String(row['ID termina']), n);
+        place.set(String(row.id), n);
+      }
+      const result: Record<string, string> = {};
+      for (const [ref, notificationId] of refs) {
+        const n = place.get(ref);
+        if (n) result[notificationId] = n;
+      }
+      setLocationByNotification(result);
+    });
+    return () => { active = false; };
+  }, [multi, companyId, notifications, locations]);
 
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
@@ -271,6 +313,7 @@ export default function ObvestilaPage() {
                             notification={notification}
                             onMarkRead={handleMarkRead}
                             onArchive={handleArchive}
+                            locationName={locationByNotification[notification.id] ?? null}
                           />
                         </motion.div>
                       ))}

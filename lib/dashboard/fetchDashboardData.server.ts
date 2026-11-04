@@ -37,6 +37,7 @@ import type {
   TopEmployee,
   RecentActivity,
 } from "./fetchDashboardData";
+import { getServerUser } from "@/lib/auth/serverUser";
 
 /** Same window Termini loads by default (start of last month), so the count
  * on the dashboard matches the list it links to. */
@@ -718,9 +719,7 @@ export async function fetchDashboardDataServer(companyId: string): Promise<Dashb
   if (!companyId || companyId.trim() === "") return null;
 
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerUser();
   if (!user) return null;
 
   const personId = await resolvePersonId(supabase, user.id);

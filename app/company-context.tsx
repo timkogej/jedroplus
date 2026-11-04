@@ -75,7 +75,6 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     try {
       const result = await getBillingStatus(true, companyUuid);
 
-      console.log('[Subscription] getBillingStatus result:', { companyUuid, ok: result.ok, plan: result.plan, subscription: result.subscription });
 
       if (result.ok && result.subscription && result.plan) {
         const normalizedCode = (result.plan.code || 'FREE').toUpperCase().replace(/[\s-]+/g, '_');
@@ -123,26 +122,22 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
   }, []);
   const fetchAndSetDirectPlanCode = useCallback(async (uuid: string) => {
     try {
-      const { data: subData, error: subError } = await supabaseReadOnly
+      const { data: subData } = await supabaseReadOnly
         .from('company_subscriptions')
         .select('plan_id')
         .eq('company_id', uuid)
         .maybeSingle();
 
-      console.log('[Plan] company_subscriptions:', { uuid, subData, subError });
-
       if (subData?.plan_id) {
-        const { data: planData, error: planError } = await supabaseReadOnly
+        const { data: planData } = await supabaseReadOnly
           .from('plans')
           .select('code')
           .eq('id', subData.plan_id)
           .maybeSingle();
 
-        console.log('[Plan] plans:', { plan_id: subData.plan_id, planData, planError });
 
         if (planData?.code) {
           const normalized = String(planData.code).toUpperCase().replace(/[\s-]+/g, '_');
-          console.log('[Plan] directPlanCode set to:', normalized);
           setDirectPlanCode(normalized);
           return normalized;
         }
@@ -203,7 +198,10 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       try {
         const { createClient } = await import("@/lib/supabase/client");
         const authClient = createClient();
-        const { data: { user: authUser } } = await authClient.auth.getUser();
+        // The local session is enough here: this only picks which company to
+        // show, and the database (RLS) still checks every read.
+        const { data: { session } } = await authClient.auth.getSession();
+        const authUser = session?.user;
         if (!authUser) return true; // not signed in: nothing to check against
 
         const { data: memberships } = await authClient
@@ -253,6 +251,20 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
     const loadSettings = async () => {
       setLoading(true);
 
+      // Everything that only needs the stored id starts at once; these used to
+      // run one after another and held the whole app on its loading screen.
+      // Nothing is shown until the membership check has passed.
+      const fetchSettingsOnce = () =>
+        supabaseReadOnly
+          .from("Podatki podjetij")
+          .select("*")
+          .eq("ID Podjetja", stored)
+          .maybeSingle();
+      const firstSettings = Promise.resolve(fetchSettingsOnce());
+      const uuidQuery = Promise.resolve(
+        supabaseReadOnly.from("companies").select("id").eq("company_id", stored).maybeSingle()
+      );
+
       if (!(await belongsToStoredCompany())) return;
 
       try {
@@ -266,11 +278,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
           if (attempt > 0) {
             await new Promise<void>((r) => setTimeout(r, attempt * 1000));
           }
-          const result = await supabaseReadOnly
-            .from("Podatki podjetij")
-            .select("*")
-            .eq("ID Podjetja", stored)
-            .maybeSingle();
+          const result = attempt === 0 ? await firstSettings : await fetchSettingsOnce();
 
           if (result.error) {
             fetchError = result.error;
@@ -299,11 +307,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
         setCompanyIdState(stored);
         setCompanySettings(data as CompanySettings);
 
-        const { data: companyData } = await supabaseReadOnly
-          .from("companies")
-          .select("id")
-          .eq("company_id", stored)
-          .maybeSingle();
+        const { data: companyData } = await uuidQuery;
 
         const uuid: string | null = companyData?.id ?? null;
         if (uuid) {
@@ -311,10 +315,10 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
         }
         setCompanyUuidState(uuid);
 
-        if (uuid) {
-          await fetchAndSetDirectPlanCode(uuid);
-        }
-        await refreshSubscription(uuid || undefined);
+        await Promise.all([
+          uuid ? fetchAndSetDirectPlanCode(uuid) : Promise.resolve(null),
+          refreshSubscription(uuid || undefined),
+        ]);
 
         setLoading(false);
       } catch (err) {
@@ -373,16 +377,15 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 
     setCompanySettings(data as CompanySettings);
 
-    if (companyUuid) {
-      await fetchAndSetDirectPlanCode(companyUuid);
-    }
-    await refreshSubscription(companyUuid || undefined);
+    await Promise.all([
+      companyUuid ? fetchAndSetDirectPlanCode(companyUuid) : Promise.resolve(null),
+      refreshSubscription(companyUuid || undefined),
+    ]);
 
     setLoading(false);
   };
   const isPlanActive = subscription?.status === 'active';
   const planCode = directPlanCode || subscription?.plan_code || 'FREE';
-  console.log('[Plan] planCode computed:', { directPlanCode, subscriptionPlanCode: subscription?.plan_code, planCode });
 
   const value = useMemo(
     () => ({
