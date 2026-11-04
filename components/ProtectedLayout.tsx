@@ -3,7 +3,7 @@
 import { stripLocalePrefix } from '@/i18n/config';
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useCompany } from "@/app/company-context";
 import { useAuth } from "@/app/auth-context";
 import { Sidebar, AppBar, SearchModal, SidebarProvider, useSidebar } from "@/components/layout";
@@ -59,7 +59,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     checkTrial();
   }, [companyId, companyLoading, planCode, role]);
 
-  const contentMargin = isMobile ? 0 : isCollapsed ? 64 : 240;
+  // Offset for the desktop sidebar comes from CSS breakpoints, not from JS:
+  // the JS check only runs after the first paint, so phones used to get the
+  // desktop offset first and then watch the page slide in from the right.
+  const contentOffset = isCollapsed ? 'md:ml-16' : 'md:ml-60';
+  const reduceMotion = useReducedMotion();
 
   // Fetch unread notification count and keep badge updated
   useEffect(() => {
@@ -88,8 +92,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* Main content area */}
       <div
-        className="flex flex-col min-h-screen transition-all duration-300"
-        style={{ marginLeft: contentMargin }}
+        className={`flex flex-col min-h-screen md:transition-[margin-left] md:duration-300 ${contentOffset}`}
       >
         {/* App Bar */}
         <AppBar />
@@ -100,14 +103,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={pathname}
-              initial={isMobile ? { opacity: 0, y: 48 } : undefined}
+              // Phone: a short, quiet fade between pages. No exit animation,
+              // so the old page never lingers or overlaps the new one.
+              initial={isMobile && !reduceMotion ? { opacity: 0, y: 8 } : false}
               animate={{ opacity: 1, y: 0 }}
-              exit={isMobile ? { opacity: 0, y: 24 } : undefined}
-              transition={
-                isMobile
-                  ? { type: 'spring', stiffness: 380, damping: 32 }
-                  : { duration: 0 }
-              }
+              transition={{ duration: isMobile && !reduceMotion ? 0.2 : 0, ease: [0.25, 0.1, 0.25, 1] }}
             >
               {children}
             </motion.div>
