@@ -236,7 +236,9 @@
       "bgToLabel": "Sfondo sfumato (fine)",
       "bgToDesc": "Colore finale dello sfondo sfumato",
       "previewLabel": "Anteprima dello sfondo:",
-      "previewButton": "Anteprima pulsante"
+      "previewButton": "Anteprima pulsante",
+      "managedDesc": "I colori valgono per prenotazioni ed email. Impostali una volta sola.",
+      "managedLink": "Modifica i colori dell'attività"
     },
     "footer": {
       "close": "Chiudi",

@@ -239,7 +239,9 @@
       "senderIdStatusZavrnjeno": "Rifiutato",
       "senderIdInUse": "I messaggi vengono attualmente inviati con il nome {ime}.",
       "senderIdDefault": "I messaggi vengono attualmente inviati con il nome Jedroplus.",
-      "senderIdNoReply": "I clienti non possono rispondere a un messaggio inviato con un nome mittente."
+      "senderIdNoReply": "I clienti non possono rispondere a un messaggio inviato con un nome mittente.",
+      "colorsManaged": "I colori valgono per prenotazioni ed email.",
+      "colorsManagedLink": "Modifica i colori dell'attività"
     },
     "before": {
       "sectionTitle": "Promemoria prima dell'appuntamento",

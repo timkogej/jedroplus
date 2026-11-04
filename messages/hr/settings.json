@@ -180,6 +180,25 @@
       "invalid": "Broj nije upisan u registar obveznika PDV-a EU-a.",
       "badFormat": "Oblik nije ispravan za PDV broj (npr. HR12345678901).",
       "unavailable": "Registar EU-a trenutačno ne odgovara. Pokušajte ponovno kasnije."
+    },
+    "brandColors": {
+      "title": "Boje tvrtke",
+      "subtitle": "Dvije boje koje postavite jednom. Koriste se na stranicama za naručivanje i u svim emailovima klijentima.",
+      "primaryLabel": "Glavna boja",
+      "primaryDesc": "Gumbi i naglasci",
+      "secondLabel": "Druga boja",
+      "secondDesc": "Linija, oznake i dodatni naglasci",
+      "previewTitle": "Ovako će izgledati email",
+      "previewHeading": "Termin je potvrđen",
+      "previewTag": "Potvrđeno",
+      "previewLink": "Dodaj u kalendar",
+      "previewButton": "Promijeni termin",
+      "tooLight": "Glavna boja je gotovo bijela pa se u emailovima ne može koristiti kao gumb. Koristit ćemo tamnu boju. Odaberite tamniju.",
+      "invalid": "Unesite boju u obliku #RRGGBB.",
+      "saveError": "Boje nije bilo moguće spremiti. Pokušajte ponovno.",
+      "save": "Spremi boje",
+      "saved": "Spremljeno",
+      "usedIn": "Boja teksta na gumbima bira se automatski kako bi uvijek bila čitljiva."
     }
   },
   "members": {

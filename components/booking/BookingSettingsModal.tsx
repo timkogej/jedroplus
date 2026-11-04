@@ -7,6 +7,7 @@ import { X, SpinnerGap, FloppyDisk, EnvelopeSimple, DeviceMobile, ArrowRight } f
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { Link } from '@/i18n/navigation';
 import {
   SettingsSection,
   SettingRow,
@@ -956,41 +957,17 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                   <SettingsSection title={t('modal.colors.sectionTitle')} description={t('modal.colors.sectionDesc')}>
                     <SettingRow
                       label={t('modal.colors.primaryLabel')}
-                      description={t('modal.colors.primaryDesc')}
+                      description={t('modal.colors.managedDesc')}
                     >
-                      <div className="flex gap-3 items-center">
-                        <input
-                          type="color"
-                          value={bookingPrimary}
-                          onChange={(e) => setBookingPrimary(e.target.value)}
-                          className="h-10 w-10 cursor-pointer rounded-lg border border-gray-200 bg-white p-0.5"
-                        />
-                        <Input
-                          value={bookingPrimary}
-                          onChange={(e) => setBookingPrimary(e.target.value)}
-                          placeholder="#7C75FC"
-                          className="w-28"
-                        />
-                      </div>
-                    </SettingRow>
-
-                    <SettingRow
-                      label={t('modal.colors.secondaryLabel')}
-                      description={t('modal.colors.secondaryDesc')}
-                    >
-                      <div className="flex gap-3 items-center">
-                        <input
-                          type="color"
-                          value={bookingSecondary}
-                          onChange={(e) => setBookingSecondary(e.target.value)}
-                          className="h-10 w-10 cursor-pointer rounded-lg border border-gray-200 bg-white p-0.5"
-                        />
-                        <Input
-                          value={bookingSecondary}
-                          onChange={(e) => setBookingSecondary(e.target.value)}
-                          placeholder="#44D0C6"
-                          className="w-28"
-                        />
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="h-8 w-8 rounded-lg border border-gray-200" style={{ background: bookingPrimary }} aria-hidden="true" />
+                        <span className="h-8 w-8 rounded-lg border border-gray-200" style={{ background: bookingSecondary }} aria-hidden="true" />
+                        <Link
+                          href="/nastavitve/podjetje"
+                          className="text-sm font-medium text-gray-900 underline underline-offset-2"
+                        >
+                          {t('modal.colors.managedLink')}
+                        </Link>
                       </div>
                     </SettingRow>
 

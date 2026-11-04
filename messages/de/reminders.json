@@ -239,7 +239,9 @@
       "senderIdStatusZavrnjeno": "Abgelehnt",
       "senderIdInUse": "Nachrichten werden derzeit unter dem Namen {ime} gesendet.",
       "senderIdDefault": "Nachrichten werden derzeit unter dem Namen Jedroplus gesendet.",
-      "senderIdNoReply": "Auf eine Nachricht mit Absendernamen können Kunden nicht antworten."
+      "senderIdNoReply": "Auf eine Nachricht mit Absendernamen können Kunden nicht antworten.",
+      "colorsManaged": "Die Farben gelten für Buchungen und E-Mails.",
+      "colorsManagedLink": "Firmenfarben bearbeiten"
     },
     "before": {
       "sectionTitle": "Erinnerungen vor dem Termin",

@@ -236,7 +236,9 @@
       "bgToLabel": "Hintergrundverlauf (Ende)",
       "bgToDesc": "Endfarbe des Hintergrundverlaufs",
       "previewLabel": "Vorschau des Hintergrunds:",
-      "previewButton": "Vorschau der Schaltfläche"
+      "previewButton": "Vorschau der Schaltfläche",
+      "managedDesc": "Die Farben gelten für Buchungen und E-Mails. Einmal festlegen.",
+      "managedLink": "Firmenfarben bearbeiten"
     },
     "footer": {
       "close": "Schließen",

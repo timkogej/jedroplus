@@ -239,7 +239,9 @@
       "senderIdStatusZavrnjeno": "Rejected",
       "senderIdInUse": "Messages are currently sent as {ime}.",
       "senderIdDefault": "Messages are currently sent as Jedroplus.",
-      "senderIdNoReply": "Clients cannot reply to a message sent from a name."
+      "senderIdNoReply": "Clients cannot reply to a message sent from a name.",
+      "colorsManaged": "Colours are shared by bookings and emails.",
+      "colorsManagedLink": "Edit company colours"
     },
     "before": {
       "sectionTitle": "Pre-appointment reminders",

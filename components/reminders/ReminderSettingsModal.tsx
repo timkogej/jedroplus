@@ -27,6 +27,7 @@ import { sheet } from '@/components/ui/sheetClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
 import { toast } from 'sonner';
+import { Link } from '@/i18n/navigation';
 import { EnglishVariant } from './EnglishVariant';
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
@@ -939,42 +940,18 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       </div>
                     </SettingRow>
 
-                    {/* Brand Colors */}
-                    <div className="space-y-4 mt-6">
+                    {/* Brand colours: set once under Settings > Company */}
+                    <div className="space-y-3 mt-6">
                       <p className="text-sm font-medium text-gray-700">{t('modal.general.colorsTitle')}</p>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">{t('modal.general.colorPrimary')}</p>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="color"
-                              value={brandPrimaryColor}
-                              onChange={(e) => setBrandPrimaryColor(e.target.value)}
-                              className="h-12 w-12 cursor-pointer rounded-lg border border-gray-200"
-                            />
-                            <Input
-                              value={brandPrimaryColor}
-                              onChange={(e) => setBrandPrimaryColor(e.target.value)}
-                              className="flex-1"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-600 mb-1">{t('modal.general.colorSecondary')}</p>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="color"
-                              value={brandSecondaryColor}
-                              onChange={(e) => setBrandSecondaryColor(e.target.value)}
-                              className="h-12 w-12 cursor-pointer rounded-lg border border-gray-200"
-                            />
-                            <Input
-                              value={brandSecondaryColor}
-                              onChange={(e) => setBrandSecondaryColor(e.target.value)}
-                              className="flex-1"
-                            />
-                          </div>
-                        </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <span className="h-8 w-8 rounded-lg border border-gray-200" style={{ background: brandPrimaryColor }} aria-hidden="true" />
+                        <span className="h-8 w-8 rounded-lg border border-gray-200" style={{ background: brandSecondaryColor }} aria-hidden="true" />
+                        <p className="text-xs text-gray-600">
+                          {t('modal.general.colorsManaged')}{' '}
+                          <Link href="/nastavitve/podjetje" className="font-medium text-gray-900 underline underline-offset-2">
+                            {t('modal.general.colorsManagedLink')}
+                          </Link>
+                        </p>
                       </div>
                     </div>
                   </SettingsSection>

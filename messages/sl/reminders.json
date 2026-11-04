@@ -239,7 +239,9 @@
       "senderIdStatusZavrnjeno": "Zavrnjeno",
       "senderIdInUse": "Trenutno se pošilja z imenom {ime}.",
       "senderIdDefault": "Trenutno se pošilja z imenom Jedroplus.",
-      "senderIdNoReply": "Na sporočilo z imenskim pošiljateljem stranka ne more odgovoriti."
+      "senderIdNoReply": "Na sporočilo z imenskim pošiljateljem stranka ne more odgovoriti.",
+      "colorsManaged": "Barve so skupne za rezervacije in emaile.",
+      "colorsManagedLink": "Uredi barve podjetja"
     },
     "before": {
       "sectionTitle": "Opomniki pred terminom",

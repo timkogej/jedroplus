@@ -21,6 +21,7 @@ import type { WorkingHoursDay, TimeInterval } from '@/types/settings';
 import { defaultWorkingHoursDay } from '@/types/settings';
 import { useMarkVisited } from '@/hooks/useMarkVisited';
 import CompanyLogoSection from '@/components/settings/CompanyLogoSection';
+import BrandColorsSection from '@/components/settings/BrandColorsSection';
 import { VatVerify } from '@/components/settings/VatVerify';
 import { useCompanyRegion } from '@/lib/hooks/useCompanyRegion';
 
@@ -49,6 +50,8 @@ export default function CompanySettingsPage() {
   useMarkVisited('workingHours');
   const t = useTranslations('settings');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [brandPrimary, setBrandPrimary] = useState('');
+  const [brandSecond, setBrandSecond] = useState('');
   const tc = useTranslations('common');
   const { companyId } = useCompany();
   const region = useCompanyRegion();
@@ -138,6 +141,8 @@ export default function CompanySettingsPage() {
           setEmail(String(data['Kontaktni_email'] ?? data['kontaktni_email'] ?? ''));
           setWebsite(String(data['Spletna stran'] ?? data['spletna_stran'] ?? ''));
           setLogoUrl(typeof data['logo_url'] === 'string' && data['logo_url'] ? String(data['logo_url']) : null);
+          setBrandPrimary(String(data['brand_primary'] || data['Booking_primary'] || ''));
+          setBrandSecond(String(data['brand_second'] || data['Booking_secondary'] || ''));
 
           // Parse working hours - support both legacy and new interval format
           const urnikData = data['Urnik'] ?? data['urnik'];
@@ -333,6 +338,8 @@ export default function CompanySettingsPage() {
 
         {/* Contact Info */}
         <CompanyLogoSection initialUrl={logoUrl} />
+
+        {!isLoading && <BrandColorsSection initialPrimary={brandPrimary} initialSecondary={brandSecond} />}
 
         <SettingsSection title={t('company.contact.title')} description={t('company.contact.subtitle')}>
           <SettingRow
