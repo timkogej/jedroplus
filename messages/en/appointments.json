@@ -125,7 +125,7 @@
     "notesPlaceholder": "Notes for the client...",
     "notesHint": "Notes are used for reminders and communication",
     "internalNotesPlaceholder": "Internal notes (not sent to client)...",
-    "addInternalNotes": "+ Internal Notes",
+    "addInternalNotes": "Internal Notes",
     "actions": {
       "cancel": "Cancel",
       "create": "Create",

@@ -125,7 +125,7 @@
     "notesPlaceholder": "Opombe za stranko...",
     "notesHint": "Opombe se uporabljajo pri opomnikih in sporočanju",
     "internalNotesPlaceholder": "Interne opombe (ne pošiljajo se stranki)...",
-    "addInternalNotes": "+ Interne opombe",
+    "addInternalNotes": "Interne opombe",
     "actions": {
       "cancel": "Prekliči",
       "create": "Ustvari",

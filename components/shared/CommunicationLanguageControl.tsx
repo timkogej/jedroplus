@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState } from 'react';
+import { CaretDown } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import {
   COMMUNICATION_LANGUAGES,
@@ -35,19 +36,19 @@ function CommunicationLanguageControl({
     return (
       <div className={className}>
         {!isOpen ? (
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-white" />
-            <button
-              type="button"
-              onClick={() => setIsOpen(true)}
-              title={label ? `${label}: ${option.label}` : option.label}
-              aria-label={label ? `${label}: ${option.label}` : option.label}
-              className="flex h-7 flex-shrink-0 items-center justify-center px-1 text-lg leading-none transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
-            >
-              {option.flag}
-            </button>
-            <div className="h-px flex-1 bg-white" />
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsOpen(true)}
+            title={label ? `${label}: ${option.label}` : option.label}
+            className="flex w-full items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 text-left transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+          >
+            <span className="text-sm font-medium text-gray-900">{label ?? 'Jezik'}</span>
+            <span className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="text-base leading-none" aria-hidden="true">{option.flag}</span>
+              {option.label}
+              <CaretDown className="h-3.5 w-3.5 text-gray-400" weight="bold" aria-hidden="true" />
+            </span>
+          </button>
         ) : (
           <Select
             value={option.value}

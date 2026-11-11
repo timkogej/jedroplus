@@ -125,7 +125,7 @@
     "notesPlaceholder": "Notizen für den Kunden...",
     "notesHint": "Notizen werden in Erinnerungen und Nachrichten verwendet",
     "internalNotesPlaceholder": "Interne Notizen (werden nicht an den Kunden gesendet)...",
-    "addInternalNotes": "+ Interne Notizen",
+    "addInternalNotes": "Interne Notizen",
     "actions": {
       "cancel": "Abbrechen",
       "create": "Anlegen",

@@ -125,7 +125,7 @@
     "notesPlaceholder": "Note per il cliente...",
     "notesHint": "Le note vengono usate nei promemoria e nei messaggi",
     "internalNotesPlaceholder": "Note interne (non vengono inviate al cliente)...",
-    "addInternalNotes": "+ Note interne",
+    "addInternalNotes": "Note interne",
     "actions": {
       "cancel": "Annulla",
       "create": "Crea",

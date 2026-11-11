@@ -12,6 +12,7 @@ import {
   Warning,
   GenderIntersex,
   Tag,
+  Plus,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import type { Client, ClientFormData, Gender, ClientType } from '@/types/clients';
@@ -628,6 +629,7 @@ function ClientModal({
                     whileTap={{ scale: 0.99 }}
                     className="flex w-full items-center gap-2 rounded-xl bg-white px-4 py-3 text-amber-700 transition-colors hover:bg-amber-50"
                   >
+                    <Plus className="h-4 w-4" weight="bold" />
                     <span className="text-sm font-medium">{t('modal.addInternalNotes')}</span>
                   </motion.button>
                 )}

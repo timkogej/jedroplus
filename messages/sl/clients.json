@@ -88,7 +88,7 @@
     "language": {
       "change": "Spremeni"
     },
-    "addInternalNotes": "+ Interne opombe",
+    "addInternalNotes": "Interne opombe",
     "warning": {
       "missingEmail": "Manjka email naslov",
       "missingPhone": "Manjka telefonska številka",

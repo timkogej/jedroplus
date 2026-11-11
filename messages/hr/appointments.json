@@ -125,7 +125,7 @@
     "notesPlaceholder": "Bilješke za klijenta...",
     "notesHint": "Bilješke se koriste u podsjetnicima i porukama",
     "internalNotesPlaceholder": "Interne bilješke (ne šalju se klijentu)...",
-    "addInternalNotes": "+ Interne bilješke",
+    "addInternalNotes": "Interne bilješke",
     "actions": {
       "cancel": "Odustani",
       "create": "Izradi",

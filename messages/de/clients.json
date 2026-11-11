@@ -88,7 +88,7 @@
     "language": {
       "change": "Ändern"
     },
-    "addInternalNotes": "+ Interne Notizen",
+    "addInternalNotes": "Interne Notizen",
     "warning": {
       "missingEmail": "E-Mail-Adresse fehlt",
       "missingPhone": "Telefonnummer fehlt",

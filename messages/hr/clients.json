@@ -88,7 +88,7 @@
     "language": {
       "change": "Promijeni"
     },
-    "addInternalNotes": "+ Interne bilješke",
+    "addInternalNotes": "Interne bilješke",
     "warning": {
       "missingEmail": "Nedostaje adresa e-pošte",
       "missingPhone": "Nedostaje telefonski broj",
