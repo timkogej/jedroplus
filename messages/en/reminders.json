@@ -226,6 +226,8 @@
       "autoTagDesc": "A note at the start of the message says it is an automatic reminder.",
       "staffLabel": "Mention the staff member",
       "staffDesc": "When on, the reminder can mention who will perform the service.",
+      "linkLabel": "Reschedule link in SMS",
+      "linkDesc": "When on, SMS reminders and confirmations include a link to reschedule or cancel the appointment.",
       "daysBeforeLabel": "Send reminder (days before)",
       "daysBeforeDesc": "How many days before the appointment the reminder is sent.",
       "select": "Select",

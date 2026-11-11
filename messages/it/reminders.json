@@ -226,6 +226,8 @@
       "autoTagDesc": "All'inizio del messaggio viene aggiunta un'etichetta che indica che si tratta di un promemoria automatico.",
       "staffLabel": "Includi l'operatore nel promemoria",
       "staffDesc": "Se attivo, il promemoria può citare il collaboratore che eseguirà il servizio.",
+      "linkLabel": "Link per modificare l'appuntamento nell'SMS",
+      "linkDesc": "Se attivo, i promemoria e le conferme via SMS includono un link per spostare o annullare l'appuntamento.",
       "daysBeforeLabel": "Invia il promemoria (giorni prima dell'appuntamento)",
       "daysBeforeDesc": "Quanti giorni prima dell'appuntamento inviare il promemoria.",
       "select": "Scegli",

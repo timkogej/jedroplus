@@ -226,6 +226,8 @@
       "autoTagDesc": "Am Anfang der Nachricht steht ein Hinweis, dass es sich um eine automatische Erinnerung handelt.",
       "staffLabel": "Mitarbeiter in der Erinnerung nennen",
       "staffDesc": "Wenn aktiviert, kann die Erinnerung nennen, wer die Leistung ausführt.",
+      "linkLabel": "Link zur Umbuchung in der SMS",
+      "linkDesc": "Wenn aktiviert, enthalten SMS-Erinnerungen und Bestätigungen einen Link zum Verschieben oder Stornieren des Termins.",
       "daysBeforeLabel": "Erinnerung senden (Tage vorher)",
       "daysBeforeDesc": "Wie viele Tage vor dem Termin die Erinnerung gesendet wird.",
       "select": "Auswählen",

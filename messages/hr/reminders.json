@@ -226,6 +226,8 @@
       "autoTagDesc": "Na početak poruke dodaje se oznaka da je riječ o automatskom podsjetniku.",
       "staffLabel": "Uključi izvođača u podsjetnik",
       "staffDesc": "Ako je uključeno, podsjetnik može spomenuti zaposlenika koji će obaviti uslugu.",
+      "linkLabel": "Poveznica za promjenu termina u SMS-u",
+      "linkDesc": "Ako je uključeno, SMS podsjetnici i potvrde sadrže poveznicu za promjenu ili otkazivanje termina.",
       "daysBeforeLabel": "Pošalji podsjetnik (dana prije termina)",
       "daysBeforeDesc": "Koliko dana prije termina treba poslati podsjetnik.",
       "select": "Odaberite",
