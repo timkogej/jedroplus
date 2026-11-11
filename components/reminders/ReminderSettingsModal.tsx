@@ -55,30 +55,22 @@ const EMPTY_ENGLISH: EnglishTemplates = {
   obvestilo_prestavitev_template_email_en: '',
 };
 
+type ReminderTab = 'general' | 'before' | 'after' | 'reschedule';
+
 interface ReminderSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   /** Scroll to this part of the form when opening ("Uredi" on a flow). */
-  initialSection?: 'general' | 'before' | 'after' | 'reschedule';
+  initialSection?: ReminderTab;
 }
 
 export function ReminderSettingsModal({ isOpen, onClose, initialSection }: ReminderSettingsModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  // Okno je razdeljeno na zavihke; "Uredi" na kartici toka odpre pravega.
+  const [tab, setTab] = useState<ReminderTab>('general');
+  const contentRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!isOpen || !initialSection || initialSection === 'general') return;
-    // Settings load after opening; retry until the section is rendered.
-    let tries = 0;
-    const timer = window.setInterval(() => {
-      const el = document.getElementById(`reminder-section-${initialSection}`);
-      tries += 1;
-      if (el) {
-        el.scrollIntoView({ block: 'start', behavior: 'smooth' });
-        window.clearInterval(timer);
-      } else if (tries > 20) {
-        window.clearInterval(timer);
-      }
-    }, 150);
-    return () => window.clearInterval(timer);
+    if (isOpen) setTab(initialSection ?? 'general');
   }, [isOpen, initialSection]);
 
   const t = useTranslations('reminders');
@@ -608,7 +600,6 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
   const lockedFieldClass = 'flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-sm text-gray-700';
   const innerPanelClass = 'space-y-4 rounded-[10px] bg-gray-50 p-4';
-  const infoPanelClass = 'rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60';
   const textareaClass = 'w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10';
 
   const renderChannelSelector = (
@@ -692,8 +683,48 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
               </div>
             </div>
 
+            {/* Zavihki: vsak sklop nastavitev ima svoje mesto */}
+            <div className="flex-shrink-0 border-b border-gray-200/70 bg-[#F2F2F7] px-4 py-2.5 sm:px-5">
+              <div
+                role="tablist"
+                aria-label={t('modal.title')}
+                className="-mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {([
+                  { id: 'general', label: t('modal.tabs.general'), on: null },
+                  { id: 'before', label: t('modal.tabs.before'), on: posiljanjePred },
+                  { id: 'after', label: t('modal.tabs.after'), on: posiljanjePo },
+                  { id: 'reschedule', label: t('modal.tabs.reschedule'), on: obvestiloPrestavitevOmogoceno },
+                ] as { id: ReminderTab; label: string; on: boolean | null }[]).map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === item.id}
+                    onClick={() => {
+                      setTab(item.id);
+                      contentRef.current?.scrollTo({ top: 0 });
+                    }}
+                    className={`flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+                      tab === item.id
+                        ? 'bg-gray-900 text-white'
+                        : 'text-gray-600 hover:bg-gray-200/70'
+                    }`}
+                  >
+                    {item.label}
+                    {item.on !== null && (
+                      <span
+                        aria-hidden="true"
+                        className={`h-1.5 w-1.5 rounded-full ${item.on ? 'bg-emerald-500' : tab === item.id ? 'bg-white/40' : 'bg-gray-300'}`}
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Content */}
-            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+            <div ref={contentRef} className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
               {isLoading ? (
                 <div className="space-y-6">
                   {[1, 2, 3, 4].map((i) => (
@@ -708,11 +739,11 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                 </div>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  {/* General Reminder Settings */}
-                  <div id="reminder-section-general" className="scroll-mt-4" />
+                  {tab === 'general' && (
+                  <>
                   <SettingsSection
-                    title={t('modal.general.sectionTitle')}
-                    description={t('modal.general.sectionDesc')}
+                    title={t('modal.groups.voice')}
+                    description={t('modal.groups.voiceDesc')}
                   >
                     <SettingRow
                       label={t('modal.general.languageLabel')}
@@ -760,15 +791,31 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       />
                     </SettingRow>
 
-                    {/* Samodejni opomnik oznaka */}
+                    {/* Nasveti glede na storitev */}
                     <SettingRow
-                      label={t('modal.general.autoTagLabel')}
-                      description={t('modal.general.autoTagDesc')}
+                      label={t('modal.general.tipsLabel')}
+                      description={t('modal.general.tipsDesc')}
                     >
-                      <Switch
-                        checked={samodejniOpomnik}
-                        onChange={setSamodejniOpomnik}
-                      />
+                      <div className="grid grid-cols-3 gap-1 rounded-xl bg-gray-100 p-1">
+                        {([
+                          { value: 'yes' as const, labelKey: 'modal.general.tipsYes' },
+                          { value: 'no' as const, labelKey: 'modal.general.tipsNo' },
+                          { value: 'auto' as const, labelKey: 'modal.general.tipsAuto' },
+                        ] as { value: 'yes' | 'no' | 'auto'; labelKey: string }[]).map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setNastvetiStoritev(opt.value)}
+                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                              nastvetiStoritev === opt.value
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-900'
+                            }`}
+                          >
+                            {t(opt.labelKey)}
+                          </button>
+                        ))}
+                      </div>
                     </SettingRow>
 
                     {/* Vključi izvajalca */}
@@ -782,22 +829,23 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       />
                     </SettingRow>
 
-                    {/* Dni pred terminom */}
+                    {/* Samodejni opomnik oznaka */}
                     <SettingRow
-                      label={t('modal.general.daysBeforeLabel')}
-                      description={t('modal.general.daysBeforeDesc')}
+                      label={t('modal.general.autoTagLabel')}
+                      description={t('modal.general.autoTagDesc')}
                     >
-                      <Select
-                        value={dniPrej}
-                        setValue={setDniPrej}
-                        placeholder={t('modal.general.select')}
-                      >
-                        {[1, 2, 3, 4, 5, 6, 7].map((d) => (
-                          <SelectOption key={d} value={String(d)}>{d}</SelectOption>
-                        ))}
-                      </Select>
+                      <Switch
+                        checked={samodejniOpomnik}
+                        onChange={setSamodejniOpomnik}
+                      />
                     </SettingRow>
 
+                  </SettingsSection>
+
+                  <SettingsSection
+                    title={t('modal.groups.sender')}
+                    description={t('modal.groups.senderDesc')}
+                  >
                     <SettingRow
                       label={t('modal.general.replyToLabel')}
                       description={t('modal.general.replyToDesc')}
@@ -826,8 +874,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       label={t('modal.general.fromEmailLabel')}
                       description={t('modal.general.fromEmailDesc')}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={lockedFieldClass}>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                        <div className={`${lockedFieldClass} min-w-0 basis-full break-all sm:basis-0`}>
                           {fromEmail}
                         </div>
                         <div className="flex items-center gap-1 text-gray-400">
@@ -843,8 +891,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       description={t('modal.general.senderIdDesc')}
                     >
                       {!senderDovoljen ? (
-                        <div className="flex items-center gap-3">
-                          <div className={lockedFieldClass}>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                          <div className={`${lockedFieldClass} min-w-0 basis-full break-all sm:basis-0`}>
                             {smsSenderId || (
                               <span className="text-gray-400 font-sans">
                                 {t('modal.general.notSet')}
@@ -868,7 +916,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                               maxLength={11}
                               onChange={(e) => setSenderOsnutek(e.target.value)}
                               placeholder={t('modal.general.notSet')}
-                              className="flex-1 rounded-lg border border-gray-200 bg-white p-3 font-mono text-sm text-gray-800"
+                              className="min-w-0 flex-1 rounded-lg border border-gray-200 bg-white p-3 font-mono text-sm text-gray-800"
                             />
                             <button
                               type="button"
@@ -916,36 +964,14 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       )}
                     </SettingRow>
 
-                    {/* Nasveti glede na storitev */}
-                    <SettingRow
-                      label={t('modal.general.tipsLabel')}
-                      description={t('modal.general.tipsDesc')}
-                    >
-                      <div className="grid grid-cols-3 gap-1 rounded-xl bg-gray-100 p-1">
-                        {([
-                          { value: 'yes' as const, labelKey: 'modal.general.tipsYes' },
-                          { value: 'no' as const, labelKey: 'modal.general.tipsNo' },
-                          { value: 'auto' as const, labelKey: 'modal.general.tipsAuto' },
-                        ] as { value: 'yes' | 'no' | 'auto'; labelKey: string }[]).map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => setNastvetiStoritev(opt.value)}
-                            className={`rounded-lg px-3 py-2 text-sm font-medium transition-all ${
-                              nastvetiStoritev === opt.value
-                                ? 'bg-white text-gray-900 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-900'
-                            }`}
-                          >
-                            {t(opt.labelKey)}
-                          </button>
-                        ))}
-                      </div>
-                    </SettingRow>
+                  </SettingsSection>
 
+                  <SettingsSection
+                    title={t('modal.groups.emailLook')}
+                    description={t('modal.groups.emailLookDesc')}
+                  >
                     {/* Brand colours: set once under Settings > Company */}
-                    <div className="space-y-3 mt-6">
-                      <p className="text-sm font-medium text-gray-700">{t('modal.general.colorsTitle')}</p>
+                    <div className="space-y-3">
                       <div className="flex flex-wrap items-center gap-3">
                         <span className="h-8 w-8 rounded-lg border border-gray-200" style={{ background: brandPrimaryColor }} aria-hidden="true" />
                         <span className="h-8 w-8 rounded-lg border border-gray-200" style={{ background: brandSecondaryColor }} aria-hidden="true" />
@@ -958,9 +984,11 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       </div>
                     </div>
                   </SettingsSection>
+                  </>
+                  )}
 
                   {/* Before Appointment Reminders */}
-                  <div id="reminder-section-before" className="scroll-mt-4" />
+                  {tab === 'before' && (
                   <SettingsSection
                     title={t('modal.before.sectionTitle')}
                     description={t('modal.before.sectionDesc')}
@@ -977,6 +1005,22 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
                     {posiljanjePred && (
                       <>
+                    <SettingRow
+                      label={t('modal.general.daysBeforeLabel')}
+                      description={t('modal.general.daysBeforeDesc')}
+                    >
+                      <Select
+                        value={dniPrej}
+                        setValue={setDniPrej}
+                        placeholder={t('modal.general.select')}
+                      >
+                        {[1, 2, 3, 4, 5, 6, 7].map((d) => (
+                          <SelectOption key={d} value={String(d)}>{d}</SelectOption>
+                        ))}
+                      </Select>
+                    </SettingRow>
+
+
                         <SettingRow
                           label={t('modal.before.channelLabel')}
                           description={t('modal.before.channelDesc')}
@@ -1115,18 +1159,13 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                           </div>
                         )}
 
-                        <div className={infoPanelClass}>
-                          <div className="font-semibold text-gray-900 mb-1">{t('modal.before.timingTitle')}</div>
-                          <div className="text-sm text-gray-700">
-                            {t('modal.before.timingDays', { count: Number(dniPrej) || 1 })}
-                          </div>
-                        </div>
                       </>
                     )}
                   </SettingsSection>
+                  )}
 
                   {/* After Appointment Reminders */}
-                  <div id="reminder-section-after" className="scroll-mt-4" />
+                  {tab === 'after' && (
                   <SettingsSection
                     title={t('modal.after.sectionTitle')}
                     description={t('modal.after.sectionDesc')}
@@ -1142,17 +1181,17 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                     </SettingRow>
 
                     <SettingRow
-                      label="Samodejno zaključi termin"
-                      description="Termin, ki ga ne zaključite sami, se zaključi izbrano število ur po koncu. Če je sporočilo po terminu vklopljeno, ga stranka prejme ob zaključku. Starejših terminov to ne zajame — te zaključite z gumbom »Zaključi vse« v Terminih."
+                      label={t('modal.after.autoCompleteLabel')}
+                      description={t('modal.after.autoCompleteDesc')}
                     >
                       <Select
                         value={autoCompleteHours}
                         setValue={setAutoCompleteHours}
-                        placeholder="Izberi"
+                        placeholder={t('modal.general.select')}
                       >
                         {[0, 1, 2, 4].map((h) => (
                           <SelectOption key={h} value={String(h)}>
-                            {h === 0 ? 'Izklopljeno' : `${h} ${h === 1 ? 'uro' : h === 2 ? 'uri' : 'ure'} po koncu`}
+                            {h === 0 ? t('modal.after.autoCompleteOff') : t('modal.after.autoCompleteHours', { count: h })}
                           </SelectOption>
                         ))}
                       </Select>
@@ -1166,30 +1205,30 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                         {/* Povezava za oceno — uporabi jo oznaka {{povezava_ocena}}
                             v predlogi sporočila po terminu. */}
                         <SettingRow
-                          label="Povezava za oceno"
-                          description="Kamor stranka odda oceno (Google, Facebook). Uporabite KRATKO obliko — dolga povezava lahko sporočilo raztegne na dva SMS. Pri Googlu jo dobite v Google Business Profile → Prosite za ocene."
+                          label={t('modal.after.reviewLinkLabel')}
+                          description={t('modal.after.reviewLinkDesc')}
                         >
                           <input
                             type="url"
                             value={povezavaOcena}
                             onChange={(e) => setPovezavaOcena(e.target.value)}
-                            placeholder="g.page/r/.../review"
+                            placeholder="g.page/r/…/review"
                             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                           />
                         </SettingRow>
 
                         <SettingRow
-                          label="Ne pošlji, če je minilo več kot (dni)"
-                          description="Sporočilo po terminu se pošlje ob zaključku termina. Če ga zaključite pozneje, se po tem številu dni ne pošlje več. 0 pomeni brez omejitve."
+                          label={t('modal.after.maxDaysLabel')}
+                          description={t('modal.after.maxDaysDesc')}
                         >
                           <Select
                             value={poTerminuMaxDni}
                             setValue={setPoTerminuMaxDni}
-                            placeholder="Izberi"
+                            placeholder={t('modal.general.select')}
                           >
                             {[0, 1, 2, 3, 5, 7, 14].map((d) => (
                               <SelectOption key={d} value={String(d)}>
-                                {d === 0 ? 'Brez omejitve' : String(d)}
+                                {d === 0 ? t('modal.after.noLimit') : String(d)}
                               </SelectOption>
                             ))}
                           </Select>
@@ -1368,18 +1407,13 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                           </>
                         )}
 
-                        <div className={infoPanelClass}>
-                          <div className="font-semibold text-gray-900 mb-1">{t('modal.after.timingTitle')}</div>
-                          <div className="text-sm text-gray-700">
-                            {t('modal.after.timingValue')}
-                          </div>
-                        </div>
                       </>
                     )}
                   </SettingsSection>
+                  )}
 
                   {/* Reschedule notification section */}
-                  <div id="reminder-section-reschedule" className="scroll-mt-4" />
+                  {tab === 'reschedule' && (
                   <SettingsSection
                     title={t('modal.reschedule.title')}
                     description={t('modal.reschedule.desc')}
@@ -1491,6 +1525,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       </>
                     )}
                   </SettingsSection>
+                  )}
                 </motion.div>
               )}
             </div>

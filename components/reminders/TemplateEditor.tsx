@@ -46,6 +46,13 @@ export function linkLength(url: string | null | undefined, fallback = 30): numbe
   return brezSheme.length || fallback;
 }
 
+const TOKEN_GROUPS: ReadonlyArray<{ key: string; tokens: ReadonlyArray<string> }> = [
+  { key: 'client', tokens: ['{{ime}}', '{{priimek}}'] },
+  { key: 'appointment', tokens: ['{{datum}}', '{{cas}}', '{{kdaj_obisk}}', '{{storitev}}', '{{ime_izvajalca}}', '{{leto}}'] },
+  { key: 'company', tokens: ['{{ime_podjetja}}', '{{naslov}}', '{{telefon_podjetja}}', '{{email_podjetja}}'] },
+  { key: 'links', tokens: ['{{povezava_prenarocanje}}', '{{povezava_ocena}}'] },
+];
+
 // Stable default, so an omitted `extraVars` does not change identity on every render.
 const NO_EXTRA_VARS: ReadonlyArray<{ token: string; label: string }> = [];
 
@@ -102,33 +109,29 @@ export function computeEffectiveLength(
   return length;
 }
 
-// Inline styles for token spans rendered inside contentEditable
+// Inline styles for token spans rendered inside contentEditable.
+// Ploščat čip brez gradienta in brez zunanjega odmika: razmik med besedilom in
+// čipom naredi presledek, zato je viden, ali presledek je ali ga ni.
 const TOKEN_OUTER = [
   'display:inline-flex',
   'align-items:center',
-  'border-radius:999px',
-  'padding:3px 10px',
+  'border-radius:6px',
+  'padding:1px 7px',
   'white-space:nowrap',
   'cursor:default',
   'user-select:none',
-  'vertical-align:middle',
-  'margin:0 2px',
-  'line-height:1.4',
-  'background-image:linear-gradient(white, white), linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-  'background-origin:padding-box, border-box',
-  'background-clip:padding-box, border-box',
-  'border:1.5px solid transparent',
+  'vertical-align:baseline',
+  'margin:0',
+  'line-height:1.5',
+  'background:#EEF2FF',
+  'border:1px solid #C7D2FE',
 ].join(';');
 
 const TOKEN_INNER = [
-  'background:linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-  '-webkit-background-clip:text',
-  '-webkit-text-fill-color:transparent',
-  'background-clip:text',
+  'color:#4338CA',
   'font-weight:600',
-  'font-size:11px',
-  'letter-spacing:0.01em',
-  'line-height:1',
+  'font-size:12px',
+  'line-height:1.4',
 ].join(';');
 
 // Build HTML string for contentEditable from raw template
@@ -336,6 +339,11 @@ export function TemplateEditor({
     [handleInput, maxLength, varLengths, sanitize]
   );
 
+  const tokenEffectiveLenOf = useCallback(
+    (token: string) => (token in varLengths ? varLengths[token] : token.length),
+    [varLengths]
+  );
+
   const insertToken = useCallback(
     (token: string) => {
       if (!editorRef.current) return;
@@ -343,8 +351,7 @@ export function TemplateEditor({
       if (maxLength) {
         const raw = extractTemplate(editorRef.current);
         const currentEffective = computeEffectiveLength(raw, varLengths);
-        const tokenEffectiveLen = token in varLengths ? varLengths[token] : token.length;
-        if (currentEffective + tokenEffectiveLen > maxLength) return;
+        if (currentEffective + tokenEffectiveLenOf(token) > maxLength) return;
       }
 
       const label = labels[token] || token;
@@ -361,26 +368,66 @@ export function TemplateEditor({
 
       editorRef.current.focus();
 
+      // Presledek pred in za spremenljivko, kjer manjkata — da besedilo ne
+      // sprime ob čip ("Pozdravljeni{{ime}}!").
       const sel = window.getSelection();
-      if (sel && sel.rangeCount > 0) {
-        const range = sel.getRangeAt(0);
-        if (editorRef.current.contains(range.commonAncestorContainer)) {
-          range.deleteContents();
-          range.insertNode(span);
-          range.setStartAfter(span);
-          range.collapse(true);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        } else {
-          editorRef.current.appendChild(span);
-        }
+      const inside =
+        !!sel && sel.rangeCount > 0 && editorRef.current.contains(sel.getRangeAt(0).commonAncestorContainer);
+      const raw0 = extractTemplate(editorRef.current);
+      let before = '';
+      let after = '';
+      if (inside && sel) {
+        const r = sel.getRangeAt(0);
+        const pre = document.createRange();
+        pre.selectNodeContents(editorRef.current);
+        pre.setEnd(r.startContainer, r.startOffset);
+        const post = document.createRange();
+        post.selectNodeContents(editorRef.current);
+        post.setStart(r.endContainer, r.endOffset);
+        const holder = document.createElement('div');
+        holder.appendChild(pre.cloneContents());
+        before = extractTemplate(holder);
+        const holder2 = document.createElement('div');
+        holder2.appendChild(post.cloneContents());
+        after = extractTemplate(holder2);
       } else {
-        editorRef.current.appendChild(span);
+        before = raw0;
+      }
+      let needSpaceBefore = before.length > 0 && !/\s$/.test(before);
+      let needSpaceAfter = after.length > 0 ? !/^[\s.,!?:;)]/.test(after) : false;
+      const extra = (needSpaceBefore ? 1 : 0) + (needSpaceAfter ? 1 : 0);
+      if (maxLength && computeEffectiveLength(raw0, varLengths) + tokenEffectiveLenOf(token) + extra > maxLength) {
+        // Presledki ne smejo pregnati meje; brez njih se spremenljivka še prilega.
+        needSpaceBefore = false;
+        needSpaceAfter = false;
+      }
+      const nodes: Node[] = [];
+      if (needSpaceBefore) nodes.push(document.createTextNode(' '));
+      nodes.push(span);
+      if (needSpaceAfter) nodes.push(document.createTextNode(' '));
+
+      if (inside && sel) {
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        let last: Node | null = null;
+        for (const n of nodes) {
+          range.insertNode(n);
+          range.setStartAfter(n);
+          range.collapse(true);
+          last = n;
+        }
+        // Kazalec za čip, pred zadnjim presledkom ne, da lahko pišeš naprej.
+        if (last) range.setStartAfter(last);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else {
+        for (const n of nodes) editorRef.current.appendChild(n);
       }
 
       handleInput();
     },
-    [handleInput, maxLength, varLengths, labels]
+    [handleInput, maxLength, varLengths, labels, tokenEffectiveLenOf]
   );
 
   const currentLength = computeEffectiveLength(value, varLengths);
@@ -404,53 +451,40 @@ export function TemplateEditor({
         <p className="text-xs text-gray-400 mb-2">
           {t('clickToInsert')}
         </p>
-        <div className="flex flex-wrap gap-1.5">
-          {vseOznake.map(v => {
-            const seVeljaga = prostoZa(v.token);
-            const dolzina = v.token in varLengths ? varLengths[v.token] : v.token.length;
+        <div className="space-y-2">
+          {TOKEN_GROUPS.map((group) => {
+            const items = vseOznake.filter((v) => group.tokens.includes(v.token));
+            if (items.length === 0) return null;
             return (
-              <button
-                key={v.token}
-                type="button"
-                onClick={() => insertToken(v.token)}
-                disabled={!seVeljaga}
-                title={
-                  seVeljaga
-                    ? t('tokenLength', { token: v.token, length: dolzina })
-                    : t('tokenTooLong', { label: labels[v.token], length: dolzina, left: Math.max(0, (maxLength ?? 0) - currentLength) })
-                }
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                  seVeljaga
-                    ? 'hover:shadow-sm active:scale-95'
-                    : 'cursor-not-allowed opacity-40'
-                }`}
-                style={
-                  seVeljaga
-                    ? {
-                        backgroundImage:
-                          'linear-gradient(white, white), linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                        backgroundOrigin: 'padding-box, border-box',
-                        backgroundClip: 'padding-box, border-box',
-                        border: '1.5px solid transparent',
-                      }
-                    : { border: '1.5px solid #E5E7EB', background: '#F9FAFB' }
-                }
-              >
-                <span
-                  style={
-                    seVeljaga
-                      ? {
-                          background: 'linear-gradient(135deg, #8B5CF6, #3B82F6, #06B6D4)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                        }
-                      : { color: '#9CA3AF' }
-                  }
-                >
-                  {labels[v.token]}
+              <div key={group.key} className="flex flex-wrap items-center gap-1.5">
+                <span className="w-full text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-400 sm:w-24 sm:flex-shrink-0">
+                  {t(`groups.${group.key}`)}
                 </span>
-              </button>
+                {items.map((v) => {
+                  const seVeljaga = prostoZa(v.token);
+                  const dolzina = v.token in varLengths ? varLengths[v.token] : v.token.length;
+                  return (
+                    <button
+                      key={v.token}
+                      type="button"
+                      onClick={() => insertToken(v.token)}
+                      disabled={!seVeljaga}
+                      title={
+                        seVeljaga
+                          ? t('tokenLength', { token: v.token, length: dolzina })
+                          : t('tokenTooLong', { label: labels[v.token], length: dolzina, left: Math.max(0, (maxLength ?? 0) - currentLength) })
+                      }
+                      className={`inline-flex min-h-8 items-center rounded-lg border px-2.5 py-1 text-xs font-semibold transition-colors ${
+                        seVeljaga
+                          ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 active:bg-indigo-200'
+                          : 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400 opacity-60'
+                      }`}
+                    >
+                      {labels[v.token]}
+                    </button>
+                  );
+                })}
+              </div>
             );
           })}
         </div>
@@ -458,8 +492,7 @@ export function TemplateEditor({
         {/* Zakaj je kakšna spremenljivka zbledela — brez tega je videti kot okvara. */}
         {maxLength > 0 && vseOznake.some(v => !prostoZa(v.token)) && (
           <p className="mt-2 text-xs text-amber-600">
-            Zbledele spremenljivke se v to predlogo ne prilegajo več. Skrajšajte
-            besedilo, da jih boste lahko dodali.
+            {t('fadedVarsHint')}
           </p>
         )}
       </div>
@@ -468,7 +501,7 @@ export function TemplateEditor({
       <div className="relative">
         {!value && (
           <div
-            className="absolute top-2 left-3 text-sm text-gray-400 pointer-events-none select-none z-10"
+            className="absolute top-2.5 left-3.5 text-[15px] leading-7 text-gray-400 pointer-events-none select-none z-10"
             aria-hidden="true"
           >
             {placeholder}
@@ -481,10 +514,10 @@ export function TemplateEditor({
           onInput={handleInput}
           onKeyDown={handleKeyDown}
           onPaste={handlePaste}
-          className={`w-full rounded-xl border-2 px-3 py-2 text-sm text-gray-900 focus:outline-none leading-7 ${
+          className={`w-full rounded-xl border bg-white px-3.5 py-2.5 text-[15px] leading-7 text-gray-900 transition-colors focus:outline-none focus:ring-2 ${
             isOverLimit
-              ? 'border-red-300 focus:border-red-400'
-              : 'border-gray-200 focus:border-violet-300'
+              ? 'border-red-300 focus:border-red-400 focus:ring-red-100'
+              : 'border-gray-200 focus:border-gray-900 focus:ring-gray-900/10'
           }`}
           style={{
             minHeight: `${rows * 1.75}rem`,

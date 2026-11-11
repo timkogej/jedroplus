@@ -311,7 +311,16 @@
       "discountFieldDesc": "Descrizione dello sconto da includere nel messaggio",
       "discountPlaceholder": "10% di sconto sulla prossima visita",
       "timingTitle": "Orario di invio",
-      "timingValue": "Fisso: subito dopo il completamento dell'appuntamento"
+      "timingValue": "Fisso: subito dopo il completamento dell'appuntamento",
+      "autoCompleteLabel": "Completa gli appuntamenti automaticamente",
+      "autoCompleteDesc": "Un appuntamento che non completi tu viene completato dopo il numero di ore scelto. Gli appuntamenti più vecchi non sono coinvolti: completali con «Completa tutti» in Appuntamenti.",
+      "autoCompleteOff": "Disattivato",
+      "autoCompleteHours": "{count, plural, one {# ora} other {# ore}} dopo la fine",
+      "reviewLinkLabel": "Link per la recensione",
+      "reviewLinkDesc": "Dove il cliente lascia la recensione (Google, Facebook). Usa la forma breve per restare in un solo SMS.",
+      "maxDaysLabel": "Non inviare dopo (giorni)",
+      "maxDaysDesc": "Se completi un appuntamento più tardi, il messaggio non viene inviato. 0 significa nessun limite.",
+      "noLimit": "Nessun limite"
     },
     "smsAccess": {
       "notIncluded": "Il tuo piano non include i messaggi SMS. Acquista un pacchetto SMS o passa a Jedro Pro, che include 250 SMS al mese.",
@@ -343,6 +352,21 @@
       "emailPlaceholder": "Gentile {{ime}}, il tuo appuntamento è stato spostato al {{datum}} alle {{cas}}. Cordiali saluti, {{ime_podjetja}}",
       "smsHint": "Puoi usare le stesse variabili dei promemoria prima e dopo l'appuntamento.",
       "emailHint": "Il modello email non ha limiti di caratteri e supporta tutti i caratteri speciali."
+    },
+    "tabs": {
+      "general": "Generale",
+      "before": "Prima",
+      "after": "Dopo",
+      "reschedule": "Spostamento"
+    },
+    "groups": {
+      "voice": "Lingua e tono",
+      "voiceDesc": "Come suonano i messaggi ai clienti.",
+      "sender": "Mittente",
+      "senderDesc": "Chi appare come mittente e dove rispondono i clienti.",
+      "emailLook": "Aspetto email",
+      "emailLookDesc": "Colori usati dai modelli email.",
+      "when": "Quando"
     }
   },
   "preview": {
@@ -380,7 +404,14 @@
     "tooLong": "Il messaggio è troppo lungo!",
     "tooLongBody": "Il modello supera i {max} caratteri. Accorcia una parte del testo.",
     "tokenLength": "{token} — circa {length} caratteri",
-    "tokenTooLong": "Non ci sta: {label} aggiunge circa {length} caratteri, ma ne restano solo {left}. Accorcia il testo."
+    "tokenTooLong": "Non ci sta: {label} aggiunge circa {length} caratteri, ma ne restano solo {left}. Accorcia il testo.",
+    "groups": {
+      "client": "Cliente",
+      "appointment": "Appuntamento",
+      "company": "Attività",
+      "links": "Link"
+    },
+    "fadedVarsHint": "Le variabili sbiadite non entrano più in questo modello. Accorcia il testo per aggiungerle."
   },
   "test": {
     "buttonSms": "Invia un SMS di prova",

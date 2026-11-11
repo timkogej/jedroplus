@@ -311,7 +311,16 @@
       "discountFieldDesc": "Opis popusta ki se vključi v sporočilo",
       "discountPlaceholder": "10% popust na naslednji obisk",
       "timingTitle": "Čas pošiljanja",
-      "timingValue": "Fiksno: Takoj po zaključenem terminu"
+      "timingValue": "Fiksno: Takoj po zaključenem terminu",
+      "autoCompleteLabel": "Samodejno zaključi termin",
+      "autoCompleteDesc": "Termin, ki ga ne zaključite sami, se zaključi izbrano število ur po koncu. Starejših terminov to ne zajame: te zaključite z gumbom »Zaključi vse« v Terminih.",
+      "autoCompleteOff": "Izklopljeno",
+      "autoCompleteHours": "{count, plural, one {# uro} two {# uri} few {# ure} other {# ur}} po koncu",
+      "reviewLinkLabel": "Povezava za oceno",
+      "reviewLinkDesc": "Kamor stranka odda oceno (Google, Facebook). Uporabite kratko obliko, da sporočilo ostane en SMS.",
+      "maxDaysLabel": "Ne pošlji po več kot (dni)",
+      "maxDaysDesc": "Če termin zaključite pozneje, se po tem številu dni sporočilo ne pošlje več. 0 pomeni brez omejitve.",
+      "noLimit": "Brez omejitve"
     },
     "smsAccess": {
       "notIncluded": "Vaš paket ne vključuje SMS sporočil. Dokupite SMS paket ali nadgradite na Jedro Pro, ki vključuje 250 SMS na mesec.",
@@ -343,6 +352,21 @@
       "emailPlaceholder": "Spoštovani {{ime}}, vaš termin je bil prestavljen na {{datum}} ob {{cas}}. Lep pozdrav, {{ime_podjetja}}",
       "smsHint": "Uporabite lahko enake spremenljivke kot pri opomnikih pred in po terminu.",
       "emailHint": "Email predloga nima omejitve znakov in podpira šumnike."
+    },
+    "tabs": {
+      "general": "Splošno",
+      "before": "Pred terminom",
+      "after": "Po terminu",
+      "reschedule": "Prestavitev"
+    },
+    "groups": {
+      "voice": "Jezik in ton",
+      "voiceDesc": "Kako zvenijo sporočila vaših strank.",
+      "sender": "Pošiljatelj",
+      "senderDesc": "Kdo je naveden kot pošiljatelj in kam stranke odgovorijo.",
+      "emailLook": "Videz e-pošte",
+      "emailLookDesc": "Barvi, ki ju uporabijo e-poštne predloge.",
+      "when": "Kdaj"
     }
   },
   "preview": {
@@ -389,7 +413,14 @@
     "tooLong": "Sporočilo je predolgo!",
     "tooLongBody": "Predloga presega {max} znakov. Skrajšajte del besedila.",
     "tokenLength": "{token} — približno {length} znakov",
-    "tokenTooLong": "Ne prilega se: {label} doda približno {length} znakov, na voljo pa jih je še {left}. Skrajšajte besedilo."
+    "tokenTooLong": "Ne prilega se: {label} doda približno {length} znakov, na voljo pa jih je še {left}. Skrajšajte besedilo.",
+    "groups": {
+      "client": "Stranka",
+      "appointment": "Termin",
+      "company": "Podjetje",
+      "links": "Povezave"
+    },
+    "fadedVarsHint": "Zbledene spremenljivke se v to predlogo ne prilegajo več. Skrajšajte besedilo, da jih boste lahko dodali."
   },
   "senderRequestError": "Zahteve ni bilo mogoče oddati."
 }

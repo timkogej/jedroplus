@@ -311,7 +311,16 @@
       "discountFieldDesc": "Beschreibung des Rabatts für die Nachricht",
       "discountPlaceholder": "10 % Rabatt auf den nächsten Besuch",
       "timingTitle": "Versandzeitpunkt",
-      "timingValue": "Fest: direkt nach dem abgeschlossenen Termin"
+      "timingValue": "Fest: direkt nach dem abgeschlossenen Termin",
+      "autoCompleteLabel": "Termine automatisch abschließen",
+      "autoCompleteDesc": "Ein Termin, den Sie nicht selbst abschließen, wird nach der gewählten Stundenzahl abgeschlossen. Ältere Termine sind nicht betroffen: schließen Sie diese mit „Alle abschließen“ in den Terminen ab.",
+      "autoCompleteOff": "Aus",
+      "autoCompleteHours": "{count, plural, one {# Stunde} other {# Stunden}} nach Ende",
+      "reviewLinkLabel": "Bewertungslink",
+      "reviewLinkDesc": "Wo der Kunde eine Bewertung abgibt (Google, Facebook). Verwenden Sie die Kurzform, damit die Nachricht eine SMS bleibt.",
+      "maxDaysLabel": "Nicht senden nach (Tage)",
+      "maxDaysDesc": "Schließen Sie einen Termin später ab, wird die Nachricht nicht mehr gesendet. 0 bedeutet keine Begrenzung.",
+      "noLimit": "Keine Begrenzung"
     },
     "smsAccess": {
       "notIncluded": "Ihr Paket enthält keine SMS. Buchen Sie ein SMS-Paket hinzu oder wechseln Sie zu Jedro Pro mit 250 SMS pro Monat.",
@@ -343,6 +352,21 @@
       "emailPlaceholder": "Guten Tag {{ime}}, Ihr Termin wurde auf {{datum}} um {{cas}} verschoben. Freundliche Grüße, {{ime_podjetja}}",
       "smsHint": "Sie können dieselben Variablen wie in den Erinnerungen vor und nach dem Termin verwenden.",
       "emailHint": "E-Mail-Vorlagen haben keine Zeichenbegrenzung und unterstützen Sonderzeichen."
+    },
+    "tabs": {
+      "general": "Allgemein",
+      "before": "Vor dem Termin",
+      "after": "Nach dem Termin",
+      "reschedule": "Verschiebung"
+    },
+    "groups": {
+      "voice": "Sprache und Ton",
+      "voiceDesc": "Wie Nachrichten an Ihre Kunden klingen.",
+      "sender": "Absender",
+      "senderDesc": "Wer als Absender erscheint und wohin Kunden antworten.",
+      "emailLook": "E-Mail-Design",
+      "emailLookDesc": "Farben der E-Mail-Vorlagen.",
+      "when": "Wann"
     }
   },
   "preview": {
@@ -380,7 +404,14 @@
     "tooLong": "Die Nachricht ist zu lang!",
     "tooLongBody": "Die Vorlage überschreitet {max} Zeichen. Kürzen Sie den Text.",
     "tokenLength": "{token} — etwa {length} Zeichen",
-    "tokenTooLong": "Passt nicht: {label} fügt etwa {length} Zeichen hinzu, verfügbar sind nur noch {left}. Kürzen Sie den Text."
+    "tokenTooLong": "Passt nicht: {label} fügt etwa {length} Zeichen hinzu, verfügbar sind nur noch {left}. Kürzen Sie den Text.",
+    "groups": {
+      "client": "Kunde",
+      "appointment": "Termin",
+      "company": "Unternehmen",
+      "links": "Links"
+    },
+    "fadedVarsHint": "Ausgegraute Variablen passen nicht mehr in diese Vorlage. Kürzen Sie den Text, um sie hinzuzufügen."
   },
   "test": {
     "buttonSms": "Test-SMS senden",

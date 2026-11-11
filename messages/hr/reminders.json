@@ -311,7 +311,16 @@
       "discountFieldDesc": "Opis popusta koji se uključuje u poruku",
       "discountPlaceholder": "10 % popusta na sljedeći posjet",
       "timingTitle": "Vrijeme slanja",
-      "timingValue": "Fiksno: odmah nakon završenog termina"
+      "timingValue": "Fiksno: odmah nakon završenog termina",
+      "autoCompleteLabel": "Automatski završi termine",
+      "autoCompleteDesc": "Termin koji sami ne završite završava se nakon odabranog broja sati. Starije termine to ne obuhvaća: njih završite gumbom „Završi sve” u Terminima.",
+      "autoCompleteOff": "Isključeno",
+      "autoCompleteHours": "{count, plural, one {# sat} few {# sata} other {# sati}} nakon završetka",
+      "reviewLinkLabel": "Poveznica za ocjenu",
+      "reviewLinkDesc": "Gdje klijent ostavlja ocjenu (Google, Facebook). Koristite kratki oblik da poruka ostane jedan SMS.",
+      "maxDaysLabel": "Ne šalji nakon (dana)",
+      "maxDaysDesc": "Ako termin završite kasnije, poruka se ne šalje. 0 znači bez ograničenja.",
+      "noLimit": "Bez ograničenja"
     },
     "smsAccess": {
       "notIncluded": "Vaš paket ne uključuje SMS poruke. Dokupite SMS paket ili nadogradite na Jedro Pro, koji uključuje 250 SMS poruka mjesečno.",
@@ -343,6 +352,21 @@
       "emailPlaceholder": "Poštovani {{ime}}, vaš je termin premješten na {{datum}} u {{cas}}. Lijep pozdrav, {{ime_podjetja}}",
       "smsHint": "Možete koristiti iste varijable kao u podsjetnicima prije i nakon termina.",
       "emailHint": "Predložak e-pošte nema ograničenje znakova i podržava dijakritičke znakove."
+    },
+    "tabs": {
+      "general": "Općenito",
+      "before": "Prije termina",
+      "after": "Nakon termina",
+      "reschedule": "Premještanje"
+    },
+    "groups": {
+      "voice": "Jezik i ton",
+      "voiceDesc": "Kako zvuče poruke vašim klijentima.",
+      "sender": "Pošiljatelj",
+      "senderDesc": "Tko je naveden kao pošiljatelj i kamo klijenti odgovaraju.",
+      "emailLook": "Izgled e-pošte",
+      "emailLookDesc": "Boje koje koriste predlošci e-pošte.",
+      "when": "Kada"
     }
   },
   "preview": {
@@ -380,7 +404,14 @@
     "tooLong": "Poruka je predugačka!",
     "tooLongBody": "Predložak premašuje {max} znakova. Skratite dio teksta.",
     "tokenLength": "{token} — otprilike {length} znakova",
-    "tokenTooLong": "Ne stane: {label} dodaje otprilike {length} znakova, a preostalo ih je još {left}. Skratite tekst."
+    "tokenTooLong": "Ne stane: {label} dodaje otprilike {length} znakova, a preostalo ih je još {left}. Skratite tekst.",
+    "groups": {
+      "client": "Klijent",
+      "appointment": "Termin",
+      "company": "Tvrtka",
+      "links": "Poveznice"
+    },
+    "fadedVarsHint": "Zasivljene varijable više ne stanu u ovaj predložak. Skratite tekst da ih dodate."
   },
   "test": {
     "buttonSms": "Pošalji probni SMS",

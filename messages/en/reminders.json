@@ -311,7 +311,16 @@
       "discountFieldDesc": "Discount description to include in the message",
       "discountPlaceholder": "10% discount on next visit",
       "timingTitle": "Sending time",
-      "timingValue": "Fixed: immediately after completed appointment"
+      "timingValue": "Fixed: immediately after completed appointment",
+      "autoCompleteLabel": "Complete appointments automatically",
+      "autoCompleteDesc": "An appointment you do not complete yourself is completed this many hours after it ends. Older appointments are not affected: complete those with \"Complete all\" in Appointments.",
+      "autoCompleteOff": "Off",
+      "autoCompleteHours": "{count, plural, one {# hour} other {# hours}} after the end",
+      "reviewLinkLabel": "Review link",
+      "reviewLinkDesc": "Where the client leaves a review (Google, Facebook). Use the short form so the message stays one SMS.",
+      "maxDaysLabel": "Do not send after (days)",
+      "maxDaysDesc": "If you complete an appointment later than this, the message is not sent. 0 means no limit.",
+      "noLimit": "No limit"
     },
     "smsAccess": {
       "notIncluded": "Your plan doesn't include SMS messages. Buy an SMS package or upgrade to Jedro Pro, which includes 250 SMS per month.",
@@ -343,6 +352,21 @@
       "emailPlaceholder": "Dear {{ime}}, your appointment has been moved to {{datum}} at {{cas}}. Kind regards, {{ime_podjetja}}",
       "smsHint": "You can use the same variables as in reminders before and after the appointment.",
       "emailHint": "Email templates have no character limit and support special letters."
+    },
+    "tabs": {
+      "general": "General",
+      "before": "Before",
+      "after": "After",
+      "reschedule": "Rescheduling"
+    },
+    "groups": {
+      "voice": "Language and tone",
+      "voiceDesc": "How messages to your clients sound.",
+      "sender": "Sender",
+      "senderDesc": "Who appears as the sender and where clients reply.",
+      "emailLook": "Email look",
+      "emailLookDesc": "Colours used by email templates.",
+      "when": "When"
     }
   },
   "preview": {
@@ -389,7 +413,14 @@
     "tooLong": "The message is too long!",
     "tooLongBody": "The template exceeds {max} characters. Shorten the text.",
     "tokenLength": "{token} — about {length} characters",
-    "tokenTooLong": "Doesn't fit: {label} adds about {length} characters, but only {left} are left. Shorten the text."
+    "tokenTooLong": "Doesn't fit: {label} adds about {length} characters, but only {left} are left. Shorten the text.",
+    "groups": {
+      "client": "Client",
+      "appointment": "Appointment",
+      "company": "Business",
+      "links": "Links"
+    },
+    "fadedVarsHint": "Faded variables no longer fit in this template. Shorten the text to add them."
   },
   "senderRequestError": "The request could not be submitted."
 }
