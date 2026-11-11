@@ -21,7 +21,7 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
-import { TemplateEditor, migrateTemplate, sanitizeTemplateText, linkLength, PO_TERMINU_VARS } from '@/components/reminders/TemplateEditor';
+import { TemplateEditor, migrateTemplate, sanitizeTemplateText, linkLength, PO_TERMINU_VARS, KDAJ_VARS } from '@/components/reminders/TemplateEditor';
 import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
@@ -143,6 +143,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   const [nagovor, setNagovor] = useState<'vikanje' | 'tikanje'>('vikanje');
   const [samodejniOpomnik, setSamodejniOpomnik] = useState(false);
   const [smsOsebaPred, setSmsOsebaPred] = useState(false);
+  const [smsPovezavaPrestavitev, setSmsPovezavaPrestavitev] = useState(true);
   const [dniPrej, setDniPrej] = useState('1');
   // Največ toliko dni po terminu se sporočilo še pošlje; 0 = brez omejitve.
   const [poTerminuMaxDni, setPoTerminuMaxDni] = useState('3');
@@ -234,7 +235,8 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
   // Variable estimated lengths for SMS character counting
   const smsVarLengths: Record<string, number> = {
     '{{cas}}': 5,
-    '{{datum}}': 6,
+    '{{datum}}': 7, // "13. 11." (letnica samo, če termin ni v tem letu)
+    '{{kdaj}}': 12, // najdaljši izpis je "v ponedeljek"
     '{{telefon_podjetja}}': 9,
     '{{email_podjetja}}': kompanyEmail.length || 20,
     '{{ime}}': 10,
@@ -363,6 +365,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
           setNazivPodjetja(String(data['Naziv podjetja'] ?? data['Naziv Podjetja'] ?? data['naziv_podjetja'] ?? ''));
           setNaslovPodjetja(String(data['Naslov podjetja'] ?? data['naslov_podjetja'] ?? data['Naslov'] ?? ''));
           setApptManagementLink(String(data['appt_management_link'] ?? ''));
+          setSmsPovezavaPrestavitev(data['sms_povezava_prestavitev'] !== false && data['sms_povezava_prestavitev'] !== 'false');
 
           // SMS Supabase columns - use true/yes for enabled
           const parseBool = (v: unknown) => {
@@ -419,6 +422,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
           'nagovor': nagovor,
           'samodejni_opomnik': samodejniOpomnik,
           'sms_oseba_pred': smsOsebaPred,
+          'sms_povezava_prestavitev': smsPovezavaPrestavitev,
           'dni_prej': Number(dniPrej),
           'po_terminu_max_dni': Number(poTerminuMaxDni),
           'povezava_ocena': povezavaOcena.trim(),
@@ -829,6 +833,17 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                       />
                     </SettingRow>
 
+                    {/* Povezava za prestavitev v SMS */}
+                    <SettingRow
+                      label={t('modal.general.linkLabel')}
+                      description={t('modal.general.linkDesc')}
+                    >
+                      <Switch
+                        checked={smsPovezavaPrestavitev}
+                        onChange={setSmsPovezavaPrestavitev}
+                      />
+                    </SettingRow>
+
                     {/* Samodejni opomnik oznaka */}
                     <SettingRow
                       label={t('modal.general.autoTagLabel')}
@@ -1128,6 +1143,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                                   placeholder={String(t.raw('modal.before.templatePlaceholder'))}
                                   rows={4}
                                   varLengths={smsVarLengths}
+                                  extraVars={KDAJ_VARS}
                                 />
                                 <MessagePreview template={smsTemplatePred} companyName={previewCompanyName} />
                                 {sendingLanguage !== 'en' && (

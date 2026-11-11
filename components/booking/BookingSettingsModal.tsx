@@ -21,7 +21,7 @@ import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { callN8nAction } from '@/src/lib/n8nClient';
 import { hasPosOnlinePaymentsSubscription, isJedroProPlan, parseSettingBool } from '@/lib/onlinePayments';
-import { TemplateEditor, migrateTemplate, sanitizeTemplateText, linkLength } from '@/components/reminders/TemplateEditor';
+import { TemplateEditor, migrateTemplate, sanitizeTemplateText, linkLength, KDAJ_VARS } from '@/components/reminders/TemplateEditor';
 import { EnglishVariant } from '@/components/reminders/EnglishVariant';
 import { EmailConfirmationTemplate, type EmailTemplateValue } from '@/components/booking/EmailConfirmationTemplate';
 import { sheet } from '@/components/ui/sheetClasses';
@@ -216,7 +216,8 @@ export function BookingSettingsModal({ isOpen, onClose, initialTab }: BookingSet
   // Variable estimated lengths for SMS character counting
   const smsVarLengths: Record<string, number> = {
     '{{cas}}': 5,
-    '{{datum}}': 6,
+    '{{datum}}': 7, // "13. 11." (letnica samo, če termin ni v tem letu)
+    '{{kdaj}}': 12, // najdaljši izpis je "v ponedeljek"
     '{{telefon_podjetja}}': 9,
     '{{email_podjetja}}': kompanyEmail.length || 20,
     '{{ime}}': 10,
@@ -811,6 +812,7 @@ export function BookingSettingsModal({ isOpen, onClose, initialTab }: BookingSet
                                     placeholder={String(t.raw('modal.confirmations.templatePlaceholder'))}
                                     rows={4}
                                     varLengths={smsVarLengths}
+                                    extraVars={KDAJ_VARS}
                                   />
                                   <p className="text-xs text-gray-400">{t('modal.confirmations.noEmojiHint')}</p>
                                   {sendingLanguage !== 'en' && (

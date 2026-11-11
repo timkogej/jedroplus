@@ -34,6 +34,16 @@ export const PO_TERMINU_VARS = [
 ] as const;
 
 /**
+ * Oznake za sporočila PRED terminom in za obvestilo o rezervaciji.
+ *
+ * `{{kdaj}}` se izpiše kot »danes«, »jutri«, »v petek« ali »13. 11.« (v jeziku
+ * sporočila), odvisno od tega, koliko dni je do termina.
+ */
+export const KDAJ_VARS = [
+  { token: '{{kdaj}}', label: 'Kdaj je termin' },
+] as const;
+
+/**
  * Dolžina povezave, kakršna bo dejansko poslana.
  *
  * V bazi je shranjena s shemo (`https://portal.jedroplus.com/...`), v SMS pa gre
@@ -48,7 +58,7 @@ export function linkLength(url: string | null | undefined, fallback = 30): numbe
 
 const TOKEN_GROUPS: ReadonlyArray<{ key: string; tokens: ReadonlyArray<string> }> = [
   { key: 'client', tokens: ['{{ime}}', '{{priimek}}'] },
-  { key: 'appointment', tokens: ['{{datum}}', '{{cas}}', '{{kdaj_obisk}}', '{{storitev}}', '{{ime_izvajalca}}', '{{leto}}'] },
+  { key: 'appointment', tokens: ['{{datum}}', '{{cas}}', '{{kdaj}}', '{{kdaj_obisk}}', '{{storitev}}', '{{ime_izvajalca}}', '{{leto}}'] },
   { key: 'company', tokens: ['{{ime_podjetja}}', '{{naslov}}', '{{telefon_podjetja}}', '{{email_podjetja}}'] },
   { key: 'links', tokens: ['{{povezava_prenarocanje}}', '{{povezava_ocena}}'] },
 ];

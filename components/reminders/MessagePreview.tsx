@@ -47,6 +47,7 @@ export function MessagePreview({ template, companyName, sms = true, subject }: M
     '{{ime}}': t('sample.firstName'),
     '{{priimek}}': t('sample.lastName'),
     '{{datum}}': tomorrow.toLocaleDateString(intlLocale(locale), { day: 'numeric', month: 'numeric' }),
+    '{{kdaj}}': ({ sl: 'jutri', hr: 'sutra', en: 'tomorrow', de: 'morgen', it: 'domani' } as Record<string, string>)[locale] ?? 'tomorrow',
     '{{cas}}': '10:00',
     '{{storitev}}': t('sample.service'),
     '{{ime_izvajalca}}': t('sample.staff'),

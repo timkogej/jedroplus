@@ -226,6 +226,8 @@
       "autoTagDesc": "Na začetku sporočila se doda oznaka, da gre za samodejni opomnik.",
       "staffLabel": "Vključi izvajalca v opomnik",
       "staffDesc": "Če je vklopljeno, lahko opomnik omeni zaposlenega, ki bo izvedel storitev.",
+      "linkLabel": "Povezava za prestavitev v SMS",
+      "linkDesc": "Če je vklopljeno, SMS opomnik in potrdilo vsebujeta povezavo za prestavitev ali odpoved termina.",
       "daysBeforeLabel": "Pošlji opomnik (dni pred terminom)",
       "daysBeforeDesc": "Koliko dni pred terminom naj se pošlje opomnik.",
       "select": "Izberi",
