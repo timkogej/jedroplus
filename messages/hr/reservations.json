@@ -294,6 +294,13 @@
       },
       "incompleteError": "Dopunite ili uklonite nepotpuna pitanja u upitniku.",
       "saveError": "Upitnik nije bilo moguće spremiti. Pokušajte ponovno."
+    },
+    "tabs": {
+      "terms": "Termini",
+      "confirmations": "Potvrde",
+      "payments": "Plaćanja",
+      "questionnaire": "Upitnik",
+      "look": "Izgled"
     }
   },
   "qr": {

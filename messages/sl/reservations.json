@@ -294,6 +294,13 @@
       },
       "incompleteError": "Dopolnite ali odstranite nepopolna vprašanja v vprašalniku.",
       "saveError": "Vprašalnika ni bilo mogoče shraniti. Poskusite znova."
+    },
+    "tabs": {
+      "terms": "Termini",
+      "confirmations": "Potrdila",
+      "payments": "Plačila",
+      "questionnaire": "Vprašalnik",
+      "look": "Videz"
     }
   },
   "qr": {

@@ -600,7 +600,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
 
   const lockedFieldClass = 'flex-1 rounded-lg border border-gray-200 bg-gray-50 p-3 font-mono text-sm text-gray-700';
   const innerPanelClass = 'space-y-4 rounded-[10px] bg-gray-50 p-4';
-  const textareaClass = 'w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10';
+  const textareaClass = 'w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 placeholder:text-[13px] placeholder:leading-5 sm:placeholder:text-sm transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10';
 
   const renderChannelSelector = (
     value: string,
@@ -1213,7 +1213,7 @@ export function ReminderSettingsModal({ isOpen, onClose, initialSection }: Remin
                             value={povezavaOcena}
                             onChange={(e) => setPovezavaOcena(e.target.value)}
                             placeholder="g.page/r/…/review"
-                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
+                            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 placeholder:text-[13px] placeholder:leading-5 sm:placeholder:text-sm transition-colors focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10"
                           />
                         </SettingRow>
 

@@ -23,6 +23,7 @@ import { useTranslations } from 'next-intl';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { useCompany } from '@/app/company-context';
 import { isJedroProPlan } from '@/lib/onlinePayments';
+import type { BookingTab } from '@/components/booking/BookingSettingsModal';
 import { useRolePermissions } from '@/app/role-permission-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { countPendingZahteve } from '@/lib/supabase/zahteveTermini';
@@ -85,6 +86,11 @@ export default function RezervacijeClient({
   const [copiedDesignId, setCopiedDesignId] = useState<number | null>(null);
   const [copiedMgmt, setCopiedMgmt] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<BookingTab | undefined>(undefined);
+  const openSettings = (tab?: BookingTab) => {
+    setSettingsTab(tab);
+    setShowSettingsModal(true);
+  };
   // Requests waiting for an answer (badge on the "Zahteve za termin" card).
   const [pendingRequests, setPendingRequests] = useState(0);
 
@@ -200,7 +206,7 @@ export default function RezervacijeClient({
             {canManageSettings && (
               <button
                 type="button"
-                onClick={() => setShowSettingsModal(true)}
+                onClick={() => openSettings()}
                 className="relative inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 active:bg-gray-100"
                 title={t('modal.title')}
               >
@@ -524,6 +530,7 @@ export default function RezervacijeClient({
                 <SectionPanel title={t('settingsOverview.title')}>
                   <SettingRow
                     icon={<ClipboardText size={16} weight="regular" />}
+                    onEdit={canManageSettings ? () => openSettings('terms') : undefined}
                     label={t('settingsOverview.bookingMode')}
                     description={t('settingsOverview.bookingModeDesc')}
                     value={
@@ -535,6 +542,7 @@ export default function RezervacijeClient({
 
                   <SettingRow
                     icon={<CheckCircle size={16} weight="regular" />}
+                    onEdit={canManageSettings ? () => openSettings('terms') : undefined}
                     label={t('settingsOverview.bookingEnabled')}
                     description={t('settingsOverview.bookingEnabledDesc')}
                     value={
@@ -547,6 +555,7 @@ export default function RezervacijeClient({
 
                   <SettingRow
                     icon={<Clock size={16} weight="regular" />}
+                    onEdit={canManageSettings ? () => openSettings('terms') : undefined}
                     label={t('settingsOverview.timeSlots')}
                     description={t('settingsOverview.timeSlotsDesc')}
                     value={
@@ -558,6 +567,7 @@ export default function RezervacijeClient({
 
                   <SettingRow
                     icon={<CheckCircle size={16} weight="regular" />}
+                    onEdit={canManageSettings ? () => openSettings('confirmations') : undefined}
                     label={t('settingsOverview.clientConfirm')}
                     description={t('settingsOverview.clientConfirmDesc')}
                     value={
@@ -577,6 +587,7 @@ export default function RezervacijeClient({
 
                   <SettingRow
                     icon={<CheckCircle size={16} weight="regular" />}
+                    onEdit={canManageSettings ? () => openSettings('confirmations') : undefined}
                     label={t('settingsOverview.onlineConfirm')}
                     description={t('settingsOverview.onlineConfirmDesc')}
                     value={
@@ -600,7 +611,7 @@ export default function RezervacijeClient({
                         {t('settingsOverview.onlineConfirmOffHint')}{' '}
                         <button
                           type="button"
-                          onClick={() => setShowSettingsModal(true)}
+                          onClick={() => openSettings('confirmations')}
                           className="font-semibold underline underline-offset-4 hover:text-amber-700"
                         >
                           {t('settingsOverview.onlineConfirmOffCta')}
@@ -612,7 +623,8 @@ export default function RezervacijeClient({
                   {shortLink && (
                     <SettingRow
                       icon={<Link size={16} weight="regular" />}
-                      label={t('settingsOverview.mainLinkLabel')}
+                      onEdit={canManageSettings ? () => openSettings('look') : undefined}
+                    label={t('settingsOverview.mainLinkLabel')}
                       description={t('settingsOverview.mainLinkDesc')}
                       value={<ValuePill tone="blue">{t(`designs.${mainDesign}.name`)}</ValuePill>}
                     />
@@ -620,6 +632,7 @@ export default function RezervacijeClient({
 
                   <SettingRow
                     icon={<Palette size={16} weight="regular" />}
+                    onEdit={canManageSettings ? () => openSettings('look') : undefined}
                     label={t('settingsOverview.colors')}
                     description={t('settingsOverview.colorsDesc')}
                     value={
@@ -662,6 +675,7 @@ export default function RezervacijeClient({
       {/* Settings Modal */}
       <BookingSettingsModal
         isOpen={showSettingsModal}
+        initialTab={settingsTab}
         onClose={() => setShowSettingsModal(false)}
       />
     </ProtectedLayout>

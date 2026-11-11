@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { CaretRight } from '@phosphor-icons/react';
 
 /**
  * Gradniki za pregledne strani — Opomniki, Rezervacije in kar pride za njimi.
@@ -62,14 +63,35 @@ export function SettingRow({
   label,
   description,
   value,
+  onEdit,
 }: {
   icon: ReactNode;
   label: string;
   description?: ReactNode;
   value: ReactNode;
+  /** Vrstica se odpre kot gumb in vodi na pravo mesto v nastavitvah. */
+  onEdit?: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 border-b border-gray-100 px-4 py-3.5 last:border-b-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+    <div
+      {...(onEdit
+        ? {
+            role: 'button',
+            tabIndex: 0,
+            onClick: onEdit,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onEdit();
+              }
+            },
+          }
+        : {})}
+      className={cx(
+        'flex flex-col gap-2 border-b border-gray-100 px-4 py-3.5 last:border-b-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4',
+        onEdit && 'cursor-pointer transition-colors hover:bg-gray-50 active:bg-gray-100'
+      )}
+    >
       <div className="flex min-w-0 items-start gap-2.5">
         <span className="mt-0.5 flex-shrink-0 text-gray-400">{icon}</span>
         <div className="min-w-0">
@@ -79,7 +101,10 @@ export function SettingRow({
           ) : null}
         </div>
       </div>
-      <div className="min-w-0 flex-shrink-0 text-left text-sm text-gray-900 sm:text-right">{value}</div>
+      <div className="flex min-w-0 flex-shrink-0 items-center gap-1.5 text-left text-sm text-gray-900 sm:text-right">
+        {value}
+        {onEdit && <CaretRight size={14} weight="bold" className="hidden flex-shrink-0 text-gray-300 sm:block" aria-hidden="true" />}
+      </div>
     </div>
   );
 }

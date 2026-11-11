@@ -294,6 +294,13 @@
       },
       "incompleteError": "Completate o rimuovete le domande incomplete del questionario.",
       "saveError": "Non è stato possibile salvare il questionario. Riprovate."
+    },
+    "tabs": {
+      "terms": "Prenotazioni",
+      "confirmations": "Conferme",
+      "payments": "Pagamenti",
+      "questionnaire": "Questionario",
+      "look": "Aspetto"
     }
   },
   "qr": {

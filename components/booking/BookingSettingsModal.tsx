@@ -42,9 +42,13 @@ function bookingWindowOptions(current: string): number[] {
     : BOOKING_WINDOW_DAYS;
 }
 
+export type BookingTab = 'terms' | 'confirmations' | 'payments' | 'questionnaire' | 'look';
+
 interface BookingSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
+  /** Zavihek, ki se odpre ob prikazu (npr. iz pregleda nastavitev na strani). */
+  initialTab?: BookingTab;
 }
 
 // ── Channel picker (SMS / Email) ─────────────────────────────────────────────
@@ -64,7 +68,7 @@ function ChannelPicker({
 }) {
   return (
     <div className="mt-3 flex flex-col gap-2">
-      <div className="inline-flex w-fit flex-wrap gap-0.5 rounded-[9px] bg-gray-100 p-0.5">
+      <div className="grid w-full grid-cols-2 gap-0.5 rounded-[9px] bg-gray-100 p-0.5 sm:inline-flex sm:w-fit">
         <button
           type="button"
           onClick={() => onChange('email')}
@@ -81,7 +85,7 @@ function ChannelPicker({
           <div className="flex cursor-not-allowed items-center gap-2 rounded-[7px] px-3 py-1.5 text-sm font-medium text-gray-400">
             <DeviceMobile className="h-4 w-4" weight="regular" />
             SMS
-            <span className="text-xs text-gray-400">{t('modal.confirmations.smsUnavailable')}</span>
+            <span className="hidden text-xs text-gray-400 sm:inline">{t('modal.confirmations.smsUnavailable')}</span>
           </div>
         ) : (
           <button
@@ -114,8 +118,13 @@ function ChannelPicker({
   );
 }
 
-export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalProps) {
+export function BookingSettingsModal({ isOpen, onClose, initialTab }: BookingSettingsModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  const [tab, setTab] = useState<BookingTab>('terms');
+  const contentRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isOpen) setTab(initialTab ?? 'terms');
+  }, [isOpen, initialTab]);
   const t = useTranslations('reservations');
   const { companyId, companyUuid, planCode } = useCompany();
   const { user } = useAuth();
@@ -551,8 +560,47 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
             </div>
             </div>
 
+            {/* Zavihki: vsak sklop nastavitev ima svoje mesto */}
+            <div className="flex-shrink-0 border-b border-gray-200/70 bg-[#F2F2F7] px-4 py-2.5 sm:px-5">
+              <div
+                role="tablist"
+                aria-label={t('modal.title')}
+                className="-mx-1 flex gap-1 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {([
+                  { id: 'terms', label: t('modal.tabs.terms'), on: bookingOmogocen },
+                  { id: 'confirmations', label: t('modal.tabs.confirmations'), on: potrdiloReservation || potrdiloOnline },
+                  { id: 'payments', label: t('modal.tabs.payments'), on: hasOnlinePaymentAccess && stripeEnabled },
+                  { id: 'questionnaire', label: t('modal.tabs.questionnaire'), on: questions.length > 0 },
+                  { id: 'look', label: t('modal.tabs.look'), on: null },
+                ] as { id: BookingTab; label: string; on: boolean | null }[]).map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === item.id}
+                    onClick={() => {
+                      setTab(item.id);
+                      contentRef.current?.scrollTo({ top: 0 });
+                    }}
+                    className={`flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+                      tab === item.id ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-200/70'
+                    }`}
+                  >
+                    {item.label}
+                    {item.on !== null && (
+                      <span
+                        aria-hidden="true"
+                        className={`h-1.5 w-1.5 rounded-full ${item.on ? 'bg-emerald-500' : tab === item.id ? 'bg-white/40' : 'bg-gray-300'}`}
+                      />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Content */}
-            <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
+            <div ref={contentRef} className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
               {isLoading ? (
                 <div className="space-y-5">
                   {[1, 2, 3, 4].map((i) => (
@@ -567,6 +615,8 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                 </div>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {tab === 'terms' && (
+                  <>
                   {/* General Booking Settings */}
                   <SettingsSection title={t('modal.general.sectionTitle')} description={t('modal.general.sectionDesc')}>
                     <SettingRow
@@ -595,13 +645,13 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                               aria-pressed={active}
                               onClick={() => setBookingMode(opt.value)}
                               className={`rounded-xl border p-3.5 text-left transition-colors ${
-                                active ? 'border-violet-400 bg-violet-50/60 ring-1 ring-violet-300' : 'border-gray-200 hover:bg-gray-50'
+                                active ? 'border-gray-900 bg-white ring-1 ring-gray-900' : 'border-gray-200 hover:bg-gray-50'
                               }`}
                             >
                               <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
                                 <span
                                   className={`flex h-4 w-4 items-center justify-center rounded-full border ${
-                                    active ? 'border-violet-500 bg-violet-500' : 'border-gray-300'
+                                    active ? 'border-gray-900 bg-gray-900' : 'border-gray-300'
                                   }`}
                                 >
                                   {active && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
@@ -650,108 +700,53 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                     </SettingRow>
                   </SettingsSection>
 
-                  {/* Online payments */}
-                  <SettingsSection title={t('modal.payments.sectionTitle')} description={t('modal.payments.sectionDesc')}>
+                  {/* Cancellation & Rescheduling Policy */}
+                  <SettingsSection title={t('modal.policy.sectionTitle')} description={t('modal.policy.sectionDesc')}>
                     <SettingRow
-                      label={t('modal.payments.enableLabel')}
-                      description={hasOnlinePaymentAccess ? t('modal.payments.enableDesc') : t('modal.payments.lockedDesc')}
-                    >
-                      <Switch
-                        checked={hasOnlinePaymentAccess && stripeEnabled}
-                        onChange={setStripeEnabled}
-                        disabled={!hasOnlinePaymentAccess || checkingPosSubscription}
-                      />
-                    </SettingRow>
-
-                    {(!hasOnlinePaymentAccess || checkingPosSubscription) && (
-                      <div className="rounded-[10px] bg-gray-50 p-3">
-                        <p className="mb-2 text-xs font-medium text-gray-600">
-                          {checkingPosSubscription ? t('modal.payments.checking') : t('modal.payments.requirementsTitle')}
-                        </p>
-                        <div className="space-y-1.5 text-xs text-gray-500">
-                          <div className="flex items-center justify-between gap-3">
-                            <span>{t('modal.payments.requirementPlan')}</span>
-                            <span className={hasProPlan ? 'text-emerald-600' : 'text-amber-600'}>
-                              {hasProPlan ? t('modal.payments.ok') : t('modal.payments.missing')}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <span>{t('modal.payments.requirementPos')}</span>
-                            <span className={hasPosSubscription ? 'text-emerald-600' : 'text-amber-600'}>
-                              {hasPosSubscription ? t('modal.payments.ok') : t('modal.payments.missing')}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {hasOnlinePaymentAccess && stripeEnabled && (
-                      <>
-                        <SettingRow
-                          label={t('modal.payments.modeLabel')}
-                          description={t('modal.payments.modeDesc')}
-                        >
-                          <Select
-                            value={stripePaymentMode}
-                            setValue={(value) => setStripePaymentMode(value === 'deposit' ? 'deposit' : 'full')}
-                            placeholder={t('modal.payments.modePlaceholder')}
-                            className="[&>button]:rounded-[10px]"
-                          >
-                            <SelectOption value="full">{t('modal.payments.modeFull')}</SelectOption>
-                            <SelectOption value="deposit">{t('modal.payments.modeDeposit')}</SelectOption>
-                          </Select>
-                        </SettingRow>
-
-                        {stripePaymentMode === 'deposit' && (
-                          <SettingRow
-                            label={t('modal.payments.depositLabel')}
-                            description={t('modal.payments.depositDesc')}
-                          >
-                            <Input
-                              type="number"
-                              min={1}
-                              max={100}
-                              value={stripeDepositPercent}
-                              onChange={(e) => setStripeDepositPercent(e.target.value)}
-                              suffix="%"
-                            />
-                          </SettingRow>
-                        )}
-                      </>
-                    )}
-                  </SettingsSection>
-
-                  {/* Main Booking Link */}
-                  <SettingsSection title={t('modal.mainLink.sectionTitle')} description={t('modal.mainLink.sectionDesc')}>
-                    <SettingRow
-                      label={t('modal.mainLink.selectLabel')}
-                      description={t('modal.mainLink.selectDesc')}
+                      label={t('modal.policy.cancelLabel')}
+                      description={t('modal.policy.cancelDesc')}
                     >
                       <Select
-                        value={mainBookingLink}
-                        setValue={setMainBookingLink}
-                        placeholder={
-                          hasBookingLinkOptions
-                            ? t('modal.mainLink.selectPlaceholder')
-                            : t('modal.mainLink.noLinksAvailable')
-                        }
-                        disabled={!hasBookingLinkOptions}
+                        value={cancelApptDays}
+                        setValue={setCancelApptDays}
+                        placeholder={t('modal.policy.selectPlaceholder')}
                         className="[&>button]:rounded-[10px]"
                       >
-                        {bookingLinkOptions.map((option) => (
-                          <SelectOption key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectOption>
-                        ))}
+                        <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
+                        <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
+                        <SelectOption value="2">{t('modal.policy.day2')}</SelectOption>
+                        <SelectOption value="3">{t('modal.policy.day3')}</SelectOption>
+                        <SelectOption value="5">{t('modal.policy.day5')}</SelectOption>
+                        <SelectOption value="7">{t('modal.policy.day7')}</SelectOption>
+                        <SelectOption value="14">{t('modal.policy.day14')}</SelectOption>
                       </Select>
                     </SettingRow>
-                    {mainBookingLink && (
-                      <div className="rounded-[10px] bg-gray-50 px-3 py-2">
-                        <p className="break-all text-xs text-gray-500">{mainBookingLink}</p>
-                      </div>
-                    )}
-                  </SettingsSection>
 
+                    <SettingRow
+                      label={t('modal.policy.rescheduleLabel')}
+                      description={t('modal.policy.rescheduleDesc')}
+                    >
+                      <Select
+                        value={rescheduleApptDays}
+                        setValue={setRescheduleApptDays}
+                        placeholder={t('modal.policy.selectPlaceholder')}
+                        className="[&>button]:rounded-[10px]"
+                      >
+                        <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
+                        <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
+                        <SelectOption value="2">{t('modal.policy.day2')}</SelectOption>
+                        <SelectOption value="3">{t('modal.policy.day3')}</SelectOption>
+                        <SelectOption value="5">{t('modal.policy.day5')}</SelectOption>
+                        <SelectOption value="7">{t('modal.policy.day7')}</SelectOption>
+                        <SelectOption value="14">{t('modal.policy.day14')}</SelectOption>
+                      </Select>
+                    </SettingRow>
+                  </SettingsSection>
+                  </>
+                  )}
+
+                  {tab === 'confirmations' && (
+                  <>
                   {/* Confirmation Settings */}
                   <SettingsSection title={t('modal.confirmations.sectionTitle')} description={t('modal.confirmations.sectionDesc')}>
                     {/* Confirmation on manual booking */}
@@ -770,22 +765,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="px-4 pb-3"
+                          className="pt-3"
                         >
                           <p className="text-xs font-medium text-gray-500 mb-2">{t('modal.confirmations.channelLabel')}</p>
-                          {smsLockedForPlan && (
-                            <p className="text-xs text-gray-500 mb-1">
-                              {t('modal.confirmations.smsPlanNotePrefix')}{' '}
-                              <button
-                                type="button"
-                                onClick={() => { onClose(); router.push(billingUsage && !billingUsage.isFree ? '/nastavitve/addoni' : '/nastavitve/paketi#razpolozljivi-paketi'); }}
-                                className="font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
-                              >
-                                {t('modal.confirmations.smsPlanNoteLink')}
-                              </button>
-                              .
-                            </p>
-                          )}
                           <ChannelPicker
                             value={potrdiloChannel}
                             onChange={setPotrdiloChannel}
@@ -865,22 +847,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="px-4 pb-3"
+                          className="pt-3"
                         >
                           <p className="text-xs font-medium text-gray-500 mb-2">{t('modal.confirmations.channelLabel')}</p>
-                          {smsLockedForPlan && (
-                            <p className="text-xs text-gray-500 mb-1">
-                              {t('modal.confirmations.smsPlanNotePrefix')}{' '}
-                              <button
-                                type="button"
-                                onClick={() => { onClose(); router.push(billingUsage && !billingUsage.isFree ? '/nastavitve/addoni' : '/nastavitve/paketi#razpolozljivi-paketi'); }}
-                                className="font-semibold text-gray-700 underline underline-offset-2 hover:text-gray-900"
-                              >
-                                {t('modal.confirmations.smsPlanNoteLink')}
-                              </button>
-                              .
-                            </p>
-                          )}
                           <ChannelPicker
                             value={potrdiloOnlineChannel}
                             onChange={setPotrdiloOnlineChannel}
@@ -895,7 +864,7 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                     {/* One email text for both kinds of booking */}
                     {((potrdiloReservation && potrdiloChannel === 'email') ||
                       (potrdiloOnline && potrdiloOnlineChannel === 'email')) && (
-                      <div className="px-4 pb-3">
+                      <div className="pt-3">
                         <EmailConfirmationTemplate
                           mode={emailModePotrdilo}
                           onModeChange={setEmailModePotrdilo}
@@ -909,53 +878,124 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                       </div>
                     )}
                   </SettingsSection>
+                  </>
+                  )}
 
-                  {/* Cancellation & Rescheduling Policy */}
-                  <SettingsSection title={t('modal.policy.sectionTitle')} description={t('modal.policy.sectionDesc')}>
+                  {tab === 'payments' && (
+                  <>
+                  {/* Online payments */}
+                  <SettingsSection title={t('modal.payments.sectionTitle')} description={t('modal.payments.sectionDesc')}>
                     <SettingRow
-                      label={t('modal.policy.cancelLabel')}
-                      description={t('modal.policy.cancelDesc')}
+                      label={t('modal.payments.enableLabel')}
+                      description={hasOnlinePaymentAccess ? t('modal.payments.enableDesc') : t('modal.payments.lockedDesc')}
                     >
-                      <Select
-                        value={cancelApptDays}
-                        setValue={setCancelApptDays}
-                        placeholder={t('modal.policy.selectPlaceholder')}
-                        className="[&>button]:rounded-[10px]"
-                      >
-                        <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
-                        <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
-                        <SelectOption value="2">{t('modal.policy.day2')}</SelectOption>
-                        <SelectOption value="3">{t('modal.policy.day3')}</SelectOption>
-                        <SelectOption value="5">{t('modal.policy.day5')}</SelectOption>
-                        <SelectOption value="7">{t('modal.policy.day7')}</SelectOption>
-                        <SelectOption value="14">{t('modal.policy.day14')}</SelectOption>
-                      </Select>
+                      <Switch
+                        checked={hasOnlinePaymentAccess && stripeEnabled}
+                        onChange={setStripeEnabled}
+                        disabled={!hasOnlinePaymentAccess || checkingPosSubscription}
+                      />
                     </SettingRow>
 
-                    <SettingRow
-                      label={t('modal.policy.rescheduleLabel')}
-                      description={t('modal.policy.rescheduleDesc')}
-                    >
-                      <Select
-                        value={rescheduleApptDays}
-                        setValue={setRescheduleApptDays}
-                        placeholder={t('modal.policy.selectPlaceholder')}
-                        className="[&>button]:rounded-[10px]"
-                      >
-                        <SelectOption value="0">{t('modal.policy.sameDay')}</SelectOption>
-                        <SelectOption value="1">{t('modal.policy.day1')}</SelectOption>
-                        <SelectOption value="2">{t('modal.policy.day2')}</SelectOption>
-                        <SelectOption value="3">{t('modal.policy.day3')}</SelectOption>
-                        <SelectOption value="5">{t('modal.policy.day5')}</SelectOption>
-                        <SelectOption value="7">{t('modal.policy.day7')}</SelectOption>
-                        <SelectOption value="14">{t('modal.policy.day14')}</SelectOption>
-                      </Select>
-                    </SettingRow>
+                    {(!hasOnlinePaymentAccess || checkingPosSubscription) && (
+                      <div className="rounded-[10px] bg-gray-50 p-3">
+                        <p className="mb-2 text-xs font-medium text-gray-600">
+                          {checkingPosSubscription ? t('modal.payments.checking') : t('modal.payments.requirementsTitle')}
+                        </p>
+                        <div className="space-y-1.5 text-xs text-gray-500">
+                          <div className="flex items-center justify-between gap-3">
+                            <span>{t('modal.payments.requirementPlan')}</span>
+                            <span className={hasProPlan ? 'text-emerald-600' : 'text-amber-600'}>
+                              {hasProPlan ? t('modal.payments.ok') : t('modal.payments.missing')}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span>{t('modal.payments.requirementPos')}</span>
+                            <span className={hasPosSubscription ? 'text-emerald-600' : 'text-amber-600'}>
+                              {hasPosSubscription ? t('modal.payments.ok') : t('modal.payments.missing')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {hasOnlinePaymentAccess && stripeEnabled && (
+                      <>
+                        <SettingRow
+                          label={t('modal.payments.modeLabel')}
+                          description={t('modal.payments.modeDesc')}
+                        >
+                          <Select
+                            value={stripePaymentMode}
+                            setValue={(value) => setStripePaymentMode(value === 'deposit' ? 'deposit' : 'full')}
+                            placeholder={t('modal.payments.modePlaceholder')}
+                            className="[&>button]:rounded-[10px]"
+                          >
+                            <SelectOption value="full">{t('modal.payments.modeFull')}</SelectOption>
+                            <SelectOption value="deposit">{t('modal.payments.modeDeposit')}</SelectOption>
+                          </Select>
+                        </SettingRow>
+
+                        {stripePaymentMode === 'deposit' && (
+                          <SettingRow
+                            label={t('modal.payments.depositLabel')}
+                            description={t('modal.payments.depositDesc')}
+                          >
+                            <Input
+                              type="number"
+                              min={1}
+                              max={100}
+                              value={stripeDepositPercent}
+                              onChange={(e) => setStripeDepositPercent(e.target.value)}
+                              suffix="%"
+                            />
+                          </SettingRow>
+                        )}
+                      </>
+                    )}
                   </SettingsSection>
+                  </>
+                  )}
 
+                  {tab === 'questionnaire' && (
+                  <>
                   {/* Questionnaire before the appointment */}
                   <SettingsSection title={t('modal.questionnaire.sectionTitle')} description={t('modal.questionnaire.sectionDesc')}>
                     <QuestionnaireEditor questions={questions} onChange={setQuestions} services={serviceOptions} />
+                  </SettingsSection>
+                  </>
+                  )}
+
+                  {tab === 'look' && (
+                  <>
+                  {/* Main Booking Link */}
+                  <SettingsSection title={t('modal.mainLink.sectionTitle')} description={t('modal.mainLink.sectionDesc')}>
+                    <SettingRow
+                      label={t('modal.mainLink.selectLabel')}
+                      description={t('modal.mainLink.selectDesc')}
+                    >
+                      <Select
+                        value={mainBookingLink}
+                        setValue={setMainBookingLink}
+                        placeholder={
+                          hasBookingLinkOptions
+                            ? t('modal.mainLink.selectPlaceholder')
+                            : t('modal.mainLink.noLinksAvailable')
+                        }
+                        disabled={!hasBookingLinkOptions}
+                        className="[&>button]:rounded-[10px]"
+                      >
+                        {bookingLinkOptions.map((option) => (
+                          <SelectOption key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectOption>
+                        ))}
+                      </Select>
+                    </SettingRow>
+                    {mainBookingLink && (
+                      <div className="rounded-[10px] bg-gray-50 px-3 py-2">
+                        <p className="break-all text-xs text-gray-500">{mainBookingLink}</p>
+                      </div>
+                    )}
                   </SettingsSection>
 
                   {/* Booking Page Colors */}
@@ -1038,6 +1078,9 @@ export function BookingSettingsModal({ isOpen, onClose }: BookingSettingsModalPr
                       </div>
                     </div>
                   </SettingsSection>
+                  </>
+                  )}
+
                 </motion.div>
               )}
             </div>

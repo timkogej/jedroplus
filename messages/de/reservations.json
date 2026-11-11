@@ -294,6 +294,13 @@
       },
       "incompleteError": "Vervollständigen oder entfernen Sie unvollständige Fragen im Fragebogen.",
       "saveError": "Der Fragebogen konnte nicht gespeichert werden. Bitte erneut versuchen."
+    },
+    "tabs": {
+      "terms": "Termine",
+      "confirmations": "Bestätigungen",
+      "payments": "Zahlungen",
+      "questionnaire": "Fragebogen",
+      "look": "Design"
     }
   },
   "qr": {

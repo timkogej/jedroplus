@@ -294,6 +294,13 @@
       },
       "incompleteError": "Complete or remove the unfinished questions in the questionnaire.",
       "saveError": "The questionnaire could not be saved. Please try again."
+    },
+    "tabs": {
+      "terms": "Bookings",
+      "confirmations": "Confirmations",
+      "payments": "Payments",
+      "questionnaire": "Questionnaire",
+      "look": "Look"
     }
   },
   "qr": {
