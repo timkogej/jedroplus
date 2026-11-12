@@ -1,6 +1,8 @@
 // app/api/glas/ukaz/route.ts
 //
 // En glasovni ukaz. Sprejme multipart (polje "zvok") ali JSON ({besedilo}).
+// Sprotni pogovor (faza 1): JSON {besedilo, stt: {sekunde}, glas: true} — besedilo
+// je prepisal Soniox v brskalniku, odgovor (`govor`) izreče brskalnik.
 // Podjetje, vloga in pravice pridejo izključno iz seje.
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -29,6 +31,8 @@ export async function POST(req: NextRequest) {
   let besedilo: string | null = null;
   let prejsnji: string | null = null;
   let izbira: { id: string; oznaka: string } | null = null;
+  let stt: { ponudnik: string; sekunde: number } | null = null;
+  let glas: { ponudnik: string } | null = null;
 
   if (vrsta.startsWith('multipart/form-data')) {
     const dolzina = Number(req.headers.get('content-length') ?? '0');
@@ -56,6 +60,9 @@ export async function POST(req: NextRequest) {
     if (iz && typeof iz.id === 'string' && typeof iz.oznaka === 'string' && iz.id.length <= 64 && iz.oznaka.length <= 160) {
       izbira = { id: iz.id, oznaka: iz.oznaka };
     }
+    const s = telo.stt as { sekunde?: unknown } | undefined;
+    if (s && typeof s.sekunde === 'number' && Number.isFinite(s.sekunde)) stt = { ponudnik: 'soniox', sekunde: s.sekunde };
+    if (telo.glas === true) glas = { ponudnik: 'soniox' };
   }
   if (prejsnji && !UUID.test(prejsnji)) prejsnji = null;
 
@@ -63,7 +70,7 @@ export async function POST(req: NextRequest) {
   if (!kont.ok) return kont.odziv;
 
   const r = await obdelajUkaz(
-    { k: kont.k, vhod: zvok ? 'aplikacija' : 'besedilo', zvok, besedilo, prejsnjiUkazId: prejsnji, izbira },
+    { k: kont.k, vhod: zvok || stt ? 'aplikacija' : 'besedilo', zvok, besedilo, prejsnjiUkazId: prejsnji, izbira, stt, glas },
     kont.odvisnosti
   );
   if (!r.ok) return NextResponse.json(r, { status: r.http });

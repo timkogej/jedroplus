@@ -197,7 +197,9 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     }
 
     // 2. Hitra pot (brez LLM) — samo branje in samo, če je orodje dovoljeno
-    const hitro = v.izbira || v.prejsnjiUkazId ? null : hitraPot(prepis);
+    // Hitra pot prepozna samo cel, nedvoumen stavek ("kaj imam jutri"), zato
+    // velja tudi sredi pogovora; ob izbiri možnosti ne.
+    const hitro = v.izbira ? null : hitraPot(prepis);
     const hitroOrodje = hitro ? dovoljena.find((o) => o.ime === hitro.orodje && o.razred === 'branje') : undefined;
     if (hitro && hitroOrodje && hitroOrodje.razred === 'branje') {
       const t = ura();
