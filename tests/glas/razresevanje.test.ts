@@ -49,6 +49,8 @@ describe('datumi (danes je četrtek 12. 11. 2026)', () => {
     expect(d('kaj imam jutri')).toBe('2026-11-13');
     expect(d('pojutrišnjem')).toBe('2026-11-14');
     expect(d('včeraj')).toBe('2026-11-11');
+    // STT (ElevenLabs) zapiše ločeno — ne sme postati "jutri"
+    expect(d('kaj imam po jutrišnjem')).toBe('2026-11-14');
   });
 
   it('dnevi v tednu pomenijo naslednji tak dan', () => {
@@ -62,6 +64,11 @@ describe('datumi (danes je četrtek 12. 11. 2026)', () => {
     expect(d('kaj imam 18. 11.')).toBe('2026-11-18');
     expect(d('3. 1.')).toBe('2027-01-03'); // pretekli datum → naslednje leto
     expect(d('15. decembra')).toBe('2026-12-15');
+    expect(d('osemnajstega novembra')).toBe('2026-11-18');
+    // STT (OpenAI) zapiše datum z besedami
+    expect(d('Kaj imam osemnajstega enajstega?')).toBe('2026-11-18');
+    expect(d('prvega dvanajstega')).toBe('2026-12-01');
+    expect(d('drugega trinajstega')).toBeNull(); // ni mesec
   });
 
   it('ura ni datum', () => {
@@ -96,6 +103,7 @@ describe('hitra pot brez LLM', () => {
     expect(hitraPot('kaj imamo v petek')).toEqual({ orodje: 'koledar_dan', vhod: { datum: 'v petek', samo_moji: false } });
     expect(hitraPot('Jutri, kaj imam?')).toEqual({ orodje: 'koledar_dan', vhod: { datum: 'jutri', samo_moji: true } });
     expect(hitraPot('Kaj imam')?.vhod).toEqual({ datum: null, samo_moji: true });
+    expect(hitraPot('Kaj imam po jutrišnjem?')?.vhod).toEqual({ datum: 'po jutrisnjem', samo_moji: true });
   });
 
   it('vse ostalo gre LLM', () => {

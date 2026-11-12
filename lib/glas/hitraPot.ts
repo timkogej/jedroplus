@@ -11,7 +11,7 @@ export interface HitriKlic {
   vhod: Record<string, unknown>;
 }
 
-const DAN = '(danes|jutri|pojutrisnjem|v ponedeljek|v torek|v sredo|v cetrtek|v petek|v soboto|v nedeljo|\\d{1,2}\\.\\s?\\d{1,2}\\.?)';
+const DAN = '(danes|jutri|po ?jutrisnjem|v ponedeljek|v torek|v sredo|v cetrtek|v petek|v soboto|v nedeljo|\\d{1,2}\\.\\s?\\d{1,2}\\.?)';
 
 export function hitraPot(prepis: string): HitriKlic | null {
   const b = brezSumnikov(prepis)

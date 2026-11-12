@@ -45,13 +45,39 @@ Dodajanje orodja: nova datoteka v `lib/glas/orodja/` in ena vrstica v `registry.
 - **RLS z dejansko Supabase sejo.** SQL preizkusi uporabljajo nadomestke za `auth.uid()`.
 - **Prvi prosti termin** ne upošteva resursov, bufferjev ali dogodkov z onemogočeno rezervacijo. Odgovor zato pove, da je okviren.
 
+## Izbira STT (12. 11. 2026, Timovih 42 posnetkov)
+
+20 posnetkov brez hrupa, 19 z glasbo v ozadju, 3 z glasno glasbo; en glas (Tim).
+
+| Ponudnik | Napaka po besedah | Imena | Odtenki | Hitrost (mediana) | Cena/ukaz |
+|---|---|---|---|---|---|
+| **ElevenLabs Scribe v2 + namigi** | **5,3 %** | **33/34** | 18/19 | ~1,0 s | ~0,08 centa |
+| ElevenLabs brez namigov | 9,3 % | 28/34 | 18/19 | ~1,0 s | ~0,07 centa |
+| OpenAI gpt-4o-mini-transcribe + namigi | 10,0 % | 27/34 | 18/19 | ~0,7 s | ~0,03 centa |
+| OpenAI brez namigov | 22,8 % | 19/34 | 15/19 | ~0,7 s | ~0,03 centa |
+
+Odločitev: **ElevenLabs z namigi** (privzeto `GLAS_STT=elevenlabs`). Z glasbo ElevenLabs ostane
+skoraj enak, OpenAI pri imenih pade z 88 % na 69 %. OpenAI je brez namigov dvakrat odgovoril v
+srbski cirilici kljub `language=sl`. Zgrešen odtenek (6.66) sta oba ponudnika slišala kot „6.6“,
+verjetno je bil tako izgovorjen.
+
+Posledice za aplikacijo:
+- Namigi so nujni. Asistent zdaj pošlje imena strank s termini danes/jutri, zaposlene in storitve.
+  Pri zapisku za stranko brez bližnjega termina je natančnost imen bližje vrstici „brez namigov“ (82 %);
+  mehko iskanje in potrditev to ujameta, a izboljšava je smiselna (npr. nedavne stranke v namigih).
+- Popravljeno po preizkusu: „po jutrišnjem“ (ElevenLabs) se je razumelo kot jutri; „osemnajstega
+  enajstega“ (OpenAI) se ni razumelo kot datum.
+- Preizkus je en glas. Pred prodajo je smiselno posneti še vsaj enega zaposlenega (drug glas, narečje).
+
+Rezultati: `posnetki/*/stt-rezultat-*.json` (lokalno, ni v gitu).
+
 ## Kaj mora narediti Tim
 
 1. **Ključi** (Vercel, samo strežnik):
    - `ELEVENLABS_API_KEY` in/ali `OPENAI_API_KEY`;
    - `ANTHROPIC_API_KEY` (morda že obstaja zaradi predloga navodil);
    - neobvezno `GLAS_STT=elevenlabs|openai`, `GLAS_LLM_MODEL`, `GLAS_TTS=brez`.
-2. **Posnetki:** posnemi stavke iz `scripts/glas-stt-stavki.md` (vsaj dva glasova, del s hrupom) in poženi:
+2. ~~**Posnetki:**~~ narejeno 12. 11. (glej Izbira STT). Neobvezno še drug glas: posnemi stavke iz `scripts/glas-stt-stavki.md` (vsaj dva glasova, del s hrupom) in poženi:
    `node scripts/glas-stt-primerjava.mjs posnetki/ --namigi namigi.txt`.
    Na podlagi rezultata izberi `GLAS_STT`.
 3. **Migracija:** poženi jo v Supabase (SQL editor), nato vklopi testno podjetje. Ukaz je v komentarju na koncu migracije:

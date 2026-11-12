@@ -79,7 +79,8 @@ export function razberiDatum(besedilo: string, danes: string): RazbranDatum | nu
   const b = ' ' + brezSumnikov(besedilo).replace(/[,!?]/g, ' ').replace(/\s+/g, ' ') + ' ';
 
   if (/\bdanes\b|\bdanasnj/.test(b)) return { datum: danes, izraz: 'danes' };
-  if (/\bpojutrisnj/.test(b)) return { datum: dodajDni(danes, 2), izraz: 'pojutrišnjem' };
+  // STT pogosto zapiše "po jutrišnjem" — brez tega bi se ujelo kot "jutri" (napačen dan).
+  if (/\bpo ?jutrisnj/.test(b)) return { datum: dodajDni(danes, 2), izraz: 'pojutrišnjem' };
   if (/\bjutri|\bjutrisnj/.test(b)) return { datum: dodajDni(danes, 1), izraz: 'jutri' };
   if (/\bvceraj|\bvcerajsnj/.test(b)) return { datum: dodajDni(danes, -1), izraz: 'včeraj' };
 
@@ -101,6 +102,17 @@ export function razberiDatum(besedilo: string, danes: string): RazbranDatum | nu
     const d = /^\d+$/.test(besedni[1]) ? Number(besedni[1]) : vrstilni(besedni[1]);
     const m = MESECI.indexOf(besedni[2]) + 1;
     if (d && m) {
+      const datum = sestaviDatum(d, m, null, danes);
+      if (datum) return { datum, izraz: `${d}. ${m}.` };
+    }
+  }
+
+  // "osemnajstega enajstega" (dan in mesec z vrstilnima števnikoma, kot ju zapiše STT)
+  const vrstilna = b.match(/\b([a-z]+?(?:ega|ga))\s+([a-z]+?(?:ega|ga))\b/);
+  if (vrstilna) {
+    const d = vrstilni(vrstilna[1]);
+    const m = vrstilni(vrstilna[2]);
+    if (d && m && m <= 12) {
       const datum = sestaviDatum(d, m, null, danes);
       if (datum) return { datum, izraz: `${d}. ${m}.` };
     }

@@ -57,7 +57,7 @@ function besedaVStevilo(b) {
  * "petinštirideset" → "45"; "%"/"procente" → "procentov"; mašila (uh, hm) izpuščena.
  */
 export function poenoti(s) {
-  let t = brezSumnikov(String(s).toLowerCase());
+  let t = brezSumnikov(String(s).toLowerCase()).replace(/\bpo jutrisnj/g, 'pojutrisnj');
   t = t.replace(/(\d)(?:[,/]|\s\/\s)(\d)/g, '$1.$2'); // "6,3" in "6/3", ne pa "7.1, 30 g"
   t = t.replace(/\s*%/g, ' procentov').replace(/\bodstot\w*|\bprocent\w*/g, 'procentov');
   t = t.replace(/[^\p{L}\p{N}.\s]/gu, ' ').replace(/(?<!\d)\.|\.(?!\d)/g, ' ');
