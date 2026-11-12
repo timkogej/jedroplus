@@ -35,25 +35,44 @@ const CENA_NA_URO = { elevenlabs: 0.4, 'elevenlabs+namigi': 0.48, openai: 0.18, 
 const STEVILA = {
   nic: 0, nula: 0, ena: 1, en: 1, eno: 1, dva: 2, dve: 2, tri: 3, stiri: 4, pet: 5, sest: 6, sedem: 7, osem: 8, devet: 9,
   deset: 10, enajst: 11, dvanajst: 12, trinajst: 13, stirinajst: 14, petnajst: 15, sestnajst: 16, sedemnajst: 17,
-  osemnajst: 18, devetnajst: 19, dvajset: 20, trideset: 30, stirideset: 40, petdeset: 50, sestdeset: 60, devetdeset: 90,
+  osemnajst: 18, devetnajst: 19, dvajset: 20, trideset: 30, stirideset: 40, petdeset: 50, sestdeset: 60,
+  sedemdeset: 70, osemdeset: 80, devetdeset: 90, sto: 100,
 };
+const ENICE = { ena: 1, en: 1, dva: 2, tri: 3, stiri: 4, pet: 5, sest: 6, sedem: 7, osem: 8, devet: 9 };
+const DESETICE = { dvajset: 20, trideset: 30, stirideset: 40, petdeset: 50, sestdeset: 60, sedemdeset: 70, osemdeset: 80, devetdeset: 90 };
+const DECIMALKA = new Set(['pika', 'cela', 'celih', 'cele', 'celo']);
+const MASILA = new Set(['uh', 'uhm', 'eee', 'ee', 'hm', 'mhm', 'aaa']);
 const brezSumnikov = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
 
-/** "šest pika tri" → "6.3", "šest tri" ostane; "6,3" → "6.3"; "%"/"procentov" poenoteno. */
+function besedaVStevilo(b) {
+  if (b in STEVILA) return String(STEVILA[b]);
+  const m = b.match(/^([a-z]+?)in([a-z]+)$/); // petinstirideset → 45
+  if (m && m[1] in ENICE && m[2] in DESETICE) return String(ENICE[m[1]] + DESETICE[m[2]]);
+  return b;
+}
+
+/**
+ * Poenoti zapis, da primerjamo vsebino, ne pravopisa:
+ * "šest pika tri" / "6,3" / "6/3" → "6.3"; "sedem cela štiri tri" → "7.43";
+ * "petinštirideset" → "45"; "%"/"procente" → "procentov"; mašila (uh, hm) izpuščena.
+ */
 export function poenoti(s) {
   let t = brezSumnikov(String(s).toLowerCase());
-  t = t.replace(/(\d)\s*[,/]\s*(\d)/g, '$1.$2');
+  t = t.replace(/(\d)(?:[,/]|\s\/\s)(\d)/g, '$1.$2'); // "6,3" in "6/3", ne pa "7.1, 30 g"
   t = t.replace(/\s*%/g, ' procentov').replace(/\bodstot\w*|\bprocent\w*/g, 'procentov');
   t = t.replace(/[^\p{L}\p{N}.\s]/gu, ' ').replace(/(?<!\d)\.|\.(?!\d)/g, ' ');
-  const besede = t.split(/\s+/).filter(Boolean).map((b) => (b in STEVILA ? String(STEVILA[b]) : b));
-  // "6 pika 3" / "6 cela 3" → "6.3"; "dvajset ena" → 21
+  const besede = t.split(/\s+/).filter((b) => b && !MASILA.has(b)).map(besedaVStevilo);
+  const stevka = (x) => /^\d$/.test(x ?? '');
   const out = [];
   for (let i = 0; i < besede.length; i++) {
     const b = besede[i];
-    if ((b === 'pika' || b === 'cela') && /^\d+$/.test(out.at(-1) ?? '') && /^\d+$/.test(besede[i + 1] ?? '')) {
-      out[out.length - 1] = `${out.at(-1)}.${besede[++i]}`;
-    } else if (b === 'in' && /^\d0$/.test(besede[i + 1] ?? '') && /^\d$/.test(out.at(-1) ?? '')) {
-      out[out.length - 1] = String(Number(besede[++i]) + Number(out.at(-1))); // "ena in dvajset"
+    if (DECIMALKA.has(b) && /^\d+$/.test(out.at(-1) ?? '') && /^\d+$/.test(besede[i + 1] ?? '')) {
+      let dec = besede[++i];
+      // "štiri tri" po decimalki = 43 (odtenki imajo do dve decimalki)
+      if (stevka(dec) && stevka(besede[i + 1])) dec += besede[++i];
+      out[out.length - 1] = `${out.at(-1)}.${dec}`;
+    } else if (b === 'in' && /^\d0$/.test(besede[i + 1] ?? '') && stevka(out.at(-1))) {
+      out[out.length - 1] = String(Number(besede[++i]) + Number(out.at(-1))); // "pet in štirideset"
     } else {
       out.push(b);
     }
@@ -157,64 +176,28 @@ const percentil = (xs, p) => {
   return s[Math.min(s.length - 1, Math.floor((p / 100) * s.length))];
 };
 
-async function main() {
-  if (!mapa) {
-    console.error('Uporaba: node scripts/glas-stt-primerjava.mjs <mapa-s-posnetki> [--namigi namigi.txt] [--ponudniki elevenlabs,openai] [--stavki pot.md]');
-    process.exit(1);
-  }
-  const stavki = await preberiStavke(opcija('stavki') ?? path.join(TU, 'glas-stt-stavki.md'));
-  const namigi = opcija('namigi')
-    ? (await readFile(opcija('namigi'), 'utf8')).split('\n').map((x) => x.trim()).filter((x) => x && x.length <= 50)
-    : [];
-  const zeleni = (opcija('ponudniki') ?? 'elevenlabs,openai').split(',').map((x) => x.trim());
-  const ponudniki = zeleni.filter((p) => {
-    if (!PONUDNIKI[p]) return console.warn(`Neznan ponudnik: ${p}`), false;
-    if (!process.env[KLJUCI[p]]) return console.warn(`Preskočen ${p}: ni ${KLJUCI[p]}`), false;
-    return true;
+/** Oceni prepise glede na pričakovane stavke (tudi za ponovno točkovanje shranjenih rezultatov). */
+function oceni(rezultati, stavki) {
+  // OpenAI ne vrne trajanja: vzamemo ga iz drugega ponudnika za isti posnetek.
+  const trajanje = new Map();
+  for (const x of rezultati) if (x.sekunde) trajanje.set(x.stavek, x.sekunde);
+  return rezultati.map((x) => {
+    if (x.napaka) return x;
+    const ref = stavki.get(x.stavek);
+    const najdeni = odtenkiVPrepisu(x.prepis);
+    return {
+      ...x,
+      sekunde: x.sekunde || trajanje.get(x.stavek) || 0,
+      wer: wer(ref.besedilo, x.prepis),
+      imena: ref.imena.map((i) => ({ ime: i, ok: imePravilno(i, x.prepis) })),
+      odtenki: ref.odtenki.map((o) => ({ odtenek: o, ok: najdeni.includes(o) })),
+    };
   });
-  if (!ponudniki.length) {
-    console.error('Ni ponudnika s ključem. Nastavite ELEVENLABS_API_KEY in/ali OPENAI_API_KEY.');
-    process.exit(1);
-  }
+}
 
-  const datoteke = (await readdir(mapa)).filter((d) => MIME[path.extname(d).toLowerCase()] && /^\d+/.test(d)).sort();
-  if (!datoteke.length) {
-    console.error(`V ${mapa} ni posnetkov (01.m4a, 02.m4a …).`);
-    process.exit(1);
-  }
-
-  const variante = ponudniki.flatMap((p) => (namigi.length ? [[p, []], [`${p}+namigi`, namigi]] : [[p, []]]));
-  const rezultati = [];
-  for (const d of datoteke) {
-    const st = Number(d.match(/^\d+/)[0]);
-    const ref = stavki.get(st);
-    if (!ref) {
-      console.warn(`Preskočen ${d}: stavka ${st} ni v seznamu.`);
-      continue;
-    }
-    const buf = await readFile(path.join(mapa, d));
-    const zvok = new Blob([buf], { type: MIME[path.extname(d).toLowerCase()] });
-    for (const [ime, n] of variante) {
-      const p = ime.split('+')[0];
-      try {
-        const r = await PONUDNIKI[p](zvok, d, n);
-        const najdeniOdtenki = odtenkiVPrepisu(r.besedilo);
-        rezultati.push({
-          stavek: st, ponudnik: ime, prepis: r.besedilo, ms: Math.round(r.ms), sekunde: r.sekunde,
-          wer: wer(ref.besedilo, r.besedilo),
-          imena: ref.imena.map((i) => ({ ime: i, ok: imePravilno(i, r.besedilo) })),
-          odtenki: ref.odtenki.map((o) => ({ odtenek: o, ok: najdeniOdtenki.includes(o) })),
-        });
-        process.stdout.write('.');
-      } catch (e) {
-        rezultati.push({ stavek: st, ponudnik: ime, napaka: e instanceof Error ? e.message : 'napaka' });
-        process.stdout.write('x');
-      }
-    }
-  }
-  console.log('\n');
-
-  const povzetek = variante.map(([ime]) => {
+function izpisi(rezultati) {
+  const imenaVariant = [...new Set(rezultati.map((x) => x.ponudnik))];
+  const povzetek = imenaVariant.map((ime) => {
     const r = rezultati.filter((x) => x.ponudnik === ime && !x.napaka);
     const imena = r.flatMap((x) => x.imena);
     const odtenki = r.flatMap((x) => x.odtenki);
@@ -242,11 +225,79 @@ async function main() {
     }))
   );
   console.log('Najslabši stavki (WER) po ponudniku:');
-  for (const [ime] of variante) {
+  for (const ime of imenaVariant) {
     const naj = rezultati.filter((x) => x.ponudnik === ime && !x.napaka).sort((a, b) => b.wer - a.wer).slice(0, 3);
     for (const x of naj) console.log(`  ${ime} #${x.stavek} WER ${pct(x.wer)}: „${x.prepis}“`);
   }
+  const zgresenaImena = rezultati.filter((x) => !x.napaka).flatMap((x) => x.imena.filter((i) => !i.ok).map((i) => `${x.ponudnik} #${x.stavek} ${i.ime}`));
+  const zgreseniOdtenki = rezultati.filter((x) => !x.napaka).flatMap((x) => x.odtenki.filter((o) => !o.ok).map((o) => `${x.ponudnik} #${x.stavek} ${o.odtenek}`));
+  if (zgresenaImena.length) console.log(`\nZgrešena imena:\n  ${zgresenaImena.join('\n  ')}`);
+  if (zgreseniOdtenki.length) console.log(`\nZgrešeni odtenki:\n  ${zgreseniOdtenki.join('\n  ')}`);
+  return povzetek;
+}
 
+async function main() {
+  const stavki = await preberiStavke(opcija('stavki') ?? path.join(TU, 'glas-stt-stavki.md'));
+
+  // Ponovno točkovanje brez klicev ponudnikov: --ponovno <stt-rezultat-….json>
+  if (opcija('ponovno')) {
+    const shranjeno = JSON.parse(await readFile(opcija('ponovno'), 'utf8'));
+    const rezultati = oceni(shranjeno.rezultati, stavki);
+    const povzetek = izpisi(rezultati);
+    await writeFile(opcija('ponovno'), JSON.stringify({ povzetek, rezultati }, null, 2));
+    return;
+  }
+
+  if (!mapa) {
+    console.error('Uporaba: node scripts/glas-stt-primerjava.mjs <mapa-s-posnetki> [--namigi namigi.txt] [--ponudniki elevenlabs,openai] [--stavki pot.md]\n       node scripts/glas-stt-primerjava.mjs --ponovno <stt-rezultat.json>');
+    process.exit(1);
+  }
+  const namigi = opcija('namigi')
+    ? (await readFile(opcija('namigi'), 'utf8')).split('\n').map((x) => x.trim()).filter((x) => x && x.length <= 50)
+    : [];
+  const zeleni = (opcija('ponudniki') ?? 'elevenlabs,openai').split(',').map((x) => x.trim());
+  const ponudniki = zeleni.filter((p) => {
+    if (!PONUDNIKI[p]) return console.warn(`Neznan ponudnik: ${p}`), false;
+    if (!process.env[KLJUCI[p]]) return console.warn(`Preskočen ${p}: ni ${KLJUCI[p]}`), false;
+    return true;
+  });
+  if (!ponudniki.length) {
+    console.error('Ni ponudnika s ključem. Nastavite ELEVENLABS_API_KEY in/ali OPENAI_API_KEY.');
+    process.exit(1);
+  }
+
+  const datoteke = (await readdir(mapa)).filter((d) => MIME[path.extname(d).toLowerCase()] && /^\d+/.test(d)).sort();
+  if (!datoteke.length) {
+    console.error(`V ${mapa} ni posnetkov (01.m4a, 02.m4a …).`);
+    process.exit(1);
+  }
+
+  const variante = ponudniki.flatMap((p) => (namigi.length ? [[p, []], [`${p}+namigi`, namigi]] : [[p, []]]));
+  const surovi = [];
+  for (const d of datoteke) {
+    const st = Number(d.match(/^\d+/)[0]);
+    if (!stavki.has(st)) {
+      console.warn(`Preskočen ${d}: stavka ${st} ni v seznamu.`);
+      continue;
+    }
+    const buf = await readFile(path.join(mapa, d));
+    const zvok = new Blob([buf], { type: MIME[path.extname(d).toLowerCase()] });
+    for (const [ime, n] of variante) {
+      const p = ime.split('+')[0];
+      try {
+        const r = await PONUDNIKI[p](zvok, d, n);
+        surovi.push({ stavek: st, ponudnik: ime, prepis: r.besedilo, ms: Math.round(r.ms), sekunde: r.sekunde });
+        process.stdout.write('.');
+      } catch (e) {
+        surovi.push({ stavek: st, ponudnik: ime, napaka: e instanceof Error ? e.message : 'napaka' });
+        process.stdout.write('x');
+      }
+    }
+  }
+  console.log('\n');
+
+  const rezultati = oceni(surovi, stavki);
+  const povzetek = izpisi(rezultati);
   const izhod = path.join(mapa, `stt-rezultat-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.json`);
   await writeFile(izhod, JSON.stringify({ povzetek, rezultati }, null, 2));
   console.log(`\nPodrobnosti: ${izhod}`);
