@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "brand": "node scripts/build-brand.mjs"
+    "brand": "node scripts/build-brand.mjs",
+    "test": "vitest run",
+    "test:glas-sql": "bash tests/glas/sql/zazeni.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.131.0",

@@ -160,6 +160,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
   const zdaj = zdajVPasu(new Date(ura()), k.casovniPas);
   const okolje: OkoljeOrodja = { k, podatki: d.podatki, danes: zdaj.datum, uraZdaj: zdaj.ura, ukazId };
   const dovoljena = orodjaZa(k, d.orodja ?? VSA_ORODJA);
+  let faza: 'stt' | 'llm' = 'stt';
 
   try {
     // 1. Besedilo
@@ -197,6 +198,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     }
 
     // 3. LLM z orodji
+    faza = 'llm';
     const llm = d.llm();
     const sporocila: LlmSporocilo[] = [];
     if (v.prejsnjiUkazId) {
@@ -277,7 +279,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     });
   } catch (e) {
     if (e instanceof NapakaPonudnika) {
-      const koda = e.ponudnik === 'anthropic' || e.ponudnik === 'lazni-llm' ? 'llm_ni_na_voljo' : 'stt_ni_na_voljo';
+      const koda = faza === 'stt' ? 'stt_ni_na_voljo' : 'llm_ni_na_voljo';
       await zakljuci({ status: 'napaka', napaka_koda: `${koda}:${e.vrsta}` }, true);
       return {
         ok: false,
