@@ -10,6 +10,7 @@ import { opisDatuma, razberiDatum, dodajDni, vMinute } from '../razresevanje/dat
 import { poisci } from '../razresevanje/imena';
 import { prviProstiTermin, razcleniUrnik } from '../razresevanje/urnik';
 import type { TerminPovzetek } from '../tipi';
+import { datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
 import { oznakaStranke, razresiStranko } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 
@@ -32,6 +33,7 @@ export const iskanjeStranke: BralnoOrodje<{ ime: string }> = {
   ime: 'iskanje_stranke',
   opis: 'Poišče stranko po imenu in/ali priimku (dovoli sklone, napake prepisa). Vrne do 5 kandidatov z ID-jem in zadnjim obiskom.',
   razred: 'branje',
+  koncno: false,
   pravica: 'stranke.branje',
   omogoceno: true,
   shema: {
@@ -96,8 +98,14 @@ export const zadnjiObisk: BralnoOrodje<{ stranka: string; stranka_id: string | n
     else if (s.zadnjaInterakcija) deli.push(`${ime}: zadnja interakcija ${opisDatuma(s.zadnjaInterakcija, o.danes)}.`);
     else deli.push(`${ime} še nima preteklega termina.`);
     if (naslednji) deli.push(`Naslednjič: ${opisDatuma(naslednji.datum, o.danes)} ob ${naslednji.zacetek}.`);
+    const govor: string[] = [];
+    if (zadnji) govor.push(`${ime} je bila zadnjič ${datumZaGovor(zadnji.datum, o.danes)}${zadnji.storitev ? `, ${zadnji.storitev}` : ''}.`);
+    else if (s.zadnjaInterakcija) govor.push(`${ime} še nima termina, zadnja interakcija je bila ${datumZaGovor(s.zadnjaInterakcija, o.danes)}.`);
+    else govor.push(`${ime} še nima preteklega termina.`);
+    if (naslednji) govor.push(`Naslednjič pride ${datumZaGovor(naslednji.datum, o.danes)} ${uraZaGovor(naslednji.zacetek)}.`);
     return {
       sporocilo: deli.join(' '),
+      govor: govor.join(' '),
       podatki: {
         stranka_id: s.id,
         zadnji: zadnji ? { datum: zadnji.datum, storitev: zadnji.storitev } : null,
@@ -139,12 +147,20 @@ export const koledarDan: BralnoOrodje<{ datum: string | null; samo_moji: boolean
       (a, b) => vMinute(a.zacetek) - vMinute(b.zacetek)
     );
     const opis = opisDatuma(dan, o.danes);
-    if (izbrani.length === 0) return { sporocilo: `${cap(opis)}: ni terminov.`, podatki: { datum: dan, termini: [] } };
+    if (izbrani.length === 0) {
+      return { sporocilo: `${cap(opis)}: ni terminov.`, govor: `${cap(datumZaGovor(dan, o.danes))} ni terminov.`, podatki: { datum: dan, termini: [] } };
+    }
     const vrstice = izbrani.map(
       (t) => `${t.zacetek}${t.konec ? `–${t.konec}` : ''} ${t.stranka || 'stranka'}${t.storitev ? `, ${t.storitev}` : ''}${!svoji && t.oseba ? ` (${t.oseba})` : ''}`
     );
+    const st = `${izbrani.length} ${sklon(izbrani.length, 'termin', 'termina', 'termine', 'terminov')}`;
+    const naGlas = izbrani.slice(0, NAJVEC_NA_GLAS).map(
+      (t) => `${cap(uraZaGovor(t.zacetek))} ${t.stranka || 'stranka'}${t.storitev ? `, ${t.storitev}` : ''}${!svoji && t.oseba ? `, ${t.oseba}` : ''}.`
+    );
+    const ostali = izbrani.length - naGlas.length;
     return {
       sporocilo: `${cap(opis)}: ${izbrani.length} ${sklon(izbrani.length, 'termin', 'termina', 'termini', 'terminov')}.\n${vrstice.join('\n')}`,
+      govor: `${cap(datumZaGovor(dan, o.danes))} ${svoji ? 'imate' : 'je'} ${st}. ${naGlas.join(' ')}${ostali > 0 ? ` In še ${ostali} ${sklon(ostali, 'termin', 'termina', 'termini', 'terminov')}, ki so na zaslonu.` : ''}`,
       podatki: {
         datum: dan,
         termini: izbrani.map((t) => ({ id: t.id, od: t.zacetek, do: t.konec, stranka: t.stranka, storitev: t.storitev, oseba: t.oseba })),
@@ -232,6 +248,7 @@ export const prviProsti: BralnoOrodje<{ storitev: string | null; oseba: string |
     const p = osebe.find((x) => x.id === prost.osebaId);
     return {
       sporocilo: `Prvi prosti termin${nazivStoritve ? ` za ${nazivStoritve} (${trajanje} min)` : ''}: ${opisDatuma(prost.datum, o.danes)} ob ${prost.zacetek}${p && kandidati.length > 1 ? `, ${p.ime}` : ''}. Okvirno — resursi niso upoštevani.`,
+      govor: `Prvi prosti termin${nazivStoritve ? ` za ${nazivStoritve}` : ''} je ${datumZaGovor(prost.datum, o.danes)} ${uraZaGovor(prost.zacetek)}${p && kandidati.length > 1 ? ` pri ${p.ime}` : ''}. Okvirno, brez resursov.`,
       podatki: { ...prost, oseba: p ? `${p.ime} ${p.priimek}`.trim() : null, storitev: nazivStoritve, trajanje },
     };
   },

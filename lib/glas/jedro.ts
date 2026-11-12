@@ -14,6 +14,7 @@
 
 import { preberiKonfiguracijo, type GlasKonfiguracija } from './konfiguracija';
 import { hitraPot } from './hitraPot';
+import { vprasanjeZaGovor, zaGovor } from './govor';
 import { imaPravico } from './pravice';
 import { hashParametrov, hashZetona, novZeton, SPOROCILA_POTRDITVE, type KodaPotrditve } from './potrditev';
 import { PRAZNA_PORABA, opozoriloKvote, sestejPorabo, strosekMikroUsd, type PorabaUkaza } from './poraba';
@@ -47,6 +48,10 @@ export interface VhodnUkaz {
   prejsnjiUkazId?: string | null;
   /** Odgovor na vprašanje: izbran ID (npr. stranke) iz kartice. */
   izbira?: { id: string; oznaka: string } | null;
+  /** Besedilo je prepisal sprotni STT v brskalniku (samo za obračun porabe). */
+  stt?: { ponudnik: string; sekunde: number } | null;
+  /** Odgovor bo brskalnik izrekel (Soniox TTS) — za obračun porabe. */
+  glas?: { ponudnik: string } | null;
 }
 
 export interface PredlogZaOdjemalca {
@@ -66,6 +71,8 @@ export type OdgovorUkaza =
       status: 'odgovor' | 'predlog' | 'vprasanje';
       prepis: string;
       odgovor: string;
+      /** Isto kot odgovor, pripravljeno za glas. */
+      govor: string;
       predlog?: PredlogZaOdjemalca;
       vprasanje?: RezultatOrodja['vprasanje'];
       opozorilo?: string | null;
@@ -92,7 +99,8 @@ Pravila:
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
 - Ne moreš brisati, pošiljati sporočil strankam, spreminjati cen, pravic ali plačil. Če to zahteva, povej, da tega ne moreš.
 - Recepture barve: odtenke zapiši kot "6.3", "7.1"; gramažo, oksidant (%) in čas (min) kot števila. Ne dodajaj ničesar, česar uporabnik ni rekel.
-- Če ukaz ni jasen, postavi eno kratko vprašanje.`;
+- Če ukaz ni jasen, postavi eno kratko vprašanje.
+- Odgovor bo izgovorjen: celi stavki, brez seznamov, oklepajev in okrajšav. Pred klicem orodja ne piši ničesar.`;
 
 const PRAZEN = /\p{L}{2,}/u;
 
@@ -175,6 +183,10 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       prepis = s.besedilo;
     } else {
       prepis = String(v.besedilo ?? '');
+      if (v.stt) {
+        const sekunde = Math.min(Math.max(Number(v.stt.sekunde) || 0, 0), 120);
+        poraba = sestejPorabo(poraba, { sttPonudnik: v.stt.ponudnik, sttSekunde: sekunde, sttZNamigi: true });
+      }
     }
     prepis = prepis.trim().slice(0, konf.najvecBesedila);
     if (v.izbira) prepis = `${prepis}${prepis ? ' — ' : ''}izbral sem: ${v.izbira.oznaka}`.slice(0, konf.najvecBesedila + 120);
@@ -194,7 +206,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       casi.orodja = ura() - t;
       uporabljena.push(hitroOrodje.ime);
       const status = r.vprasanje ? 'vprasanje' : 'odgovor';
-      return await koncaj({ status, odgovor: r.sporocilo, vprasanje: r.vprasanje });
+      return await koncaj({ status, odgovor: r.sporocilo, govor: r.govor, vprasanje: r.vprasanje });
     }
 
     // 3. LLM z orodji
@@ -237,6 +249,10 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
 
       sporocila.push({ vloga: 'asistent', besedilo: o.besedilo, klici: o.klici, surovo: o.surovo });
       const rezultati: { id: string; vsebina: string; napaka?: boolean }[] = [];
+      // Končni rezultati bralnih orodij: če so vsi klici kroga taki, jih izrečemo
+      // brez drugega kroga LLM (en krog namesto dveh, ~1,2 s manj).
+      const koncni: RezultatOrodja[] = [];
+      let vsiKoncni = true;
       for (const klic of o.klici) {
         const orodje = dovoljena.find((x) => x.ime === klic.ime);
         if (!orodje) {
@@ -257,6 +273,9 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
           const r = await orodje.izvedi(vhod.data, okolje);
           if (r.vprasanje) zadnjeVprasanje = r.vprasanje;
           rezultati.push({ id: klic.id, vsebina: zaLlm(r) });
+          // Vprašanje (več strank) je tudi končno: uporabnik mora izbrati.
+          if (orodje.koncno !== false || r.vprasanje) koncni.push(r);
+          else vsiKoncni = false;
         } else {
           const p = await orodje.predogled(vhod.data, okolje);
           casi.orodja = (casi.orodja ?? 0) + ura() - t2;
@@ -267,8 +286,19 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
           }
           if (p.vprasanje) zadnjeVprasanje = p.vprasanje;
           rezultati.push({ id: klic.id, vsebina: zaLlm(p) });
+          vsiKoncni = false;
         }
         casi.orodja = (casi.orodja ?? 0) + ura() - t2;
+      }
+      if (vsiKoncni && koncni.length > 0 && koncni.length === rezultati.length && !rezultati.some((x) => x.napaka)) {
+        const vpr = koncni.find((x) => x.vprasanje)?.vprasanje;
+        const izbrani = vpr ? koncni.filter((x) => x.vprasanje) : koncni;
+        return await koncaj({
+          status: vpr ? 'vprasanje' : 'odgovor',
+          odgovor: izbrani.map((x) => x.sporocilo).join('\n'),
+          govor: vpr ? vprasanjeZaGovor(vpr) : izbrani.map((x) => x.govor ?? zaGovor(x.sporocilo)).join(' '),
+          vprasanje: vpr,
+        });
       }
       sporocila.push({ vloga: 'rezultati', rezultati });
     }
@@ -300,9 +330,14 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
   async function koncaj(r: {
     status: 'odgovor' | 'predlog' | 'vprasanje';
     odgovor: string;
+    govor?: string;
     predlog?: PredlogZaOdjemalca;
     vprasanje?: RezultatOrodja['vprasanje'];
   }): Promise<OdgovorUkaza> {
+    let govor = r.govor ?? zaGovor(r.odgovor);
+    if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} Potrdim?`;
+    else if (r.vprasanje?.moznosti?.length && !r.govor) govor = vprasanjeZaGovor(r.vprasanje);
+    if (v.glas) poraba = sestejPorabo(poraba, { ttsPonudnik: v.glas.ponudnik, ttsZnaki: govor.length });
     let zvok: { mime: string; base64: string } | null = null;
     if (konf.tts !== 'brez') {
       try {
@@ -328,6 +363,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       status: r.status,
       prepis,
       odgovor: r.odgovor,
+      govor,
       predlog: r.predlog,
       vprasanje: r.vprasanje,
       opozorilo: opozoriloKvote(rez.ok ? rez.porabljeno : 0, rez.ok ? rez.kvota : 0),

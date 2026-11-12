@@ -29,6 +29,12 @@ interface OsnovaOrodja<P> {
 
 export interface BralnoOrodje<P> extends OsnovaOrodja<P> {
   razred: 'branje';
+  /**
+   * false = rezultat je vmesni korak (npr. iskanje stranke), LLM nadaljuje.
+   * Privzeto (true) je rezultat že končni odgovor: jedro ga izreče brez
+   * drugega kroga LLM (~1,2 s manj).
+   */
+  koncno?: boolean;
   izvedi(p: P, o: OkoljeOrodja): Promise<RezultatOrodja>;
 }
 

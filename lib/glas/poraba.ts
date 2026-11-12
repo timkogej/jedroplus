@@ -34,6 +34,7 @@ export const PRAZNA_PORABA: PorabaUkaza = {
 const STT_NA_URO: Record<string, number> = {
   elevenlabs: 0.4, // Scribe; +20 % z namigi (keyterms) — OCENA
   openai: 0.18, // gpt-4o-mini-transcribe ~0,003 $/min — OCENA
+  soniox: 0.12, // stt-rt sprotno, soniox.com/pricing 12. 11. 2026 (namigi so žetoni besedila, zanemarljivo)
   lazni: 0,
 };
 
@@ -45,7 +46,8 @@ const LLM_CENE: Record<string, { vhod: number; izhod: number }> = {
 };
 
 /** USD na milijon znakov. */
-const TTS_NA_MILIJON: Record<string, number> = { brez: 0, stub: 0 };
+// Soniox ~0,70 $/h govora ≈ 13 $/M znakov pri ~15 znakih/s — OCENA (soniox.com/pricing 12. 11. 2026).
+const TTS_NA_MILIJON: Record<string, number> = { brez: 0, stub: 0, soniox: 13 };
 
 export function strosekMikroUsd(p: PorabaUkaza): number {
   let usd = 0;

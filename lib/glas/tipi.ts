@@ -47,8 +47,10 @@ export type JsonShema = {
 
 /** Kar orodje vrne jedru po branju ali izvedbi. */
 export interface RezultatOrodja {
-  /** Kratko besedilo za uporabnika (slovensko). */
+  /** Kratko besedilo za uporabnika (slovensko), za zaslon. */
   sporocilo: string;
+  /** Isto za glas (ure z besedami, brez seznamov); brez = izpeljano iz sporočila. */
+  govor?: string;
   /** Strukturirani podatki za zaslon in za LLM (brez telefonov/e-pošte). */
   podatki?: unknown;
   /** Orodje potrebuje odgovor uporabnika (npr. več strank z istim imenom). */

@@ -3,8 +3,9 @@
 // Razumevanje ukaza z orodji. Jedro govori nevtralno obliko (LlmZahteva/LlmOdgovor),
 // prilagojevalnik jo prevede za ponudnika. GLAS_LLM = anthropic | lazni.
 //
-// Anthropic: claude-haiku-5-5 (najcenejši model z orodji), brez razmišljanja
-// (dovoljeno pri privzetem effort medium), tool_choice auto, strogi JSON shemi.
+// Anthropic: claude-haiku-5-5 (najcenejši model z orodji), brez razmišljanja,
+// effort low (kot Receptionist+; faza 0: ~0,9 s do prvega dela odgovora),
+// tool_choice auto, strogi JSON shemi.
 // Sistemski poziv in orodja so stabilna in na začetku, zato ju predpomnimo
 // (cache_control na sistemskem bloku); spremenljivi kontekst (datum, ime) je v
 // uporabniškem sporočilu, da ne razveljavi predpomnilnika.
@@ -83,6 +84,7 @@ export function llmAnthropic(model: string, timeoutMs: number, client?: Anthropi
           model,
           max_tokens: z.najvecIzhoda,
           thinking: { type: 'disabled' },
+          output_config: { effort: 'low' },
           system: [{ type: 'text', text: z.sistem, cache_control: { type: 'ephemeral' } }],
           tools: z.orodja.map((o) => ({
             name: o.ime,

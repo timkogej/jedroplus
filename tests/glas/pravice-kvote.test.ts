@@ -158,9 +158,10 @@ describe('strošek in kvota', () => {
     const u = [...shramba.ukazi.values()][0].zakljucen!;
     expect(u.status).toBe('odgovor');
     expect(u.stt_sekunde).toBe(3);
-    expect(u.llm_vhod).toBe(200);
+    // En krog: zadnji_obisk je končni rezultat, drugega klica LLM ni.
+    expect(u.llm_vhod).toBe(100);
     expect(u.orodja).toEqual(['zadnji_obisk']);
-    expect(Object.keys(u.trajanje_ms)).toEqual(expect.arrayContaining(['stt', 'llm0', 'llm1', 'skupaj']));
+    expect(Object.keys(u.trajanje_ms)).toEqual(expect.arrayContaining(['stt', 'llm0', 'orodja', 'skupaj']));
     expect(shramba.revizije.some((x) => x.dogodek === 'ukaz')).toBe(true);
     // Revizija ne vsebuje prepisa ali imen.
     expect(JSON.stringify(shramba.revizije)).not.toMatch(/Mateja/);

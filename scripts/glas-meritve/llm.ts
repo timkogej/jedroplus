@@ -1,3 +1,4 @@
+// @ts-nocheck — merilna skripta (faza 0), ni del aplikacije.
 // Meritev LLM: zdajšnji način (brez pretakanja, privzeti effort) proti pretakanju + effort low,
 // in "en krog" (podatki že v pozivu, odgovor se pretaka kot govor).
 import Anthropic from '@anthropic-ai/sdk';
