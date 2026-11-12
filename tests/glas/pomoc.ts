@@ -83,7 +83,10 @@ export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): 
     async stranka(id) { return s.stranke.find((x) => x.id === id) ?? null; }, // tuj ID → null (RLS)
     async storitve() { return s.storitve; },
     async osebe() { return s.osebe; },
-    async termini(od, doo) { return s.termini.filter((x) => x.datum >= od && x.datum <= doo); },
+    async termini(od, doo, m) {
+      const r = s.termini.filter((x) => x.datum >= od && x.datum <= doo).sort((a, b) => a.datum.localeCompare(b.datum));
+      return m?.padajoce ? r.reverse() : r;
+    },
     async zadnjiTermin(id, pred) {
       return s.termini.filter((x) => x.idStranke === id && x.datum < pred && x.status !== 'cancelled').sort((a, b) => b.datum.localeCompare(a.datum))[0] ?? null;
     },

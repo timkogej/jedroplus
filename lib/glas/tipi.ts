@@ -82,8 +82,11 @@ export interface PodatkiSalona {
   stranka(idStranke: string): Promise<StrankaPovzetek | null>;
   storitve(): Promise<StoritevPovzetek[]>;
   osebe(): Promise<OsebaPovzetek[]>;
-  /** Termini med datumoma (vključno), brez izbrisanih. */
-  termini(od: string, doo: string): Promise<TerminPovzetek[]>;
+  /**
+   * Termini med datumoma (vključno), brez izbrisanih; največ 2000.
+   * `padajoce`: najnovejši najprej (pri omejitvi se odrežejo najstarejši).
+   */
+  termini(od: string, doo: string, moznosti?: { padajoce?: boolean }): Promise<TerminPovzetek[]>;
   /** Zadnji zaključen/pretekli termin stranke. */
   zadnjiTermin(idStranke: string, predDatumom: string): Promise<TerminPovzetek | null>;
   naslednjiTermin(idStranke: string, odDatuma: string): Promise<TerminPovzetek | null>;

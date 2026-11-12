@@ -167,9 +167,9 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     if (v.zvok) {
       const stt = d.stt();
       const t = ura();
-      const namigi = await zberiNamige(d.podatki, zdaj.datum).catch(() => [] as string[]);
+      const namigi = await zberiNamige(d.podatki, zdaj.datum, konf.najvecNamigov).catch(() => [] as string[]);
       casi.namigi = ura() - t;
-      const s = await stt.prepisi({ zvok: v.zvok, jezik: 'sl', namigi: namigi.slice(0, konf.najvecNamigov) });
+      const s = await stt.prepisi({ zvok: v.zvok, jezik: 'sl', namigi });
       casi.stt = ura() - t - casi.namigi;
       poraba = sestejPorabo(poraba, { sttPonudnik: stt.ime, sttSekunde: s.sekunde, sttZNamigi: s.zNamigi });
       prepis = s.besedilo;
@@ -349,21 +349,71 @@ function uvodUkaza(
   return `Danes je ${opisDatuma(zdaj.datum, zdaj.datum)} (${zdaj.datum}), ura ${zdaj.ura}. Uporabnik: ${vloga}${k.osebaId ? ', ima svoj koledar' : ''}.${izbor}\n<ukaz>${prepis.replace(/<\/?ukaz>/g, '')}</ukaz>`;
 }
 
-/** Namigi za STT: storitve, zaposleni, stranke današnjih/jutrišnjih terminov in strokovni izrazi. */
-export async function zberiNamige(podatki: PodatkiSalona, danes: string): Promise<string[]> {
-  const jutri = new Date(Date.parse(`${danes}T12:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
-  const [storitve, osebe, termini] = await Promise.all([
+/** Koliko dni nazaj iščemo nedavne stranke za namige. */
+export const NAMIGI_DNI_NAZAJ = 45;
+/** Največ storitev v namigih, da ne izpodrinejo imen strank. */
+const NAMIGI_NAJVEC_STORITEV = 30;
+
+const STROKOVNI_IZRAZI = ['oksidant', 'balayage', 'pramenov', 'odtenek', 'konice', 'izrastek', 'toner', 'trajna', 'keratin'];
+
+/**
+ * Namigi za STT (imena in izrazi, ki jih ponudnik sicer slabo razpozna), po prednosti:
+ *   1. stranke s termini danes in jutri,
+ *   2. aktivni zaposleni,
+ *   3. strokovni izrazi,
+ *   4. storitve (največ 30),
+ *   5. nedavne stranke (termini zadnjih 45 dni; najprej najnovejše, ob enakem dnevu pogostejše).
+ * Brez podvojenih in brez telefonov/e-pošte. Največ `najvec` (ElevenLabs: nad 100 je
+ * vsak klic obračunan kot vsaj 20 s).
+ * Preizkus 12. 11. 2026: z namigi 97 % pravilnih imen, brez 82 % (docs/glasovni-asistent-stanje.md).
+ */
+export async function zberiNamige(podatki: PodatkiSalona, danes: string, najvec = 100): Promise<string[]> {
+  const dan = (n: number) => new Date(Date.parse(`${danes}T12:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
+  const jutri = dan(1);
+  // Bližnji in pretekli termini posebej: obe poizvedbi sta omejeni na 2000 vrstic,
+  // pretekle beremo od najnovejših, da pri velikem salonu ne odrežemo zadnjih tednov.
+  const [storitve, osebe, termini, pretekli] = await Promise.all([
     podatki.storitve().catch(() => []),
     podatki.osebe().catch(() => []),
     podatki.termini(danes, jutri).catch(() => []),
+    podatki.termini(dan(-NAMIGI_DNI_NAZAJ), dan(-1), { padajoce: true }).catch(() => []),
   ]);
-  const izrazi = [
-    ...termini.map((t) => t.stranka),
+
+  const bliznji = termini.filter((t) => t.status !== 'cancelled').map((t) => t.stranka);
+
+  // Nedavne: zadnji obisk na stranko, nato pogostost.
+  const zadnji = new Map<string, { datum: string; krat: number }>();
+  for (const t of pretekli) {
+    if (t.datum >= danes || t.status === 'cancelled' || t.status === 'no_show' || !t.stranka) continue;
+    const z = zadnji.get(t.stranka);
+    if (!z) zadnji.set(t.stranka, { datum: t.datum, krat: 1 });
+    else {
+      z.krat++;
+      if (t.datum > z.datum) z.datum = t.datum;
+    }
+  }
+  const nedavne = [...zadnji.entries()]
+    .sort((a, b) => b[1].datum.localeCompare(a[1].datum) || b[1].krat - a[1].krat)
+    .map(([ime]) => ime);
+
+  const vrstni = [
+    ...bliznji,
     ...osebe.filter((o) => o.aktivna).map((o) => `${o.ime} ${o.priimek}`.trim()),
-    ...storitve.filter((s) => s.aktivna).map((s) => s.naziv),
-    'oksidant', 'balayage', 'pramenov', 'odtenek', 'konice', 'izrastek', 'toner', 'trajna', 'keratin',
+    ...STROKOVNI_IZRAZI,
+    ...storitve.filter((s) => s.aktivna).map((s) => s.naziv).slice(0, NAMIGI_NAJVEC_STORITEV),
+    ...nedavne,
   ];
-  return izrazi.filter((x) => x && x.length <= 50);
+  const videno = new Set<string>();
+  const out: string[] = [];
+  for (const x of vrstni) {
+    const c = (x ?? '').replace(/\s+/g, ' ').trim();
+    const k = c.toLowerCase();
+    if (!c || c.length > 50 || c.split(' ').length > 5 || videno.has(k)) continue;
+    videno.add(k);
+    out.push(c);
+    if (out.length >= najvec) break;
+  }
+  return out;
 }
 
 async function ustvariPredlog(

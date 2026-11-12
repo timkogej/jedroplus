@@ -145,7 +145,7 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
       }));
     },
 
-    async termini(od, doo) {
+    async termini(od, doo, moznosti) {
       const { data, error } = await seja
         .from('Termini')
         .select(STOLPCI_TERMINA)
@@ -153,7 +153,7 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
         .gte('Datum', od)
         .lte('Datum', doo)
         .is('deleted_at', null)
-        .order('Datum', { ascending: true })
+        .order('Datum', { ascending: !moznosti?.padajoce })
         .limit(2000);
       if (error) throw new Error(`termini: ${error.code ?? 'napaka'}`);
       return ((data ?? []) as Vrstica[]).map(vTermin);

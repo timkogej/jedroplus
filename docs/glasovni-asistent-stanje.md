@@ -62,9 +62,10 @@ srbski cirilici kljub `language=sl`. Zgrešen odtenek (6.66) sta oba ponudnika s
 verjetno je bil tako izgovorjen.
 
 Posledice za aplikacijo:
-- Namigi so nujni. Asistent zdaj pošlje imena strank s termini danes/jutri, zaposlene in storitve.
-  Pri zapisku za stranko brez bližnjega termina je natančnost imen bližje vrstici „brez namigov“ (82 %);
-  mehko iskanje in potrditev to ujameta, a izboljšava je smiselna (npr. nedavne stranke v namigih).
+- Namigi so nujni. Asistent pošlje (največ 100): stranke s termini danes/jutri, zaposlene,
+  strokovne izraze, storitve (največ 30) in nedavne stranke iz terminov zadnjih 45 dni (najnovejše
+  najprej). Stranka, ki ni bila v salonu 45 dni, ni v namigih — za njo velja vrstica „brez namigov“
+  (82 % imen); mehko iskanje in potrditev to ujameta.
 - Popravljeno po preizkusu: „po jutrišnjem“ (ElevenLabs) se je razumelo kot jutri; „osemnajstega
   enajstega“ (OpenAI) se ni razumelo kot datum.
 - Preizkus je en glas. Pred prodajo je smiselno posneti še vsaj enega zaposlenega (drug glas, narečje).
