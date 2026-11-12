@@ -25,6 +25,16 @@ export interface SttPonudnik {
   prepisi(z: SttZahteva): Promise<SttOdgovor>;
 }
 
+/** Ime datoteke s pravo končnico (OpenAI format prepozna po končnici; iOS snema mp4). */
+export function imeDatoteke(zvok: Blob): string {
+  const t = (zvok.type || '').toLowerCase();
+  if (t.includes('mp4') || t.includes('m4a') || t.includes('aac')) return 'ukaz.m4a';
+  if (t.includes('ogg')) return 'ukaz.ogg';
+  if (t.includes('wav')) return 'ukaz.wav';
+  if (t.includes('mpeg') || t.includes('mp3')) return 'ukaz.mp3';
+  return 'ukaz.webm';
+}
+
 /** ElevenLabs Scribe: POST /v1/speech-to-text, multipart, `keyterms` (≤100 brez 20-s minimalnega obračuna). */
 export function sttElevenlabs(kljuc: string, model: string, timeoutMs: number): SttPonudnik {
   return {
@@ -37,7 +47,7 @@ export function sttElevenlabs(kljuc: string, model: string, timeoutMs: number): 
         () => {
           const f = new FormData();
           f.append('model_id', model);
-          f.append('file', zvok, 'ukaz');
+          f.append('file', zvok, imeDatoteke(zvok));
           f.append('language_code', jezik);
           f.append('tag_audio_events', 'false');
           f.append('diarize', 'false');
@@ -69,7 +79,7 @@ export function sttOpenai(kljuc: string, model: string, timeoutMs: number): SttP
         () => {
           const f = new FormData();
           f.append('model', model);
-          f.append('file', zvok, 'ukaz.webm');
+          f.append('file', zvok, imeDatoteke(zvok));
           f.append('language', jezik);
           f.append('response_format', 'json');
           if (prompt) f.append('prompt', `Salon. Izrazi: ${prompt}.`);
