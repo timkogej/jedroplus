@@ -95,7 +95,10 @@ export function getCompanyCommunicationLanguage(
   fallback: CommunicationLanguageCode = 'slo'
 ) {
   return normalizeCommunicationLanguage(
-    companySettings?.language ??
+    // "Jezik pošiljanja" (Opomniki > Splošno) ima prednost; enak vrstni red kot jp_company_language v bazi.
+    companySettings?.['jezik posiljanja'] ??
+      companySettings?.jezik_posiljanja ??
+      companySettings?.language ??
       companySettings?.Language ??
       companySettings?.preferred_language ??
       companySettings?.notification_language,
