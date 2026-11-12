@@ -1,0 +1,251 @@
+// lib/glas/podatki/supabase.ts
+//
+// Dostop do podatkov salona za orodja asistenta — VEDNO z uporabnikovo sejo
+// (createServerSupabaseClient), zato RLS omeji podjetje in lokacije točno
+// tako kot v aplikaciji. Service role se tukaj ne uporablja.
+//
+// Bere le stolpce, ki jih orodja potrebujejo (brez telefonov in e-pošte).
+
+import 'server-only';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { normalizeAppointmentStatus } from '@/lib/appointments/status';
+import type {
+  NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, StoritevPovzetek, StrankaPovzetek, TerminPovzetek,
+} from '../tipi';
+
+type Vrstica = Record<string, unknown>;
+
+const niz = (v: unknown) => (v === null || v === undefined ? '' : String(v)).trim();
+const ura = (v: unknown) => {
+  const s = niz(v);
+  return s ? s.slice(0, 5) : '';
+};
+
+/** Trajanje storitve iz besedila ("60", "1h 30min", "90 min") v minutah. */
+export function trajanjeVMinutah(skupno: unknown, osnovno: unknown): number {
+  for (const v of [skupno, osnovno]) {
+    const s = niz(v).toLowerCase();
+    if (!s) continue;
+    const h = s.match(/(\d+)\s*h/);
+    const m = s.match(/(\d+)\s*m/);
+    if (h || m) return (h ? Number(h[1]) * 60 : 0) + (m ? Number(m[1]) : 0);
+    const n = parseInt(s, 10);
+    if (Number.isFinite(n) && n > 0) return n;
+  }
+  return 60;
+}
+
+function aktivna(v: unknown): boolean {
+  const s = niz(v).toLowerCase();
+  // Neaktivno samo, če je izrecno označeno; prazno = aktivno (kot v aplikaciji).
+  return !(s === 'inactive' || s === 'false' || s === '0' || s.startsWith('neaktiv'));
+}
+
+function daNe(v: unknown, privzeto: boolean): boolean {
+  const s = niz(v).toLowerCase();
+  if (!s) return privzeto;
+  return s === 'true' || s === '1' || s === 'da' || s === 'yes';
+}
+
+function seznamStoritev(v: unknown): string[] {
+  if (Array.isArray(v)) return v.map(String);
+  const s = niz(v);
+  if (!s) return [];
+  try {
+    const j = JSON.parse(s);
+    if (Array.isArray(j)) return j.map(String);
+  } catch {
+    /* vejice */
+  }
+  return s.split(',').map((x) => x.trim()).filter(Boolean);
+}
+
+function vTermin(r: Vrstica): TerminPovzetek {
+  return {
+    id: niz(r['ID termina']),
+    idStranke: niz(r['ID stranke']) || null,
+    stranka: niz(r['Stranka']),
+    datum: niz(r['Datum']).slice(0, 10),
+    zacetek: ura(r['Čas']),
+    konec: ura(r['Konec']) || null,
+    storitev: niz(r['Storitev']),
+    osebaId: niz(r['ID Osebe']) || null,
+    oseba: niz(r['Oseba']),
+    status: normalizeAppointmentStatus(r['Status']),
+    lokacijaId: niz(r['lokacija_id']) || null,
+  };
+}
+
+const STOLPCI_TERMINA = '"ID termina","ID stranke",Stranka,Datum,"Čas",Konec,Storitev,"ID Osebe",Oseba,Status,lokacija_id';
+
+export function podatkiSupabase(seja: SupabaseClient, podjetje: string): PodatkiSalona {
+  let strankeCache: Promise<StrankaPovzetek[]> | null = null;
+
+  return {
+    stranke() {
+      strankeCache ??= (async () => {
+        const out: StrankaPovzetek[] = [];
+        for (let od = 0; od < 20_000; od += 1000) {
+          const { data, error } = await seja
+            .from('Stranke')
+            .select('"ID stranke",Ime,Priimek,Stranka,"Zadnja interakcija"')
+            .eq('ID Podjetja', podjetje)
+            .order('id', { ascending: true })
+            .range(od, od + 999);
+          if (error) throw new Error(`stranke: ${error.code ?? 'napaka'}`);
+          for (const r of (data ?? []) as Vrstica[]) out.push(vStranko(r));
+          if ((data ?? []).length < 1000) break;
+        }
+        return out;
+      })();
+      return strankeCache;
+    },
+
+    async stranka(idStranke) {
+      const { data, error } = await seja
+        .from('Stranke')
+        .select('"ID stranke",Ime,Priimek,Stranka,"Zadnja interakcija"')
+        .eq('ID Podjetja', podjetje)
+        .eq('ID stranke', idStranke)
+        .limit(1);
+      if (error) throw new Error(`stranka: ${error.code ?? 'napaka'}`);
+      const r = (data ?? [])[0] as Vrstica | undefined;
+      return r ? vStranko(r) : null;
+    },
+
+    async storitve(): Promise<StoritevPovzetek[]> {
+      const { data, error } = await seja
+        .from('Storitve')
+        .select('"ID storitve",Naziv,Trajanje,"Skupno trajanje",Status')
+        .eq('ID podjetja', podjetje);
+      if (error) throw new Error(`storitve: ${error.code ?? 'napaka'}`);
+      return ((data ?? []) as Vrstica[]).map((r) => ({
+        id: niz(r['ID storitve']),
+        naziv: niz(r['Naziv']),
+        trajanjeMin: trajanjeVMinutah(r['Skupno trajanje'], r['Trajanje']),
+        aktivna: aktivna(r['Status']),
+      }));
+    },
+
+    async osebe(): Promise<OsebaPovzetek[]> {
+      const { data, error } = await seja
+        .from('Osebe')
+        .select('"ID osebe",Ime,Priimek,Status,Urnik,Storitve,"Ali opravlja vse","Ali ima urnik podjetja"')
+        .eq('ID podjetja', podjetje);
+      if (error) throw new Error(`osebe: ${error.code ?? 'napaka'}`);
+      return ((data ?? []) as Vrstica[]).map((r) => ({
+        id: niz(r['ID osebe']),
+        ime: niz(r['Ime']),
+        priimek: niz(r['Priimek']),
+        aktivna: aktivna(r['Status']),
+        urnik: r['Urnik'] ?? null,
+        imaUrnikPodjetja: daNe(r['Ali ima urnik podjetja'], true),
+        opravljaVse: daNe(r['Ali opravlja vse'], true),
+        storitve: seznamStoritev(r['Storitve']),
+      }));
+    },
+
+    async termini(od, doo) {
+      const { data, error } = await seja
+        .from('Termini')
+        .select(STOLPCI_TERMINA)
+        .eq('ID podjetja', podjetje)
+        .gte('Datum', od)
+        .lte('Datum', doo)
+        .is('deleted_at', null)
+        .order('Datum', { ascending: true })
+        .limit(2000);
+      if (error) throw new Error(`termini: ${error.code ?? 'napaka'}`);
+      return ((data ?? []) as Vrstica[]).map(vTermin);
+    },
+
+    async zadnjiTermin(idStranke, predDatumom) {
+      const { data, error } = await seja
+        .from('Termini')
+        .select(STOLPCI_TERMINA)
+        .eq('ID podjetja', podjetje)
+        .eq('ID stranke', idStranke)
+        .lt('Datum', predDatumom)
+        .is('deleted_at', null)
+        .order('Datum', { ascending: false })
+        .limit(10);
+      if (error) throw new Error(`zadnji termin: ${error.code ?? 'napaka'}`);
+      return ((data ?? []) as Vrstica[]).map(vTermin).find((t) => t.status !== 'cancelled' && t.status !== 'no_show') ?? null;
+    },
+
+    async naslednjiTermin(idStranke, odDatuma) {
+      const { data, error } = await seja
+        .from('Termini')
+        .select(STOLPCI_TERMINA)
+        .eq('ID podjetja', podjetje)
+        .eq('ID stranke', idStranke)
+        .gte('Datum', odDatuma)
+        .is('deleted_at', null)
+        .order('Datum', { ascending: true })
+        .limit(10);
+      if (error) throw new Error(`naslednji termin: ${error.code ?? 'napaka'}`);
+      return ((data ?? []) as Vrstica[]).map(vTermin).find((t) => t.status === 'scheduled' || t.status === 'confirmed') ?? null;
+    },
+
+    async urnikPodjetja() {
+      const { data } = await seja.from('Podatki podjetij').select('urnik').eq('ID Podjetja', podjetje).maybeSingle();
+      return (data as Vrstica | null)?.urnik ?? null;
+    },
+
+    async odsotnosti(od, doo): Promise<OdsotnostPovzetek[]> {
+      const { data, error } = await seja
+        .from('absences')
+        .select('employee_id,start_at,end_at,status')
+        .eq('company_id', podjetje)
+        .lte('start_at', `${doo}T23:59:59Z`)
+        .gte('end_at', `${od}T00:00:00Z`);
+      if (error) return []; // odsotnosti so dodatek; brez njih je odgovor še vedno okviren
+      // absences.employee_id je Osebe.id (bigint); termini uporabljajo "ID osebe".
+      // Preslikamo v orodju ni mogoče brez dodatnega branja, zato tukaj:
+      const ids = [...new Set(((data ?? []) as Vrstica[]).map((r) => niz(r.employee_id)).filter(Boolean))];
+      const preslikava = new Map<string, string>();
+      if (ids.length) {
+        const { data: osebe } = await seja.from('Osebe').select('id,"ID osebe"').eq('ID podjetja', podjetje).in('id', ids);
+        for (const o of (osebe ?? []) as Vrstica[]) preslikava.set(niz(o.id), niz(o['ID osebe']));
+      }
+      return ((data ?? []) as Vrstica[])
+        .filter((r) => !/zavrn|reject|cancel|preklic/i.test(niz(r.status)))
+        .map((r) => ({
+          osebaId: r.employee_id ? preslikava.get(niz(r.employee_id)) ?? `id:${niz(r.employee_id)}` : null,
+          zacetek: niz(r.start_at),
+          konec: niz(r.end_at),
+        }));
+    },
+
+    async dodajZapisek(z: NovZapisek) {
+      // Vstavi uporabnik sam (RLS: članstvo + can_edit_clients + stranka podjetja).
+      const { data, error } = await seja
+        .from('stranke_zapiski')
+        .insert({
+          'ID podjetja': z.podjetje,
+          'ID stranke': z.idStranke,
+          kategorija: z.kategorija,
+          besedilo: z.besedilo,
+          podrobnosti: z.podrobnosti,
+          vir: 'glas',
+          ukaz_id: z.ukazId,
+          avtor_ime: z.avtorIme,
+        })
+        .select('id')
+        .single();
+      if (error || !data) throw new Error(`zapisek: ${error?.code ?? 'napaka'}`);
+      return { id: String(data.id) };
+    },
+  };
+}
+
+function vStranko(r: Vrstica): StrankaPovzetek {
+  let ime = niz(r['Ime']);
+  let priimek = niz(r['Priimek']);
+  if (!ime && !priimek) {
+    const deli = niz(r['Stranka']).split(/\s+/);
+    ime = deli[0] ?? '';
+    priimek = deli.slice(1).join(' ');
+  }
+  return { id: niz(r['ID stranke']), ime, priimek, zadnjaInterakcija: niz(r['Zadnja interakcija']).slice(0, 10) || null };
+}
