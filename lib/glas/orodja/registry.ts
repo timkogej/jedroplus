@@ -13,6 +13,7 @@ import { dodajZapisek } from './zapiski';
 import { karticaStranke, neaktivneStranke, zadnjaBarva } from './kartica';
 import { kdoDela, naslednjaStranka, prosteLuknjeOrodje, resursiDan } from './pregled';
 import { odpriStran, pomocAplikacija } from './pomoc';
+import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, vpisiOdsotnost } from './obrazci';
 
 export const VSA_ORODJA: readonly Orodje[] = [
   iskanjeStranke,
@@ -28,6 +29,11 @@ export const VSA_ORODJA: readonly Orodje[] = [
   neaktivneStranke,
   pomocAplikacija,
   odpriStran,
+  pripraviTermin,
+  prestaviTermin,
+  statusTermina,
+  vpisiOdsotnost,
+  novaStranka,
   dodajZapisek,
   // faza 2 — onemogočeno
   ustvariTermin,

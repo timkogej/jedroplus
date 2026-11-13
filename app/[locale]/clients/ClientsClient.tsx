@@ -41,12 +41,14 @@ import {
 } from '@/lib/webhookPayloadBuilders';
 import { getNextClientId } from '@/src/lib/idGenerators';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
+import { vzemiObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
 import { TABLES } from '@/lib/data';
 
 // Components
 import ClientTable from '@/components/clients/ClientTable';
 import { MetricGroup } from '@/components/dashboard';
 import ClientModal from '@/components/clients/ClientModal';
+type ClientModalPredizpolnitev = React.ComponentProps<typeof ClientModal>['predizpolnitev'];
 import ClientDetailsPanel from '@/components/clients/ClientDetailsPanel';
 import DeleteClientModal from '@/components/clients/DeleteClientModal';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
@@ -330,6 +332,7 @@ export default function ClientsClient({
   const closeModal = useCallback(() => {
     setModalOpen(false);
     setSelectedClient(null);
+    setGlasStranka(null);
   }, []);
 
   // Open create modal
@@ -353,8 +356,26 @@ export default function ClientsClient({
     setDetailsOpen(true);
   }, []);
 
-  // ?stranka=ID (npr. iz Asistent+ "odpri kartico Ane Novak") odpre kartico enkrat.
+  // ?glas=1 + obrazec v sessionStorage (Asistent+) odpre obrazec nove stranke že
+  // izpolnjen; shrani uporabnik sam (ista pot kot ročno). Podatki niso v URL-ju.
   const searchParams = useSearchParams();
+  const [glasStranka, setGlasStranka] = useState<ClientModalPredizpolnitev>(null);
+  const glasNova = searchParams.get('glas') === '1';
+  useEffect(() => {
+    if (!glasNova || !canCreateClient) return;
+    window.history.replaceState(null, '', window.location.pathname);
+    const obrazec = vzemiObrazec(['nova_stranka']);
+    if (!obrazec) return;
+    const v = (k: string) => (obrazec.polja[k] ?? '').trim().slice(0, 120) || undefined;
+    setGlasStranka({ ime: v('ime'), priimek: v('priimek'), telefon: v('telefon'), email: v('email') });
+    setSelectedClient(null);
+    setModalMode('create');
+    setModalOpen(true);
+    // Samo ob prihodu s takšno povezavo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [glasNova]);
+
+  // ?stranka=ID (npr. iz Asistent+ "odpri kartico Ane Novak") odpre kartico enkrat.
   const strankaIzPovezave = searchParams.get('stranka');
   const odprtaIzPovezave = useRef<string | null>(null);
   useEffect(() => {
@@ -890,6 +911,7 @@ export default function ClientsClient({
         companyId={companyId}
         onSave={handleSaveClient}
         isSaving={isSaving}
+        predizpolnitev={modalMode === 'create' ? glasStranka : null}
       />
 
       {/* Details Panel */}

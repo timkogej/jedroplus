@@ -23,6 +23,8 @@ interface AbsenceModalProps {
   employees: (Zaposleni & { initials: string })[];
   onSave: (data: AbsenceFormData) => Promise<void>;
   isSaving?: boolean;
+  /** Asistent+ (glas): obrazec odpre že izpolnjen; shrani uporabnik sam. */
+  predizpolnitev?: Partial<AbsenceFormData> | null;
 }
 
 export interface AbsenceFormData {
@@ -66,6 +68,7 @@ function AbsenceModal({
   employees,
   onSave,
   isSaving = false,
+  predizpolnitev = null,
 }: AbsenceModalProps) {
   const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('appointments');
@@ -154,6 +157,19 @@ function AbsenceModal({
     setReason('');
     setErrors([]);
   }, []);
+
+  // Asistent+: ob odprtju z glasom izpolni polja (enkrat na odprtje).
+  useEffect(() => {
+    if (!isOpen || !predizpolnitev) return;
+    const p = predizpolnitev;
+    if (p.employeeId) setSelectedEmployeeId(p.employeeId);
+    if (p.singleDay !== undefined) setSingleDay(p.singleDay);
+    if (p.dateFrom) setDateFrom(p.dateFrom);
+    if (p.dateTo || p.dateFrom) setDateTo(p.dateTo || p.dateFrom!);
+    if (p.timeFrom) setTimeFrom(p.timeFrom);
+    if (p.timeTo) setTimeTo(p.timeTo);
+    if (p.reason) setReason(p.reason);
+  }, [isOpen, predizpolnitev]);
 
   // Animation variants
   const backdropVariants = {

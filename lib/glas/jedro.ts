@@ -77,6 +77,8 @@ export type OdgovorUkaza =
       vprasanje?: RezultatOrodja['vprasanje'];
       /** Stran v aplikaciji, ki naj jo odjemalec odpre (brez jezika). */
       pojdi?: string;
+      /** Obrazec, ki ga odjemalec odpre izpolnjenega (nič ni shranjeno). */
+      obrazec?: RezultatOrodja['obrazec'];
       opozorilo?: string | null;
       porabljeno: number;
       kvota: number;
@@ -98,6 +100,7 @@ Pravila:
 - Podatke dobiš samo z orodji. Nikoli si ne izmišljuj strank, ID-jev, terminov ali datumov.
 - Če orodje vrne vprašanje ali več možnosti, vprašaj uporabnika kratko in ne izberi sam.
 - Dejanja, ki kaj zapišejo, izvedeš samo s klicem ustreznega orodja. Uporabnik jih potrdi na zaslonu; nikoli ne trdi, da je nekaj že shranjeno.
+- Nov termin, prestavitev, odsotnost, nova stranka ter "ni prišla", "zaključi", "odpovej": orodje odpre obstoječi obrazec, uporabnik ga shrani sam.
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
 - Ne moreš brisati, pošiljati sporočil strankam, spreminjati cen, pravic ali plačil. Če to zahteva, povej, da tega ne moreš.
 - Recepture barve: odtenke zapiši kot "6.3", "7.1"; gramažo, oksidant (%) in čas (min) kot števila. Ne dodajaj ničesar, česar uporabnik ni rekel.
@@ -212,7 +215,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       casi.orodja = ura() - t;
       uporabljena.push(hitroOrodje.ime);
       const status = r.vprasanje ? 'vprasanje' : 'odgovor';
-      return await koncaj({ status, odgovor: r.sporocilo, govor: r.govor, vprasanje: r.vprasanje, pojdi: r.pojdi });
+      return await koncaj({ status, odgovor: r.sporocilo, govor: r.govor, vprasanje: r.vprasanje, pojdi: r.pojdi, obrazec: r.obrazec });
     }
 
     // 3. LLM z orodji
@@ -305,6 +308,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
           govor: vpr ? vprasanjeZaGovor(vpr) : izbrani.map((x) => x.govor ?? zaGovor(x.sporocilo)).join(' '),
           vprasanje: vpr,
           pojdi: vpr ? undefined : izbrani.find((x) => x.pojdi)?.pojdi,
+          obrazec: vpr ? undefined : izbrani.find((x) => x.obrazec)?.obrazec,
         });
       }
       sporocila.push({ vloga: 'rezultati', rezultati });
@@ -341,6 +345,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     predlog?: PredlogZaOdjemalca;
     vprasanje?: RezultatOrodja['vprasanje'];
     pojdi?: string;
+    obrazec?: RezultatOrodja['obrazec'];
   }): Promise<OdgovorUkaza> {
     let govor = r.govor ?? zaGovor(r.odgovor);
     if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} Potrdim?`;
@@ -374,7 +379,8 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       govor,
       predlog: r.predlog,
       vprasanje: r.vprasanje,
-      pojdi: r.pojdi && /^\/[a-z0-9/_-]*(\?[a-z_]+=[\w%-]+)?$/i.test(r.pojdi) ? r.pojdi : undefined,
+      pojdi: r.pojdi && /^\/[a-z0-9/_-]*(\?[a-z_]+=[\w%.-]+(&[a-z_]+=[\w%.-]+){0,3})?$/i.test(r.pojdi) ? r.pojdi : undefined,
+      obrazec: r.pojdi && r.obrazec ? r.obrazec : undefined,
       opozorilo: opozoriloKvote(rez.ok ? rez.porabljeno : 0, rez.ok ? rez.kvota : 0),
       porabljeno: rez.ok ? rez.porabljeno : 0,
       kvota: rez.ok ? rez.kvota : 0,

@@ -59,6 +59,8 @@ export interface RezultatOrodja {
   neuspeh?: boolean;
   /** Pot v aplikaciji, ki naj jo odjemalec odpre (brez jezika, npr. "/clients?stranka=101"). */
   pojdi?: string;
+  /** Predizpolnitev obstoječega obrazca (odjemalec jo da v sessionStorage, ne v URL). */
+  obrazec?: { vrsta: 'nov_termin' | 'prestavi_termin' | 'odsotnost' | 'nova_stranka'; polja: Record<string, string> };
 }
 
 /** Kar pisalno orodje pokaže pred potrditvijo. */

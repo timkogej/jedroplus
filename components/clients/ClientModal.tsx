@@ -40,6 +40,8 @@ interface ClientModalProps {
   companyId: string;
   onSave: (data: ClientFormData) => Promise<void>;
   isSaving?: boolean;
+  /** Asistent+ (glas): nova stranka z že izpolnjenimi polji; shrani uporabnik sam. */
+  predizpolnitev?: Partial<Pick<ClientFormData, 'ime' | 'priimek' | 'telefon' | 'email'>> | null;
 }
 
 // Normalize client type value from DB to form values
@@ -81,6 +83,7 @@ function ClientModal({
   companyId,
   onSave,
   isSaving = false,
+  predizpolnitev = null,
 }: ClientModalProps) {
   const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('clients');
@@ -152,13 +155,13 @@ function ClientModal({
         });
       } else {
         setFormData({
-          ime: '',
-          priimek: '',
+          ime: predizpolnitev?.ime ?? '',
+          priimek: predizpolnitev?.priimek ?? '',
           spol: '',
           tip_stranke: 'nova',
           language: defaultLanguage,
-          email: '',
-          telefon: '',
+          email: predizpolnitev?.email ?? '',
+          telefon: predizpolnitev?.telefon ?? '',
           opombe: '',
           interne_opombe: '',
         });
@@ -169,7 +172,7 @@ function ClientModal({
       setShowInternalNotes(mode === 'edit');
       setShowClientTypeSelect(false);
     }
-  }, [isOpen, mode, client, defaultLanguage]);
+  }, [isOpen, mode, client, defaultLanguage, predizpolnitev]);
 
   const getClientTypeLabel = useCallback((type: ClientType | '') => {
     if (type === 'vip') return t('modal.clientType.vip');

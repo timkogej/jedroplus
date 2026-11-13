@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, useEffect, useCallback, useMemo } from 'react';
+import { memo, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { BodyPortal } from '@/components/ui/BodyPortal';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
@@ -57,6 +57,12 @@ interface AppointmentModalProps {
   initialStartTime?: string;
   initialEmployeeId?: string;
   lockEmployee?: boolean;
+  /**
+   * Asistent+ (glas): obrazec odpre že izpolnjen. Pri novem terminu stranka in
+   * storitev, pri urejanju nov datum/ura (prestavitev). Shrani uporabnik sam,
+   * po isti poti kot ročno.
+   */
+  predizpolnitev?: { stranka?: Client | null; storitevId?: string; datum?: string; cas?: string } | null;
 }
 
 export interface AppointmentFormData {
@@ -156,6 +162,7 @@ function AppointmentModal({
   initialStartTime,
   initialEmployeeId,
   lockEmployee = false,
+  predizpolnitev = null,
 }: AppointmentModalProps) {
   const sheetDrag = useSheetDrag(onClose);
   const { money, locale } = useFormat();
@@ -831,6 +838,40 @@ function AppointmentModal({
     // Reset manual end time flag to allow auto-calculation
     setEndTimeManuallySet(false);
   }, [employees, canPerformService]);
+
+  // Asistent+: predizpolnitev se uporabi enkrat na odprtje (po osnovni inicializaciji zgoraj).
+  const uporabljenaPredizpolnitev = useRef<object | null>(null);
+  useEffect(() => {
+    if (!isOpen) {
+      uporabljenaPredizpolnitev.current = null;
+      return;
+    }
+    const p = predizpolnitev;
+    if (!p || uporabljenaPredizpolnitev.current === p) return;
+    uporabljenaPredizpolnitev.current = p;
+    if (mode === 'create') {
+      if (p.stranka) handleClientSelect(p.stranka);
+      if (p.storitevId) handleServiceChange(p.storitevId, 1);
+    } else if (mode === 'edit' && (p.datum || p.cas)) {
+      const vMin = (u: string) => {
+        const [h, m] = u.split(':').map(Number);
+        return h * 60 + (m || 0);
+      };
+      setFormData((prev) => {
+        const zacetek = p.cas || prev.cas_zacetek;
+        const trajanje = prev.cas_zacetek && prev.cas_konec ? Math.max(5, vMin(prev.cas_konec) - vMin(prev.cas_zacetek)) : 60;
+        const konec = Math.min(vMin(zacetek) + trajanje, 23 * 60 + 59);
+        return {
+          ...prev,
+          datum: p.datum || prev.datum,
+          cas_zacetek: zacetek,
+          cas_konec: `${String(Math.floor(konec / 60)).padStart(2, '0')}:${String(konec % 60).padStart(2, '0')}`,
+        };
+      });
+    }
+    // handleClientSelect je navadna funkcija; predizpolnitev se uporabi samo ob spremembi.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, mode, predizpolnitev, handleServiceChange]);
 
   // Add another service selector (max 3)
   const handleAddService = useCallback(() => {

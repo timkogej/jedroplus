@@ -28,6 +28,7 @@ import DayView from './calendar/DayView';
 import MonthView from './calendar/MonthView';
 import TwoDayView from './calendar/TwoDayView';
 import AppointmentModal, { type AppointmentFormData } from './appointments/AppointmentModal';
+type AppointmentModalPredizpolnitev = React.ComponentProps<typeof AppointmentModal>['predizpolnitev'];
 import { RescheduleNotificationModal } from './appointments/RescheduleNotificationModal';
 import DeleteConfirmation from './appointments/DeleteConfirmation';
 import AbsenceModal, { type AbsenceFormData } from './calendar/AbsenceModal';
@@ -43,6 +44,7 @@ import {
   type Absence,
 } from '@/lib/supabase/appointments';
 import { getClientById } from '@/lib/supabase/clients';
+import { vzemiObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
 import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
 import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, syncResursiZaTermin, sprostiResurseTermina } from '@/lib/supabase/resursi';
 import type { Resurs } from '@/types/resursi';
@@ -1281,6 +1283,87 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     return () => window.clearTimeout(timer);
   }, [pendingTerminId, appointments]);
 
+  // Asistent+ (glas): /koledar?glas=1 + obrazec v sessionStorage (lib/glas/odjemalec/predizpolnitev)
+  // odpre obstoječi obrazec že izpolnjen. Nič se ne shrani samo: uporabnik pregleda in pritisne Shrani,
+  // shrani pa ista koda kot pri ročnem vnosu (potrdilo, resursi, obvestilo o prestavitvi).
+  const [glasNamen, setGlasNamen] = useState<Record<string, string> | null>(null);
+  const [glasPredizpolnitev, setGlasPredizpolnitev] = useState<AppointmentModalPredizpolnitev>(null);
+  const [glasOsebaId, setGlasOsebaId] = useState<string | undefined>(undefined);
+  const [glasOdsotnost, setGlasOdsotnost] = useState<Partial<AbsenceFormData> | null>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('glas')) return;
+    params.delete('glas');
+    const obrazec = vzemiObrazec(['nov_termin', 'prestavi_termin', 'odsotnost']);
+    const namen: Record<string, string> | null = obrazec
+      ? { ...obrazec.polja, glas: obrazec.vrsta === 'nov_termin' ? 'nov' : obrazec.vrsta === 'prestavi_termin' ? 'prestavi' : 'odsotnost' }
+      : null;
+    const query = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+    if (!namen) return;
+    const dan = namen.dan_prej ?? namen.dan;
+    if (dan && /^\d{4}-\d{2}-\d{2}$/.test(dan)) {
+      const [y, m, d] = dan.split('-').map(Number);
+      setCurrentDate(new Date(y, m - 1, d));
+    }
+    setGlasNamen(namen);
+  }, []);
+  useEffect(() => {
+    if (!glasNamen || !companyId) return;
+    const n = glasNamen;
+    const dan = n.dan && /^\d{4}-\d{2}-\d{2}$/.test(n.dan) ? n.dan : undefined;
+    const ura = n.ura && /^\d{2}:\d{2}$/.test(n.ura) ? n.ura : undefined;
+    const zaposleni = (ref?: string) => (ref ? employees.find((e) => e.ref === ref || e.id === ref)?.id : undefined);
+    if (n.glas === 'nov') {
+      if (!canCreateAppointment) return setGlasNamen(null);
+      if (n.oseba && employees.length === 0) return; // počakaj na zaposlene
+      const storitev = n.storitev ? services.find((x) => x.ref === n.storitev || x.id === n.storitev)?.id : undefined;
+      if (n.storitev && !storitev && services.length === 0) return; // počakaj na storitve
+      setGlasNamen(null);
+      void (async () => {
+        const stranka = n.stranka ? (await getClientById(companyId, n.stranka)).data : null;
+        setGlasOsebaId(zaposleni(n.oseba));
+        setGlasPredizpolnitev({ stranka, storitevId: storitev });
+        setNewAppointmentInitials({ date: dan, startTime: ura });
+        setEditingAppointment(null);
+        setModalMode('create');
+        setIsModalOpen(true);
+      })();
+    } else if (n.glas === 'prestavi' && n.idt) {
+      const termin = appointments.find((a) => a.id_termina === n.idt || a.id === n.idt);
+      if (!termin) return; // počakaj, da se termini dneva naložijo (spodaj časovna omejitev)
+      setGlasNamen(null);
+      if (!canEditAppointment(termin)) return;
+      setGlasPredizpolnitev({ datum: dan, cas: ura });
+      setEditingAppointment(termin);
+      setModalMode('edit');
+      setIsModalOpen(true);
+    } else if (n.glas === 'odsotnost') {
+      if (n.oseba && employees.length === 0) return;
+      setGlasNamen(null);
+      const doDan = n.do_dan && /^\d{4}-\d{2}-\d{2}$/.test(n.do_dan) ? n.do_dan : dan;
+      const doUra = n.do_ura && /^\d{2}:\d{2}$/.test(n.do_ura) ? n.do_ura : undefined;
+      setGlasOdsotnost({
+        employeeId: zaposleni(n.oseba),
+        dateFrom: dan,
+        dateTo: doDan,
+        singleDay: Boolean(ura && doUra),
+        timeFrom: ura,
+        timeTo: doUra,
+        reason: n.razlog?.slice(0, 200),
+      });
+      setIsAbsenceModalOpen(true);
+    } else {
+      setGlasNamen(null);
+    }
+  }, [glasNamen, companyId, appointments, services, employees, canCreateAppointment, canEditAppointment]);
+  useEffect(() => {
+    if (!glasNamen) return;
+    // Termin ni viden ali ga ni več: ne čakamo v nedogled.
+    const timer = window.setTimeout(() => setGlasNamen(null), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [glasNamen]);
+
   // First visit: a short guided tour of the calendar.
   const tour = useOptionalTour();
   useEffect(() => {
@@ -1295,6 +1378,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingAppointment(null);
+    setGlasPredizpolnitev(null);
+    setGlasOsebaId(undefined);
   }, []);
 
   const handleSaveAppointment = useCallback(async (data: AppointmentFormData) => {
@@ -1851,6 +1936,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
 
   const handleCloseAbsenceModal = useCallback(() => {
     setIsAbsenceModalOpen(false);
+    setGlasOdsotnost(null);
   }, []);
 
   // Sidebar toggle handler
@@ -2351,8 +2437,9 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         isSaving={isSaving}
         initialDate={newAppointmentInitials.date}
         initialStartTime={newAppointmentInitials.startTime}
-        initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : undefined}
+        initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : glasOsebaId}
         lockEmployee={role === 'staff' && Boolean(rolePersonId)}
+        predizpolnitev={glasPredizpolnitev}
       />
 
       {/* Absence modal */}
@@ -2362,6 +2449,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         employees={visibleEmployees}
         onSave={handleSaveAbsence}
         isSaving={isSaving}
+        predizpolnitev={glasOdsotnost}
       />
 
       {/* Absence detail modal */}

@@ -18,9 +18,10 @@ import { Microphone, Stop, Check, X, PaperPlaneRight, SpeakerHigh, ArrowSquareOu
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { Pogovor, type Meritev, type OdgovorOdjemalec, type StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
+import { shraniObrazec, type Obrazec } from '@/lib/glas/odjemalec/predizpolnitev';
 
 type Stanje = { ok: boolean; vklopljeno?: boolean; pravica?: boolean; kvota?: number; porabljeno?: number; opozorilo?: string | null; sporocilo?: string };
-type Vrstica = { kdo: 'jaz' | 'asistent' | 'napaka'; besedilo: string; meritev?: Meritev | null; pojdi?: string };
+type Vrstica = { kdo: 'jaz' | 'asistent' | 'napaka'; besedilo: string; meritev?: Meritev | null; pojdi?: string; obrazec?: Obrazec };
 
 const OPIS: Record<StanjePogovora, string> = {
   mirovanje: 'Tapnite in začnite govoriti',
@@ -65,7 +66,7 @@ export default function GlasTestPage() {
       },
       odgovor: (o) => {
         setZadnji(o);
-        dodaj({ kdo: 'asistent', besedilo: o.odgovor ?? '', pojdi: o.pojdi });
+        dodaj({ kdo: 'asistent', besedilo: o.odgovor ?? '', pojdi: o.pojdi, obrazec: o.obrazec });
         osveziStanje();
       },
       potrditev: (o) => {
@@ -179,9 +180,10 @@ export default function GlasTestPage() {
                     // Faza 4: plavajoča bunka ostane odprta in stran se odpre sama.
                     <a
                       href={`/${jezik}${v.pojdi}`}
+                      onClick={() => v.obrazec && shraniObrazec(v.obrazec)}
                       className="mt-1 inline-flex items-center gap-1 px-1 text-xs font-medium text-label underline"
                     >
-                      <ArrowSquareOut size={14} /> Odpri
+                      <ArrowSquareOut size={14} /> {v.obrazec ? 'Odpri obrazec' : 'Odpri'}
                     </a>
                   )}
                   {v.meritev && (

@@ -44,6 +44,8 @@ export interface OdgovorOdjemalec {
   vprasanje?: VprasanjeOdjemalec;
   /** Stran v aplikaciji (brez jezika), ki jo je asistent predlagal odpreti. */
   pojdi?: string;
+  /** Obrazec, ki naj se odpre izpolnjen (shraniObrazec pred premikom na `pojdi`). */
+  obrazec?: { vrsta: 'nov_termin' | 'prestavi_termin' | 'odsotnost' | 'nova_stranka'; polja: Record<string, string> };
   opozorilo?: string | null;
   sporocilo?: string;
   koda?: string;
