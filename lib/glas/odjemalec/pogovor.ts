@@ -1,7 +1,6 @@
 // lib/glas/odjemalec/pogovor.ts
 //
-// Sprotni glasovni pogovor v brskalniku (faza 1, arhitektura A iz
-// docs/glasovni-asistent-faza0.md):
+// Sprotni glasovni pogovor v brskalniku (arhitektura A iz docs/glasovni-asistent-faza0.md):
 //
 //   gumb → /api/glas/seja (pravice, kvota, kratkotrajna Soniox ključa, namigi)
 //        → mikrofon → Soniox STT (WebSocket, neposredno) → konec govora
@@ -9,14 +8,28 @@
 //        → `govor` → Soniox TTS (WebSocket, glas Nina) → zvočnik
 //        → spet posluša (nadaljevanje pogovora), po tišini se zapre.
 //
-// Zvok ne gre prek našega strežnika. Pisanje gre vedno prek predloga z žetonom;
-// glasovni "ja" samo pokliče isto /api/glas/potrdi kot gumb.
+// Zvok ne gre prek našega strežnika. Pisanje gre vedno prek predloga z žetonom
+// ali obrazca, ki ga uporabnik shrani; glasovni "ja" samo pokliče isto pot kot gumb.
 //
-// Polovični dupleks: med razmišljanjem in govorom gre v STT tišina, da asistent
-// ne sliši samega sebe (odmev iz zvočnika). Prekinitev = dotik gumba.
+// Poln dupleks (docs/glasovni-asistent-pogovor.md): mikrofon gre v STT ves čas.
+//   * Konec izjave: Soniox <end> + čakanje po vsebini (tok.cakanjePoKoncu).
+//   * Med razmišljanjem: če uporabnik nadaljuje, se zahteva prekliče, izjavi se združita.
+//   * Med govorom: prava prekinitev (tok.jePrekinitev) asistenta utiša; lasten odmev ne.
+//   * Kar Soniox prepiše iz zvoka med govorom asistenta (+ kratek rep), ne gre v izjavo.
 // Ne zapisuje prepisov v konzolo (osebni podatki).
 
 import { izberiMoznost, jePotrditev, jeZavrnitev, pcmVFloat, SestavljalecIzjave, type SonioxZeton } from './besede';
+import {
+  besedeGovora,
+  cakanjePoKoncu,
+  jeNadaljevanje,
+  jePrekinitev,
+  lokalniOdziv,
+  NAMIGI_CAKANJA,
+  napakaZaGovor,
+  odstraniOdmev,
+  rms,
+} from './tok';
 
 export type StanjePogovora = 'mirovanje' | 'povezujem' | 'poslusam' | 'razmisljam' | 'govorim';
 
@@ -58,11 +71,14 @@ export interface Meritev {
   doZvoka: number | null;
 }
 
+/** Izjavo obdela vmesnik sam (npr. "shrani" v obrazcu): izgovori `govor` ali počaka na izid. */
+export type LokalniOdziv = { govor: string } | { caka: true };
+
 export interface DogodkiPogovora {
   stanje(s: StanjePogovora): void;
   /** Sproten prepis tega, kar uporabnik govori. */
   slisano(besedilo: string): void;
-  /** Izjava je zaključena in poslana. */
+  /** Izjava je zaključena in poslana. Ob nadaljevanju pride znova, daljša (vsebuje prejšnjo). */
   izjava(besedilo: string): void;
   odgovor(o: OdgovorOdjemalec): void;
   /** Rezultat potrditve ali zavrnitve predloga. */
@@ -72,11 +88,10 @@ export interface DogodkiPogovora {
   meritev(m: Meritev): void;
   /** Čas zagona: do poslušanja (mikrofon prižgan) in do povezave z razpoznavo. */
   zacetek?(m: { doPoslusanja: number; doPovezave: number; sejaVnaprej: boolean }): void;
-  /**
-   * Izjavo lahko obdela vmesnik sam, brez strežnika (npr. "shrani" v obrazcu,
-   * ki ga je odprl asistent). Vrne besedilo odgovora ali null (gre na strežnik).
-   */
-  lokalno?(izjava: string): string | null;
+  /** Lokalno obdelana izjava (shrani/prekliči v obrazcu); null = gre na strežnik. */
+  lokalno?(izjava: string): LokalniOdziv | string | null;
+  /** Asistent je izgovoril besedilo, ki ni odgovor strežnika (izid shranjevanja, "Prosim."). */
+  obvestilo?(besedilo: string): void;
 }
 
 interface Seja {
@@ -93,18 +108,32 @@ interface Seja {
 /** Po odgovoru posluša še toliko časa, nato se pogovor zapre. */
 const TISINA_PO_ODGOVORU_MS = 8000;
 const TISINA_NA_ZACETKU_MS = 12000;
+/** Po "hvala" je pogovor verjetno končan: zapre se prej. */
+const TISINA_PO_ZAHVALI_MS = 4000;
 /** Zgodovina pogovora: zadnjih toliko ukazov, če je od zadnjega manj kot 5 minut (enako preverja strežnik). */
 const ZGODOVINA_NAJVEC = 6;
 const ZGODOVINA_VELJA_MS = 5 * 60_000;
-/** Če uporabnik po zaznanem koncu takoj nadaljuje (premor sredi nareka), izjavi združimo. */
-const POCAKAJ_PO_KONCU_MS = 250;
 const ZAHTEVA_TIMEOUT_MS = 20000;
+/** Če odgovor zamuja toliko, asistent reče "Moment." (pripravljeno vnaprej). */
+const NAMIG_PO_MS = 2500;
+/** Med dvema namigoma čakanja vsaj toliko (da ne zveni kot posnetek). */
+const NAMIG_PREMOR_MS = 20_000;
+/** Vmesnik javi izid lokalnega dejanja (npr. shranjevanja obrazca) v tem času. */
+const LOKALNO_CAKA_MS = 15_000;
 /** Seja (ključa) mora imeti ob uporabi še vsaj toliko veljavnosti. */
 const SEJA_REZERVA_MS = 60_000;
 /** Po neuspeli pripravi vnaprej (npr. izklopljeno) ne poskušamo znova toliko časa. */
 const PRIPRAVA_PREMOR_MS = 60_000;
 /** Največ toliko zvoka (okvirji po 100 ms) hranimo, dokler se razpoznava ne poveže. */
 const NAJVEC_CAKAJOCEGA_ZVOKA = 150;
+/** Okvir mikrofona = 100 ms zvoka (public/glas/mikrofon-worklet.js). */
+const OKVIR_MS = 100;
+/** Prepis zvoka do toliko po koncu asistentovega govora je odmev (zvočnik → mikrofon). */
+const REP_ODMEVA_MS = 350;
+/** Glasnost za prekinitev: največja v zadnjih toliko okvirjih. */
+const GLASNOST_OKVIRJEV = 6;
+/** Razpoznava se ob prekinitvi poveže znova največ tolikokrat na minuto. */
+const NAJVEC_OBNOV_STT = 2;
 const TTS_HZ = 24000;
 
 const SPOROCILA = {
@@ -130,14 +159,29 @@ export class Pogovor {
   private izhod: AudioContext | null = null;
   private stt: WebSocket | null = null;
   private tts: WebSocket | null = null;
+  private ttsOdpiranje: Promise<void> | null = null;
   private ttsZiv: ReturnType<typeof setInterval> | null = null;
   private ttsObnova: ReturnType<typeof setInterval> | null = null;
   private tisina: ReturnType<typeof setTimeout> | null = null;
   private cakanje: ReturnType<typeof setTimeout> | null = null;
+  private namigCasovnik: ReturnType<typeof setTimeout> | null = null;
+  private lokalnoCasovnik: ReturnType<typeof setTimeout> | null = null;
   private sestavljalec = new SestavljalecIzjave();
+  /** Kar Soniox prepiše med asistentovim govorom (odmev ali prekinitev). */
+  private medGovorom = new SestavljalecIzjave();
   private cakajoca: string | null = null;
+  /** Zadnja poslana izjava (za združitev, če uporabnik med razmišljanjem nadaljuje). */
+  private zadnjaIzjava: string | null = null;
   private tKonec = 0;
   private sekundeZvoka = 0;
+  /** Položaj v zvoku trenutne STT povezave (ms; Soniox `end_ms` je v isti časovnici). */
+  private polozajMs = 0;
+  /** Žetoni, ki se končajo pred tem položajem, so odmev asistentovega glasu. */
+  private odmevDo = 0;
+  private zadnjiKonecZetona = 0;
+  private glasnosti: number[] = [];
+  private govorBesede: Set<string> = new Set();
+  private obnoveStt: number[] = [];
   /** ID-ji zadnjih ukazov tega pogovora (strežnik iz njih sestavi zgodovino). */
   private zgodovina: string[] = [];
   private zadnjiCas = 0;
@@ -148,6 +192,12 @@ export class Pogovor {
   private naslednjiCas = 0;
   private koncajGovor: (() => void) | null = null;
   private zahteva: AbortController | null = null;
+  /** Namigi čakanja ("Moment."), sintetizirani enkrat na pogovor-objekt. */
+  private namigi: Float32Array[] = [];
+  private namigiPriprava = new Map<string, Float32Array[]>();
+  private namigiZahtevani = false;
+  private zadnjiNamig = 0;
+  private namigIndeks = 0;
 
   /** Koliko časa po odgovoru še posluša (daljše, ko je odprt obrazec za pregled). */
   tisinaPoOdgovoru = TISINA_PO_ODGOVORU_MS;
@@ -215,7 +265,7 @@ export class Pogovor {
       this.tok = tok;
       this.zvokCaka = [];
       this.povezMikrofon(tok);
-      this.ton(880);
+      this.mehakNamig();
       this.poslusaj(TISINA_NA_ZACETKU_MS);
       const doPoslusanja = Math.round(performance.now() - t0);
 
@@ -271,6 +321,20 @@ export class Pogovor {
 
   async zavrniPredlog() {
     if (this.predlog) await this.zavrni(this.predlog);
+  }
+
+  /**
+   * Vmesnik pove nekaj sam (izid shranjevanja obrazca, "Obvestim stranko?"), nato
+   * asistent posluša naprej. Ne prekine uporabnika, ki ravno govori.
+   */
+  async povejObvestilo(besedilo: string, tisinaMs?: number) {
+    if (!this.aktiven || !besedilo) return;
+    if (this.s === 'poslusam' && (this.cakajoca || this.sestavljalec.trenutno)) return;
+    this.pocistiLokalno();
+    if (this.s === 'govorim') this.utisaj();
+    this.d.obvestilo?.(besedilo);
+    this.tKonec = performance.now();
+    await this.povej(besedilo, performance.now(), tisinaMs);
   }
 
   // ───────────────────────────── povezave ─────────────────────────────
@@ -346,8 +410,15 @@ export class Pogovor {
             context: { terms: seja.stt.namigi },
           })
         );
+        // Nova povezava = nova časovnica zvoka (Soniox end_ms začne pri 0).
+        this.polozajMs = 0;
+        this.odmevDo = 0;
+        this.zadnjiKonecZetona = 0;
         // Zvok, posnet med povezovanjem, gre naprej v pravem vrstnem redu.
-        for (const okvir of this.zvokCaka) ws.send(okvir);
+        for (const okvir of this.zvokCaka) {
+          ws.send(okvir);
+          this.polozajMs += OKVIR_MS;
+        }
         this.sekundeZvoka += this.zvokCaka.length * 0.1;
         this.zvokCaka = [];
         resolve();
@@ -358,20 +429,54 @@ export class Pogovor {
         reject(new NapakaPogovora(SPOROCILA.povezava));
       };
       ws.onclose = () => {
-        if (this.stt === ws && this.aktiven) this.koncaj(SPOROCILA.razpoznava);
+        if (this.stt === ws && this.aktiven) void this.obnoviStt();
       };
       this.stt = ws;
     });
   }
 
+  /**
+   * Razpoznava se je prekinila (omrežje, Soniox): poveži znova, pogovor teče naprej.
+   * Zvok se med tem hrani. Po več neuspehih v minuti se pogovor zapre.
+   */
+  private async obnoviStt() {
+    const zdaj = Date.now();
+    this.obnoveStt = this.obnoveStt.filter((t) => zdaj - t < 60_000);
+    const stara = this.stt;
+    this.stt = null;
+    try {
+      stara?.close();
+    } catch {
+      /* že zaprta */
+    }
+    if (this.obnoveStt.length >= NAJVEC_OBNOV_STT) {
+      this.koncaj(SPOROCILA.razpoznava);
+      return;
+    }
+    this.obnoveStt.push(zdaj);
+    this.sestavljalec.pocisti();
+    this.medGovorom.pocisti();
+    try {
+      const seja = this.svezaZaloga() ?? (await this.pridobiSejo());
+      if (!this.aktiven) return;
+      if (!this.seja) this.seja = seja;
+      await this.odpriStt(seja);
+    } catch {
+      if (this.aktiven) this.koncaj(SPOROCILA.razpoznava);
+    }
+  }
+
   private odpriTts(seja: Seja): Promise<void> {
-    return new Promise((resolve) => {
+    if (this.ttsOdpiranje) return this.ttsOdpiranje;
+    const p = new Promise<void>((resolve) => {
       const ws = new WebSocket(seja.tts.url);
       // Glas ni nujen: brez njega je odgovor še vedno na zaslonu.
       const t = setTimeout(() => resolve(), 6000);
       ws.onopen = () => {
         clearTimeout(t);
+        if (this.ttsZiv) clearInterval(this.ttsZiv);
         this.ttsZiv = setInterval(() => ws.readyState === 1 && ws.send(JSON.stringify({ keep_alive: true })), 5000);
+        this.pripraviNamige();
         resolve();
       };
       ws.onmessage = (e) => this.ttsSporocilo(e.data);
@@ -384,7 +489,11 @@ export class Pogovor {
         if (this.s === 'govorim') this.koncajGovor?.();
       };
       this.tts = ws;
+    }).finally(() => {
+      this.ttsOdpiranje = null;
     });
+    this.ttsOdpiranje = p;
+    return p;
   }
 
   private povezMikrofon(tok: MediaStream) {
@@ -396,15 +505,19 @@ export class Pogovor {
     vir.connect(node);
     node.connect(nic);
     nic.connect(ctx.destination); // brez tega nekateri brskalniki ne poganjajo worklet-a
-    const tisina = new ArrayBuffer(3200);
     node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => {
+      // Glasnost (za prekinitev): samo zadnjih nekaj okvirjev.
+      this.glasnosti.push(rms(new Int16Array(e.data, 0, Math.floor(e.data.byteLength / 2))));
+      if (this.glasnosti.length > GLASNOST_OKVIRJEV) this.glasnosti.shift();
       if (!this.stt || this.stt.readyState !== 1) {
-        // Razpoznava se še povezuje: hrani zvok (samo med poslušanjem).
-        if (this.s === 'poslusam' && this.zvokCaka.length < NAJVEC_CAKAJOCEGA_ZVOKA) this.zvokCaka.push(e.data);
+        // Razpoznava se (znova) povezuje: hrani zvok.
+        if (this.aktiven && this.zvokCaka.length < NAJVEC_CAKAJOCEGA_ZVOKA) this.zvokCaka.push(e.data);
         return;
       }
-      // Polovični dupleks: asistent ne sme slišati sebe.
-      this.stt.send(this.s === 'poslusam' ? e.data : tisina);
+      // Poln dupleks: mikrofon gre v STT tudi med govorom (prekinitev z glasom);
+      // odmev loči logika v sttSporocilo.
+      this.stt.send(e.data);
+      this.polozajMs += OKVIR_MS;
       this.sekundeZvoka += 0.1;
     };
   }
@@ -420,21 +533,39 @@ export class Pogovor {
       return;
     }
     if (m.error_code) {
-      this.koncaj(SPOROCILA.razpoznava);
+      void this.obnoviStt();
       return;
     }
     if (!m.tokens?.length) return;
-    if (this.s !== 'poslusam') {
-      // Kar pride med razmišljanjem/govorom (tišina, zakasnjeni žetoni), zavržemo.
-      this.sestavljalec.dodaj(m.tokens);
-      this.sestavljalec.pocisti();
+    for (const z of m.tokens) if (z.end_ms && z.end_ms > this.zadnjiKonecZetona) this.zadnjiKonecZetona = z.end_ms;
+
+    if (this.s === 'govorim') {
+      this.medGovorom.dodaj(m.tokens);
+      const slisano = this.medGovorom.trenutno;
+      const glasnost = Math.max(0, ...this.glasnosti);
+      if (slisano && jePrekinitev({ slisano, govor: this.govorBesede, glasnost })) this.prekiniZGlasom(slisano);
       return;
     }
-    const r = this.sestavljalec.dodaj(m.tokens);
+    if (this.s !== 'poslusam' && this.s !== 'razmisljam') return;
+
+    // Odmev konca asistentovega govora (in namiga "Moment.") ne gre v izjavo.
+    const zetoni = m.tokens.filter((z) => z.text === '<end>' || z.end_ms === undefined || z.end_ms > this.odmevDo);
+    const r = this.sestavljalec.dodaj(zetoni);
+
+    if (this.s === 'razmisljam') {
+      // Uporabnik nadaljuje, preden je asistent spregovoril: preklic in združitev.
+      if (this.zahteva && this.zadnjaIzjava && jeNadaljevanje(this.sestavljalec.trenutno)) {
+        this.nadaljujIzjavo();
+      } else {
+        this.sestavljalec.pocisti();
+        return;
+      }
+    }
+
     if (r.imaGovor) {
       this.ustaviTisino();
       if (this.cakanje) {
-        clearTimeout(this.cakanje); // nadaljuje po kratkem premoru
+        clearTimeout(this.cakanje); // nadaljuje po premoru
         this.cakanje = null;
       }
       const prej = this.cakajoca ? `${this.cakajoca} ` : '';
@@ -444,23 +575,50 @@ export class Pogovor {
       this.tKonec = performance.now();
       this.cakajoca = this.cakajoca ? `${this.cakajoca} ${r.izjava}` : r.izjava;
       if (this.cakanje) clearTimeout(this.cakanje);
+      // Po vsebini: "… ob" počaka dlje, "ja" skoraj takoj (docs/glasovni-asistent-pogovor.md).
       this.cakanje = setTimeout(() => {
         this.cakanje = null;
         const izjava = this.cakajoca;
         this.cakajoca = null;
         if (izjava && this.s === 'poslusam') void this.obdelaj(izjava);
-      }, POCAKAJ_PO_KONCU_MS);
+      }, cakanjePoKoncu(this.cakajoca));
+    }
+  }
+
+  /** Med razmišljanjem je uporabnik nadaljoval: zahteva se prekliče, izjava se nadaljuje. */
+  private nadaljujIzjavo() {
+    this.zahteva?.abort();
+    this.zahteva = null;
+    this.ustaviNamig();
+    this.cakajoca = this.zadnjaIzjava;
+    this.zadnjaIzjava = null;
+    this.nastavi('poslusam');
+  }
+
+  /** Uporabnik je asistenta prekinil z glasom: utihni, njegove besede so začetek nove izjave. */
+  private prekiniZGlasom(slisano: string) {
+    const govor = this.govorBesede;
+    this.utisaj();
+    this.poslusaj(this.tisinaPoOdgovoru);
+    // Kar je že prepisano, je obdelano; nove besede gredo v izjavo.
+    this.odmevDo = this.zadnjiKonecZetona;
+    const zacetek = odstraniOdmev(slisano, govor);
+    this.sestavljalec.nastavi(zacetek);
+    if (zacetek) {
+      this.ustaviTisino();
+      this.d.slisano(zacetek);
     }
   }
 
   private poslusaj(tisinaMs: number) {
     if (!this.aktiven) return;
     this.sestavljalec.pocisti();
+    this.medGovorom.pocisti();
     this.cakajoca = null;
     this.nastavi('poslusam');
     this.ustaviTisino();
     this.tisina = setTimeout(() => {
-      if (this.s === 'poslusam' && !this.cakajoca) this.koncaj(null);
+      if (this.s === 'poslusam' && !this.cakajoca && !this.sestavljalec.trenutno) this.koncaj(null);
     }, tisinaMs);
   }
 
@@ -475,7 +633,7 @@ export class Pogovor {
     this.ustaviTisino();
     this.d.izjava(izjava);
     this.nastavi('razmisljam');
-    this.ton(660);
+    this.zadnjaIzjava = null;
 
     // Odprt predlog: kratek "ja"/"ne" ga potrdi/zavrne; vse drugo je nov ukaz.
     const p = this.predlog;
@@ -488,8 +646,24 @@ export class Pogovor {
       const lokalno = this.d.lokalno?.(izjava);
       if (lokalno) {
         this.vprasanje = null;
-        this.d.odgovor({ ok: true, status: 'odgovor', odgovor: lokalno });
-        await this.povej(lokalno, performance.now());
+        const o: LokalniOdziv = typeof lokalno === 'string' ? { govor: lokalno } : lokalno;
+        if ('caka' in o) {
+          // Vmesnik izid sporoči s povejObvestilo (npr. "Shranjeno."); varovalka za vsak primer.
+          this.lokalnoCasovnik = setTimeout(() => {
+            this.lokalnoCasovnik = null;
+            if (this.s === 'razmisljam') this.poslusaj(this.tisinaPoOdgovoru);
+          }, LOKALNO_CAKA_MS);
+          return;
+        }
+        this.d.odgovor({ ok: true, status: 'odgovor', odgovor: o.govor });
+        await this.povej(o.govor, performance.now());
+        return;
+      }
+      const kratko = lokalniOdziv(izjava);
+      if (kratko) {
+        this.d.obvestilo?.(kratko.govor);
+        await this.povej(kratko.govor, performance.now(), kratko.vrsta === 'zahvala' ? TISINA_PO_ZAHVALI_MS : undefined);
+        if (kratko.vrsta === 'konec') this.koncaj(null);
         return;
       }
     }
@@ -497,6 +671,9 @@ export class Pogovor {
 
     const sekunde = Math.round(this.sekundeZvoka * 10) / 10;
     this.sekundeZvoka = 0;
+    // Če uporabnik nadaljuje, preden pride odgovor, se ta zahteva prekliče (nadaljujIzjavo).
+    if (!izbira) this.zadnjaIzjava = izjava;
+    this.zacniNamig();
     const odgovor = await this.zahtevaj<OdgovorOdjemalec>('/api/glas/ukaz', {
       besedilo: izjava,
       prejsnji: Date.now() - this.zadnjiCas < ZGODOVINA_VELJA_MS ? this.zgodovina : [],
@@ -505,11 +682,17 @@ export class Pogovor {
       stt: this.stt ? { sekunde } : undefined,
       glas: Boolean(this.tts),
     });
+    // Preklicano zaradi nadaljevanja (ali konca pogovora): odgovor ne velja več.
+    if (odgovor.koda === 'preklicano' || this.s !== 'razmisljam') return;
+    this.zadnjaIzjava = null;
+    this.ustaviNamig();
     const tOdgovor = performance.now();
     if (!odgovor.ok) {
       this.vprasanje = null;
-      this.d.napaka(odgovor.sporocilo ?? SPOROCILA.povezava);
-      await this.povej(odgovor.sporocilo ?? SPOROCILA.povezava, tOdgovor);
+      const sporocilo = odgovor.sporocilo ?? SPOROCILA.povezava;
+      this.d.napaka(sporocilo);
+      // Kratko in posluša naprej (pogovor se ne zapre).
+      await this.povej(napakaZaGovor(sporocilo), tOdgovor);
       return;
     }
     if (Date.now() - this.zadnjiCas >= ZGODOVINA_VELJA_MS) this.zgodovina = [];
@@ -527,22 +710,25 @@ export class Pogovor {
     const r = await this.zahtevaj<{ ok: boolean; sporocilo?: string }>('/api/glas/potrdi', { predlog: p.id, zeton: p.zeton });
     const sporocilo = r.sporocilo ?? (r.ok ? 'Shranjeno.' : 'Ni uspelo. Nič ni bilo spremenjeno.');
     this.d.potrditev({ ok: r.ok, sporocilo });
-    await this.povej(sporocilo, performance.now());
+    await this.povej(r.ok ? sporocilo : napakaZaGovor(sporocilo), performance.now());
   }
 
   private async zavrni(p: PredlogOdjemalec) {
     this.predlog = null;
     void this.zahtevaj('/api/glas/zavrni', { predlog: p.id });
-    const sporocilo = 'Preklicano. Nič ni bilo spremenjeno.';
-    this.d.potrditev({ ok: true, sporocilo });
-    await this.povej(sporocilo, performance.now());
+    this.d.potrditev({ ok: true, sporocilo: 'Preklicano. Nič ni bilo spremenjeno.' });
+    await this.povej('Prav, preklicano.', performance.now());
   }
 
-  private async zahtevaj<T extends { ok: boolean; sporocilo?: string }>(url: string, telo: unknown): Promise<T> {
+  private async zahtevaj<T extends { ok: boolean; sporocilo?: string; koda?: string }>(url: string, telo: unknown): Promise<T> {
     this.zahteva?.abort();
     const ctrl = new AbortController();
     this.zahteva = ctrl;
-    const t = setTimeout(() => ctrl.abort(), ZAHTEVA_TIMEOUT_MS);
+    let casovna = false;
+    const t = setTimeout(() => {
+      casovna = true;
+      ctrl.abort();
+    }, ZAHTEVA_TIMEOUT_MS);
     try {
       const r = await fetch(url, {
         method: 'POST',
@@ -554,8 +740,9 @@ export class Pogovor {
       if (!j) return { ok: false, sporocilo: `${SPOROCILA.nerazumljiv} (${r.status})` } as T;
       return j;
     } catch (e) {
-      const casovna = e instanceof DOMException && e.name === 'AbortError';
-      return { ok: false, sporocilo: casovna ? SPOROCILA.casovna : SPOROCILA.povezava } as T;
+      const prekinjeno = e instanceof DOMException && e.name === 'AbortError';
+      if (prekinjeno && !casovna) return { ok: false, koda: 'preklicano' } as T;
+      return { ok: false, sporocilo: prekinjeno ? SPOROCILA.casovna : SPOROCILA.povezava } as T;
     } finally {
       clearTimeout(t);
       if (this.zahteva === ctrl) this.zahteva = null;
@@ -564,17 +751,20 @@ export class Pogovor {
 
   // ───────────────────────────── govor ─────────────────────────────
 
-  private async povej(besedilo: string, tOdgovor: number) {
+  private async povej(besedilo: string, tOdgovor: number, tisinaMs = this.tisinaPoOdgovoru) {
     const tKonec = this.tKonec;
     const meri = (zvok: number | null) => this.d.meritev({ doOdgovora: Math.round(tOdgovor - tKonec), doZvoka: zvok === null ? null : Math.round(zvok - tKonec) });
     if (!this.aktiven) {
       meri(null);
       return;
     }
+    // Glas se je vmes zaprl (omrežje, spanje zavihka): poskusi znova.
+    if (besedilo && this.seja && (!this.tts || this.tts.readyState !== 1)) await this.odpriTts(this.seja);
+    if (!this.aktiven) return;
     if (!besedilo || !this.tts || this.tts.readyState !== 1 || !this.izhod || !this.seja) {
       meri(null);
       // Brez odprtega pogovora (besedilni vnos, gumb) ni kaj poslušati.
-      if (this.stt) this.poslusaj(this.tisinaPoOdgovoru);
+      if (this.stt) this.poslusaj(tisinaMs);
       else this.nastavi('mirovanje');
       return;
     }
@@ -582,14 +772,15 @@ export class Pogovor {
     const ttsCas = this.zaloga?.seja === this.seja ? this.zaloga.ttsCas : 0;
     if (Date.now() - ttsCas > (this.seja.veljaS ?? 60) * 1000 - 5000 && !(await this.obnoviTtsKljuc())) {
       meri(null);
-      this.poslusaj(this.tisinaPoOdgovoru);
+      this.poslusaj(tisinaMs);
       return;
     }
     const seja = this.seja!;
+    this.medGovorom.pocisti();
+    this.govorBesede = besedeGovora(besedilo);
     this.nastavi('govorim');
     const id = `g${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
     this.govorId = id;
-    this.naslednjiCas = 0;
     let izmerjeno = false;
     await new Promise<void>((resolve) => {
       let koncano = false;
@@ -625,10 +816,31 @@ export class Pogovor {
         if (this.govorId === id) this.koncajGovor?.();
       }, 30000);
     });
-    if (this.s === 'govorim') this.poslusaj(this.tisinaPoOdgovoru);
+    if (this.s === 'govorim') this.poslusaj(tisinaMs);
   }
 
   private prviZvok: (() => void) | null = null;
+
+  /** Predvaja vzorce (24 kHz) za že načrtovanim zvokom; podaljša okno odmeva. */
+  private predvajaj(vzorci: Float32Array) {
+    const ctx = this.izhod;
+    if (!ctx || !vzorci.length) return;
+    const buf = ctx.createBuffer(1, vzorci.length, TTS_HZ);
+    buf.getChannelData(0).set(vzorci);
+    const vir = ctx.createBufferSource();
+    vir.buffer = buf;
+    vir.connect(ctx.destination);
+    const zacetek = Math.max(ctx.currentTime + 0.02, this.naslednjiCas);
+    vir.start(zacetek);
+    this.naslednjiCas = zacetek + buf.duration;
+    this.viri.push(vir);
+    vir.onended = () => {
+      this.viri = this.viri.filter((x) => x !== vir);
+    };
+    // Kar mikrofon ujame do konca tega zvoka (+ rep), je odmev.
+    const doKonca = (this.naslednjiCas - ctx.currentTime) * 1000;
+    this.odmevDo = Math.max(this.odmevDo, this.polozajMs + doKonca + REP_ODMEVA_MS);
+  }
 
   private ttsSporocilo(podatki: unknown) {
     if (typeof podatki !== 'string') return;
@@ -638,29 +850,35 @@ export class Pogovor {
     } catch {
       return;
     }
-    if (!m.stream_id || m.stream_id !== this.govorId) return;
+    if (!m.stream_id) return;
+    // Namigi čakanja se sintetizirajo enkrat in hranijo.
+    const namig = this.namigiPriprava.get(m.stream_id);
+    if (namig) {
+      if (m.audio) namig.push(pcmVFloat(b64(m.audio)));
+      if (m.terminated || m.error_code) {
+        this.namigiPriprava.delete(m.stream_id);
+        const n = namig.reduce((a, x) => a + x.length, 0);
+        if (n && !m.error_code) {
+          const vse = new Float32Array(n);
+          let i = 0;
+          for (const x of namig) {
+            vse.set(x, i);
+            i += x.length;
+          }
+          this.namigi.push(vse);
+        }
+      }
+      return;
+    }
+    if (m.stream_id !== this.govorId) return;
     if (m.error_code) {
       this.koncajGovor?.();
       return;
     }
     if (m.audio && this.izhod) {
-      const bin = atob(m.audio);
-      const bajti = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bajti[i] = bin.charCodeAt(i);
-      const vzorci = pcmVFloat(bajti);
+      const vzorci = pcmVFloat(b64(m.audio));
       if (vzorci.length) {
-        const buf = this.izhod.createBuffer(1, vzorci.length, TTS_HZ);
-        buf.getChannelData(0).set(vzorci);
-        const vir = this.izhod.createBufferSource();
-        vir.buffer = buf;
-        vir.connect(this.izhod.destination);
-        const zacetek = Math.max(this.izhod.currentTime + 0.02, this.naslednjiCas);
-        vir.start(zacetek);
-        this.naslednjiCas = zacetek + buf.duration;
-        this.viri.push(vir);
-        vir.onended = () => {
-          this.viri = this.viri.filter((x) => x !== vir);
-        };
+        this.predvajaj(vzorci);
         this.prviZvok?.();
       }
     }
@@ -684,25 +902,78 @@ export class Pogovor {
       }
     }
     this.viri = [];
+    this.naslednjiCas = 0;
+    // Zvok je utihnil: odmev se konča skoraj takoj.
+    this.odmevDo = Math.min(this.odmevDo, this.polozajMs + 150);
     this.koncajGovor?.();
   }
 
-  /** Kratek ton (začetek poslušanja, slišal sem). */
-  private ton(hz: number) {
+  // ───────────────────────────── namigi ─────────────────────────────
+
+  /** Enkrat na objekt: sintetiziraj "Moment." ipd., da se ob zamudi predvaja brez čakanja. */
+  private pripraviNamige() {
+    if (this.namigiZahtevani || !this.tts || this.tts.readyState !== 1 || !this.seja) return;
+    this.namigiZahtevani = true;
+    const seja = this.seja;
+    NAMIGI_CAKANJA.forEach((besedilo, i) => {
+      const id = `n${i}${Math.random().toString(36).slice(2, 6)}`;
+      this.namigiPriprava.set(id, []);
+      this.tts!.send(
+        JSON.stringify({
+          api_key: seja.tts.kljuc,
+          model: seja.tts.model,
+          language: seja.jezik,
+          voice: seja.tts.glas,
+          audio_format: 'pcm_s16le',
+          sample_rate: TTS_HZ,
+          speed: seja.tts.hitrost,
+          stream_id: id,
+        })
+      );
+      this.tts!.send(JSON.stringify({ stream_id: id, text: besedilo }));
+      this.tts!.send(JSON.stringify({ stream_id: id, text_end: true }));
+    });
+  }
+
+  /** Če odgovor zamuja, asistent reče "Moment." (ne pogosteje kot na 20 s). */
+  private zacniNamig() {
+    this.ustaviNamig();
+    this.namigCasovnik = setTimeout(() => {
+      this.namigCasovnik = null;
+      if (this.s !== 'razmisljam' || !this.namigi.length || Date.now() - this.zadnjiNamig < NAMIG_PREMOR_MS) return;
+      this.zadnjiNamig = Date.now();
+      this.predvajaj(this.namigi[this.namigIndeks++ % this.namigi.length]);
+    }, NAMIG_PO_MS);
+  }
+
+  private ustaviNamig() {
+    if (this.namigCasovnik) clearTimeout(this.namigCasovnik);
+    this.namigCasovnik = null;
+  }
+
+  private pocistiLokalno() {
+    if (this.lokalnoCasovnik) clearTimeout(this.lokalnoCasovnik);
+    this.lokalnoCasovnik = null;
+  }
+
+  /** Komaj slišen namig ob začetku poslušanja (namesto piska). */
+  private mehakNamig() {
     const ctx = this.izhod;
     if (!ctx) return;
     try {
       const o = ctx.createOscillator();
       const g = ctx.createGain();
-      o.frequency.value = hz;
+      o.type = 'sine';
+      o.frequency.setValueAtTime(520, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.12);
       g.gain.setValueAtTime(0.0001, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.09);
+      g.gain.exponentialRampToValueAtTime(0.018, ctx.currentTime + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
       o.connect(g).connect(ctx.destination);
       o.start();
-      o.stop(ctx.currentTime + 0.1);
+      o.stop(ctx.currentTime + 0.2);
     } catch {
-      /* ton ni nujen */
+      /* namig ni nujen */
     }
   }
 
@@ -716,6 +987,8 @@ export class Pogovor {
   private koncaj(napaka: string | null) {
     const bilAktiven = this.aktiven;
     this.ustaviTisino();
+    this.ustaviNamig();
+    this.pocistiLokalno();
     if (this.cakanje) clearTimeout(this.cakanje);
     this.cakanje = null;
     this.zahteva?.abort();
@@ -745,7 +1018,7 @@ export class Pogovor {
     this.vhod = null;
     const izhod = this.izhod;
     this.izhod = null;
-    // Izhod zapremo malo kasneje, da se zadnji ton ne odreže.
+    // Izhod zapremo malo kasneje, da se zadnji zvok ne odreže.
     setTimeout(() => void izhod?.close().catch(() => {}), 300);
     this.seja = null;
     this.zvokCaka = [];
@@ -753,13 +1026,27 @@ export class Pogovor {
     this.vprasanje = null;
     this.sekundeZvoka = 0;
     this.sestavljalec.pocisti();
+    this.medGovorom.pocisti();
     this.cakajoca = null;
+    this.zadnjaIzjava = null;
+    this.glasnosti = [];
+    this.obnoveStt = [];
+    // Pripravljeni namigi (vzorci) ostanejo za naslednji pogovor; nedokončani se pripravijo znova.
+    if (!this.namigi.length) this.namigiZahtevani = false;
+    this.namigiPriprava.clear();
     this.nastavi('mirovanje');
     if (napaka && (bilAktiven || napaka)) this.d.napaka(napaka);
   }
 }
 
 class NapakaPogovora extends Error {}
+
+function b64(s: string): Uint8Array {
+  const bin = atob(s);
+  const bajti = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bajti[i] = bin.charCodeAt(i);
+  return bajti;
+}
 
 /**
  * DNS in TLS do Soniox vnaprej (preconnect), da prva povezava ob tapu ne čaka

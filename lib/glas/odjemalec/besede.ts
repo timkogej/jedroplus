@@ -49,6 +49,12 @@ export class SestavljalecIzjave {
     this.koncno = '';
     this.delno = '';
   }
+
+  /** Začne z danim besedilom (npr. besede, s katerimi je uporabnik prekinil asistenta). */
+  nastavi(besedilo: string) {
+    this.koncno = besedilo ? `${besedilo} ` : '';
+    this.delno = '';
+  }
 }
 
 const brezLocil = (s: string) =>
