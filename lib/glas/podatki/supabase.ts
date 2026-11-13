@@ -10,7 +10,7 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeAppointmentStatus } from '@/lib/appointments/status';
 import type {
-  NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
+  LokacijePovzetek, NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
   TerminPovzetek, ZapisekPovzetek,
 } from '../tipi';
 
@@ -297,6 +297,43 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
         for (const r of (data ?? []) as Vrstica[]) out.push({ vrstica: niz(r.termin_id), resursId: niz(r.resurs_id) });
       }
       return out;
+    },
+
+    async lokacije(): Promise<LokacijePovzetek> {
+      const { data, error } = await seja
+        .from('Lokacije')
+        .select('id,naziv,je_glavna')
+        .eq('ID podjetja', podjetje)
+        .eq('status', 'active')
+        .order('je_glavna', { ascending: false })
+        .order('zaporedje');
+      if (error) throw new Error(`lokacije: ${error.code ?? 'napaka'}`);
+      const vse = ((data ?? []) as Vrstica[]).map((r) => ({ id: niz(r.id), naziv: niz(r.naziv), glavna: r.je_glavna === true }));
+      if (vse.length <= 1) return { seznam: vse, osebe: {}, storitve: {} };
+      // Član z omejitvijo (Clani_Lokacije) vidi samo svoje lokacije — isto pravilo kot v bazi
+      // in /api/webhook. Če preverjanje odpove, lokacija ostane (zapis jo preveri še enkrat).
+      const dostop = await Promise.all(
+        vse.map(async (l) => {
+          const { data: ok, error: e } = await seja.rpc('jp_ima_dostop_do_lokacije', { p_company: podjetje, p_lokacija: l.id });
+          return e ? true : ok !== false;
+        })
+      );
+      const seznam = vse.filter((_, i) => dostop[i]);
+      const [po, ps] = await Promise.all([
+        seja.from('Osebe_Lokacije').select('"ID osebe",lokacija_id').eq('ID podjetja', podjetje),
+        seja.from('Storitve_Lokacije').select('"ID storitve",lokacija_id').eq('ID podjetja', podjetje),
+      ]);
+      if (po.error || ps.error) throw new Error(`lokacije povezave: ${(po.error ?? ps.error)?.code ?? 'napaka'}`);
+      const zdruzi = (vrstice: Vrstica[], stolpec: string) => {
+        const out: Record<string, string[]> = {};
+        for (const r of vrstice) (out[niz(r[stolpec])] ??= []).push(niz(r.lokacija_id));
+        return out;
+      };
+      return {
+        seznam,
+        osebe: zdruzi((po.data ?? []) as Vrstica[], 'ID osebe'),
+        storitve: zdruzi((ps.data ?? []) as Vrstica[], 'ID storitve'),
+      };
     },
   };
 }

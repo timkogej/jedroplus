@@ -1349,7 +1349,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       void (async () => {
         const stranka = n.stranka ? (await getClientById(companyId, n.stranka)).data : null;
         setGlasOsebaId(zaposleni(n.oseba));
-        setGlasPredizpolnitev({ stranka, storitevId: storitev });
+        const lokacijaId = n.lokacija && /^[0-9a-f-]{36}$/i.test(n.lokacija) ? n.lokacija : undefined;
+        setGlasPredizpolnitev({ stranka, storitevId: storitev, lokacijaId });
         setNewAppointmentInitials({ date: dan, startTime: ura });
         setEditingAppointment(null);
         setModalMode('create');

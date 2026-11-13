@@ -15,7 +15,7 @@ import { dodajDni, opisDatuma, razberiUro, vMinute } from '../razresevanje/datum
 import { poisci } from '../razresevanje/imena';
 import { prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
 import { datumZaGovor, uraZaGovor } from '../govor';
-import type { Kontekst, OsebaPovzetek, RezultatOrodja, StoritevPovzetek, TerminPovzetek } from '../tipi';
+import type { Kontekst, LokacijaPovzetek, OsebaPovzetek, RezultatOrodja, StoritevPovzetek, TerminPovzetek } from '../tipi';
 import { datumIzParametra } from './branje';
 import { razresiStranko, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
@@ -84,6 +84,54 @@ function izberiOsebo(ime: string, osebe: OsebaPovzetek[]): OsebaPovzetek | Rezul
 const jeRezultat = (x: unknown): x is RezultatOrodja => typeof (x as RezultatOrodja)?.sporocilo === 'string';
 
 /**
+ * Lokacija novega termina (samo pri podjetju z več lokacijami; sicer null).
+ *   * povedana ("v Šiški") → preveri, da zaposleni tam dela in je storitev tam na voljo;
+ *   * sicer ena možna (zaposleni dela samo tam ali je storitev samo tam) → ta;
+ *   * zaposleni dela na več lokacijah → vpraša "Na kateri lokaciji?";
+ *   * zaposleni ni znan → null: lokacijo izbere obrazec kot pri ročnem vnosu.
+ * Oseba ali storitev brez povezav dela oz. je na voljo povsod (kot app/location-context).
+ */
+export async function lokacijaTermina(
+  o: OkoljeOrodja,
+  oseba: OsebaPovzetek | null,
+  storitev: StoritevPovzetek | null,
+  izgovorjena: string | null | undefined
+): Promise<LokacijaPovzetek | null | RezultatOrodja> {
+  const L = await o.podatki.lokacije();
+  if (L.seznam.length <= 1) return null;
+  const delaTam = (l: LokacijaPovzetek) => !oseba || !L.osebe[oseba.id] || L.osebe[oseba.id].includes(l.id);
+  const naVoljo = (l: LokacijaPovzetek) => !storitev || !L.storitve[storitev.id] || L.storitve[storitev.id].includes(l.id);
+  const vprasaj = (mozne: LokacijaPovzetek[]): RezultatOrodja => ({
+    sporocilo: `Na kateri lokaciji${oseba ? ` (${oseba.ime})` : ''}? ${mozne.map((l) => l.naziv).join(' ali ')}.`,
+    govor: `Na kateri lokaciji, ${mozne.map((l) => l.naziv).join(' ali ')}?`,
+    vprasanje: { besedilo: 'Na kateri lokaciji?', moznosti: mozne.map((l) => ({ id: l.id, oznaka: l.naziv })) },
+  });
+
+  if (izgovorjena?.trim()) {
+    let l = L.seznam.find((x) => x.id === izgovorjena.trim()) ?? null;
+    if (!l) {
+      const izid = poisci(izgovorjena, L.seznam, (x) => [x.naziv]);
+      if (izid.izid === 'nic') return { sporocilo: `Lokacije »${izgovorjena}« ne najdem. Lokacije: ${L.seznam.map((x) => x.naziv).join(', ')}.` };
+      if (izid.izid === 'vec') return vprasaj(izid.kandidati.map((k) => k.vrednost));
+      l = izid.najden;
+    }
+    if (!delaTam(l)) {
+      const kje = L.seznam.filter(delaTam).map((x) => x.naziv).join(', ');
+      return { sporocilo: `${oseba!.ime} na lokaciji ${l.naziv} ne dela${kje ? ` (dela: ${kje})` : ''}.` };
+    }
+    if (!naVoljo(l)) return { sporocilo: `${storitev!.naziv} na lokaciji ${l.naziv} ni na voljo.` };
+    return l;
+  }
+
+  const mozne = L.seznam.filter((l) => delaTam(l) && naVoljo(l));
+  if (mozne.length === 1) return mozne[0];
+  if (mozne.length === 0) {
+    return oseba && storitev ? { sporocilo: `${oseba.ime} ne dela na nobeni lokaciji, kjer je ${storitev.naziv}.` } : null;
+  }
+  return oseba ? vprasaj(mozne) : null;
+}
+
+/**
  * Ali je oseba prosta ob danem času (delovni čas, termini, odsotnosti).
  * Vrne opozorilo za uporabnika ali null. Okvirno: brez resursov — te preveri obrazec.
  */
@@ -125,7 +173,10 @@ function govorPozor(pozor: string | null): string {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
-type VhodNov = { stranka: string; stranka_id: string | null; storitev: string | null; oseba: string | null; datum: string | null; ura: string | null };
+type VhodNov = {
+  stranka: string; stranka_id: string | null; storitev: string | null; oseba: string | null; datum: string | null; ura: string | null;
+  lokacija?: string | null;
+};
 
 export const pripraviTermin: BralnoOrodje<VhodNov> = {
   ime: 'pripravi_termin',
@@ -144,8 +195,9 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       oseba: { type: ['string', 'null'], description: 'Ime ali ID zaposlenega; null = uporabnik ali ni povedano.' },
       datum: { type: ['string', 'null'], description: 'Samo dan, ki ga je uporabnik izgovoril ("jutri", "v petek") ali YYYY-MM-DD; null, če dneva ni povedal (ne "danes" na pamet).' },
       ura: { type: ['string', 'null'], description: 'Samo ura, ki jo je uporabnik izgovoril ("HH:MM" ali "ob desetih"); null, če je ni povedal. Trenutna ura NI ura termina.' },
+      lokacija: { type: ['string', 'null'], description: 'Ime ali ID lokacije (podjetja z več lokacijami), samo če jo je uporabnik povedal ("v Šiški" → "Šiška"); sicer null — orodje samo vpraša, če je treba.' },
     },
-    required: ['stranka', 'stranka_id', 'storitev', 'oseba', 'datum', 'ura'],
+    required: ['stranka', 'stranka_id', 'storitev', 'oseba', 'datum', 'ura', 'lokacija'],
     additionalProperties: false,
   },
   vhod: z.object({
@@ -155,6 +207,7 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     oseba: z.string().max(80).nullable(),
     datum: z.string().max(60).nullable(),
     ura: z.string().max(40).nullable(),
+    lokacija: z.string().max(80).nullable().optional(),
   }),
   async izvedi(p, o) {
     const r = await razresiStranko(p.stranka, p.stranka_id, o);
@@ -194,6 +247,8 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     if (oseba && storitev && !oseba.opravljaVse && !oseba.storitve.includes(storitev.id)) {
       return { sporocilo: `${oseba.ime} ne opravlja storitve ${storitev.naziv}.` };
     }
+    const lokacija = await lokacijaTermina(o, oseba, storitev, p.lokacija);
+    if (jeRezultat(lokacija)) return lokacija;
 
     const pozor = oseba && datum && ura ? await opozoriloZaCas(o, oseba, datum, ura, storitev?.trajanjeMin ?? 60) : null;
     const ime = `${s.ime} ${s.priimek}`.trim();
@@ -203,6 +258,7 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       ura ? `ob ${ura}` : null,
       storitev?.naziv ?? null,
       oseba && p.oseba ? `pri ${oseba.ime}` : null,
+      lokacija ? `lokacija ${lokacija.naziv}` : null,
     ].filter(Boolean);
     const manjka = [!datum && 'dan', !ura && 'uro', !storitev && 'storitev'].filter(Boolean) as ('dan' | 'uro' | 'storitev')[];
     const neznana = neznanaStoritev ? ` Storitve »${neznanaStoritev}« ne najdem.` : '';
@@ -212,12 +268,13 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     if (oseba) polja.oseba = oseba.id;
     if (datum) polja.dan = datum;
     if (ura) polja.ura = ura;
+    if (lokacija) polja.lokacija = lokacija.id;
     return {
       sporocilo: `Nov termin: ${deli.join(', ')}.${pozor ? ` ${pozor}` : ''}${neznana}${manjka.length ? ` Manjka še: ${manjka.join(', ')}.` : ` ${SHRANI}`}`,
       govor: `${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${oseba && p.oseba ? `, pri ${oseba.ime}` : ''}.${govorPozor(pozor)}${neznana} ${vprasanje}`,
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'nov_termin', polja },
-      podatki: { stranka_id: s.id, datum, ura, storitev: storitev?.naziv ?? null, oseba: oseba ? imeOsebe(oseba) : null, pozor },
+      podatki: { stranka_id: s.id, datum, ura, storitev: storitev?.naziv ?? null, oseba: oseba ? imeOsebe(oseba) : null, lokacija: lokacija?.naziv ?? null, pozor },
     };
   },
 };

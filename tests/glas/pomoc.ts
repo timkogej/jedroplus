@@ -11,6 +11,7 @@ import { sttLazni, type SttPonudnik } from '@/lib/glas/ponudniki/stt';
 import { ttsBrez } from '@/lib/glas/ponudniki/tts';
 import { shrambaVPomnilniku, type NastavitvePomnilnik } from '@/lib/glas/shramba/pomnilnik';
 import type {
+  LokacijePovzetek,
   Kontekst, NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
   TerminPovzetek, ZapisekPovzetek,
 } from '@/lib/glas/tipi';
@@ -40,6 +41,7 @@ export interface Salon {
   /** vrstica termina → resurs */
   povezave?: { vrstica: string; resursId: string }[];
   odsotnosti?: OdsotnostPovzetek[];
+  lokacije?: LokacijePovzetek;
 }
 
 export const SALONI: Record<string, Salon> = {
@@ -83,6 +85,30 @@ export const SALONI: Record<string, Salon> = {
       { vrstica: 'v-t2', resursId: 'r1' },
     ],
     odsotnosti: [{ osebaId: 'o2', zacetek: '2026-11-16T07:00:00Z', konec: '2026-11-16T16:00:00Z' }],
+  },
+  // Podjetje s tremi lokacijami: Luka dela v Centru in Šiški, Maja samo v Šiški,
+  // Tina (brez vrstic) povsod; pedikura je samo v Centru.
+  L3: {
+    stranke: [{ id: '301', ime: 'Nika', priimek: 'Horvat', zadnjaInterakcija: '2026-10-01' }],
+    storitve: [
+      { id: 's31', naziv: 'Barvanje', trajanjeMin: 90, aktivna: true },
+      { id: 's32', naziv: 'Pedikura', trajanjeMin: 45, aktivna: true },
+    ],
+    osebe: [
+      { id: 'o31', ime: 'Luka', priimek: 'Kralj', aktivna: true, urnik: null, imaUrnikPodjetja: true, opravljaVse: true, storitve: [] },
+      { id: 'o32', ime: 'Maja', priimek: 'Zorc', aktivna: true, urnik: null, imaUrnikPodjetja: true, opravljaVse: true, storitve: [] },
+      { id: 'o33', ime: 'Tina', priimek: 'Vidmar', aktivna: true, urnik: null, imaUrnikPodjetja: true, opravljaVse: true, storitve: [] },
+    ],
+    termini: [],
+    lokacije: {
+      seznam: [
+        { id: 'l-center', naziv: 'Center', glavna: true },
+        { id: 'l-siska', naziv: 'Šiška', glavna: false },
+        { id: 'l-bezigrad', naziv: 'Bežigrad', glavna: false },
+      ],
+      osebe: { o31: ['l-center', 'l-siska'], o32: ['l-siska'] },
+      storitve: { s32: ['l-center'] },
+    },
   },
   B2: {
     stranke: [{ id: '201', ime: 'Mateja', priimek: 'Tuja', zadnjaInterakcija: null }],
@@ -130,6 +156,7 @@ export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): 
     async interneOpombe(id) { return s.opombe?.[id] ?? null; },
     async resursi() { return s.resursi ?? []; },
     async resursiTerminov(vrstice) { return (s.povezave ?? []).filter((p) => vrstice.includes(p.vrstica)); },
+    async lokacije() { return s.lokacije ?? { seznam: [], osebe: {}, storitve: {} }; },
   };
 }
 

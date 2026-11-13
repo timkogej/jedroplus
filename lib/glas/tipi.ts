@@ -106,6 +106,24 @@ export interface PodatkiSalona {
   resursi(): Promise<ResursPovzetek[]>;
   /** Povezave termin ↔ resurs za dane vrstice terminov (TerminPovzetek.vrstica). */
   resursiTerminov(vrstice: string[]): Promise<{ vrstica: string; resursId: string }[]>;
+  /** Aktivne lokacije, do katerih ima uporabnik dostop, in kdo/kaj je kje (samo pri več lokacijah). */
+  lokacije(): Promise<LokacijePovzetek>;
+}
+
+export interface LokacijaPovzetek {
+  id: string; // Lokacije.id (uuid) — kot Termini.lokacija_id
+  naziv: string;
+  glavna: boolean;
+}
+
+/**
+ * Lokacije podjetja. `osebe`/`storitve`: ID → lokacije; osebe ali storitve
+ * brez vrstice delajo oz. so na voljo povsod (enako kot app/location-context).
+ */
+export interface LokacijePovzetek {
+  seznam: LokacijaPovzetek[];
+  osebe: Record<string, string[]>;
+  storitve: Record<string, string[]>;
 }
 
 export interface ZapisekPovzetek {

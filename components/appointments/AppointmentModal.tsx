@@ -63,7 +63,7 @@ interface AppointmentModalProps {
    * storitev, pri urejanju nov datum/ura (prestavitev). Shrani uporabnik sam,
    * po isti poti kot ročno.
    */
-  predizpolnitev?: { stranka?: Client | null; storitevId?: string; datum?: string; cas?: string } | null;
+  predizpolnitev?: { stranka?: Client | null; storitevId?: string; lokacijaId?: string; datum?: string; cas?: string } | null;
 }
 
 export interface AppointmentFormData {
@@ -232,6 +232,17 @@ function AppointmentModal({
     if (!isOpen || !multi || mode === 'view' || !soleLocationId) return;
     setFormData((prev) => (prev.lokacija_id === soleLocationId ? prev : { ...prev, lokacija_id: soleLocationId }));
   }, [isOpen, multi, mode, soleLocationId]);
+
+  // New appointment with a person who works at several locations, none of them the
+  // current one (e.g. the main location by default): move to one of theirs —
+  // the selected one in the header if it is theirs, else their first.
+  useEffect(() => {
+    if (!isOpen || !multi || mode !== 'create' || soleLocationId || !formData.lokacija_id) return;
+    if (pickableLocations.length === locations.length) return;
+    if (pickableLocations.some((l) => l.id === formData.lokacija_id)) return;
+    const target = pickableLocations.find((l) => l.id === selectedLocationId) ?? pickableLocations[0];
+    if (target) setFormData((prev) => ({ ...prev, lokacija_id: target.id }));
+  }, [isOpen, multi, mode, soleLocationId, formData.lokacija_id, pickableLocations, locations.length, selectedLocationId]);
 
   const employees = useMemo(
     () => !multi || !formData.lokacija_id
@@ -854,6 +865,8 @@ function AppointmentModal({
     if (!p || uporabljenaPredizpolnitev.current === p) return;
     uporabljenaPredizpolnitev.current = p;
     if (mode === 'create') {
+      // Lokacijo je asistent že preveril (zaposleni tam dela, storitev je tam na voljo).
+      if (p.lokacijaId) setFormData((prev) => ({ ...prev, lokacija_id: p.lokacijaId }));
       if (p.stranka) handleClientSelect(p.stranka);
       if (p.storitevId) handleServiceChange(p.storitevId, 1);
     } else if (mode === 'edit' && (p.datum || p.cas)) {

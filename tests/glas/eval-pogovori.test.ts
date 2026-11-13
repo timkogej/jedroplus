@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { obdelajUkaz, type OdprtObrazec } from '@/lib/glas/jedro';
 import { llmAnthropic } from '@/lib/glas/ponudniki/llm';
 import { ukazObrazcu } from '@/lib/glas/odjemalec/obrazecGlas';
-import { kontekst, okolje, SALONI } from './pomoc';
+import { kontekst, NASTAVITVE, okolje, SALONI } from './pomoc';
 
 const VKLOP = process.env.GLAS_EVAL === '1' && Boolean(process.env.ANTHROPIC_API_KEY);
 
@@ -18,7 +18,7 @@ const ROBOTSKO = /pritisnite|preverite in|v obrazcu izberite|kliknite|gumb shran
 
 // `shrani`: zadnji "ja" je odgovor na "Shranim?" in ga obdela brskalnik (requestSubmit),
 // ne strežnik — tu ga simuliramo kot odjemalec (components/glas/AsistentPlus lokalno).
-const POGOVORI: { ukazi: string[]; konec: Record<string, string>; shrani?: boolean }[] = [
+const POGOVORI: { ukazi: string[]; konec: Record<string, string>; shrani?: boolean; podjetje?: string }[] = [
   {
     ukazi: ['Uh, zapiši nov termin za', 'Za Anja Novak.', 'Pedikura za Luka— za Lukata, no, se pravi Luka je zaposleni, in pa ob 10 zjutraj.', 'Ne danes. Za ponedeljek.'],
     konec: { stranka: '201', storitev: 's9', oseba: 'o9', dan: '2026-11-16', ura: '10:00' },
@@ -37,6 +37,11 @@ const POGOVORI: { ukazi: string[]; konec: Record<string, string>; shrani?: boole
   { ukazi: ['Zapiši nov termin za Anjo Novak ob. desetih na pedikuro pri Luki.', 'V ponedeljek.', 'ja'], konec: { stranka: '201', storitev: 's9', oseba: 'o9', dan: '2026-11-16', ura: '10:00' }, shrani: true },
   // Odrezan stavek (uporabnik je res nehal): vpraša, ne ugiba.
   { ukazi: ['Vpiši Ano Novak jutri ob', 'ob desetih, barvanje'], konec: { stranka: '102', storitev: 's1', dan: '2026-11-13', ura: '10:00' } },
+  // Več lokacij (salon L3): Luka dela v Centru in Šiški, Maja samo v Šiški, pedikura samo v Centru.
+  { podjetje: 'L3', ukazi: ['Vpiši Niko Horvat jutri ob enajstih na barvanje pri Luki', 'v Šiški'], konec: { stranka: '301', oseba: 'o31', lokacija: 'l-siska', dan: '2026-11-13', ura: '11:00' } },
+  { podjetje: 'L3', ukazi: ['Zapiši Niko jutri ob desetih na barvanje pri Maji'], konec: { stranka: '301', oseba: 'o32', lokacija: 'l-siska' } },
+  { podjetje: 'L3', ukazi: ['Nov termin za Niko Horvat pri Luki', 'pedikura, jutri ob devetih'], konec: { stranka: '301', storitev: 's32', oseba: 'o31', lokacija: 'l-center' } },
+  { podjetje: 'L3', ukazi: ['Vpiši Niko Horvat jutri ob enajstih pri Luki v Centru', 'barvanje', 'ja'], konec: { stranka: '301', storitev: 's31', lokacija: 'l-center' }, shrani: true },
 ];
 
 describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {
@@ -53,7 +58,8 @@ describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {
     let uspesnih = 0;
     let robotskih = 0;
     for (const p of POGOVORI) {
-      const { d } = okolje();
+      const podjetje = p.podjetje ?? 'A1';
+      const { d } = okolje({ podjetje, nastavitve: { ...structuredClone(NASTAVITVE), L3: { ...NASTAVITVE.A1 } } });
       const llm = llmAnthropic(process.env.GLAS_LLM_MODEL || 'claude-haiku-5-5', 15000);
       d.llm = () => llm;
       const zgodovina: string[] = [];
@@ -67,7 +73,7 @@ describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {
           continue;
         }
         const t = Date.now();
-        const r = (await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: u, prejsnjiUkazi: [...zgodovina], odprtObrazec: obrazec }, d)) as {
+        const r = (await obdelajUkaz({ k: kontekst(podjetje === 'A1' ? {} : { podjetje, osebaId: null }), vhod: 'besedilo', besedilo: u, prejsnjiUkazi: [...zgodovina], odprtObrazec: obrazec }, d)) as {
           ukazId?: string; status?: string; odgovor?: string; govor?: string; obrazec?: OdprtObrazec;
         };
         if (r.ukazId) zgodovina.push(r.ukazId);
