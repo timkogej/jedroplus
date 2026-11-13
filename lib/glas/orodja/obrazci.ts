@@ -199,6 +199,7 @@ type VhodNov = {
   jezik?: (typeof JEZIKI_SPOROCIL)[number] | null;
   opombe?: string | null;
   interne_opombe?: string | null;
+  kot_zadnjic?: boolean | null;
 };
 
 export const pripraviTermin: BralnoOrodje<VhodNov> = {
@@ -223,8 +224,9 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       jezik: { type: ['string', 'null'], enum: [...JEZIKI_SPOROCIL, null], description: 'Jezik sporočil (slo, eng, de, it, hr), samo če ga je uporabnik povedal ("v angleščini"); sicer null = privzeti jezik stranke ali podjetja.' },
       opombe: { type: ['string', 'null'], description: 'Opomba termina, samo če jo je uporabnik narekoval; sicer null.' },
       interne_opombe: { type: ['string', 'null'], description: 'Interna opomba (samo za salon), samo če jo je uporabnik narekoval; sicer null.' },
+      kot_zadnjic: { type: ['boolean', 'null'], description: 'true za "isto kot zadnjič", "kot prejšnjič": storitev, zaposleni in lokacija iz zadnjega termina stranke (kar uporabnik pove posebej, ima prednost).' },
     },
-    required: ['stranka', 'stranka_id', 'storitev', 'oseba', 'datum', 'ura', 'lokacija', 'dodaj_storitve', 'jezik', 'opombe', 'interne_opombe'],
+    required: ['stranka', 'stranka_id', 'storitev', 'oseba', 'datum', 'ura', 'lokacija', 'dodaj_storitve', 'jezik', 'opombe', 'interne_opombe', 'kot_zadnjic'],
     additionalProperties: false,
   },
   vhod: z.object({
@@ -239,6 +241,7 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     jezik: z.enum(JEZIKI_SPOROCIL).nullable().optional(),
     opombe: opomba.optional(),
     interne_opombe: opomba.optional(),
+    kot_zadnjic: z.boolean().nullable().optional(),
   }),
   async izvedi(p, o) {
     const r = await razresiStranko(p.stranka, p.stranka_id, o);
@@ -255,10 +258,23 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     const ura = p.ura ? uraIzParametra(p.ura) : null;
     if (p.ura && !ura) return { sporocilo: `Ure »${p.ura}« ne razumem.` };
 
-    const [storitve, osebe] = await Promise.all([o.podatki.storitve(), o.podatki.osebe()]);
+    const [storitve, osebe, zadnji] = await Promise.all([
+      o.podatki.storitve(),
+      o.podatki.osebe(),
+      p.kot_zadnjic ? o.podatki.zadnjiTermin(s.id, o.danes) : Promise.resolve(null),
+    ]);
     let storitev: StoritevPovzetek | null = null;
     // Neznana storitev ne ustavi obrazca: uporabnik jo izbere sam (več možnosti pa vpraša).
     let neznanaStoritev: string | null = null;
+    // "Isto kot zadnjič": storitev in zaposleni iz zadnjega termina, če nista povedana posebej.
+    const izZadnjega = { storitev: false, oseba: false };
+    if (!p.storitev && zadnji?.storitev) {
+      const x = izberiStoritev(zadnji.storitev.split(/[,+]/)[0].trim(), storitve);
+      if (!jeRezultat(x)) {
+        storitev = x;
+        izZadnjega.storitev = true;
+      }
+    }
     if (p.storitev) {
       const x = izberiStoritev(p.storitev, storitve);
       if (jeRezultat(x)) {
@@ -272,6 +288,9 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       if (jeRezultat(x)) return x;
       oseba = x;
       if (samoSvojiTermini(o.k) && oseba.id !== o.k.osebaId) return { sporocilo: 'Vpisujete lahko samo svoje termine.' };
+    } else if (zadnji?.osebaId && osebe.some((x) => x.id === zadnji.osebaId && x.aktivna) && (!samoSvojiTermini(o.k) || zadnji.osebaId === o.k.osebaId)) {
+      oseba = osebe.find((x) => x.id === zadnji.osebaId) ?? null;
+      izZadnjega.oseba = true;
     } else if (o.k.osebaId) {
       oseba = osebe.find((x) => x.id === o.k.osebaId) ?? null;
     }
@@ -280,7 +299,9 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     }
     const dodatne = dodatneStoritve(p.dodaj_storitve, storitve);
     if (jeRezultat(dodatne)) return dodatne;
-    const lokacija = await lokacijaTermina(o, oseba, storitev, p.lokacija);
+    // Lokacija zadnjega termina, če zaposleni tam še dela (sicer kot brez nje).
+    let lokacija = await lokacijaTermina(o, oseba, storitev, p.lokacija ?? zadnji?.lokacijaId ?? null);
+    if (jeRezultat(lokacija) && !p.lokacija && zadnji?.lokacijaId) lokacija = await lokacijaTermina(o, oseba, storitev, null);
     if (jeRezultat(lokacija)) return lokacija;
 
     const pozor = oseba && datum && ura ? await opozoriloZaCas(o, oseba, datum, ura, storitev?.trajanjeMin ?? 60) : null;
@@ -291,14 +312,14 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       ura ? `ob ${ura}` : null,
       storitev?.naziv ?? null,
       dodatne.length ? `še ${dodatne.map((x) => x.naziv).join(' in ')}` : null,
-      oseba && p.oseba ? `pri ${mestnik(oseba.ime)}` : null,
+      oseba && (p.oseba || izZadnjega.oseba) ? `pri ${mestnik(oseba.ime)}` : null,
       lokacija ? `lokacija ${lokacija.naziv}` : null,
       p.jezik ? `jezik ${IME_JEZIKA[p.jezik]}` : null,
       p.opombe ? `opomba »${p.opombe}«` : null,
       p.interne_opombe ? `interna opomba »${p.interne_opombe}«` : null,
     ].filter(Boolean);
     const manjka = [!datum && 'dan', !ura && 'uro', !storitev && 'storitev'].filter(Boolean) as ('dan' | 'uro' | 'storitev')[];
-    const neznana = neznanaStoritev ? ` Storitve »${neznanaStoritev}« ne najdem.` : '';
+    const neznana = `${neznanaStoritev ? ` Storitve »${neznanaStoritev}« ne najdem.` : ''}${p.kot_zadnjic && !zadnji ? ' Prejšnjega termina nima.' : ''}`;
     const vprasanje = vprasajZaManjkajoce(manjka);
     const polja: Record<string, string> = { stranka: s.id };
     if (storitev) polja.storitev = storitev.id;
@@ -319,7 +340,7 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     ].filter(Boolean);
     return {
       sporocilo: `Nov termin: ${deli.join(', ')}.${pozor ? ` ${pozor}` : ''}${neznana}${manjka.length ? ` Manjka še: ${manjka.join(', ')}.` : ` ${SHRANI}`}`,
-      govor: `${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${dodatek.length ? `, ${dodatek.join(', ')}` : ''}${oseba && p.oseba ? `, pri ${mestnik(oseba.ime)}` : ''}.${govorPozor(pozor)}${neznana} ${vprasanje}`,
+      govor: `${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${dodatek.length ? `, ${dodatek.join(', ')}` : ''}${oseba && (p.oseba || izZadnjega.oseba) ? `, pri ${mestnik(oseba.ime)}` : ''}.${govorPozor(pozor)}${neznana} ${vprasanje}`,
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'nov_termin', polja },
       podatki: { stranka_id: s.id, datum, ura, storitev: storitev?.naziv ?? null, oseba: oseba ? imeOsebe(oseba) : null, lokacija: lokacija?.naziv ?? null, pozor },

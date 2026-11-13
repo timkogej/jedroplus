@@ -84,6 +84,22 @@ export function razberiDatum(besedilo: string, danes: string): RazbranDatum | nu
   if (/\bjutri|\bjutrisnj/.test(b)) return { datum: dodajDni(danes, 1), izraz: 'jutri' };
   if (/\bvceraj|\bvcerajsnj/.test(b)) return { datum: dodajDni(danes, -1), izraz: 'včeraj' };
 
+  // čez 3 dni | čez šest tednov | čez en mesec | čez teden
+  const cez = b.match(/\bcez (?:(\d{1,2}|[a-z]+) )?(dan|dni|dneva|teden|tedna|tedne|tednov|mesec|meseca|mesece|mesecev)\b/);
+  if (cez) {
+    const n = cez[1] ? besedaVStevilo(cez[1]) : 1;
+    if (n && n > 0 && n <= 24) {
+      const enota = cez[2];
+      if (enota.startsWith('d')) return { datum: dodajDni(danes, n), izraz: `čez ${n} dni` };
+      if (enota.startsWith('t')) return { datum: dodajDni(danes, 7 * n), izraz: `čez ${n} tednov` };
+      const [l, m, d] = danes.split('-').map(Number);
+      const cilj = new Date(Date.UTC(l, m - 1 + n, 1));
+      const zadnji = new Date(Date.UTC(cilj.getUTCFullYear(), cilj.getUTCMonth() + 1, 0)).getUTCDate();
+      cilj.setUTCDate(Math.min(d, zadnji));
+      return { datum: cilj.toISOString().slice(0, 10), izraz: `čez ${n} mesecev` };
+    }
+  }
+
   // 15. 11. | 15.11. | 15. 11. 2026 | 15/11
   // "ob 10.15" je ura, ne datum — zato ne sme slediti "ob/okoli/od/do".
   const stevilcno = b.match(/(?<!\b(?:ob|okoli|od|do) )\b(\d{1,2})\s*[./]\s*(\d{1,2})\s*\.?(?:\s*(\d{4}))?/);
