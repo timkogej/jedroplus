@@ -13,6 +13,8 @@ const redis = UPSTASH_CONFIGURED
   ? new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL!,
       token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      // Ob izpadu ne ponavljaj v nedogled (privzeto 5 ponovitev v ozadju).
+      retry: { retries: 1 },
     })
   : null;
 
@@ -20,6 +22,12 @@ const redis = UPSTASH_CONFIGURED
 // If Redis does not answer in time the request goes through (the library's
 // default wait is 5 s, which would slow every save when Redis is down).
 const LIMIT_TIMEOUT_MS = 1000;
+
+// Ko Redis ne odgovori (časovna omejitev ali napaka), ga toliko časa ne
+// sprašujemo in zahteve spustimo takoj. Brez tega vsaka zahteva čaka celo
+// LIMIT_TIMEOUT_MS (13. 11. 2026: lokalni Upstash ni obstajal → +1 s na klic).
+export const IZPAD_PRESKOK_MS = 60_000;
+let izpadDo = 0;
 
 export const rateLimiters = UPSTASH_CONFIGURED && redis
   ? {
@@ -62,15 +70,24 @@ export async function rateLimit(
     return { success: true, limit: 999, remaining: 998, reset: Date.now() + 10000 };
   }
 
+  const spusti = { success: true, limit: 999, remaining: 998, reset: Date.now() + 10000 };
+  if (Date.now() < izpadDo) return spusti;
+
   const ip = getIP(request);
   const limiter = rateLimiters[type];
 
   try {
-    const { success, limit, remaining, reset } = await limiter.limit(ip);
+    const { success, limit, remaining, reset, reason } = await limiter.limit(ip);
+    if (reason === "timeout") {
+      izpadDo = Date.now() + IZPAD_PRESKOK_MS;
+      console.warn(JSON.stringify({ rateLimit: "izpad", vrsta: "timeout" }));
+    }
     return { success, limit, remaining, reset };
   } catch {
     // If Redis call fails, allow the request through rather than blocking all users
-    return { success: true, limit: 999, remaining: 998, reset: Date.now() + 10000 };
+    izpadDo = Date.now() + IZPAD_PRESKOK_MS;
+    console.warn(JSON.stringify({ rateLimit: "izpad", vrsta: "napaka" }));
+    return spusti;
   }
 }
 
