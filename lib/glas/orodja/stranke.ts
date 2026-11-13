@@ -8,9 +8,16 @@ import { opisDatuma } from '../razresevanje/datumi';
 import type { RezultatOrodja, StrankaPovzetek } from '../tipi';
 import type { OkoljeOrodja } from './tipi';
 
+/**
+ * ID stranke: številke (1234567) ali s predpono (AB-123456, ABC-12345).
+ * V bazi je oboje; preverjanje mora sprejeti obe obliki.
+ */
+export const ID_STRANKE = /^[A-Za-z0-9][A-Za-z0-9-]{0,23}$/;
+
 export function oznakaStranke(s: StrankaPovzetek, danes: string): string {
   const ime = `${s.ime} ${s.priimek}`.trim() || `stranka ${s.id}`;
-  return s.zadnjaInterakcija ? `${ime} (zadnjič ${opisDatuma(s.zadnjaInterakcija, danes)})` : ime;
+  // Pri istoimenskih strankah mora biti razlika vidna tudi brez obiska.
+  return s.zadnjaInterakcija ? `${ime} (zadnjič ${opisDatuma(s.zadnjaInterakcija, danes)})` : `${ime} (še brez obiska)`;
 }
 
 export type RazresenaStranka = { stranka: StrankaPovzetek } | { odgovor: RezultatOrodja };

@@ -11,7 +11,7 @@ import { poisci } from '../razresevanje/imena';
 import { prviProstiTermin, razcleniUrnik } from '../razresevanje/urnik';
 import type { TerminPovzetek } from '../tipi';
 import { datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
-import { oznakaStranke, razresiStranko } from './stranke';
+import { oznakaStranke, razresiStranko, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 
 const besedilo = (najvec: number) => z.string().trim().min(1).max(najvec);
@@ -83,7 +83,7 @@ export const zadnjiObisk: BralnoOrodje<{ stranka: string; stranka_id: string | n
     required: ['stranka', 'stranka_id'],
     additionalProperties: false,
   },
-  vhod: z.object({ stranka: besedilo(80), stranka_id: z.string().regex(/^\d{1,12}$/).nullable() }),
+  vhod: z.object({ stranka: besedilo(80), stranka_id: z.string().regex(ID_STRANKE).nullable() }),
   async izvedi({ stranka, stranka_id }, o) {
     const r = await razresiStranko(stranka, stranka_id, o);
     if ('odgovor' in r) return r.odgovor;

@@ -11,10 +11,10 @@ import { datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
 import { dodajDni, opisDatuma } from '../razresevanje/datumi';
 import type { ZapisekPovzetek } from '../tipi';
 import { cap, sklon } from './branje';
-import { razresiStranko } from './stranke';
+import { razresiStranko, ID_STRANKE } from './stranke';
 import type { BralnoOrodje } from './tipi';
 
-const vhodStranke = z.object({ stranka: z.string().trim().min(1).max(80), stranka_id: z.string().regex(/^\d{1,12}$/).nullable() });
+const vhodStranke = z.object({ stranka: z.string().trim().min(1).max(80), stranka_id: z.string().regex(ID_STRANKE).nullable() });
 const shemaStranke = {
   type: 'object' as const,
   properties: {

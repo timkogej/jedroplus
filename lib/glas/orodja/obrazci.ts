@@ -17,7 +17,7 @@ import { prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
 import { datumZaGovor, uraZaGovor } from '../govor';
 import type { Kontekst, OsebaPovzetek, RezultatOrodja, StoritevPovzetek, TerminPovzetek } from '../tipi';
 import { datumIzParametra } from './branje';
-import { razresiStranko } from './stranke';
+import { razresiStranko, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 
 const SHRANI = 'Preverite in pritisnite Shrani.';
@@ -133,7 +133,7 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
   },
   vhod: z.object({
     stranka: z.string().trim().min(1).max(80),
-    stranka_id: z.string().regex(/^\d{1,12}$/).nullable(),
+    stranka_id: z.string().regex(ID_STRANKE).nullable(),
     storitev: z.string().max(80).nullable(),
     oseba: z.string().max(80).nullable(),
     datum: z.string().max(60).nullable(),
@@ -156,10 +156,14 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
 
     const [storitve, osebe] = await Promise.all([o.podatki.storitve(), o.podatki.osebe()]);
     let storitev: StoritevPovzetek | null = null;
+    // Neznana storitev ne ustavi obrazca: uporabnik jo izbere sam (več možnosti pa vpraša).
+    let neznanaStoritev: string | null = null;
     if (p.storitev) {
       const x = izberiStoritev(p.storitev, storitve);
-      if (jeRezultat(x)) return x;
-      storitev = x;
+      if (jeRezultat(x)) {
+        if (x.vprasanje) return x;
+        neznanaStoritev = p.storitev;
+      } else storitev = x;
     }
     let oseba: OsebaPovzetek | null = null;
     if (p.oseba) {
@@ -184,7 +188,9 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       oseba && p.oseba ? `pri ${oseba.ime}` : null,
     ].filter(Boolean);
     const manjka = [!datum && 'dan', !ura && 'uro', !storitev && 'storitev'].filter(Boolean) as string[];
-    const dopolni = manjka.length ? ` V obrazcu izberite še ${manjka.join(', ')}.` : '';
+    const dopolni =
+      (neznanaStoritev ? ` Storitve »${neznanaStoritev}« ne najdem.` : '') +
+      (manjka.length ? ` V obrazcu izberite še ${manjka.join(', ')}.` : '');
     const polja: Record<string, string> = { stranka: s.id };
     if (storitev) polja.storitev = storitev.id;
     if (oseba) polja.oseba = oseba.id;
@@ -244,7 +250,7 @@ const vhodTermina = {
 };
 const zodTermina = {
   stranka: z.string().trim().min(1).max(80),
-  stranka_id: z.string().regex(/^\d{1,12}$/).nullable(),
+  stranka_id: z.string().regex(ID_STRANKE).nullable(),
   termin_id: z.string().max(40).nullable(),
   datum_zdaj: z.string().max(60).nullable(),
 };

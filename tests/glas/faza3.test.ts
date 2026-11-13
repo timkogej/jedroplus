@@ -188,3 +188,41 @@ describe('besedilo odgovora', () => {
     expect(JSON.stringify(r)).not.toMatch(/\d\.\.[^.]/);
   });
 });
+
+describe('ID stranke s črkami (AB-123456)', () => {
+  it('dve istoimenski stranki: vprašanje z razločljivima oznakama, nato obrazec', async () => {
+    const vhod = { stranka: 'Tim Zupančič', stranka_id: null, storitev: null, oseba: null, datum: 'jutri', ura: '10:30' };
+    const r1 = await pripraviTermin.izvedi(vhod, o());
+    expect(r1.vprasanje?.moznosti).toEqual([
+      { id: 'ABC-12345', oznaka: 'Tim Zupančič (zadnjič petek, 24. 7.)' },
+      { id: 'AB-123456', oznaka: 'Tim Zupančič (še brez obiska)' },
+    ]);
+    const vhod2 = pripraviTermin.vhod.parse({ ...vhod, stranka_id: 'AB-123456' });
+    const r2 = await pripraviTermin.izvedi(vhod2, o());
+    expect(r2.obrazec?.polja.stranka).toBe('AB-123456');
+  });
+
+  it('jedro po izbiri: en krog, brez napake parametrov', async () => {
+    const { d, llm } = okolje({
+      llm: [{ klici: [{ id: 'a', ime: 'pripravi_termin', vhod: { stranka: 'Tim Zupančič', stranka_id: 'AB-123456', datum: 'jutri', ura: '10:30' } }] }],
+    });
+    const r = await obdelajUkaz(
+      { k: kontekst(), vhod: 'besedilo', besedilo: 'termin za Tima Zupančiča jutri ob 10:30', izbira: { id: 'AB-123456', oznaka: 'Tim Zupančič (še brez obiska)' } },
+      d
+    );
+    expect(llm.zahteve).toHaveLength(1);
+    expect(r).toMatchObject({ ok: true, obrazec: { vrsta: 'nov_termin', polja: { stranka: 'AB-123456' } } });
+  });
+
+  it('nevarni ID se še vedno zavrne', () => {
+    expect(pripraviTermin.vhod.safeParse({ stranka: 'x', stranka_id: "1' or 1=1", storitev: null, oseba: null, datum: null, ura: null }).success).toBe(false);
+  });
+});
+
+describe('neznana storitev', () => {
+  it('obrazec se vseeno odpre, storitev izbere uporabnik', async () => {
+    const r = await pripraviTermin.izvedi({ stranka: 'Mateja', stranka_id: null, storitev: 'moška pedikura', oseba: null, datum: 'jutri', ura: '10:30' }, o());
+    expect(r.obrazec?.polja).toEqual({ stranka: '101', oseba: 'o1', dan: '2026-11-13', ura: '10:30' });
+    expect(r.sporocilo).toContain('Storitve »moška pedikura« ne najdem. V obrazcu izberite še storitev.');
+  });
+});

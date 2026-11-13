@@ -6,7 +6,7 @@
 // dostop do strani še vedno preveri stran sama (vloge, paket).
 
 import { z } from 'zod';
-import { razresiStranko } from './stranke';
+import { razresiStranko, ID_STRANKE } from './stranke';
 import type { BralnoOrodje } from './tipi';
 
 /** Strani, ki jih asistent zna odpreti (pot brez jezika). */
@@ -134,7 +134,7 @@ export const odpriStran: BralnoOrodje<{ stran: Stran; stranka: string | null; st
   vhod: z.object({
     stran: z.enum(Object.keys(STRANI) as [Stran, ...Stran[]]),
     stranka: z.string().trim().min(1).max(80).nullable(),
-    stranka_id: z.string().regex(/^\d{1,12}$/).nullable(),
+    stranka_id: z.string().regex(ID_STRANKE).nullable(),
   }),
   async izvedi({ stran, stranka, stranka_id }, o) {
     if (stranka || stranka_id) {

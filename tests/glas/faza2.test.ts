@@ -127,7 +127,7 @@ describe('kartica_stranke in zadnja_barva', () => {
 describe('neaktivne_stranke', () => {
   it('brez obiska več kot mesec in brez termina', async () => {
     const r = await neaktivneStranke.izvedi({ mesecev: 1 }, o());
-    expect(r.podatki).toMatchObject({ stevilo: 1, stranke: [{ ime: 'Ana Novinc' }] });
+    expect(r.podatki).toMatchObject({ stevilo: 2, stranke: [{ ime: 'Ana Novinc' }, { ime: 'Tim Zupančič' }] });
   });
 });
 

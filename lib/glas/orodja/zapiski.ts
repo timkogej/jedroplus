@@ -11,7 +11,7 @@
 
 import { z } from 'zod';
 import type { Predogled, RezultatOrodja } from '../tipi';
-import { oznakaStranke, razresiStranko } from './stranke';
+import { oznakaStranke, razresiStranko, ID_STRANKE } from './stranke';
 import type { PisalnoOrodje } from './tipi';
 
 const KATEGORIJE = ['barva', 'preferenca', 'opomba'] as const;
@@ -20,7 +20,7 @@ const ODTENEK = /^\d{1,2}([.,/]\d{1,2}){0,2}$/;
 
 const vhod = z.object({
   stranka: z.string().trim().min(1).max(80),
-  stranka_id: z.string().regex(/^\d{1,12}$/).nullable(),
+  stranka_id: z.string().regex(ID_STRANKE).nullable(),
   kategorija: z.enum(KATEGORIJE),
   besedilo: z.string().trim().min(1).max(1000),
   odtenki: z.array(z.string().trim().regex(ODTENEK)).max(6),
@@ -31,7 +31,7 @@ const vhod = z.object({
 type Vhod = z.infer<typeof vhod>;
 
 const shranjeno = z.object({
-  idStranke: z.string().regex(/^\d{1,12}$/),
+  idStranke: z.string().regex(ID_STRANKE),
   imeStranke: z.string().max(160),
   kategorija: z.enum(KATEGORIJE),
   besedilo: z.string().min(1).max(1000),
