@@ -57,6 +57,8 @@ export interface RezultatOrodja {
   vprasanje?: { besedilo: string; moznosti?: { id: string; oznaka: string }[] };
   /** Ob potrditvi: dejanje se ni izvedlo (npr. stranke ni več), nič ni zapisano. */
   neuspeh?: boolean;
+  /** Pot v aplikaciji, ki naj jo odjemalec odpre (brez jezika, npr. "/clients?stranka=101"). */
+  pojdi?: string;
 }
 
 /** Kar pisalno orodje pokaže pred potrditvijo. */
@@ -95,6 +97,27 @@ export interface PodatkiSalona {
   urnikPodjetja(): Promise<unknown>;
   odsotnosti(od: string, doo: string): Promise<OdsotnostPovzetek[]>;
   dodajZapisek(z: NovZapisek): Promise<{ id: string }>;
+  /** Zapiski s kartice stranke, najnovejši najprej. */
+  zapiskiStranke(idStranke: string, najvec: number): Promise<ZapisekPovzetek[]>;
+  /** Interne opombe s kartice stranke (brez kontaktov). */
+  interneOpombe(idStranke: string): Promise<string | null>;
+  resursi(): Promise<ResursPovzetek[]>;
+  /** Povezave termin ↔ resurs za dane vrstice terminov (TerminPovzetek.vrstica). */
+  resursiTerminov(vrstice: string[]): Promise<{ vrstica: string; resursId: string }[]>;
+}
+
+export interface ZapisekPovzetek {
+  kategorija: 'barva' | 'preferenca' | 'opomba';
+  besedilo: string;
+  podrobnosti: { odtenki?: string[]; gramov?: number; oksidant_pct?: number; cas_min?: number };
+  datum: string; // yyyy-MM-dd (v pasu podjetja ni nujno; za govor zadošča)
+}
+
+export interface ResursPovzetek {
+  id: string; // Resursi.id (številčni, kot Termini_Resursi.resurs_id)
+  naziv: string;
+  kolicina: number;
+  aktivna: boolean;
 }
 
 export interface StrankaPovzetek {
@@ -124,6 +147,8 @@ export interface OsebaPovzetek {
 
 export interface TerminPovzetek {
   id: string; // "ID termina"
+  /** Termini.id (številčni) — Termini_Resursi.termin_id. */
+  vrstica?: string;
   idStranke: string | null;
   stranka: string;
   datum: string; // yyyy-MM-dd

@@ -109,7 +109,7 @@ describe('namigi za STT', () => {
     expect(prejeto).not.toBeNull();
     const n = prejeto!.namigi;
     expect(n.length).toBeLessThanOrEqual(100);
-    expect(n.slice(0, 2)).toEqual(['Mateja Kovačič', 'Ana Novak']); // jutrišnji termini
+    expect(n.slice(0, 2)).toEqual(['Ana Novak', 'Mateja Kovačič']); // danes, nato jutri
     expect(n).not.toContain('Špela Žagar'); // jutri odpovedan, prej ni bila
     expect(n).not.toContain('Mateja Tuja'); // drugo podjetje
   });

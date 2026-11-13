@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import { readRow, waitForRowChanged, waitForRowDeleted, type RowKey } from '@/lib/confirmWrite';
 import { intlLocale } from '@/lib/format';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Users,
@@ -30,6 +30,7 @@ import {
   fetchClientsWithCount,
   deriveClientStats,
   waitForClient,
+  getClientById,
 } from '@/lib/supabase/clients';
 import { callN8nAction, type N8nErrorCode } from '@/src/lib/n8nClient';
 import {
@@ -351,6 +352,25 @@ export default function ClientsClient({
     setDetailsClient(client);
     setDetailsOpen(true);
   }, []);
+
+  // ?stranka=ID (npr. iz Asistent+ "odpri kartico Ane Novak") odpre kartico enkrat.
+  const searchParams = useSearchParams();
+  const strankaIzPovezave = searchParams.get('stranka');
+  const odprtaIzPovezave = useRef<string | null>(null);
+  useEffect(() => {
+    if (!strankaIzPovezave || !companyId || !canViewClient || odprtaIzPovezave.current === strankaIzPovezave) return;
+    const najdena = clients.find((c) => c.id === strankaIzPovezave);
+    if (najdena) {
+      odprtaIzPovezave.current = strankaIzPovezave;
+      openDetailsPanel(najdena);
+      return;
+    }
+    if (isLoading) return;
+    odprtaIzPovezave.current = strankaIzPovezave;
+    getClientById(companyId, strankaIzPovezave).then((r) => {
+      if (r.data) openDetailsPanel(r.data);
+    });
+  }, [strankaIzPovezave, companyId, canViewClient, clients, isLoading, openDetailsPanel]);
 
   // Close details panel
   const closeDetailsPanel = useCallback(() => {

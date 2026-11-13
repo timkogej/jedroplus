@@ -254,11 +254,11 @@ export const prviProsti: BralnoOrodje<{ storitev: string | null; oseba: string |
   },
 };
 
-function cap(s: string) {
+export function cap(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function sklon(n: number, ed: string, dv: string, mn34: string, mn: string) {
+export function sklon(n: number, ed: string, dv: string, mn34: string, mn: string) {
   const s = n % 100;
   if (s === 1) return ed;
   if (s === 2) return dv;

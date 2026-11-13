@@ -250,5 +250,13 @@
     "redeemed": "Nagrada je iskorištena.",
     "loadError": "Bodove nije bilo moguće učitati.",
     "redeemError": "Nagradu nije bilo moguće iskoristiti. Osvježite karticu i pokušajte ponovno."
+  },
+  "zapiski": {
+    "title": "Bilješke",
+    "barva": "Boja",
+    "preferenca": "Preferencija",
+    "opomba": "Bilješka",
+    "glas": "glasom",
+    "loadError": "Bilješke nije moguće učitati."
   }
 }

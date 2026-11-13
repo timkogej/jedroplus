@@ -115,6 +115,62 @@ function zasedeno(
   return out;
 }
 
+/** Urnik, ki velja za osebo: lasten ali podjetja. */
+export function urnikOsebe(
+  p: { urnik: unknown; imaUrnikPodjetja: boolean },
+  urnikPodjetja: UrnikData | IzmenicenUrnik | null
+): UrnikData | IzmenicenUrnik | null {
+  return p.imaUrnikPodjetja ? urnikPodjetja : (razcleniUrnik(p.urnik) ?? urnikPodjetja);
+}
+
+/** Odšteje zasedene intervale od delovnih (vse v minutah, urejeno). */
+export function odstej(delovni: [number, number][], zasedeni: [number, number][]): [number, number][] {
+  let out = delovni.map((x) => [...x] as [number, number]);
+  for (const [a, b] of zasedeni) {
+    const nov: [number, number][] = [];
+    for (const [z, k] of out) {
+      if (b <= z || a >= k) nov.push([z, k]);
+      else {
+        if (a > z) nov.push([z, a]);
+        if (b < k) nov.push([b, k]);
+      }
+    }
+    out = nov;
+  }
+  return out.filter(([z, k]) => k > z).sort((x, y) => x[0] - y[0]);
+}
+
+/** Delovni čas osebe na dan brez odsotnosti (brez terminov). */
+export function delovniBrezOdsotnosti(
+  osebaId: string,
+  urnik: UrnikData | IzmenicenUrnik | null,
+  datum: string,
+  odsotnosti: OdsotnostPovzetek[],
+  casovniPas: string
+): { delovni: [number, number][]; dela: [number, number][] } {
+  const delovni = delovniIntervali(urnik, datum);
+  return { delovni, dela: odstej(delovni, zasedeno(osebaId, datum, [], odsotnosti, casovniPas)) };
+}
+
+/** Proste luknje osebe na dan (delovni čas − termini − odsotnosti), vsaj `najmanjMin` dolge. */
+export function prosteLuknje(i: {
+  osebaId: string;
+  urnik: UrnikData | IzmenicenUrnik | null;
+  datum: string;
+  odMinute: number;
+  najmanjMin: number;
+  termini: TerminPovzetek[];
+  odsotnosti: OdsotnostPovzetek[];
+  casovniPas: string;
+}): [number, number][] {
+  const delovni = delovniIntervali(i.urnik, i.datum)
+    .map(([a, b]) => [Math.max(a, i.odMinute), b] as [number, number])
+    .filter(([a, b]) => b > a);
+  return odstej(delovni, zasedeno(i.osebaId, i.datum, i.termini, i.odsotnosti, i.casovniPas)).filter(
+    ([a, b]) => b - a >= i.najmanjMin
+  );
+}
+
 /** Prvi prost termin med osebami (najzgodnejši; ob enakem času prva oseba v seznamu). */
 export function prviProstiTermin(i: IskanjeProstega): ProstTermin | null {
   const korak = i.korakMin ?? 15;

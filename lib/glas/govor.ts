@@ -75,3 +75,19 @@ export function vprasanjeZaGovor(v: { besedilo: string; moznosti?: { oznaka: str
   if (m.length < 2) return `${osnova}?`;
   return `${osnova}: ${m.slice(0, -1).join(', ')} ali ${m.at(-1)}?`;
 }
+
+/** "09:00", "10:30" → "od devetih do pól enajstih". */
+export function razponZaGovor(od: string, doo: string): string {
+  return `${uraZaGovor(od).replace(/^ob /, 'od ')} ${uraZaGovor(doo).replace(/^ob /, 'do ')}`;
+}
+
+/** 30 → "pol ure", 60 → "eno uro", 90 → "uro in pol", 150 → "2 uri in 30 minut". */
+export function trajanjeZaGovor(min: number): string {
+  const ur = Math.floor(min / 60);
+  const ost = min % 60;
+  if (ur === 0) return ost === 30 ? 'pol ure' : `${ost} minut`;
+  const ure = ur === 1 ? 'eno uro' : ur === 2 ? 'dve uri' : ur <= 4 ? `${ur} ure` : `${ur} ur`;
+  if (ost === 0) return ure;
+  if (ost === 30) return ur === 1 ? 'uro in pol' : `${ure} in pol`;
+  return `${ure} in ${ost} minut`;
+}

@@ -75,6 +75,8 @@ export type OdgovorUkaza =
       govor: string;
       predlog?: PredlogZaOdjemalca;
       vprasanje?: RezultatOrodja['vprasanje'];
+      /** Stran v aplikaciji, ki naj jo odjemalec odpre (brez jezika). */
+      pojdi?: string;
       opozorilo?: string | null;
       porabljeno: number;
       kvota: number;
@@ -99,6 +101,8 @@ Pravila:
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
 - Ne moreš brisati, pošiljati sporočil strankam, spreminjati cen, pravic ali plačil. Če to zahteva, povej, da tega ne moreš.
 - Recepture barve: odtenke zapiši kot "6.3", "7.1"; gramažo, oksidant (%) in čas (min) kot števila. Ne dodajaj ničesar, česar uporabnik ni rekel.
+- Za vprašanja, kako se kaj naredi v aplikaciji, uporabi pomoc_aplikacija; za "odpri", "pojdi na", "pokaži stran" uporabi odpri_stran. Navodil za aplikacijo si ne izmišljuj.
+- Poslovne analitike (prihodki, statistika, primerjave) ne delaš; povej, da je to na strani Analitika.
 - Če ukaz ni jasen, postavi eno kratko vprašanje.
 - Odgovor bo izgovorjen: celi stavki, brez seznamov, oklepajev in okrajšav. Pred klicem orodja ne piši ničesar.`;
 
@@ -208,7 +212,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       casi.orodja = ura() - t;
       uporabljena.push(hitroOrodje.ime);
       const status = r.vprasanje ? 'vprasanje' : 'odgovor';
-      return await koncaj({ status, odgovor: r.sporocilo, govor: r.govor, vprasanje: r.vprasanje });
+      return await koncaj({ status, odgovor: r.sporocilo, govor: r.govor, vprasanje: r.vprasanje, pojdi: r.pojdi });
     }
 
     // 3. LLM z orodji
@@ -300,6 +304,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
           odgovor: izbrani.map((x) => x.sporocilo).join('\n'),
           govor: vpr ? vprasanjeZaGovor(vpr) : izbrani.map((x) => x.govor ?? zaGovor(x.sporocilo)).join(' '),
           vprasanje: vpr,
+          pojdi: vpr ? undefined : izbrani.find((x) => x.pojdi)?.pojdi,
         });
       }
       sporocila.push({ vloga: 'rezultati', rezultati });
@@ -335,6 +340,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     govor?: string;
     predlog?: PredlogZaOdjemalca;
     vprasanje?: RezultatOrodja['vprasanje'];
+    pojdi?: string;
   }): Promise<OdgovorUkaza> {
     let govor = r.govor ?? zaGovor(r.odgovor);
     if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} Potrdim?`;
@@ -368,6 +374,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       govor,
       predlog: r.predlog,
       vprasanje: r.vprasanje,
+      pojdi: r.pojdi && /^\/[a-z0-9/_-]*(\?[a-z_]+=[\w%-]+)?$/i.test(r.pojdi) ? r.pojdi : undefined,
       opozorilo: opozoriloKvote(rez.ok ? rez.porabljeno : 0, rez.ok ? rez.kvota : 0),
       porabljeno: rez.ok ? rez.porabljeno : 0,
       kvota: rez.ok ? rez.kvota : 0,

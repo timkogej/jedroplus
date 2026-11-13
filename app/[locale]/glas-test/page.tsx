@@ -13,13 +13,14 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Microphone, Stop, Check, X, PaperPlaneRight, SpeakerHigh } from '@phosphor-icons/react';
+import { useLocale } from 'next-intl';
+import { Microphone, Stop, Check, X, PaperPlaneRight, SpeakerHigh, ArrowSquareOut } from '@phosphor-icons/react';
 import ProtectedLayout from '@/components/ProtectedLayout';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
 import { Pogovor, type Meritev, type OdgovorOdjemalec, type StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 
 type Stanje = { ok: boolean; vklopljeno?: boolean; pravica?: boolean; kvota?: number; porabljeno?: number; opozorilo?: string | null; sporocilo?: string };
-type Vrstica = { kdo: 'jaz' | 'asistent' | 'napaka'; besedilo: string; meritev?: Meritev | null };
+type Vrstica = { kdo: 'jaz' | 'asistent' | 'napaka'; besedilo: string; meritev?: Meritev | null; pojdi?: string };
 
 const OPIS: Record<StanjePogovora, string> = {
   mirovanje: 'Tapnite in začnite govoriti',
@@ -37,6 +38,7 @@ export default function GlasTestPage() {
   const [zadnji, setZadnji] = useState<OdgovorOdjemalec | null>(null);
   const [besedilo, setBesedilo] = useState('');
   const pogovor = useRef<Pogovor | null>(null);
+  const jezik = useLocale();
   const konec = useRef<HTMLDivElement | null>(null);
 
   const osveziStanje = useCallback(async () => {
@@ -63,7 +65,7 @@ export default function GlasTestPage() {
       },
       odgovor: (o) => {
         setZadnji(o);
-        dodaj({ kdo: 'asistent', besedilo: o.odgovor ?? '' });
+        dodaj({ kdo: 'asistent', besedilo: o.odgovor ?? '', pojdi: o.pojdi });
         osveziStanje();
       },
       potrditev: (o) => {
@@ -172,6 +174,16 @@ export default function GlasTestPage() {
                   >
                     {v.besedilo}
                   </p>
+                  {v.pojdi && (
+                    // Testna stran: povezava namesto samodejnega premika (pogovor bi se ustavil).
+                    // Faza 4: plavajoča bunka ostane odprta in stran se odpre sama.
+                    <a
+                      href={`/${jezik}${v.pojdi}`}
+                      className="mt-1 inline-flex items-center gap-1 px-1 text-xs font-medium text-label underline"
+                    >
+                      <ArrowSquareOut size={14} /> Odpri
+                    </a>
+                  )}
                   {v.meritev && (
                     <p className="mt-0.5 px-1 text-[11px] text-label-tertiary">
                       odgovor {v.meritev.doOdgovora} ms{v.meritev.doZvoka !== null ? ` · prvi zvok ${v.meritev.doZvoka} ms` : ' · brez glasu'}

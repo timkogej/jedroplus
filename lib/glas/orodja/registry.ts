@@ -10,12 +10,24 @@ import { iskanjeStranke, koledarDan, prviProsti, zadnjiObisk } from './branje';
 import { prekliciTermin, premakniTermin, ustvariTermin } from './rezervirano';
 import type { Orodje } from './tipi';
 import { dodajZapisek } from './zapiski';
+import { karticaStranke, neaktivneStranke, zadnjaBarva } from './kartica';
+import { kdoDela, naslednjaStranka, prosteLuknjeOrodje, resursiDan } from './pregled';
+import { odpriStran, pomocAplikacija } from './pomoc';
 
 export const VSA_ORODJA: readonly Orodje[] = [
   iskanjeStranke,
   zadnjiObisk,
   koledarDan,
   prviProsti,
+  naslednjaStranka,
+  prosteLuknjeOrodje,
+  kdoDela,
+  resursiDan,
+  karticaStranke,
+  zadnjaBarva,
+  neaktivneStranke,
+  pomocAplikacija,
+  odpriStran,
   dodajZapisek,
   // faza 2 — onemogočeno
   ustvariTermin,

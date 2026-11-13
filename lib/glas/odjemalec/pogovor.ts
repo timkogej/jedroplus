@@ -42,6 +42,8 @@ export interface OdgovorOdjemalec {
   govor?: string;
   predlog?: PredlogOdjemalec;
   vprasanje?: VprasanjeOdjemalec;
+  /** Stran v aplikaciji (brez jezika), ki jo je asistent predlagal odpreti. */
+  pojdi?: string;
   opozorilo?: string | null;
   sporocilo?: string;
   koda?: string;

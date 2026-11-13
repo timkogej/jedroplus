@@ -11,7 +11,8 @@ import { sttLazni, type SttPonudnik } from '@/lib/glas/ponudniki/stt';
 import { ttsBrez } from '@/lib/glas/ponudniki/tts';
 import { shrambaVPomnilniku, type NastavitvePomnilnik } from '@/lib/glas/shramba/pomnilnik';
 import type {
-  Kontekst, NovZapisek, OsebaPovzetek, PodatkiSalona, StoritevPovzetek, StrankaPovzetek, TerminPovzetek,
+  Kontekst, NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
+  TerminPovzetek, ZapisekPovzetek,
 } from '@/lib/glas/tipi';
 
 export const DANES = '2026-11-12'; // četrtek
@@ -33,6 +34,12 @@ export interface Salon {
   storitve: StoritevPovzetek[];
   osebe: OsebaPovzetek[];
   termini: TerminPovzetek[];
+  zapiski?: (ZapisekPovzetek & { idStranke: string })[];
+  opombe?: Record<string, string>;
+  resursi?: ResursPovzetek[];
+  /** vrstica termina → resurs */
+  povezave?: { vrstica: string; resursId: string }[];
+  odsotnosti?: OdsotnostPovzetek[];
 }
 
 export const SALONI: Record<string, Salon> = {
@@ -58,7 +65,22 @@ export const SALONI: Record<string, Salon> = {
       t('t2', '2026-11-13', '11:00', '11:30', 'o2', 'Ana Novak', 'Moško striženje', '102'),
       t('t3', '2026-11-13', '12:00', '12:30', 'o1', 'Špela Žagar', 'Moško striženje', '104', 'cancelled'),
       t('t4', '2026-10-20', '09:00', '10:30', 'o1', 'Mateja Kovačič', 'Barvanje', '101', 'completed'),
+      t('t5', '2026-11-12', '13:00', '14:00', 'o1', 'Ana Novak', 'Barvanje', '102'),
     ],
+    zapiski: [
+      { idStranke: '101', kategorija: 'opomba', besedilo: 'Ima rada kratke konice', podrobnosti: {}, datum: '2026-11-01' },
+      { idStranke: '101', kategorija: 'barva', besedilo: 'Barva 6.3 z 7.1', podrobnosti: { odtenki: ['6.3', '7.1'], gramov: 30, oksidant_pct: 6, cas_min: 35 }, datum: '2026-10-20' },
+    ],
+    opombe: { '101': 'Alergija na amonijak' },
+    resursi: [
+      { id: 'r1', naziv: 'Umivalnik', kolicina: 1, aktivna: true },
+      { id: 'r2', naziv: 'Masažna soba', kolicina: 2, aktivna: true },
+    ],
+    povezave: [
+      { vrstica: 'v-t1', resursId: 'r1' },
+      { vrstica: 'v-t2', resursId: 'r1' },
+    ],
+    odsotnosti: [{ osebaId: 'o2', zacetek: '2026-11-16T07:00:00Z', konec: '2026-11-16T16:00:00Z' }],
   },
   B2: {
     stranke: [{ id: '201', ime: 'Mateja', priimek: 'Tuja', zadnjaInterakcija: null }],
@@ -72,7 +94,7 @@ function t(
   id: string, datum: string, zacetek: string, konec: string, osebaId: string, stranka: string, storitev: string,
   idStranke: string, status: TerminPovzetek['status'] = 'scheduled'
 ): TerminPovzetek {
-  return { id, idStranke, stranka, datum, zacetek, konec, storitev, osebaId, oseba: osebaId === 'o1' ? 'Tina' : 'Urška', status, lokacijaId: null };
+  return { id, vrstica: `v-${id}`, idStranke, stranka, datum, zacetek, konec, storitev, osebaId, oseba: osebaId === 'o1' ? 'Tina' : 'Urška', status, lokacijaId: null };
 }
 
 export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): PodatkiSalona & { zapiski: NovZapisek[] } {
@@ -94,12 +116,18 @@ export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): 
       return s.termini.filter((x) => x.idStranke === id && x.datum >= od && x.status === 'scheduled').sort((a, b) => a.datum.localeCompare(b.datum))[0] ?? null;
     },
     async urnikPodjetja() { return URNIK; },
-    async odsotnosti() { return []; },
+    async odsotnosti() { return s.odsotnosti ?? []; },
     async dodajZapisek(z) {
       if (z.podjetje !== podjetje) throw new Error('RLS');
       zapiski.push(z);
       return { id: String(zapiski.length) };
     },
+    async zapiskiStranke(id, najvec) {
+      return (s.zapiski ?? []).filter((x) => x.idStranke === id).slice(0, najvec);
+    },
+    async interneOpombe(id) { return s.opombe?.[id] ?? null; },
+    async resursi() { return s.resursi ?? []; },
+    async resursiTerminov(vrstice) { return (s.povezave ?? []).filter((p) => vrstice.includes(p.vrstica)); },
   };
 }
 

@@ -250,5 +250,13 @@
     "redeemed": "Reward redeemed.",
     "loadError": "Could not load loyalty points.",
     "redeemError": "Could not redeem reward. Refresh the card and try again."
+  },
+  "zapiski": {
+    "title": "Notes",
+    "barva": "Colour",
+    "preferenca": "Preference",
+    "opomba": "Note",
+    "glas": "by voice",
+    "loadError": "Notes could not be loaded."
   }
 }

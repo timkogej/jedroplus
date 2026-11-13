@@ -10,7 +10,8 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeAppointmentStatus } from '@/lib/appointments/status';
 import type {
-  NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, StoritevPovzetek, StrankaPovzetek, TerminPovzetek,
+  NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
+  TerminPovzetek, ZapisekPovzetek,
 } from '../tipi';
 
 type Vrstica = Record<string, unknown>;
@@ -63,6 +64,7 @@ function seznamStoritev(v: unknown): string[] {
 function vTermin(r: Vrstica): TerminPovzetek {
   return {
     id: niz(r['ID termina']),
+    vrstica: niz(r['id']) || undefined,
     idStranke: niz(r['ID stranke']) || null,
     stranka: niz(r['Stranka']),
     datum: niz(r['Datum']).slice(0, 10),
@@ -76,7 +78,7 @@ function vTermin(r: Vrstica): TerminPovzetek {
   };
 }
 
-const STOLPCI_TERMINA = '"ID termina","ID stranke",Stranka,Datum,"Čas",Konec,Storitev,"ID Osebe",Oseba,Status,lokacija_id';
+const STOLPCI_TERMINA = 'id,"ID termina","ID stranke",Stranka,Datum,"Čas",Konec,Storitev,"ID Osebe",Oseba,Status,lokacija_id';
 
 export function podatkiSupabase(seja: SupabaseClient, podjetje: string): PodatkiSalona {
   let strankeCache: Promise<StrankaPovzetek[]> | null = null;
@@ -235,6 +237,66 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
         .single();
       if (error || !data) throw new Error(`zapisek: ${error?.code ?? 'napaka'}`);
       return { id: String(data.id) };
+    },
+
+    async zapiskiStranke(idStranke, najvec): Promise<ZapisekPovzetek[]> {
+      const { data, error } = await seja
+        .from('stranke_zapiski')
+        .select('kategorija,besedilo,podrobnosti,created_at')
+        .eq('ID podjetja', podjetje)
+        .eq('ID stranke', idStranke)
+        .order('created_at', { ascending: false })
+        .limit(Math.min(Math.max(1, najvec), 20));
+      if (error) throw new Error(`zapiski: ${error.code ?? 'napaka'}`);
+      return ((data ?? []) as Vrstica[]).map((r) => ({
+        kategorija: niz(r.kategorija) as ZapisekPovzetek['kategorija'],
+        besedilo: niz(r.besedilo),
+        podrobnosti: (r.podrobnosti && typeof r.podrobnosti === 'object' ? r.podrobnosti : {}) as ZapisekPovzetek['podrobnosti'],
+        datum: niz(r.created_at).slice(0, 10),
+      }));
+    },
+
+    async interneOpombe(idStranke) {
+      const { data, error } = await seja
+        .from('Stranke')
+        .select('"Interne opombe"')
+        .eq('ID Podjetja', podjetje)
+        .eq('ID stranke', idStranke)
+        .limit(1);
+      if (error) return null; // dodatek; brez njega je kartica še vedno uporabna
+      const v = niz(((data ?? [])[0] as Vrstica | undefined)?.['Interne opombe']);
+      return v || null;
+    },
+
+    async resursi(): Promise<ResursPovzetek[]> {
+      const { data, error } = await seja
+        .from('Resursi')
+        .select('id,Naziv,Kolicina,Status')
+        .eq('ID podjetja', podjetje)
+        .order('Naziv');
+      if (error) throw new Error(`resursi: ${error.code ?? 'napaka'}`);
+      return ((data ?? []) as Vrstica[]).map((r) => ({
+        id: niz(r.id),
+        naziv: niz(r['Naziv']),
+        kolicina: Math.max(1, Number(r['Kolicina']) || 1),
+        aktivna: aktivna(r['Status']),
+      }));
+    },
+
+    async resursiTerminov(vrstice) {
+      const ids = [...new Set(vrstice.filter((v) => /^\d+$/.test(v)))];
+      if (ids.length === 0) return [];
+      const out: { vrstica: string; resursId: string }[] = [];
+      for (let i = 0; i < ids.length; i += 300) {
+        const { data, error } = await seja
+          .from('Termini_Resursi')
+          .select('termin_id,resurs_id')
+          .eq('ID podjetja', podjetje)
+          .in('termin_id', ids.slice(i, i + 300));
+        if (error) throw new Error(`resursi terminov: ${error.code ?? 'napaka'}`);
+        for (const r of (data ?? []) as Vrstica[]) out.push({ vrstica: niz(r.termin_id), resursId: niz(r.resurs_id) });
+      }
+      return out;
     },
   };
 }

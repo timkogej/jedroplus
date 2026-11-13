@@ -29,5 +29,48 @@ export function hitraPot(prepis: string): HitriKlic | null {
     const dan = [m[1], m[2]].find((x) => x && x !== 'imam' && x !== 'imamo') ?? null;
     return { orodje: 'koledar_dan', vhod: { datum: dan, samo_moji: oseba } };
   }
+
+  // "kdo je naslednja", "kdo je moja naslednja stranka", "kdo pride naslednji"
+  const n = b.match(/^kdo (?:je (moja |moj )?naslednj[aiie]|pride naslednj[aiie])(?: stranka)?$/);
+  if (n) return { orodje: 'naslednja_stranka', vhod: { samo_moji: n[1] ? true : null } };
+
+  // "kdo dela jutri", "kdo dela danes", "jutri kdo dela"
+  const d = b.match(new RegExp(`^kdo (?:vse )?dela(?: ${DAN})?$`)) ?? b.match(new RegExp(`^${DAN} kdo dela$`));
+  if (d) return { orodje: 'kdo_dela', vhod: { datum: d[1] ?? null } };
+
+  // "kdaj imam danes prosto", "kdaj imam prosto jutri", "ali imam danes kaj prostega"
+  const p =
+    b.match(new RegExp(`^kdaj imam(?: ${DAN})? (?:prosto|luknjo|luknje)(?: ${DAN})?$`)) ??
+    b.match(new RegExp(`^(?:ali )?imam(?: ${DAN})? kaj prostega(?: ${DAN})?$`));
+  if (p) return { orodje: 'proste_luknje', vhod: { datum: p[1] ?? p[2] ?? null, oseba: null, najmanj_min: null } };
+
+  // "odpri koledar", "pojdi na stranke", "pokazi nastavitve"
+  const o = b.match(/^(?:odpri|pojdi na|pokazi|prikazi)(?: stran)? (.+)$/);
+  if (o && STRANI_PO_IMENU[o[1]]) return { orodje: 'odpri_stran', vhod: { stran: STRANI_PO_IMENU[o[1]], stranka: null, stranka_id: null } };
   return null;
 }
+
+/** Izgovorjeno ime strani (brez šumnikov) → ključ v orodju odpri_stran. */
+const STRANI_PO_IMENU: Record<string, string> = {
+  koledar: 'koledar',
+  termine: 'termini',
+  termini: 'termini',
+  stranke: 'stranke',
+  storitve: 'storitve',
+  zaposlene: 'zaposleni',
+  zaposleni: 'zaposleni',
+  resurse: 'resursi',
+  resursi: 'resursi',
+  opomnike: 'opomniki',
+  opomniki: 'opomniki',
+  rezervacije: 'rezervacije',
+  'spletne rezervacije': 'rezervacije',
+  obvestila: 'obvestila',
+  nastavitve: 'nastavitve',
+  'nadzorno plosco': 'nadzorna_plosca',
+  'nadzorna plosca': 'nadzorna_plosca',
+  domov: 'nadzorna_plosca',
+  paket: 'paketi',
+  pakete: 'paketi',
+  ekipo: 'ekipa',
+};

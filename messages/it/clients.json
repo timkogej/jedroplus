@@ -250,5 +250,13 @@
     "redeemed": "Premio riscattato.",
     "loadError": "Impossibile caricare i punti fedeltà.",
     "redeemError": "Impossibile riscattare il premio. Aggiorna la scheda e riprova."
+  },
+  "zapiski": {
+    "title": "Appunti",
+    "barva": "Colore",
+    "preferenca": "Preferenza",
+    "opomba": "Nota",
+    "glas": "a voce",
+    "loadError": "Impossibile caricare gli appunti."
   }
 }

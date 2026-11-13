@@ -33,6 +33,7 @@ import { getClientWithAppointments } from '@/lib/supabase/clients';
 import ClientInitialsBadge from './ClientInitialsBadge';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
 import LoyaltyClientCard from './LoyaltyClientCard';
+import ZapiskiStranke from './ZapiskiStranke';
 
 interface ClientDetailsPanelProps {
   isOpen: boolean;
@@ -395,6 +396,9 @@ function ClientDetailsPanel({
                   </section>
                 );
               })()}
+
+              {/* Zapiski (Asistent+): recepture, preference, opombe */}
+              <ZapiskiStranke companyId={companyId} clientId={client.id} />
 
               {/* Statistika — povzetek z lasnimi črtami */}
               <section>
