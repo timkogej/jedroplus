@@ -102,3 +102,18 @@ describe('odprt obrazec za urejanje', () => {
     expect(z && 'besedilo' in z ? z.besedilo : '').toContain('pokliči uredi_termin');
   });
 });
+
+describe('pripravi_termin: jezik, opombe, dodatne storitve', () => {
+  it('jezik in opombe le, če ju uporabnik pove', async () => {
+    const { pripraviTermin } = await import('@/lib/glas/orodja/obrazci');
+    const osnova = { stranka: 'Mateja', stranka_id: null, storitev: 'barvanje', oseba: null, datum: 'jutri', ura: '11:00', lokacija: null };
+    const brez = await pripraviTermin.izvedi(pripraviTermin.vhod.parse(osnova), o());
+    expect(brez.obrazec?.polja.jezik).toBeUndefined();
+    const z = await pripraviTermin.izvedi(
+      pripraviTermin.vhod.parse({ ...osnova, jezik: 'eng', opombe: 'Prvič pri nas.', interne_opombe: 'Občutljivo lasišče', dodaj_storitve: ['moško striženje'] }),
+      o()
+    );
+    expect(z.obrazec?.polja).toMatchObject({ jezik: 'eng', opombe: 'Prvič pri nas.', interne: 'Občutljivo lasišče', dodaj1: 's2' });
+    expect(z.govor).toContain('še Moško striženje, jezik angleščina, z opombo');
+  });
+});

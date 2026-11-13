@@ -172,10 +172,33 @@ function govorPozor(pozor: string | null): string {
   return pozor ? ` ${pozor.replace(/\([^)]*\)/g, '').replace(/\s+\./g, '.').trim()}` : '';
 }
 
+/** Jeziki sporočil (kode, kot jih hrani baza in bere n8n). */
+export const JEZIKI_SPOROCIL = ['slo', 'eng', 'de', 'it', 'hr'] as const;
+const IME_JEZIKA: Record<(typeof JEZIKI_SPOROCIL)[number], string> = {
+  slo: 'slovenščina', eng: 'angleščina', de: 'nemščina', it: 'italijanščina', hr: 'hrvaščina',
+};
+/** Opombe iz govora: brez znakov za oznake, kratko. */
+const opomba = z.string().trim().max(300).transform((x) => x.replace(/[<>]/g, '')).nullable();
+
+/** Razreši do dve dodatni storitvi ("dodaj še barvanje"); neznana ali dvoumna → rezultat. */
+function dodatneStoritve(imena: string[] | null | undefined, storitve: StoritevPovzetek[]): StoritevPovzetek[] | RezultatOrodja {
+  const out: StoritevPovzetek[] = [];
+  for (const ime of (imena ?? []).slice(0, 2)) {
+    const x = izberiStoritev(ime, storitve);
+    if (jeRezultat(x)) return x;
+    if (!out.some((y) => y.id === x.id)) out.push(x);
+  }
+  return out;
+}
+
 // ───────────────────────────────────────────────────────────────────────────
 type VhodNov = {
   stranka: string; stranka_id: string | null; storitev: string | null; oseba: string | null; datum: string | null; ura: string | null;
   lokacija?: string | null;
+  dodaj_storitve?: string[] | null;
+  jezik?: (typeof JEZIKI_SPOROCIL)[number] | null;
+  opombe?: string | null;
+  interne_opombe?: string | null;
 };
 
 export const pripraviTermin: BralnoOrodje<VhodNov> = {
@@ -196,8 +219,12 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       datum: { type: ['string', 'null'], description: 'Samo dan, ki ga je uporabnik izgovoril ("jutri", "v petek") ali YYYY-MM-DD; null, če dneva ni povedal (ne "danes" na pamet).' },
       ura: { type: ['string', 'null'], description: 'Samo ura, ki jo je uporabnik izgovoril ("HH:MM" ali "ob desetih"); null, če je ni povedal. Trenutna ura NI ura termina.' },
       lokacija: { type: ['string', 'null'], description: 'Ime ali ID lokacije (podjetja z več lokacijami), samo če jo je uporabnik povedal ("v Šiški" → "Šiška"); sicer null — orodje samo vpraša, če je treba.' },
+      dodaj_storitve: { type: ['array', 'null'], items: { type: 'string' }, description: 'Druga in tretja storitev ("in še barvanje", "dodaj še pedikuro"); null = nič.' },
+      jezik: { type: ['string', 'null'], enum: [...JEZIKI_SPOROCIL, null], description: 'Jezik sporočil (slo, eng, de, it, hr), samo če ga je uporabnik povedal ("v angleščini"); sicer null = privzeti jezik stranke ali podjetja.' },
+      opombe: { type: ['string', 'null'], description: 'Opomba termina, samo če jo je uporabnik narekoval; sicer null.' },
+      interne_opombe: { type: ['string', 'null'], description: 'Interna opomba (samo za salon), samo če jo je uporabnik narekoval; sicer null.' },
     },
-    required: ['stranka', 'stranka_id', 'storitev', 'oseba', 'datum', 'ura', 'lokacija'],
+    required: ['stranka', 'stranka_id', 'storitev', 'oseba', 'datum', 'ura', 'lokacija', 'dodaj_storitve', 'jezik', 'opombe', 'interne_opombe'],
     additionalProperties: false,
   },
   vhod: z.object({
@@ -208,6 +235,10 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     datum: z.string().max(60).nullable(),
     ura: z.string().max(40).nullable(),
     lokacija: z.string().max(80).nullable().optional(),
+    dodaj_storitve: z.array(z.string().max(80)).max(2).nullable().optional(),
+    jezik: z.enum(JEZIKI_SPOROCIL).nullable().optional(),
+    opombe: opomba.optional(),
+    interne_opombe: opomba.optional(),
   }),
   async izvedi(p, o) {
     const r = await razresiStranko(p.stranka, p.stranka_id, o);
@@ -247,6 +278,8 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     if (oseba && storitev && !oseba.opravljaVse && !oseba.storitve.includes(storitev.id)) {
       return { sporocilo: `${oseba.ime} ne opravlja storitve ${storitev.naziv}.` };
     }
+    const dodatne = dodatneStoritve(p.dodaj_storitve, storitve);
+    if (jeRezultat(dodatne)) return dodatne;
     const lokacija = await lokacijaTermina(o, oseba, storitev, p.lokacija);
     if (jeRezultat(lokacija)) return lokacija;
 
@@ -257,8 +290,12 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       datum ? opisDatuma(datum, o.danes) : null,
       ura ? `ob ${ura}` : null,
       storitev?.naziv ?? null,
+      dodatne.length ? `še ${dodatne.map((x) => x.naziv).join(' in ')}` : null,
       oseba && p.oseba ? `pri ${mestnik(oseba.ime)}` : null,
       lokacija ? `lokacija ${lokacija.naziv}` : null,
+      p.jezik ? `jezik ${IME_JEZIKA[p.jezik]}` : null,
+      p.opombe ? `opomba »${p.opombe}«` : null,
+      p.interne_opombe ? `interna opomba »${p.interne_opombe}«` : null,
     ].filter(Boolean);
     const manjka = [!datum && 'dan', !ura && 'uro', !storitev && 'storitev'].filter(Boolean) as ('dan' | 'uro' | 'storitev')[];
     const neznana = neznanaStoritev ? ` Storitve »${neznanaStoritev}« ne najdem.` : '';
@@ -269,9 +306,20 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     if (datum) polja.dan = datum;
     if (ura) polja.ura = ura;
     if (lokacija) polja.lokacija = lokacija.id;
+    dodatne.forEach((x, i) => {
+      polja[`dodaj${i + 1}`] = x.id;
+    });
+    if (p.jezik) polja.jezik = p.jezik;
+    if (p.opombe) polja.opombe = p.opombe;
+    if (p.interne_opombe) polja.interne = p.interne_opombe;
+    const dodatek = [
+      dodatne.length ? `še ${dodatne.map((x) => x.naziv).join(' in ')}` : '',
+      p.jezik ? `jezik ${IME_JEZIKA[p.jezik]}` : '',
+      p.opombe || p.interne_opombe ? 'z opombo' : '',
+    ].filter(Boolean);
     return {
       sporocilo: `Nov termin: ${deli.join(', ')}.${pozor ? ` ${pozor}` : ''}${neznana}${manjka.length ? ` Manjka še: ${manjka.join(', ')}.` : ` ${SHRANI}`}`,
-      govor: `${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${oseba && p.oseba ? `, pri ${mestnik(oseba.ime)}` : ''}.${govorPozor(pozor)}${neznana} ${vprasanje}`,
+      govor: `${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${dodatek.length ? `, ${dodatek.join(', ')}` : ''}${oseba && p.oseba ? `, pri ${mestnik(oseba.ime)}` : ''}.${govorPozor(pozor)}${neznana} ${vprasanje}`,
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'nov_termin', polja },
       podatki: { stranka_id: s.id, datum, ura, storitev: storitev?.naziv ?? null, oseba: oseba ? imeOsebe(oseba) : null, lokacija: lokacija?.naziv ?? null, pozor },
@@ -280,25 +328,6 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
 };
 
 // ───────────────────────────────────────────────────────────────────────────
-/** Jeziki sporočil (kode, kot jih hrani baza in bere n8n). */
-export const JEZIKI_SPOROCIL = ['slo', 'eng', 'de', 'it', 'hr'] as const;
-const IME_JEZIKA: Record<(typeof JEZIKI_SPOROCIL)[number], string> = {
-  slo: 'slovenščina', eng: 'angleščina', de: 'nemščina', it: 'italijanščina', hr: 'hrvaščina',
-};
-/** Opombe iz govora: brez znakov za oznake, kratko. */
-const opomba = z.string().trim().max(300).transform((x) => x.replace(/[<>]/g, '')).nullable();
-
-/** Razreši do dve dodatni storitvi ("dodaj še barvanje"); neznana ali dvoumna → rezultat. */
-function dodatneStoritve(imena: string[] | null | undefined, storitve: StoritevPovzetek[]): StoritevPovzetek[] | RezultatOrodja {
-  const out: StoritevPovzetek[] = [];
-  for (const ime of (imena ?? []).slice(0, 2)) {
-    const x = izberiStoritev(ime, storitve);
-    if (jeRezultat(x)) return x;
-    if (!out.some((y) => y.id === x.id)) out.push(x);
-  }
-  return out;
-}
-
 // ───────────────────────────────────────────────────────────────────────────
 /** Prihodnji (ali današnji) aktivni termini stranke; ob več → vprašanje. */
 async function izberiTermin(

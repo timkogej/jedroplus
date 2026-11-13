@@ -1343,13 +1343,25 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       if (!canCreateAppointment) return setGlasNamen(null);
       if (n.oseba && employees.length === 0) return; // počakaj na zaposlene
       const storitev = n.storitev ? services.find((x) => x.ref === n.storitev || x.id === n.storitev)?.id : undefined;
-      if (n.storitev && !storitev && services.length === 0) return; // počakaj na storitve
+      if ((n.storitev || n.dodaj1) && services.length === 0) return; // počakaj na storitve
       setGlasNamen(null);
       void (async () => {
         const stranka = n.stranka ? (await getClientById(companyId, n.stranka)).data : null;
         setGlasOsebaId(zaposleni(n.oseba));
         const lokacijaId = n.lokacija && /^[0-9a-f-]{36}$/i.test(n.lokacija) ? n.lokacija : undefined;
-        setGlasPredizpolnitev({ stranka, storitevId: storitev, lokacijaId });
+        const dodatne = [n.dodaj1, n.dodaj2]
+          .map((ref) => (ref ? services.find((x) => x.ref === ref || x.id === ref)?.id : undefined))
+          .filter((x): x is string => Boolean(x));
+        const jezik = n.jezik && ['slo', 'eng', 'de', 'it', 'hr'].includes(n.jezik) ? (n.jezik as CommunicationLanguageCode) : undefined;
+        setGlasPredizpolnitev({
+          stranka,
+          storitevId: storitev,
+          lokacijaId,
+          dodatneStoritve: dodatne,
+          jezik,
+          opombe: n.opombe?.slice(0, 300),
+          interneOpombe: n.interne?.slice(0, 300),
+        });
         setNewAppointmentInitials({ date: dan, startTime: ura });
         setEditingAppointment(null);
         setModalMode('create');

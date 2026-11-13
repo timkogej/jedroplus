@@ -163,6 +163,7 @@ describe('vhod brez strogega načina', () => {
   it('manjkajoča polja postanejo null, številka v niz', () => {
     expect(uskladiVhod(pripraviTermin.shema, { stranka: 'Tim', ura: '10:30', stranka_id: 101 })).toEqual({
       stranka: 'Tim', ura: '10:30', stranka_id: '101', storitev: null, oseba: null, datum: null, lokacija: null,
+      dodaj_storitve: null, jezik: null, opombe: null, interne_opombe: null,
     });
   });
 
