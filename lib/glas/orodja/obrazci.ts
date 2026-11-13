@@ -20,7 +20,19 @@ import { datumIzParametra } from './branje';
 import { razresiStranko, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 
-const SHRANI = 'Preverite in pritisnite Shrani.';
+/** Na koncu odgovora, ko je obrazec izpolnjen: asistent vpraša, uporabnik reče "ja" (= gumb Shrani). */
+const SHRANI = 'Shranim?';
+
+/** Kar manjka, vpraša kratko, kot receptorka ("Za kdaj?"), namesto navodila za obrazec. */
+export function vprasajZaManjkajoce(manjka: readonly ('dan' | 'uro' | 'storitev')[]): string {
+  const dan = manjka.includes('dan');
+  const ura = manjka.includes('uro');
+  const storitev = manjka.includes('storitev');
+  const kdaj = dan && ura ? 'Za kdaj' : dan ? 'Kateri dan' : ura ? 'Ob kateri uri' : '';
+  if (kdaj && storitev) return `${kdaj} in katera storitev?`;
+  if (kdaj) return `${kdaj}?`;
+  return storitev ? 'Katera storitev?' : SHRANI;
+}
 const imeOsebe = (p: OsebaPovzetek) => `${p.ime} ${p.priimek}`.trim();
 const aktiven = (t: TerminPovzetek) => t.status === 'scheduled' || t.status === 'confirmed';
 
@@ -192,18 +204,17 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       storitev?.naziv ?? null,
       oseba && p.oseba ? `pri ${oseba.ime}` : null,
     ].filter(Boolean);
-    const manjka = [!datum && 'dan', !ura && 'uro', !storitev && 'storitev'].filter(Boolean) as string[];
-    const dopolni =
-      (neznanaStoritev ? ` Storitve »${neznanaStoritev}« ne najdem.` : '') +
-      (manjka.length ? ` V obrazcu izberite še ${manjka.join(', ')}.` : '');
+    const manjka = [!datum && 'dan', !ura && 'uro', !storitev && 'storitev'].filter(Boolean) as ('dan' | 'uro' | 'storitev')[];
+    const neznana = neznanaStoritev ? ` Storitve »${neznanaStoritev}« ne najdem.` : '';
+    const vprasanje = vprasajZaManjkajoce(manjka);
     const polja: Record<string, string> = { stranka: s.id };
     if (storitev) polja.storitev = storitev.id;
     if (oseba) polja.oseba = oseba.id;
     if (datum) polja.dan = datum;
     if (ura) polja.ura = ura;
     return {
-      sporocilo: `Nov termin: ${deli.join(', ')}.${pozor ? ` ${pozor}` : ''}${dopolni} ${SHRANI}`,
-      govor: `Odpiram nov termin za ${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${oseba && p.oseba ? `, pri ${oseba.ime}` : ''}.${govorPozor(pozor)}${dopolni} Preverite in shranite.`,
+      sporocilo: `Nov termin: ${deli.join(', ')}.${pozor ? ` ${pozor}` : ''}${neznana}${manjka.length ? ` Manjka še: ${manjka.join(', ')}.` : ` ${SHRANI}`}`,
+      govor: `${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${oseba && p.oseba ? `, pri ${oseba.ime}` : ''}.${govorPozor(pozor)}${neznana} ${vprasanje}`,
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'nov_termin', polja },
       podatki: { stranka_id: s.id, datum, ura, storitev: storitev?.naziv ?? null, oseba: oseba ? imeOsebe(oseba) : null, pozor },
@@ -299,7 +310,7 @@ export const prestaviTermin: BralnoOrodje<VhodPrestavi> = {
     const pozor = oseba ? await opozoriloZaCas(o, oseba, datum, zacetek, trajanje, t.id) : null;
     return {
       sporocilo: `Prestavitev: ${ime}, ${opisDatuma(t.datum, o.danes)} ob ${t.zacetek} → ${opisDatuma(datum, o.danes)} ob ${zacetek}.${pozor ? ` ${pozor}` : ''} ${SHRANI}`,
-      govor: `Odpiram termin ${ime} s ${datumZaGovor(t.datum, o.danes)} ${uraZaGovor(t.zacetek)}, nov čas je ${datumZaGovor(datum, o.danes)} ${uraZaGovor(zacetek)}.${govorPozor(pozor)} Preverite in shranite.`,
+      govor: `${ime}, nov čas ${datumZaGovor(datum, o.danes)} ${uraZaGovor(zacetek)}.${govorPozor(pozor)} ${SHRANI}`,
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'prestavi_termin', polja: { idt: t.id, dan_prej: t.datum, dan: datum, ura: zacetek } },
       podatki: { termin_id: t.id, od: { datum: t.datum, ura: t.zacetek }, na: { datum, ura: zacetek }, pozor },
@@ -405,7 +416,7 @@ export const vpisiOdsotnost: BralnoOrodje<VhodOdsotnost> = {
     const jaz = oseba.id === o.k.osebaId;
     return {
       sporocilo: `Odsotnost: ${imeOsebe(oseba)}, ${kdaj}${delDneva ? `, ${uraOd}–${uraDo}` : ', cel dan'}. ${SHRANI}`,
-      govor: `Odpiram odsotnost ${jaz ? 'za vas' : `za ${oseba.ime}`}, ${od === doo ? datumZaGovor(od, o.danes) : `${datumZaGovor(od, o.danes)} do ${datumZaGovor(doo, o.danes)}`}${delDneva ? ` od ${uraZaGovor(uraOd!).replace(/^ob /, '')} do ${uraZaGovor(uraDo!).replace(/^ob /, '')}` : ''}. Preverite in shranite.`,
+      govor: `Odsotnost ${jaz ? 'za vas' : `za ${oseba.ime}`}, ${od === doo ? datumZaGovor(od, o.danes) : `${datumZaGovor(od, o.danes)} do ${datumZaGovor(doo, o.danes)}`}${delDneva ? ` od ${uraZaGovor(uraOd!).replace(/^ob /, '')} do ${uraZaGovor(uraDo!).replace(/^ob /, '')}` : ''}. ${SHRANI}`,
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'odsotnost', polja },
       podatki: { oseba: imeOsebe(oseba), od, do: doo, ura_od: delDneva ? uraOd : null, ura_do: delDneva ? uraDo : null },
@@ -454,7 +465,7 @@ export const novaStranka: BralnoOrodje<VhodStranka> = {
     if (email) polja.email = email;
     return {
       sporocilo: `Nova stranka: ${ime}${telefon ? `, ${telefon}` : ''}${email ? `, ${email}` : ''}.${pozor} ${SHRANI}`,
-      govor: `Odpiram novo stranko ${ime}.${pozor} Preverite in shranite.`,
+      govor: `Nova stranka ${ime}.${pozor} ${SHRANI}`,
       pojdi: '/clients?glas=1',
       obrazec: { vrsta: 'nova_stranka', polja },
       podatki: { ime, ze_obstaja: obstaja },

@@ -30,7 +30,7 @@ describe('pripravi_termin', () => {
     expect(r.pojdi).toBe('/koledar?glas=1');
     expect(r.obrazec).toEqual({ vrsta: 'nov_termin', polja: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-11-13', ura: '11:00' } });
     expect(r.sporocilo).not.toContain('Pozor');
-    expect(r.govor).toBe('Odpiram nov termin za Mateja Kovačič, jutri, v petek ob enajstih, Barvanje, pri Tina. Preverite in shranite.');
+    expect(r.govor).toBe('Mateja Kovačič, jutri, v petek ob enajstih, Barvanje, pri Tina. Shranim?');
   });
 
   it('zaseden čas: opozori, a vseeno odpre obrazec', async () => {
@@ -52,7 +52,8 @@ describe('pripravi_termin', () => {
 
   it('manjkajoče pove, obrazec vseeno odpre', async () => {
     const r = await pripraviTermin.izvedi({ ...vhod, storitev: null, datum: null, ura: null }, o());
-    expect(r.sporocilo).toContain('V obrazcu izberite še dan, uro, storitev.');
+    expect(r.sporocilo).toContain('Manjka še: dan, uro, storitev.');
+    expect(r.govor).toMatch(/Za kdaj in katera storitev\?$/);
     expect(r.obrazec?.polja).toEqual({ stranka: '101', oseba: 'o1' });
   });
 
@@ -92,7 +93,7 @@ describe('vpisi_odsotnost', () => {
   it('zame, del dneva', async () => {
     const r = await vpisiOdsotnost.izvedi({ oseba: null, od: 'jutri', do: null, ura_od: '14:00', ura_do: 'ob štirih', razlog: 'zdravnik' }, o());
     expect(r.obrazec).toEqual({ vrsta: 'odsotnost', polja: { oseba: 'o1', dan: '2026-11-13', do_dan: '2026-11-13', ura: '14:00', do_ura: '16:00', razlog: 'zdravnik' } });
-    expect(r.govor).toBe('Odpiram odsotnost za vas, jutri, v petek od dveh do štirih. Preverite in shranite.');
+    expect(r.govor).toBe('Odsotnost za vas, jutri, v petek od dveh do štirih. Shranim?');
   });
 
   it('zaposleni "samo svoji" samo zase', async () => {
@@ -223,6 +224,7 @@ describe('neznana storitev', () => {
   it('obrazec se vseeno odpre, storitev izbere uporabnik', async () => {
     const r = await pripraviTermin.izvedi({ stranka: 'Mateja', stranka_id: null, storitev: 'moška pedikura', oseba: null, datum: 'jutri', ura: '10:30' }, o());
     expect(r.obrazec?.polja).toEqual({ stranka: '101', oseba: 'o1', dan: '2026-11-13', ura: '10:30' });
-    expect(r.sporocilo).toContain('Storitve »moška pedikura« ne najdem. V obrazcu izberite še storitev.');
+    expect(r.sporocilo).toContain('Storitve »moška pedikura« ne najdem. Manjka še: storitev.');
+    expect(r.govor).toMatch(/Katera storitev\?$/);
   });
 });

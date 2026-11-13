@@ -12,6 +12,7 @@ import {
   rms,
   tujeBesede,
 } from '@/lib/glas/odjemalec/tok';
+import { vprasajZaManjkajoce } from '@/lib/glas/orodja/obrazci';
 
 describe('cakanjePoKoncu', () => {
   // Prepisi, kot jih je Soniox dal v meritvi 13. 11. 2026 ob premoru sredi stavka.
@@ -126,5 +127,15 @@ describe('napakaZaGovor', () => {
   it('samo prvi stavek', () => {
     expect(napakaZaGovor('Povezava ni uspela. Nič ni bilo spremenjeno. Poskusite znova.')).toBe('Povezava ni uspela.');
     expect(napakaZaGovor('Neveljaven odgovor strežnika. (502)')).toBe('Neveljaven odgovor strežnika.');
+  });
+});
+
+describe('vprasajZaManjkajoce', () => {
+  it('vpraša samo, kar manjka', () => {
+    expect(vprasajZaManjkajoce([])).toBe('Shranim?');
+    expect(vprasajZaManjkajoce(['dan', 'uro'])).toBe('Za kdaj?');
+    expect(vprasajZaManjkajoce(['uro'])).toBe('Ob kateri uri?');
+    expect(vprasajZaManjkajoce(['storitev'])).toBe('Katera storitev?');
+    expect(vprasajZaManjkajoce(['dan', 'storitev'])).toBe('Kateri dan in katera storitev?');
   });
 });

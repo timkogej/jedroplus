@@ -250,6 +250,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     newEndTime?: string;
     channel: 'sms' | 'email' | 'both';
     source: 'edit' | 'drag_drop';
+    /** Asistent+: prestavitev je bila odprta z glasom (vprašanje se da odgovoriti z glasom). */
+    glas?: boolean;
   } | null>(null);
 
   // Action feedback
@@ -1616,6 +1618,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
             newEndTime: data.cas_konec,
             channel,
             source: 'edit',
+            glas: Boolean(glasPredizpolnitev),
           });
         }
       }
@@ -1627,7 +1630,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal, editingAppointment, companySettings, t, tCommon]);
+  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal, editingAppointment, companySettings, t, tCommon, glasPredizpolnitev]);
 
   // Drag-and-drop reschedule: callback from WeekView/DayView
   const handleAppointmentDropped = useCallback((
@@ -2847,6 +2850,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
           newDate={rescheduleNotifyTarget.newDate}
           newTime={rescheduleNotifyTarget.newTime}
           channel={rescheduleNotifyTarget.channel}
+          glas={rescheduleNotifyTarget.glas}
         />
       )}
 
