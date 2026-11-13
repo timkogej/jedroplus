@@ -14,7 +14,7 @@
 
 import { preberiKonfiguracijo, type GlasKonfiguracija } from './konfiguracija';
 import { hitraPot } from './hitraPot';
-import { brezRazmisleka, vprasanjeZaGovor, zaGovor } from './govor';
+import { brezKontaktov, brezRazmisleka, vprasanjeZaGovor, zaGovor } from './govor';
 import { imaPravico } from './pravice';
 import { hashParametrov, hashZetona, novZeton, SPOROCILA_POTRDITVE, type KodaPotrditve } from './potrditev';
 import { PRAZNA_PORABA, opozoriloKvote, sestejPorabo, strosekMikroUsd, type PorabaUkaza } from './poraba';
@@ -111,7 +111,7 @@ Pravila:
 - Stranka in zaposleni imata lahko isto ime. "Pri Luki", "Luka je zaposleni", "pri frizerki Tini" je oseba (zaposleni); za koga je termin, je stranka.
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
 - Dneva in ure nikoli ne ugibaj. Trenutni čas ni čas termina: če uporabnik ure ni povedal, je null. Če se ukaz konča sredi stavka (npr. "ob.", "za.", "pri."), je prepis odrezan: samo vprašaj, kaj je manjkalo (npr. "Za koga in ob kateri uri?"), in ne dopolni sam.
-- Ne moreš brisati, pošiljati sporočil strankam, spreminjati cen, pravic ali plačil. Če to zahteva, povej, da tega ne moreš.
+- Ne moreš brisati, pošiljati sporočil strankam, spreminjati cen, pravic, plačil ali marketinške privolitve. Če to zahteva, povej, da tega ne moreš (privolitev spremeni stranka sama ali uporabnik na kartici).
 - Recepture barve: odtenke zapiši kot "6.3", "7.1"; gramažo, oksidant (%) in čas (min) kot števila. Ne dodajaj ničesar, česar uporabnik ni rekel.
 - Za vprašanja, kako se kaj naredi v aplikaciji, uporabi pomoc_aplikacija; za "odpri", "pojdi na", "pokaži stran" uporabi odpri_stran. Navodil za aplikacijo si ne izmišljuj.
 - Poslovne analitike (prihodki, statistika, primerjave) ne delaš; povej, da je to na strani Analitika.
@@ -194,7 +194,8 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     casi.skupaj = ura() - t0;
     const zapis: ZakljucekUkaza = {
       status: 'napaka',
-      prepis: prepis || null,
+      // Telefon in e-pošta iz nareka ne gresta v dnevnik (zgodovino); obrazec ju že ima.
+      prepis: prepis ? brezKontaktov(prepis) : null,
       odgovor: null,
       orodja: uporabljena,
       napaka_koda: null,

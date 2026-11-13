@@ -179,3 +179,14 @@ export function mestnik(ime: string): string {
   else m = prvo;
   return [m, ...ostalo].join(' ');
 }
+
+/**
+ * Za dnevnik (glas_ukazi.prepis): telefonske številke (7+ števk) in e-naslovi se zamenjajo
+ * z oznako. Ure ("10:30"), datumi ("15. 11.") in kratka števila ostanejo.
+ */
+export function brezKontaktov(besedilo: string): string {
+  return besedilo
+    .replace(/[^\s@,;]+@[^\s@,;]+\.[a-z]{2,}/gi, '(e-pošta)')
+    .replace(/[^\s@]+ afna [^\s@]+( pika [^\s@]+)+/gi, '(e-pošta)')
+    .replace(/\+?\d[\d \-/]{5,}\d/g, (m) => (m.replace(/\D/g, '').length >= 7 ? '(telefon)' : m));
+}

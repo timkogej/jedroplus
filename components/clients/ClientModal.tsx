@@ -41,8 +41,11 @@ interface ClientModalProps {
   companyId: string;
   onSave: (data: ClientFormData) => Promise<void>;
   isSaving?: boolean;
-  /** Asistent+ (glas): nova stranka z že izpolnjenimi polji; shrani uporabnik sam. */
-  predizpolnitev?: Partial<Pick<ClientFormData, 'ime' | 'priimek' | 'telefon' | 'email'>> | null;
+  /**
+   * Asistent+ (glas): nova stranka z že izpolnjenimi polji ali sprememba obstoječe
+   * (telefon, e-pošta, jezik; opombe se dodajo obstoječim). Shrani uporabnik sam.
+   */
+  predizpolnitev?: Partial<Pick<ClientFormData, 'ime' | 'priimek' | 'telefon' | 'email' | 'language' | 'opombe' | 'interne_opombe'>> | null;
 }
 
 // Normalize client type value from DB to form values
@@ -146,16 +149,19 @@ function ClientModal({
           ?? (client.tip_stranke as string)
           ?? '';
 
+        // Asistent+: sprememba prek glasu (predizpolnitev) prekrije le povedana polja.
+        const g = predizpolnitev;
+        const dodaj = (staro: string, novo?: string) => (!novo || staro.includes(novo) ? staro : staro.trim() ? `${staro.trim()}\n${novo}` : novo);
         setFormData({
           ime: client.ime || '',
           priimek: client.priimek || '',
           spol: normalizeGender(client.spol),
           tip_stranke: normalizeClientType(tipStranke),
-          language: normalizeCommunicationLanguage(client.language ?? clientRecord.language ?? clientRecord.Language, defaultLanguage),
-          email: client.email || '',
-          telefon: client.telefon || '',
-          opombe: opombe,
-          interne_opombe: interneOpombe,
+          language: g?.language ?? normalizeCommunicationLanguage(client.language ?? clientRecord.language ?? clientRecord.Language, defaultLanguage),
+          email: g?.email ?? (client.email || ''),
+          telefon: g?.telefon ?? (client.telefon || ''),
+          opombe: dodaj(opombe, g?.opombe),
+          interne_opombe: dodaj(interneOpombe, g?.interne_opombe),
         });
       } else {
         setFormData({

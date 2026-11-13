@@ -14,7 +14,7 @@ import { samoSvojiTermini } from '../pravice';
 import { dodajDni, opisDatuma, razberiUro, vMinute } from '../razresevanje/datumi';
 import { poisci } from '../razresevanje/imena';
 import { prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
-import { datumZaGovor, mestnik, uraZaGovor } from '../govor';
+import { datumZaGovor, emailZaGovor, mestnik, povezavaKontakta, telefonZaGovor, telefonZaZaslon, uraZaGovor } from '../govor';
 import type { Kontekst, LokacijaPovzetek, OsebaPovzetek, RezultatOrodja, StoritevPovzetek, TerminPovzetek } from '../tipi';
 import { datumIzParametra } from './branje';
 import { razresiStranko, ID_STRANKE } from './stranke';
@@ -724,7 +724,107 @@ export const novaStranka: BralnoOrodje<VhodStranka> = {
       pojdi: '/clients?glas=1',
       obrazec: { vrsta: 'nova_stranka', polja },
       podatki: { ime, ze_obstaja: obstaja },
+      ...(telefon || email ? { zasebno: { dnevnik: `Nova stranka: ${ime}${telefon ? ', (telefon)' : ''}${email ? ', (e-pošta)' : ''}.${pozor} ${SHRANI}` } } : {}),
     };
   },
 };
 
+
+// ───────────────────────────────────────────────────────────────────────────
+const zodUrediStranko = z.object({
+  stranka: z.string().trim().min(1).max(80),
+  stranka_id: z.string().regex(ID_STRANKE).nullable(),
+  telefon: z.string().trim().max(30).nullable(),
+  email: z.string().trim().max(120).nullable(),
+  jezik: z.enum(JEZIKI_SPOROCIL).nullable(),
+  opombe: opomba,
+  interne_opombe: opomba,
+});
+type VhodUrediStranko = z.infer<typeof zodUrediStranko>;
+
+/**
+ * Sprememba podatkov stranke prek obstoječega obrazca stranke: telefon, e-pošta,
+ * jezik sporočil, opombe, interne opombe. Marketinške privolitve asistent NE spreminja
+ * (polja ni), imena in brisanja tudi ne. Shrani uporabnik.
+ */
+export const urediStranko: BralnoOrodje<VhodUrediStranko> = {
+  ime: 'uredi_stranko',
+  opis:
+    'Spremeni podatke stranke: telefon, e-pošta, jezik sporočil, opombe in interne opombe ("Ani spremeni telefon na …", "piši ji v angleščini", "v opombe stranke dodaj …"). ' +
+    'Odpre obrazec stranke izpolnjen; shrani uporabnik. Podaj samo, kar se spremeni. Marketinške privolitve ne spreminja.',
+  razred: 'branje',
+  pravica: 'stranke.urejanje',
+  omogoceno: true,
+  shema: {
+    type: 'object',
+    properties: {
+      stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno.' },
+      stranka_id: { type: ['string', 'null'], description: 'ID stranke, če je znan (aktivna stranka), sicer null.' },
+      telefon: { type: ['string', 'null'], description: 'Nov telefon (števke in +, kot povedano); null = ne spremeni.' },
+      email: { type: ['string', 'null'], description: 'Nova e-pošta ("afna" = @, "pika" = .); null = ne spremeni.' },
+      jezik: { type: ['string', 'null'], enum: [...JEZIKI_SPOROCIL, null], description: 'Jezik sporočil: slo, eng, de, it ali hr; null = ne spremeni.' },
+      opombe: { type: ['string', 'null'], description: 'Besedilo, ki se doda v opombe stranke; null = nič.' },
+      interne_opombe: { type: ['string', 'null'], description: 'Besedilo, ki se doda v interne opombe stranke; null = nič.' },
+    },
+    required: ['stranka', 'stranka_id', 'telefon', 'email', 'jezik', 'opombe', 'interne_opombe'],
+    additionalProperties: false,
+  },
+  vhod: zodUrediStranko,
+  async izvedi(p, o) {
+    const r = await razresiStranko(p.stranka, p.stranka_id, o);
+    if ('odgovor' in r) return r.odgovor;
+    const s = r.stranka;
+    const ime = `${s.ime} ${s.priimek}`.trim();
+    const fokus = { stranka_id: s.id };
+    const telefon = p.telefon ? p.telefon.replace(/[^\d+]/g, '') : '';
+    if (p.telefon && (telefon.replace(/\D/g, '').length < 6 || !povezavaKontakta('klic', telefon))) {
+      return { sporocilo: 'Te telefonske številke ne razumem. Ponovite jo, prosim.', podatki: fokus };
+    }
+    const email = p.email ? p.email.trim().toLowerCase() : '';
+    if (p.email && !povezavaKontakta('pisi', email)) return { sporocilo: 'Tega e-naslova ne razumem. Ponovite ga, prosim.', podatki: fokus };
+
+    const polja: Record<string, string> = { id: s.id };
+    const zaslon: string[] = [];
+    const govor: string[] = [];
+    const dnevnik: string[] = [];
+    if (telefon) {
+      polja.telefon = telefon;
+      zaslon.push(`telefon ${telefonZaZaslon(telefon)}`);
+      govor.push(`telefon ${telefonZaGovor(telefon)}`);
+      dnevnik.push('(nov telefon)');
+    }
+    if (email) {
+      polja.email = email;
+      zaslon.push(`e-pošta ${email}`);
+      govor.push(`e-pošta ${emailZaGovor(email)}`);
+      dnevnik.push('(nova e-pošta)');
+    }
+    if (p.jezik) {
+      polja.jezik = p.jezik;
+      zaslon.push(`jezik ${IME_JEZIKA[p.jezik]}`);
+      govor.push(`jezik ${IME_JEZIKA[p.jezik]}`);
+      dnevnik.push(`jezik ${IME_JEZIKA[p.jezik]}`);
+    }
+    if (p.opombe) {
+      polja.opombe = p.opombe;
+      zaslon.push(`opomba »${p.opombe}«`);
+      govor.push(`opomba ${p.opombe}`);
+      dnevnik.push('(opomba)');
+    }
+    if (p.interne_opombe) {
+      polja.interne = p.interne_opombe;
+      zaslon.push(`interna opomba »${p.interne_opombe}«`);
+      govor.push(`interna opomba ${p.interne_opombe}`);
+      dnevnik.push('(interna opomba)');
+    }
+    if (zaslon.length === 0) return { sporocilo: `${ime}: kaj naj spremenim?`, podatki: fokus };
+    return {
+      sporocilo: `Sprememba stranke ${ime}: ${zaslon.join(', ')}. ${SHRANI}`,
+      govor: `${ime}: ${govor.join(', ')}. ${SHRANI}`,
+      pojdi: '/clients?glas=1',
+      obrazec: { vrsta: 'uredi_stranko', polja },
+      podatki: { ...fokus, spremembe: Object.keys(polja).filter((k) => k !== 'id') },
+      zasebno: { dnevnik: `Sprememba stranke ${ime}: ${dnevnik.join(', ')}. ${SHRANI}` },
+    };
+  },
+};

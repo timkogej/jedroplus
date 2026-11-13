@@ -13,7 +13,7 @@ import { dodajZapisek } from './zapiski';
 import { karticaStranke, neaktivneStranke, podatkiStranke, zadnjaBarva } from './kartica';
 import { kdoDela, naslednjaStranka, prosteLuknjeOrodje, resursiDan } from './pregled';
 import { odpriStran, pomocAplikacija } from './pomoc';
-import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, urediTermin, vpisiOdsotnost } from './obrazci';
+import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, urediStranko, urediTermin, vpisiOdsotnost } from './obrazci';
 
 export const VSA_ORODJA: readonly Orodje[] = [
   iskanjeStranke,
@@ -33,6 +33,7 @@ export const VSA_ORODJA: readonly Orodje[] = [
   pripraviTermin,
   prestaviTermin,
   urediTermin,
+  urediStranko,
   statusTermina,
   vpisiOdsotnost,
   novaStranka,

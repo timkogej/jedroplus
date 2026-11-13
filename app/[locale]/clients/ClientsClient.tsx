@@ -26,6 +26,7 @@ import { useAuth } from '@/app/auth-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
 import type { Client, ClientFormData, ClientStats } from '@/types/clients';
+import type { CommunicationLanguageCode } from '@/lib/communicationLanguage';
 import {
   fetchClientsWithCount,
   deriveClientStats,
@@ -363,17 +364,42 @@ export default function ClientsClient({
   const [glasStranka, setGlasStranka] = useState<ClientModalPredizpolnitev>(null);
   const glasNova = searchParams.get('glas') === '1';
   const odpriGlasStranko = useCallback(() => {
-    if (!canCreateClient) return;
-    const obrazec = vzemiObrazec(['nova_stranka']);
+    if (!canCreateClient && !canEditClient) return;
+    const obrazec = vzemiObrazec(['nova_stranka', 'uredi_stranko']);
     if (!obrazec) return;
-    const v = (k: string) => (obrazec.polja[k] ?? '').trim().slice(0, 120) || undefined;
+    const v = (k: string, najvec = 120) => (obrazec.polja[k] ?? '').trim().slice(0, najvec) || undefined;
+    if (obrazec.vrsta === 'uredi_stranko') {
+      // Sprememba obstoječe stranke: isti obrazec za urejanje kot ročno, shrani uporabnik.
+      const id = v('id');
+      if (!id || !canEditClient || !companyId) return;
+      const jezik = v('jezik');
+      const prekrij: ClientModalPredizpolnitev = {
+        telefon: v('telefon'),
+        email: v('email'),
+        language: jezik && ['slo', 'eng', 'de', 'it', 'hr'].includes(jezik) ? (jezik as CommunicationLanguageCode) : undefined,
+        opombe: v('opombe', 300),
+        interne_opombe: v('interne', 300),
+      };
+      const odpri = (c: Client) => {
+        setGlasStranka(prekrij);
+        setSelectedClient(c);
+        setModalMode('edit');
+        setModalOpen(true);
+        setDetailsOpen(false);
+      };
+      const znana = clients.find((c) => c.id === id);
+      if (znana) odpri(znana);
+      else void getClientById(companyId, id).then((r) => r.data && odpri(r.data));
+      return;
+    }
+    if (!canCreateClient) return;
     setGlasStranka({ ime: v('ime'), priimek: v('priimek'), telefon: v('telefon'), email: v('email') });
     setSelectedClient(null);
     setModalMode('create');
     setModalOpen(true);
-  }, [canCreateClient]);
+  }, [canCreateClient, canEditClient, clients, companyId]);
   useEffect(() => {
-    if (!glasNova || !canCreateClient) return;
+    if (!glasNova || (!canCreateClient && !canEditClient)) return;
     window.history.replaceState(null, '', window.location.pathname);
     odpriGlasStranko();
     // Samo ob prihodu s takšno povezavo.
@@ -934,7 +960,7 @@ export default function ClientsClient({
         companyId={companyId}
         onSave={handleSaveClient}
         isSaving={isSaving}
-        predizpolnitev={modalMode === 'create' ? glasStranka : null}
+        predizpolnitev={glasStranka}
       />
 
       {/* Details Panel */}
