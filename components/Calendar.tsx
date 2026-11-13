@@ -45,6 +45,7 @@ import {
 } from '@/lib/supabase/appointments';
 import { getClientById } from '@/lib/supabase/clients';
 import { vzemiObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
+import { DOGODEK_POJDI } from '@/lib/glas/odjemalec/obrazecGlas';
 import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
 import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, syncResursiZaTermin, sprostiResurseTermina } from '@/lib/supabase/resursi';
 import type { Resurs } from '@/types/resursi';
@@ -1255,21 +1256,26 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   // Klik na obvestilo (v aplikaciji ali push): /koledar?termin=OB-000063&datum=2026-10-21
   // skoči na ta dan in odpre termin, ko se naloži.
   const [pendingTerminId, setPendingTerminId] = useState<string | null>(null);
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+  /** Vrne true, če je povezava vsebovala termin ali datum. */
+  const preberiTerminIzPovezave = useCallback((params: URLSearchParams) => {
     const termin = params.get('termin');
     const datum = params.get('datum');
-    if (!termin && !datum) return;
+    if (!termin && !datum) return false;
     if (datum && /^\d{4}-\d{2}-\d{2}$/.test(datum)) {
       const [y, m, d] = datum.split('-').map(Number);
       setCurrentDate(new Date(y, m - 1, d));
     }
     if (termin) setPendingTerminId(termin);
+    return true;
+  }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!preberiTerminIzPovezave(params)) return;
     params.delete('termin');
     params.delete('datum');
     const query = params.toString();
     window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
-  }, []);
+  }, [preberiTerminIzPovezave]);
   useEffect(() => {
     if (!pendingTerminId) return;
     const match = appointments.find((a) => a.id_termina === pendingTerminId || a.id === pendingTerminId);
@@ -1290,17 +1296,13 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const [glasPredizpolnitev, setGlasPredizpolnitev] = useState<AppointmentModalPredizpolnitev>(null);
   const [glasOsebaId, setGlasOsebaId] = useState<string | undefined>(undefined);
   const [glasOdsotnost, setGlasOdsotnost] = useState<Partial<AbsenceFormData> | null>(null);
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (!params.get('glas')) return;
-    params.delete('glas');
+  const preberiGlasObrazec = useCallback(() => {
     const obrazec = vzemiObrazec(['nov_termin', 'prestavi_termin', 'odsotnost']);
-    const namen: Record<string, string> | null = obrazec
-      ? { ...obrazec.polja, glas: obrazec.vrsta === 'nov_termin' ? 'nov' : obrazec.vrsta === 'prestavi_termin' ? 'prestavi' : 'odsotnost' }
-      : null;
-    const query = params.toString();
-    window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
-    if (!namen) return;
+    if (!obrazec) return;
+    const namen: Record<string, string> = {
+      ...obrazec.polja,
+      glas: obrazec.vrsta === 'nov_termin' ? 'nov' : obrazec.vrsta === 'prestavi_termin' ? 'prestavi' : 'odsotnost',
+    };
     const dan = namen.dan_prej ?? namen.dan;
     if (dan && /^\d{4}-\d{2}-\d{2}$/.test(dan)) {
       const [y, m, d] = dan.split('-').map(Number);
@@ -1308,6 +1310,28 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     }
     setGlasNamen(namen);
   }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('glas')) return;
+    params.delete('glas');
+    const query = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+    preberiGlasObrazec();
+  }, [preberiGlasObrazec]);
+  // Plavajoči asistent na že odprtem koledarju: stran se ne naloži znova, zato
+  // namen pride kot dogodek (lib/glas/odjemalec/obrazecGlas).
+  useEffect(() => {
+    const ob = (e: Event) => {
+      const pot = (e as CustomEvent<{ pot?: string }>).detail?.pot ?? '';
+      const [pod, query = ''] = pot.split('?');
+      if (pod !== '/koledar') return;
+      const params = new URLSearchParams(query);
+      if (params.get('glas')) preberiGlasObrazec();
+      preberiTerminIzPovezave(params);
+    };
+    window.addEventListener(DOGODEK_POJDI, ob);
+    return () => window.removeEventListener(DOGODEK_POJDI, ob);
+  }, [preberiGlasObrazec, preberiTerminIzPovezave]);
   useEffect(() => {
     if (!glasNamen || !companyId) return;
     const n = glasNamen;

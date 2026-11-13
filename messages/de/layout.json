@@ -218,5 +218,26 @@
   },
   "meta": {
     "description": "Jedro+ – System zur Terminverwaltung"
+  },
+  "asistent": {
+    "odpri": "Asistent+ öffnen",
+    "naslov": "Asistent+",
+    "mirovanje": "Tippen und sprechen",
+    "povezujem": "Verbinde …",
+    "poslusam": "Ich höre zu …",
+    "razmisljam": "Ich denke nach …",
+    "govorim": "Ich spreche … tippen zum Unterbrechen",
+    "obrazec": "Sagen Sie „speichern“ oder „abbrechen“",
+    "shranjujem": "Wird gespeichert.",
+    "zaprto": "Geschlossen. Nichts wurde gespeichert.",
+    "shranjeno": "Gespeichert.",
+    "vpisi": "Oder schreiben …",
+    "poslji": "Senden",
+    "zapri": "Schließen",
+    "koncaj": "Gespräch beenden",
+    "potrdi": "Bestätigen",
+    "preklici": "Abbrechen",
+    "predlogNamig": "Sagen Sie „ja“ oder „nein“.",
+    "pozdrav": "Was kann ich tun? Zum Beispiel: „Wer ist als Nächstes dran?“ oder „Trage Ana morgen um zehn ein.“"
   }
 }

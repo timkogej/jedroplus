@@ -218,5 +218,26 @@
   },
   "meta": {
     "description": "Jedro+ – sustav za upravljanje terminima"
+  },
+  "asistent": {
+    "odpri": "Otvori Asistent+",
+    "naslov": "Asistent+",
+    "mirovanje": "Dodirnite i recite",
+    "povezujem": "Povezujem …",
+    "poslusam": "Slušam …",
+    "razmisljam": "Razmišljam …",
+    "govorim": "Govorim … dodirnite za prekid",
+    "obrazec": "Recite »spremi« ili »odustani«",
+    "shranjujem": "Spremam.",
+    "zaprto": "Zatvoreno. Ništa nije spremljeno.",
+    "shranjeno": "Spremljeno.",
+    "vpisi": "Ili napišite …",
+    "poslji": "Pošalji",
+    "zapri": "Zatvori",
+    "koncaj": "Završi razgovor",
+    "potrdi": "Potvrdi",
+    "preklici": "Odustani",
+    "predlogNamig": "Recite »da« ili »ne«.",
+    "pozdrav": "Što mogu učiniti? Na primjer: »Tko je sljedeći?« ili »Upiši Anu sutra u deset.«"
   }
 }

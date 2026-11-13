@@ -218,5 +218,26 @@
   },
   "meta": {
     "description": "Jedro+ – appointment management system"
+  },
+  "asistent": {
+    "odpri": "Open Asistent+",
+    "naslov": "Asistent+",
+    "mirovanje": "Tap and speak",
+    "povezujem": "Connecting …",
+    "poslusam": "Listening …",
+    "razmisljam": "Thinking …",
+    "govorim": "Speaking … tap to interrupt",
+    "obrazec": "Say “save” or “cancel”",
+    "shranjujem": "Saving.",
+    "zaprto": "Closed. Nothing was saved.",
+    "shranjeno": "Saved.",
+    "vpisi": "Or type …",
+    "poslji": "Send",
+    "zapri": "Close",
+    "koncaj": "End conversation",
+    "potrdi": "Confirm",
+    "preklici": "Cancel",
+    "predlogNamig": "Say “yes” or “no”.",
+    "pozdrav": "What can I do? For example: “Who is next?” or “Book Ana tomorrow at ten.”"
   }
 }

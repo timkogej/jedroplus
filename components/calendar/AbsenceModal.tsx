@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, memo } from 'react';
+import { useState, useCallback, useEffect, memo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 
 interface AbsenceModalProps {
   isOpen: boolean;
@@ -71,6 +72,9 @@ function AbsenceModal({
   predizpolnitev = null,
 }: AbsenceModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  // Asistent+: obrazec, odprt z glasom, sprejme »shrani« / »prekliči« (requestSubmit = gumb Shrani).
+  const glasFormRef = useRef<HTMLFormElement | null>(null);
+  useGlasovniObrazec(isOpen && Boolean(predizpolnitev), glasFormRef, onClose);
   const t = useTranslations('appointments');
 
   // Form state
@@ -236,7 +240,7 @@ function AbsenceModal({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className={`${sheet.body} overflow-x-hidden`}>
+            <form ref={glasFormRef} onSubmit={handleSubmit} className={`${sheet.body} overflow-x-hidden`}>
               {/* Errors */}
               {errors.length > 0 && (
                 <div className="rounded-xl bg-red-50 p-4">

@@ -42,6 +42,7 @@ import { checkResourceConflicts, fetchResursIdsForTerminRow, type ResourceConfli
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 import { waitForClient } from '@/lib/supabase/clients';
+import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 type ModalMode = 'view' | 'edit' | 'create';
 
 interface AppointmentModalProps {
@@ -165,6 +166,9 @@ function AppointmentModal({
   predizpolnitev = null,
 }: AppointmentModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  // Asistent+: obrazec, odprt z glasom, sprejme »shrani« / »prekliči« (requestSubmit = gumb Shrani).
+  const glasFormRef = useRef<HTMLFormElement | null>(null);
+  useGlasovniObrazec(isOpen && Boolean(predizpolnitev), glasFormRef, onClose);
   const { money, locale } = useFormat();
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
@@ -1286,7 +1290,7 @@ function AppointmentModal({
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
+          <form ref={glasFormRef} onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
             <div
               className="min-h-0 flex-1 touch-pan-y overflow-y-auto overflow-x-hidden overscroll-contain p-4 custom-scrollbar sm:p-5"
               style={{ WebkitOverflowScrolling: 'touch' }}

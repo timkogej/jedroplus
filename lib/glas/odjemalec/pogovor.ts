@@ -70,6 +70,11 @@ export interface DogodkiPogovora {
   /** Napaka, ki jo mora uporabnik videti (in jo tudi sliši, če glas deluje). */
   napaka(sporocilo: string): void;
   meritev(m: Meritev): void;
+  /**
+   * Izjavo lahko obdela vmesnik sam, brez strežnika (npr. "shrani" v obrazcu,
+   * ki ga je odprl asistent). Vrne besedilo odgovora ali null (gre na strežnik).
+   */
+  lokalno?(izjava: string): string | null;
 }
 
 interface Seja {
@@ -125,6 +130,9 @@ export class Pogovor {
   private naslednjiCas = 0;
   private koncajGovor: (() => void) | null = null;
   private zahteva: AbortController | null = null;
+
+  /** Koliko časa po odgovoru še posluša (daljše, ko je odprt obrazec za pregled). */
+  tisinaPoOdgovoru = TISINA_PO_ODGOVORU_MS;
 
   constructor(private d: DogodkiPogovora) {}
 
@@ -187,7 +195,7 @@ export class Pogovor {
   prekini() {
     if (this.s === 'govorim') {
       this.utisaj();
-      this.poslusaj(TISINA_PO_ODGOVORU_MS);
+      this.poslusaj(this.tisinaPoOdgovoru);
     }
   }
 
@@ -396,6 +404,15 @@ export class Pogovor {
       if (jeZavrnitev(izjava)) return this.zavrni(p);
     }
     this.predlog = null;
+    if (!izbira) {
+      const lokalno = this.d.lokalno?.(izjava);
+      if (lokalno) {
+        this.vprasanje = null;
+        this.d.odgovor({ ok: true, status: 'odgovor', odgovor: lokalno });
+        await this.povej(lokalno, performance.now());
+        return;
+      }
+    }
     const moznost = izbira ?? (this.vprasanje?.moznosti?.length ? izberiMoznost(izjava, this.vprasanje.moznosti) : null);
 
     const sekunde = Math.round(this.sekundeZvoka * 10) / 10;
@@ -474,14 +491,14 @@ export class Pogovor {
     if (!besedilo || !this.tts || this.tts.readyState !== 1 || !this.izhod || !this.seja) {
       meri(null);
       // Brez odprtega pogovora (besedilni vnos, gumb) ni kaj poslušati.
-      if (this.stt) this.poslusaj(TISINA_PO_ODGOVORU_MS);
+      if (this.stt) this.poslusaj(this.tisinaPoOdgovoru);
       else this.nastavi('mirovanje');
       return;
     }
     // Varovalka, če obnova v ozadju ni uspela (npr. zaspan zavihek).
     if (performance.now() - this.sejaCas > 55000 && !(await this.obnoviTtsKljuc())) {
       meri(null);
-      this.poslusaj(TISINA_PO_ODGOVORU_MS);
+      this.poslusaj(this.tisinaPoOdgovoru);
       return;
     }
     const seja = this.seja!;
@@ -524,7 +541,7 @@ export class Pogovor {
         if (this.govorId === id) this.koncajGovor?.();
       }, 30000);
     });
-    if (this.s === 'govorim') this.poslusaj(TISINA_PO_ODGOVORU_MS);
+    if (this.s === 'govorim') this.poslusaj(this.tisinaPoOdgovoru);
   }
 
   private prviZvok: (() => void) | null = null;

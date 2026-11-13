@@ -42,6 +42,7 @@ import {
 import { getNextClientId } from '@/src/lib/idGenerators';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
 import { vzemiObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
+import { DOGODEK_POJDI } from '@/lib/glas/odjemalec/obrazecGlas';
 import { TABLES } from '@/lib/data';
 
 // Components
@@ -361,9 +362,8 @@ export default function ClientsClient({
   const searchParams = useSearchParams();
   const [glasStranka, setGlasStranka] = useState<ClientModalPredizpolnitev>(null);
   const glasNova = searchParams.get('glas') === '1';
-  useEffect(() => {
-    if (!glasNova || !canCreateClient) return;
-    window.history.replaceState(null, '', window.location.pathname);
+  const odpriGlasStranko = useCallback(() => {
+    if (!canCreateClient) return;
     const obrazec = vzemiObrazec(['nova_stranka']);
     if (!obrazec) return;
     const v = (k: string) => (obrazec.polja[k] ?? '').trim().slice(0, 120) || undefined;
@@ -371,13 +371,36 @@ export default function ClientsClient({
     setSelectedClient(null);
     setModalMode('create');
     setModalOpen(true);
+  }, [canCreateClient]);
+  useEffect(() => {
+    if (!glasNova || !canCreateClient) return;
+    window.history.replaceState(null, '', window.location.pathname);
+    odpriGlasStranko();
     // Samo ob prihodu s takšno povezavo.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [glasNova]);
 
   // ?stranka=ID (npr. iz Asistent+ "odpri kartico Ane Novak") odpre kartico enkrat.
-  const strankaIzPovezave = searchParams.get('stranka');
+  // Plavajoči asistent na že odprti strani pošlje isto kot dogodek (stran se ne naloži znova).
+  const [strankaIzDogodka, setStrankaIzDogodka] = useState<string | null>(null);
+  const strankaIzPovezave = strankaIzDogodka ?? searchParams.get('stranka');
   const odprtaIzPovezave = useRef<string | null>(null);
+  useEffect(() => {
+    const ob = (e: Event) => {
+      const pot = (e as CustomEvent<{ pot?: string }>).detail?.pot ?? '';
+      const [pod, query = ''] = pot.split('?');
+      if (pod !== '/clients') return;
+      const params = new URLSearchParams(query);
+      if (params.get('glas')) odpriGlasStranko();
+      const id = params.get('stranka');
+      if (id) {
+        odprtaIzPovezave.current = null;
+        setStrankaIzDogodka(id);
+      }
+    };
+    window.addEventListener(DOGODEK_POJDI, ob);
+    return () => window.removeEventListener(DOGODEK_POJDI, ob);
+  }, [odpriGlasStranko]);
   useEffect(() => {
     if (!strankaIzPovezave || !companyId || !canViewClient || odprtaIzPovezave.current === strankaIzPovezave) return;
     const najdena = clients.find((c) => c.id === strankaIzPovezave);

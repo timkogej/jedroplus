@@ -218,5 +218,26 @@
   },
   "meta": {
     "description": "Jedro+ – gestionale per appuntamenti"
+  },
+  "asistent": {
+    "odpri": "Apri Asistent+",
+    "naslov": "Asistent+",
+    "mirovanje": "Tocca e parla",
+    "povezujem": "Connessione …",
+    "poslusam": "Ascolto …",
+    "razmisljam": "Sto pensando …",
+    "govorim": "Sto parlando … tocca per interrompere",
+    "obrazec": "Di’ «salva» o «annulla»",
+    "shranjujem": "Salvataggio.",
+    "zaprto": "Chiuso. Non è stato salvato nulla.",
+    "shranjeno": "Salvato.",
+    "vpisi": "Oppure scrivi …",
+    "poslji": "Invia",
+    "zapri": "Chiudi",
+    "koncaj": "Termina conversazione",
+    "potrdi": "Conferma",
+    "preklici": "Annulla",
+    "predlogNamig": "Di’ «sì» o «no».",
+    "pozdrav": "Cosa posso fare? Per esempio: «Chi è il prossimo?» o «Prenota Ana domani alle dieci.»"
   }
 }

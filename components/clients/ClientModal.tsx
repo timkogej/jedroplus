@@ -29,6 +29,7 @@ import { languageFromPhone, normalizePhone, phonePlaceholder } from '@/lib/phone
 import { smsAllowedFor } from '@/lib/sms';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 
 type ModalMode = 'create' | 'edit';
 
@@ -86,6 +87,9 @@ function ClientModal({
   predizpolnitev = null,
 }: ClientModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  // Asistent+: obrazec, odprt z glasom, sprejme »shrani« / »prekliči« (requestSubmit = gumb Shrani).
+  const glasFormRef = useRef<HTMLFormElement | null>(null);
+  useGlasovniObrazec(isOpen && Boolean(predizpolnitev), glasFormRef, onClose);
   const t = useTranslations('clients');
   const { companySettings } = useCompany();
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
@@ -363,7 +367,7 @@ function ClientModal({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
+            <form ref={glasFormRef} onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
               <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
                 <div className="space-y-4">
                   {/* First name */}
