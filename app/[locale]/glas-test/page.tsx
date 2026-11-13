@@ -77,6 +77,11 @@ export default function GlasTestPage() {
         setZadnji(null);
         dodaj({ kdo: 'napaka', besedilo: t });
       },
+      zacetek: (m) =>
+        dodaj({
+          kdo: 'asistent',
+          besedilo: `Začetek: poslušam po ${m.doPoslusanja} ms, razpoznava povezana po ${m.doPovezave} ms${m.sejaVnaprej ? ' (seja vnaprej)' : ' (brez seje vnaprej)'}.`,
+        }),
       meritev: (m) =>
         setVrstice((x) => {
           const i = x.map((v) => v.kdo).lastIndexOf('asistent');
@@ -87,6 +92,7 @@ export default function GlasTestPage() {
           return kopija;
         }),
     });
+    pogovor.current.pripravi();
     return () => pogovor.current?.ustavi();
   }, [osveziStanje]);
 

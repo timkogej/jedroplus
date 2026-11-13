@@ -70,6 +70,8 @@ export interface DogodkiPogovora {
   /** Napaka, ki jo mora uporabnik videti (in jo tudi sliši, če glas deluje). */
   napaka(sporocilo: string): void;
   meritev(m: Meritev): void;
+  /** Čas zagona: do poslušanja (mikrofon prižgan) in do povezave z razpoznavo. */
+  zacetek?(m: { doPoslusanja: number; doPovezave: number; sejaVnaprej: boolean }): void;
   /**
    * Izjavo lahko obdela vmesnik sam, brez strežnika (npr. "shrani" v obrazcu,
    * ki ga je odprl asistent). Vrne besedilo odgovora ali null (gre na strežnik).
@@ -84,6 +86,8 @@ interface Seja {
   stt: { url: string; kljuc: string; model: string; namigi: string[]; najdaljsiKonecMs: number };
   tts: { url: string; kljuc: string; model: string; glas: string; hitrost: number };
   opozorilo?: string | null;
+  /** Veljavnost ključev v sekundah (strežnik; privzeto 60). */
+  veljaS?: number;
 }
 
 /** Po odgovoru posluša še toliko časa, nato se pogovor zapre. */
@@ -95,8 +99,12 @@ const ZGODOVINA_VELJA_MS = 5 * 60_000;
 /** Če uporabnik po zaznanem koncu takoj nadaljuje (premor sredi nareka), izjavi združimo. */
 const POCAKAJ_PO_KONCU_MS = 250;
 const ZAHTEVA_TIMEOUT_MS = 20000;
-/** TTS ključ se preveri ob vsakem govoru in velja 60 s: obnavljamo ga v ozadju. */
-const TTS_KLJUC_OBNOVI_MS = 40000;
+/** Seja (ključa) mora imeti ob uporabi še vsaj toliko veljavnosti. */
+const SEJA_REZERVA_MS = 60_000;
+/** Po neuspeli pripravi vnaprej (npr. izklopljeno) ne poskušamo znova toliko časa. */
+const PRIPRAVA_PREMOR_MS = 60_000;
+/** Največ toliko zvoka (okvirji po 100 ms) hranimo, dokler se razpoznava ne poveže. */
+const NAJVEC_CAKAJOCEGA_ZVOKA = 150;
 const TTS_HZ = 24000;
 
 const SPOROCILA = {
@@ -111,7 +119,12 @@ const SPOROCILA = {
 export class Pogovor {
   private s: StanjePogovora = 'mirovanje';
   private seja: Seja | null = null;
-  private sejaCas = 0;
+  /** Seja, pripravljena vnaprej (ključa veljata več minut, isti ključ odpre več povezav). */
+  private zaloga: { seja: Seja; cas: number; ttsCas: number } | null = null;
+  private nalaganje: Promise<Seja> | null = null;
+  private pripravaNeuspelaDo = 0;
+  /** Zvok, posnet preden je razpoznava povezana (uporabnik lahko govori takoj). */
+  private zvokCaka: ArrayBuffer[] = [];
   private tok: MediaStream | null = null;
   private vhod: AudioContext | null = null;
   private izhod: AudioContext | null = null;
@@ -151,9 +164,22 @@ export class Pogovor {
     return this.s !== 'mirovanje';
   }
 
+  /**
+   * Pripravi sejo vnaprej (ključa, namigi), da je pogovor ob tapu takoj pripravljen.
+   * Kliče jo vmesnik, ko se gumb pokaže, ob prihodu miške in na dotik. Brez mikrofona.
+   */
+  pripravi(): void {
+    if (this.svezaZaloga() || this.nalaganje || Date.now() < this.pripravaNeuspelaDo) return;
+    this.pridobiSejo().catch(() => {
+      this.pripravaNeuspelaDo = Date.now() + PRIPRAVA_PREMOR_MS;
+    });
+    ogrejPovezave();
+  }
+
   /** Mora biti klicano iz dotika/klika (iOS dovoli zvok samo takrat). */
   async zacni(): Promise<void> {
     if (this.aktiven) return;
+    const t0 = performance.now();
     this.nastavi('povezujem');
     // Zvočna konteksta ustvarimo takoj, še v dotiku (iOS Safari).
     const AC: typeof AudioContext | undefined =
@@ -167,9 +193,12 @@ export class Pogovor {
     void this.izhod.resume();
     void this.vhod.resume();
 
+    const sejaVnaprej = Boolean(this.svezaZaloga());
+    const sejaP = this.vzemiSejo();
+    sejaP.catch(() => {}); // obravnavano spodaj
     try {
-      const [seja, tok] = await Promise.all([
-        this.pridobiSejo(),
+      // Mikrofon in zvočni modul; seja (če ni pripravljena) se nalaga vzporedno.
+      const [tok] = await Promise.all([
         navigator.mediaDevices
           .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } })
           .catch((e: unknown) => {
@@ -181,15 +210,29 @@ export class Pogovor {
         tok.getTracks().forEach((t) => t.stop());
         return;
       }
+      // Poslušamo takoj: zvok se hrani, dokler se razpoznava ne poveže, nato gre v
+      // celoti naprej. Uporabniku ni treba čakati na povezavo.
       this.tok = tok;
-      await Promise.all([this.odpriStt(seja), this.odpriTts(seja)]);
+      this.zvokCaka = [];
       this.povezMikrofon(tok);
-      this.ttsObnova = setInterval(() => void this.obnoviTtsKljuc(), TTS_KLJUC_OBNOVI_MS);
       this.ton(880);
       this.poslusaj(TISINA_NA_ZACETKU_MS);
+      const doPoslusanja = Math.round(performance.now() - t0);
+
+      const seja = await sejaP;
+      if (!this.aktiven) return;
+      this.seja = seja;
+      await this.odpriStt(seja);
+      if (!this.aktiven) return;
+      this.d.zacetek?.({ doPoslusanja, doPovezave: Math.round(performance.now() - t0), sejaVnaprej });
+      // Glas ni nujen za poslušanje: odpre se v ozadju.
+      void this.odpriTts(seja);
+      const veljaMs = (seja.veljaS ?? 60) * 1000;
+      this.ttsObnova = setInterval(() => void this.obnoviTtsKljuc(), Math.max(30_000, veljaMs - SEJA_REZERVA_MS));
       if (seja.opozorilo) this.d.napaka(seja.opozorilo);
     } catch (e) {
-      this.koncaj(e instanceof NapakaPogovora ? e.message : SPOROCILA.povezava);
+      // Uporabnik je medtem sam končal: brez sporočila o napaki.
+      if (this.aktiven) this.koncaj(e instanceof NapakaPogovora ? e.message : SPOROCILA.povezava);
     }
   }
 
@@ -232,7 +275,29 @@ export class Pogovor {
 
   // ───────────────────────────── povezave ─────────────────────────────
 
-  private async pridobiSejo(): Promise<Seja> {
+  private svezaZaloga(): Seja | null {
+    const z = this.zaloga;
+    if (!z) return null;
+    const veljaMs = (z.seja.veljaS ?? 60) * 1000;
+    return Date.now() - z.cas < veljaMs - SEJA_REZERVA_MS ? z.seja : null;
+  }
+
+  /** Pripravljena seja, seja, ki se že nalaga, ali nova. */
+  private vzemiSejo(): Promise<Seja> {
+    const z = this.svezaZaloga();
+    if (z) return Promise.resolve(z);
+    return this.nalaganje ?? this.pridobiSejo();
+  }
+
+  private pridobiSejo(): Promise<Seja> {
+    const p = this.naloziSejo().finally(() => {
+      if (this.nalaganje === p) this.nalaganje = null;
+    });
+    this.nalaganje = p;
+    return p;
+  }
+
+  private async naloziSejo(): Promise<Seja> {
     let r: Response;
     try {
       r = await fetch('/api/glas/seja', { method: 'POST', cache: 'no-store' });
@@ -242,8 +307,8 @@ export class Pogovor {
     const j = (await r.json().catch(() => null)) as Seja | null;
     if (!j) throw new NapakaPogovora(SPOROCILA.nerazumljiv);
     if (!j.ok) throw new NapakaPogovora(j.sporocilo ?? SPOROCILA.povezava);
-    this.seja = j;
-    this.sejaCas = performance.now();
+    this.zaloga = { seja: j, cas: Date.now(), ttsCas: Date.now() };
+    this.pripravaNeuspelaDo = 0;
     return j;
   }
 
@@ -254,7 +319,7 @@ export class Pogovor {
       const j = (await r.json().catch(() => null)) as { ok?: boolean; tts?: { kljuc?: string } } | null;
       if (!j?.ok || !j.tts?.kljuc || !this.seja) return false;
       this.seja.tts.kljuc = j.tts.kljuc;
-      this.sejaCas = performance.now();
+      if (this.zaloga?.seja === this.seja) this.zaloga.ttsCas = Date.now();
       return true;
     } catch {
       return false;
@@ -281,6 +346,10 @@ export class Pogovor {
             context: { terms: seja.stt.namigi },
           })
         );
+        // Zvok, posnet med povezovanjem, gre naprej v pravem vrstnem redu.
+        for (const okvir of this.zvokCaka) ws.send(okvir);
+        this.sekundeZvoka += this.zvokCaka.length * 0.1;
+        this.zvokCaka = [];
         resolve();
       };
       ws.onmessage = (e) => this.sttSporocilo(e.data);
@@ -329,7 +398,11 @@ export class Pogovor {
     nic.connect(ctx.destination); // brez tega nekateri brskalniki ne poganjajo worklet-a
     const tisina = new ArrayBuffer(3200);
     node.port.onmessage = (e: MessageEvent<ArrayBuffer>) => {
-      if (!this.stt || this.stt.readyState !== 1) return;
+      if (!this.stt || this.stt.readyState !== 1) {
+        // Razpoznava se še povezuje: hrani zvok (samo med poslušanjem).
+        if (this.s === 'poslusam' && this.zvokCaka.length < NAJVEC_CAKAJOCEGA_ZVOKA) this.zvokCaka.push(e.data);
+        return;
+      }
       // Polovični dupleks: asistent ne sme slišati sebe.
       this.stt.send(this.s === 'poslusam' ? e.data : tisina);
       this.sekundeZvoka += 0.1;
@@ -506,7 +579,8 @@ export class Pogovor {
       return;
     }
     // Varovalka, če obnova v ozadju ni uspela (npr. zaspan zavihek).
-    if (performance.now() - this.sejaCas > 55000 && !(await this.obnoviTtsKljuc())) {
+    const ttsCas = this.zaloga?.seja === this.seja ? this.zaloga.ttsCas : 0;
+    if (Date.now() - ttsCas > (this.seja.veljaS ?? 60) * 1000 - 5000 && !(await this.obnoviTtsKljuc())) {
       meri(null);
       this.poslusaj(this.tisinaPoOdgovoru);
       return;
@@ -674,6 +748,7 @@ export class Pogovor {
     // Izhod zapremo malo kasneje, da se zadnji ton ne odreže.
     setTimeout(() => void izhod?.close().catch(() => {}), 300);
     this.seja = null;
+    this.zvokCaka = [];
     this.predlog = null;
     this.vprasanje = null;
     this.sekundeZvoka = 0;
@@ -685,3 +760,21 @@ export class Pogovor {
 }
 
 class NapakaPogovora extends Error {}
+
+/**
+ * DNS in TLS do Soniox vnaprej (preconnect), da prva povezava ob tapu ne čaka
+ * na rokovanje; zvočni modul mikrofona v predpomnilnik brskalnika.
+ */
+let ogreto = false;
+function ogrejPovezave() {
+  if (ogreto || typeof document === 'undefined') return;
+  ogreto = true;
+  for (const izvor of ['https://stt-rt.soniox.com', 'https://tts-rt.soniox.com']) {
+    const l = document.createElement('link');
+    l.rel = 'preconnect';
+    l.href = izvor;
+    l.crossOrigin = 'anonymous';
+    document.head.appendChild(l);
+  }
+  void fetch('/glas/mikrofon-worklet.js', { cache: 'force-cache' }).catch(() => {});
+}

@@ -7,7 +7,9 @@
 //
 // {samo: "tts"}: samo nov ključ za glas. Odprta STT povezava ostane veljavna tudi po
 // poteku ključa, TTS pa ključ preveri ob vsakem govoru (preizkus 12. 11. 2026),
-// zato ga brskalnik med pogovorom obnavlja v ozadju.
+// zato ga brskalnik med daljšim pogovorom obnavlja v ozadju.
+//
+// Brskalnik sejo kliče vnaprej (ko se pokaže gumb asistenta), ne šele ob tapu.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/rateLimit';
@@ -24,8 +26,13 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 15;
 
-/** Ključ mora le odpreti povezavo; brskalnik ga porabi takoj. */
-const KLJUC_VELJA_S = 60;
+/**
+ * Brskalnik sejo pripravi vnaprej (ko se gumb asistenta pokaže), da je pogovor
+ * ob tapu takoj pripravljen; zato ključa veljata 5 minut. Ključ je omejen na
+ * razpoznavo oz. glas in odpre le povezavo (preizkus 13. 11. 2026: isti ključ
+ * odpre več povezav). Brskalnik sejo osveži pred potekom.
+ */
+const KLJUC_VELJA_S = 300;
 
 const napaka = (status: number, koda: string, sporocilo: string) =>
   NextResponse.json({ ok: false, koda, sporocilo }, { status, headers: { 'Cache-Control': 'no-store' } });
@@ -45,6 +52,14 @@ export async function POST(req: NextRequest) {
   const seja = await createServerSupabaseClient();
   // Mesec se v SQL šteje po Europe/Ljubljana (jp_glas_rezerviraj_ukaz).
   const mesec = zdajVPasu(new Date(), 'Europe/Ljubljana').datum.slice(0, 7) + '-01';
+  const danes = zdajVPasu(new Date(), k.casovniPas).datum;
+  // Nastavitve, kvota, ključa in namigi vzporedno (en krog namesto treh). Ključa
+  // nastanejo tudi, če je asistent izklopljen; takrat ju preprosto ne vrnemo.
+  const kljuci = samoTts
+    ? Promise.all([null, zacasniKljuc('tts_rt', KLJUC_VELJA_S)] as const)
+    : Promise.all([zacasniKljuc('transcribe_websocket', KLJUC_VELJA_S), zacasniKljuc('tts_rt', KLJUC_VELJA_S)] as const);
+  kljuci.catch(() => {}); // obravnavano spodaj; brez nerešene zavrnitve ob zgodnjem izhodu
+  const namigiP = samoTts ? Promise.resolve([] as string[]) : zberiNamige(odvisnosti.podatki, danes, 100).catch(() => [] as string[]);
   const [{ data: nast }, { data: poraba }, { data: uporabnik }] = await Promise.all([
     seja.from('glas_nastavitve_podjetja').select('vklopljeno, mesecna_kvota').eq('company_id', k.podjetje).maybeSingle(),
     seja.from('glas_poraba_mesec').select('ukazi').eq('company_id', k.podjetje).eq('mesec', mesec).maybeSingle(),
@@ -60,22 +75,17 @@ export async function POST(req: NextRequest) {
     return napaka(402, 'kvota', opozoriloKvote(porabljeno, kvota) ?? 'Mesečna kvota je porabljena.');
   }
 
-  const danes = zdajVPasu(new Date(), k.casovniPas).datum;
   try {
-    if (samoTts) {
-      const tts = await zacasniKljuc('tts_rt', KLJUC_VELJA_S);
+    const [[stt, tts], namigi] = await Promise.all([kljuci, namigiP]);
+    if (samoTts || !stt) {
       return NextResponse.json({ ok: true, tts: { kljuc: tts.kljuc } }, { headers: { 'Cache-Control': 'no-store' } });
     }
-    const [stt, tts, namigi] = await Promise.all([
-      zacasniKljuc('transcribe_websocket', KLJUC_VELJA_S),
-      zacasniKljuc('tts_rt', KLJUC_VELJA_S),
-      zberiNamige(odvisnosti.podatki, danes, 100).catch(() => [] as string[]),
-    ]);
     console.info(JSON.stringify({ glas: 'seja', podjetje: k.podjetje, namigov: namigi.length }));
     return NextResponse.json(
       {
         ok: true,
         jezik: 'sl',
+        veljaS: KLJUC_VELJA_S,
         stt: { url: SONIOX.sttUrl, kljuc: stt.kljuc, model: SONIOX.sttModel, namigi, najdaljsiKonecMs: SONIOX.najdaljsiKonecMs },
         tts: { url: SONIOX.ttsUrl, kljuc: tts.kljuc, model: SONIOX.ttsModel, glas: SONIOX.glas, hitrost: SONIOX.hitrost },
         kvota,

@@ -37,23 +37,26 @@ const napaka = (status: number, koda: string, sporocilo: string) =>
 
 export async function kontekstIzSeje(): Promise<IzidKonteksta> {
   const seja = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await seja.auth.getUser();
-  if (!user) return { ok: false, odziv: napaka(401, 'ni_prijave', 'Niste prijavljeni.') };
+  // getClaims preveri žeton lokalno (asimetrični ključi projekta, kot lib/auth/serverUser),
+  // brez klica na Supabase Auth; s starim žetonom sam vpraša Supabase.
+  const { data: zahtevki, error: napakaPrijave } = await seja.auth.getClaims();
+  const userId = typeof zahtevki?.claims?.sub === 'string' ? zahtevki.claims.sub : null;
+  if (napakaPrijave || !userId) return { ok: false, odziv: napaka(401, 'ni_prijave', 'Niste prijavljeni.') };
+  const email = typeof zahtevki?.claims?.email === 'string' ? zahtevki.claims.email : null;
 
   const admin = adminOdjemalec();
+  // Član in besedilni ID podjetja v eni poizvedbi (en krog manj).
   const { data: clan } = await admin
     .from('company_members')
-    .select('company_id, role, person_id')
-    .eq('user_id', user.id)
+    .select('company_id, role, person_id, companies(company_id)')
+    .eq('user_id', userId)
     .maybeSingle();
   const vloga = (clan?.role as string | undefined) ?? null;
   if (!clan?.company_id || (vloga !== 'owner' && vloga !== 'admin' && vloga !== 'staff')) {
     return { ok: false, odziv: napaka(403, 'ni_clan', 'Niste član podjetja.') };
   }
-  const { data: podjetje } = await admin.from('companies').select('company_id').eq('id', clan.company_id).maybeSingle();
-  const besedilniId = (podjetje?.company_id as string | undefined) ?? null;
+  const podjetje = (Array.isArray(clan.companies) ? clan.companies[0] : clan.companies) as { company_id?: string } | null | undefined;
+  const besedilniId = podjetje?.company_id ?? null;
   if (!besedilniId) return { ok: false, odziv: napaka(403, 'ni_clan', 'Podjetje ni najdeno.') };
 
   const [{ data: pravice }, regija] = await Promise.all([
@@ -64,8 +67,8 @@ export async function kontekstIzSeje(): Promise<IzidKonteksta> {
   const k: Kontekst = {
     podjetje: besedilniId,
     podjetjeUuid: String(clan.company_id),
-    userId: user.id,
-    email: user.email ?? null,
+    userId,
+    email,
     vloga: vloga as Vloga,
     pravice: (pravice as StaffPermissions | null) ?? null,
     osebaId: clan.person_id ? String(clan.person_id) : null,

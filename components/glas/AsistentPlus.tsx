@@ -31,6 +31,8 @@ const TISINA_OBRAZEC_MS = 30_000;
 const TISINA_OBICAJNO_MS = 8_000;
 /** "Shranjeno" pokažemo, če se obrazec po glasovnem "shrani" zapre v tem času. */
 const SHRANI_OKNO_MS = 20_000;
+/** Pripravljena seja velja 5 min; osvežimo jo, dokler je zavihek viden. */
+const PRIPRAVA_OSVEZI_MS = 3.5 * 60_000;
 
 type Vrstica = { kdo: 'jaz' | 'asistent' | 'napaka'; besedilo: string };
 
@@ -135,7 +137,16 @@ export function AsistentPlus() {
         return ukaz === 'shrani' ? tRef.current('shranjujem') : tRef.current('zaprto');
       },
     });
+    // Seja vnaprej: ob tapu so ključa in namigi že pripravljeni (brez mikrofona).
+    pogovor.current.pripravi();
+    const osvezi = () => {
+      if (document.visibilityState === 'visible') pogovor.current?.pripravi();
+    };
+    const casovnik = window.setInterval(osvezi, PRIPRAVA_OSVEZI_MS);
+    document.addEventListener('visibilitychange', osvezi);
     return () => {
+      window.clearInterval(casovnik);
+      document.removeEventListener('visibilitychange', osvezi);
       pogovor.current?.ustavi();
       pogovor.current = null;
     };
@@ -334,6 +345,8 @@ export function AsistentPlus() {
         <button
           type="button"
           onClick={tap}
+          onPointerEnter={() => pogovor.current?.pripravi()}
+          onPointerDown={() => pogovor.current?.pripravi()}
           aria-label={aktiven ? opis : t('odpri')}
           className="relative flex h-14 w-14 items-center justify-center rounded-full text-white shadow-xl transition-transform active:scale-95"
         >
