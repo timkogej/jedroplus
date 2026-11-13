@@ -189,6 +189,9 @@ export class Pogovor {
   private vprasanje: VprasanjeOdjemalec | null = null;
   private govorId: string | null = null;
   private viri: AudioBufferSourceNode[] = [];
+  /** Samo za vmesnik (utrip krogca): glasnost asistentovega glasu. Ne vpliva na zvok. */
+  private analiza: AnalyserNode | null = null;
+  private analizaVzorci: Float32Array<ArrayBuffer> | null = null;
   private naslednjiCas = 0;
   private koncajGovor: (() => void) | null = null;
   private zahteva: AbortController | null = null;
@@ -212,6 +215,23 @@ export class Pogovor {
 
   get aktiven() {
     return this.s !== 'mirovanje';
+  }
+
+  /**
+   * Glasnost za vmesnik (0–~0,3 RMS): `vhod` = mikrofon (zadnji okvir 100 ms),
+   * `izhod` = asistentov glas. Samo branje; na pogovor ne vpliva.
+   */
+  glasnost(): { vhod: number; izhod: number } {
+    const vhod = this.glasnosti.length ? this.glasnosti[this.glasnosti.length - 1] : 0;
+    let izhod = 0;
+    const a = this.analiza;
+    if (a && this.analizaVzorci && this.viri.length) {
+      a.getFloatTimeDomainData(this.analizaVzorci);
+      let v = 0;
+      for (let i = 0; i < this.analizaVzorci.length; i++) v += this.analizaVzorci[i] * this.analizaVzorci[i];
+      izhod = Math.sqrt(v / this.analizaVzorci.length);
+    }
+    return { vhod, izhod };
   }
 
   /**
@@ -240,6 +260,7 @@ export class Pogovor {
     }
     this.izhod = new AC();
     this.vhod = new AC();
+    this.pripraviAnalizo(this.izhod);
     void this.izhod.resume();
     void this.vhod.resume();
 
@@ -821,6 +842,21 @@ export class Pogovor {
 
   private prviZvok: (() => void) | null = null;
 
+  /** Analizator glasnosti za vmesnik: vir → analizator → zvočnik (zvok ostane enak). */
+  private pripraviAnalizo(ctx: AudioContext) {
+    this.analiza = null;
+    try {
+      if (typeof ctx.createAnalyser !== 'function') return;
+      const a = ctx.createAnalyser();
+      a.fftSize = 512;
+      a.connect(ctx.destination);
+      this.analiza = a;
+      this.analizaVzorci = new Float32Array(new ArrayBuffer(a.fftSize * 4));
+    } catch {
+      this.analiza = null;
+    }
+  }
+
   /** Predvaja vzorce (24 kHz) za že načrtovanim zvokom; podaljša okno odmeva. */
   private predvajaj(vzorci: Float32Array) {
     const ctx = this.izhod;
@@ -829,7 +865,7 @@ export class Pogovor {
     buf.getChannelData(0).set(vzorci);
     const vir = ctx.createBufferSource();
     vir.buffer = buf;
-    vir.connect(ctx.destination);
+    vir.connect(this.analiza ?? ctx.destination);
     const zacetek = Math.max(ctx.currentTime + 0.02, this.naslednjiCas);
     vir.start(zacetek);
     this.naslednjiCas = zacetek + buf.duration;
@@ -1018,6 +1054,7 @@ export class Pogovor {
     this.vhod = null;
     const izhod = this.izhod;
     this.izhod = null;
+    this.analiza = null;
     // Izhod zapremo malo kasneje, da se zadnji zvok ne odreže.
     setTimeout(() => void izhod?.close().catch(() => {}), 300);
     this.seja = null;

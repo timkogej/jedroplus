@@ -18,27 +18,33 @@
  *
  * Prikaže se samo prijavljenim z vklopljenim Asistent+ in pravico (/api/glas/stanje).
  * Ne zapisuje prepisov v konzolo (osebni podatki).
+ *
+ * Videz (orb, tančica, sij roba, napisi, okvir obrazca) je v components/glas/ui/*;
+ * ta datoteka ima samo logiko in ga sestavi (AsistentVmesnik).
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Microphone, PaperPlaneRight, SpeakerHigh, X, Check } from '@phosphor-icons/react';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { Pogovor, type OdgovorOdjemalec, type StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import { shraniObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
 import {
   DOGODEK_IZID,
   DOGODEK_STANJE,
+  napakaVObrazcu,
   posljiPojdi,
   posljiUkazObrazcu,
   ukazObrazcu,
   type IzidObrazca,
   type StanjeObrazca,
 } from '@/lib/glas/odjemalec/obrazecGlas';
-import { polozajKrogca, type NacinKrogca, type Okno, type Polozaj, type Pravokotnik } from '@/lib/glas/odjemalec/polozaj';
+import type { NacinKrogca, Okno } from '@/lib/glas/odjemalec/polozaj';
+import { AsistentVmesnik } from './ui/AsistentVmesnik';
+import { useListObrazca } from './ui/useOkvirObrazca';
+import type { Vrstica } from './ui/tipi';
 
 /** Strani, kjer asistenta ni (prijava, registracija, testna stran ima svojega). */
-const BREZ = /^\/(login|signup|forgot-password|logout|auth|onboarding|glas-test)(\/|$)/;
+const BREZ = /^\/(login|signup|forgot-password|logout|auth|onboarding|glas-test|glas-dizajn)(\/|$)/;
 /** Ko je obrazec odprt za pregled, posluša dlje kot običajno (8 s). */
 const TISINA_OBRAZEC_MS = 30_000;
 const TISINA_OBICAJNO_MS = 8_000;
@@ -50,6 +56,12 @@ const NAJAVA_ZDRUZI_MS = 450;
 const PRIPRAVA_OSVEZI_MS = 3.5 * 60_000;
 /** Napaka po koncu pogovora ostane vidna toliko časa. */
 const NAPIS_MS = 6000;
+/** Trenutek uspeha (kljukica v orbu, napis) traja toliko časa. */
+const USPEH_MS = 2600;
+/** Oddaja obrazca v tem času po glasovnem "shrani" je glasovna (napake javi useGlasovniObrazec). */
+const GLASOVNO_OKNO_MS = 1500;
+/** Po ročni oddaji preverjamo napake v obrazcu toliko časa. */
+const PREVERJAJ_ROCNO_MS = 12_000;
 
 // Izgovorjeni izidi: glas asistenta je slovenski (Soniox Nina, jezik seje "sl").
 const GOVOR = {
@@ -60,20 +72,15 @@ const GOVOR = {
   niShranjeno: 'Še ni shranjeno.',
   preveri: 'Obrazec še ni shranjen. Poglejte ga, prosim.',
 };
+/** Uspeh po vrsti obrazca (trenutek potrditve). */
+const USPEH: Record<string, string> = {
+  nov_termin: 'Super, termin je zapisan.',
+  prestavi_termin: 'Super, termin je prestavljen.',
+  odsotnost: 'Super, odsotnost je zapisana.',
+  nova_stranka: 'Super, stranka je dodana.',
+};
 
-type Vrstica = { kdo: 'jaz' | 'asistent' | 'napaka'; besedilo: string };
 type OdprtObrazec = { el: HTMLElement | null; vprasanje?: string };
-
-/** List (panel) obrazca: najvišji prednik, ki ne pokriva celega zaslona (ozadje). */
-function najdiPanel(el: HTMLElement): HTMLElement {
-  let p = el;
-  while (p.parentElement && p.parentElement !== document.body) {
-    const r = p.parentElement.getBoundingClientRect();
-    if (r.width >= window.innerWidth - 1 && r.height >= window.innerHeight - 1) break;
-    p = p.parentElement;
-  }
-  return p;
-}
 
 /** Varni robovi zaslona (iPhone) iz CSS env(). */
 function varniRobovi(): { zgoraj: number; spodaj: number } {
@@ -95,11 +102,11 @@ export function AsistentPlus() {
   const [slisano, setSlisano] = useState('');
   const [vrstice, setVrstice] = useState<Vrstica[]>([]);
   const [zadnji, setZadnji] = useState<OdgovorOdjemalec | null>(null);
-  const [besedilo, setBesedilo] = useState('');
   const [obrazec, setObrazec] = useState<OdprtObrazec | null>(null);
-  const [panel, setPanel] = useState<Pravokotnik | null>(null);
   const [okno, setOkno] = useState<Okno | null>(null);
   const [napis, setNapis] = useState<string | null>(null);
+  const [uspeh, setUspeh] = useState<{ kljuc: number; besedilo: string } | null>(null);
+  const panel = useListObrazca(obrazec?.el ?? null, Boolean(obrazec));
   const pogovor = useRef<Pogovor | null>(null);
   const potRef = useRef(pot);
   const obrazecRef = useRef<OdprtObrazec | null>(null);
@@ -109,8 +116,8 @@ export function AsistentPlus() {
   const najavaCasovnik = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Zadnja izgovorjena najava (že v vrsticah; obvestilo je ne doda znova). */
   const zadnjaNajava = useRef('');
-  const konec = useRef<HTMLDivElement | null>(null);
   const preverjeno = useRef(false);
+  const rocnoPreverjanje = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Pogovor se ustvari enkrat; prevode in pot bere prek refov (sicer bi se ob
   // spremembi ustvaril znova in prekinil).
@@ -267,8 +274,12 @@ export function AsistentPlus() {
         p.tisinaPoOdgovoru = TISINA_OBICAJNO_MS;
         p.kontekstObrazca = null;
       }
+      if (rocnoPreverjanje.current) clearInterval(rocnoPreverjanje.current);
+      rocnoPreverjanje.current = null;
       if (shranjujeOd.current && Date.now() - shranjujeOd.current < SHRANI_OKNO_MS) {
-        najavi(bil?.vprasanje ? GOVOR.poslano : GOVOR.shranjeno);
+        const besedilo = bil?.vprasanje ? GOVOR.poslano : (USPEH[zadnjiObrazec.current?.vrsta ?? ''] ?? GOVOR.shranjeno);
+        najavi(besedilo, 'uspeh');
+        setUspeh((u) => ({ kljuc: (u?.kljuc ?? 0) + 1, besedilo }));
       }
       shranjujeOd.current = 0;
     };
@@ -295,33 +306,6 @@ export function AsistentPlus() {
     return () => window.removeEventListener('resize', izmeri);
   }, [na_voljo]);
 
-  // Položaj lista obrazca (med animacijo odpiranja in ob spremembi velikosti).
-  useEffect(() => {
-    const el = obrazec?.el;
-    if (!el || !el.isConnected) {
-      setPanel(obrazec ? { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight } : null);
-      return;
-    }
-    const list = najdiPanel(el);
-    const izmeri = () => {
-      if (!list.isConnected) return;
-      const r = list.getBoundingClientRect();
-      setPanel((prej) =>
-        prej && Math.abs(prej.left - r.left) < 1 && Math.abs(prej.top - r.top) < 1 ? prej : { left: r.left, top: r.top, right: r.right, bottom: r.bottom }
-      );
-    };
-    izmeri();
-    const casi = [80, 200, 400, 700].map((ms) => window.setTimeout(izmeri, ms));
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(izmeri) : null;
-    ro?.observe(list);
-    window.addEventListener('resize', izmeri);
-    return () => {
-      casi.forEach((c) => window.clearTimeout(c));
-      ro?.disconnect();
-      window.removeEventListener('resize', izmeri);
-    };
-  }, [obrazec]);
-
   // Napaka po koncu pogovora (npr. mikrofon ni dovoljen) ostane vidna nekaj sekund.
   useEffect(() => {
     if (!napis) return;
@@ -329,11 +313,55 @@ export function AsistentPlus() {
     return () => window.clearTimeout(c);
   }, [napis]);
 
+  // Trenutek uspeha je kratek.
   useEffect(() => {
-    konec.current?.scrollIntoView({ block: 'nearest' });
-  }, [vrstice, slisano]);
+    if (!uspeh) return;
+    const c = window.setTimeout(() => setUspeh(null), USPEH_MS);
+    return () => window.clearTimeout(c);
+  }, [uspeh]);
+
+  useEffect(
+    () => () => {
+      if (rocnoPreverjanje.current) clearInterval(rocnoPreverjanje.current);
+    },
+    []
+  );
+
+  /**
+   * Obrazec je oddan. Glasovni "shrani" (requestSubmit) ima izid že urejen
+   * (useGlasovniObrazec). Ročni gumb Shrani: zaprtje = uspeh, napaka v polju = asistent
+   * jo pove. Shranjevanje teče po poti obrazca; tu samo opazujemo.
+   */
+  const poslano = useCallback(
+    (form: HTMLFormElement) => {
+      if (shranjujeOd.current && Date.now() - shranjujeOd.current < GLASOVNO_OKNO_MS) return;
+      shranjujeOd.current = Date.now();
+      if (rocnoPreverjanje.current) clearInterval(rocnoPreverjanje.current);
+      const zacetek = Date.now();
+      rocnoPreverjanje.current = setInterval(() => {
+        const ustavi = () => {
+          if (rocnoPreverjanje.current) clearInterval(rocnoPreverjanje.current);
+          rocnoPreverjanje.current = null;
+        };
+        if (!form.isConnected) return ustavi();
+        const napaka = napakaVObrazcu(form);
+        if (napaka) {
+          ustavi();
+          shranjujeOd.current = 0;
+          if (pogovor.current?.aktiven) najavi(`${GOVOR.niShranjeno} ${napaka}`, 'napaka');
+        } else if (Date.now() - zacetek > PREVERJAJ_ROCNO_MS) {
+          ustavi();
+          shranjujeOd.current = 0;
+        }
+      }, 300);
+    },
+    [najavi]
+  );
 
   const aktiven = s !== 'mirovanje';
+  const glasnost = useCallback(() => pogovor.current?.glasnost() ?? { vhod: 0, izhod: 0 }, []);
+  const pripravi = useCallback(() => pogovor.current?.pripravi(), []);
+  const koncaj = useCallback(() => pogovor.current?.ustavi(), []);
 
   // Esc konča pogovor (računalnik).
   useEffect(() => {
@@ -347,9 +375,7 @@ export function AsistentPlus() {
 
   if (!na_voljo || BREZ.test(pot) || !okno) return null;
 
-  const zaseden = s === 'povezujem' || s === 'razmisljam';
   const nacin: NacinKrogca = obrazec ? 'obrazec' : aktiven ? 'sredina' : 'kot';
-  const poz: Polozaj = polozajKrogca(nacin, okno, panel);
 
   const tap = () => {
     const p = pogovor.current;
@@ -362,265 +388,29 @@ export function AsistentPlus() {
     } else if (s === 'govorim') p.prekini();
     else p.ustavi();
   };
-  const zapri = () => pogovor.current?.ustavi();
-
-  const opis = obrazec && s === 'poslusam' ? (obrazec.vprasanje ? t('predlogNamig') : t('obrazec')) : t(s);
-  const zadnjiOdgovor = [...vrstice].reverse().find((v) => v.kdo !== 'jaz');
-  const prikaz = vrstice.slice(-4);
 
   return (
-    <>
-      {/* Način pogovora: nežna tančica, stran ostane vidna. */}
-      <div
-        aria-hidden
-        className={`fixed inset-0 z-[105] bg-white/60 backdrop-blur-[3px] transition-opacity duration-300 ${
-          nacin === 'sredina' ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-      />
-
-      <button
-        type="button"
-        onClick={tap}
-        onPointerEnter={() => pogovor.current?.pripravi()}
-        onPointerDown={() => pogovor.current?.pripravi()}
-        aria-label={aktiven ? opis : t('odpri')}
-        className="fixed left-0 top-0 z-[110] flex items-center justify-center rounded-full text-white shadow-xl active:scale-95"
-        style={{
-          width: poz.velikost,
-          height: poz.velikost,
-          transform: `translate3d(${poz.x}px, ${poz.y}px, 0)`,
-          transition: 'transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1), width 300ms ease, height 300ms ease',
-        }}
-      >
-        <Sij aktiven={aktiven} razmislja={zaseden} majhen={poz.velikost < 48} />
-        <Ikona s={s} velikost={Math.round(poz.velikost * 0.4)} />
-      </button>
-
-      {/* Sredina: napisi, možnosti, predlog in vnos pod krogcem. */}
-      {nacin === 'sredina' && (
-        <div
-          role="dialog"
-          aria-label={t('naslov')}
-          className="fixed z-[110] flex flex-col items-center"
-          style={{
-            left: 16,
-            right: 16,
-            top: poz.y + poz.velikost + 20,
-            maxHeight: `calc(100dvh - ${poz.y + poz.velikost + 36}px - env(safe-area-inset-bottom))`,
-          }}
-        >
-          <div className="flex min-h-0 w-full max-w-[420px] flex-col">
-            <p className="text-center text-[13px] font-medium text-label-secondary" aria-live="polite">
-              {opis}
-            </p>
-            <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
-              {prikaz.length === 0 && !slisano && <p className="text-center text-sm text-label-secondary">{t('pozdrav')}</p>}
-              <div className="flex flex-col gap-1.5">
-                {prikaz.map((v, i) => (
-                  <p
-                    key={`${vrstice.length}-${i}`}
-                    className={`max-w-[88%] whitespace-pre-line rounded-2xl px-3 py-2 text-[15px] leading-snug ${
-                      v.kdo === 'jaz'
-                        ? 'self-end bg-fill text-label'
-                        : v.kdo === 'napaka'
-                          ? 'self-start border border-red-200 bg-white text-red-600'
-                          : 'self-start border border-separator bg-white text-label'
-                    }`}
-                  >
-                    {v.besedilo}
-                  </p>
-                ))}
-                {slisano && <p className="max-w-[88%] self-end rounded-2xl bg-fill px-3 py-2 text-[15px] italic text-label-secondary">{slisano}</p>}
-              </div>
-              <Kartice
-                zadnji={zadnji}
-                zaseden={zaseden}
-                t={t}
-                izberi={(m) => void pogovor.current?.izberi(m)}
-                potrdi={() => void pogovor.current?.potrdiPredlog()}
-                zavrni={() => void pogovor.current?.zavrniPredlog()}
-              />
-              <div ref={konec} />
-            </div>
-            <form
-              className="mt-3 flex gap-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const x = besedilo.trim();
-                if (x && !zaseden) {
-                  void pogovor.current?.besedilo(x);
-                  setBesedilo('');
-                }
-              }}
-            >
-              <input
-                value={besedilo}
-                onChange={(e) => setBesedilo(e.target.value)}
-                maxLength={500}
-                placeholder={t('vpisi')}
-                className="h-10 min-w-0 flex-1 rounded-xl border border-separator bg-white px-3 text-base text-label outline-none placeholder:text-label-tertiary md:h-9 md:text-sm"
-              />
-              <button
-                type="submit"
-                disabled={zaseden || !besedilo.trim()}
-                aria-label={t('poslji')}
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-label disabled:opacity-30 md:h-9 md:w-9"
-              >
-                <PaperPlaneRight size={18} />
-              </button>
-              <button
-                type="button"
-                onClick={zapri}
-                aria-label={t('koncaj')}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-separator bg-white text-label md:h-9 md:w-9"
-              >
-                <X size={16} />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Obrazec: kratek napis desno od krogca (nad listom, ne čez polja). */}
-      {nacin === 'obrazec' && (
-        <div
-          className="pointer-events-none fixed z-[110] flex items-center gap-1.5"
-          style={{
-            left: poz.x + poz.velikost + 8,
-            top: poz.y + poz.velikost / 2 - 16,
-            maxWidth: Math.max(160, Math.min(380, okno.w - poz.x - poz.velikost - 20)),
-          }}
-        >
-          <p className="pointer-events-auto truncate rounded-full bg-black/85 px-3 py-1.5 text-[13px] leading-tight text-white shadow backdrop-blur" aria-live="polite">
-            {s === 'poslusam' && slisano ? slisano : !aktiven ? t('mirovanje') : zadnjiOdgovor && s !== 'poslusam' ? zadnjiOdgovor.besedilo : opis}
-          </p>
-          {aktiven && (
-            <button
-              type="button"
-              onClick={zapri}
-              aria-label={t('koncaj')}
-              className="pointer-events-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/70 text-white"
-            >
-              <X size={13} weight="bold" />
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Kot: napaka po koncu pogovora. */}
-      {nacin === 'kot' && napis && (
-        <p
-          role="status"
-          className="fixed z-[110] max-w-[min(20rem,calc(100vw-2rem))] rounded-2xl border border-red-200 bg-white px-3 py-2 text-sm text-red-600 shadow-lg"
-          style={{ right: okno.w - poz.x - poz.velikost, bottom: okno.h - poz.y + 10 }}
-        >
-          {napis}
-        </p>
-      )}
-    </>
-  );
-}
-
-function Kartice({
-  zadnji,
-  zaseden,
-  t,
-  izberi,
-  potrdi,
-  zavrni,
-}: {
-  zadnji: OdgovorOdjemalec | null;
-  zaseden: boolean;
-  t: ReturnType<typeof useTranslations>;
-  izberi: (m: { id: string; oznaka: string }) => void;
-  potrdi: () => void;
-  zavrni: () => void;
-}) {
-  if (zadnji?.status === 'vprasanje' && zadnji.vprasanje?.moznosti?.length) {
-    return (
-      <div className="mt-2 flex flex-col divide-y divide-separator overflow-hidden rounded-xl border border-separator bg-white">
-        {zadnji.vprasanje.moznosti.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            disabled={zaseden}
-            onClick={() => izberi(m)}
-            className="px-3 py-3 text-left text-sm text-label hover:bg-fill disabled:opacity-50 md:py-2"
-          >
-            {m.oznaka}
-          </button>
-        ))}
-      </div>
-    );
-  }
-  if (zadnji?.status === 'predlog' && zadnji.predlog) {
-    return (
-      <div className="mt-2 rounded-2xl border border-separator bg-white p-3">
-        {zadnji.predlog.podrobnosti.length > 0 && (
-          <dl className="divide-y divide-separator text-sm">
-            {zadnji.predlog.podrobnosti.map((d) => (
-              <div key={d.oznaka} className="flex justify-between gap-4 py-1.5">
-                <dt className="text-label-secondary">{d.oznaka}</dt>
-                <dd className="text-right text-label">{d.vrednost}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-        <div className="mt-2 flex gap-2">
-          <button
-            type="button"
-            disabled={zaseden}
-            onClick={zavrni}
-            className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-separator text-sm font-medium text-label disabled:opacity-50 md:h-8"
-          >
-            <X size={14} /> {t('preklici')}
-          </button>
-          <button
-            type="button"
-            disabled={zaseden}
-            onClick={potrdi}
-            className="btn-gradient-primary flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-medium disabled:opacity-50 md:h-8"
-          >
-            <Check size={14} weight="bold" /> {t('potrdi')}
-          </button>
-        </div>
-        <p className="mt-1.5 text-xs text-label-tertiary">{t('predlogNamig')}</p>
-      </div>
-    );
-  }
-  return null;
-}
-
-/** Siri-podoben sij: mirno ozadje v mirovanju, vrteč se barvni obroč med pogovorom. */
-function Sij({ aktiven, razmislja, majhen = false }: { aktiven: boolean; razmislja: boolean; majhen?: boolean }) {
-  return (
-    <span aria-hidden className={`absolute inset-0 overflow-hidden rounded-full ${razmislja ? 'animate-pulse' : ''}`}>
-      <span
-        className={`absolute -inset-1/2 bg-[conic-gradient(from_0deg,#7c5cff,#3ba7ff,#2fd4a3,#ff6fb1,#7c5cff)] ${aktiven ? 'animate-spin' : ''}`}
-        style={{ animationDuration: razmislja ? '1.2s' : '2.4s' }}
-      />
-      <span className={`absolute rounded-full bg-black/25 ${majhen ? 'inset-[3px]' : 'inset-[5px]'} ${aktiven ? 'backdrop-blur-sm' : 'bg-transparent'}`} />
-    </span>
-  );
-}
-
-function Ikona({ s, velikost }: { s: StanjePogovora; velikost: number }) {
-  const r = 'relative';
-  if (s === 'povezujem' || s === 'razmisljam') {
-    return <span className={`${r} h-[34%] w-[34%] animate-pulse rounded-full bg-white/90`} />;
-  }
-  if (s === 'govorim') return <SpeakerHigh className={r} size={velikost} weight="fill" />;
-  if (s === 'poslusam') return <Valovi velikost={velikost} />;
-  return <Microphone className={r} size={velikost} weight="fill" />;
-}
-
-/** Poslušam: tri mirne črtice (namesto ikone Stop — tap še vedno konča pogovor). */
-function Valovi({ velikost }: { velikost: number }) {
-  return (
-    <span className="relative flex items-center gap-[3px]" style={{ height: velikost }} aria-hidden>
-      {[0, 150, 300].map((zamik) => (
-        <span key={zamik} className="w-[3px] animate-pulse rounded-full bg-white" style={{ height: '55%', animationDelay: `${zamik}ms` }} />
-      ))}
-    </span>
+    <AsistentVmesnik
+      stanje={s}
+      nacin={nacin}
+      okno={okno}
+      panel={panel}
+      obrazecEl={obrazec?.el ?? null}
+      slisano={slisano}
+      vrstice={vrstice.slice(-4)}
+      zadnji={zadnji}
+      napis={napis}
+      uspeh={uspeh}
+      glasnost={glasnost}
+      t={t}
+      onTap={tap}
+      onPripravi={pripravi}
+      onKoncaj={koncaj}
+      onBesedilo={(x) => void pogovor.current?.besedilo(x)}
+      onIzberi={(m) => void pogovor.current?.izberi(m)}
+      onPotrdi={() => void pogovor.current?.potrdiPredlog()}
+      onZavrni={() => void pogovor.current?.zavrniPredlog()}
+      onPoslano={poslano}
+    />
   );
 }
