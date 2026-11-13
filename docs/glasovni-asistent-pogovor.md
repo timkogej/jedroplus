@@ -75,3 +75,49 @@
    - Napake strežnika in LLM asistent pove kratko in posluša naprej.
 
 Rezultati in seznam za preizkus so na koncu dokumenta (razdelek 3).
+
+## 3. Preverjanje (13. 11. 2026)
+
+- **Testi:** `npx vitest run` gre skozi: 235 testov, od tega 62 novih.
+  - `tests/glas/tok.test.ts`: konec po vsebini, prekinitev, odmev, lokalni odzivi, »Za kdaj?«, brez razmišljanja modela.
+  - `tests/glas/pogovor-tok.test.ts`: cel pogovor z lažnimi Soniox žetoni:
+    - premor po »ob«;
+    - »uh«;
+    - nadaljevanje med razmišljanjem s preklicem zahteve;
+    - odmev, ki ne prekine;
+    - prekinitev s tujimi besedami;
+    - tih mikrofon;
+    - rep odmeva;
+    - »hvala, to je vse«;
+    - napaka strežnika;
+    - ponovna povezava razpoznave;
+    - lokalni »shrani«.
+  - `tests/glas/polozaj.test.ts`: položaj krogca (kot, sredina, list obrazca na telefonu in računalniku).
+- **`npx tsc --noEmit`** in **eslint** (glas, obrazci) sta čista. `npx next build` ob oddaji še ni bil končan (teče v ločeni kopiji): preveri ga.
+- **Eval s pravim modelom** (Haiku), 9 večkrožnih pogovorov, 4 med njimi novi:
+  - »Shranim?« → »ja«;
+  - združena izjava po premoru;
+  - odrezan »… jutri ob«.
+  - Zadnja dva zagona: 9/9 in 8/9. Nestabilen ostaja popravek »ne, za Ano Novak«, ki je bil nestabilen že prej.
+  - Robotskih stavkov v govoru je bilo 0.
+  - LLM je odgovoril v 1,16–2,18 s, mediana 1,46 s.
+
+### Ocena časa od konca govora do prvega zvoka
+| | Prej | Zdaj |
+|---|---|---|
+| Kratek odgovor (»ja«, »kaj imam jutri«) | 0,45 + 0,25 + LLM + 0,37 | 0,45 + **0,15** + LLM + 0,37 |
+| Navaden stavek | 0,45 + 0,25 + LLM + 0,37 | 0,45 + **0,35** + LLM + 0,37 |
+| Stavek s premorom sredi | **odrezan** | počaka 2,2 s ali se združi, brez reza |
+
+Navaden stavek je tako ~0,1 s počasnejši, a premor sredi stavka nikoli več ne odreže izjave. Kratki odgovori so ~0,1 s hitrejši.
+
+### Nepreizkušeno (brskalnik s prijavo, zvočnik, iPhone)
+- Prekinitev z glasom na pravem zvočniku. Odmevno izničevanje brskalnika (Chrome, Safari) pri zvoku iz WebAudio ni zagotovljeno. Varovalka je primerjava besed z asistentovim stavkom in prag glasnosti `PRAG_PREKINITVE` 0,012. Prag morda potrebuje uglasitev.
+- Krogec na sredini in v kotu obrazca, animacija premika, tančica.
+- Izid »Shranjeno« oziroma napaka s polja v pravem obrazcu.
+- Glasovni odgovor na »Obvestim stranko?«.
+- »Moment.« ob počasnem odgovoru.
+- iPhone Safari in PWA:
+  - mikrofon in zvok po premiku strani;
+  - varni robovi;
+  - glasnost zvoka ob odprtem mikrofonu.
