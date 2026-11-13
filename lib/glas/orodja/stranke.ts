@@ -30,8 +30,13 @@ export async function razresiStranko(
   if (idStranke) {
     // Preverjeno z uporabnikovo sejo (RLS): tuj ID vrne null.
     const s = await o.podatki.stranka(idStranke);
-    if (s) return { stranka: s };
-    return { odgovor: { sporocilo: 'Te stranke ne najdem.' } };
+    if (!s) return { odgovor: { sporocilo: 'Te stranke ne najdem.' } };
+    // ID je lahko iz fokusa (aktivna stranka), ime pa novo ("ne, za Ano Novak"):
+    // če ime nedvoumno pomeni drugo stranko, velja ime. Zaimek ("ona") ali isto ime → ID.
+    const izid = poizvedba.trim() ? poisci(poizvedba, await o.podatki.stranke(), (x) => [x.ime, x.priimek]) : null;
+    if (izid?.izid === 'enolicno' && izid.najden.id !== s.id) return { stranka: izid.najden };
+    if (izid?.izid === 'vec' && !izid.kandidati.some((k) => k.vrednost.id === s.id)) return vecStrank(poizvedba, izid.kandidati.map((k) => k.vrednost), o);
+    return { stranka: s };
   }
   const vse = await o.podatki.stranke();
   const izid = poisci(poizvedba, vse, (s) => [s.ime, s.priimek]);
@@ -39,14 +44,18 @@ export async function razresiStranko(
   if (izid.izid === 'nic') {
     return { odgovor: { sporocilo: `Stranke z imenom »${poizvedba}« ne najdem.` } };
   }
+  return vecStrank(poizvedba, izid.kandidati.map((k) => k.vrednost), o);
+}
+
+function vecStrank(poizvedba: string, kandidati: StrankaPovzetek[], o: OkoljeOrodja): RazresenaStranka {
   return {
     odgovor: {
       sporocilo: `Najdenih je več strank za »${poizvedba}«. Katero imate v mislih?`,
       vprasanje: {
         besedilo: 'Katero stranko?',
-        moznosti: izid.kandidati.map((k) => ({ id: k.vrednost.id, oznaka: oznakaStranke(k.vrednost, o.danes) })),
+        moznosti: kandidati.map((k) => ({ id: k.id, oznaka: oznakaStranke(k, o.danes) })),
       },
-      podatki: izid.kandidati.map((k) => ({ id: k.vrednost.id, ime: k.vrednost.ime, priimek: k.vrednost.priimek })),
+      podatki: kandidati.map((k) => ({ id: k.id, ime: k.ime, priimek: k.priimek })),
     },
   };
 }

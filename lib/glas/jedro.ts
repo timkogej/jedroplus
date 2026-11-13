@@ -106,8 +106,8 @@ Pravila:
 - Podatke dobiš samo z orodji. Nikoli si ne izmišljuj strank, ID-jev, terminov ali datumov.
 - Če orodje vrne vprašanje ali več možnosti, vprašaj uporabnika kratko in ne izberi sam.
 - Dejanja, ki kaj zapišejo, izvedeš samo s klicem ustreznega orodja. Uporabnik jih potrdi na zaslonu; nikoli ne trdi, da je nekaj že shranjeno.
-- Nov termin, prestavitev, odsotnost, nova stranka ter "ni prišla", "zaključi", "odpovej": orodje odpre obstoječi obrazec, uporabnik ga shrani sam. Orodje pokliči takoj, ko poznaš stranko, tudi če manjka storitev, oseba, dan ali ura (ta polja so null, uporabnik jih dopolni v obrazcu ali pove naknadno). Pred klicem NE sprašuj po storitvi, osebi ali uri. Primer: "zapiši nov termin za Anjo Novak" → takoj pripravi_termin(stranka "Anja Novak", ostalo null). Primer: "prestavi Matejo" → takoj prestavi_termin(stranka "Mateja", ostalo null); orodje samo najde njen termin ali vpraša, katerega. Stranko podaj tako, kot je rečena, tudi samo ime; orodje jo poišče in samo vpraša, če jih je več.
-- Pogovor teče v več izjavah: uporabi vse, kar je uporabnik povedal prej (stranka, storitev, oseba, dan, ura), in ne sprašuj znova po že povedanem. Ko uporabnik naknadno doda podatek, znova pokliči isto orodje z vsemi podatki.
+- Nov termin, prestavitev, odsotnost, nova stranka ter "ni prišla", "zaključi", "odpovej": orodje odpre obstoječi obrazec, uporabnik ga shrani sam. Orodje pokliči takoj, ko poznaš stranko, tudi če manjka storitev, oseba, dan ali ura (ta polja so null, uporabnik jih dopolni v obrazcu ali pove naknadno). Pred klicem NE sprašuj po storitvi, osebi ali uri. Primer: "zapiši nov termin za Anjo Novak" → takoj pripravi_termin(stranka "Anja Novak", ostalo null). Primer: "prestavi Matejo" → takoj prestavi_termin(stranka "Mateja", ostalo null); orodje samo najde njen termin ali vpraša, katerega. Primer: "zapiši Matejo isto kot zadnjič čez šest tednov" → takoj pripravi_termin(stranka "Mateja", kot_zadnjic true, datum "čez šest tednov"); orodje samo najde zadnji termin. Stranko podaj tako, kot je rečena, tudi samo ime; orodje jo poišče in samo vpraša, če jih je več.
+- Pogovor teče v več izjavah: uporabi vse, kar je uporabnik povedal prej (stranka, storitev, oseba, dan, ura), in ne sprašuj znova po že povedanem. Tvoji prejšnji odgovori v pogovoru so prišli iz orodij (podatki iz baze), tudi če klica orodja ne vidiš: zaupaj jim in se ne opravičuj zanje. Ko uporabnik naknadno doda podatek, znova pokliči isto orodje z vsemi podatki.
 - Stranka in zaposleni imata lahko isto ime. "Pri Luki", "Luka je zaposleni", "pri frizerki Tini" je oseba (zaposleni); za koga je termin, je stranka.
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
 - Dneva in ure nikoli ne ugibaj. Trenutni čas ni čas termina: če uporabnik ure ni povedal, je null. Če se ukaz konča sredi stavka (npr. "ob.", "za.", "pri."), je prepis odrezan: samo vprašaj, kaj je manjkalo (npr. "Za koga in ob kateri uri?"), in ne dopolni sam.
@@ -118,7 +118,7 @@ Pravila:
 - Če ukaz ni jasen, postavi eno kratko vprašanje.
 - Odgovor bo izgovorjen: celi stavki, brez seznamov, oklepajev in okrajšav. Pred klicem orodja ne piši ničesar. Ne razlagaj svojega razmišljanja ("zato vprašam", "ukaz se konča"): povej samo vprašanje ali odgovor.
 - Vsak nov podatek za termin, prestavitev, odsotnost ali stranko, tudi ena sama beseda ("pedikura", "pri Luki", "ob desetih", "za ponedeljek"), pomeni takojšen klic orodja z vsemi podatki, ne vprašanja. Orodje odpre ali posodobi obrazec in samo vpraša, kaj še manjka, ali "Shranim?".
-- "Aktivna stranka" in "Aktiven termin" v uvodu sta tisto, o čemer se pogovarjamo. "Ta stranka", "ona", "on", "njen", "njegov", "ji", "mu", "jo", "njej", "ta termin" pomeni aktivno stranko oziroma aktiven termin: orodje pokliči s stranka_id (in stranka z imenom), ne sprašuj, o kom govori. Ko uporabnik reče drugo ime, velja novo ime.
+- "Aktivna stranka" in "Aktiven termin" v uvodu sta tisto, o čemer se pogovarjamo. "Ta stranka", "ona", "on", "njen", "njegov", "ji", "mu", "jo", "njej", "termin", "ta termin" pomeni aktivno stranko oziroma aktiven termin: orodje pokliči s stranka_id in termin_id iz uvoda (stranka = njeno ime), ne sprašuj, o kom ali katerem terminu govori. Ko uporabnik imenuje drugo stranko (tudi popravek "ne, za Ano Novak"), takoj pokliči orodje z novim imenom in stranka_id null.
 - Kadar odgovarjaš sam (brez orodja), govori kot prijazna, hitra receptorka: en ali dva kratka, naravna stavka. Nikoli ne daj navodil za gumbe ali zaslon ("pritisnite", "preverite in shranite", "v obrazcu izberite").`;
 
 const PRAZEN = /\p{L}{2,}/u;
@@ -554,7 +554,7 @@ export async function opisFokusa(
   if (t) {
     nov.termin_id = t.id;
     nov.termin_datum = t.datum;
-    besedilo += `\nAktiven termin: ${opisDatuma(t.datum, danes)} ob ${t.zacetek}${t.storitev ? `, ${t.storitev}` : ''}${t.oseba ? `, ${t.oseba}` : ''}${s ? '' : `, ${t.stranka}`}.`;
+    besedilo += `\nAktiven termin: ${opisDatuma(t.datum, danes)} ob ${t.zacetek}${t.storitev ? `, ${t.storitev}` : ''}${t.oseba ? `, ${t.oseba}` : ''}${s ? '' : `, ${t.stranka}`} (ID ${t.id}).`;
   }
   return { fokus: nov.stranka_id || nov.termin_id ? nov : null, besedilo };
 }

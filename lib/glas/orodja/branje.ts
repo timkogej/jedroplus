@@ -108,6 +108,8 @@ export const zadnjiObisk: BralnoOrodje<{ stranka: string; stranka_id: string | n
       govor: govor.join(' '),
       podatki: {
         stranka_id: s.id,
+        // Naslednji termin postane aktiven ("prestavi ga", "spremeni jezik termina").
+        ...(naslednji ? { termin_id: naslednji.id, termin_datum: naslednji.datum } : {}),
         zadnji: zadnji ? { datum: zadnji.datum, storitev: zadnji.storitev } : null,
         naslednji: naslednji ? { datum: naslednji.datum, ura: naslednji.zacetek, storitev: naslednji.storitev } : null,
       },

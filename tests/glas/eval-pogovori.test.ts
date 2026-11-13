@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { obdelajUkaz, type OdprtObrazec } from '@/lib/glas/jedro';
 import { llmAnthropic } from '@/lib/glas/ponudniki/llm';
 import { ukazObrazcu } from '@/lib/glas/odjemalec/obrazecGlas';
+import { izberiMoznost } from '@/lib/glas/odjemalec/besede';
 import { kontekst, NASTAVITVE, okolje, SALONI } from './pomoc';
 
 const VKLOP = process.env.GLAS_EVAL === '1' && Boolean(process.env.ANTHROPIC_API_KEY);
@@ -18,7 +19,16 @@ const ROBOTSKO = /pritisnite|preverite in|v obrazcu izberite|kliknite|gumb shran
 
 // `shrani`: zadnji "ja" je odgovor na "Shranim?" in ga obdela brskalnik (requestSubmit),
 // ne strežnik — tu ga simuliramo kot odjemalec (components/glas/AsistentPlus lokalno).
-const POGOVORI: { ukazi: string[]; konec: Record<string, string>; shrani?: boolean; podjetje?: string }[] = [
+// `#ID` v ukazih je dotik možnosti na zaslonu (izbira). `odgovor`: kaj mora vsebovati odgovor
+// pri indeksu ukaza (zaslon ali govor); `ne`: česa ne sme (npr. ponovno vprašanje).
+const POGOVORI: {
+  ukazi: string[];
+  konec: Record<string, string>;
+  shrani?: boolean;
+  podjetje?: string;
+  odgovor?: Record<number, RegExp>;
+  ne?: Record<number, RegExp>;
+}[] = [
   {
     ukazi: ['Uh, zapiši nov termin za', 'Za Anja Novak.', 'Pedikura za Luka— za Lukata, no, se pravi Luka je zaposleni, in pa ob 10 zjutraj.', 'Ne danes. Za ponedeljek.'],
     konec: { stranka: '201', storitev: 's9', oseba: 'o9', dan: '2026-11-16', ura: '10:00' },
@@ -42,6 +52,21 @@ const POGOVORI: { ukazi: string[]; konec: Record<string, string>; shrani?: boole
   { podjetje: 'L3', ukazi: ['Zapiši Niko jutri ob desetih na barvanje pri Maji'], konec: { stranka: '301', oseba: 'o32', lokacija: 'l-siska' } },
   { podjetje: 'L3', ukazi: ['Nov termin za Niko Horvat pri Luki', 'pedikura, jutri ob devetih'], konec: { stranka: '301', storitev: 's32', oseba: 'o31', lokacija: 'l-center' } },
   { podjetje: 'L3', ukazi: ['Vpiši Niko Horvat jutri ob enajstih pri Luki v Centru', 'barvanje', 'ja'], konec: { stranka: '301', storitev: 's31', lokacija: 'l-center' }, shrani: true },
+  // Fokus: dva Tima → izbira → "kakšen telefon ima" ne vpraša znova → prestavitev brez imena.
+  {
+    ukazi: ['Kaj vemo o Timu Zupančiču?', '#ABC-12345', 'Kakšen telefon ima?', 'Prestavi mu termin na petek.'],
+    konec: { idt: 't9', dan: '2026-11-13' },
+    odgovor: { 2: /040 111 222/ },
+    ne: { 2: /katere|katerega|kateri tim/i, 3: /katere|katerega|kateri tim/i },
+  },
+  // Urejanje termina: jezik aktivnega termina, nato "ja".
+  { ukazi: ['Kdaj pride Ana Novak?', 'Spremeni jezik termina v angleščino.', 'ja'], konec: { idt: 't5', jezik: 'eng' }, shrani: true },
+  // Odprt obrazec novega termina: "dodaj še barvanje" doda drugo storitev.
+  { ukazi: ['Zapiši Matejo jutri ob enajstih na moško striženje.', 'Dodaj še barvanje.'], konec: { stranka: '101', storitev: 's2', dodaj1: 's1' } },
+  // Opomba stranke: končen odgovor iz baze, ne izmišljen.
+  { ukazi: ['Ima Ana Novak kakšno opombo?'], konec: {}, odgovor: { 0: /zamujala/ } },
+  // Isto kot zadnjič.
+  { ukazi: ['Zapiši Matejo isto kot zadnjič čez šest tednov.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-12-24' } },
 ];
 
 describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {
@@ -54,6 +79,10 @@ describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {
     );
     A.storitve.push({ id: 's9', naziv: 'Pedikura', trajanjeMin: 60, aktivna: true });
     A.osebe.push({ ...A.osebe[0], id: 'o9', ime: 'Luka', priimek: 'Kranjc' });
+    A.termini.push({
+      id: 't9', vrstica: 'v-t9', idStranke: 'ABC-12345', stranka: 'Tim Zupančič', datum: '2026-11-17', zacetek: '10:00', konec: '10:30',
+      storitev: 'Moško striženje', osebaId: 'o1', oseba: 'Tina', status: 'scheduled', lokacijaId: null,
+    });
 
     let uspesnih = 0;
     let robotskih = 0;
@@ -65,23 +94,33 @@ describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {
       const zgodovina: string[] = [];
       let obrazec: OdprtObrazec | null = null;
       let shranjeno = false;
+      let moznosti: { id: string; oznaka: string }[] = [];
+      let preverjeno = true;
       console.log('\n════════');
-      for (const u of p.ukazi) {
+      for (const [i, u] of p.ukazi.entries()) {
         if (obrazec && ukazObrazcu(u) === 'shrani') {
           shranjeno = true;
           console.log(`» ${u}\n  (brskalnik: requestSubmit obrazca)`);
           continue;
         }
         const t = Date.now();
-        const r = (await obdelajUkaz({ k: kontekst(podjetje === 'A1' ? {} : { podjetje, osebaId: null }), vhod: 'besedilo', besedilo: u, prejsnjiUkazi: [...zgodovina], odprtObrazec: obrazec }, d)) as {
-          ukazId?: string; status?: string; odgovor?: string; govor?: string; obrazec?: OdprtObrazec;
-        };
+        // Dotik možnosti (#ID) ali izbira po imenu, kot v brskalniku.
+        const izbira = u.startsWith('#') ? moznosti.find((m) => m.id === u.slice(1)) ?? null : moznosti.length ? izberiMoznost(u, moznosti) : null;
+        const besedilo = u.startsWith('#') ? (izbira?.oznaka ?? u) : u;
+        const r = (await obdelajUkaz(
+          { k: kontekst(podjetje === 'A1' ? {} : { podjetje, osebaId: null }), vhod: 'besedilo', besedilo, prejsnjiUkazi: [...zgodovina], odprtObrazec: obrazec, izbira },
+          d
+        )) as { ukazId?: string; status?: string; odgovor?: string; govor?: string; obrazec?: OdprtObrazec; vprasanje?: { moznosti?: { id: string; oznaka: string }[] } };
         if (r.ukazId) zgodovina.push(r.ukazId);
         if (r.obrazec) obrazec = r.obrazec;
+        moznosti = r.vprasanje?.moznosti ?? [];
+        const besedila = `${r.odgovor ?? ''}\n${r.govor ?? ''}`;
+        if (p.odgovor?.[i] && !p.odgovor[i].test(besedila)) preverjeno = false;
+        if (p.ne?.[i]?.test(besedila)) preverjeno = false;
         if (ROBOTSKO.test(r.govor ?? '')) robotskih++;
         console.log(`» ${u}\n  ${Date.now() - t} ms | ${r.status} | ${r.odgovor}\n  🔊 ${r.govor}`);
       }
-      const ok = Object.entries(p.konec).every(([k, v]) => obrazec?.polja[k] === v) && (!p.shrani || shranjeno);
+      const ok = preverjeno && Object.entries(p.konec).every(([k, v]) => obrazec?.polja[k] === v) && (!p.shrani || shranjeno);
       if (ok) uspesnih++;
       console.log(`  ${ok ? 'OK' : 'NAROBE'} obrazec=${JSON.stringify(obrazec?.polja ?? null)}`);
     }

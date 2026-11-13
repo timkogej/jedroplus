@@ -51,7 +51,7 @@ describe('fokus stranke', () => {
     });
     const zg: string[] = [];
     await ukaz(env, 'kdaj pride Mateja', zg);
-    expect(env.shramba.ukazi.get(zg[0])?.zakljucen?.kontekst).toEqual({ stranka_id: '101' });
+    expect(env.shramba.ukazi.get(zg[0])?.zakljucen?.kontekst).toMatchObject({ stranka_id: '101', termin_id: 't1' });
 
     await ukaz(env, 'prestavi Ano Novak, ki pride jutri', zg);
     expect(zadnjaZahteva(env)).toContain('Aktivna stranka: Mateja Kovačič (ID 101).');
@@ -69,7 +69,7 @@ describe('fokus stranke', () => {
     const zg: string[] = [];
     await ukaz(env, 'povej o Mateji', zg);
     await ukaz(env, 'kaj imam jutri', zg);
-    expect(env.shramba.ukazi.get(zg[1])?.zakljucen?.kontekst).toEqual({ stranka_id: '101' });
+    expect(env.shramba.ukazi.get(zg[1])?.zakljucen?.kontekst).toMatchObject({ stranka_id: '101', termin_id: 't1' });
     await ukaz(env, 'kaj ima rada', zg);
     expect(zadnjaZahteva(env)).toContain('Aktivna stranka: Mateja Kovačič (ID 101).');
   });
@@ -105,5 +105,22 @@ describe('fokus stranke', () => {
     expect(preberiKontekst({ stranka_id: "1' or 1=1" })).toBeNull();
     expect(preberiKontekst({ termin_datum: '2026-11-13' })).toBeNull();
     expect(preberiKontekst('101')).toBeNull();
+  });
+});
+
+describe('ime ima prednost pred ID-jem iz fokusa', () => {
+  it('drugo ime → druga stranka; zaimek ali isto ime → ID', async () => {
+    const { razresiStranko } = await import('@/lib/glas/orodja/stranke');
+    const { DANES, podatkiPomnilnik } = await import('./pomoc');
+    const o = { k: kontekst(), podatki: podatkiPomnilnik('A1'), danes: DANES, uraZdaj: '10:00', ukazId: 'u' };
+    const id = async (ime: string, sid: string) => {
+      const r = await razresiStranko(ime, sid, o);
+      return 'stranka' in r ? r.stranka.id : 'vprasanje';
+    };
+    expect(await id('Ana Novak', '101')).toBe('102');
+    expect(await id('ona', '102')).toBe('102');
+    expect(await id('Tim Zupančič', 'ABC-12345')).toBe('ABC-12345');
+    expect(await id('Ana', '101')).toBe('vprasanje');
+    expect(await id('Ana', '103')).toBe('103');
   });
 });

@@ -98,6 +98,8 @@ export const karticaStranke: BralnoOrodje<z.infer<typeof vhodStranke>> = {
       govor: govor.join(' ').replace(/\.\./g, '.'),
       podatki: {
         stranka_id: s.id,
+        // Naslednji termin postane aktiven ("prestavi ga", "spremeni jezik termina").
+        ...(naslednji ? { termin_id: naslednji.id, termin_datum: naslednji.datum } : {}),
         zadnji: zadnji ? { datum: zadnji.datum, storitev: zadnji.storitev, oseba: zadnji.oseba } : null,
         naslednji: naslednji ? { datum: naslednji.datum, ura: naslednji.zacetek, storitev: naslednji.storitev } : null,
         zapiski: zapiski.length,
