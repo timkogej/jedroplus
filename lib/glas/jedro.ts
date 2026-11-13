@@ -236,7 +236,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       const t = ura();
       const o = await llm.pogovor({
         sistem: SISTEM,
-        orodja: dovoljena.map((x) => ({ ime: x.ime, opis: x.opis, shema: x.shema })),
+        orodja: dovoljena.map((x) => ({ ime: x.ime, opis: x.opis, shema: x.shema, strogo: x.razred !== 'branje' })),
         sporocila,
         najvecIzhoda: 600,
       });

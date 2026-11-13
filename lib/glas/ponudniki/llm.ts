@@ -19,6 +19,10 @@ export interface LlmOrodje {
   ime: string;
   opis: string;
   shema: JsonShema;
+  /** Strogi način (strict). Anthropic dovoli največ 16 nullable/union parametrov
+   *  v vseh strogih orodjih skupaj, zato samo pisalna orodja; vhod vseh orodij
+   *  strežnik tako ali tako preveri z zod. */
+  strogo?: boolean;
 }
 
 export interface LlmKlic {
@@ -90,7 +94,7 @@ export function llmAnthropic(model: string, timeoutMs: number, client?: Anthropi
             name: o.ime,
             description: o.opis,
             input_schema: o.shema as Anthropic.Tool.InputSchema,
-            strict: true,
+            ...(o.strogo ? { strict: true } : {}),
           })),
           tool_choice: { type: 'auto' },
           messages,
