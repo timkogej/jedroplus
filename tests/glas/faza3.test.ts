@@ -1,6 +1,6 @@
 // Faza 3: dejanja prek obstoječih obrazcev (nič se ne zapiše na strežniku).
 import { afterEach, describe, expect, it } from 'vitest';
-import { obdelajUkaz } from '@/lib/glas/jedro';
+import { obdelajUkaz, uskladiVhod } from '@/lib/glas/jedro';
 import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, uraIzParametra, vpisiOdsotnost } from '@/lib/glas/orodja/obrazci';
 import { shraniObrazec, vzemiObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
 import type { OkoljeOrodja } from '@/lib/glas/orodja/tipi';
@@ -155,5 +155,36 @@ describe('predizpolnitev v brskalniku', () => {
   it('star obrazec se ne uporabi', () => {
     shramba.set('asistent-obrazec', JSON.stringify({ vrsta: 'odsotnost', polja: {}, cas: Date.now() - 3 * 60_000 }));
     expect(vzemiObrazec(['odsotnost'])).toBeNull();
+  });
+});
+
+describe('vhod brez strogega načina', () => {
+  it('manjkajoča polja postanejo null, številka v niz', () => {
+    expect(uskladiVhod(pripraviTermin.shema, { stranka: 'Tim', ura: '10:30', stranka_id: 101 })).toEqual({
+      stranka: 'Tim', ura: '10:30', stranka_id: '101', storitev: null, oseba: null, datum: null,
+    });
+  });
+
+  it('jedro: LLM izpusti neobvezna polja, obrazec se vseeno odpre v enem krogu', async () => {
+    const { d, llm } = okolje({ llm: [{ klici: [{ id: 'a', ime: 'pripravi_termin', vhod: { stranka: 'Mateja', datum: 'jutri', ura: '10:30' } }] }] });
+    const r = await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: 'vpiši Matejo jutri ob pol enajstih' }, d);
+    expect(llm.zahteve).toHaveLength(1);
+    expect(r).toMatchObject({ ok: true, obrazec: { vrsta: 'nov_termin', polja: { stranka: '101', dan: '2026-11-13', ura: '10:30' } } });
+  });
+
+  it('napaka parametrov pove imena polj, ne vrednosti', async () => {
+    const { d, llm } = okolje({ llm: [{ klici: [{ id: 'a', ime: 'pripravi_termin', vhod: { stranka: '', ura: 'x'.repeat(50) } }] }, { besedilo: 'Ne gre.' }] });
+    await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: 'vpiši' }, d);
+    const rezultat = JSON.stringify(llm.zahteve[1].sporocila.at(-1));
+    expect(rezultat).toContain('Neveljavni parametri orodja: stranka, ura.');
+    expect(rezultat).not.toContain('xxxx');
+  });
+});
+
+describe('besedilo odgovora', () => {
+  it('brez dvojne pike za datumom', async () => {
+    const { d } = okolje({ llm: [{ klici: [{ id: 'a', ime: 'pripravi_termin', vhod: { stranka: 'Mateja', datum: 'jutri' } }] }] });
+    const r = await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: 'vpiši Matejo jutri' }, d);
+    expect(JSON.stringify(r)).not.toMatch(/\d\.\.[^.]/);
   });
 });

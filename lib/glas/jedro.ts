@@ -26,7 +26,7 @@ import { NapakaPonudnika } from './ponudniki/skupno';
 import type { SttPonudnik } from './ponudniki/stt';
 import type { TtsPonudnik } from './ponudniki/tts';
 import type { ShrambaGlasa, VhodUkaza, ZakljucekUkaza } from './shramba/tipi';
-import type { Kontekst, PodatkiSalona, Predogled, RezultatOrodja } from './tipi';
+import type { JsonShema, Kontekst, PodatkiSalona, Predogled, RezultatOrodja } from './tipi';
 
 export interface Odvisnosti {
   /** Leni, ker ponudnik brez ključa vrže napako šele, ko ga res potrebujemo. */
@@ -100,16 +100,38 @@ Pravila:
 - Podatke dobiš samo z orodji. Nikoli si ne izmišljuj strank, ID-jev, terminov ali datumov.
 - Če orodje vrne vprašanje ali več možnosti, vprašaj uporabnika kratko in ne izberi sam.
 - Dejanja, ki kaj zapišejo, izvedeš samo s klicem ustreznega orodja. Uporabnik jih potrdi na zaslonu; nikoli ne trdi, da je nekaj že shranjeno.
-- Nov termin, prestavitev, odsotnost, nova stranka ter "ni prišla", "zaključi", "odpovej": orodje odpre obstoječi obrazec, uporabnik ga shrani sam.
+- Nov termin, prestavitev, odsotnost, nova stranka ter "ni prišla", "zaključi", "odpovej": orodje odpre obstoječi obrazec, uporabnik ga shrani sam. Orodje pokliči takoj, tudi če manjka storitev, oseba, dan ali ura (ta polja so null, uporabnik jih izbere v obrazcu). Stranko podaj tako, kot je rečena, tudi samo ime; orodje jo poišče in samo vpraša, če jih je več.
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
+- Dneva in ure nikoli ne ugibaj. Trenutni čas ni čas termina: če uporabnik ure ni povedal, je null. Če se ukaz konča sredi stavka (npr. "ob.", "za.", "pri."), je prepis odrezan: samo vprašaj, kaj je manjkalo (npr. "Za koga in ob kateri uri?"), in ne dopolni sam.
 - Ne moreš brisati, pošiljati sporočil strankam, spreminjati cen, pravic ali plačil. Če to zahteva, povej, da tega ne moreš.
 - Recepture barve: odtenke zapiši kot "6.3", "7.1"; gramažo, oksidant (%) in čas (min) kot števila. Ne dodajaj ničesar, česar uporabnik ni rekel.
 - Za vprašanja, kako se kaj naredi v aplikaciji, uporabi pomoc_aplikacija; za "odpri", "pojdi na", "pokaži stran" uporabi odpri_stran. Navodil za aplikacijo si ne izmišljuj.
 - Poslovne analitike (prihodki, statistika, primerjave) ne delaš; povej, da je to na strani Analitika.
 - Če ukaz ni jasen, postavi eno kratko vprašanje.
-- Odgovor bo izgovorjen: celi stavki, brez seznamov, oklepajev in okrajšav. Pred klicem orodja ne piši ničesar.`;
+- Odgovor bo izgovorjen: celi stavki, brez seznamov, oklepajev in okrajšav. Pred klicem orodja ne piši ničesar. Ne razlagaj svojega razmišljanja ("zato vprašam", "ukaz se konča"): povej samo vprašanje ali odgovor.`;
 
 const PRAZEN = /\p{L}{2,}/u;
+
+/**
+ * Brez strogega načina (strict) LLM neobvezna polja pogosto izpusti ali pošlje
+ * številko namesto niza. Manjkajoča polja iz sheme dopolni z null, številke v
+ * nizih pretvori v niz. Vse ostalo (meje, vzorci, enum) še vedno preveri zod.
+ */
+export function uskladiVhod(shema: JsonShema, vhod: unknown): unknown {
+  if (!vhod || typeof vhod !== 'object' || Array.isArray(vhod)) return vhod;
+  const lastnosti = (shema.properties ?? {}) as Record<string, { type?: unknown }>;
+  const izhod: Record<string, unknown> = { ...(vhod as Record<string, unknown>) };
+  for (const [ime, def] of Object.entries(lastnosti)) {
+    const tipi = Array.isArray(def?.type) ? def.type : [def?.type];
+    const v = izhod[ime];
+    if (v === undefined || v === '') {
+      if (tipi.includes('null')) izhod[ime] = null;
+    } else if (typeof v === 'number' && tipi.includes('string') && !tipi.includes('number') && !tipi.includes('integer')) {
+      izhod[ime] = String(v);
+    }
+  }
+  return izhod;
+}
 
 export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorUkaza> {
   const konf = d.konf ?? preberiKonfiguracijo();
@@ -271,9 +293,11 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
           rezultati.push({ id: klic.id, vsebina: 'To orodje ni na voljo.', napaka: true });
           continue;
         }
-        const vhod = orodje.vhod.safeParse(klic.vhod);
+        const vhod = orodje.vhod.safeParse(uskladiVhod(orodje.shema, klic.vhod));
         if (!vhod.success) {
-          rezultati.push({ id: klic.id, vsebina: 'Neveljavni parametri orodja.', napaka: true });
+          // Samo imena polj (brez vrednosti), da LLM v naslednjem krogu popravi klic.
+          const polja = [...new Set(vhod.error.issues.map((i) => i.path.join('.') || 'vhod'))].join(', ');
+          rezultati.push({ id: klic.id, vsebina: `Neveljavni parametri orodja: ${polja}. Pošlji vsa polja; neznana kot null.`, napaka: true });
           continue;
         }
         uporabljena.push(orodje.ime);
@@ -347,6 +371,8 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     pojdi?: string;
     obrazec?: RezultatOrodja['obrazec'];
   }): Promise<OdgovorUkaza> {
+    // Datum na koncu stavka ("13. 11." + ".") ne sme dati dvojne pike.
+    r = { ...r, odgovor: r.odgovor.replace(/(\d\.)\.(?!\.)/g, '$1') };
     let govor = r.govor ?? zaGovor(r.odgovor);
     if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} Potrdim?`;
     else if (r.vprasanje?.moznosti?.length && !r.govor) govor = vprasanjeZaGovor(r.vprasanje);

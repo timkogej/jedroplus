@@ -114,14 +114,14 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
   ime: 'pripravi_termin',
   opis:
     'Nov termin: odpre obrazec v koledarju, izpolnjen s stranko, storitvijo, zaposlenim, dnevom in uro ("vpiši Ano Novak jutri ob desetih na barvanje pri Tini"). ' +
-    'Ničesar ne shrani — uporabnik preveri in shrani v obrazcu.',
+    'Pokliči tudi z nepopolnimi podatki ("vpiši Matejo jutri"): manjkajoče izbere uporabnik v obrazcu. Ničesar ne shrani — uporabnik preveri in shrani v obrazcu.',
   razred: 'branje',
   pravica: 'termini.ustvarjanje',
   omogoceno: true,
   shema: {
     type: 'object',
     properties: {
-      stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno.' },
+      stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno (lahko samo ime ali samo priimek).' },
       stranka_id: { type: ['string', 'null'], description: 'ID stranke, če je že znan, sicer null.' },
       storitev: { type: ['string', 'null'], description: 'Ime storitve; null, če ni povedana.' },
       oseba: { type: ['string', 'null'], description: 'Ime zaposlenega; null = uporabnik ali ni povedano.' },
@@ -237,7 +237,7 @@ async function izberiTermin(
 }
 
 const vhodTermina = {
-  stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno.' },
+  stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno (lahko samo ime ali samo priimek).' },
   stranka_id: { type: ['string', 'null'], description: 'ID stranke, če je že znan, sicer null.' },
   termin_id: { type: ['string', 'null'], description: 'ID termina, če ga je uporabnik izbral med možnostmi, sicer null.' },
   datum_zdaj: { type: ['string', 'null'], description: 'Dan, na katerem je termin zdaj (če ga uporabnik pove), sicer null.' },
@@ -303,7 +303,7 @@ type Akcija = keyof typeof AKCIJE;
 export const statusTermina: BralnoOrodje<z.infer<z.ZodObject<typeof zodTermina>> & { akcija: Akcija }> = {
   ime: 'status_termina',
   opis:
-    'Stranka ni prišla, zaključi termin ali odpovej termin: odpre termin v koledarju, kjer uporabnik potrdi dejanje z gumbom. Ničesar ne spremeni samo.',
+    'Stranka ni prišla, zaključi termin ali odpovej termin ("Mateja ni prišla", "zaključi Ano"): poišče termin stranke in ga odpre v koledarju, kjer uporabnik potrdi dejanje z gumbom. Zadostuje samo ime. Ničesar ne spremeni samo.',
   razred: 'branje',
   pravica: 'termini.urejanje',
   omogoceno: true,
