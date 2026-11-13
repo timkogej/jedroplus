@@ -10,7 +10,7 @@ import { iskanjeStranke, koledarDan, prviProsti, zadnjiObisk } from './branje';
 import { prekliciTermin, premakniTermin, ustvariTermin } from './rezervirano';
 import type { Orodje } from './tipi';
 import { dodajZapisek } from './zapiski';
-import { karticaStranke, neaktivneStranke, zadnjaBarva } from './kartica';
+import { karticaStranke, neaktivneStranke, podatkiStranke, zadnjaBarva } from './kartica';
 import { kdoDela, naslednjaStranka, prosteLuknjeOrodje, resursiDan } from './pregled';
 import { odpriStran, pomocAplikacija } from './pomoc';
 import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, vpisiOdsotnost } from './obrazci';
@@ -25,6 +25,7 @@ export const VSA_ORODJA: readonly Orodje[] = [
   kdoDela,
   resursiDan,
   karticaStranke,
+  podatkiStranke,
   zadnjaBarva,
   neaktivneStranke,
   pomocAplikacija,

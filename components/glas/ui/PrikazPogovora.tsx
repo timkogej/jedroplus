@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowUp, CaretRight, Check, CheckCircle, Keyboard, WarningCircle, X } from '@phosphor-icons/react';
+import { ArrowUp, CaretRight, Check, CheckCircle, EnvelopeSimple, Keyboard, Phone, WarningCircle, X } from '@phosphor-icons/react';
 import type { OdgovorOdjemalec, StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import type { Moznost, Vrstica } from './tipi';
 
@@ -181,6 +181,24 @@ function Kartice({
             <span className="min-w-0 flex-1">{m.oznaka}</span>
             <CaretRight size={16} className="shrink-0 text-label-tertiary transition-transform group-hover:translate-x-0.5" aria-hidden />
           </button>
+        ))}
+      </div>
+    );
+  }
+  const akcije = (zadnji?.akcije ?? []).filter((a) => /^(tel|mailto):/.test(a.href));
+  if (zadnji?.status !== 'predlog' && akcije.length) {
+    // Samo povezava: klic ali pošto začne uporabnik s pritiskom, asistent nikoli sam.
+    return (
+      <div className="ap-vstop mt-6 flex w-full max-w-[420px] gap-2" style={{ animationDelay: '120ms' }}>
+        {akcije.map((a) => (
+          <a
+            key={a.vrsta}
+            href={a.href}
+            className="ap-steklo flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl text-[15px] font-semibold text-label transition-transform active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-violet)] md:h-11 md:text-sm"
+          >
+            {a.vrsta === 'klic' ? <Phone size={17} weight="fill" aria-hidden /> : <EnvelopeSimple size={17} weight="fill" aria-hidden />}
+            {t(a.vrsta === 'klic' ? 'poklici' : 'pisi')}
+          </a>
         ))}
       </div>
     );

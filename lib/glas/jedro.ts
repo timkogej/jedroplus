@@ -26,7 +26,7 @@ import { NapakaPonudnika } from './ponudniki/skupno';
 import type { SttPonudnik } from './ponudniki/stt';
 import type { TtsPonudnik } from './ponudniki/tts';
 import type { KontekstPogovora, ShrambaGlasa, VhodUkaza, ZakljucekUkaza } from './shramba/tipi';
-import type { JsonShema, Kontekst, PodatkiSalona, Predogled, RezultatOrodja } from './tipi';
+import type { AkcijaStranke, JsonShema, Kontekst, PodatkiSalona, Predogled, RezultatOrodja } from './tipi';
 
 export interface Odvisnosti {
   /** Leni, ker ponudnik brez ključa vrže napako šele, ko ga res potrebujemo. */
@@ -83,6 +83,8 @@ export type OdgovorUkaza =
       pojdi?: string;
       /** Obrazec, ki ga odjemalec odpre izpolnjenega (nič ni shranjeno). */
       obrazec?: RezultatOrodja['obrazec'];
+      /** Gumbi Pokliči / Piši (tel:, mailto:). */
+      akcije?: AkcijaStranke[];
       opozorilo?: string | null;
       porabljeno: number;
       kvota: number;
@@ -269,7 +271,10 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       casi.orodja = ura() - t;
       uporabljena.push(hitroOrodje.ime);
       const status = r.vprasanje ? 'vprasanje' : 'odgovor';
-      return await koncaj({ status, odgovor: r.sporocilo, govor: r.govor, vprasanje: r.vprasanje, pojdi: r.pojdi, obrazec: r.obrazec });
+      return await koncaj({
+        status, odgovor: r.sporocilo, govor: r.govor, vprasanje: r.vprasanje, pojdi: r.pojdi, obrazec: r.obrazec,
+        dnevnik: r.zasebno?.dnevnik, akcije: r.akcije,
+      });
     }
 
     // 3. LLM z orodji
@@ -286,6 +291,9 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     sporocila.push({ vloga: 'uporabnik', besedilo: uvodUkaza(k, zdaj, prepis, v.izbira ?? null, v.odprtObrazec ?? null, opis.besedilo) });
 
     let zadnjeVprasanje: RezultatOrodja['vprasanje'];
+    // Zasebni rezultati (telefon, e-pošta, opombe) iz krogov, ki gredo nazaj modelu:
+    // model dobi samo dnevnik, uporabnik pa vsebino skupaj s končnim odgovorom.
+    const zasebni: RezultatOrodja[] = [];
     for (let krog = 0; krog < konf.najvecKrogovLlm; krog++) {
       const t = ura();
       const o = await llm.pogovor({
@@ -307,6 +315,16 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       if (o.klici.length === 0) {
         const odgovor = brezRazmisleka(o.besedilo || 'V redu.');
         const status = zadnjeVprasanje || /\?\s*$/.test(odgovor) ? 'vprasanje' : 'odgovor';
+        if (zasebni.length) {
+          return await koncaj({
+            status,
+            odgovor: [...zasebni.map((x) => x.sporocilo), odgovor].join('\n'),
+            govor: [...zasebni.map((x) => x.govor ?? zaGovor(x.sporocilo)), zaGovor(odgovor)].join(' '),
+            dnevnik: [...zasebni.map((x) => x.zasebno?.dnevnik ?? ''), odgovor].join('\n'),
+            akcije: zasebni.flatMap((x) => x.akcije ?? []),
+            vprasanje: zadnjeVprasanje,
+          });
+        }
         return await koncaj({ status, odgovor, vprasanje: zadnjeVprasanje });
       }
 
@@ -337,6 +355,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
         if (orodje.razred === 'branje') {
           const r = await orodje.izvedi(vhod.data, okolje);
           posodobiFokus(r);
+          if (r.zasebno) zasebni.push(r);
           if (r.vprasanje) zadnjeVprasanje = r.vprasanje;
           rezultati.push({ id: klic.id, vsebina: zaLlm(r) });
           // Vprašanje (več strank) je tudi končno: uporabnik mora izbrati.
@@ -366,6 +385,8 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
           vprasanje: vpr,
           pojdi: vpr ? undefined : izbrani.find((x) => x.pojdi)?.pojdi,
           obrazec: vpr ? undefined : izbrani.find((x) => x.obrazec)?.obrazec,
+          dnevnik: izbrani.some((x) => x.zasebno) ? izbrani.map((x) => x.zasebno?.dnevnik ?? x.sporocilo).join('\n') : undefined,
+          akcije: vpr ? undefined : izbrani.flatMap((x) => x.akcije ?? []),
         });
       }
       sporocila.push({ vloga: 'rezultati', rezultati });
@@ -403,6 +424,9 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     vprasanje?: RezultatOrodja['vprasanje'];
     pojdi?: string;
     obrazec?: RezultatOrodja['obrazec'];
+    /** Besedilo za dnevnik in zgodovino (brez telefona, e-pošte, opomb). */
+    dnevnik?: string;
+    akcije?: AkcijaStranke[];
   }): Promise<OdgovorUkaza> {
     // Datum na koncu stavka ("13. 11." + ".") ne sme dati dvojne pike.
     r = { ...r, odgovor: r.odgovor.replace(/(\d\.)\.(?!\.)/g, '$1') };
@@ -420,7 +444,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
         // Glas je izbiren: odgovor je še vedno na zaslonu.
       }
     }
-    await zakljuci({ status: r.status, odgovor: r.odgovor });
+    await zakljuci({ status: r.status, odgovor: r.dnevnik ?? r.odgovor });
     await d.shramba.revizija({
       podjetje: k.podjetje,
       userId: k.userId,
@@ -440,12 +464,22 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       vprasanje: r.vprasanje,
       pojdi: r.pojdi && /^\/[a-z0-9/_-]*(\?[a-z_]+=[\w%.-]+(&[a-z_]+=[\w%.-]+){0,3})?$/i.test(r.pojdi) ? r.pojdi : undefined,
       obrazec: r.pojdi && r.obrazec ? r.obrazec : undefined,
+      akcije: varneAkcije(r.akcije),
       opozorilo: opozoriloKvote(rez.ok ? rez.porabljeno : 0, rez.ok ? rez.kvota : 0),
       porabljeno: rez.ok ? rez.porabljeno : 0,
       kvota: rez.ok ? rez.kvota : 0,
       zvok,
     };
   }
+}
+
+/** Samo tel: in mailto: brez parametrov, največ dva gumba. */
+function varneAkcije(a: AkcijaStranke[] | undefined): AkcijaStranke[] | undefined {
+  const ok = (a ?? []).filter(
+    (x) => (x.vrsta === 'klic' && /^tel:\+?\d{6,15}$/.test(x.href)) || (x.vrsta === 'pisi' && /^mailto:[^\s?&#/:]+@[^\s?&#/:]+$/.test(x.href))
+  );
+  const enkrat = ok.filter((x, i) => ok.findIndex((y) => y.vrsta === x.vrsta) === i);
+  return enkrat.length ? enkrat : undefined;
 }
 
 /** Največ toliko prejšnjih izmenjav gre modelu kot zgodovina pogovora. */

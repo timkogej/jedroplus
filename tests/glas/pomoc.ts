@@ -12,7 +12,7 @@ import { ttsBrez } from '@/lib/glas/ponudniki/tts';
 import { shrambaVPomnilniku, type NastavitvePomnilnik } from '@/lib/glas/shramba/pomnilnik';
 import type {
   LokacijePovzetek,
-  Kontekst, NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
+  Kontekst, NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, PodrobnostiStranke, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
   TerminPovzetek, ZapisekPovzetek,
 } from '@/lib/glas/tipi';
 
@@ -37,6 +37,7 @@ export interface Salon {
   termini: TerminPovzetek[];
   zapiski?: (ZapisekPovzetek & { idStranke: string })[];
   opombe?: Record<string, string>;
+  podrobnosti?: Record<string, Partial<Omit<PodrobnostiStranke, 'obiski' | 'neprihodi' | 'interneOpombe'>>>;
   resursi?: ResursPovzetek[];
   /** vrstica termina → resurs */
   povezave?: { vrstica: string; resursId: string }[];
@@ -76,6 +77,11 @@ export const SALONI: Record<string, Salon> = {
       { idStranke: '101', kategorija: 'barva', besedilo: 'Barva 6.3 z 7.1', podrobnosti: { odtenki: ['6.3', '7.1'], gramov: 30, oksidant_pct: 6, cas_min: 35 }, datum: '2026-10-20' },
     ],
     opombe: { '101': 'Alergija na amonijak' },
+    podrobnosti: {
+      '101': { telefon: '041 234 567', email: 'mateja.k@gmail.com', jezik: 'slo', opombe: 'Pije kavo brez mleka', marketing: true },
+      '102': { telefon: '+386 31 555 111', email: null, jezik: 'eng', opombe: 'Bo zamujala 10 minut', marketing: null },
+      'ABC-12345': { telefon: '040 111 222', marketing: false },
+    },
     resursi: [
       { id: 'r1', naziv: 'Umivalnik', kolicina: 1, aktivna: true },
       { id: 'r2', naziv: 'Masažna soba', kolicina: 2, aktivna: true },
@@ -154,6 +160,18 @@ export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): 
       return (s.zapiski ?? []).filter((x) => x.idStranke === id).slice(0, najvec);
     },
     async interneOpombe(id) { return s.opombe?.[id] ?? null; },
+    async podrobnostiStranke(id, danes) {
+      const st = s.stranke.find((x) => x.id === id);
+      if (!st) return null;
+      const p = s.podrobnosti?.[id] ?? {};
+      const termini = s.termini.filter((x) => x.idStranke === id);
+      return {
+        telefon: null, email: null, jezik: null, opombe: null, marketing: null, ...p,
+        interneOpombe: s.opombe?.[id] ?? null,
+        obiski: termini.filter((x) => x.datum < danes && x.status !== 'cancelled' && x.status !== 'no_show').length,
+        neprihodi: termini.filter((x) => x.status === 'no_show').length,
+      };
+    },
     async resursi() { return s.resursi ?? []; },
     async resursiTerminov(vrstice) { return (s.povezave ?? []).filter((p) => vrstice.includes(p.vrstica)); },
     async lokacije() { return s.lokacije ?? { seznam: [], osebe: {}, storitve: {} }; },

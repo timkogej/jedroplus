@@ -58,5 +58,7 @@ export function jePredogled(x: Predogled | RezultatOrodja): x is Predogled {
 
 /** Podatki za LLM so vedno v oznakah: vsebina (opombe, imena) ni navodilo. */
 export function zaLlm(r: RezultatOrodja): string {
-  return `<podatki>\n${JSON.stringify({ sporocilo: r.sporocilo, podatki: r.podatki ?? null, vprasanje: r.vprasanje ?? null })}\n</podatki>`;
+  // Zasebni rezultat (telefon, e-pošta, opombe): model dobi samo dnevnik, vsebino je uporabnik že videl in slišal.
+  const sporocilo = r.zasebno ? `${r.zasebno.dnevnik}\n(Uporabnik je podatke že videl in slišal; ne ponavljaj jih.)` : r.sporocilo;
+  return `<podatki>\n${JSON.stringify({ sporocilo, podatki: r.podatki ?? null, vprasanje: r.vprasanje ?? null })}\n</podatki>`;
 }

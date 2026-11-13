@@ -61,6 +61,34 @@ export interface RezultatOrodja {
   pojdi?: string;
   /** Predizpolnitev obstoječega obrazca (odjemalec jo da v sessionStorage, ne v URL). */
   obrazec?: { vrsta: 'nov_termin' | 'prestavi_termin' | 'odsotnost' | 'nova_stranka'; polja: Record<string, string> };
+  /**
+   * Sporočilo in govor vsebujeta osebne podatke (telefon, e-pošta, opombe): gresta samo
+   * na zaslon in v glas. Modelu AI in v dnevnik (glas_ukazi.odgovor) gre `dnevnik`.
+   */
+  zasebno?: { dnevnik: string };
+  /** Gumbi na zaslonu (Pokliči, Piši). Nikoli se ne sprožijo sami. */
+  akcije?: AkcijaStranke[];
+}
+
+export interface AkcijaStranke {
+  vrsta: 'klic' | 'pisi';
+  /** tel:+38641… ali mailto:… */
+  href: string;
+}
+
+/** Podatki s kartice stranke za glasovni odgovor. Telefon, e-pošta in opombe ne gredo modelu AI. */
+export interface PodrobnostiStranke {
+  telefon: string | null;
+  email: string | null;
+  /** Koda jezika sporočil ('slo', 'eng', …) ali null. */
+  jezik: string | null;
+  opombe: string | null;
+  interneOpombe: string | null;
+  /** true = privolitev; false = odjava ali zavrnitev; null = ni odgovora (šteje kot ne). */
+  marketing: boolean | null;
+  /** Pretekli termini, ki niso odpovedani ali neprihodi. */
+  obiski: number;
+  neprihodi: number;
 }
 
 /** Kar pisalno orodje pokaže pred potrditvijo. */
@@ -103,6 +131,8 @@ export interface PodatkiSalona {
   zapiskiStranke(idStranke: string, najvec: number): Promise<ZapisekPovzetek[]>;
   /** Interne opombe s kartice stranke (brez kontaktov). */
   interneOpombe(idStranke: string): Promise<string | null>;
+  /** Kontakt, jezik, opombe, privolitev in štetje obiskov (RLS). */
+  podrobnostiStranke(idStranke: string, danes: string): Promise<PodrobnostiStranke | null>;
   resursi(): Promise<ResursPovzetek[]>;
   /** Povezave termin ↔ resurs za dane vrstice terminov (TerminPovzetek.vrstica). */
   resursiTerminov(vrstice: string[]): Promise<{ vrstica: string; resursId: string }[]>;

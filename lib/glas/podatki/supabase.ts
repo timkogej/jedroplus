@@ -4,13 +4,14 @@
 // (createServerSupabaseClient), zato RLS omeji podjetje in lokacije točno
 // tako kot v aplikaciji. Service role se tukaj ne uporablja.
 //
-// Bere le stolpce, ki jih orodja potrebujejo (brez telefonov in e-pošte).
+// Bere le stolpce, ki jih orodja potrebujejo. Telefon, e-pošto in opombe bere samo
+// podrobnostiStranke (za glasovni odgovor; modelu AI ne gredo).
 
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { normalizeAppointmentStatus } from '@/lib/appointments/status';
 import type {
-  LokacijePovzetek, NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
+  LokacijePovzetek, NovZapisek, OdsotnostPovzetek, OsebaPovzetek, PodatkiSalona, PodrobnostiStranke, ResursPovzetek, StoritevPovzetek, StrankaPovzetek,
   TerminPovzetek, ZapisekPovzetek,
 } from '../tipi';
 
@@ -266,6 +267,40 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
       if (error) return null; // dodatek; brez njega je kartica še vedno uporabna
       const v = niz(((data ?? [])[0] as Vrstica | undefined)?.['Interne opombe']);
       return v || null;
+    },
+
+    async podrobnostiStranke(idStranke, danes): Promise<PodrobnostiStranke | null> {
+      // Imena stolpcev se med starimi in novimi bazami razlikujejo (kot lib/supabase/clients.ts).
+      const [st, te] = await Promise.all([
+        seja.from('Stranke').select('*').eq('ID Podjetja', podjetje).eq('ID stranke', idStranke).limit(1),
+        seja.from('Termini').select('Datum,Status').eq('ID podjetja', podjetje).eq('ID stranke', idStranke).is('deleted_at', null).limit(2000),
+      ]);
+      if (st.error) throw new Error(`podrobnosti stranke: ${st.error.code ?? 'napaka'}`);
+      const r = (st.data ?? [])[0] as Vrstica | undefined;
+      if (!r) return null;
+      const prvo = (imena: string[]) => {
+        for (const i of imena) if (i in r && niz(r[i])) return niz(r[i]);
+        return null;
+      };
+      const odjava = Boolean(r.marketing_opt_out_at);
+      const privolitev = r.marketing_consent;
+      let obiski = 0;
+      let neprihodi = 0;
+      for (const t of (te.error ? [] : (te.data ?? [])) as Vrstica[]) {
+        const status = normalizeAppointmentStatus(t['Status']);
+        if (status === 'no_show') neprihodi++;
+        else if (status !== 'cancelled' && niz(t['Datum']).slice(0, 10) < danes) obiski++;
+      }
+      return {
+        telefon: prvo(['Telefonska številka', 'Telefon', 'telefon', 'phone', 'Phone', 'tel']),
+        email: prvo(['Email stranke', 'Email', 'email', 'e-mail', 'E-mail']),
+        jezik: prvo(['language', 'Language', 'Jezik komunikacije', 'jezik_komunikacije', 'Jezik', 'jezik', 'preferred_language']),
+        opombe: prvo(['Opombe stranke', 'Opombe', 'opombe', 'notes', 'Notes', 'Opombe strank']),
+        interneOpombe: prvo(['Interne opombe', 'interne_opombe', 'internal_notes', 'Internal notes']),
+        marketing: odjava ? false : privolitev === true ? true : privolitev === false ? false : null,
+        obiski,
+        neprihodi,
+      };
     },
 
     async resursi(): Promise<ResursPovzetek[]> {

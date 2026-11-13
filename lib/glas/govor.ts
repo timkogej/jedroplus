@@ -104,3 +104,60 @@ export function brezRazmisleka(besedilo: string): string {
   const ostane = stavki.filter((s) => !META.test(s) && !ANGLESKO.test(s));
   return ostane.length ? ostane.join(' ').trim() : besedilo;
 }
+
+const STEVKE = ['nič', 'ena', 'dve', 'tri', 'štiri', 'pet', 'šest', 'sedem', 'osem', 'devet'];
+
+/** Skupine števk telefona: "+38631555111" → ["+386", "31", "555", "111"], "041234567" → ["041", "234", "567"]. */
+export function skupineTelefona(telefon: string): string[] {
+  const t = telefon.replace(/[^\d+]/g, '');
+  const plus = t.startsWith('+');
+  let stevke = t.replace(/\D/g, '');
+  const out: string[] = [];
+  if (plus && stevke.startsWith('386')) {
+    out.push('+386');
+    stevke = stevke.slice(3);
+  } else if (plus) {
+    out.push(`+${stevke.slice(0, 2)}`);
+    stevke = stevke.slice(2);
+  }
+  const deli: string[] = [];
+  for (let i = stevke.length; i > 0; i -= 3) deli.unshift(stevke.slice(Math.max(0, i - 3), i));
+  if (deli.length > 1 && deli[0].length === 1) deli.splice(0, 2, deli[0] + deli[1]);
+  return [...out, ...deli].filter(Boolean);
+}
+
+/** Telefon za zaslon: "041 234 567". */
+export function telefonZaZaslon(telefon: string): string {
+  return skupineTelefona(telefon).join(' ');
+}
+
+/** Telefon za glas, po skupinah števk: "nič štiri ena, dve tri štiri, pet šest sedem". */
+export function telefonZaGovor(telefon: string): string {
+  return skupineTelefona(telefon)
+    .map((g) => [...g].map((c) => (c === '+' ? 'plus' : STEVKE[Number(c)])).join(' '))
+    .join(', ');
+}
+
+/** E-pošta za glas: "mateja.k@gmail.com" → "mateja pika k afna gmail pika com". */
+export function emailZaGovor(email: string): string {
+  return email
+    .toLowerCase()
+    .replace(/\d/g, (c) => ` ${STEVKE[Number(c)]} `)
+    .replace(/@/g, ' afna ')
+    .replace(/\./g, ' pika ')
+    .replace(/-/g, ' pomišljaj ')
+    .replace(/_/g, ' podčrtaj ')
+    .replace(/\+/g, ' plus ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+/** Varna povezava za gumb Pokliči / Piši, ali null. */
+export function povezavaKontakta(vrsta: 'klic' | 'pisi', vrednost: string): string | null {
+  if (vrsta === 'klic') {
+    const t = vrednost.replace(/[^\d+]/g, '');
+    return /^\+?\d{6,15}$/.test(t) ? `tel:${t}` : null;
+  }
+  const e = vrednost.trim();
+  return /^[^\s@?&#/:]{1,64}@[^\s@?&#/:]{1,190}\.[a-z]{2,}$/i.test(e) ? `mailto:${e}` : null;
+}

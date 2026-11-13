@@ -7,9 +7,10 @@
 // ne gre nazaj ponudniku AI — samo na zaslon in v glas.
 
 import { z } from 'zod';
-import { datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
+import { datumZaGovor, emailZaGovor, NAJVEC_NA_GLAS, povezavaKontakta, telefonZaGovor, telefonZaZaslon, uraZaGovor } from '../govor';
+import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
 import { dodajDni, opisDatuma } from '../razresevanje/datumi';
-import type { ZapisekPovzetek } from '../tipi';
+import type { AkcijaStranke, ZapisekPovzetek } from '../tipi';
 import { cap, sklon } from './branje';
 import { razresiStranko, ID_STRANKE } from './stranke';
 import type { BralnoOrodje } from './tipi';
@@ -101,6 +102,10 @@ export const karticaStranke: BralnoOrodje<z.infer<typeof vhodStranke>> = {
         naslednji: naslednji ? { datum: naslednji.datum, ura: naslednji.zacetek, storitev: naslednji.storitev } : null,
         zapiski: zapiski.length,
       },
+      // Zapiski in interne opombe ne gredo modelu AI niti v dnevnik.
+      ...(zapiski.length || opombe
+        ? { zasebno: { dnevnik: [...zaslon.filter((x) => !/^(Zapisek|Interne opombe)/.test(x)), zapiski.length ? '(zapiski prikazani)' : '', opombe ? '(interne opombe prikazane)' : ''].filter(Boolean).join('\n') } }
+        : {}),
     };
   },
 };
@@ -173,6 +178,172 @@ export const neaktivneStranke: BralnoOrodje<{ mesecev: number | null }> = {
         .join('\n')}${n > 30 ? `\n… in še ${n - 30}` : ''}`,
       govor: `${cap(`${n}`)} ${sklon(n, 'stranka ni bila', 'stranki nista bili', 'stranke niso bile', 'strank ni bilo')} več kot ${mes}. ${n === 1 ? 'To je' : 'Nazadnje so bile'} ${naGlas.join('; ')}.${n > NAJVEC_NA_GLAS ? ' Ostale so na zaslonu.' : ''}`,
       podatki: { mesecev: m, stevilo: n, stranke: seznam.slice(0, 30).map((s) => ({ id: s.id, ime: ime(s), zadnjic: s.zadnjaInterakcija })) },
+    };
+  },
+};
+
+// ───────────────────────────────────────────────────────────────────────────
+// Podatki s kartice: telefon, e-pošta, opombe, jezik, privolitev, obiski.
+// Telefon, e-pošta in opombe gredo samo na zaslon in v glas (zasebno), modelu AI
+// in v dnevnik gre le "(telefon prikazan)" ipd.
+
+export const POLJA_STRANKE = ['telefon', 'email', 'opombe', 'interne_opombe', 'jezik', 'privolitev', 'obiski', 'naslednji'] as const;
+type PoljeStranke = (typeof POLJA_STRANKE)[number];
+
+const JEZIKI: Record<string, string> = { slo: 'slovenščina', eng: 'angleščina', de: 'nemščina', it: 'italijanščina', hr: 'hrvaščina' };
+
+const stevilo = (n: number, ena: string, dve: string, tri: string, vec: string) =>
+  `${n} ${n % 100 === 1 ? ena : n % 100 === 2 ? dve : n % 100 === 3 || n % 100 === 4 ? tri : vec}`;
+
+const vhodPodatkov = vhodStranke.extend({
+  polja: z.array(z.enum(POLJA_STRANKE)).max(8).nullable(),
+});
+
+export const podatkiStranke: BralnoOrodje<z.infer<typeof vhodPodatkov>> = {
+  ime: 'podatki_stranke',
+  opis:
+    'Posamezni podatki s kartice stranke: telefon, e-pošta, opombe, interne opombe, jezik sporočil, marketinška privolitev, število obiskov in neprihodov, naslednji termin ("kakšen telefon ima", "ima Ana kakšno opombo", "v katerem jeziku ji pišemo", "ali sme dobiti novice", "kolikokrat je že bila", "pokliči jo"). Za "pokliči jo" zahtevaj telefon (na zaslonu se pokaže gumb Pokliči).',
+  razred: 'branje',
+  pravica: 'stranke.branje',
+  omogoceno: true,
+  shema: {
+    type: 'object' as const,
+    properties: {
+      ...shemaStranke.properties,
+      polja: {
+        type: ['array', 'null'],
+        items: { type: 'string', enum: [...POLJA_STRANKE] },
+        description: 'Katere podatke uporabnik želi; null = vse.',
+      },
+    },
+    required: ['stranka', 'stranka_id', 'polja'],
+    additionalProperties: false as const,
+  },
+  vhod: vhodPodatkov,
+  async izvedi({ stranka, stranka_id, polja }, o) {
+    const r = await razresiStranko(stranka, stranka_id, o);
+    if ('odgovor' in r) return r.odgovor;
+    const s = r.stranka;
+    const ime = `${s.ime} ${s.priimek}`.trim();
+    const zelja = new Set<PoljeStranke>(polja?.length ? polja : POLJA_STRANKE);
+    const [p, naslednji] = await Promise.all([
+      o.podatki.podrobnostiStranke(s.id, o.danes),
+      zelja.has('naslednji') ? o.podatki.naslednjiTermin(s.id, o.danes) : Promise.resolve(null),
+    ]);
+    if (!p) return { sporocilo: 'Te stranke ne najdem.' };
+
+    const zaslon: string[] = [ime];
+    const govor: string[] = [];
+    const dnevnik: string[] = [ime];
+    const akcije: AkcijaStranke[] = [];
+    let zasebno = false;
+
+    if (zelja.has('telefon')) {
+      const href = p.telefon ? povezavaKontakta('klic', p.telefon) : null;
+      if (p.telefon && href) {
+        zaslon.push(`Telefon: ${telefonZaZaslon(p.telefon)}`);
+        govor.push(`Telefon: ${telefonZaGovor(p.telefon)}.`);
+        dnevnik.push('(telefon prikazan)');
+        akcije.push({ vrsta: 'klic', href });
+        zasebno = true;
+      } else {
+        zaslon.push('Telefon: ni vpisan');
+        govor.push('Telefona nima vpisanega.');
+        dnevnik.push('Telefon: ni vpisan');
+      }
+    }
+    if (zelja.has('email')) {
+      const href = p.email ? povezavaKontakta('pisi', p.email) : null;
+      if (p.email && href) {
+        zaslon.push(`E-pošta: ${p.email}`);
+        govor.push(`E-pošta: ${emailZaGovor(p.email)}.`);
+        dnevnik.push('(e-pošta prikazana)');
+        akcije.push({ vrsta: 'pisi', href });
+        zasebno = true;
+      } else {
+        zaslon.push('E-pošta: ni vpisana');
+        govor.push('E-pošte nima vpisane.');
+        dnevnik.push('E-pošta: ni vpisana');
+      }
+    }
+    if (zelja.has('opombe')) {
+      if (p.opombe) {
+        zaslon.push(`Opombe: ${p.opombe}`);
+        govor.push(`Opombe: ${p.opombe.slice(0, 200)}.`);
+        dnevnik.push('(opombe prikazane)');
+        zasebno = true;
+      } else if (polja?.length) {
+        zaslon.push('Opombe: ni');
+        govor.push('Opomb nima.');
+        dnevnik.push('Opombe: ni');
+      }
+    }
+    if (zelja.has('interne_opombe')) {
+      if (p.interneOpombe) {
+        zaslon.push(`Interne opombe: ${p.interneOpombe}`);
+        govor.push(`Interne opombe: ${p.interneOpombe.slice(0, 200)}.`);
+        dnevnik.push('(interne opombe prikazane)');
+        zasebno = true;
+      } else if (polja?.length) {
+        zaslon.push('Interne opombe: ni');
+        govor.push('Internih opomb nima.');
+        dnevnik.push('Interne opombe: ni');
+      }
+    }
+    if (zelja.has('jezik')) {
+      const j = p.jezik ? JEZIKI[normalizeCommunicationLanguage(p.jezik, 'slo')] : null;
+      const t = j ? `Jezik sporočil: ${j}` : 'Jezik sporočil: ni nastavljen (velja jezik podjetja)';
+      zaslon.push(t);
+      govor.push(j ? `Sporočila dobiva v jeziku ${j}.`.replace('v jeziku slovenščina', 'v slovenščini') : 'Jezik ni nastavljen, velja jezik podjetja.');
+      dnevnik.push(t);
+    }
+    if (zelja.has('privolitev')) {
+      const t =
+        p.marketing === true
+          ? 'Marketinška privolitev: da'
+          : p.marketing === false
+            ? 'Marketinška privolitev: ne'
+            : 'Marketinška privolitev: ni odgovora (šteje kot ne)';
+      zaslon.push(t);
+      govor.push(
+        p.marketing === true
+          ? 'Za novice in akcije ima privolitev.'
+          : p.marketing === false
+            ? 'Novic in akcij ne želi.'
+            : 'Privolitve za novice ni, zato jih ne pošiljamo.'
+      );
+      dnevnik.push(t);
+    }
+    if (zelja.has('obiski')) {
+      const t = `Obiskov: ${p.obiski}, neprihodov: ${p.neprihodi}`;
+      zaslon.push(t);
+      govor.push(
+        `${p.obiski === 0 ? 'Obiskov še ni bilo' : `Obiskov: ${p.obiski}`}, ${
+          p.neprihodi ? stevilo(p.neprihodi, 'neprihod', 'neprihoda', 'neprihodi', 'neprihodov') : 'brez neprihodov'
+        }.`
+      );
+      dnevnik.push(t);
+    }
+    if (zelja.has('naslednji')) {
+      const t = naslednji
+        ? `Naslednji termin: ${opisDatuma(naslednji.datum, o.danes)} ob ${naslednji.zacetek}${naslednji.storitev ? `, ${naslednji.storitev}` : ''}`
+        : 'Naslednji termin: ni';
+      zaslon.push(t);
+      govor.push(naslednji ? `Naslednjič pride ${datumZaGovor(naslednji.datum, o.danes)} ${uraZaGovor(naslednji.zacetek)}.` : 'Naslednjega termina nima.');
+      dnevnik.push(t);
+    }
+    if (govor.length === 0) govor.push(`${ime}: nič od tega ni vpisano.`);
+    return {
+      sporocilo: zaslon.join('\n'),
+      govor: govor.join(' '),
+      podatki: {
+        stranka_id: s.id,
+        ...(naslednji ? { termin_id: naslednji.id, termin_datum: naslednji.datum } : {}),
+        ima_telefon: Boolean(p.telefon),
+        ima_email: Boolean(p.email),
+      },
+      ...(zasebno ? { zasebno: { dnevnik: dnevnik.join('\n') } } : {}),
+      ...(akcije.length ? { akcije } : {}),
     };
   },
 };
