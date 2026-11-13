@@ -25,6 +25,36 @@ export interface ZakljucekUkaza {
   tts_znaki: number;
   strosek_mikro_usd: number;
   trajanje_ms: Record<string, number>;
+  /** Fokus pogovora po tem ukazu (samo ID-ji). */
+  kontekst?: KontekstPogovora | null;
+}
+
+/** Aktivna stranka in termin pogovora. Samo ID-ji; orodja jih znova preberejo prek RLS. */
+export interface KontekstPogovora {
+  stranka_id?: string;
+  termin_id?: string;
+  termin_datum?: string;
+}
+
+export interface PrejsnjiUkaz {
+  prepis: string;
+  odgovor: string;
+  kontekst: KontekstPogovora | null;
+}
+
+/** Iz zapisa v bazi vzame samo znana, kratka polja. */
+export function preberiKontekst(x: unknown): KontekstPogovora | null {
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
+  const o = x as Record<string, unknown>;
+  const id = (v: unknown) => (typeof v === 'string' && /^[\w-]{1,64}$/.test(v) ? v : undefined);
+  const k: KontekstPogovora = {
+    stranka_id: id(o.stranka_id),
+    termin_id: id(o.termin_id),
+    termin_datum: typeof o.termin_datum === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.termin_datum) ? o.termin_datum : undefined,
+  };
+  if (!k.termin_id) delete k.termin_datum;
+  for (const kljuc of Object.keys(k) as (keyof KontekstPogovora)[]) if (k[kljuc] === undefined) delete k[kljuc];
+  return Object.keys(k).length ? k : null;
 }
 
 export interface NovPredlog {
@@ -70,7 +100,7 @@ export interface ShrambaGlasa {
   rezervirajUkaz(podjetje: string, userId: string, vhod: VhodUkaza): Promise<RezervacijaUkaza>;
   zakljuciUkaz(ukazId: string, z: ZakljucekUkaza, vrniKvoto: boolean): Promise<void>;
   /** Prepis in odgovor prejšnjega ukaza istega uporabnika (≤5 min), za nadaljevanje pogovora. */
-  prejsnjiUkaz(ukazId: string, userId: string): Promise<{ prepis: string; odgovor: string } | null>;
+  prejsnjiUkaz(ukazId: string, userId: string, podjetje: string): Promise<PrejsnjiUkaz | null>;
   ustvariPredlog(p: NovPredlog): Promise<string>;
   zacniPotrditev(predlogId: string, userId: string, zetonHash: string): Promise<ZacetekPotrditve>;
   zakljuciPotrditev(predlogId: string, status: 'izvedeno' | 'napaka', rezultat: unknown, napaka: string | null): Promise<void>;

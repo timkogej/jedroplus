@@ -7,6 +7,7 @@ import { randomUUID } from 'node:crypto';
 import type {
   NovPredlog, RezervacijaUkaza, ShrambaGlasa, ShranjenPredlog, ZacetekPotrditve, ZakljucekUkaza, ZapisRevizije,
 } from './tipi';
+import { preberiKontekst } from './tipi';
 
 interface Ukaz { id: string; podjetje: string; userId: string; ustvarjen: number; steje: boolean; zakljucen: ZakljucekUkaza | null }
 interface Predlog extends ShranjenPredlog { zeton_hash: string; status: string; potece: number; rezultat: unknown; napaka: string | null }
@@ -53,11 +54,11 @@ export function shrambaVPomnilniku(nastavitve: Record<string, NastavitvePomnilni
       u.zakljucen = z;
     },
 
-    async prejsnjiUkaz(ukazId, userId) {
+    async prejsnjiUkaz(ukazId, userId, podjetje) {
       const u = ukazi.get(ukazId);
-      if (!u || u.userId !== userId || !u.zakljucen || u.ustvarjen < ura() - 5 * 60_000) return null;
+      if (!u || u.userId !== userId || u.podjetje !== podjetje || !u.zakljucen || u.ustvarjen < ura() - 5 * 60_000) return null;
       if (!u.zakljucen.prepis || !u.zakljucen.odgovor) return null;
-      return { prepis: u.zakljucen.prepis, odgovor: u.zakljucen.odgovor };
+      return { prepis: u.zakljucen.prepis, odgovor: u.zakljucen.odgovor, kontekst: preberiKontekst(u.zakljucen.kontekst) };
     },
 
     async ustvariPredlog(p: NovPredlog) {

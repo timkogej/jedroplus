@@ -91,6 +91,14 @@ select jp_glas_zakljuci_ukaz((select id from glas_ukazi order by created_at limi
   '{"status":"napaka"}'::jsonb, true);
 select pg_temp.mora((select ukazi = 2 and strosek_mikro_usd = 12.5 and stt_sekunde = 4 from glas_poraba_mesec), 'kvota vrnjena enkrat, strošek zapisan');
 
+-- kontekst (1793600000): zapiše se samo objekt
+select jp_glas_zakljuci_ukaz((select id from glas_ukazi where zakljucen_at is null order by created_at limit 1),
+  '{"status":"odgovor","kontekst":{"stranka_id":"101"}}'::jsonb, false);
+select pg_temp.mora((select count(*) = 1 from glas_ukazi where kontekst = '{"stranka_id":"101"}'::jsonb), 'kontekst zapisan');
+select jp_glas_zakljuci_ukaz((select id from glas_ukazi where zakljucen_at is null order by created_at limit 1),
+  '{"status":"odgovor","kontekst":"101"}'::jsonb, false);
+select pg_temp.mora((select count(*) = 1 from glas_ukazi where kontekst is not null), 'kontekst, ki ni objekt, se ne zapiše');
+
 insert into glas_nastavitve_uporabnika (company_id, user_id, vklopljeno) values ('AAAAAA', '22222222-2222-2222-2222-222222222222', false);
 select pg_temp.mora((jp_glas_rezerviraj_ukaz('AAAAAA', '22222222-2222-2222-2222-222222222222', 'aplikacija')->>'koda') = 'uporabnik_izklopljen', 'izklopljen uporabnik');
 

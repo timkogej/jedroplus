@@ -25,7 +25,7 @@ import type { LlmPonudnik, LlmSporocilo } from './ponudniki/llm';
 import { NapakaPonudnika } from './ponudniki/skupno';
 import type { SttPonudnik } from './ponudniki/stt';
 import type { TtsPonudnik } from './ponudniki/tts';
-import type { ShrambaGlasa, VhodUkaza, ZakljucekUkaza } from './shramba/tipi';
+import type { KontekstPogovora, ShrambaGlasa, VhodUkaza, ZakljucekUkaza } from './shramba/tipi';
 import type { JsonShema, Kontekst, PodatkiSalona, Predogled, RezultatOrodja } from './tipi';
 
 export interface Odvisnosti {
@@ -116,6 +116,7 @@ Pravila:
 - Če ukaz ni jasen, postavi eno kratko vprašanje.
 - Odgovor bo izgovorjen: celi stavki, brez seznamov, oklepajev in okrajšav. Pred klicem orodja ne piši ničesar. Ne razlagaj svojega razmišljanja ("zato vprašam", "ukaz se konča"): povej samo vprašanje ali odgovor.
 - Vsak nov podatek za termin, prestavitev, odsotnost ali stranko, tudi ena sama beseda ("pedikura", "pri Luki", "ob desetih", "za ponedeljek"), pomeni takojšen klic orodja z vsemi podatki, ne vprašanja. Orodje odpre ali posodobi obrazec in samo vpraša, kaj še manjka, ali "Shranim?".
+- "Aktivna stranka" in "Aktiven termin" v uvodu sta tisto, o čemer se pogovarjamo. "Ta stranka", "ona", "on", "njen", "njegov", "ji", "mu", "jo", "njej", "ta termin" pomeni aktivno stranko oziroma aktiven termin: orodje pokliči s stranka_id (in stranka z imenom), ne sprašuj, o kom govori. Ko uporabnik reče drugo ime, velja novo ime.
 - Kadar odgovarjaš sam (brez orodja), govori kot prijazna, hitra receptorka: en ali dva kratka, naravna stavka. Nikoli ne daj navodil za gumbe ali zaslon ("pritisnite", "preverite in shranite", "v obrazcu izberite").`;
 
 const PRAZEN = /\p{L}{2,}/u;
@@ -176,6 +177,17 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
   let poraba: PorabaUkaza = { ...PRAZNA_PORABA };
   let prepis = '';
   const uporabljena: string[] = [];
+  // Fokus pogovora: zadnja razrešena stranka in termin. Shrani se z ukazom (samo ID-ji).
+  let fokus: KontekstPogovora | null = null;
+  const posodobiFokus = (r: RezultatOrodja) => {
+    const p = (r.podatki ?? {}) as Record<string, unknown>;
+    const id = (x: unknown) => (typeof x === 'string' && /^[\w-]{1,64}$/.test(x) ? x : null);
+    const stranka = id(p.stranka_id);
+    const termin = id(p.termin_id);
+    const datum = typeof p.termin_datum === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.termin_datum) ? p.termin_datum : null;
+    if (stranka && stranka !== fokus?.stranka_id) fokus = { stranka_id: stranka };
+    if (termin && datum) fokus = { ...(fokus ?? {}), termin_id: termin, termin_datum: datum };
+  };
   const zakljuci = async (z: Partial<ZakljucekUkaza>, vrniKvoto = false) => {
     casi.skupaj = ura() - t0;
     const zapis: ZakljucekUkaza = {
@@ -194,6 +206,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       tts_znaki: poraba.ttsZnaki,
       strosek_mikro_usd: strosekMikroUsd(poraba),
       trajanje_ms: casi,
+      kontekst: fokus,
       ...z,
     };
     await d.shramba.zakljuciUkaz(ukazId, zapis, vrniKvoto);
@@ -206,6 +219,11 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
   const okolje: OkoljeOrodja = { k, podatki: d.podatki, danes: zdaj.datum, uraZdaj: zdaj.ura, ukazId };
   const dovoljena = orodjaZa(k, d.orodja ?? VSA_ORODJA);
   let faza: 'stt' | 'llm' = 'stt';
+
+  // Zgodovina pogovora: strežnik prebere prejšnje ukaze sam (samo istega uporabnika in
+  // podjetja, zadnjih 5 minut), zato odjemalec ne more podtakniti odgovorov ali fokusa.
+  const idji = (v.prejsnjiUkazi?.length ? v.prejsnjiUkazi : v.prejsnjiUkazId ? [v.prejsnjiUkazId] : []).slice(-NAJVEC_ZGODOVINE);
+  const prejsnjiP = Promise.all(idji.map((id) => d.shramba.prejsnjiUkaz(id, k.userId, k.podjetje).catch(() => null)));
 
   try {
     // 1. Besedilo
@@ -236,12 +254,18 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     // 2. Hitra pot (brez LLM) — samo branje in samo, če je orodje dovoljeno
     // Hitra pot prepozna samo cel, nedvoumen stavek ("kaj imam jutri"), zato
     // velja tudi sredi pogovora; ob izbiri možnosti ne.
+    const prejsnji = await prejsnjiP;
+    fokus = [...prejsnji].reverse().find((x) => x?.kontekst)?.kontekst ?? null;
+    // Izbrana možnost je stranka (dva Tima): postane aktivna. ID preveri RLS.
+    if (v.izbira && (await d.podatki.stranka(v.izbira.id).catch(() => null))) fokus = { stranka_id: v.izbira.id };
+
     const hitro = v.izbira ? null : hitraPot(prepis);
     const hitroOrodje = hitro ? dovoljena.find((o) => o.ime === hitro.orodje && o.razred === 'branje') : undefined;
     if (hitro && hitroOrodje && hitroOrodje.razred === 'branje') {
       const t = ura();
       const vhod = hitroOrodje.vhod.parse(hitro.vhod);
       const r = await hitroOrodje.izvedi(vhod, okolje);
+      posodobiFokus(r);
       casi.orodja = ura() - t;
       uporabljena.push(hitroOrodje.ime);
       const status = r.vprasanje ? 'vprasanje' : 'odgovor';
@@ -252,16 +276,14 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     faza = 'llm';
     const llm = d.llm();
     const sporocila: LlmSporocilo[] = [];
-    // Zgodovina pogovora: strežnik prebere prejšnje ukaze sam (samo uporabnikove,
-    // zadnjih 5 minut), zato odjemalec ne more podtakniti odgovorov asistenta.
-    const idji = (v.prejsnjiUkazi?.length ? v.prejsnjiUkazi : v.prejsnjiUkazId ? [v.prejsnjiUkazId] : []).slice(-NAJVEC_ZGODOVINE);
-    const prejsnji = await Promise.all(idji.map((id) => d.shramba.prejsnjiUkaz(id, k.userId)));
     for (const prej of prejsnji) {
       if (!prej) continue;
       sporocila.push({ vloga: 'uporabnik', besedilo: `<ukaz>${prej.prepis.replace(/<\/?ukaz>/g, '')}</ukaz>` });
       sporocila.push({ vloga: 'asistent', besedilo: prej.odgovor, klici: [] });
     }
-    sporocila.push({ vloga: 'uporabnik', besedilo: uvodUkaza(k, zdaj, prepis, v.izbira ?? null, v.odprtObrazec ?? null) });
+    const opis = await opisFokusa(fokus, d.podatki, zdaj.datum);
+    fokus = opis.fokus;
+    sporocila.push({ vloga: 'uporabnik', besedilo: uvodUkaza(k, zdaj, prepis, v.izbira ?? null, v.odprtObrazec ?? null, opis.besedilo) });
 
     let zadnjeVprasanje: RezultatOrodja['vprasanje'];
     for (let krog = 0; krog < konf.najvecKrogovLlm; krog++) {
@@ -314,6 +336,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
         const t2 = ura();
         if (orodje.razred === 'branje') {
           const r = await orodje.izvedi(vhod.data, okolje);
+          posodobiFokus(r);
           if (r.vprasanje) zadnjeVprasanje = r.vprasanje;
           rezultati.push({ id: klic.id, vsebina: zaLlm(r) });
           // Vprašanje (več strank) je tudi končno: uporabnik mora izbrati.
@@ -448,7 +471,8 @@ function uvodUkaza(
   zdaj: { datum: string; ura: string },
   prepis: string,
   izbira: { id: string; oznaka: string } | null,
-  obrazec: OdprtObrazec | null = null
+  obrazec: OdprtObrazec | null = null,
+  fokus = ''
 ): string {
   const vloga = k.vloga === 'staff' ? 'zaposleni' : k.vloga === 'owner' ? 'lastnik' : 'skrbnik';
   const izbor = izbira ? `\nUporabnik je izbral možnost z ID ${izbira.id} (${izbira.oznaka}).` : '';
@@ -457,7 +481,36 @@ function uvodUkaza(
         Object.entries(obrazec.polja).map(([a, b]) => `${a}=${b}`).join(', ') || 'nič'
       }). Če uporabnik doda ali spremeni podatek, takoj znova pokliči ${VRSTE_OBRAZCA[obrazec.vrsta]} z vsemi podatki (prejšnji in novi); obrazec se posodobi.`
     : '';
-  return `Danes je ${opisDatuma(zdaj.datum, zdaj.datum)} (${zdaj.datum}); trenutni čas ${zdaj.ura} (samo za izraze, kot je "čez eno uro", nikoli kot ura termina). Uporabnik: ${vloga}${k.osebaId ? ', ima svoj koledar' : ''}.${izbor}${odprt}\n<ukaz>${prepis.replace(/<\/?ukaz>/g, '')}</ukaz>`;
+  return `Danes je ${opisDatuma(zdaj.datum, zdaj.datum)} (${zdaj.datum}); trenutni čas ${zdaj.ura} (samo za izraze, kot je "čez eno uro", nikoli kot ura termina). Uporabnik: ${vloga}${k.osebaId ? ', ima svoj koledar' : ''}.${fokus}${izbor}${odprt}\n<ukaz>${prepis.replace(/<\/?ukaz>/g, '')}</ukaz>`;
+}
+
+/**
+ * Fokus iz shrambe je le namig: stranko in termin znova preberemo z uporabnikovo sejo (RLS).
+ * Tuj ali izbrisan ID izpade iz fokusa. Termin mora pripadati aktivni stranki.
+ */
+export async function opisFokusa(
+  fokus: KontekstPogovora | null,
+  podatki: PodatkiSalona,
+  danes: string
+): Promise<{ fokus: KontekstPogovora | null; besedilo: string }> {
+  if (!fokus?.stranka_id && !fokus?.termin_id) return { fokus: null, besedilo: '' };
+  const [s, termini] = await Promise.all([
+    fokus.stranka_id ? podatki.stranka(fokus.stranka_id).catch(() => null) : null,
+    fokus.termin_id && fokus.termin_datum ? podatki.termini(fokus.termin_datum, fokus.termin_datum).catch(() => []) : [],
+  ]);
+  const t = termini.find((x) => x.id === fokus.termin_id && (!s || x.idStranke === s.id)) ?? null;
+  const nov: KontekstPogovora = {};
+  let besedilo = '';
+  if (s) {
+    nov.stranka_id = s.id;
+    besedilo += `\nAktivna stranka: ${`${s.ime} ${s.priimek}`.trim()} (ID ${s.id}).`;
+  }
+  if (t) {
+    nov.termin_id = t.id;
+    nov.termin_datum = t.datum;
+    besedilo += `\nAktiven termin: ${opisDatuma(t.datum, danes)} ob ${t.zacetek}${t.storitev ? `, ${t.storitev}` : ''}${t.oseba ? `, ${t.oseba}` : ''}${s ? '' : `, ${t.stranka}`}.`;
+  }
+  return { fokus: nov.stranka_id || nov.termin_id ? nov : null, besedilo };
 }
 
 /** Koliko dni nazaj iščemo nedavne stranke za namige. */

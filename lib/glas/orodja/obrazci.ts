@@ -305,6 +305,7 @@ async function izberiTermin(
     return {
       odgovor: {
         sporocilo: `${ime} ima več terminov. Katerega?`,
+        podatki: { stranka_id: s.id },
         vprasanje: {
           besedilo: 'Kateri termin?',
           moznosti: termini.slice(0, 5).map((t) => ({ id: t.id, oznaka: `${opisDatuma(t.datum, o.danes)} ob ${t.zacetek}${t.storitev ? `, ${t.storitev}` : ''}` })),
@@ -318,7 +319,7 @@ async function izberiTermin(
 const vhodTermina = {
   stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno (lahko samo ime ali samo priimek).' },
   stranka_id: { type: ['string', 'null'], description: 'ID stranke, če je že znan, sicer null.' },
-  termin_id: { type: ['string', 'null'], description: 'ID termina, če ga je uporabnik izbral med možnostmi, sicer null.' },
+  termin_id: { type: ['string', 'null'], description: 'ID termina, če ga je uporabnik izbral med možnostmi ali gre za aktiven termin, sicer null.' },
   datum_zdaj: { type: ['string', 'null'], description: 'Dan, na katerem je termin zdaj, samo če ga je uporabnik izrecno povedal; sicer null (orodje samo najde prihodnje termine stranke).' },
 };
 const zodTermina = {
@@ -350,7 +351,6 @@ export const prestaviTermin: BralnoOrodje<VhodPrestavi> = {
   },
   vhod: z.object({ ...zodTermina, nov_datum: z.string().max(60).nullable(), nova_ura: z.string().max(40).nullable() }),
   async izvedi(p, o) {
-    if (!p.nov_datum && !p.nova_ura) return { sporocilo: 'Na kdaj naj termin prestavim?' };
     const nov = p.nov_datum ? datumIzParametra(p.nov_datum, o.danes) : null;
     if (p.nov_datum && !nov) return { sporocilo: `Datuma »${p.nov_datum}« ne razumem.` };
     const ura = p.nova_ura ? uraIzParametra(p.nova_ura) : null;
@@ -359,6 +359,14 @@ export const prestaviTermin: BralnoOrodje<VhodPrestavi> = {
     if ('odgovor' in izbran) return izbran.odgovor;
     const { termin: t, ime } = izbran;
     if (samoSvojeUrejanje(o.k) && t.osebaId !== o.k.osebaId) return { sporocilo: 'Urejate lahko samo svoje termine.' };
+    // Brez novega časa: termin je najden in postane aktiven, zato "na ponedeljek" v naslednji izjavi ve, kaj prestavljamo.
+    if (!p.nov_datum && !p.nova_ura) {
+      return {
+        sporocilo: `${ime}, ${opisDatuma(t.datum, o.danes)} ob ${t.zacetek}. Na kdaj naj ga prestavim?`,
+        govor: `${ime}, ${datumZaGovor(t.datum, o.danes)} ${uraZaGovor(t.zacetek)}. Na kdaj?`,
+        podatki: { termin_id: t.id, termin_datum: t.datum, stranka_id: t.idStranke },
+      };
+    }
     const datum = nov ?? t.datum;
     const zacetek = ura ?? t.zacetek;
     if (datum < o.danes) return { sporocilo: 'Termina ne prestavljam v preteklost.' };
@@ -370,7 +378,7 @@ export const prestaviTermin: BralnoOrodje<VhodPrestavi> = {
       govor: `${ime}, nov čas ${datumZaGovor(datum, o.danes)} ${uraZaGovor(zacetek)}.${govorPozor(pozor)} ${SHRANI}`,
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'prestavi_termin', polja: { idt: t.id, dan_prej: t.datum, dan: datum, ura: zacetek } },
-      podatki: { termin_id: t.id, od: { datum: t.datum, ura: t.zacetek }, na: { datum, ura: zacetek }, pozor },
+      podatki: { termin_id: t.id, termin_datum: t.datum, stranka_id: t.idStranke, od: { datum: t.datum, ura: t.zacetek }, na: { datum, ura: zacetek }, pozor },
     };
   },
 };
@@ -405,7 +413,7 @@ export const statusTermina: BralnoOrodje<z.infer<z.ZodObject<typeof zodTermina>>
       govor: `Odpiram termin ${ime}, ${datumZaGovor(t.datum, o.danes)} ${uraZaGovor(t.zacetek)}. Tapnite ${gumb}.`,
       // Obstoječa povezava koledarja (obvestila): skoči na dan in odpre termin. ID termina ni oseben podatek.
       pojdi: `/koledar?termin=${encodeURIComponent(t.id)}&datum=${t.datum}`,
-      podatki: { termin_id: t.id, akcija: p.akcija },
+      podatki: { termin_id: t.id, termin_datum: t.datum, stranka_id: t.idStranke, akcija: p.akcija },
     };
   },
 };

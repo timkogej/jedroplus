@@ -7,6 +7,7 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ShrambaGlasa, ShranjenPredlog, ZacetekPotrditve, RezervacijaUkaza } from './tipi';
+import { preberiKontekst } from './tipi';
 
 export function shrambaSupabase(admin: SupabaseClient): ShrambaGlasa {
   return {
@@ -30,16 +31,22 @@ export function shrambaSupabase(admin: SupabaseClient): ShrambaGlasa {
       if (error) console.error(JSON.stringify({ glas: 'zakljuci_ukaz', koda: error.code, ukaz: ukazId }));
     },
 
-    async prejsnjiUkaz(ukazId, userId) {
-      const { data } = await admin
-        .from('glas_ukazi')
-        .select('prepis, odgovor, created_at')
-        .eq('id', ukazId)
-        .eq('user_id', userId)
-        .gte('created_at', new Date(Date.now() - 5 * 60_000).toISOString())
-        .maybeSingle();
-      if (!data?.prepis || !data?.odgovor) return null;
-      return { prepis: String(data.prepis), odgovor: String(data.odgovor) };
+    async prejsnjiUkaz(ukazId, userId, podjetje) {
+      const beri = (stolpci: string) =>
+        admin
+          .from('glas_ukazi')
+          .select(stolpci)
+          .eq('id', ukazId)
+          .eq('user_id', userId)
+          .eq('company_id', podjetje)
+          .gte('created_at', new Date(Date.now() - 5 * 60_000).toISOString())
+          .maybeSingle();
+      let { data, error } = await beri('prepis, odgovor, kontekst, created_at');
+      // Dokler migracija 1793600000 ni zagnana, stolpca kontekst ni: zgodovina dela brez fokusa.
+      if (error?.code === '42703') ({ data, error } = await beri('prepis, odgovor, created_at'));
+      const r = data as { prepis?: unknown; odgovor?: unknown; kontekst?: unknown } | null;
+      if (!r?.prepis || !r?.odgovor) return null;
+      return { prepis: String(r.prepis), odgovor: String(r.odgovor), kontekst: preberiKontekst(r.kontekst) };
     },
 
     async ustvariPredlog(p) {

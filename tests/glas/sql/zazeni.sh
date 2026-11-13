@@ -16,4 +16,6 @@ psql_v < tests/glas/sql/osnova.sql
 psql_v < supabase/migrations/1793500000_glasovni_asistent.sql
 # idempotenca: drugi zagon migracije ne sme pasti
 psql_v < supabase/migrations/1793500000_glasovni_asistent.sql
+psql_v < supabase/migrations/1793600000_glas_kontekst.sql
+psql_v < supabase/migrations/1793600000_glas_kontekst.sql
 psql_v < tests/glas/sql/preizkus.sql
