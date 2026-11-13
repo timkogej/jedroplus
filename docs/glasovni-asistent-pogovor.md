@@ -93,7 +93,7 @@ Rezultati in seznam za preizkus so na koncu dokumenta (razdelek 3).
     - ponovna povezava razpoznave;
     - lokalni »shrani«.
   - `tests/glas/polozaj.test.ts`: položaj krogca (kot, sredina, list obrazca na telefonu in računalniku).
-- **`npx tsc --noEmit`** in **eslint** (glas, obrazci) sta čista. `npx next build` ob oddaji še ni bil končan (teče v ločeni kopiji): preveri ga.
+- **`npx tsc --noEmit`** in **eslint** (glas, obrazci) sta čista. **`npx next build`** uspe (v ločeni kopiji).
 - **Eval s pravim modelom** (Haiku), 9 večkrožnih pogovorov, 4 med njimi novi:
   - »Shranim?« → »ja«;
   - združena izjava po premoru;
