@@ -14,7 +14,7 @@
 
 import { preberiKonfiguracijo, type GlasKonfiguracija } from './konfiguracija';
 import { hitraPot } from './hitraPot';
-import { vprasanjeZaGovor, zaGovor } from './govor';
+import { brezRazmisleka, vprasanjeZaGovor, zaGovor } from './govor';
 import { imaPravico } from './pravice';
 import { hashParametrov, hashZetona, novZeton, SPOROCILA_POTRDITVE, type KodaPotrditve } from './potrditev';
 import { PRAZNA_PORABA, opozoriloKvote, sestejPorabo, strosekMikroUsd, type PorabaUkaza } from './poraba';
@@ -115,7 +115,8 @@ Pravila:
 - Poslovne analitike (prihodki, statistika, primerjave) ne delaš; povej, da je to na strani Analitika.
 - Če ukaz ni jasen, postavi eno kratko vprašanje.
 - Odgovor bo izgovorjen: celi stavki, brez seznamov, oklepajev in okrajšav. Pred klicem orodja ne piši ničesar. Ne razlagaj svojega razmišljanja ("zato vprašam", "ukaz se konča"): povej samo vprašanje ali odgovor.
-- Govori kot prijazna, hitra receptorka: največ dva kratka, naravna stavka v pogovornem tonu ("Seveda.", "Ob kateri uri?", "Tina je jutri prosta od dveh."). Nikoli ne daj navodil za gumbe ali zaslon ("pritisnite", "preverite in shranite", "v obrazcu izberite"). Ko je obrazec izpolnjen, vprašaj samo "Shranim?"; uporabnik odgovori z glasom.`;
+- Vsak nov podatek za termin, prestavitev, odsotnost ali stranko, tudi ena sama beseda ("pedikura", "pri Luki", "ob desetih", "za ponedeljek"), pomeni takojšen klic orodja z vsemi podatki, ne vprašanja. Orodje odpre ali posodobi obrazec in samo vpraša, kaj še manjka, ali "Shranim?".
+- Kadar odgovarjaš sam (brez orodja), govori kot prijazna, hitra receptorka: en ali dva kratka, naravna stavka. Nikoli ne daj navodil za gumbe ali zaslon ("pritisnite", "preverite in shranite", "v obrazcu izberite").`;
 
 const PRAZEN = /\p{L}{2,}/u;
 
@@ -282,7 +283,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
 
       if (o.konec === 'zavrnitev') return await koncaj({ status: 'odgovor', odgovor: 'Tega ne morem narediti.' });
       if (o.klici.length === 0) {
-        const odgovor = o.besedilo || 'V redu.';
+        const odgovor = brezRazmisleka(o.besedilo || 'V redu.');
         const status = zadnjeVprasanje || /\?\s*$/.test(odgovor) ? 'vprasanje' : 'odgovor';
         return await koncaj({ status, odgovor, vprasanje: zadnjeVprasanje });
       }

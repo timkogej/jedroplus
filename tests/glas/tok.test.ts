@@ -13,6 +13,7 @@ import {
   tujeBesede,
 } from '@/lib/glas/odjemalec/tok';
 import { vprasajZaManjkajoce } from '@/lib/glas/orodja/obrazci';
+import { brezRazmisleka } from '@/lib/glas/govor';
 
 describe('cakanjePoKoncu', () => {
   // Prepisi, kot jih je Soniox dal v meritvi 13. 11. 2026 ob premoru sredi stavka.
@@ -137,5 +138,14 @@ describe('vprasajZaManjkajoce', () => {
     expect(vprasajZaManjkajoce(['uro'])).toBe('Ob kateri uri?');
     expect(vprasajZaManjkajoce(['storitev'])).toBe('Katera storitev?');
     expect(vprasajZaManjkajoce(['dan', 'storitev'])).toBe('Kateri dan in katera storitev?');
+  });
+});
+
+describe('brezRazmisleka', () => {
+  it('odstrani stavke o ukazu/prepisu, ohrani vprašanje', () => {
+    expect(brezRazmisleka('Ukaz se konča z "ob", zato je ura manjkajoča. Samo vprašam. Ob kateri uri jutri?')).toBe('Ob kateri uri jutri?');
+    expect(brezRazmisleka('Seveda. Ob kateri uri?')).toBe('Seveda. Ob kateri uri?');
+    expect(brezRazmisleka('Prepis je odrezan.')).toBe('Prepis je odrezan.');
+    expect(brezRazmisleka("Seveda. Ob kateri uri? Hmm, the command got cut off after ob, so per the rules I should ask what's missing: the hour. Note that the stranka is Ana Novak.")).toBe('Seveda. Ob kateri uri?');
   });
 });

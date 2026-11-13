@@ -91,3 +91,16 @@ export function trajanjeZaGovor(min: number): string {
   if (ost === 30) return ur === 1 ? 'uro in pol' : `${ure} in pol`;
   return `${ure} in ${ost} minut`;
 }
+
+/**
+ * Model včasih izgovori svoje razmišljanje ("Ukaz se konča z »ob«, zato vprašam.").
+ * Takšne stavke odstranimo; če ne ostane nič, vrnemo izvirnik.
+ */
+export function brezRazmisleka(besedilo: string): string {
+  const stavki = besedilo.split(/(?<=[.!?])\s+/);
+  const META = /\b(ukaz\w*|prepis\w*|odrezan\w*)\b|\b(zato|samo) (vprašam|sprašujem)\b|\bkratko vprašanje\b|\bposkušam razumeti\b/i;
+  // Razmišljanje v angleščini (slovenski odgovor teh besed nima).
+  const ANGLESKO = /\b(the|should|rules|command|user|hmm|so I|per the|got cut)\b/i;
+  const ostane = stavki.filter((s) => !META.test(s) && !ANGLESKO.test(s));
+  return ostane.length ? ostane.join(' ').trim() : besedilo;
+}
