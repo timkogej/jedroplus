@@ -46,6 +46,10 @@ export interface VhodnUkaz {
   zvok?: Blob | null;
   besedilo?: string | null;
   prejsnjiUkazId?: string | null;
+  /** Prejšnji ukazi istega pogovora (najstarejši prvi), največ NAJVEC_ZGODOVINE. */
+  prejsnjiUkazi?: string[];
+  /** Obrazec, ki ga je asistent odprl in je še odprt na zaslonu. */
+  odprtObrazec?: OdprtObrazec | null;
   /** Odgovor na vprašanje: izbran ID (npr. stranke) iz kartice. */
   izbira?: { id: string; oznaka: string } | null;
   /** Besedilo je prepisal sprotni STT v brskalniku (samo za obračun porabe). */
@@ -100,7 +104,9 @@ Pravila:
 - Podatke dobiš samo z orodji. Nikoli si ne izmišljuj strank, ID-jev, terminov ali datumov.
 - Če orodje vrne vprašanje ali več možnosti, vprašaj uporabnika kratko in ne izberi sam.
 - Dejanja, ki kaj zapišejo, izvedeš samo s klicem ustreznega orodja. Uporabnik jih potrdi na zaslonu; nikoli ne trdi, da je nekaj že shranjeno.
-- Nov termin, prestavitev, odsotnost, nova stranka ter "ni prišla", "zaključi", "odpovej": orodje odpre obstoječi obrazec, uporabnik ga shrani sam. Orodje pokliči takoj, tudi če manjka storitev, oseba, dan ali ura (ta polja so null, uporabnik jih izbere v obrazcu). Stranko podaj tako, kot je rečena, tudi samo ime; orodje jo poišče in samo vpraša, če jih je več.
+- Nov termin, prestavitev, odsotnost, nova stranka ter "ni prišla", "zaključi", "odpovej": orodje odpre obstoječi obrazec, uporabnik ga shrani sam. Orodje pokliči takoj, ko poznaš stranko, tudi če manjka storitev, oseba, dan ali ura (ta polja so null, uporabnik jih dopolni v obrazcu ali pove naknadno). Pred klicem NE sprašuj po storitvi, osebi ali uri. Primer: "zapiši nov termin za Anjo Novak" → takoj pripravi_termin(stranka "Anja Novak", ostalo null). Primer: "prestavi Matejo" → takoj prestavi_termin(stranka "Mateja", ostalo null); orodje samo najde njen termin ali vpraša, katerega. Stranko podaj tako, kot je rečena, tudi samo ime; orodje jo poišče in samo vpraša, če jih je več.
+- Pogovor teče v več izjavah: uporabi vse, kar je uporabnik povedal prej (stranka, storitev, oseba, dan, ura), in ne sprašuj znova po že povedanem. Ko uporabnik naknadno doda podatek, znova pokliči isto orodje z vsemi podatki.
+- Stranka in zaposleni imata lahko isto ime. "Pri Luki", "Luka je zaposleni", "pri frizerki Tini" je oseba (zaposleni); za koga je termin, je stranka.
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
 - Dneva in ure nikoli ne ugibaj. Trenutni čas ni čas termina: če uporabnik ure ni povedal, je null. Če se ukaz konča sredi stavka (npr. "ob.", "za.", "pri."), je prepis odrezan: samo vprašaj, kaj je manjkalo (npr. "Za koga in ob kateri uri?"), in ne dopolni sam.
 - Ne moreš brisati, pošiljati sporočil strankam, spreminjati cen, pravic ali plačil. Če to zahteva, povej, da tega ne moreš.
@@ -244,14 +250,16 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     faza = 'llm';
     const llm = d.llm();
     const sporocila: LlmSporocilo[] = [];
-    if (v.prejsnjiUkazId) {
-      const prej = await d.shramba.prejsnjiUkaz(v.prejsnjiUkazId, k.userId);
-      if (prej) {
-        sporocila.push({ vloga: 'uporabnik', besedilo: `<ukaz>${prej.prepis}</ukaz>` });
-        sporocila.push({ vloga: 'asistent', besedilo: prej.odgovor, klici: [] });
-      }
+    // Zgodovina pogovora: strežnik prebere prejšnje ukaze sam (samo uporabnikove,
+    // zadnjih 5 minut), zato odjemalec ne more podtakniti odgovorov asistenta.
+    const idji = (v.prejsnjiUkazi?.length ? v.prejsnjiUkazi : v.prejsnjiUkazId ? [v.prejsnjiUkazId] : []).slice(-NAJVEC_ZGODOVINE);
+    const prejsnji = await Promise.all(idji.map((id) => d.shramba.prejsnjiUkaz(id, k.userId)));
+    for (const prej of prejsnji) {
+      if (!prej) continue;
+      sporocila.push({ vloga: 'uporabnik', besedilo: `<ukaz>${prej.prepis.replace(/<\/?ukaz>/g, '')}</ukaz>` });
+      sporocila.push({ vloga: 'asistent', besedilo: prej.odgovor, klici: [] });
     }
-    sporocila.push({ vloga: 'uporabnik', besedilo: uvodUkaza(k, zdaj, prepis, v.izbira ?? null) });
+    sporocila.push({ vloga: 'uporabnik', besedilo: uvodUkaza(k, zdaj, prepis, v.izbira ?? null, v.odprtObrazec ?? null) });
 
     let zadnjeVprasanje: RezultatOrodja['vprasanje'];
     for (let krog = 0; krog < konf.najvecKrogovLlm; krog++) {
@@ -415,15 +423,39 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
   }
 }
 
+/** Največ toliko prejšnjih izmenjav gre modelu kot zgodovina pogovora. */
+export const NAJVEC_ZGODOVINE = 6;
+
+const VRSTE_OBRAZCA = { nov_termin: 'pripravi_termin', prestavi_termin: 'prestavi_termin', odsotnost: 'vpisi_odsotnost', nova_stranka: 'nova_stranka' } as const;
+export type OdprtObrazec = { vrsta: keyof typeof VRSTE_OBRAZCA; polja: Record<string, string> };
+
+/** Stanje odprtega obrazca od odjemalca: samo znane vrste, kratka polja brez posebnih znakov. */
+export function preberiOdprtObrazec(x: unknown): OdprtObrazec | null {
+  if (!x || typeof x !== 'object') return null;
+  const o = x as { vrsta?: unknown; polja?: unknown };
+  if (typeof o.vrsta !== 'string' || !(o.vrsta in VRSTE_OBRAZCA) || !o.polja || typeof o.polja !== 'object') return null;
+  const polja: Record<string, string> = {};
+  for (const [kljuc, v] of Object.entries(o.polja as Record<string, unknown>).slice(0, 10)) {
+    if (/^[a-z_]{1,12}$/.test(kljuc) && typeof v === 'string' && /^[\p{L}\p{N} .:@+_-]{1,60}$/u.test(v)) polja[kljuc] = v;
+  }
+  return { vrsta: o.vrsta as OdprtObrazec['vrsta'], polja };
+}
+
 function uvodUkaza(
   k: Kontekst,
   zdaj: { datum: string; ura: string },
   prepis: string,
-  izbira: { id: string; oznaka: string } | null
+  izbira: { id: string; oznaka: string } | null,
+  obrazec: OdprtObrazec | null = null
 ): string {
   const vloga = k.vloga === 'staff' ? 'zaposleni' : k.vloga === 'owner' ? 'lastnik' : 'skrbnik';
   const izbor = izbira ? `\nUporabnik je izbral možnost z ID ${izbira.id} (${izbira.oznaka}).` : '';
-  return `Danes je ${opisDatuma(zdaj.datum, zdaj.datum)} (${zdaj.datum}), ura ${zdaj.ura}. Uporabnik: ${vloga}${k.osebaId ? ', ima svoj koledar' : ''}.${izbor}\n<ukaz>${prepis.replace(/<\/?ukaz>/g, '')}</ukaz>`;
+  const odprt = obrazec
+    ? `\nNa zaslonu je odprt obrazec, ki ga je odprlo orodje ${VRSTE_OBRAZCA[obrazec.vrsta]} (izpolnjeno: ${
+        Object.entries(obrazec.polja).map(([a, b]) => `${a}=${b}`).join(', ') || 'nič'
+      }). Če uporabnik doda ali spremeni podatek, takoj znova pokliči ${VRSTE_OBRAZCA[obrazec.vrsta]} z vsemi podatki (prejšnji in novi); obrazec se posodobi.`
+    : '';
+  return `Danes je ${opisDatuma(zdaj.datum, zdaj.datum)} (${zdaj.datum}); trenutni čas ${zdaj.ura} (samo za izraze, kot je "čez eno uro", nikoli kot ura termina). Uporabnik: ${vloga}${k.osebaId ? ', ima svoj koledar' : ''}.${izbor}${odprt}\n<ukaz>${prepis.replace(/<\/?ukaz>/g, '')}</ukaz>`;
 }
 
 /** Koliko dni nazaj iščemo nedavne stranke za namige. */

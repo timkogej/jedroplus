@@ -29,3 +29,23 @@ describe('ukaz odprtemu obrazcu', () => {
     }
   );
 });
+
+import { poisci } from '@/lib/glas/razresevanje/imena';
+
+describe('iskanje: podobna imena in skloni', () => {
+  const S = [
+    { i: 'Ana', p: 'Novak' }, { i: 'Anja', p: 'Novak' }, { i: 'Ana', p: 'Novinc' },
+    { i: 'Tim', p: 'Zupančič' }, { i: 'Tim', p: 'Zupančič' }, { i: 'Luka', p: 'Zupančič' },
+  ];
+  const najdi = (q: string) => {
+    const r = poisci(q, S, (x) => [x.i, x.p]);
+    return r.izid === 'enolicno' ? `${r.najden.i} ${r.najden.p}` : r.izid;
+  };
+  it.each([
+    ['Anja Novak', 'Anja Novak'], ['Anjo Novak', 'Anja Novak'], ['Anji Novak', 'Anja Novak'], ['Anje Novak', 'Anja Novak'],
+    ['Ana Novak', 'Ana Novak'], ['Ano Novak', 'Ana Novak'], ['Ani Novak', 'Ana Novak'], ['Ane Novak', 'Ana Novak'],
+    ['Luko Zupančič', 'Luka Zupančič'],
+  ])('%s → %s', (q, pricakovano) => expect(najdi(q)).toBe(pricakovano));
+
+  it.each(['Tim Zupančič', 'Novak', 'Ana'])('%s ostane vprašanje', (q) => expect(najdi(q)).toBe('vec'));
+});

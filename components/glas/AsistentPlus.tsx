@@ -50,6 +50,7 @@ export function AsistentPlus() {
   const potRef = useRef(pot);
   const obrazecRef = useRef(false);
   const shranjujeOd = useRef(0);
+  const zadnjiObrazec = useRef<OdgovorOdjemalec['obrazec'] | null>(null);
   const konec = useRef<HTMLDivElement | null>(null);
   const preverjeno = useRef(false);
 
@@ -85,7 +86,12 @@ export function AsistentPlus() {
   const premakni = useCallback(
     (o: OdgovorOdjemalec) => {
       if (!o.pojdi) return;
-      if (o.obrazec) shraniObrazec(o.obrazec);
+      if (o.obrazec) {
+        shraniObrazec(o.obrazec);
+        zadnjiObrazec.current = o.obrazec;
+        // Obrazec je morda že odprt: naslednji ukaz ga dopolni.
+        if (pogovor.current && obrazecRef.current) pogovor.current.kontekstObrazca = o.obrazec;
+      }
       const [cilj] = o.pojdi.split('?');
       // Ista stran se ne naloži znova: namen pošljemo kot dogodek.
       if (cilj === potRef.current) posljiPojdi(o.pojdi);
@@ -141,7 +147,11 @@ export function AsistentPlus() {
       const odprtZdaj = Boolean((e as CustomEvent<{ odprt?: boolean }>).detail?.odprt);
       obrazecRef.current = odprtZdaj;
       setObrazecOdprt(odprtZdaj);
-      if (pogovor.current) pogovor.current.tisinaPoOdgovoru = odprtZdaj ? TISINA_OBRAZEC_MS : TISINA_OBICAJNO_MS;
+      if (pogovor.current) {
+        pogovor.current.tisinaPoOdgovoru = odprtZdaj ? TISINA_OBRAZEC_MS : TISINA_OBICAJNO_MS;
+        // Asistent ve, kateri obrazec je odprt, in ga z naslednjim ukazom dopolni.
+        pogovor.current.kontekstObrazca = odprtZdaj ? (zadnjiObrazec.current ?? null) : null;
+      }
       if (!odprtZdaj && shranjujeOd.current && Date.now() - shranjujeOd.current < SHRANI_OKNO_MS) {
         dodaj({ kdo: 'asistent', besedilo: tRef.current('shranjeno') });
       }

@@ -89,6 +89,9 @@ interface Seja {
 /** Po odgovoru posluša še toliko časa, nato se pogovor zapre. */
 const TISINA_PO_ODGOVORU_MS = 8000;
 const TISINA_NA_ZACETKU_MS = 12000;
+/** Zgodovina pogovora: zadnjih toliko ukazov, če je od zadnjega manj kot 5 minut (enako preverja strežnik). */
+const ZGODOVINA_NAJVEC = 6;
+const ZGODOVINA_VELJA_MS = 5 * 60_000;
 /** Če uporabnik po zaznanem koncu takoj nadaljuje (premor sredi nareka), izjavi združimo. */
 const POCAKAJ_PO_KONCU_MS = 250;
 const ZAHTEVA_TIMEOUT_MS = 20000;
@@ -122,7 +125,9 @@ export class Pogovor {
   private cakajoca: string | null = null;
   private tKonec = 0;
   private sekundeZvoka = 0;
-  private zadnjiUkaz: string | null = null;
+  /** ID-ji zadnjih ukazov tega pogovora (strežnik iz njih sestavi zgodovino). */
+  private zgodovina: string[] = [];
+  private zadnjiCas = 0;
   private predlog: PredlogOdjemalec | null = null;
   private vprasanje: VprasanjeOdjemalec | null = null;
   private govorId: string | null = null;
@@ -133,6 +138,8 @@ export class Pogovor {
 
   /** Koliko časa po odgovoru še posluša (daljše, ko je odprt obrazec za pregled). */
   tisinaPoOdgovoru = TISINA_PO_ODGOVORU_MS;
+  /** Obrazec, ki ga je odprl asistent in je še odprt (nastavi vmesnik). */
+  kontekstObrazca: { vrsta: string; polja: Record<string, string> } | null = null;
 
   constructor(private d: DogodkiPogovora) {}
 
@@ -419,7 +426,8 @@ export class Pogovor {
     this.sekundeZvoka = 0;
     const odgovor = await this.zahtevaj<OdgovorOdjemalec>('/api/glas/ukaz', {
       besedilo: izjava,
-      prejsnji: this.zadnjiUkaz,
+      prejsnji: Date.now() - this.zadnjiCas < ZGODOVINA_VELJA_MS ? this.zgodovina : [],
+      obrazec: this.kontekstObrazca ?? undefined,
       izbira: moznost,
       stt: this.stt ? { sekunde } : undefined,
       glas: Boolean(this.tts),
@@ -431,7 +439,9 @@ export class Pogovor {
       await this.povej(odgovor.sporocilo ?? SPOROCILA.povezava, tOdgovor);
       return;
     }
-    this.zadnjiUkaz = odgovor.ukazId ?? null;
+    if (Date.now() - this.zadnjiCas >= ZGODOVINA_VELJA_MS) this.zgodovina = [];
+    if (odgovor.ukazId) this.zgodovina = [...this.zgodovina, odgovor.ukazId].slice(-ZGODOVINA_NAJVEC);
+    this.zadnjiCas = Date.now();
     this.predlog = odgovor.status === 'predlog' ? (odgovor.predlog ?? null) : null;
     this.vprasanje = odgovor.status === 'vprasanje' ? (odgovor.vprasanje ?? null) : null;
     this.d.odgovor(odgovor);

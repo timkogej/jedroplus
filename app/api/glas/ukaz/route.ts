@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/rateLimit';
-import { obdelajUkaz } from '@/lib/glas/jedro';
+import { NAJVEC_ZGODOVINE, obdelajUkaz, preberiOdprtObrazec, type OdprtObrazec } from '@/lib/glas/jedro';
 import { kontekstIzSeje, preberiJson, UUID } from '@/lib/glas/streznik';
 import { preberiKonfiguracijo } from '@/lib/glas/konfiguracija';
 
@@ -30,6 +30,9 @@ export async function POST(req: NextRequest) {
   let zvok: Blob | null = null;
   let besedilo: string | null = null;
   let prejsnji: string | null = null;
+  // Zgodovina pogovora: ID-ji prejšnjih ukazov (strežnik jih prebere sam, samo svoje in sveže).
+  let zgodovina: string[] = [];
+  let odprtObrazec: OdprtObrazec | null = null;
   let izbira: { id: string; oznaka: string } | null = null;
   let stt: { ponudnik: string; sekunde: number } | null = null;
   let glas: { ponudnik: string } | null = null;
@@ -55,7 +58,11 @@ export async function POST(req: NextRequest) {
     if (typeof telo.besedilo !== 'string' || !telo.besedilo.trim()) return napaka(400, 'prazno', 'Ni besedila.');
     if (telo.besedilo.length > konf.najvecBesedila) return napaka(413, 'predolgo', 'Ukaz je predolg.');
     besedilo = telo.besedilo;
-    prejsnji = typeof telo.prejsnji === 'string' ? telo.prejsnji : null;
+    if (typeof telo.prejsnji === 'string') prejsnji = telo.prejsnji;
+    else if (Array.isArray(telo.prejsnji)) {
+      zgodovina = telo.prejsnji.filter((x): x is string => typeof x === 'string' && UUID.test(x)).slice(-NAJVEC_ZGODOVINE);
+    }
+    odprtObrazec = preberiOdprtObrazec(telo.obrazec);
     const iz = telo.izbira as { id?: unknown; oznaka?: unknown } | undefined;
     if (iz && typeof iz.id === 'string' && typeof iz.oznaka === 'string' && iz.id.length <= 64 && iz.oznaka.length <= 160) {
       izbira = { id: iz.id, oznaka: iz.oznaka };
@@ -70,7 +77,7 @@ export async function POST(req: NextRequest) {
   if (!kont.ok) return kont.odziv;
 
   const r = await obdelajUkaz(
-    { k: kont.k, vhod: zvok || stt ? 'aplikacija' : 'besedilo', zvok, besedilo, prejsnjiUkazId: prejsnji, izbira, stt, glas },
+    { k: kont.k, vhod: zvok || stt ? 'aplikacija' : 'besedilo', zvok, besedilo, prejsnjiUkazId: prejsnji, prejsnjiUkazi: zgodovina, odprtObrazec, izbira, stt, glas },
     kont.odvisnosti
   );
   if (!r.ok) return NextResponse.json(r, { status: r.http });

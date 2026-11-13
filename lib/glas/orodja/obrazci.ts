@@ -41,6 +41,9 @@ export function uraIzParametra(v: string | null | undefined): string | null {
 }
 
 function izberiStoritev(ime: string, storitve: StoritevPovzetek[]): StoritevPovzetek | RezultatOrodja {
+  // LLM včasih poda ID iz odprtega obrazca namesto imena.
+  const poId = storitve.find((s) => s.id === ime.trim() && s.aktivna);
+  if (poId) return poId;
   const izid = poisci(ime, storitve.filter((s) => s.aktivna), (s) => [s.naziv]);
   if (izid.izid === 'nic') return { sporocilo: `Storitve »${ime}« ne najdem.` };
   if (izid.izid === 'vec') {
@@ -53,6 +56,8 @@ function izberiStoritev(ime: string, storitve: StoritevPovzetek[]): StoritevPovz
 }
 
 function izberiOsebo(ime: string, osebe: OsebaPovzetek[]): OsebaPovzetek | RezultatOrodja {
+  const poId = osebe.find((p) => p.id === ime.trim() && p.aktivna);
+  if (poId) return poId;
   const izid = poisci(ime, osebe.filter((p) => p.aktivna), (p) => [p.ime, p.priimek]);
   if (izid.izid === 'nic') return { sporocilo: `Zaposlenega »${ime}« ne najdem.` };
   if (izid.izid === 'vec') {
@@ -123,10 +128,10 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     properties: {
       stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno (lahko samo ime ali samo priimek).' },
       stranka_id: { type: ['string', 'null'], description: 'ID stranke, če je že znan, sicer null.' },
-      storitev: { type: ['string', 'null'], description: 'Ime storitve; null, če ni povedana.' },
-      oseba: { type: ['string', 'null'], description: 'Ime zaposlenega; null = uporabnik ali ni povedano.' },
-      datum: { type: ['string', 'null'], description: 'Izraz ("jutri", "v petek") ali YYYY-MM-DD; null = ni povedano.' },
-      ura: { type: ['string', 'null'], description: 'Ura "HH:MM" ali izraz ("ob desetih"); null = ni povedana.' },
+      storitev: { type: ['string', 'null'], description: 'Ime ali ID storitve; null, če ni povedana.' },
+      oseba: { type: ['string', 'null'], description: 'Ime ali ID zaposlenega; null = uporabnik ali ni povedano.' },
+      datum: { type: ['string', 'null'], description: 'Samo dan, ki ga je uporabnik izgovoril ("jutri", "v petek") ali YYYY-MM-DD; null, če dneva ni povedal (ne "danes" na pamet).' },
+      ura: { type: ['string', 'null'], description: 'Samo ura, ki jo je uporabnik izgovoril ("HH:MM" ali "ob desetih"); null, če je ni povedal. Trenutna ura NI ura termina.' },
     },
     required: ['stranka', 'stranka_id', 'storitev', 'oseba', 'datum', 'ura'],
     additionalProperties: false,
@@ -246,7 +251,7 @@ const vhodTermina = {
   stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno (lahko samo ime ali samo priimek).' },
   stranka_id: { type: ['string', 'null'], description: 'ID stranke, če je že znan, sicer null.' },
   termin_id: { type: ['string', 'null'], description: 'ID termina, če ga je uporabnik izbral med možnostmi, sicer null.' },
-  datum_zdaj: { type: ['string', 'null'], description: 'Dan, na katerem je termin zdaj (če ga uporabnik pove), sicer null.' },
+  datum_zdaj: { type: ['string', 'null'], description: 'Dan, na katerem je termin zdaj, samo če ga je uporabnik izrecno povedal; sicer null (orodje samo najde prihodnje termine stranke).' },
 };
 const zodTermina = {
   stranka: z.string().trim().min(1).max(80),

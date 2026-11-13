@@ -126,5 +126,55 @@ export function poisci<T>(
   if (prvi.ocena >= meje.enolicno && (!drugi || prvi.ocena - drugi.ocena >= meje.razlika)) {
     return { izid: 'enolicno', najden: prvi.vrednost, ocena: prvi.ocena, kandidati: blizu };
   }
+  // Več močnih kandidatov: osnove so lahko prekratke ("Anja", "Ana" in "Ano" → "an").
+  // Odloči natančnost, če je en kandidat jasno boljši; pravi dvojniki ostanejo vprašanje.
+  const mocni = ocenjeni.filter((k) => k.ocena >= meje.enolicno && k.ocena >= prvi.ocena - meje.razlika);
+  if (mocni.length > 1) {
+    const izbran = najnatancnejsi(besede, mocni, besedeKandidata);
+    if (izbran) return { izid: 'enolicno', najden: izbran.vrednost, ocena: izbran.ocena, kandidati: blizu };
+  }
   return { izid: 'vec', kandidati: blizu };
+}
+
+/**
+ * Natančnost ujemanja za izenačene kandidate, po vrsti:
+ *   1. število besed, ki se ujemajo točno ("Anja" = "Anja");
+ *   2. skupna dolžina najdaljših skupnih osnov ("Anjo"/"Anja" → "anj", "Anjo"/"Ana" → "an");
+ *   3. podobnost celih besed (Jaro-Winkler: "Ano" je bližje "Ana" kot "Anja").
+ * Vrne kandidata samo, če je pri prvem merilu, ki ju loči, jasno boljši od drugega.
+ */
+function najnatancnejsi<T>(besede: string[], kandidati: Kandidat<T>[], besedeKandidata: (k: T) => string[]): Kandidat<T> | null {
+  const ocene = kandidati.map((k) => {
+    const kb = besedeKandidata(k.vrednost).flatMap((s) => s.split(/[\s-]+/)).filter(Boolean);
+    let tocno = 0;
+    let osnova = 0;
+    let celo = 0;
+    for (const b of besede) {
+      let t = 0;
+      let o = 0;
+      let c = 0;
+      for (const x of kb) {
+        if (kljuc(b) === kljuc(x)) t = 1;
+        const ox = new Set(osnove(x));
+        for (const ob of osnove(b)) if (ox.has(ob)) o = Math.max(o, ob.length);
+        c = Math.max(c, jaroWinkler(kljuc(b), kljuc(x)));
+      }
+      tocno += t;
+      osnova += o;
+      celo += c;
+    }
+    return { k, merila: [tocno, osnova, celo] };
+  });
+  const PRAG = [1, 1, 0.04];
+  ocene.sort((a, b) => {
+    for (let i = 0; i < 3; i++) if (a.merila[i] !== b.merila[i]) return b.merila[i] - a.merila[i];
+    return 0;
+  });
+  const [a, b] = ocene;
+  for (let i = 0; i < 3; i++) {
+    const razlika = a.merila[i] - b.merila[i];
+    if (razlika >= PRAG[i]) return a.k;
+    if (razlika > 1e-9) return null; // loči jih, a premalo: raje vprašamo
+  }
+  return null;
 }
