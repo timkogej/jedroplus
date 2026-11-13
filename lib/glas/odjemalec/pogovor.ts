@@ -26,6 +26,7 @@ import {
   jeNadaljevanje,
   jePrekinitev,
   lokalniOdziv,
+  pocasneje,
   NAMIGI_CAKANJA,
   napakaZaGovor,
   odstraniOdmev,
@@ -187,6 +188,10 @@ export class Pogovor {
   private obnoveStt: number[] = [];
   /** ID-ji zadnjih ukazov tega pogovora (strežnik iz njih sestavi zgodovino). */
   private zgodovina: string[] = [];
+  /** Zadnji izgovorjeni odgovor (za lokalni "ponovi"). Samo v pomnilniku, ne v dnevniku. */
+  private zadnjiGovor = '';
+  /** Hitrost glasu po "počasneje" (do konca pogovora); null = hitrost seje. */
+  private hitrostGovora: number | null = null;
   private zadnjiCas = 0;
   private predlog: PredlogOdjemalec | null = null;
   private vprasanje: VprasanjeOdjemalec | null = null;
@@ -252,6 +257,8 @@ export class Pogovor {
   /** Mora biti klicano iz dotika/klika (iOS dovoli zvok samo takrat). */
   async zacni(): Promise<void> {
     if (this.aktiven) return;
+    this.zadnjiGovor = '';
+    this.hitrostGovora = null;
     const t0 = performance.now();
     this.nastavi('povezujem');
     // Zvočna konteksta ustvarimo takoj, še v dotiku (iOS Safari).
@@ -684,9 +691,17 @@ export class Pogovor {
         return;
       }
       const kratko = lokalniOdziv(izjava);
+      if (kratko && (kratko.vrsta === 'ponovi' || kratko.vrsta === 'pocasneje')) {
+        // Brez strežnika in AI: zadnji odgovor znova (po "počasneje" počasneje).
+        if (kratko.vrsta === 'pocasneje' && this.seja) this.hitrostGovora = pocasneje(this.hitrostGovora ?? this.seja.tts.hitrost);
+        const besedilo = this.zadnjiGovor || 'Nimam česa ponoviti.';
+        this.d.obvestilo?.(besedilo);
+        await this.povej(besedilo, performance.now(), undefined, false);
+        return;
+      }
       if (kratko) {
         this.d.obvestilo?.(kratko.govor);
-        await this.povej(kratko.govor, performance.now(), kratko.vrsta === 'zahvala' ? TISINA_PO_ZAHVALI_MS : undefined);
+        await this.povej(kratko.govor, performance.now(), kratko.vrsta === 'zahvala' ? TISINA_PO_ZAHVALI_MS : undefined, false);
         if (kratko.vrsta === 'konec') this.koncaj(null);
         return;
       }
@@ -775,7 +790,8 @@ export class Pogovor {
 
   // ───────────────────────────── govor ─────────────────────────────
 
-  private async povej(besedilo: string, tOdgovor: number, tisinaMs = this.tisinaPoOdgovoru) {
+  private async povej(besedilo: string, tOdgovor: number, tisinaMs = this.tisinaPoOdgovoru, zapomni = true) {
+    if (zapomni && besedilo) this.zadnjiGovor = besedilo;
     const tKonec = this.tKonec;
     const meri = (zvok: number | null) => this.d.meritev({ doOdgovora: Math.round(tOdgovor - tKonec), doZvoka: zvok === null ? null : Math.round(zvok - tKonec) });
     if (!this.aktiven) {
@@ -829,7 +845,7 @@ export class Pogovor {
           voice: seja.tts.glas,
           audio_format: 'pcm_s16le',
           sample_rate: TTS_HZ,
-          speed: seja.tts.hitrost,
+          speed: this.hitrostGovora ?? seja.tts.hitrost,
           stream_id: id,
         })
       );

@@ -149,3 +149,16 @@ describe('brezRazmisleka', () => {
     expect(brezRazmisleka("Seveda. Ob kateri uri? Hmm, the command got cut off after ob, so per the rules I should ask what's missing: the hour. Note that the stranka is Ana Novak.")).toBe('Seveda. Ob kateri uri?');
   });
 });
+
+describe('ponovi in počasneje', () => {
+  it('prepozna kratke izjave, ne pa ukazov', async () => {
+    const { lokalniOdziv, pocasneje } = await import('@/lib/glas/odjemalec/tok');
+    expect(lokalniOdziv('Ponovi, prosim.')?.vrsta).toBe('ponovi');
+    expect(lokalniOdziv('Kaj si rekla?')?.vrsta).toBe('ponovi');
+    expect(lokalniOdziv('Malo počasneje.')?.vrsta).toBe('pocasneje');
+    expect(lokalniOdziv('Ponovi termin za Ano')).toBeNull();
+    expect(lokalniOdziv('kaj imam jutri')).toBeNull();
+    expect(pocasneje(1.04)).toBe(0.89);
+    expect(pocasneje(0.8)).toBe(0.75);
+  });
+});

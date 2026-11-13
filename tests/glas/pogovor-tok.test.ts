@@ -338,3 +338,45 @@ describe('lokalni odzivi in napake', () => {
     expect(tts().json().some((m) => m.text === 'Shranjeno.')).toBe(true);
   });
 });
+
+describe('ponovi in počasneje (lokalno, brez strežnika)', () => {
+  const GOVOR = 'Telefon: nič štiri ena, dve tri štiri, pet šest sedem.';
+  const nastavitve = () => tts().json().filter((m) => 'speed' in m);
+  const besedila = () => tts().json().filter((m) => typeof m.text === 'string').map((m) => m.text);
+
+  it('"ponovi" izgovori zadnji odgovor znova, enako hitro', async () => {
+    const { id } = await govori(GOVOR);
+    tts().sporoci({ stream_id: id, terminated: true });
+    await korak(300);
+    recem('Ponovi, prosim.', 5000);
+    await korak(CAKANJE.kratko + 10);
+    expect(ukazi).toHaveLength(1); // samo prvi ukaz
+    expect(besedila().filter((x) => x === GOVOR)).toHaveLength(2);
+    expect(nastavitve().at(-1).speed).toBe(1);
+  });
+
+  it('"počasneje" ponovi počasneje in hitrost ostane do konca pogovora', async () => {
+    const { id } = await govori(GOVOR);
+    tts().sporoci({ stream_id: id, terminated: true });
+    await korak(300);
+    recem('Počasneje.', 5000);
+    await korak(CAKANJE.kratko + 10);
+    expect(ukazi).toHaveLength(1);
+    expect(besedila().at(-1)).toBe(GOVOR);
+    expect(nastavitve().at(-1).speed).toBe(0.85);
+    const id2 = nastavitve().at(-1).stream_id;
+    tts().sporoci({ stream_id: id2, terminated: true });
+    await korak(300);
+    recem('Bolj počasi.', 9000);
+    await korak(CAKANJE.kratko + 10);
+    expect(nastavitve().at(-1).speed).toBe(0.75);
+  });
+
+  it('brez prejšnjega odgovora: "Nimam česa ponoviti."', async () => {
+    await zagnan();
+    recem('Ponovi.', 0);
+    await korak(CAKANJE.kratko + 10);
+    expect(ukazi).toHaveLength(0);
+    expect(besedila()).toContain('Nimam česa ponoviti.');
+  });
+});

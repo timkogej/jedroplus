@@ -140,12 +140,35 @@ const KONEC_POGOVORA = new Set([
 
 const ZAHVALA = new Set(['hvala', 'hvala lepa', 'hvala ti', 'hvala vam', 'super hvala', 'ok hvala', 'okej hvala', 'v redu hvala', 'odlicno hvala', 'thanks', 'thank you', 'danke', 'grazie']);
 
-/** "hvala, to je vse" → konec; "hvala" → kratek odziv, pogovor teče naprej. */
-export function lokalniOdziv(izjava: string): { vrsta: 'konec' | 'zahvala'; govor: string } | null {
+const PONOVI = new Set([
+  'ponovi', 'ponovi prosim', 'prosim ponovi', 'lahko ponovis', 'ponovi se enkrat', 'se enkrat', 'se enkrat prosim', 'povej se enkrat',
+  'kaj si rekla', 'kaj si rekel', 'kaj si rekla prosim', 'nisem slisal', 'nisem slisala', 'nisem razumel', 'nisem razumela', 'ponovite',
+  'ponovite prosim', 'kako prosim', 'kaj prosim', 'pardon', 'repeat', 'say again', 'wie bitte',
+]);
+const POCASNEJE = new Set([
+  'pocasneje', 'pocasneje prosim', 'bolj pocasi', 'pocasi', 'malo pocasneje', 'govori pocasneje', 'govori pocasi', 'lahko pocasneje',
+  'povej pocasneje', 'ponovi pocasneje', 'ponovi pocasi', 'se enkrat pocasneje', 'pocasneje ponovi', 'slower', 'langsamer',
+]);
+
+/** Najnižja hitrost glasu po "počasneje" (Soniox speed; običajno 1.04). */
+export const NAJNIZJA_HITROST = 0.75;
+
+/**
+ * "hvala, to je vse" → konec; "hvala" → kratek odziv; "ponovi" → zadnji odgovor znova;
+ * "počasneje" → zadnji odgovor znova in počasneje (do konca pogovora). Brez strežnika in AI.
+ */
+export function lokalniOdziv(izjava: string): { vrsta: 'konec' | 'zahvala' | 'ponovi' | 'pocasneje'; govor: string } | null {
   const s = brezLocil(izjava);
   if (KONEC_POGOVORA.has(s)) return { vrsta: 'konec', govor: 'Prav. Lep dan.' };
   if (ZAHVALA.has(s)) return { vrsta: 'zahvala', govor: 'Prosim.' };
+  if (POCASNEJE.has(s)) return { vrsta: 'pocasneje', govor: '' };
+  if (PONOVI.has(s)) return { vrsta: 'ponovi', govor: '' };
   return null;
+}
+
+/** Hitrost po "počasneje": vsakič za 0,15 nižja, ne pod NAJNIZJA_HITROST. */
+export function pocasneje(hitrost: number): number {
+  return Math.max(NAJNIZJA_HITROST, Math.round((hitrost - 0.15) * 100) / 100);
 }
 
 /** Napaka za glas: samo prvi stavek, brez "Nič ni bilo spremenjeno." (to je na zaslonu). */
