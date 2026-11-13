@@ -30,7 +30,7 @@ describe('pripravi_termin', () => {
     expect(r.pojdi).toBe('/koledar?glas=1');
     expect(r.obrazec).toEqual({ vrsta: 'nov_termin', polja: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-11-13', ura: '11:00' } });
     expect(r.sporocilo).not.toContain('Pozor');
-    expect(r.govor).toBe('Mateja Kovačič, jutri, v petek ob enajstih, Barvanje, pri Tina. Shranim?');
+    expect(r.govor).toBe('Mateja Kovačič, jutri, v petek ob enajstih, Barvanje, pri Tini. Shranim?');
   });
 
   it('zaseden čas: opozori, a vseeno odpre obrazec', async () => {

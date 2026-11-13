@@ -46,6 +46,8 @@ export type JsonShema = {
 };
 
 /** Kar orodje vrne jedru po branju ali izvedbi. */
+export type VrstaObrazcaGlas = 'nov_termin' | 'prestavi_termin' | 'uredi_termin' | 'odsotnost' | 'nova_stranka' | 'uredi_stranko';
+
 export interface RezultatOrodja {
   /** Kratko besedilo za uporabnika (slovensko), za zaslon. */
   sporocilo: string;
@@ -60,7 +62,7 @@ export interface RezultatOrodja {
   /** Pot v aplikaciji, ki naj jo odjemalec odpre (brez jezika, npr. "/clients?stranka=101"). */
   pojdi?: string;
   /** Predizpolnitev obstoječega obrazca (odjemalec jo da v sessionStorage, ne v URL). */
-  obrazec?: { vrsta: 'nov_termin' | 'prestavi_termin' | 'odsotnost' | 'nova_stranka'; polja: Record<string, string> };
+  obrazec?: { vrsta: VrstaObrazcaGlas; polja: Record<string, string> };
   /**
    * Sporočilo in govor vsebujeta osebne podatke (telefon, e-pošta, opombe): gresta samo
    * na zaslon in v glas. Modelu AI in v dnevnik (glas_ukazi.odgovor) gre `dnevnik`.

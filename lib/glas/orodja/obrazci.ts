@@ -14,7 +14,7 @@ import { samoSvojiTermini } from '../pravice';
 import { dodajDni, opisDatuma, razberiUro, vMinute } from '../razresevanje/datumi';
 import { poisci } from '../razresevanje/imena';
 import { prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
-import { datumZaGovor, uraZaGovor } from '../govor';
+import { datumZaGovor, mestnik, uraZaGovor } from '../govor';
 import type { Kontekst, LokacijaPovzetek, OsebaPovzetek, RezultatOrodja, StoritevPovzetek, TerminPovzetek } from '../tipi';
 import { datumIzParametra } from './branje';
 import { razresiStranko, ID_STRANKE } from './stranke';
@@ -257,7 +257,7 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       datum ? opisDatuma(datum, o.danes) : null,
       ura ? `ob ${ura}` : null,
       storitev?.naziv ?? null,
-      oseba && p.oseba ? `pri ${oseba.ime}` : null,
+      oseba && p.oseba ? `pri ${mestnik(oseba.ime)}` : null,
       lokacija ? `lokacija ${lokacija.naziv}` : null,
     ].filter(Boolean);
     const manjka = [!datum && 'dan', !ura && 'uro', !storitev && 'storitev'].filter(Boolean) as ('dan' | 'uro' | 'storitev')[];
@@ -271,13 +271,33 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     if (lokacija) polja.lokacija = lokacija.id;
     return {
       sporocilo: `Nov termin: ${deli.join(', ')}.${pozor ? ` ${pozor}` : ''}${neznana}${manjka.length ? ` Manjka še: ${manjka.join(', ')}.` : ` ${SHRANI}`}`,
-      govor: `${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${oseba && p.oseba ? `, pri ${oseba.ime}` : ''}.${govorPozor(pozor)}${neznana} ${vprasanje}`,
+      govor: `${ime}${datum ? `, ${datumZaGovor(datum, o.danes)}` : ''}${ura ? ` ${uraZaGovor(ura)}` : ''}${storitev ? `, ${storitev.naziv}` : ''}${oseba && p.oseba ? `, pri ${mestnik(oseba.ime)}` : ''}.${govorPozor(pozor)}${neznana} ${vprasanje}`,
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'nov_termin', polja },
       podatki: { stranka_id: s.id, datum, ura, storitev: storitev?.naziv ?? null, oseba: oseba ? imeOsebe(oseba) : null, lokacija: lokacija?.naziv ?? null, pozor },
     };
   },
 };
+
+// ───────────────────────────────────────────────────────────────────────────
+/** Jeziki sporočil (kode, kot jih hrani baza in bere n8n). */
+export const JEZIKI_SPOROCIL = ['slo', 'eng', 'de', 'it', 'hr'] as const;
+const IME_JEZIKA: Record<(typeof JEZIKI_SPOROCIL)[number], string> = {
+  slo: 'slovenščina', eng: 'angleščina', de: 'nemščina', it: 'italijanščina', hr: 'hrvaščina',
+};
+/** Opombe iz govora: brez znakov za oznake, kratko. */
+const opomba = z.string().trim().max(300).transform((x) => x.replace(/[<>]/g, '')).nullable();
+
+/** Razreši do dve dodatni storitvi ("dodaj še barvanje"); neznana ali dvoumna → rezultat. */
+function dodatneStoritve(imena: string[] | null | undefined, storitve: StoritevPovzetek[]): StoritevPovzetek[] | RezultatOrodja {
+  const out: StoritevPovzetek[] = [];
+  for (const ime of (imena ?? []).slice(0, 2)) {
+    const x = izberiStoritev(ime, storitve);
+    if (jeRezultat(x)) return x;
+    if (!out.some((y) => y.id === x.id)) out.push(x);
+  }
+  return out;
+}
 
 // ───────────────────────────────────────────────────────────────────────────
 /** Prihodnji (ali današnji) aktivni termini stranke; ob več → vprašanje. */
@@ -379,6 +399,147 @@ export const prestaviTermin: BralnoOrodje<VhodPrestavi> = {
       pojdi: '/koledar?glas=1',
       obrazec: { vrsta: 'prestavi_termin', polja: { idt: t.id, dan_prej: t.datum, dan: datum, ura: zacetek } },
       podatki: { termin_id: t.id, termin_datum: t.datum, stranka_id: t.idStranke, od: { datum: t.datum, ura: t.zacetek }, na: { datum, ura: zacetek }, pozor },
+    };
+  },
+};
+
+// ───────────────────────────────────────────────────────────────────────────
+const zodUredi = z.object({
+  ...zodTermina,
+  storitev: z.string().max(80).nullable(),
+  dodaj_storitve: z.array(z.string().max(80)).max(2).nullable(),
+  oseba: z.string().max(80).nullable(),
+  jezik: z.enum(JEZIKI_SPOROCIL).nullable(),
+  opombe: opomba,
+  interne_opombe: opomba,
+  lokacija: z.string().max(80).nullable(),
+  nov_datum: z.string().max(60).nullable(),
+  nova_ura: z.string().max(40).nullable(),
+});
+type VhodUredi = z.infer<typeof zodUredi>;
+
+/**
+ * Sprememba obstoječega termina prek obrazca za urejanje (isti kot ročno):
+ * storitev, dodatna storitev, zaposleni, jezik sporočil, opombe, lokacija, dan, ura.
+ * Nič se ne shrani: obrazec se odpre izpolnjen, uporabnik reče "ja" ali pritisne Shrani.
+ */
+export const urediTermin: BralnoOrodje<VhodUredi> = {
+  ime: 'uredi_termin',
+  opis:
+    'Spremeni obstoječi termin: storitev, dodatna storitev ("dodaj še barvanje"), zaposleni ("daj ga k Maji"), jezik sporočil ("spremeni jezik v angleščino"), opombe ("v opombo napiši, da bo zamujala"), interne opombe, lokacija ("prestavi v Šiško"), dan in ura. ' +
+    'Odpre obrazec termina izpolnjen s spremembami; shrani uporabnik. Podaj samo, kar se spremeni; ostalo null. Za samo dan ali uro lahko tudi prestavi_termin.',
+  razred: 'branje',
+  pravica: 'termini.urejanje',
+  omogoceno: true,
+  shema: {
+    type: 'object',
+    properties: {
+      ...vhodTermina,
+      storitev: { type: ['string', 'null'], description: 'Nova glavna storitev (zamenja obstoječo); null = ne spremeni.' },
+      dodaj_storitve: { type: ['array', 'null'], items: { type: 'string' }, description: 'Storitve, ki se dodajo terminu kot druga ali tretja ("dodaj še barvanje"); null = nič.' },
+      oseba: { type: ['string', 'null'], description: 'Nov zaposleni (ime ali ID); null = ne spremeni.' },
+      jezik: { type: ['string', 'null'], enum: [...JEZIKI_SPOROCIL, null], description: 'Jezik sporočil termina: slo, eng, de, it ali hr; null = ne spremeni.' },
+      opombe: { type: ['string', 'null'], description: 'Besedilo, ki se doda v opombe termina (stranka jih lahko vidi); null = nič.' },
+      interne_opombe: { type: ['string', 'null'], description: 'Besedilo, ki se doda v interne opombe (samo za salon); null = nič.' },
+      lokacija: { type: ['string', 'null'], description: 'Nova lokacija (ime ali ID), samo pri več lokacijah; null = ne spremeni.' },
+      nov_datum: { type: ['string', 'null'], description: 'Nov dan (izraz ali YYYY-MM-DD); null = ne spremeni.' },
+      nova_ura: { type: ['string', 'null'], description: 'Nova ura ("HH:MM" ali izraz); null = ne spremeni.' },
+    },
+    required: [
+      'stranka', 'stranka_id', 'termin_id', 'datum_zdaj', 'storitev', 'dodaj_storitve', 'oseba', 'jezik', 'opombe', 'interne_opombe', 'lokacija', 'nov_datum', 'nova_ura',
+    ],
+    additionalProperties: false,
+  },
+  vhod: zodUredi,
+  async izvedi(p, o) {
+    const nov = p.nov_datum ? datumIzParametra(p.nov_datum, o.danes) : null;
+    if (p.nov_datum && !nov) return { sporocilo: `Datuma »${p.nov_datum}« ne razumem.` };
+    const ura = p.nova_ura ? uraIzParametra(p.nova_ura) : null;
+    if (p.nova_ura && !ura) return { sporocilo: `Ure »${p.nova_ura}« ne razumem.` };
+    const izbran = await izberiTermin(o, p, true);
+    if ('odgovor' in izbran) return izbran.odgovor;
+    const { termin: t, ime } = izbran;
+    if (samoSvojeUrejanje(o.k) && t.osebaId !== o.k.osebaId) return { sporocilo: 'Urejate lahko samo svoje termine.' };
+    const fokus = { termin_id: t.id, termin_datum: t.datum, stranka_id: t.idStranke };
+
+    const [storitve, osebe] = await Promise.all([o.podatki.storitve(), o.podatki.osebe()]);
+    let storitev: StoritevPovzetek | null = null;
+    if (p.storitev) {
+      const x = izberiStoritev(p.storitev, storitve);
+      if (jeRezultat(x)) return { ...x, podatki: fokus };
+      storitev = x;
+    }
+    const dodatne = dodatneStoritve(p.dodaj_storitve, storitve);
+    if (jeRezultat(dodatne)) return { ...dodatne, podatki: fokus };
+    let oseba: OsebaPovzetek | null = null;
+    if (p.oseba) {
+      const x = izberiOsebo(p.oseba, osebe);
+      if (jeRezultat(x)) return { ...x, podatki: fokus };
+      oseba = x;
+      if (samoSvojeUrejanje(o.k) && oseba.id !== o.k.osebaId) return { sporocilo: 'Termin lahko dodelite samo sebi.', podatki: fokus };
+    }
+    const sedanjaOseba = oseba ?? osebe.find((x) => x.id === t.osebaId) ?? null;
+    const sedanjaStoritev = storitev ?? storitve.find((x) => x.naziv === t.storitev) ?? null;
+    if (sedanjaOseba && sedanjaStoritev && (oseba || storitev) && !sedanjaOseba.opravljaVse && !sedanjaOseba.storitve.includes(sedanjaStoritev.id)) {
+      return { sporocilo: `${sedanjaOseba.ime} ne opravlja storitve ${sedanjaStoritev.naziv}.`, podatki: fokus };
+    }
+    const lokacija = p.lokacija ? await lokacijaTermina(o, sedanjaOseba, sedanjaStoritev, p.lokacija) : null;
+    if (jeRezultat(lokacija)) return { ...lokacija, podatki: fokus };
+
+    const datum = nov ?? t.datum;
+    const zacetek = ura ?? t.zacetek;
+    if ((nov || ura) && datum < o.danes) return { sporocilo: 'Termina ne prestavljam v preteklost.', podatki: fokus };
+    const trajanje = t.konec ? Math.max(5, vMinute(t.konec) - vMinute(t.zacetek)) : 60;
+    const pozor = (nov || ura || oseba) && sedanjaOseba ? await opozoriloZaCas(o, sedanjaOseba, datum, zacetek, trajanje, t.id) : null;
+
+    const zaslon: string[] = [];
+    const govor: string[] = [];
+    const polja: Record<string, string> = { idt: t.id, dan_prej: t.datum };
+    if (storitev) {
+      polja.storitev = storitev.id;
+      zaslon.push(`storitev ${storitev.naziv}`);
+    }
+    dodatne.forEach((x, i) => {
+      polja[`dodaj${i + 1}`] = x.id;
+    });
+    if (dodatne.length) zaslon.push(`dodana storitev ${dodatne.map((x) => x.naziv).join(' in ')}`);
+    if (oseba) {
+      polja.oseba = oseba.id;
+      zaslon.push(`pri ${mestnik(oseba.ime)}`);
+    }
+    if (p.jezik) {
+      polja.jezik = p.jezik;
+      zaslon.push(`jezik ${IME_JEZIKA[p.jezik]}`);
+    }
+    if (p.opombe) {
+      polja.opombe = p.opombe;
+      zaslon.push(`opomba »${p.opombe}«`);
+    }
+    if (p.interne_opombe) {
+      polja.interne = p.interne_opombe;
+      zaslon.push(`interna opomba »${p.interne_opombe}«`);
+    }
+    if (lokacija) {
+      polja.lokacija = lokacija.id;
+      zaslon.push(`lokacija ${lokacija.naziv}`);
+    }
+    if (nov || ura) {
+      polja.dan = datum;
+      polja.ura = zacetek;
+      zaslon.push(`nov čas ${opisDatuma(datum, o.danes)} ob ${zacetek}`);
+      govor.push(`nov čas ${datumZaGovor(datum, o.danes)} ${uraZaGovor(zacetek)}`);
+    }
+    const kdaj = `${opisDatuma(t.datum, o.danes)} ob ${t.zacetek}`;
+    if (zaslon.length === 0) {
+      return { sporocilo: `${ime}, ${kdaj}. Kaj naj spremenim?`, govor: `${ime}, ${datumZaGovor(t.datum, o.danes)} ${uraZaGovor(t.zacetek)}. Kaj naj spremenim?`, podatki: fokus };
+    }
+    const brezCasa = zaslon.filter((x) => !x.startsWith('nov čas')).map((x) => x.replace(/[»«]/g, ''));
+    return {
+      sporocilo: `Sprememba termina: ${ime}, ${kdaj} → ${zaslon.join(', ')}.${pozor ? ` ${pozor}` : ''} ${SHRANI}`,
+      govor: `${ime}: ${[...brezCasa, ...govor].join(', ')}.${govorPozor(pozor)} ${SHRANI}`,
+      pojdi: '/koledar?glas=1',
+      obrazec: { vrsta: 'uredi_termin', polja },
+      podatki: { ...fokus, spremembe: Object.keys(polja).filter((k) => k !== 'idt' && k !== 'dan_prej'), pozor },
     };
   },
 };

@@ -29,6 +29,7 @@ import MonthView from './calendar/MonthView';
 import TwoDayView from './calendar/TwoDayView';
 import AppointmentModal, { type AppointmentFormData } from './appointments/AppointmentModal';
 type AppointmentModalPredizpolnitev = React.ComponentProps<typeof AppointmentModal>['predizpolnitev'];
+import type { CommunicationLanguageCode } from '@/lib/communicationLanguage';
 import { RescheduleNotificationModal } from './appointments/RescheduleNotificationModal';
 import DeleteConfirmation from './appointments/DeleteConfirmation';
 import AbsenceModal, { type AbsenceFormData } from './calendar/AbsenceModal';
@@ -1299,12 +1300,10 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const [glasOsebaId, setGlasOsebaId] = useState<string | undefined>(undefined);
   const [glasOdsotnost, setGlasOdsotnost] = useState<Partial<AbsenceFormData> | null>(null);
   const preberiGlasObrazec = useCallback(() => {
-    const obrazec = vzemiObrazec(['nov_termin', 'prestavi_termin', 'odsotnost']);
+    const obrazec = vzemiObrazec(['nov_termin', 'prestavi_termin', 'uredi_termin', 'odsotnost']);
     if (!obrazec) return;
-    const namen: Record<string, string> = {
-      ...obrazec.polja,
-      glas: obrazec.vrsta === 'nov_termin' ? 'nov' : obrazec.vrsta === 'prestavi_termin' ? 'prestavi' : 'odsotnost',
-    };
+    const vrsta = { nov_termin: 'nov', prestavi_termin: 'prestavi', uredi_termin: 'uredi' } as Record<string, string>;
+    const namen: Record<string, string> = { ...obrazec.polja, glas: vrsta[obrazec.vrsta] ?? 'odsotnost' };
     const dan = namen.dan_prej ?? namen.dan;
     if (dan && /^\d{4}-\d{2}-\d{2}$/.test(dan)) {
       const [y, m, d] = dan.split('-').map(Number);
@@ -1356,12 +1355,29 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         setModalMode('create');
         setIsModalOpen(true);
       })();
-    } else if (n.glas === 'prestavi' && n.idt) {
+    } else if ((n.glas === 'prestavi' || n.glas === 'uredi') && n.idt) {
       const termin = appointments.find((a) => a.id_termina === n.idt || a.id === n.idt);
       if (!termin) return; // počakaj, da se termini dneva naložijo (spodaj časovna omejitev)
+      if (n.glas === 'uredi' && (n.oseba || n.storitev || n.dodaj1) && (employees.length === 0 || services.length === 0)) return;
       setGlasNamen(null);
       if (!canEditAppointment(termin)) return;
-      setGlasPredizpolnitev({ datum: dan, cas: ura });
+      const storitevId = (ref?: string) => (ref ? services.find((x) => x.ref === ref || x.id === ref)?.id : undefined);
+      const jezik = n.jezik && ['slo', 'eng', 'de', 'it', 'hr'].includes(n.jezik) ? (n.jezik as CommunicationLanguageCode) : undefined;
+      setGlasPredizpolnitev({
+        datum: dan,
+        cas: ura,
+        ...(n.glas === 'uredi'
+          ? {
+              storitevId: storitevId(n.storitev),
+              dodatneStoritve: [storitevId(n.dodaj1), storitevId(n.dodaj2)].filter((x): x is string => Boolean(x)),
+              zaposleniId: zaposleni(n.oseba),
+              jezik,
+              opombe: n.opombe?.slice(0, 300),
+              interneOpombe: n.interne?.slice(0, 300),
+              lokacijaId: n.lokacija && /^[0-9a-f-]{36}$/i.test(n.lokacija) ? n.lokacija : undefined,
+            }
+          : {}),
+      });
       setEditingAppointment(termin);
       setModalMode('edit');
       setIsModalOpen(true);

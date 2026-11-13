@@ -60,10 +60,22 @@ interface AppointmentModalProps {
   lockEmployee?: boolean;
   /**
    * Asistent+ (glas): obrazec odpre že izpolnjen. Pri novem terminu stranka in
-   * storitev, pri urejanju nov datum/ura (prestavitev). Shrani uporabnik sam,
-   * po isti poti kot ročno.
+   * storitev, pri urejanju sprememba (storitev, zaposleni, jezik, opombe, lokacija,
+   * dan/ura). Opombe se dodajo obstoječim. Shrani uporabnik sam, po isti poti kot ročno.
    */
-  predizpolnitev?: { stranka?: Client | null; storitevId?: string; lokacijaId?: string; datum?: string; cas?: string } | null;
+  predizpolnitev?: {
+    stranka?: Client | null;
+    storitevId?: string;
+    /** Druga in tretja storitev: zapolnita prvi prosti mesti. */
+    dodatneStoritve?: string[];
+    zaposleniId?: string;
+    jezik?: CommunicationLanguageCode;
+    opombe?: string;
+    interneOpombe?: string;
+    lokacijaId?: string;
+    datum?: string;
+    cas?: string;
+  } | null;
 }
 
 export interface AppointmentFormData {
@@ -869,23 +881,45 @@ function AppointmentModal({
       if (p.lokacijaId) setFormData((prev) => ({ ...prev, lokacija_id: p.lokacijaId }));
       if (p.stranka) handleClientSelect(p.stranka);
       if (p.storitevId) handleServiceChange(p.storitevId, 1);
-    } else if (mode === 'edit' && (p.datum || p.cas)) {
-      const vMin = (u: string) => {
-        const [h, m] = u.split(':').map(Number);
-        return h * 60 + (m || 0);
-      };
-      setFormData((prev) => {
-        const zacetek = p.cas || prev.cas_zacetek;
-        const trajanje = prev.cas_zacetek && prev.cas_konec ? Math.max(5, vMin(prev.cas_konec) - vMin(prev.cas_zacetek)) : 60;
-        const konec = Math.min(vMin(zacetek) + trajanje, 23 * 60 + 59);
-        return {
-          ...prev,
-          datum: p.datum || prev.datum,
-          cas_zacetek: zacetek,
-          cas_konec: `${String(Math.floor(konec / 60)).padStart(2, '0')}:${String(konec % 60).padStart(2, '0')}`,
+    } else if (mode === 'edit') {
+      // Isti upravljalci kot ročna izbira: lokacija počisti, česar tam ni; zaposleni preveri storitev.
+      if (p.lokacijaId) handleLocationChange(p.lokacijaId);
+      if (p.zaposleniId) handleEmployeeChange(p.zaposleniId);
+      if (p.storitevId) handleServiceChange(p.storitevId, 1);
+      if (p.datum || p.cas) {
+        const vMin = (u: string) => {
+          const [h, m] = u.split(':').map(Number);
+          return h * 60 + (m || 0);
         };
-      });
+        setFormData((prev) => {
+          const zacetek = p.cas || prev.cas_zacetek;
+          const trajanje = prev.cas_zacetek && prev.cas_konec ? Math.max(5, vMin(prev.cas_konec) - vMin(prev.cas_zacetek)) : 60;
+          const konec = Math.min(vMin(zacetek) + trajanje, 23 * 60 + 59);
+          return {
+            ...prev,
+            datum: p.datum || prev.datum,
+            cas_zacetek: zacetek,
+            cas_konec: `${String(Math.floor(konec / 60)).padStart(2, '0')}:${String(konec % 60).padStart(2, '0')}`,
+          };
+        });
+      }
     }
+    // Oboje (nov in urejanje): dodatne storitve, jezik, opombe.
+    if (p.dodatneStoritve?.length) {
+      const zasedena = [formData.storitev_id_2, formData.storitev_id_3];
+      const prosta = ([2, 3] as const).filter((i) => !zasedena[i - 2]);
+      const nove = p.dodatneStoritve.filter((id) => ![formData.storitev_id, ...zasedena].includes(id));
+      nove.slice(0, prosta.length).forEach((id, i) => handleServiceChange(id, prosta[i]));
+      const skupaj = 1 + zasedena.filter(Boolean).length + Math.min(nove.length, prosta.length);
+      setServiceCount((prev) => Math.max(prev, Math.min(skupaj, 3)));
+    }
+    if (p.jezik) setFormData((prev) => ({ ...prev, language: p.jezik }));
+    const dodaj = (staro: string | undefined, novo: string) => {
+      const s0 = (staro ?? '').trim();
+      return s0.includes(novo) ? s0 : s0 ? `${s0}\n${novo}` : novo;
+    };
+    if (p.opombe) setFormData((prev) => ({ ...prev, opombe: dodaj(prev.opombe, p.opombe!) }));
+    if (p.interneOpombe) setFormData((prev) => ({ ...prev, internal_opombe: dodaj(prev.internal_opombe, p.interneOpombe!) }));
     // handleClientSelect je navadna funkcija; predizpolnitev se uporabi samo ob spremembi.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, mode, predizpolnitev, handleServiceChange]);

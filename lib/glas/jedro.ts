@@ -485,7 +485,16 @@ function varneAkcije(a: AkcijaStranke[] | undefined): AkcijaStranke[] | undefine
 /** Največ toliko prejšnjih izmenjav gre modelu kot zgodovina pogovora. */
 export const NAJVEC_ZGODOVINE = 6;
 
-const VRSTE_OBRAZCA = { nov_termin: 'pripravi_termin', prestavi_termin: 'prestavi_termin', odsotnost: 'vpisi_odsotnost', nova_stranka: 'nova_stranka' } as const;
+const VRSTE_OBRAZCA = {
+  nov_termin: 'pripravi_termin',
+  prestavi_termin: 'prestavi_termin',
+  uredi_termin: 'uredi_termin',
+  odsotnost: 'vpisi_odsotnost',
+  nova_stranka: 'nova_stranka',
+  uredi_stranko: 'uredi_stranko',
+} as const;
+/** Polja z besedilom (opombe), kjer so dovoljena tudi ločila. */
+const BESEDILNA_POLJA = new Set(['opombe', 'interne', 'razlog']);
 export type OdprtObrazec = { vrsta: keyof typeof VRSTE_OBRAZCA; polja: Record<string, string> };
 
 /** Stanje odprtega obrazca od odjemalca: samo znane vrste, kratka polja brez posebnih znakov. */
@@ -494,8 +503,10 @@ export function preberiOdprtObrazec(x: unknown): OdprtObrazec | null {
   const o = x as { vrsta?: unknown; polja?: unknown };
   if (typeof o.vrsta !== 'string' || !(o.vrsta in VRSTE_OBRAZCA) || !o.polja || typeof o.polja !== 'object') return null;
   const polja: Record<string, string> = {};
-  for (const [kljuc, v] of Object.entries(o.polja as Record<string, unknown>).slice(0, 10)) {
-    if (/^[a-z_]{1,12}$/.test(kljuc) && typeof v === 'string' && /^[\p{L}\p{N} .:@+_-]{1,60}$/u.test(v)) polja[kljuc] = v;
+  for (const [kljuc, v] of Object.entries(o.polja as Record<string, unknown>).slice(0, 14)) {
+    if (!/^[a-z_0-9]{1,12}$/.test(kljuc) || typeof v !== 'string') continue;
+    const ok = BESEDILNA_POLJA.has(kljuc) ? /^[\p{L}\p{N} .,:;!?()'"%/@+_-]{1,300}$/u.test(v) : /^[\p{L}\p{N} .:@+_-]{1,60}$/u.test(v);
+    if (ok) polja[kljuc] = v.replace(/<\/?ukaz>/g, '');
   }
   return { vrsta: o.vrsta as OdprtObrazec['vrsta'], polja };
 }

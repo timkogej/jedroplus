@@ -10,7 +10,7 @@ import { opisDatuma, razberiDatum, dodajDni, vMinute } from '../razresevanje/dat
 import { poisci } from '../razresevanje/imena';
 import { prviProstiTermin, razcleniUrnik } from '../razresevanje/urnik';
 import type { TerminPovzetek } from '../tipi';
-import { datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
+import { datumZaGovor, mestnik, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
 import { oznakaStranke, razresiStranko, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 
@@ -248,7 +248,7 @@ export const prviProsti: BralnoOrodje<{ storitev: string | null; oseba: string |
     const p = osebe.find((x) => x.id === prost.osebaId);
     return {
       sporocilo: `Prvi prosti termin${nazivStoritve ? ` za ${nazivStoritve} (${trajanje} min)` : ''}: ${opisDatuma(prost.datum, o.danes)} ob ${prost.zacetek}${p && kandidati.length > 1 ? `, ${p.ime}` : ''}. Okvirno — resursi niso upoštevani.`,
-      govor: `Prvi prosti termin${nazivStoritve ? ` za ${nazivStoritve}` : ''} je ${datumZaGovor(prost.datum, o.danes)} ${uraZaGovor(prost.zacetek)}${p && kandidati.length > 1 ? ` pri ${p.ime}` : ''}. Okvirno, brez resursov.`,
+      govor: `Prvi prosti termin${nazivStoritve ? ` za ${nazivStoritve}` : ''} je ${datumZaGovor(prost.datum, o.danes)} ${uraZaGovor(prost.zacetek)}${p && kandidati.length > 1 ? ` pri ${mestnik(p.ime)}` : ''}. Okvirno, brez resursov.`,
       podatki: { ...prost, oseba: p ? `${p.ime} ${p.priimek}`.trim() : null, storitev: nazivStoritve, trajanje },
     };
   },

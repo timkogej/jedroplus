@@ -9,7 +9,7 @@ import { samoSvojiTermini } from '../pravice';
 import { dodajDni, izMinut, vMinute } from '../razresevanje/datumi';
 import { poisci } from '../razresevanje/imena';
 import { delovniBrezOdsotnosti, prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
-import { datumZaGovor, NAJVEC_NA_GLAS, razponZaGovor, uraZaGovor } from '../govor';
+import { datumZaGovor, mestnik, NAJVEC_NA_GLAS, razponZaGovor, uraZaGovor } from '../govor';
 import type { OsebaPovzetek, RezultatOrodja, TerminPovzetek } from '../tipi';
 import { cap, datumIzParametra } from './branje';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
@@ -84,7 +84,7 @@ export const naslednjaStranka: BralnoOrodje<{ samo_moji: boolean | null }> = {
       return { sporocilo: `${kdo} terminov v naslednjih 7 dneh.`, podatki: { termin: null } };
     }
     const ime = n.stranka || 'stranka';
-    const pri = !s.svoji && n.oseba ? `, pri ${n.oseba}` : '';
+    const pri = !s.svoji && n.oseba ? `, pri ${mestnik(n.oseba)}` : '';
     const danesNi = n.datum !== o.danes ? `${s.svoji ? 'Danes nimate več terminov' : 'Danes ni več terminov'}. ` : '';
     return {
       sporocilo: `${danesNi}Naslednja: ${ime}, ${n.datum === o.danes ? 'danes' : datumZaGovor(n.datum, o.danes)} ob ${n.zacetek}${n.storitev ? `, ${n.storitev}` : ''}${pri}.`,

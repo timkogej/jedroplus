@@ -161,3 +161,21 @@ export function povezavaKontakta(vrsta: 'klic' | 'pisi', vrednost: string): stri
   const e = vrednost.trim();
   return /^[^\s@?&#/:]{1,64}@[^\s@?&#/:]{1,190}\.[a-z]{2,}$/i.test(e) ? `mailto:${e}` : null;
 }
+
+/**
+ * Ime v mestniku za "pri …": Luka → Luki, Tina → Tini, Marko → Marku, Tim → Timu,
+ * Matej → Mateju, Peter → Petru. Sklanja se samo prva beseda (ime), priimek ostane.
+ */
+export function mestnik(ime: string): string {
+  const [prvo, ...ostalo] = ime.trim().split(/\s+/);
+  if (!prvo) return ime;
+  let m: string;
+  if (/[aA]$/.test(prvo)) m = `${prvo.slice(0, -1)}i`;
+  else if (/[oO]$/.test(prvo)) m = `${prvo.slice(0, -1)}u`;
+  else if (/[eE]$/.test(prvo)) m = `${prvo}tu`;
+  else if (/[iIuU]$/.test(prvo)) m = `${prvo}ju`;
+  else if (/[^aeiou]er$/i.test(prvo)) m = `${prvo.slice(0, -2)}ru`;
+  else if (/\p{L}$/u.test(prvo)) m = `${prvo}u`;
+  else m = prvo;
+  return [m, ...ostalo].join(' ');
+}

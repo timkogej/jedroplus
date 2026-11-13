@@ -76,6 +76,8 @@ const GOVOR = {
 const USPEH: Record<string, string> = {
   nov_termin: 'Super, termin je zapisan.',
   prestavi_termin: 'Super, termin je prestavljen.',
+  uredi_termin: 'Super, termin je posodobljen.',
+  uredi_stranko: 'Super, podatki stranke so posodobljeni.',
   odsotnost: 'Super, odsotnost je zapisana.',
   nova_stranka: 'Super, stranka je dodana.',
 };

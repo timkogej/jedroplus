@@ -44,7 +44,7 @@ describe('naslednja_stranka', () => {
 
   it('za cel salon pove, pri kom', async () => {
     const r = await naslednjaStranka.izvedi({ samo_moji: false }, o('14:00'));
-    expect(r.govor).toContain('pri Tina');
+    expect(r.govor).toContain('pri Tini');
   });
 });
 

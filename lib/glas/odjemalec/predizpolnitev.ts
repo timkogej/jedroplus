@@ -5,7 +5,7 @@
 // naslovi strani se zapisujejo v dnevnike strežnika in zgodovino brskalnika,
 // imena, telefoni in razlogi odsotnosti pa tja ne sodijo. URL nosi samo ?glas=1.
 
-export type VrstaObrazca = 'nov_termin' | 'prestavi_termin' | 'odsotnost' | 'nova_stranka';
+export type VrstaObrazca = 'nov_termin' | 'prestavi_termin' | 'uredi_termin' | 'odsotnost' | 'nova_stranka' | 'uredi_stranko';
 
 export interface Obrazec {
   vrsta: VrstaObrazca;
