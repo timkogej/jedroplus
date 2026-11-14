@@ -493,7 +493,7 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 |---|---|---|
 | 1 | Jutranji povzetek (`povzetek_dneva`) | narejeno, testi; brez migracije |
 | 2 | Številke za lastnika (`stevilke_salona`) + Analitika na skupnem izračunu (`lib/analytics/izracun.ts`) | narejeno, testi; brez migracije |
-| 3 | Sporoči stranki | ni začeto (potrebuje migracijo `glas_sporocila` in n8n workflow — oboje po tvojem ja) |
+| 3 | Sporoči stranki (`sporoci_stranki`) | koda in testi narejeni; čaka migracijo, n8n tok in ključ (spodaj) |
 | 4a | Zapolnitev luknje | ni začeto |
 | 5 | Osebni opomniki | ni začeto (potrebuje pg_cron) |
 | 6 | Ponavljajoči termini | ni začeto |
@@ -510,3 +510,35 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 - Številke Analitike na pravi bazi in v brskalniku (primerjaj s staro stranjo; razlika je pričakovana zaradi novega pravila).
 - Ali `Termini."ID storitve"` / `"ID Osebe"` kažeta na `id` ali na besedilni ID — koda išče po obeh, branje produkcije ni bilo dovoljeno.
 - Povzetek dneva na pravem salonu (zahteve v pregledu, opombe strank, nove stranke).
+
+### Sporoči stranki (3): kaj je narejeno
+
+- Orodje `sporoci_stranki` (`lib/glas/orodja/sporocila.ts`), pravila v `lib/glas/sporocila/besedilo.ts`:
+  - vedno vezano na termin (danes ali v 30 dneh, tudi odpovedan);
+  - zavrne ponudbe, cene, povezave in telefonske številke (sl, en, de, it, hr);
+  - en SMS (160 znakov brez šumnikov), podpis salona doda strežnik;
+  - jezik stranke s kartice (drugačen jezik → model napiše znova).
+- Telefon in e-naslov prebere strežnik z RLS, model ju ne vidi. Brez telefona gre e-pošta (O2).
+- Pošlje se šele po potrditvi (gumb »Pošlji« ali »ja«; asistent vpraša »Pošljem?«). Ob potrditvi se vse preveri znova.
+- Omejitev 3 na stranko in 30 na podjetje na dan je v SQL (`supabase/migrations/1793700000_glas_sporocila.sql`), SMS kvota pa v n8n.
+- Po odpovedi: »obvesti stranko« pošlje samo, če je termin v bazi res odpovedan.
+- n8n: nov tok »Asistent+ – sporočilo stranki« (webhook `glas-sporocilo`) v `~/n8n-backup/20261114-glas-sporocilo/`:
+  - `zgradi.py`: kopija »Receptionist+ – SMS stranki«; e-pošta gre prek SES s `booking@jedroplus.com`;
+  - `uveljavi.py`: ustvari in vklopi tok, obstoječih ne spreminja; `uveljavi.py nazaj` ga izklopi.
+
+### Kaj mora narediti Tim (3)
+
+1. Pognati migracijo `supabase/migrations/1793700000_glas_sporocila.sql`.
+2. Ustvariti dolg naključen ključ in ga nastaviti kot `GLAS_N8N_HMAC_SECRET`:
+   - na Vercelu;
+   - v okolju n8n, nato n8n ponovno zagnati.
+3. Reči »ja« za n8n, nato pognati `python3 ~/n8n-backup/20261114-glas-sporocilo/uveljavi.py`.
+4. Preizkusiti na svoji številki (7LHB28): SMS, e-pošto (stranka brez telefona), kvoto in »obvesti stranko« po odpovedi.
+
+### Nepreizkušeno (3)
+
+- Nič ni bilo poslano zares; n8n tok ni naložen. Preizkušeno je samo z lažnim pošiljateljem in simulacijo podpisa HMAC.
+- `message_outbox` z `entity_type 'glas_sporocilo'` in `channel 'email'`: ne vem, ali jih omejitve tabele dovolijo.
+- SES vozlišče za e-pošto stranki: poverilnica in pošiljatelj sta prepisana iz bookinga, a nista preizkušena.
+- `companies.name` za podpis bere uporabnikova seja. Če RLS zaposlenemu tega ne dovoli, je podpis prazen; n8n pri e-pošti vzame ime sam.
+- Jezik sporočila je jezik s kartice stranke (brez → slovenščina); »Jezik pošiljanja« podjetja se ne upošteva.

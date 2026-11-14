@@ -9,6 +9,7 @@ import { preberiKonfiguracijo } from '@/lib/glas/konfiguracija';
 import { llmLazni, type LlmOdgovor } from '@/lib/glas/ponudniki/llm';
 import { sttLazni, type SttPonudnik } from '@/lib/glas/ponudniki/stt';
 import { ttsBrez } from '@/lib/glas/ponudniki/tts';
+import { OMEJITEV_NA_PODJETJE, OMEJITEV_NA_STRANKO, type IzidPosiljanja, type PosiljateljSporocil, type ZahtevaPosiljanja } from '@/lib/glas/sporocila/tipi';
 import { shrambaVPomnilniku, type NastavitvePomnilnik } from '@/lib/glas/shramba/pomnilnik';
 import type {
   LokacijePovzetek,
@@ -44,6 +45,8 @@ export interface Salon {
   odsotnosti?: OdsotnostPovzetek[];
   lokacije?: LokacijePovzetek;
   zahteve?: number;
+  /** Ime salona (podpis sporočil). */
+  ime?: string;
   /** Surove vrstice za številke lastnika. */
   analitika?: { termini: Record<string, unknown>[]; storitve: Record<string, unknown>[]; osebe: Record<string, unknown>[] };
 }
@@ -179,6 +182,7 @@ export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): 
     async resursiTerminov(vrstice) { return (s.povezave ?? []).filter((p) => vrstice.includes(p.vrstica)); },
     async lokacije() { return s.lokacije ?? { seznam: [], osebe: {}, storitve: {} }; },
     async zahteveVPregledu() { return s.zahteve ?? 0; },
+    async imePodjetja() { return s.ime ?? 'Salon Lepota'; },
     async analitika(od, doo) {
       const v = s.analitika ?? { termini: [], storitve: [], osebe: [] };
       return { ...v, termini: v.termini.filter((r) => String(r.Datum) >= od && String(r.Datum) <= doo) };
@@ -240,6 +244,7 @@ export function okolje(o: {
       throw napaka;
     };
   }
+  const sporocila = posiljateljLazni();
   const stt: SttPonudnik = o.stt && !Array.isArray(o.stt) ? o.stt : sttLazni(o.stt ?? ['']);
   const sttKlici = { n: 0 };
   const d: Odvisnosti = {
@@ -252,9 +257,36 @@ export function okolje(o: {
     tts: () => ttsBrez,
     shramba,
     podatki,
+    sporocila,
     ura: () => ura.zdaj,
   };
-  return { d, ura, shramba, podatki, llm, sttKlici };
+  return { d, ura, shramba, podatki, llm, sttKlici, sporocila };
+}
+
+/** Lažni pošiljatelj: omejitev 3/30 na dan v pomnilniku, izid nastavljiv. */
+export function posiljateljLazni(izid: IzidPosiljanja = { status: 'poslano' }) {
+  const vrstice: { id: string; podjetje: string; idStranke: string; status: string }[] = [];
+  const poslana: ZahtevaPosiljanja[] = [];
+  const p: PosiljateljSporocil & { vrstice: typeof vrstice; poslana: typeof poslana; izid: IzidPosiljanja } = {
+    vrstice,
+    poslana,
+    izid,
+    async rezerviraj(r) {
+      const steje = (x: (typeof vrstice)[number]) => x.podjetje === r.podjetje && ['v_vrsti', 'poslano', 'neznano'].includes(x.status);
+      if (vrstice.filter(steje).length >= OMEJITEV_NA_PODJETJE) return { ok: false, koda: 'podjetje' };
+      if (vrstice.filter((x) => steje(x) && x.idStranke === r.idStranke).length >= OMEJITEV_NA_STRANKO) return { ok: false, koda: 'stranka' };
+      const id = `sp-${vrstice.length + 1}`;
+      vrstice.push({ id, podjetje: r.podjetje, idStranke: r.idStranke, status: 'v_vrsti' });
+      return { ok: true, id };
+    },
+    async poslji(z) {
+      poslana.push(z);
+      const v = vrstice.find((x) => x.id === z.id);
+      if (v) v.status = p.izid.status;
+      return p.izid;
+    },
+  };
+  return p;
 }
 
 export const ZVOK = new Blob([new Uint8Array(2000)], { type: 'audio/webm' });

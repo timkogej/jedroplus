@@ -4,6 +4,7 @@
 // registry.ts. Jedro samo poskrbi za pravice, potrditev, revizijo in merjenje.
 
 import type { z } from 'zod';
+import type { PosiljateljSporocil } from '../sporocila/tipi';
 import type { JsonShema, Kontekst, PodatkiSalona, Pravica, Predogled, RazredTveganja, RezultatOrodja } from '../tipi';
 
 export interface OkoljeOrodja {
@@ -13,6 +14,8 @@ export interface OkoljeOrodja {
   danes: string;
   uraZdaj: string;
   ukazId: string | null;
+  /** Pošiljanje sporočil strankam (samo potrdi orodja sporoci_stranki); brez = ni nastavljeno. */
+  sporocila?: PosiljateljSporocil;
 }
 
 interface OsnovaOrodja<P> {

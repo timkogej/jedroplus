@@ -27,6 +27,7 @@ import type { LlmPonudnik, LlmSporocilo } from './ponudniki/llm';
 import { NapakaPonudnika } from './ponudniki/skupno';
 import type { SttPonudnik } from './ponudniki/stt';
 import type { TtsPonudnik } from './ponudniki/tts';
+import type { PosiljateljSporocil } from './sporocila/tipi';
 import type { KontekstPogovora, ShrambaGlasa, VhodUkaza, ZakljucekUkaza } from './shramba/tipi';
 import type { AkcijaStranke, JsonShema, Kontekst, PodatkiSalona, Predogled, RezultatOrodja } from './tipi';
 
@@ -37,6 +38,8 @@ export interface Odvisnosti {
   tts: () => TtsPonudnik;
   shramba: ShrambaGlasa;
   podatki: PodatkiSalona;
+  /** Pošiljanje sporočil strankam (sporoci_stranki); brez = orodje pove, da ni nastavljeno. */
+  sporocila?: PosiljateljSporocil;
   konf?: GlasKonfiguracija;
   orodja?: readonly Orodje[];
   ura?: () => number;
@@ -113,7 +116,8 @@ Pravila:
 - Stranka in zaposleni imata lahko isto ime. "Pri Luki", "Luka je zaposleni", "pri frizerki Tini" je oseba (zaposleni); za koga je termin, je stranka.
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
 - Dneva in ure nikoli ne ugibaj. Trenutni čas ni čas termina: če uporabnik ure ni povedal, je null. Če se ukaz konča sredi stavka (npr. "ob.", "za.", "pri."), je prepis odrezan: samo vprašaj, kaj je manjkalo (npr. "Za koga in ob kateri uri?"), in ne dopolni sam.
-- Ne moreš brisati, pošiljati sporočil strankam, spreminjati cen, pravic, plačil ali marketinške privolitve. Če to zahteva, povej, da tega ne moreš (privolitev spremeni stranka sama ali uporabnik na kartici).
+- Ne moreš brisati, pošiljati reklam ali ponudb, spreminjati cen, pravic, plačil ali marketinške privolitve. Če to zahteva, povej, da tega ne moreš (privolitev spremeni stranka sama ali uporabnik na kartici).
+- Sporočilo stranki o njenem terminu (zamuda, sprememba, prošnja, odpoved) pošlješ samo z orodjem sporoci_stranki, če ga imaš. Besedilo napiši sam v jeziku stranke (če ga ne poznaš, v jeziku pogovora; orodje te popravi): kratko, vljudno, vikanje, brez podpisa, brez ponudb, cen, povezav in telefonskih številk. Primer: "sporoči Ani, da zamujamo 15 minut" → sporoci_stranki(stranka "Ana", besedilo "Pozdravljeni, zamujamo približno 15 minut. Hvala za razumevanje."). Dan in uro napiši v besedilo samo, če jih je povedal uporabnik. "Obvesti jo" / "obvesti stranko" po odpovedi → sporoci_stranki z o_odpovedi true, termin_id aktivnega termina in besedilom, da je termin (dan, ura) odpovedan in naj pokliče za nov termin. Nikoli ne trdi, da je poslano: uporabnik potrdi.
 - Recepture barve: odtenke zapiši kot "6.3", "7.1"; gramažo, oksidant (%) in čas (min) kot števila. Ne dodajaj ničesar, česar uporabnik ni rekel.
 - Za vprašanja, kako se kaj naredi v aplikaciji, uporabi pomoc_aplikacija; za "odpri", "pojdi na", "pokaži stran" uporabi odpri_stran. Navodil za aplikacijo si ne izmišljuj.
 - Številke salona (zaslužek, prihodki, statistika, primerjave obdobij) dobiš samo z orodjem stevilke_salona, če ga imaš; nikoli jih ne izračunaj ali ugibaj sam in jih ne ponavljaj (so na zaslonu). Če orodja nimaš, povej, da številke vidi samo lastnik.
@@ -243,7 +247,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
   };
 
   const zdaj = zdajVPasu(new Date(ura()), k.casovniPas);
-  const okolje: OkoljeOrodja = { k, podatki: d.podatki, danes: zdaj.datum, uraZdaj: zdaj.ura, ukazId };
+  const okolje: OkoljeOrodja = { k, podatki: d.podatki, danes: zdaj.datum, uraZdaj: zdaj.ura, ukazId, sporocila: d.sporocila };
   const dovoljena = orodjaZa(k, d.orodja ?? VSA_ORODJA);
   let faza: 'stt' | 'llm' = 'stt';
 
@@ -457,7 +461,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     // Datum na koncu stavka ("13. 11." + ".") ne sme dati dvojne pike.
     r = { ...r, odgovor: r.odgovor.replace(/(\d\.)\.(?!\.)/g, '$1') };
     let govor = r.govor ?? zaGovor(r.odgovor);
-    if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} ${jt('Potrdim?')}`;
+    if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} ${r.predlog?.sporocil ? jt('Pošljem?') : jt('Potrdim?')}`;
     else if (r.vprasanje?.moznosti?.length && !r.govor) govor = vprasanjeZaGovor(r.vprasanje);
     if (v.glas) poraba = sestejPorabo(poraba, { ttsPonudnik: v.glas.ponudnik, ttsZnaki: govor.length });
     let zvok: { mime: string; base64: string } | null = null;
@@ -699,14 +703,14 @@ const HTTP_POTRDITVE: Record<KodaPotrditve, number> = {
 
 export function potrdiPredlog(
   v: { k: Kontekst; predlogId: string; zeton: string },
-  d: Pick<Odvisnosti, 'shramba' | 'podatki' | 'orodja' | 'ura'>
+  d: Pick<Odvisnosti, 'shramba' | 'podatki' | 'orodja' | 'ura' | 'sporocila'>
 ): Promise<OdgovorPotrditve> {
   return zJezikom(v.k.jezik, () => potrdiPredlogVJeziku(v, d));
 }
 
 async function potrdiPredlogVJeziku(
   v: { k: Kontekst; predlogId: string; zeton: string },
-  d: Pick<Odvisnosti, 'shramba' | 'podatki' | 'orodja' | 'ura'>
+  d: Pick<Odvisnosti, 'shramba' | 'podatki' | 'orodja' | 'ura' | 'sporocila'>
 ): Promise<OdgovorPotrditve> {
   const { k } = v;
   const ura = d.ura ?? Date.now;
@@ -765,7 +769,7 @@ async function potrdiPredlogVJeziku(
 
   const zdaj = zdajVPasu(new Date(ura()), k.casovniPas);
   try {
-    const r = await orodje.potrdi(parametri.data, { k, podatki: d.podatki, danes: zdaj.datum, uraZdaj: zdaj.ura, ukazId: p.ukaz_id });
+    const r = await orodje.potrdi(parametri.data, { k, podatki: d.podatki, danes: zdaj.datum, uraZdaj: zdaj.ura, ukazId: p.ukaz_id, sporocila: d.sporocila });
     if (r.neuspeh) {
       await zakljuci('napaka', { sporocilo: r.sporocilo }, 'neuspeh');
       await revizija('napaka', 'neuspeh');

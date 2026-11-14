@@ -10,7 +10,7 @@
 // v URL (imena, telefoni in razlogi ne sodijo v dnevnike strežnika).
 
 import { z } from 'zod';
-import { samoSvojiTermini } from '../pravice';
+import { imaPravico, samoSvojiTermini } from '../pravice';
 import { dodajDni, opisDatuma, razberiUro, vMinute } from '../razresevanje/datumi';
 import { poisci } from '../razresevanje/imena';
 import { prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
@@ -634,7 +634,10 @@ export const statusTermina: BralnoOrodje<z.infer<z.ZodObject<typeof zodTermina>>
     if (samoSvojeUrejanje(o.k) && t.osebaId !== o.k.osebaId) return { sporocilo: jt('Urejate lahko samo svoje termine.') };
     const gumb = jt(AKCIJE[p.akcija]);
     return {
-      sporocilo: jt('Termin {ime}, {kdaj}. V koledarju tapnite »{gumb}«.', { ime, kdaj: jt('{datum} ob {ura}', { datum: opisDatuma(t.datum, o.danes), ura: t.zacetek }), gumb }),
+      sporocilo:
+        jt('Termin {ime}, {kdaj}. V koledarju tapnite »{gumb}«.', { ime, kdaj: jt('{datum} ob {ura}', { datum: opisDatuma(t.datum, o.danes), ura: t.zacetek }), gumb }) +
+        // Po odpovedi lahko stranko obvesti (sporoci_stranki preveri, da je termin res odpovedan v bazi).
+        (p.akcija === 'odpovej' && o.sporocila && imaPravico(o.k, 'sporocila.stranke') ? ` ${jt('Ko odpoveste, recite »obvesti stranko«.')}` : ''),
       govor: jt('Odpiram termin {ime}, {kdaj}. Tapnite {gumb}.', { ime, kdaj: `${datumZaGovor(t.datum, o.danes)} ${uraZaGovor(t.zacetek)}`, gumb }),
       // Obstoječa povezava koledarja (obvestila): skoči na dan in odpre termin. ID termina ni oseben podatek.
       pojdi: `/koledar?termin=${encodeURIComponent(t.id)}&datum=${t.datum}`,

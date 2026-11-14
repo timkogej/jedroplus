@@ -27,6 +27,7 @@ export function imaPravico(k: Pick<Kontekst, 'vloga' | 'pravice'>, pravica: Prav
     case 'termini.branje':
       return (p?.can_view_all_appointments ?? true) || p?.can_view_only_own_appointments === true;
     case 'termini.urejanje':
+    case 'sporocila.stranke':
       return (p?.can_edit_all_appointments ?? true) || p?.can_edit_only_own_appointments === true;
     case 'termini.ustvarjanje':
       return p?.can_create_appointments ?? true;

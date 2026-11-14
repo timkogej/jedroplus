@@ -14,6 +14,7 @@ import { karticaStranke, neaktivneStranke, podatkiStranke, zadnjaBarva } from '.
 import { kdoDela, naslednjaStranka, prosteLuknjeOrodje, resursiDan } from './pregled';
 import { povzetekDneva } from './povzetek';
 import { stevilkeSalona } from './stevilke';
+import { sporociStranki } from './sporocila';
 import { odpriStran, pomocAplikacija } from './pomoc';
 import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, urediStranko, urediTermin, vpisiOdsotnost } from './obrazci';
 
@@ -23,6 +24,7 @@ export const VSA_ORODJA: readonly Orodje[] = [
   koledarDan,
   povzetekDneva,
   stevilkeSalona,
+  sporociStranki,
   prviProsti,
   naslednjaStranka,
   prosteLuknjeOrodje,

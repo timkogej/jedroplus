@@ -67,6 +67,9 @@ const POGOVORI: {
   { ukazi: ['Ima Ana Novak kakšno opombo?'], konec: {}, odgovor: { 0: /zamujala/ } },
   // Isto kot zadnjič.
   { ukazi: ['Zapiši Matejo isto kot zadnjič čez šest tednov.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-12-24' } },
+  // Sporoči stranki: predlog SMS (pošlje šele potrditev). Ana prejema v angleščini → model napiše znova.
+  { ukazi: ['Sporoči Mateji, da jutri zamujamo kakšnih 15 minut.'], konec: {}, odgovor: { 0: /SMS za Mateja Kova[čc]i[čc]: ».*15/ }, ne: { 0: /jutri danes|danes jutri/i } },
+  { ukazi: ['Sporoči Ani Novak, da danes zamujamo deset minut.'], konec: {}, odgovor: { 0: /SMS za Ana Novak: ».*(late|minutes)/i } },
   // Povzetek dneva (model, ne hitra pot) in številke za lastnika (samo zaslon).
   { ukazi: ['Kako bo izgledal ponedeljek, kaj vse imamo?'], konec: {}, odgovor: { 0: /termin/i } },
   { ukazi: ['Koliko smo zaslužili ta mesec v primerjavi s prejšnjim?'], konec: {}, odgovor: { 0: /Zaslužek po ceniku/ } },

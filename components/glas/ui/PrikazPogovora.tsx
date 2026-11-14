@@ -232,7 +232,7 @@ function Kartice({
             className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl text-[15px] font-semibold text-white shadow-[0_8px_20px_-8px_rgb(89_100_234/0.7)] transition-transform active:scale-[0.98] disabled:opacity-50 md:h-10 md:text-sm"
             style={{ background: 'linear-gradient(135deg, var(--brand-violet), var(--brand-blue) 60%, var(--brand-cyan))' }}
           >
-            <Check size={15} weight="bold" aria-hidden /> {t('potrdi')}
+            <Check size={15} weight="bold" aria-hidden /> {t(zadnji.predlog.sporocil > 0 ? 'poslji' : 'potrdi')}
           </button>
         </div>
         <p className="mt-2 text-center text-xs text-label-tertiary">{t('predlogNamig')}</p>

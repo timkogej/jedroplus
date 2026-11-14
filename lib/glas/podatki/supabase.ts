@@ -407,6 +407,12 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
       return { termini, storitve: (st.data ?? []) as Vrstica[], osebe: (os.data ?? []) as Vrstica[] };
     },
 
+    async imePodjetja() {
+      // RLS: član bere svoje podjetje.
+      const { data } = await seja.from('companies').select('name').eq('company_id', podjetje).maybeSingle();
+      return niz((data as { name?: unknown } | null)?.name).slice(0, 40);
+    },
+
     async lokacije(): Promise<LokacijePovzetek> {
       const { data, error } = await seja
         .from('Lokacije')
