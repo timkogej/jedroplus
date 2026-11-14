@@ -32,6 +32,7 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ['How much did we earn this month?'], konec: {} },
     { ukazi: ["Text Ana Novak that we're running ten minutes late today."], konec: {} },
     { ukazi: ['Who could come in tomorrow at noon with Tina?'], konec: {} },
+    { ukazi: ['Remind me tomorrow at 9 to call the supplier.'], konec: {} },
   ],
   de: [
     { ukazi: ['Trag Ana Novak morgen um elf Uhr für Barvanje ein.'], konec: NOV },
@@ -43,6 +44,7 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ['Wie viel haben wir diesen Monat verdient?'], konec: {} },
     { ukazi: ["Schreib Ana Novak, dass wir heute zehn Minuten später dran sind."], konec: {} },
     { ukazi: ['Wer könnte morgen um zwölf zu Tina kommen?'], konec: {} },
+    { ukazi: ['Erinnere mich morgen um 9, den Lieferanten anzurufen.'], konec: {} },
   ],
   it: [
     { ukazi: ['Segna Ana Novak domani alle undici per Barvanje.'], konec: NOV },
@@ -54,6 +56,7 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ['Quanto abbiamo guadagnato questo mese?'], konec: {} },
     { ukazi: ["Scrivi ad Ana Novak che oggi siamo in ritardo di dieci minuti."], konec: {} },
     { ukazi: ['Chi potrebbe venire domani a mezzogiorno da Tina?'], konec: {} },
+    { ukazi: ['Ricordami domani alle 9 di chiamare il fornitore.'], konec: {} },
   ],
   hr: [
     { ukazi: ['Upiši Anu Novak sutra u jedanaest na Barvanje.'], konec: NOV },
@@ -65,6 +68,7 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ['Koliko smo zaradili ovaj mjesec?'], konec: {} },
     { ukazi: ["Javi Ani Novak da danas kasnimo deset minuta."], konec: {} },
     { ukazi: ['Tko bi mogao doći sutra u podne kod Tine?'], konec: {} },
+    { ukazi: ['Podsjeti me sutra u 9 da nazovem dobavljača.'], konec: {} },
   ],
 };
 

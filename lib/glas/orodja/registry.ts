@@ -16,6 +16,7 @@ import { povzetekDneva } from './povzetek';
 import { stevilkeSalona } from './stevilke';
 import { sporociStranki } from './sporocila';
 import { kandidatiZaLuknjo, ponudiProstiTermin } from './zapolnitev';
+import { prekliciOpomnik, mojiOpomniki, novOpomnik } from './opomniki';
 import { odpriStran, pomocAplikacija } from './pomoc';
 import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, urediStranko, urediTermin, vpisiOdsotnost } from './obrazci';
 
@@ -28,6 +29,9 @@ export const VSA_ORODJA: readonly Orodje[] = [
   sporociStranki,
   kandidatiZaLuknjo,
   ponudiProstiTermin,
+  novOpomnik,
+  mojiOpomniki,
+  prekliciOpomnik,
   prviProsti,
   naslednjaStranka,
   prosteLuknjeOrodje,

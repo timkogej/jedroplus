@@ -9,6 +9,7 @@ import { preberiKonfiguracijo } from '@/lib/glas/konfiguracija';
 import { llmLazni, type LlmOdgovor } from '@/lib/glas/ponudniki/llm';
 import { sttLazni, type SttPonudnik } from '@/lib/glas/ponudniki/stt';
 import { ttsBrez } from '@/lib/glas/ponudniki/tts';
+import { NAJVEC_OPOMNIKOV, type NovOpomnik, type ShrambaOpomnikov } from '@/lib/glas/opomniki/tipi';
 import { OMEJITEV_NA_PODJETJE, OMEJITEV_NA_STRANKO, type IzidPosiljanja, type PosiljateljSporocil, type ZahtevaPosiljanja } from '@/lib/glas/sporocila/tipi';
 import { shrambaVPomnilniku, type NastavitvePomnilnik } from '@/lib/glas/shramba/pomnilnik';
 import type {
@@ -322,6 +323,7 @@ export function okolje(o: {
     };
   }
   const sporocila = posiljateljLazni();
+  const opomniki = opomnikiLazni();
   const stt: SttPonudnik = o.stt && !Array.isArray(o.stt) ? o.stt : sttLazni(o.stt ?? ['']);
   const sttKlici = { n: 0 };
   const d: Odvisnosti = {
@@ -335,9 +337,10 @@ export function okolje(o: {
     shramba,
     podatki,
     sporocila,
+    opomniki,
     ura: () => ura.zdaj,
   };
-  return { d, ura, shramba, podatki, llm, sttKlici, sporocila };
+  return { d, ura, shramba, podatki, llm, sttKlici, sporocila, opomniki };
 }
 
 /** Lažni pošiljatelj: omejitev 3/30 na dan v pomnilniku, izid nastavljiv. */
@@ -381,3 +384,36 @@ export function klicZapiska(vhod: Partial<Record<string, unknown>> = {}): Partia
     }],
   };
 }
+
+/** Lažna shramba opomnikov (kot SQL: omejitev čakajočih, preklic samo svojih). */
+export function opomnikiLazni(push = true) {
+  const vrstice: (NovOpomnik & { id: string; stanje: 'caka' | 'preklican' })[] = [];
+  const s: ShrambaOpomnikov & { vrstice: typeof vrstice; push: boolean } = {
+    vrstice,
+    push,
+    async dodaj(o) {
+      const cakajo = vrstice.filter((x) => x.userId === o.userId && x.podjetje === o.podjetje && x.stanje === 'caka').length;
+      if (cakajo >= NAJVEC_OPOMNIKOV) return { ok: false, koda: 'omejitev' };
+      const id = `00000000-0000-4000-8000-${String(vrstice.length + 1).padStart(12, '0')}`;
+      vrstice.push({ ...o, id, stanje: 'caka' });
+      return { ok: true, id };
+    },
+    async cakajoci(podjetje, userId) {
+      return vrstice
+        .filter((x) => x.podjetje === podjetje && x.userId === userId && x.stanje === 'caka')
+        .sort((a, b) => String(a.ob).localeCompare(String(b.ob)))
+        .map((x) => ({ id: x.id, besedilo: x.besedilo, ob: x.ob, idTermina: x.idTermina, idStranke: x.idStranke }));
+    },
+    async preklici(podjetje, userId, id) {
+      const x = vrstice.find((v) => v.id === id && v.podjetje === podjetje && v.userId === userId && v.stanje === 'caka');
+      if (!x) return false;
+      x.stanje = 'preklican';
+      return true;
+    },
+    async imaPush() {
+      return s.push;
+    },
+  };
+  return s;
+}
+

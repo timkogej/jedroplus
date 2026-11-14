@@ -21,6 +21,7 @@ import { preberiKonfiguracijo } from './konfiguracija';
 import { podatkiSupabase } from './podatki/supabase';
 import { shrambaSupabase } from './shramba/supabase';
 import { posiljateljN8n } from './sporocila/n8n';
+import { shrambaOpomnikov } from './opomniki/supabase';
 import type { Odvisnosti } from './jedro';
 import type { Kontekst, Vloga } from './tipi';
 
@@ -92,6 +93,7 @@ export async function kontekstIzSeje(): Promise<IzidKonteksta> {
     shramba: shrambaSupabase(admin),
     podatki: podatkiSupabase(seja, besedilniId),
     sporocila: posiljateljN8n(admin),
+    opomniki: shrambaOpomnikov(admin),
   };
   return { ok: true, k, odvisnosti, glasVPaketu };
 }

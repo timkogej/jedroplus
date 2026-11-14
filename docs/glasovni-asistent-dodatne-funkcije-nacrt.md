@@ -495,7 +495,7 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 | 2 | Številke za lastnika (`stevilke_salona`) + Analitika na skupnem izračunu (`lib/analytics/izracun.ts`) | narejeno, testi; brez migracije |
 | 3 | Sporoči stranki (`sporoci_stranki`) | narejeno; migracija, n8n tok in ključ nastavljeni, Tim preizkusil SMS |
 | 4a | Zapolnitev luknje (`kandidati_za_luknjo`, `ponudi_prosti_termin`) | koda in testi narejeni; čaka migracijo `1793700001` (spodaj) |
-| 5 | Osebni opomniki | ni začeto (potrebuje pg_cron; migracija bo `1793700002`) |
+| 5 | Osebni opomniki (`nov_opomnik`, `moji_opomniki`, `preklici_opomnik`) | koda in testi narejeni; čaka pg_cron in migracijo `1793700002` (spodaj) |
 | 6 | Ponavljajoči termini | ni začeto |
 
 ### Spremembe na strani Analitika (O4)
@@ -567,4 +567,34 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 - Kandidati na pravih podatkih (ali ritem in navada najdeta smiselne stranke; hitrost branja 18 mesecev terminov).
 - `ponudi_prosti_termin` zares (SMS brez termina skozi n8n in `message_outbox`).
 - Gumbi »Pokliči« z imeni na telefonu.
+
+### Osebni opomniki (5): kaj je narejeno
+
+- Orodja v `lib/glas/orodja/opomniki.ts`:
+  - `nov_opomnik`: datum + ura, del dneva (zjutraj 9.00, dopoldne 10.00, popoldne 14.00, zvečer 18.00 — O8), »čez X minut« ali ob naslednjem terminu stranke (60 dni);
+  - pred shranjevanjem vedno točen dan, datum in uro; preteklost → »Ta čas je že mimo«; največ eno leto vnaprej in 50 čakajočih;
+  - `moji_opomniki`: seznam po času;
+  - `preklici_opomnik`: po besedah iz besedila (sklon: prve 4 črke), dvoumno → vprašanje; samo svoje (ime brez »izbris«, ker varnostni test asistentu prepoveduje orodja za brisanje).
+- Čas v pasu podjetja (`lib/glas/opomniki/cas.ts`), testirano tudi za oba prehoda poletnega časa.
+- Migracija `supabase/migrations/1793700002_glas_opomniki.sql`:
+  - tabela `glas_opomniki`, RLS: vsak vidi samo svoje; piše samo strežnik prek `jp_glas_dodaj_opomnik` / `jp_glas_preklici_opomnik`;
+  - `jp_glas_opomniki_tek()` vsako minuto (pg_cron): vstavi `notifications` za uporabnika (`type 'system'`, `entity_type 'glas_opomnik'`, `dedupe_key`) → obstoječi sprožilec pošlje push;
+  - vezan na termin: prestavljen termin premakne opomnik; odpovedan ali izbrisan ga prekliče in o tem obvesti;
+  - zamuda > 5 min → »(zamuda)«, starejši od 24 h → `potekel`; uporabnik ni več član → `preklican`;
+  - pogled `glas_opomniki_zamuda` za nadzor.
+- SQL testi (Docker): dva teka pošljeta enkrat, prestavljen/odpovedan termin, preklic samo svojega, RLS.
+- Brez pusha asistent ob shranjevanju pove, da bo opomnik viden samo v obvestilih aplikacije.
+
+### Kaj mora narediti Tim (5)
+
+1. Supabase → Database → Extensions: vklopi **pg_cron**.
+2. Pognati `supabase/migrations/1793700002_glas_opomniki.sql` (ob koncu nastavi opravilo `glas-opomniki` vsako minuto; brez pg_cron izpiše opozorilo).
+3. Preizkus: »opomni me čez dve minuti, da pijem vodo« → push na telefonu in zapis v zvončku; drug uporabnik ga ne sme videti.
+
+### Nepreizkušeno (5)
+
+- Ali `notifications` sprejme zapis (stolpci, `dedupe_key` unikaten, omejitve na `type`/`entity_type`) — testirano na nadomestni tabeli.
+- Push na telefon (PWA) in prikaz v zvončku/Obvestilih (`entity_type 'glas_opomnik'` nima posebne ikone ali povezave).
+- `Termini."Datum"`/`"Čas"` v produkciji: tek ju bere kot besedilo (`left(…,10)::date`, `left(…,5)::time`).
+- Ni še: asistent ob odprtju ne pove neprebranih opomnikov (§5 »Neprebran opomnik«) in »opomni Tino« (v2).
 

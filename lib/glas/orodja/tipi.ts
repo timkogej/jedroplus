@@ -4,6 +4,7 @@
 // registry.ts. Jedro samo poskrbi za pravice, potrditev, revizijo in merjenje.
 
 import type { z } from 'zod';
+import type { ShrambaOpomnikov } from '../opomniki/tipi';
 import type { PosiljateljSporocil } from '../sporocila/tipi';
 import type { JsonShema, Kontekst, PodatkiSalona, Pravica, Predogled, RazredTveganja, RezultatOrodja } from '../tipi';
 
@@ -16,6 +17,8 @@ export interface OkoljeOrodja {
   ukazId: string | null;
   /** Pošiljanje sporočil strankam (samo potrdi orodja sporoci_stranki); brez = ni nastavljeno. */
   sporocila?: PosiljateljSporocil;
+  /** Osebni opomniki (nov_opomnik, moji_opomniki, preklici_opomnik); brez = niso nastavljeni. */
+  opomniki?: ShrambaOpomnikov;
 }
 
 interface OsnovaOrodja<P> {

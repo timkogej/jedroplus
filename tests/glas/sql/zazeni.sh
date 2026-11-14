@@ -23,3 +23,6 @@ psql_v < supabase/migrations/1793700000_glas_sporocila.sql
 psql_v < supabase/migrations/1793700000_glas_sporocila.sql
 psql_v < supabase/migrations/1793700001_glas_sporocila_ponudba.sql
 psql_v < tests/glas/sql/preizkus_sporocila.sql
+psql_v < supabase/migrations/1793700002_glas_opomniki.sql
+psql_v < supabase/migrations/1793700002_glas_opomniki.sql
+psql_v < tests/glas/sql/preizkus_opomniki.sql

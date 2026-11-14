@@ -75,7 +75,12 @@ const POGOVORI: {
   { ukazi: ['Sporoči Ani Novak, da danes zamujamo deset minut.'], konec: {}, odgovor: { 0: /SMS za Ana Novak: ».*(late|minutes)/i } },
   // Povzetek dneva (model, ne hitra pot) in številke za lastnika (samo zaslon).
   { ukazi: ['Kako bo izgledal ponedeljek, kaj vse imamo?'], konec: {}, odgovor: { 0: /termin/i } },
-  { ukazi: ['Koliko smo zaslužili ta mesec v primerjavi s prejšnjim?'], konec: {}, odgovor: { 0: /Zaslužek po ceniku/ } },  // Zapolnitev luknje (salon Z5: Tina jutri prosta od 10.30; Mateja ima kasnejši termin, Ana privolitev, Nina ne).
+  { ukazi: ['Koliko smo zaslužili ta mesec v primerjavi s prejšnjim?'], konec: {}, odgovor: { 0: /Zaslužek po ceniku/ } },  // Osebni opomniki (zdaj je četrtek 12. 11. ob 10.00).
+  { ukazi: ['Opomni me jutri ob devetih, da pokličem dobavitelja.'], konec: {}, odgovor: { 0: /Opomnik jutri.*09:00.*dobavitelj/i } },
+  { ukazi: ['Čez pol ure me opomni, naj preverim barvo.'], konec: {}, odgovor: { 0: /^Opomnik .*10:30.*barv/i } },
+  { ukazi: ['Ko pride Mateja, me opomni, da ji povem za novo barvo.'], konec: {}, odgovor: { 0: /ob terminu stranke Mateja Kova[čc]i[čc].*barv/i } },
+  { ukazi: ['V petek popoldne me opomni, da naročim barve.'], konec: {}, odgovor: { 0: /Opomnik .*13\. 11\. ob 14:00/ } },
+  // Zapolnitev luknje (salon Z5: Tina jutri prosta od 10.30; Mateja ima kasnejši termin, Ana privolitev, Nina ne).
   { podjetje: 'Z5', ukazi: ['Stranka je odpovedala jutri ob pol enajstih pri Tini. Koga naj pokličem?'], konec: {}, odgovor: { 0: /Mateja Kos[\s\S]*Ana Novak[\s\S]*Nina Bela/ } },
   { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji Mateji predlog.'], konec: {}, odgovor: { 1: /SMS za Mateja Kos: ».*(prestav|sprostil|prost)/i } },
   { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji vsem SMS.'], konec: {}, odgovor: { 1: /SMS za (Mateja Kos|Ana Novak)|privolit/i }, ne: { 1: /SMS za Nina|popust/i } },
