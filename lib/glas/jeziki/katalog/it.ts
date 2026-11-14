@@ -324,4 +324,26 @@ export const it: Katalog = {
     "La guida dell'app si ripete dal menu del profilo in alto a destra, con Guida dell'app.",
   'Lahko vprašate, kaj imate danes ali jutri, kdo je naslednja stranka, kdaj imate prosto, kdo dela, katero barvo je imela stranka in kdaj je bila zadnjič. Zapišete lahko recepturo ali opombo na kartico stranke; vsako spremembo potrdite z ja. Lahko vas tudi peljem na stran, na primer: odpri koledar.':
     "Può chiedere cosa ha oggi o domani, chi è la prossima cliente, quando è libera, chi lavora, che colore ha fatto una cliente e quando è venuta l'ultima volta. Può aggiungere una ricetta colore o una nota alla scheda cliente; ogni modifica si conferma con sì. Posso anche portarLa a una pagina, ad esempio: apri il calendario.",
+
+  // Povzetek dneva
+  "Nova stranka: {ime}.": "Nuova cliente: {ime}.",
+  "Nove stranke": "Nuovi clienti",
+  "Opombe strank": "Note dei clienti",
+  "Proste luknje": "Spazi liberi",
+  "Prosto je {casi} in še {n} {n|luknja|luknji|luknje|lukenj} na zaslonu.": "Libero {casi}, e altri {n} {n|spazio|spazi} sullo schermo.",
+  "Prosto je {casi}.": "Libero {casi}.",
+  "Včeraj {n} {n|termin ni označen|termina nista označena|termini niso označeni|terminov ni označenih}.": "Ieri {n} {n|appuntamento non è stato segnato|appuntamenti non sono stati segnati}.",
+  "ni terminov.": "nessun appuntamento.",
+  "prvi ob {ura} ({stranka})": "il primo alle {ura} ({stranka})",
+  "prvi {ura}, {stranka}": "il primo {ura}, {stranka}",
+  "zadnji do {ura}": "l'ultimo fino alle {ura}",
+  "{ime} ima opombo, je na zaslonu.": "{ime} ha una nota, è sullo schermo.",
+  "{kdaj} imate {n} {n|termin|termina|termine|terminov}": "{kdaj} ha {n} {n|appuntamento|appuntamenti}",
+  "{kdaj} je {n} {n|termin|termina|termine|terminov}": "{kdaj} {n|c'è|ci sono} {n} {n|appuntamento|appuntamenti}",
+  "{kdaj} ni terminov.": "{kdaj} non ci sono appuntamenti.",
+  "{kdaj} nimate terminov.": "{kdaj} non ha appuntamenti.",
+  "{n} {n|nova stranka|novi stranki|nove stranke|novih strank}.": "{n} {n|nuova cliente|nuovi clienti}.",
+  "{n} {n|stranka ima|stranki imata|stranke imajo|strank ima} opombe, so na zaslonu.": "{n} {n|cliente ha|clienti hanno} delle note, sono sullo schermo.",
+  "{n} {n|termin|termina|termini|terminov}": "{n} {n|appuntamento|appuntamenti}",
+  "{n} {n|zahteva za rezervacijo čaka|zahtevi za rezervacijo čakata|zahteve za rezervacijo čakajo|zahtev za rezervacijo čaka}.": "{n} {n|richiesta di prenotazione è|richieste di prenotazione sono} in attesa.",
 };

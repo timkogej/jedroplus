@@ -28,6 +28,7 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ['Move Mateja to Monday at twelve.', 'Yes, save it.'], konec: PRESTAVI, shrani: true },
     { ukazi: ['Uh, book a new appointment for', 'Ana Novak, Barvanje, tomorrow at eleven', 'yes'], konec: NOV, shrani: true },
     { ukazi: ['When is Ana Novak coming in next?'], konec: {} },
+    { ukazi: ['What does tomorrow look like?'], konec: {} },
   ],
   de: [
     { ukazi: ['Trag Ana Novak morgen um elf Uhr für Barvanje ein.'], konec: NOV },
@@ -35,6 +36,7 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ['Verschieb Mateja auf Montag um zwölf.', 'Ja, speichern.'], konec: PRESTAVI, shrani: true },
     { ukazi: ['Ähm, trag einen neuen Termin ein für', 'Ana Novak, Barvanje, morgen um elf', 'ja'], konec: NOV, shrani: true },
     { ukazi: ['Wann kommt Ana Novak das nächste Mal?'], konec: {} },
+    { ukazi: ['Wie sieht der morgige Tag aus?'], konec: {} },
   ],
   it: [
     { ukazi: ['Segna Ana Novak domani alle undici per Barvanje.'], konec: NOV },
@@ -42,6 +44,7 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ['Sposta Mateja a lunedì alle dodici.', 'Sì, salva.'], konec: PRESTAVI, shrani: true },
     { ukazi: ['Ehm, segna un nuovo appuntamento per', 'Ana Novak, Barvanje, domani alle undici', 'sì'], konec: NOV, shrani: true },
     { ukazi: ['Quando viene Ana Novak la prossima volta?'], konec: {} },
+    { ukazi: ["Com'è la giornata di domani?"], konec: {} },
   ],
   hr: [
     { ukazi: ['Upiši Anu Novak sutra u jedanaest na Barvanje.'], konec: NOV },
@@ -49,6 +52,7 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ['Premjesti Mateju na ponedjeljak u podne.', 'Da, spremi.'], konec: PRESTAVI, shrani: true },
     { ukazi: ['Ovaj, upiši novi termin za', 'Ana Novak, Barvanje, sutra u jedanaest', 'da'], konec: NOV, shrani: true },
     { ukazi: ['Kada Ana Novak sljedeći put dolazi?'], konec: {} },
+    { ukazi: ['Kako izgleda sutrašnji dan?'], konec: {} },
   ],
 };
 

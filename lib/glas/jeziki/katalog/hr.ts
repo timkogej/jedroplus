@@ -326,4 +326,26 @@ export const hr: Katalog = {
     'Vodič kroz aplikaciju ponavljate u izborniku profila gore desno, opcijom Vodič kroz aplikaciju.',
   'Lahko vprašate, kaj imate danes ali jutri, kdo je naslednja stranka, kdaj imate prosto, kdo dela, katero barvo je imela stranka in kdaj je bila zadnjič. Zapišete lahko recepturo ali opombo na kartico stranke; vsako spremembo potrdite z ja. Lahko vas tudi peljem na stran, na primer: odpri koledar.':
     'Možete pitati što imate danas ili sutra, tko je sljedeća klijentica, kada ste slobodni, tko radi, koju je boju imala klijentica i kada je zadnji put bila. Možete zapisati recepturu ili napomenu na karticu klijentice; svaku promjenu potvrdite s da. Mogu Vas i odvesti na stranicu, na primjer: otvori kalendar.',
+
+  // Povzetek dneva
+  "Nova stranka: {ime}.": "Nova stranka: {ime}.",
+  "Nove stranke": "Nove stranke",
+  "Opombe strank": "Napomene stranaka",
+  "Proste luknje": "Slobodni termini",
+  "Prosto je {casi} in še {n} {n|luknja|luknji|luknje|lukenj} na zaslonu.": "Slobodno je {casi} i još {n} {n|rupa|rupe|rupa} na zaslonu.",
+  "Prosto je {casi}.": "Slobodno je {casi}.",
+  "Včeraj {n} {n|termin ni označen|termina nista označena|termini niso označeni|terminov ni označenih}.": "Jučer {n} {n|termin nije označen|termina nisu označena|termina nije označeno}.",
+  "ni terminov.": "nema termina.",
+  "prvi ob {ura} ({stranka})": "prvi u {ura} ({stranka})",
+  "prvi {ura}, {stranka}": "prvi {ura}, {stranka}",
+  "zadnji do {ura}": "zadnji do {ura}",
+  "{ime} ima opombo, je na zaslonu.": "{ime} ima napomenu, na zaslonu je.",
+  "{kdaj} imate {n} {n|termin|termina|termine|terminov}": "{kdaj} imate {n} {n|termin|termina|termina}",
+  "{kdaj} je {n} {n|termin|termina|termine|terminov}": "{kdaj} {n|je|su|je} {n} {n|termin|termina|termina}",
+  "{kdaj} ni terminov.": "{kdaj} nema termina.",
+  "{kdaj} nimate terminov.": "{kdaj} nemate termina.",
+  "{n} {n|nova stranka|novi stranki|nove stranke|novih strank}.": "{n} {n|nova stranka|nove stranke|novih stranaka}.",
+  "{n} {n|stranka ima|stranki imata|stranke imajo|strank ima} opombe, so na zaslonu.": "{n} {n|stranka ima|stranke imaju|stranaka ima} napomene, na zaslonu su.",
+  "{n} {n|termin|termina|termini|terminov}": "{n} {n|termin|termina|termina}",
+  "{n} {n|zahteva za rezervacijo čaka|zahtevi za rezervacijo čakata|zahteve za rezervacijo čakajo|zahtev za rezervacijo čaka}.": "{n} {n|zahtjev za rezervaciju čeka|zahtjeva za rezervaciju čekaju|zahtjeva za rezervaciju čeka}.",
 };

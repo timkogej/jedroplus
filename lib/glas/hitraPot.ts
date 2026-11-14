@@ -30,6 +30,17 @@ export function hitraPot(prepis: string): HitriKlic | null {
     return { orodje: 'koledar_dan', vhod: { datum: dan, samo_moji: oseba } };
   }
 
+  // "kaj me danes caka", "kaj me caka jutri", "povzetek dneva", "kako izgleda moj dan"
+  const pz =
+    b.match(new RegExp(`^kaj (me|nas)(?: ${DAN})? caka(?: ${DAN})?$`)) ??
+    b.match(new RegExp(`^(?:povzetek|pregled)(?: dneva| dneva ${DAN}| za ${DAN}| ${DAN})?$`)) ??
+    b.match(new RegExp(`^kako (?:izgleda|zgleda) (moj |najin |nas )?dan(?: ${DAN})?$`));
+  if (pz) {
+    const dan = pz.slice(1).find((x) => x && /^(danes|jutri|po|v |\d)/.test(x)) ?? null;
+    const moj = pz[1] === 'me' || pz[1] === 'moj ' ? true : pz[1] === 'nas' || pz[1] === 'nas ' ? false : null;
+    return { orodje: 'povzetek_dneva', vhod: { datum: dan, samo_moji: moj } };
+  }
+
   // "kdo je naslednja", "kdo je moja naslednja stranka", "kdo pride naslednji"
   const n = b.match(/^kdo (?:je (moja |moj )?naslednj[aiie]|pride naslednj[aiie])(?: stranka)?$/);
   if (n) return { orodje: 'naslednja_stranka', vhod: { samo_moji: n[1] ? true : null } };

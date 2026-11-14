@@ -67,6 +67,8 @@ const POGOVORI: {
   { ukazi: ['Ima Ana Novak kakšno opombo?'], konec: {}, odgovor: { 0: /zamujala/ } },
   // Isto kot zadnjič.
   { ukazi: ['Zapiši Matejo isto kot zadnjič čez šest tednov.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-12-24' } },
+  // Povzetek dneva (model, ne hitra pot).
+  { ukazi: ['Kako bo izgledal ponedeljek, kaj vse imamo?'], konec: {}, odgovor: { 0: /termin/i } },
 ];
 
 describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {

@@ -143,6 +143,12 @@ export interface PodatkiSalona {
   resursiTerminov(vrstice: string[]): Promise<{ vrstica: string; resursId: string }[]>;
   /** Aktivne lokacije, do katerih ima uporabnik dostop, in kdo/kaj je kje (samo pri več lokacijah). */
   lokacije(): Promise<LokacijePovzetek>;
+  /** Število zahtev za rezervacijo, ki čakajo na salon (zahteve_termini, status v_pregledu). */
+  zahteveVPregledu(): Promise<number>;
+  /** Med danimi strankami tiste, ki imajo pred datumom vsaj en neodpovedan, neizbrisan termin. */
+  strankeSPreteklimTerminom(idStrank: string[], predDatumom: string): Promise<Set<string>>;
+  /** Opombe s kartic strank (samo opombe, brez kontaktov); ID → opomba. */
+  opombeStrank(idStrank: string[]): Promise<Record<string, string>>;
 }
 
 export interface LokacijaPovzetek {

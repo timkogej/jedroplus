@@ -43,6 +43,7 @@ export interface Salon {
   povezave?: { vrstica: string; resursId: string }[];
   odsotnosti?: OdsotnostPovzetek[];
   lokacije?: LokacijePovzetek;
+  zahteve?: number;
 }
 
 export const SALONI: Record<string, Salon> = {
@@ -175,6 +176,18 @@ export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): 
     async resursi() { return s.resursi ?? []; },
     async resursiTerminov(vrstice) { return (s.povezave ?? []).filter((p) => vrstice.includes(p.vrstica)); },
     async lokacije() { return s.lokacije ?? { seznam: [], osebe: {}, storitve: {} }; },
+    async zahteveVPregledu() { return s.zahteve ?? 0; },
+    async strankeSPreteklimTerminom(ids, pred) {
+      return new Set(s.termini.filter((x) => x.idStranke && ids.includes(x.idStranke) && x.datum < pred && x.status !== 'cancelled').map((x) => x.idStranke!));
+    },
+    async opombeStrank(ids) {
+      const out: Record<string, string> = {};
+      for (const id of ids) {
+        const o = s.podrobnosti?.[id]?.opombe;
+        if (o) out[id] = o;
+      }
+      return out;
+    },
   };
 }
 

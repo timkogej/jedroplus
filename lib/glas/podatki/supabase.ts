@@ -334,6 +334,54 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
       return out;
     },
 
+    async zahteveVPregledu() {
+      const { count, error } = await seja
+        .from('zahteve_termini')
+        .select('id', { count: 'exact', head: true })
+        .eq('ID podjetja', podjetje)
+        .eq('status', 'v_pregledu');
+      if (error) throw new Error(`zahteve: ${error.code ?? 'napaka'}`);
+      return count ?? 0;
+    },
+
+    async strankeSPreteklimTerminom(idStrank, predDatumom) {
+      const ids = [...new Set(idStrank.filter(Boolean))];
+      const out = new Set<string>();
+      for (let i = 0; i < ids.length; i += 200) {
+        const { data, error } = await seja
+          .from('Termini')
+          .select('"ID stranke",Status')
+          .eq('ID podjetja', podjetje)
+          .in('ID stranke', ids.slice(i, i + 200))
+          .lt('Datum', predDatumom)
+          .is('deleted_at', null)
+          .limit(2000);
+        if (error) throw new Error(`pretekli termini: ${error.code ?? 'napaka'}`);
+        for (const r of (data ?? []) as Vrstica[]) {
+          if (normalizeAppointmentStatus(r['Status']) !== 'cancelled') out.add(niz(r['ID stranke']));
+        }
+      }
+      return out;
+    },
+
+    async opombeStrank(idStrank) {
+      const ids = [...new Set(idStrank.filter(Boolean))].slice(0, 200);
+      if (ids.length === 0) return {};
+      // '*': ime stolpca z opombami se med bazami razlikuje (kot podrobnostiStranke).
+      const { data, error } = await seja.from('Stranke').select('*').eq('ID Podjetja', podjetje).in('ID stranke', ids);
+      if (error) return {}; // dodatek: povzetek brez opomb je še vedno uporaben
+      const out: Record<string, string> = {};
+      for (const r of (data ?? []) as Vrstica[]) {
+        for (const i of ['Opombe stranke', 'Opombe', 'opombe', 'notes', 'Notes', 'Opombe strank']) {
+          if (i in r && niz(r[i])) {
+            out[niz(r['ID stranke'])] = niz(r[i]).slice(0, 300);
+            break;
+          }
+        }
+      }
+      return out;
+    },
+
     async lokacije(): Promise<LokacijePovzetek> {
       const { data, error } = await seja
         .from('Lokacije')
