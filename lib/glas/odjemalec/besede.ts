@@ -72,8 +72,8 @@ const brezLocil = (s: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const DA_SL = new Set(['ja', 'jap', 'ja ja', 'ja prosim', 'potrdi', 'potrdim', 'potrjujem', 'seveda', 'lahko', 'v redu', 'ok', 'okej', 'ja potrdi', 'ja lahko', 'ja shrani', 'shrani', 'ja v redu', 'kar', 'ja kar']);
-const NE_SL = new Set(['ne', 'nee', 'ne hvala', 'preklici', 'prekliči', 'stop', 'ne ne', 'pusti', 'ni treba', 'ne zapisi', 'ne shrani', 'odpovej']);
+const DA_SL = new Set(['ja', 'jap', 'ja ja', 'ja prosim', 'potrdi', 'potrdim', 'potrjujem', 'seveda', 'lahko', 'v redu', 'ok', 'okej', 'ja potrdi', 'ja lahko', 'ja shrani', 'shrani', 'ja v redu', 'kar', 'ja kar', 'da', 'da prosim', 'da potrdi', 'da shrani', 'poslji', 'ja poslji', 'da poslji', 'poslji ga', 'poslji jo', 'ja poslji ga', 'ja poslji jo', 'kar poslji', 'lahko poslji', 'ja lahko poslji', 'posljem', 'posljite', 'ja posljite', 'ja seveda', 'ja ok', 'ja okej', 'super', 'ja super', 'tocno', 'drzi', 'ja drzi', 'prav', 'ja ja ja', 'mhm', 'ja hvala', 'ja lahko ja', 'gremo', 'ja gremo', 'dajmo', 'ja dajmo', 'vredu', 'ja vredu']);
+const NE_SL = new Set(['ne', 'nee', 'ne hvala', 'preklici', 'prekliči', 'stop', 'ne ne', 'pusti', 'ni treba', 'ne zapisi', 'ne shrani', 'odpovej', 'ne poslji', 'ne posiljaj', 'ne posiljajte', 'ne posljite', 'nikar', 'ne ne ne', 'ne zdaj', 'ne se', 'ustavi', 'raje ne', 'ne bo treba', 'ne rabim', 'ne ne poslji', 'ne hvala ne', 'ne bomo', 'pozabi']);
 
 // Drugi jeziki (jezik pogovora iz seje); množice se zgradijo enkrat.
 const ZA_JEZIK = new Map<string, { da: Set<string>; ne: Set<string> }>();
@@ -95,13 +95,16 @@ function dane(): { da: Set<string>; ne: Set<string> } {
 export function jePotrditev(izjava: string): boolean {
   const s = brezLocil(izjava);
   const { da } = dane();
-  return da.has(s) || da.has(s.replace(/ (hvala|thanks|thank you|danke|grazie)$/, ''));
+  const brezHvala = s.replace(/ (hvala|thanks|thank you|danke|grazie)$/, '');
+  // "Ja, pošlji ga" / "Ja, schick es": uvodni "ja" pred drugo potrditvijo.
+  return da.has(s) || da.has(brezHvala) || da.has(brezHvala.replace(/^(ja|da|yes|si|ok|okej|okay) /, ''));
 }
 
 export function jeZavrnitev(izjava: string): boolean {
   const s = brezLocil(izjava);
   const { ne } = dane();
-  return ne.has(s) || ne.has(brezLocil(s));
+  // "Ne, ne pošiljaj" / "No, don't send": uvodni "ne" pred drugo zavrnitvijo.
+  return ne.has(s) || ne.has(s.replace(/^(ne|no|nein) /, ''));
 }
 
 /** Uporabnik je izgovoril ime ene od možnosti ("Ano Novak") → ta možnost; sicer null. */

@@ -35,8 +35,8 @@ export interface BesedeJezika {
 
 export const BESEDE: Record<Tuj, BesedeJezika> = {
   en: {
-    da: ['yes', 'yeah', 'yep', 'yes please', 'confirm', 'sure', 'ok', 'okay', 'alright', 'all right', 'go ahead', 'save', 'save it', 'yes save', 'yes confirm', 'do it', 'correct', 'right', 'mhm'],
-    ne: ['no', 'nope', 'no thanks', 'no thank you', 'cancel', 'stop', 'no no', 'leave it', 'never mind', 'dont', 'dont save', 'forget it'],
+    da: ['yes', 'yeah', 'yep', 'yes please', 'confirm', 'sure', 'ok', 'okay', 'alright', 'all right', 'go ahead', 'save', 'save it', 'yes save', 'yes confirm', 'do it', 'correct', 'right', 'mhm', 'send', 'send it', 'yes send', 'yes send it', 'go', 'yes go ahead', 'sounds good'],
+    ne: ['no', 'nope', 'no thanks', 'no thank you', 'cancel', 'stop', 'no no', 'leave it', 'never mind', 'dont', 'dont save', 'forget it', 'dont send', 'do not send', 'dont send it', 'no dont send', 'not now'],
     masila: ['uh', 'uhm', 'um', 'umm', 'er', 'erm', 'eh', 'hm', 'hmm', 'mm', 'well', 'like'],
     nedokoncane: [
       'at', 'for', 'with', 'on', 'in', 'to', 'from', 'by', 'of', 'about', 'until', 'till', 'before', 'after', 'around', 'between',
@@ -46,11 +46,11 @@ export const BESEDE: Record<Tuj, BesedeJezika> = {
     zahvala: ['thanks', 'thank you', 'thanks a lot', 'great thanks', 'ok thanks', 'okay thanks', 'perfect thanks', 'cheers'],
     ponovi: ['repeat', 'repeat that', 'say again', 'say that again', 'pardon', 'sorry', 'what', 'come again', 'can you repeat', 'repeat please', 'what did you say', 'i didnt catch that'],
     pocasneje: ['slower', 'slower please', 'slow down', 'more slowly', 'say it slower', 'repeat slower', 'speak slower'],
-    prekini: ['stop', 'wait', 'hold on', 'hey', 'no', 'yes', 'save', 'cancel', 'close', 'enough'],
+    prekini: ['stop', 'hey', 'no', 'yes', 'save', 'cancel', 'close', 'enough'],
   },
   de: {
-    da: ['ja', 'jawohl', 'ja bitte', 'bestatigen', 'bestatige', 'klar', 'sicher', 'ok', 'okay', 'in ordnung', 'passt', 'genau', 'richtig', 'speichern', 'ja speichern', 'mach das', 'mhm', 'gerne'],
-    ne: ['nein', 'nee', 'nein danke', 'abbrechen', 'stopp', 'stop', 'nein nein', 'lass es', 'lass das', 'nicht speichern', 'vergiss es'],
+    da: ['ja', 'jawohl', 'ja bitte', 'bestatigen', 'bestatige', 'klar', 'sicher', 'ok', 'okay', 'in ordnung', 'passt', 'genau', 'richtig', 'speichern', 'ja speichern', 'mach das', 'mhm', 'gerne', 'senden', 'ja senden', 'schick', 'schicken', 'schick es', 'schicks', 'ja schick', 'ja schicken', 'abschicken', 'ja abschicken', 'senden bitte'],
+    ne: ['nein', 'nee', 'nein danke', 'abbrechen', 'stopp', 'stop', 'nein nein', 'lass es', 'lass das', 'nicht speichern', 'vergiss es', 'nicht senden', 'nicht schicken', 'nein nicht senden', 'jetzt nicht'],
     masila: ['ah', 'ahm', 'ahh', 'eh', 'ehm', 'em', 'hm', 'hmm', 'mm', 'also', 'naja'],
     nedokoncane: [
       'um', 'fur', 'mit', 'am', 'an', 'auf', 'in', 'im', 'zu', 'zum', 'zur', 'von', 'vom', 'bis', 'bei', 'beim', 'nach', 'vor', 'ab', 'gegen',
@@ -60,11 +60,11 @@ export const BESEDE: Record<Tuj, BesedeJezika> = {
     zahvala: ['danke', 'danke schon', 'vielen dank', 'super danke', 'ok danke', 'okay danke', 'perfekt danke'],
     ponovi: ['wiederholen', 'wiederhole', 'bitte wiederholen', 'wie bitte', 'nochmal', 'noch einmal', 'nochmal bitte', 'was', 'was hast du gesagt', 'hab ich nicht verstanden'],
     pocasneje: ['langsamer', 'langsamer bitte', 'bitte langsamer', 'etwas langsamer', 'sprich langsamer', 'nochmal langsamer'],
-    prekini: ['stopp', 'stop', 'warte', 'moment', 'halt', 'hey', 'nein', 'ja', 'speichern', 'abbrechen', 'schliessen', 'genug'],
+    prekini: ['stopp', 'stop', 'moment', 'halt', 'hey', 'nein', 'ja', 'speichern', 'abbrechen', 'schliessen', 'genug'],
   },
   it: {
-    da: ['si', 'si grazie', 'si per favore', 'conferma', 'confermo', 'certo', 'ok', 'okay', 'va bene', 'daccordo', 'perfetto', 'esatto', 'salva', 'si salva', 'si conferma', 'procedi', 'mhm', 'giusto'],
-    ne: ['no', 'no grazie', 'annulla', 'stop', 'no no', 'lascia stare', 'lascia perdere', 'non salvare', 'niente', 'basta'],
+    da: ['si', 'si grazie', 'si per favore', 'conferma', 'confermo', 'certo', 'ok', 'okay', 'va bene', 'daccordo', 'perfetto', 'esatto', 'salva', 'si salva', 'si conferma', 'procedi', 'mhm', 'giusto', 'invia', 'si invia', 'invialo', 'inviala', 'manda', 'mandalo', 'si mandalo', 'si invialo', 'vai'],
+    ne: ['no', 'no grazie', 'annulla', 'stop', 'no no', 'lascia stare', 'lascia perdere', 'non salvare', 'niente', 'basta', 'non inviare', 'non mandare', 'no non inviare', 'non ora'],
     masila: ['eh', 'ehm', 'em', 'mmm', 'mm', 'hm', 'hmm', 'cioe', 'allora', 'dunque', 'beh', 'boh'],
     nedokoncane: [
       'alle', 'alla', 'all', 'per', 'con', 'a', 'al', 'da', 'dal', 'dalle', 'di', 'del', 'della', 'in', 'nel', 'su', 'fino', 'prima', 'dopo', 'verso', 'tra', 'fra',
@@ -74,11 +74,11 @@ export const BESEDE: Record<Tuj, BesedeJezika> = {
     zahvala: ['grazie', 'grazie mille', 'ok grazie', 'okay grazie', 'perfetto grazie', 'ottimo grazie', 'molte grazie'],
     ponovi: ['ripeti', 'ripeti per favore', 'puoi ripetere', 'come', 'come scusa', 'scusa', 'cosa hai detto', 'non ho capito', 'di nuovo', 'ancora una volta'],
     pocasneje: ['piu piano', 'piu lentamente', 'piano', 'piu piano per favore', 'parla piu piano', 'ripeti piu piano'],
-    prekini: ['stop', 'aspetta', 'basta', 'ferma', 'ehi', 'no', 'si', 'salva', 'annulla', 'chiudi', 'momento'],
+    prekini: ['stop', 'basta', 'ferma', 'ehi', 'no', 'si', 'salva', 'annulla', 'chiudi', 'momento'],
   },
   hr: {
-    da: ['da', 'da molim', 'potvrdi', 'potvrdujem', 'naravno', 'moze', 'ok', 'okej', 'u redu', 'dobro', 'tako je', 'tocno', 'spremi', 'da spremi', 'da potvrdi', 'samo naprijed', 'mhm', 'ajde'],
-    ne: ['ne', 'nee', 'ne hvala', 'otkazi', 'odustani', 'stop', 'ne ne', 'pusti', 'nije potrebno', 'ne spremaj', 'zaboravi'],
+    da: ['da', 'da molim', 'potvrdi', 'potvrdujem', 'naravno', 'moze', 'ok', 'okej', 'u redu', 'dobro', 'tako je', 'tocno', 'spremi', 'da spremi', 'da potvrdi', 'samo naprijed', 'mhm', 'ajde', 'posalji', 'da posalji', 'posalji ga', 'posalji je', 'salji', 'da salji', 'moze posalji', 'posaljite', 'da posaljite'],
+    ne: ['ne', 'nee', 'ne hvala', 'otkazi', 'odustani', 'stop', 'ne ne', 'pusti', 'nije potrebno', 'ne spremaj', 'zaboravi', 'ne salji', 'ne saljite', 'nemoj slati', 'nemoj', 'ne posalji', 'ne sad'],
     masila: ['ovaj', 'eee', 'ee', 'em', 'ehm', 'hm', 'hmm', 'mm', 'aaa', 'pa', 'dakle', 'znaci'],
     // Brez "da": to je potrditev ("da" = ja), ne nedokončan stavek.
     nedokoncane: [
@@ -89,7 +89,7 @@ export const BESEDE: Record<Tuj, BesedeJezika> = {
     zahvala: ['hvala', 'hvala lijepa', 'hvala ti', 'hvala vam', 'super hvala', 'ok hvala', 'okej hvala', 'u redu hvala', 'odlicno hvala'],
     ponovi: ['ponovi', 'ponovi molim', 'molim ponovi', 'mozes ponoviti', 'ponovi jos jednom', 'jos jednom', 'sto si rekla', 'sto si rekao', 'nisam cuo', 'nisam cula', 'nisam razumio', 'nisam razumjela', 'molim', 'kako molim'],
     pocasneje: ['sporije', 'sporije molim', 'polako', 'malo sporije', 'govori sporije', 'ponovi sporije'],
-    prekini: ['stop', 'stani', 'cekaj', 'pricekaj', 'dosta', 'hej', 'ne', 'da', 'spremi', 'otkazi', 'zatvori', 'moment'],
+    prekini: ['stop', 'stani', 'pricekaj', 'dosta', 'hej', 'ne', 'da', 'spremi', 'otkazi', 'zatvori', 'moment'],
   },
 };
 

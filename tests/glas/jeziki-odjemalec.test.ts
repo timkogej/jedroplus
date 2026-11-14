@@ -19,11 +19,11 @@ describe('nastaviJezikOdjemalca', () => {
 
 describe('da/ne po jezikih', () => {
   const primeri = {
-    sl: { da: ['Ja.', 'ja, hvala', 'Potrdi'], ne: ['Ne.', 'Prekliči', 'ne hvala'], ni: ['ja, ampak ob desetih', 'yes'] },
-    en: { da: ['Yes.', 'Yes, please.', 'okay', 'Yes, thanks', 'Go ahead.'], ne: ['No.', 'Cancel', 'No, thank you.', "Don't save."], ni: ['yes but at ten', 'ja'] },
-    de: { da: ['Ja.', 'Ja bitte', 'Bestätigen', 'In Ordnung.', 'ja danke'], ne: ['Nein.', 'Abbrechen', 'Nein, danke.'], ni: ['ja aber um zehn', 'yes'] },
-    it: { da: ['Sì.', 'Sì, grazie.', 'Va bene', 'Conferma', "D'accordo."], ne: ['No.', 'Annulla', 'No, grazie.', 'Lascia stare.'], ni: ['sì ma alle dieci', 'ja'] },
-    hr: { da: ['Da.', 'Može.', 'U redu', 'Potvrđujem', 'da, hvala'], ne: ['Ne.', 'Otkaži', 'Ne, hvala.'], ni: ['da ali u deset', 'yes'] },
+    sl: { da: ['Ja.', 'ja, hvala', 'Potrdi', 'Da.', 'Ja, pošlji.', 'Pošlji!', 'Da, pošlji', 'Pošlji ga.', 'Kar pošlji.', 'Ja seveda', 'Super.', 'Drži.'], ne: ['Ne.', 'Prekliči', 'ne hvala', 'Ne pošlji.', 'Ne, ne pošiljaj.', 'Nikar.', 'Raje ne.', 'Ne zdaj.'], ni: ['ja, ampak ob desetih', 'yes', 'pošlji še Ani', 'ja, pošlji jutri'] },
+    en: { da: ['Yes.', 'Yes, please.', 'okay', 'Yes, thanks', 'Go ahead.', 'Send it.', 'Yes, send it.', 'Send'], ne: ['No.', 'Cancel', 'No, thank you.', "Don't save.", "Don't send it.", 'Not now.'], ni: ['yes but at ten', 'ja'] },
+    de: { da: ['Ja.', 'Ja bitte', 'Bestätigen', 'In Ordnung.', 'ja danke', 'Senden.', 'Ja, schick es.', 'Abschicken'], ne: ['Nein.', 'Abbrechen', 'Nein, danke.', 'Nicht senden.'], ni: ['ja aber um zehn', 'yes'] },
+    it: { da: ['Sì.', 'Sì, grazie.', 'Va bene', 'Conferma', "D'accordo.", 'Invia.', 'Sì, invialo.', 'Mandalo!'], ne: ['No.', 'Annulla', 'No, grazie.', 'Lascia stare.', 'Non inviare.'], ni: ['sì ma alle dieci', 'ja'] },
+    hr: { da: ['Da.', 'Može.', 'U redu', 'Potvrđujem', 'da, hvala', 'Pošalji.', 'Da, pošalji.', 'Šalji'], ne: ['Ne.', 'Otkaži', 'Ne, hvala.', 'Ne šalji.', 'Nemoj slati.'], ni: ['da ali u deset', 'yes'] },
   } as const;
   for (const [j, p] of Object.entries(primeri)) {
     it(j, () => {
