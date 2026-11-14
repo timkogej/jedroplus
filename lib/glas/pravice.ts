@@ -10,6 +10,8 @@
 import type { Kontekst, Pravica } from './tipi';
 
 export function imaPravico(k: Pick<Kontekst, 'vloga' | 'pravice'>, pravica: Pravica): boolean {
+  // Številke salona: samo lastnik — ne admin, ne zaposleni, ne glede na can_view_analytics.
+  if (pravica === 'analitika.lastnik') return k.vloga === 'owner';
   if (k.vloga === 'owner' || k.vloga === 'admin') return true;
   if (k.vloga !== 'staff') return false;
   const p = k.pravice;

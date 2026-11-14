@@ -44,6 +44,8 @@ export interface Salon {
   odsotnosti?: OdsotnostPovzetek[];
   lokacije?: LokacijePovzetek;
   zahteve?: number;
+  /** Surove vrstice za številke lastnika. */
+  analitika?: { termini: Record<string, unknown>[]; storitve: Record<string, unknown>[]; osebe: Record<string, unknown>[] };
 }
 
 export const SALONI: Record<string, Salon> = {
@@ -177,6 +179,10 @@ export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): 
     async resursiTerminov(vrstice) { return (s.povezave ?? []).filter((p) => vrstice.includes(p.vrstica)); },
     async lokacije() { return s.lokacije ?? { seznam: [], osebe: {}, storitve: {} }; },
     async zahteveVPregledu() { return s.zahteve ?? 0; },
+    async analitika(od, doo) {
+      const v = s.analitika ?? { termini: [], storitve: [], osebe: [] };
+      return { ...v, termini: v.termini.filter((r) => String(r.Datum) >= od && String(r.Datum) <= doo) };
+    },
     async strankeSPreteklimTerminom(ids, pred) {
       return new Set(s.termini.filter((x) => x.idStranke && ids.includes(x.idStranke) && x.datum < pred && x.status !== 'cancelled').map((x) => x.idStranke!));
     },

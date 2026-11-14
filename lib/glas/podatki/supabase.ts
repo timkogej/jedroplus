@@ -382,6 +382,31 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
       return out;
     },
 
+    async analitika(od, doo) {
+      // Isto kot stran Analitika (fetchTableRowsByDateRange + fetchTableRows), a na strežniku z uporabnikovo sejo.
+      const termini: Vrstica[] = [];
+      for (let i = 0; i < 50_000; i += 1000) {
+        const { data, error } = await seja
+          .from('Termini')
+          .select('*')
+          .eq('ID podjetja', podjetje)
+          .gte('Datum', od)
+          .lte('Datum', doo)
+          .order('Datum', { ascending: false })
+          .order('id', { ascending: false })
+          .range(i, i + 999);
+        if (error) throw new Error(`analitika termini: ${error.code ?? 'napaka'}`);
+        termini.push(...((data ?? []) as Vrstica[]));
+        if ((data ?? []).length < 1000) break;
+      }
+      const [st, os] = await Promise.all([
+        seja.from('Storitve').select('*').eq('ID podjetja', podjetje).limit(1000),
+        seja.from('Osebe').select('*').eq('ID podjetja', podjetje).limit(1000),
+      ]);
+      if (st.error || os.error) throw new Error(`analitika cenik: ${(st.error ?? os.error)?.code ?? 'napaka'}`);
+      return { termini, storitve: (st.data ?? []) as Vrstica[], osebe: (os.data ?? []) as Vrstica[] };
+    },
+
     async lokacije(): Promise<LokacijePovzetek> {
       const { data, error } = await seja
         .from('Lokacije')

@@ -36,7 +36,9 @@ export type Pravica =
   | 'stranke.ustvarjanje'
   | 'termini.branje'
   | 'termini.urejanje'
-  | 'termini.ustvarjanje';
+  | 'termini.ustvarjanje'
+  /** Številke salona (zaslužek, statistika): samo lastnik (Timova odločitev 14. 11. 2026). */
+  | 'analitika.lastnik';
 
 export type RazredTveganja = 'branje' | 'pisanje' | 'mnozicno' | 'sporocila';
 
@@ -149,6 +151,11 @@ export interface PodatkiSalona {
   strankeSPreteklimTerminom(idStrank: string[], predDatumom: string): Promise<Set<string>>;
   /** Opombe s kartic strank (samo opombe, brez kontaktov); ID → opomba. */
   opombeStrank(idStrank: string[]): Promise<Record<string, string>>;
+  /**
+   * Surove vrstice za številke lastnika (lib/analytics/izracun.ts, isti izračun kot stran
+   * Analitika): Termini z datumom v [od, doo], Storitve, Osebe. Z uporabnikovo sejo (RLS).
+   */
+  analitika(od: string, doo: string): Promise<{ termini: Record<string, unknown>[]; storitve: Record<string, unknown>[]; osebe: Record<string, unknown>[] }>;
 }
 
 export interface LokacijaPovzetek {

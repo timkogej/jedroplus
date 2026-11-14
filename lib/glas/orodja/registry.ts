@@ -13,6 +13,7 @@ import { dodajZapisek } from './zapiski';
 import { karticaStranke, neaktivneStranke, podatkiStranke, zadnjaBarva } from './kartica';
 import { kdoDela, naslednjaStranka, prosteLuknjeOrodje, resursiDan } from './pregled';
 import { povzetekDneva } from './povzetek';
+import { stevilkeSalona } from './stevilke';
 import { odpriStran, pomocAplikacija } from './pomoc';
 import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, urediStranko, urediTermin, vpisiOdsotnost } from './obrazci';
 
@@ -21,6 +22,7 @@ export const VSA_ORODJA: readonly Orodje[] = [
   zadnjiObisk,
   koledarDan,
   povzetekDneva,
+  stevilkeSalona,
   prviProsti,
   naslednjaStranka,
   prosteLuknjeOrodje,
