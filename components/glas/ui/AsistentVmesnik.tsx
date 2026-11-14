@@ -21,6 +21,8 @@ import { X, CheckCircle, WarningCircle } from '@phosphor-icons/react';
 import type { OdgovorOdjemalec, StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import { polozajKrogca, type NacinKrogca, type Okno, type Polozaj, type Pravokotnik } from '@/lib/glas/odjemalec/polozaj';
 import { AsistentOrb } from './AsistentOrb';
+import { PlusOrb } from './PlusOrb';
+import type { OblikaOrba } from './plusOblika';
 import { ObrobaZaslona } from './ObrobaZaslona';
 import { PrikazPogovora } from './PrikazPogovora';
 import { Tancica } from './Tancica';
@@ -72,10 +74,15 @@ export interface AsistentVmesnikProps {
   onZavrni: () => void;
   /** Obrazec je bil oddan (gumb Shrani ali glasovni "shrani"). */
   onPoslano?: (form: HTMLFormElement) => void;
+  /** Oblika orba: krog ali plus (različice v plusOblika.ts). */
+  oblika?: OblikaOrba;
 }
 
+/** Oblika v aplikaciji (testna stran jo lahko preklaplja). */
+export const OBLIKA_PRIVZETA: OblikaOrba = 'krog';
+
 export function AsistentVmesnik(p: AsistentVmesnikProps) {
-  const { stanje, nacin, okno, panel, t } = p;
+  const { stanje, nacin, okno, panel, t, oblika = OBLIKA_PRIVZETA } = p;
   const koren = useRef<HTMLDivElement | null>(null);
   useNivoGlasu(koren, stanje, p.glasnost);
   useOkvirObrazca(p.obrazecEl, nacin === 'obrazec', p.onPoslano);
@@ -132,16 +139,30 @@ export function AsistentVmesnik(p: AsistentVmesnikProps) {
         </ObOrbu>
       )}
 
-      <AsistentOrb
-        stanje={stanje}
-        x={poz.x}
-        y={poz.y}
-        velikost={poz.velikost}
-        uspeh={p.uspeh?.kljuc ?? null}
-        oznaka={oznaka}
-        onClick={p.onTap}
-        onPripravi={p.onPripravi}
-      />
+      {oblika === 'krog' ? (
+        <AsistentOrb
+          stanje={stanje}
+          x={poz.x}
+          y={poz.y}
+          velikost={poz.velikost}
+          uspeh={p.uspeh?.kljuc ?? null}
+          oznaka={oznaka}
+          onClick={p.onTap}
+          onPripravi={p.onPripravi}
+        />
+      ) : (
+        <PlusOrb
+          razlicica={oblika}
+          stanje={stanje}
+          x={poz.x}
+          y={poz.y}
+          velikost={poz.velikost}
+          uspeh={p.uspeh?.kljuc ?? null}
+          oznaka={oznaka}
+          onClick={p.onTap}
+          onPripravi={p.onPripravi}
+        />
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@
  * strežnika in prijave). Prizor se izbere s tipkami spodaj levo ali v naslovu:
  *   ?prizor=mirovanje|povezujem|poslusam|razmisljam|govorim|moznosti|predlog|obrazec|shrani|uspeh|napaka
  *   &cist=1  skrije tipke (za posnetke zaslona)   &toast=1  pokaže obvestilo spodaj desno
+ *   &oblika=krog|logo|mehak|zele   &primerjava=1  vse oblike drug ob drugem (velike in v pravi velikosti)
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -13,6 +14,10 @@ import { CalendarBlank, CaretLeft, CaretRight, ListChecks, MagnifyingGlass, X } 
 import { JedroLogo } from '@/components/brand/JedroLogo';
 import { AsistentVmesnik } from '@/components/glas/ui/AsistentVmesnik';
 import { useListObrazca } from '@/components/glas/ui/useOkvirObrazca';
+import { AsistentOrb } from '@/components/glas/ui/AsistentOrb';
+import { PlusOrb } from '@/components/glas/ui/PlusOrb';
+import { OBLIKE, type OblikaOrba } from '@/components/glas/ui/plusOblika';
+import { useNivoGlasu, type Glasnost } from '@/components/glas/ui/useNivoGlasu';
 import type { Vrstica } from '@/components/glas/ui/tipi';
 import type { OdgovorOdjemalec, StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import type { NacinKrogca, Okno } from '@/lib/glas/odjemalec/polozaj';
@@ -50,6 +55,8 @@ export function GlasDizajn() {
   const [okno, setOkno] = useState<Okno | null>(null);
   const [cist, setCist] = useState(false);
   const [toast, setToast] = useState(false);
+  const [oblika, setOblika] = useState<OblikaOrba>('mehak');
+  const [primerjava, setPrimerjava] = useState(false);
   const [formEl, setFormEl] = useState<HTMLFormElement | null>(null);
   const [polja, setPolja] = useState({ stranka: 'Ana Novak', storitev: 'pedikura', zaposleni: 'maja', datum: '2026-11-14', ura: '10:00' });
   const casi = useRef<number[]>([]);
@@ -163,6 +170,9 @@ export function GlasDizajn() {
     const c = window.setTimeout(() => {
       setCist(q.get('cist') === '1');
       setToast(q.get('toast') === '1');
+      setPrimerjava(q.get('primerjava') === '1');
+      const o = q.get('oblika') as OblikaOrba | null;
+      if (o && OBLIKE.includes(o)) setOblika(o);
       if (p && PRIZORI.includes(p)) pokazi(p);
     }, 50);
     return () => window.clearTimeout(c);
@@ -224,26 +234,31 @@ export function GlasDizajn() {
         />
       )}
 
-      <AsistentVmesnik
-        stanje={st.stanje}
-        nacin={nacin}
-        okno={okno}
-        panel={panel}
-        obrazecEl={st.obrazec ? formEl : null}
-        slisano={st.slisano}
-        vrstice={st.vrstice}
-        zadnji={st.zadnji}
-        napis={st.napis}
-        uspeh={st.uspeh}
-        glasnost={glasnost}
-        t={t}
-        onTap={() => pokazi(aktiven ? 'mirovanje' : 'povezujem')}
-        onKoncaj={() => pokazi('mirovanje')}
-        onBesedilo={() => pokazi('razmisljam')}
-        onIzberi={() => pokazi('govorim')}
-        onPotrdi={() => pokazi('uspeh')}
-        onZavrni={() => pokazi('mirovanje')}
-      />
+      {primerjava ? (
+        <Primerjava stanje={st.stanje} uspeh={st.uspeh?.kljuc ?? null} okno={okno} glasnost={glasnost} onTap={() => pokazi(aktiven ? 'mirovanje' : 'povezujem')} />
+      ) : (
+        <AsistentVmesnik
+          oblika={oblika}
+          stanje={st.stanje}
+          nacin={nacin}
+          okno={okno}
+          panel={panel}
+          obrazecEl={st.obrazec ? formEl : null}
+          slisano={st.slisano}
+          vrstice={st.vrstice}
+          zadnji={st.zadnji}
+          napis={st.napis}
+          uspeh={st.uspeh}
+          glasnost={glasnost}
+          t={t}
+          onTap={() => pokazi(aktiven ? 'mirovanje' : 'povezujem')}
+          onKoncaj={() => pokazi('mirovanje')}
+          onBesedilo={() => pokazi('razmisljam')}
+          onIzberi={() => pokazi('govorim')}
+          onPotrdi={() => pokazi('uspeh')}
+          onZavrni={() => pokazi('mirovanje')}
+        />
+      )}
 
       {!cist && (
         <div className="fixed left-2 top-2 z-[200] flex max-w-[calc(100vw-1rem)] flex-wrap gap-1 rounded-xl bg-black/80 p-1.5 text-[11px] text-white">
@@ -255,8 +270,92 @@ export function GlasDizajn() {
           <button type="button" onClick={() => setToast((x) => !x)} className="rounded-md px-2 py-1 hover:bg-white/15">
             toast
           </button>
+          <span className="mx-1 w-px self-stretch bg-white/25" />
+          {OBLIKE.map((o) => (
+            <button
+              key={o}
+              type="button"
+              onClick={() => setOblika(o)}
+              className={`rounded-md px-2 py-1 hover:bg-white/15 ${o === oblika && !primerjava ? 'bg-white/25' : ''}`}
+            >
+              {o}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setPrimerjava((x) => !x)}
+            className={`rounded-md px-2 py-1 hover:bg-white/15 ${primerjava ? 'bg-white/25' : ''}`}
+          >
+            primerjava
+          </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Vse oblike drug ob drugem: zgoraj velike, spodaj v pravi velikosti (kot v kotu aplikacije). */
+function Primerjava({
+  stanje,
+  uspeh,
+  okno,
+  glasnost,
+  onTap,
+}: {
+  stanje: StanjePogovora;
+  uspeh: number | null;
+  okno: Okno;
+  glasnost: Glasnost;
+  onTap: () => void;
+}) {
+  const siroko = okno.w >= 640;
+  const stolpcev = siroko ? OBLIKE.length : 2;
+  const celica = Math.min(220, (okno.w - 32) / stolpcev);
+  const velika = Math.min(132, celica - 28);
+  const zacetek = (okno.w - celica * stolpcev) / 2;
+  return (
+    <div className="fixed inset-0 z-[100] bg-white/80 backdrop-blur-md">
+      {OBLIKE.map((o, i) => {
+        const cx = zacetek + celica * (i % stolpcev) + celica / 2;
+        const vrh = (siroko ? 110 : 80) + Math.floor(i / stolpcev) * (velika + 150);
+        return <VzorecOrba key={o} oblika={o} stanje={stanje} uspeh={uspeh} glasnost={glasnost} onTap={onTap} cx={cx} vrh={vrh} velika={velika} />;
+      })}
+    </div>
+  );
+}
+
+function VzorecOrba({
+  oblika,
+  stanje,
+  uspeh,
+  glasnost,
+  onTap,
+  cx,
+  vrh,
+  velika,
+}: {
+  oblika: OblikaOrba;
+  stanje: StanjePogovora;
+  uspeh: number | null;
+  glasnost: Glasnost;
+  onTap: () => void;
+  cx: number;
+  vrh: number;
+  velika: number;
+}) {
+  const koren = useRef<HTMLDivElement | null>(null);
+  useNivoGlasu(koren, stanje, glasnost);
+  const orb = (v: number, y: number) => {
+    const skupno = { stanje, x: cx - v / 2, y, velikost: v, uspeh, oznaka: oblika, onClick: onTap };
+    return oblika === 'krog' ? <AsistentOrb {...skupno} /> : <PlusOrb razlicica={oblika} {...skupno} />;
+  };
+  return (
+    <div ref={koren} className="ap-koren" data-stanje={stanje}>
+      {orb(velika, vrh)}
+      {orb(52, vrh + velika + 34)}
+      <p className="fixed -translate-x-1/2 text-[13px] font-medium text-label-secondary" style={{ left: cx, top: vrh + velika + 96 }}>
+        {oblika}
+      </p>
     </div>
   );
 }

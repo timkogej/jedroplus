@@ -20,6 +20,23 @@ Asistent je **orb v barvah plusa** (vijolična → modra → turkizna). V jedru 
 
 Prikaz pogovora ni klepet. Vidni sta samo zadnji dve izjavi: prejšnja je manjša in zbledela, zadnja je velika. Vnos z besedilom je sekundarna tipka »Napišite«.
 
+## Oblika plusa (14. 11., v izbiri)
+
+Namesto kroga je asistent lahko **plus iz logotipa**, ki se ob glasu napihne proti krogu. Plus sta dve zaobljeni palici; ko se odebelita, skrajšata in zaoblita do iste mere, sta isti krog, zato je prehod zvezen (`plusOblika.ts`, testi v `tests/glas/plus-oblika.test.ts`).
+
+| Stanje | Plus |
+|---|---|
+| Mirovanje | Gradient logotipa (vijolična → turkizna), počasno dihanje, barve počasi tečejo, vsakih ~7 s svetel lesk. Miška: kraki se rahlo raztegnejo. Brez JS. |
+| Vklop | Plus se hitro napihne v krog in se odpre nazaj. |
+| Poslušam | Kraki se nežno iztegujejo z glasom uporabnika. |
+| Razmišljam | Kraki utripajo po vrsti v krogu. |
+| Govorim | Napihuje se z glasom asistenta, vsak krak diha zase; običajen govor malo, poudarki do kroga. |
+| Uspeh | Napihne se v krog s kljukico, nato nazaj v plus. |
+
+Različice: `logo` (razmerja logotipa), `mehak` (debelejši, berljiv v 48 px), `zele` (zaobljen, močno napihovanje). Izbira: `OBLIKA_PRIVZETA` v `AsistentVmesnik.tsx` (zdaj še `krog`). Primerjava: `/sl/glas-dizajn?primerjava=1`, posamezna: `?oblika=mehak`.
+
+Oblika se računa v `requestAnimationFrame` samo med pogovorom in kratkimi prehodi; nato se zanka ustavi.
+
 ## Plasti (z-index)
 
 aplikacija ≤ 56 · obrazci 60–100 · tančica 104 (ob obrazcu 59, pod listom) · sij roba 106 · prikaz 108 · orb 110.

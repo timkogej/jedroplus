@@ -276,6 +276,112 @@
     0 0 28px 6px rgb(53 227 219 / 0.35);
 }
 
+/* ─────────────────────────── orb v obliki plusa ─────────────────────────── */
+/* Oblika (clip-path) se nastavi v PlusOrb.tsx; tu so samo barve, globina in lesk. */
+
+.ap-orb--plus {
+  border-radius: 0;
+}
+.ap-plus__senca {
+  position: absolute;
+  inset: 0;
+  /* Globina: senca sledi obliki (drop-shadow obrezane vsebine). */
+  filter: drop-shadow(0 9px 12px rgb(60 70 190 / 0.26)) drop-shadow(0 2px 3px rgb(40 30 120 / 0.18));
+}
+.ap-orb--plus .ap-orb__tel {
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+  /* Plus iz logotipa: diagonalni gradient vijolična → modra → turkizna. */
+  /* Kot v logotipu: barve na 25 % / 75 % diagonale, da konca krakov dobita pravi barvi. */
+  background: linear-gradient(135deg, #7c78fa 25%, #35e3db 75%);
+}
+/* Barvne plasti tečejo čez gradient (mehko svetlo/temno), ne ga prekrijejo. */
+.ap-orb--plus .ap-orb__plast {
+  opacity: 0.4;
+  mix-blend-mode: soft-light;
+}
+.ap-orb--plus .ap-orb__plast--2 {
+  mix-blend-mode: normal;
+  opacity: 0.2;
+}
+.ap-orb--plus .ap-orb__mehurcki {
+  filter: blur(10px) saturate(1.35);
+}
+/* V mirovanju barve počasi tečejo (premik že narisane plasti, brez ponovnega risanja). */
+.ap-koren[data-stanje='mirovanje'] .ap-orb--plus .ap-orb__mehurcki {
+  animation: ap-vrti 38s linear infinite;
+}
+.ap-orb--plus .ap-orb__sijaj {
+  background:
+    radial-gradient(circle at 36% 28%, rgb(255 255 255 / 0.32) 0%, rgb(255 255 255 / 0.05) 22%, transparent 38%),
+    linear-gradient(180deg, transparent 60%, rgb(25 15 105 / 0.1) 100%);
+}
+.ap-orb--plus .ap-orb__zrno {
+  opacity: 0.08;
+}
+.ap-orb--plus .ap-orb__zar {
+  opacity: calc(var(--ap-nivo) * 0.9);
+}
+.ap-orb--plus .ap-orb__halo {
+  inset: -26%;
+}
+/* V mirovanju brez sija (ostra oblika); sij pride z glasom. */
+.ap-koren[data-stanje='mirovanje'] .ap-orb--plus .ap-orb__halo {
+  opacity: 0;
+  animation: none;
+}
+
+/* Rob: tanka svetla črta po obliki (SVG, ista pot kot clip-path). */
+.ap-plus__rob {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.ap-plus__rob path {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.5);
+  stroke-width: 2.4;
+}
+
+/* Lesk: svetla proga čez plus vsakih ~7 s (samo v mirovanju; transform). */
+.ap-plus__lesk {
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(115deg, transparent 38%, rgb(255 255 255 / 0.5) 50%, transparent 62%);
+  transform: translateX(-110%);
+}
+.ap-koren[data-stanje='mirovanje'] .ap-plus__lesk {
+  opacity: 1;
+  animation: ap-lesk 7.5s 1.2s ease-in-out infinite;
+}
+
+/* Fokus (tipkovnica): obroč okoli plusa. */
+.ap-plus__fokus {
+  position: absolute;
+  inset: -6%;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand-violet) 70%, transparent);
+}
+.ap-orb--plus:focus-visible .ap-plus__fokus {
+  opacity: 1;
+}
+.ap-orb--plus:focus-visible .ap-orb__tel {
+  box-shadow: none;
+}
+
+/* Uspeh: kljukica v napihnjenem krogu. */
+.ap-orb--plus[data-uspeh] .ap-orb__kljukica {
+  transition-delay: 180ms;
+}
+
 /* ─────────────────────── tančica (zamegljeno ozadje) ─────────────────────── */
 
 .ap-tancica {
@@ -538,6 +644,15 @@
     stroke-dashoffset: 0;
   }
 }
+@keyframes ap-lesk {
+  0%,
+  72% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(110%);
+  }
+}
 @keyframes ap-tek-desno {
   from {
     transform: translateX(-33.3334%);
@@ -646,6 +761,8 @@
   }
   .ap-orb__plast,
   .ap-orb__pospesek,
+  .ap-orb__mehurcki,
+  .ap-plus__lesk,
   .ap-rob__trak {
     animation: none !important;
   }
