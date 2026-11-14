@@ -65,6 +65,11 @@ function planRank(code: string): number {
   return idx === -1 ? 0 : idx; // unknown codes fall back to FREE level
 }
 
+/** Whether `currentPlan` is `minPlan` or higher (unknown codes count as FREE). */
+export function planAtLeast(currentPlan: string | null | undefined, minPlan: PlanCode): boolean {
+  return planRank(currentPlan ?? '') >= planRank(minPlan);
+}
+
 /**
  * Check whether `currentPlan` satisfies the minimum requirement for
  * the given pathname. Returns `true` when access is allowed.

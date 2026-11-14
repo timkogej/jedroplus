@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
 
   const kont = await kontekstIzSeje();
   if (!kont.ok) return kont.odziv;
+  if (!kont.glasVPaketu) return napaka(403, 'paket', 'Asistent+ je vključen v paket Pro.');
 
   const r = await obdelajUkaz(
     { k: kont.k, vhod: zvok || stt ? 'aplikacija' : 'besedilo', zvok, besedilo, prejsnjiUkazId: prejsnji, prejsnjiUkazi: zgodovina, odprtObrazec, izbira, stt, glas },

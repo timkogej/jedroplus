@@ -33,7 +33,8 @@
       "new": "Neu",
       "newAppointment": "Neuer Termin",
       "newClient": "Neuer Kunde",
-      "newService": "Neue Leistung"
+      "newService": "Neue Leistung",
+      "ai": "KI-Assistenten"
     },
     "tooltips": {
       "expand": "Ausklappen",
@@ -88,7 +89,8 @@
       "discounts": "Rabatte",
       "happyHours": "Happy Hours",
       "serviceAddOns": "Leistungs-Add-ons",
-      "requests": "Anfragen"
+      "requests": "Anfragen",
+      "ai": "KI-Assistenten"
     }
   },
   "search": {
@@ -242,5 +244,42 @@
     "poklici": "Anrufen",
     "pisi": "E-Mail",
     "pozdrav": "Was kann ich tun? Zum Beispiel: „Wer ist als Nächstes dran?“ oder „Trage Ana morgen um zehn ein.“"
+  },
+  "aiStran": {
+    "naslov": "KI-Assistenten",
+    "podnaslov": "Asistent+ in der App und Receptionist+ am Telefon.",
+    "zavihki": {
+      "asistent": "Asistent+",
+      "receptionist": "Receptionist+"
+    },
+    "asistent": {
+      "opis": "Sprachassistent in der App: trägt Termine ein und verschiebt sie, findet Kunden und beantwortet Fragen. Gespeichert wird erst nach Ihrer Bestätigung.",
+      "sekcija": "Asistent+",
+      "vklop": "Asistent+",
+      "vklopOpis": "Für Mitglieder des Unternehmens aktiviert.",
+      "izklopOpis": "Für alle Mitglieder deaktiviert.",
+      "jezik": "Sprache des Assistenten",
+      "jezikOpis": "In dieser Sprache hört und spricht der Assistent.",
+      "jezikiKmalu": "Bald auch: {jeziki}.",
+      "poraba": "Nutzung diesen Monat",
+      "porabaOpis": "Sprachbefehle aller Mitglieder.",
+      "porabaVrednost": "{porabljeno} von {kvota} Befehlen",
+      "clani": "Mitglieder",
+      "claniOpis": "Sie können den Assistenten für einzelne Mitglieder deaktivieren.",
+      "pravicaZaposlenih": "Mitarbeiter benötigen außerdem die Berechtigung Asistent+ unter Einstellungen → Mitglieder → Berechtigungen.",
+      "samoPro": "Asistent+ ist im Pro-Paket enthalten.",
+      "samoProOpis": "Mit einem Upgrade auf Pro können Sie ihn für alle Mitglieder aktivieren.",
+      "nadgradi": "Auf Pro upgraden",
+      "samoLastnik": "Nur der Inhaber oder ein Admin kann diese Einstellungen ändern.",
+      "jazIzklopljen": "Asistent+ ist für Ihr Konto deaktiviert.",
+      "shranjeno": "Gespeichert",
+      "napaka": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+      "napakaNalaganja": "Einstellungen konnten nicht geladen werden.",
+      "vloga": {
+        "owner": "Inhaber",
+        "admin": "Admin",
+        "staff": "Mitarbeiter"
+      }
+    }
   }
 }

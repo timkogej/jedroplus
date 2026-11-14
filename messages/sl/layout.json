@@ -33,7 +33,8 @@
       "new": "Novo",
       "newAppointment": "Nov termin",
       "newClient": "Nova stranka",
-      "newService": "Nova storitev"
+      "newService": "Nova storitev",
+      "ai": "AI asistenti"
     },
     "tooltips": {
       "expand": "Razširi",
@@ -88,7 +89,8 @@
       "discounts": "Popusti",
       "happyHours": "Happy Hours",
       "serviceAddOns": "Dodajanje storitev",
-      "requests": "Zahteve"
+      "requests": "Zahteve",
+      "ai": "AI asistenti"
     }
   },
   "search": {
@@ -242,5 +244,42 @@
     "poklici": "Pokliči",
     "pisi": "Piši",
     "pozdrav": "Kaj lahko naredim? Na primer: »Kdo je naslednji?« ali »Vpiši Ano jutri ob desetih.«"
+  },
+  "aiStran": {
+    "naslov": "AI asistenti",
+    "podnaslov": "Asistent+ v aplikaciji in Receptionist+ na telefonu.",
+    "zavihki": {
+      "asistent": "Asistent+",
+      "receptionist": "Receptionist+"
+    },
+    "asistent": {
+      "opis": "Glasovni asistent v aplikaciji: vpisuje in prestavlja termine, poišče stranke in odgovarja na vprašanja. Vse shrani šele, ko potrdite.",
+      "sekcija": "Asistent+",
+      "vklop": "Asistent+",
+      "vklopOpis": "Vklopljen za člane podjetja.",
+      "izklopOpis": "Izklopljen za vse člane.",
+      "jezik": "Jezik asistenta",
+      "jezikOpis": "V tem jeziku asistent posluša in govori.",
+      "jezikiKmalu": "Kmalu tudi: {jeziki}.",
+      "poraba": "Poraba ta mesec",
+      "porabaOpis": "Glasovni ukazi vseh članov.",
+      "porabaVrednost": "{porabljeno} od {kvota} ukazov",
+      "clani": "Člani",
+      "claniOpis": "Asistenta lahko izklopite posameznemu članu.",
+      "pravicaZaposlenih": "Zaposleni potrebujejo še pravico Asistent+ v Nastavitve → Člani → Pravice.",
+      "samoPro": "Asistent+ je vključen v paket Pro.",
+      "samoProOpis": "Z nadgradnjo na Pro ga lahko vklopite za vse člane.",
+      "nadgradi": "Nadgradi na Pro",
+      "samoLastnik": "Nastavitve lahko spreminja lastnik ali admin.",
+      "jazIzklopljen": "Asistent+ je za vaš račun izklopljen.",
+      "shranjeno": "Shranjeno",
+      "napaka": "Shranjevanje ni uspelo. Poskusite znova.",
+      "napakaNalaganja": "Nastavitev ni bilo mogoče naložiti.",
+      "vloga": {
+        "owner": "Lastnik",
+        "admin": "Admin",
+        "staff": "Zaposleni"
+      }
+    }
   }
 }

@@ -33,7 +33,8 @@
       "new": "New",
       "newAppointment": "New appointment",
       "newClient": "New client",
-      "newService": "New service"
+      "newService": "New service",
+      "ai": "AI assistants"
     },
     "tooltips": {
       "expand": "Expand",
@@ -88,7 +89,8 @@
       "discounts": "Discounts",
       "happyHours": "Happy Hours",
       "serviceAddOns": "Service add-ons",
-      "requests": "Requests"
+      "requests": "Requests",
+      "ai": "AI assistants"
     }
   },
   "search": {
@@ -242,5 +244,42 @@
     "poklici": "Call",
     "pisi": "Email",
     "pozdrav": "What can I do? For example: “Who is next?” or “Book Ana tomorrow at ten.”"
+  },
+  "aiStran": {
+    "naslov": "AI assistants",
+    "podnaslov": "Asistent+ in the app and Receptionist+ on the phone.",
+    "zavihki": {
+      "asistent": "Asistent+",
+      "receptionist": "Receptionist+"
+    },
+    "asistent": {
+      "opis": "Voice assistant in the app: books and moves appointments, finds clients and answers questions. Nothing is saved until you confirm.",
+      "sekcija": "Asistent+",
+      "vklop": "Asistent+",
+      "vklopOpis": "On for company members.",
+      "izklopOpis": "Off for all members.",
+      "jezik": "Assistant language",
+      "jezikOpis": "The assistant listens and speaks in this language.",
+      "jezikiKmalu": "Coming soon: {jeziki}.",
+      "poraba": "Usage this month",
+      "porabaOpis": "Voice commands of all members.",
+      "porabaVrednost": "{porabljeno} of {kvota} commands",
+      "clani": "Members",
+      "claniOpis": "You can turn the assistant off for individual members.",
+      "pravicaZaposlenih": "Staff also need the Asistent+ permission in Settings → Members → Permissions.",
+      "samoPro": "Asistent+ is included in the Pro plan.",
+      "samoProOpis": "Upgrade to Pro to turn it on for all members.",
+      "nadgradi": "Upgrade to Pro",
+      "samoLastnik": "Only the owner or an admin can change these settings.",
+      "jazIzklopljen": "Asistent+ is turned off for your account.",
+      "shranjeno": "Saved",
+      "napaka": "Could not save. Please try again.",
+      "napakaNalaganja": "Settings could not be loaded.",
+      "vloga": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "staff": "Staff"
+      }
+    }
   }
 }

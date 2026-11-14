@@ -20,6 +20,7 @@ import { opozoriloKvote } from '@/lib/glas/poraba';
 import { NapakaPonudnika } from '@/lib/glas/ponudniki/skupno';
 import { SONIOX, zacasniKljuc } from '@/lib/glas/ponudniki/soniox';
 import { zdajVPasu } from '@/lib/glas/razresevanje/datumi';
+import { jezikZaPogovor } from '@/lib/glas/paket';
 import { kontekstIzSeje, preberiJson } from '@/lib/glas/streznik';
 
 export const runtime = 'nodejs';
@@ -48,6 +49,7 @@ export async function POST(req: NextRequest) {
   if (!kont.ok) return kont.odziv;
   const { k, odvisnosti } = kont;
   if (!imaPravico(k, 'glas.uporaba')) return napaka(403, 'ni_pravice', 'Za glasovnega asistenta nimate pravice.');
+  if (!kont.glasVPaketu) return napaka(403, 'paket', 'Asistent+ je vključen v paket Pro.');
 
   const seja = await createServerSupabaseClient();
   // Mesec se v SQL šteje po Europe/Ljubljana (jp_glas_rezerviraj_ukaz).
@@ -61,7 +63,8 @@ export async function POST(req: NextRequest) {
   kljuci.catch(() => {}); // obravnavano spodaj; brez nerešene zavrnitve ob zgodnjem izhodu
   const namigiP = samoTts ? Promise.resolve([] as string[]) : zberiNamige(odvisnosti.podatki, danes, 100).catch(() => [] as string[]);
   const [{ data: nast }, { data: poraba }, { data: uporabnik }] = await Promise.all([
-    seja.from('glas_nastavitve_podjetja').select('vklopljeno, mesecna_kvota').eq('company_id', k.podjetje).maybeSingle(),
+    // '*': stolpec jezik pride z migracijo 1793600001; pred njo poizvedba ne sme pasti.
+    seja.from('glas_nastavitve_podjetja').select('*').eq('company_id', k.podjetje).maybeSingle(),
     seja.from('glas_poraba_mesec').select('ukazi').eq('company_id', k.podjetje).eq('mesec', mesec).maybeSingle(),
     seja.from('glas_nastavitve_uporabnika').select('vklopljeno').eq('company_id', k.podjetje).eq('user_id', k.userId).maybeSingle(),
   ]);
@@ -84,7 +87,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         ok: true,
-        jezik: 'sl',
+        jezik: jezikZaPogovor((nast as { jezik?: unknown }).jezik),
         veljaS: KLJUC_VELJA_S,
         stt: { url: SONIOX.sttUrl, kljuc: stt.kljuc, model: SONIOX.sttModel, namigi, najdaljsiKonecMs: SONIOX.najdaljsiKonecMs },
         tts: { url: SONIOX.ttsUrl, kljuc: tts.kljuc, model: SONIOX.ttsModel, glas: SONIOX.glas, hitrost: SONIOX.hitrost },

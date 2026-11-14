@@ -9,6 +9,7 @@
 
 import 'server-only';
 import { NextResponse } from 'next/server';
+import { paketDovoliGlas, paketPodjetja } from './paket';
 import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { fetchCompanyRegionServer } from '@/lib/region.server';
@@ -29,7 +30,8 @@ function adminOdjemalec() {
 }
 
 export type IzidKonteksta =
-  | { ok: true; k: Kontekst; odvisnosti: Odvisnosti }
+  /** `glasVPaketu`: paket podjetja vključuje Asistent+ (Pro+); ob napaki branja paketa true (ne zapremo asistenta zaradi izpada). */
+  | { ok: true; k: Kontekst; odvisnosti: Odvisnosti; glasVPaketu: boolean }
   | { ok: false; odziv: NextResponse };
 
 const napaka = (status: number, koda: string, sporocilo: string) =>
@@ -59,9 +61,10 @@ export async function kontekstIzSeje(): Promise<IzidKonteksta> {
   const besedilniId = podjetje?.company_id ?? null;
   if (!besedilniId) return { ok: false, odziv: napaka(403, 'ni_clan', 'Podjetje ni najdeno.') };
 
-  const [{ data: pravice }, regija] = await Promise.all([
+  const [{ data: pravice }, regija, glasVPaketu] = await Promise.all([
     admin.from('staff_role_permissions').select('*').eq('company_id', clan.company_id).maybeSingle(),
     fetchCompanyRegionServer(seja, besedilniId),
+    paketPodjetja(admin, String(clan.company_id)).then(paketDovoliGlas, () => true),
   ]);
 
   const k: Kontekst = {
@@ -85,7 +88,7 @@ export async function kontekstIzSeje(): Promise<IzidKonteksta> {
     shramba: shrambaSupabase(admin),
     podatki: podatkiSupabase(seja, besedilniId),
   };
-  return { ok: true, k, odvisnosti };
+  return { ok: true, k, odvisnosti, glasVPaketu };
 }
 
 /** Telo JSON z omejeno velikostjo (zaščita pred velikimi zahtevki). */

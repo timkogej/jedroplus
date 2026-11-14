@@ -26,7 +26,7 @@ import {
   CaretLeft,
   CaretDown,
   Cube,
-  Phone,
+  Sparkle,
 } from '@phosphor-icons/react';
 import { useSidebar } from './sidebar-context';
 import { JedroLogo, JedroMark } from '@/components/brand/JedroLogo';
@@ -83,7 +83,7 @@ function buildNavigationSectionsPaid(t: T): NavSection[] {
     {
       label: t('sidebar.sections.ai'),
       items: [
-        { name: t('sidebar.items.receptionistPlus'), href: '/receptionist-plus', icon: Phone },
+        { name: t('sidebar.items.ai'), href: '/ai', icon: Sparkle },
         // Asistent+ - začasno skrito, logika ohranjena v /asistent
         // { name: 'Asistent+', href: '/asistent', icon: Robot, badge: 'new' },
         // Chatbot+ - začasno skrito, bo dodano kasneje
@@ -150,7 +150,7 @@ function buildNavigationSectionsFree(t: T): NavSection[] {
     {
       label: t('sidebar.sections.ai'),
       items: [
-        { name: t('sidebar.items.receptionistPlus'), href: '/receptionist-plus', icon: Phone },
+        { name: t('sidebar.items.ai'), href: '/ai', icon: Sparkle },
       ],
     },
     {

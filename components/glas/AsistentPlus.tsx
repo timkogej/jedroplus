@@ -26,6 +26,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
+import { DOGODEK_NASTAVITVE_ASISTENTA } from '@/lib/glas/odjemalec/nastavitve';
 import { Pogovor, type OdgovorOdjemalec, type StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import { shraniObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
 import {
@@ -131,6 +132,15 @@ export function AsistentPlus() {
 
   // Ali je asistent na voljo (prijava, vklop, pravica). Ob neuspehu preverimo
   // znova ob naslednji strani (npr. po prijavi).
+  const [preveriZnova, setPreveriZnova] = useState(0);
+  useEffect(() => {
+    const ob = () => {
+      preverjeno.current = false;
+      setPreveriZnova((n) => n + 1);
+    };
+    window.addEventListener(DOGODEK_NASTAVITVE_ASISTENTA, ob);
+    return () => window.removeEventListener(DOGODEK_NASTAVITVE_ASISTENTA, ob);
+  }, []);
   useEffect(() => {
     if (BREZ.test(pot) || preverjeno.current) return;
     let preklic = false;
@@ -146,7 +156,7 @@ export function AsistentPlus() {
     return () => {
       preklic = true;
     };
-  }, [pot]);
+  }, [pot, preveriZnova]);
 
   const dodaj = useCallback((v: Vrstica) => setVrstice((x) => [...x.slice(-12), v]), []);
 

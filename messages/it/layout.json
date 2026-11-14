@@ -33,7 +33,8 @@
       "new": "Nuovo",
       "newAppointment": "Nuovo appuntamento",
       "newClient": "Nuovo cliente",
-      "newService": "Nuovo servizio"
+      "newService": "Nuovo servizio",
+      "ai": "Assistenti AI"
     },
     "tooltips": {
       "expand": "Espandi",
@@ -88,7 +89,8 @@
       "discounts": "Sconti",
       "happyHours": "Happy hour",
       "serviceAddOns": "Servizi aggiuntivi",
-      "requests": "Richieste"
+      "requests": "Richieste",
+      "ai": "Assistenti AI"
     }
   },
   "search": {
@@ -242,5 +244,42 @@
     "poklici": "Chiama",
     "pisi": "Scrivi",
     "pozdrav": "Cosa posso fare? Per esempio: «Chi è il prossimo?» o «Prenota Ana domani alle dieci.»"
+  },
+  "aiStran": {
+    "naslov": "Assistenti AI",
+    "podnaslov": "Asistent+ nell'app e Receptionist+ al telefono.",
+    "zavihki": {
+      "asistent": "Asistent+",
+      "receptionist": "Receptionist+"
+    },
+    "asistent": {
+      "opis": "Assistente vocale nell'app: inserisce e sposta appuntamenti, trova i clienti e risponde alle domande. Nulla viene salvato finché non confermi.",
+      "sekcija": "Asistent+",
+      "vklop": "Asistent+",
+      "vklopOpis": "Attivo per i membri dell'azienda.",
+      "izklopOpis": "Disattivato per tutti i membri.",
+      "jezik": "Lingua dell'assistente",
+      "jezikOpis": "In questa lingua l'assistente ascolta e parla.",
+      "jezikiKmalu": "Presto anche: {jeziki}.",
+      "poraba": "Utilizzo questo mese",
+      "porabaOpis": "Comandi vocali di tutti i membri.",
+      "porabaVrednost": "{porabljeno} di {kvota} comandi",
+      "clani": "Membri",
+      "claniOpis": "Puoi disattivare l'assistente per singoli membri.",
+      "pravicaZaposlenih": "Il personale necessita anche del permesso Asistent+ in Impostazioni → Membri → Permessi.",
+      "samoPro": "Asistent+ è incluso nel piano Pro.",
+      "samoProOpis": "Passa a Pro per attivarlo per tutti i membri.",
+      "nadgradi": "Passa a Pro",
+      "samoLastnik": "Solo il titolare o un admin può modificare queste impostazioni.",
+      "jazIzklopljen": "Asistent+ è disattivato per il tuo account.",
+      "shranjeno": "Salvato",
+      "napaka": "Salvataggio non riuscito. Riprova.",
+      "napakaNalaganja": "Impossibile caricare le impostazioni.",
+      "vloga": {
+        "owner": "Titolare",
+        "admin": "Admin",
+        "staff": "Personale"
+      }
+    }
   }
 }
