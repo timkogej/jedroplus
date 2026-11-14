@@ -13,7 +13,7 @@ import { DANES, kontekst, okolje, podatkiPomnilnik, posiljateljLazni, VSE_PRAVIC
 type Vhod = Parameters<typeof sporociStranki.predogled>[0];
 const vhod = (p: Partial<Vhod> = {}): Vhod => ({
   stranka: 'Mateja', stranka_id: null, termin_id: null, datum_termina: null,
-  besedilo: 'Pozdravljeni, jutri zamujamo približno 15 minut.', jezik_besedila: 'sl', o_odpovedi: false, ...p,
+  besedilo: 'Pozdravljeni, jutri zamujamo približno 15 minut.', jezik_besedila: 'sl', o_odpovedi: false, podpis: true, ...p,
 });
 function o(k: Partial<Kontekst> = {}, podatki: PodatkiSalona = podatkiPomnilnik('A1'), sporocila = posiljateljLazni()): OkoljeOrodja & { sporocila: ReturnType<typeof posiljateljLazni> } {
   return { k: kontekst(k), podatki, danes: DANES, uraZdaj: '10:00', ukazId: null, sporocila };
@@ -104,6 +104,11 @@ describe('sporoci_stranki: predogled', () => {
     expect(await predogled({ besedilo: 'Jutri imamo 20 % popust!' })).toMatchObject({ sporocilo: expect.stringContaining('ponudb') });
     expect(await predogled({ besedilo: 'Pozdravljeni, '.repeat(12) })).toMatchObject({ sporocilo: expect.stringContaining('predolgo') });
     expect(await predogled({ stranka: 'Ana Novinc' })).toMatchObject({ sporocilo: expect.stringContaining('samo o terminu') });
+  });
+
+  it('brez podpisa, če uporabnik tako reče', async () => {
+    const p = kotPredlog(await predogled({ podpis: false }));
+    expect(p.parametri.besedilo).toBe('Pozdravljeni, jutri zamujamo priblizno 15 minut.');
   });
 
   it('pretekel datum termina ne', async () => {
@@ -220,6 +225,14 @@ describe('sporoci_stranki v jedru', () => {
     expect(env.sporocila.poslana).toHaveLength(1);
     // Revizija: samo ID-ji in kode, brez telefona in besedila.
     expect(JSON.stringify(env.shramba.revizije)).not.toMatch(/234 567|zamujamo/);
+  });
+
+  it('predlog postavi fokus na termin (za "spremeni besedilo", "brez podpisa")', async () => {
+    const env = okolje({ llm: [klic()] });
+    const r = await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: 'Sporoči Mateji, da zamujamo.' }, env.d);
+    if (!r.ok) throw new Error();
+    const u = env.shramba.ukazi.get(r.ukazId!);
+    expect(u?.zakljucen?.kontekst).toMatchObject({ stranka_id: '101', termin_id: 't1', termin_datum: '2026-11-13' });
   });
 
   it('orodje vidijo lastnik, admin in zaposleni z urejanjem terminov; brez urejanja ne', () => {

@@ -39,6 +39,7 @@ const vhod = z.object({
   besedilo: z.string().trim().min(1).max(NAJVEC_EMAIL),
   jezik_besedila: z.enum(JEZIKI),
   o_odpovedi: z.boolean(),
+  podpis: z.boolean(),
 });
 type Vhod = z.infer<typeof vhod>;
 
@@ -116,7 +117,8 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
   opis:
     'Pošlje stranki kratko sporočilo o njenem terminu (SMS, brez telefona e-pošta): zamuda, sprememba, prošnja, odpoved ("sporoči Ani, da zamujamo 15 minut"). ' +
     'Besedilo napiši sam v jeziku stranke: kratko, vljudno, vikanje, brez podpisa, brez ponudb, cen, povezav in telefonskih številk. ' +
-    'Orodje najde termin, doda podpis salona in pokaže predogled; pošlje se šele po potrditvi uporabnika.',
+    'Orodje najde termin, doda podpis salona in pokaže predogled; pošlje se šele po potrditvi uporabnika. ' +
+    'Popravek odprtega predloga (drugo besedilo, krajše, brez podpisa): pokliči znova z istim termin_id in popravljenimi polji.',
   razred: 'sporocila',
   pravica: 'sporocila.stranke',
   omogoceno: true,
@@ -130,8 +132,9 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
       besedilo: { type: 'string', description: 'Besedilo sporočila stranki (en SMS, do ~120 znakov), brez podpisa.' },
       jezik_besedila: { type: 'string', enum: [...JEZIKI], description: 'Jezik, v katerem je napisano besedilo.' },
       o_odpovedi: { type: 'boolean', description: 'true, če sporočilo pove, da je termin odpovedan (obvestilo po odpovedi).' },
+      podpis: { type: 'boolean', description: 'true = na koncu doda ime salona (privzeto). false samo, če uporabnik reče "brez podpisa".' },
     },
-    required: ['stranka', 'stranka_id', 'termin_id', 'datum_termina', 'besedilo', 'jezik_besedila', 'o_odpovedi'],
+    required: ['stranka', 'stranka_id', 'termin_id', 'datum_termina', 'besedilo', 'jezik_besedila', 'o_odpovedi', 'podpis'],
     additionalProperties: false,
   },
   vhod,
@@ -160,7 +163,7 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
     const zavrnjeno = zavrnitevBesedila(p.besedilo);
     if (zavrnjeno) return zavrnjeno;
 
-    const podpis = await o.podatki.imePodjetja();
+    const podpis = p.podpis ? await o.podatki.imePodjetja() : '';
     let besedilo: string;
     let zadeva: string | null = null;
     if (kanal === 'sms') {

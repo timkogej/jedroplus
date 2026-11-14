@@ -69,6 +69,9 @@ const POGOVORI: {
   { ukazi: ['Zapiši Matejo isto kot zadnjič čez šest tednov.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-12-24' } },
   // Sporoči stranki: predlog SMS (pošlje šele potrditev). Ana prejema v angleščini → model napiše znova.
   { ukazi: ['Sporoči Mateji, da jutri zamujamo kakšnih 15 minut.'], konec: {}, odgovor: { 0: /SMS za Mateja Kova[čc]i[čc]: ».*15/ }, ne: { 0: /jutri danes|danes jutri/i } },
+  // Popravek odprtega predloga: model mora znova poklicati orodje (ne samo reči, da je spremenil).
+  { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Brez podpisa na koncu.'], konec: {}, odgovor: { 1: /SMS za Mateja Kova[čc]i[čc]: ».*15 minut/ }, ne: { 1: /Salon Lepota/ } },
+  { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Dodaj še, da se opravičujemo.'], konec: {}, odgovor: { 1: /SMS za Mateja Kova[čc]i[čc]: ».*opravic/i } },
   { ukazi: ['Sporoči Ani Novak, da danes zamujamo deset minut.'], konec: {}, odgovor: { 0: /SMS za Ana Novak: ».*(late|minutes)/i } },
   // Povzetek dneva (model, ne hitra pot) in številke za lastnika (samo zaslon).
   { ukazi: ['Kako bo izgledal ponedeljek, kaj vse imamo?'], konec: {}, odgovor: { 0: /termin/i } },
