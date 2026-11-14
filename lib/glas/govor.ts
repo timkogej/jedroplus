@@ -6,6 +6,8 @@
 // "pól" z naglasom, ker ga Nina sicer naglasi narobe (Receptionist+, 2026-11).
 
 import { danVTednu, razlikaDni } from './razresevanje/datumi';
+import { trenutniJezik } from './jeziki/jezik';
+import { ALI, EMAIL_TUJE, PREDLOG_URE, STEVKE_TUJE, datumZaGovorTuj, razponZaGovorTuj, trajanjeZaGovorTuj, uraZaGovorTuj } from './jeziki/koledar';
 
 const OB: Record<number, string> = {
   1: 'enih', 2: 'dveh', 3: 'treh', 4: 'štirih', 5: 'petih', 6: 'šestih', 7: 'sedmih',
@@ -25,6 +27,11 @@ const MESEC_RODILNIK = ['januarja', 'februarja', 'marca', 'aprila', 'maja', 'jun
  */
 export function datumZaGovor(datum: string, danes: string): string {
   const r = razlikaDni(danes, datum);
+  const j = trenutniJezik();
+  if (j !== 'sl') {
+    const [, mm, dd] = datum.split('-').map(Number);
+    return datumZaGovorTuj(j, dd, mm, danVTednu(datum), r);
+  }
   const dan = `v ${DAN_TOZILNIK[danVTednu(datum)]}`;
   if (r === 0) return 'danes';
   if (r === 1) return `jutri, ${dan}`;
@@ -43,6 +50,8 @@ export function uraZaGovor(hhmm: string): string {
   const h = Number(m[1]);
   const min = Number(m[2]);
   if (h > 23 || min > 59) return hhmm;
+  const j = trenutniJezik();
+  if (j !== 'sl') return uraZaGovorTuj(j, h, min);
   if (min === 0) return `ob ${OB[h12(h)]}`;
   if (min === 30) return `ob pól ${OB[h12(h + 1)]}`;
   if (min === 15) return `ob četrt čez ${IMENOVALNIK[h12(h)]}`;
@@ -55,9 +64,18 @@ export function uraZaGovor(hhmm: string): string {
  * gole ure in razponi ("09:00–10:30") → začetek, vrstice → stavki.
  */
 export function zaGovor(besedilo: string): string {
-  return besedilo
-    .replace(/\bob (\d{1,2}:\d{2})\b/g, (_, u: string) => uraZaGovor(u))
-    .replace(/\b(\d{1,2}:\d{2})(?:\s*[–-]\s*\d{1,2}:\d{2})?/g, (_, u: string) => uraZaGovor(u))
+  const j = trenutniJezik();
+  const ure =
+    j === 'sl'
+      ? besedilo
+          .replace(/\bob (\d{1,2}:\d{2})\b/g, (_, u: string) => uraZaGovor(u))
+          .replace(/\b(\d{1,2}:\d{2})(?:\s*[–-]\s*\d{1,2}:\d{2})?/g, (_, u: string) => uraZaGovor(u))
+      : // En prehod: izgovorjena ura ("at 10:30 am") vsebuje števke in se ne sme pretvoriti znova.
+        besedilo.replace(
+          new RegExp(`(?:\\b${PREDLOG_URE[j]} )?\\b(\\d{1,2}:\\d{2})(?:\\s*[–-]\\s*\\d{1,2}:\\d{2})?`, 'g'),
+          (_, u: string) => uraZaGovor(u)
+        );
+  return ure
     .replace(/\s*\n+\s*/g, '. ')
     .replace(/\.\s*\./g, '.')
     .replace(/[»«"]/g, '')
@@ -73,16 +91,23 @@ export function vprasanjeZaGovor(v: { besedilo: string; moznosti?: { oznaka: str
   const m = (v.moznosti ?? []).slice(0, 4).map((x) => x.oznaka.replace(/\s*\([^)]*\)/g, '').trim()).filter(Boolean);
   const osnova = zaGovor(v.besedilo).replace(/\?\s*$/, '');
   if (m.length < 2) return `${osnova}?`;
-  return `${osnova}: ${m.slice(0, -1).join(', ')} ali ${m.at(-1)}?`;
+  return `${osnova}: ${m.slice(0, -1).join(', ')} ${ALI[trenutniJezik()]} ${m.at(-1)}?`;
 }
 
 /** "09:00", "10:30" → "od devetih do pól enajstih". */
 export function razponZaGovor(od: string, doo: string): string {
+  const j = trenutniJezik();
+  if (j !== 'sl') {
+    const r = (x: string) => x.split(':').map(Number) as [number, number];
+    return razponZaGovorTuj(j, r(od), r(doo));
+  }
   return `${uraZaGovor(od).replace(/^ob /, 'od ')} ${uraZaGovor(doo).replace(/^ob /, 'do ')}`;
 }
 
 /** 30 → "pol ure", 60 → "eno uro", 90 → "uro in pol", 150 → "2 uri in 30 minut". */
 export function trajanjeZaGovor(min: number): string {
+  const j = trenutniJezik();
+  if (j !== 'sl') return trajanjeZaGovorTuj(j, min);
   const ur = Math.floor(min / 60);
   const ost = min % 60;
   if (ur === 0) return ost === 30 ? 'pol ure' : `${ost} minut`;
@@ -101,7 +126,9 @@ export function brezRazmisleka(besedilo: string): string {
   const META = /\b(ukaz\w*|prepis\w*|odrezan\w*)\b|\b(zato|samo) (vprašam|sprašujem)\b|\bkratko vprašanje\b|\bposkušam razumeti\b/i;
   // Razmišljanje v angleščini (slovenski odgovor teh besed nima).
   const ANGLESKO = /\b(the|should|rules|command|user|hmm|so I|per the|got cut)\b/i;
-  const ostane = stavki.filter((s) => !META.test(s) && !ANGLESKO.test(s));
+  // V angleškem pogovoru so angleški stavki odgovor, ne razmišljanje.
+  const angl = trenutniJezik() === 'en';
+  const ostane = stavki.filter((s) => !META.test(s) && (angl || !ANGLESKO.test(s)));
   return ostane.length ? ostane.join(' ').trim() : besedilo;
 }
 
@@ -133,21 +160,27 @@ export function telefonZaZaslon(telefon: string): string {
 
 /** Telefon za glas, po skupinah števk: "nič štiri ena, dve tri štiri, pet šest sedem". */
 export function telefonZaGovor(telefon: string): string {
+  const j = trenutniJezik();
+  const st = j === 'sl' ? STEVKE : STEVKE_TUJE[j];
+  const plus = j === 'sl' ? 'plus' : EMAIL_TUJE[j].plus;
   return skupineTelefona(telefon)
-    .map((g) => [...g].map((c) => (c === '+' ? 'plus' : STEVKE[Number(c)])).join(' '))
+    .map((g) => [...g].map((c) => (c === '+' ? plus : st[Number(c)])).join(' '))
     .join(', ');
 }
 
 /** E-pošta za glas: "mateja.k@gmail.com" → "mateja pika k afna gmail pika com". */
 export function emailZaGovor(email: string): string {
+  const j = trenutniJezik();
+  const st = j === 'sl' ? STEVKE : STEVKE_TUJE[j];
+  const z = j === 'sl' ? { afna: 'afna', pika: 'pika', pomisljaj: 'pomišljaj', podcrtaj: 'podčrtaj', plus: 'plus' } : EMAIL_TUJE[j];
   return email
     .toLowerCase()
-    .replace(/\d/g, (c) => ` ${STEVKE[Number(c)]} `)
-    .replace(/@/g, ' afna ')
-    .replace(/\./g, ' pika ')
-    .replace(/-/g, ' pomišljaj ')
-    .replace(/_/g, ' podčrtaj ')
-    .replace(/\+/g, ' plus ')
+    .replace(/\d/g, (c) => ` ${st[Number(c)]} `)
+    .replace(/@/g, ` ${z.afna} `)
+    .replace(/\./g, ` ${z.pika} `)
+    .replace(/-/g, ` ${z.pomisljaj} `)
+    .replace(/_/g, ` ${z.podcrtaj} `)
+    .replace(/\+/g, ` ${z.plus} `)
     .replace(/\s{2,}/g, ' ')
     .trim();
 }

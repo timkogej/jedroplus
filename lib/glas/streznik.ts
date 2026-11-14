@@ -9,7 +9,7 @@
 
 import 'server-only';
 import { NextResponse } from 'next/server';
-import { paketDovoliGlas, paketPodjetja } from './paket';
+import { jezikZaPogovor, paketDovoliGlas, paketPodjetja } from './paket';
 import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { fetchCompanyRegionServer } from '@/lib/region.server';
@@ -61,10 +61,12 @@ export async function kontekstIzSeje(): Promise<IzidKonteksta> {
   const besedilniId = podjetje?.company_id ?? null;
   if (!besedilniId) return { ok: false, odziv: napaka(403, 'ni_clan', 'Podjetje ni najdeno.') };
 
-  const [{ data: pravice }, regija, glasVPaketu] = await Promise.all([
+  const [{ data: pravice }, regija, glasVPaketu, { data: nastGlas }] = await Promise.all([
     admin.from('staff_role_permissions').select('*').eq('company_id', clan.company_id).maybeSingle(),
     fetchCompanyRegionServer(seja, besedilniId),
     paketPodjetja(admin, String(clan.company_id)).then(paketDovoliGlas, () => true),
+    // '*': stolpec jezik pride z migracijo 1793600001; pred njo poizvedba ne sme pasti.
+    admin.from('glas_nastavitve_podjetja').select('*').eq('company_id', besedilniId).maybeSingle(),
   ]);
 
   const k: Kontekst = {
@@ -77,6 +79,7 @@ export async function kontekstIzSeje(): Promise<IzidKonteksta> {
     osebaId: clan.person_id ? String(clan.person_id) : null,
     casovniPas: regija.timezone,
     zdaj: new Date(),
+    jezik: jezikZaPogovor((nastGlas as { jezik?: unknown } | null)?.jezik),
   };
 
   const konf = preberiKonfiguracijo();

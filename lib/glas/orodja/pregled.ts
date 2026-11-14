@@ -9,10 +9,11 @@ import { samoSvojiTermini } from '../pravice';
 import { dodajDni, izMinut, vMinute } from '../razresevanje/datumi';
 import { poisci } from '../razresevanje/imena';
 import { delovniBrezOdsotnosti, prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
-import { datumZaGovor, mestnik, NAJVEC_NA_GLAS, razponZaGovor, uraZaGovor } from '../govor';
+import { datumZaGovor, NAJVEC_NA_GLAS, razponZaGovor, uraZaGovor } from '../govor';
 import type { OsebaPovzetek, RezultatOrodja, TerminPovzetek } from '../tipi';
 import { cap, datumIzParametra } from './branje';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
+import { inSeznam, jt } from '../jeziki/t';
 
 const aktiven = (t: TerminPovzetek) => t.status !== 'cancelled' && t.status !== 'no_show';
 const razpon = (a: number, b: number) => `${izMinut(a)}–${izMinut(b)}`;
@@ -21,14 +22,14 @@ const imeOsebe = (p: OsebaPovzetek) => `${p.ime} ${p.priimek}`.trim();
 /** Ali uporabnik gleda samo svoje termine; null + napaka, če mora, a ni povezan z zaposlenim. */
 function svojiAliNapaka(o: OkoljeOrodja, zelja: boolean | null): { svoji: boolean } | { napaka: RezultatOrodja } {
   const vsili = samoSvojiTermini(o.k);
-  if (vsili && !o.k.osebaId) return { napaka: { sporocilo: 'Vaš račun ni povezan z zaposlenim, zato ne vidim vaših terminov.' } };
+  if (vsili && !o.k.osebaId) return { napaka: { sporocilo: jt('Vaš račun ni povezan z zaposlenim, zato ne vidim vaših terminov.') } };
   return { svoji: Boolean(o.k.osebaId) && (vsili || (zelja ?? true)) };
 }
 
 /** Datum iz parametra; null = danes. Napačen izraz → napaka za uporabnika. */
 function dan(datum: string | null, o: OkoljeOrodja): string | RezultatOrodja {
   const d = datumIzParametra(datum, o.danes) ?? (datum ? null : o.danes);
-  return d ?? { sporocilo: `Datuma »${datum}« ne razumem. Povejte npr. »jutri« ali »v petek«.` };
+  return d ?? { sporocilo: jt('Datuma »{datum}« ne razumem. Povejte npr. »jutri« ali »v petek«.', { datum }) };
 }
 
 /** Zaposleni po imenu (ali vsi aktivni). */
@@ -40,14 +41,14 @@ function izberiOsebe(
   const aktivne = osebe.filter((p) => p.aktivna);
   if (oseba) {
     const izid = poisci(oseba, aktivne, (p) => [p.ime, p.priimek]);
-    if (izid.izid === 'nic') return { sporocilo: `Zaposlenega »${oseba}« ne najdem.` };
+    if (izid.izid === 'nic') return { sporocilo: jt('Zaposlenega »{oseba}« ne najdem.', { oseba }) };
     if (izid.izid === 'vec') {
       return {
-        sporocilo: `Koga imate v mislih? ${izid.kandidati.map((k) => imeOsebe(k.vrednost)).join(', ')}.`,
-        vprasanje: { besedilo: 'Katerega zaposlenega?', moznosti: izid.kandidati.map((k) => ({ id: k.vrednost.id, oznaka: imeOsebe(k.vrednost) })) },
+        sporocilo: `${jt('Koga imate v mislih?')} ${izid.kandidati.map((k) => imeOsebe(k.vrednost)).join(', ')}.`,
+        vprasanje: { besedilo: jt('Katerega zaposlenega?'), moznosti: izid.kandidati.map((k) => ({ id: k.vrednost.id, oznaka: imeOsebe(k.vrednost) })) },
       };
     }
-    if (samoSvojiTermini(o.k) && izid.najden.id !== o.k.osebaId) return { sporocilo: 'Vidite lahko samo svoj urnik.' };
+    if (samoSvojiTermini(o.k) && izid.najden.id !== o.k.osebaId) return { sporocilo: jt('Vidite lahko samo svoj urnik.') };
     return [izid.najden];
   }
   return aktivne;
@@ -80,15 +81,14 @@ export const naslednjaStranka: BralnoOrodje<{ samo_moji: boolean | null }> = {
       .sort((a, b) => a.datum.localeCompare(b.datum) || vMinute(a.zacetek) - vMinute(b.zacetek));
     const n = termini[0];
     if (!n) {
-      const kdo = s.svoji ? 'Nimate' : 'Ni';
-      return { sporocilo: `${kdo} terminov v naslednjih 7 dneh.`, podatki: { termin: null } };
+      return { sporocilo: s.svoji ? jt('Nimate terminov v naslednjih 7 dneh.') : jt('Ni terminov v naslednjih 7 dneh.'), podatki: { termin: null } };
     }
-    const ime = n.stranka || 'stranka';
-    const pri = !s.svoji && n.oseba ? `, pri ${mestnik(n.oseba)}` : '';
-    const danesNi = n.datum !== o.danes ? `${s.svoji ? 'Danes nimate več terminov' : 'Danes ni več terminov'}. ` : '';
+    const ime = n.stranka || jt('stranka');
+    const pri = !s.svoji && n.oseba ? `, ${jt('pri {oseba:mestnik}', { oseba: n.oseba })}` : '';
+    const danesNi = n.datum !== o.danes ? `${s.svoji ? jt('Danes nimate več terminov.') : jt('Danes ni več terminov.')} ` : '';
     return {
-      sporocilo: `${danesNi}Naslednja: ${ime}, ${n.datum === o.danes ? 'danes' : datumZaGovor(n.datum, o.danes)} ob ${n.zacetek}${n.storitev ? `, ${n.storitev}` : ''}${pri}.`,
-      govor: `${danesNi}Naslednja je ${ime}, ${n.datum === o.danes ? '' : `${datumZaGovor(n.datum, o.danes)} `}${uraZaGovor(n.zacetek)}${n.storitev ? `, ${n.storitev}` : ''}${pri}.`,
+      sporocilo: `${danesNi}${jt('Naslednja: {ime}, {datum} ob {ura}', { ime, datum: n.datum === o.danes ? jt('danes') : datumZaGovor(n.datum, o.danes), ura: n.zacetek })}${n.storitev ? `, ${n.storitev}` : ''}${pri}.`,
+      govor: `${danesNi}${jt('Naslednja je {ime}, {kdaj}', { ime, kdaj: `${n.datum === o.danes ? '' : `${datumZaGovor(n.datum, o.danes)} `}${uraZaGovor(n.zacetek)}` })}${n.storitev ? `, ${n.storitev}` : ''}${pri}.`,
       podatki: { termin: { id: n.id, datum: n.datum, od: n.zacetek, do: n.konec, stranka: n.stranka, storitev: n.storitev, oseba: n.oseba } },
     };
   },
@@ -119,7 +119,7 @@ export const prosteLuknjeOrodje: BralnoOrodje<{ datum: string | null; oseba: str
   async izvedi({ datum, oseba, najmanj_min }, o) {
     const d = dan(datum, o);
     if (typeof d !== 'string') return d;
-    if (d < o.danes) return { sporocilo: 'Luknje iščem samo za danes in naprej.' };
+    if (d < o.danes) return { sporocilo: jt('Luknje iščem samo za danes in naprej.') };
     const [osebe, urnikSurov, termini, odsotnosti] = await Promise.all([
       o.podatki.osebe(),
       o.podatki.urnikPodjetja(),
@@ -133,7 +133,7 @@ export const prosteLuknjeOrodje: BralnoOrodje<{ datum: string | null; oseba: str
       if (jaz) izbrane = [jaz];
     }
     if (!oseba && samoSvojiTermini(o.k) && !izbrane.some((p) => p.id === o.k.osebaId)) {
-      return { sporocilo: 'Vaš račun ni povezan z zaposlenim.' };
+      return { sporocilo: jt('Vaš račun ni povezan z zaposlenim.') };
     }
     const urnikPodjetja = razcleniUrnik(urnikSurov);
     const najmanj = najmanj_min ?? 30;
@@ -150,8 +150,12 @@ export const prosteLuknjeOrodje: BralnoOrodje<{ datum: string | null; oseba: str
     const kdaj = datumZaGovor(d, o.danes);
     const podatki = { datum: d, osebe: zaOsebo.map((x) => ({ oseba: imeOsebe(x.p), luknje: x.luknje.map(([a, b]) => ({ od: izMinut(a), do: izMinut(b) })) })) };
     if (zLuknjami.length === 0) {
-      const kdo = jaz ? 'nimate' : izbrane.length === 1 ? `${izbrane[0].ime} nima` : 'ni';
-      return { sporocilo: `${cap(kdaj)} ${kdo} prostih lukenj (vsaj ${najmanj} min).`, govor: `${cap(kdaj)} ${kdo} prostega časa.`, podatki };
+      const k = cap(kdaj);
+      return jaz
+        ? { sporocilo: jt('{kdaj} nimate prostih lukenj (vsaj {min} min).', { kdaj: k, min: najmanj }), govor: jt('{kdaj} nimate prostega časa.', { kdaj: k }), podatki }
+        : izbrane.length === 1
+          ? { sporocilo: jt('{kdaj} {oseba} nima prostih lukenj (vsaj {min} min).', { kdaj: k, oseba: izbrane[0].ime, min: najmanj }), govor: jt('{kdaj} {oseba} nima prostega časa.', { kdaj: k, oseba: izbrane[0].ime }), podatki }
+          : { sporocilo: jt('{kdaj} ni prostih lukenj (vsaj {min} min).', { kdaj: k, min: najmanj }), govor: jt('{kdaj} ni prostega časa.', { kdaj: k }), podatki };
     }
     const vrstice = zLuknjami.map((x) => `${izbrane.length > 1 ? `${imeOsebe(x.p)}: ` : ''}${x.luknje.map(([a, b]) => razpon(a, b)).join(', ')}`);
     let preostalo = NAJVEC_NA_GLAS;
@@ -161,14 +165,18 @@ export const prosteLuknjeOrodje: BralnoOrodje<{ datum: string | null; oseba: str
       const l = x.luknje.slice(0, preostalo);
       preostalo -= l.length;
       const casi = l.map(([a, b]) => razponZaGovor(izMinut(a), izMinut(b)));
-      const seznam = casi.length > 1 ? `${casi.slice(0, -1).join(', ')} in ${casi.at(-1)}` : casi[0];
+      const seznam = inSeznam(casi);
       deli.push(izbrane.length > 1 ? `${x.p.ime} ${seznam}` : seznam);
     }
     const vseh = zLuknjami.reduce((n, x) => n + x.luknje.length, 0);
-    const vec = vseh > NAJVEC_NA_GLAS ? ' Ostale so na zaslonu.' : '';
-    const uvod = jaz ? `${cap(kdaj)} imate prosto` : izbrane.length === 1 ? `${cap(kdaj)} ima ${izbrane[0].ime} prosto` : `${cap(kdaj)} je prosto`;
+    const vec = vseh > NAJVEC_NA_GLAS ? ` ${jt('Ostale so na zaslonu.')}` : '';
+    const uvod = jaz
+      ? jt('{kdaj} imate prosto', { kdaj: cap(kdaj) })
+      : izbrane.length === 1
+        ? jt('{kdaj} ima {oseba} prosto', { kdaj: cap(kdaj), oseba: izbrane[0].ime })
+        : jt('{kdaj} je prosto', { kdaj: cap(kdaj) });
     return {
-      sporocilo: `Proste luknje ${kdaj} (vsaj ${najmanj} min, okvirno):\n${vrstice.join('\n')}`,
+      sporocilo: `${jt('Proste luknje {kdaj} (vsaj {min} min, okvirno):', { kdaj, min: najmanj })}\n${vrstice.join('\n')}`,
       govor: `${uvod} ${deli.join('; ')}.${vec}`,
       podatki,
     };
@@ -208,15 +216,15 @@ export const kdoDela: BralnoOrodje<{ datum: string | null }> = {
       dela: dela.map((x) => ({ oseba: imeOsebe(x.p), od: izMinut(x.od), do: izMinut(x.do) })),
       odsotni: odsotni.map(imeOsebe),
     };
-    const ods = odsotni.length ? ` Odsotni: ${odsotni.map((p) => p.ime).join(', ')}.` : '';
+    const ods = odsotni.length ? ` ${jt('Odsotni: {osebe}.', { osebe: odsotni.map((p) => p.ime).join(', ') })}` : '';
     if (dela.length === 0) {
-      return { sporocilo: `${cap(kdaj)} ne dela nihče.${ods}`, govor: `${cap(kdaj)} ne dela nihče.${ods}`, podatki };
+      return { sporocilo: `${jt('{kdaj} ne dela nihče.', { kdaj: cap(kdaj) })}${ods}`, govor: `${jt('{kdaj} ne dela nihče.', { kdaj: cap(kdaj) })}${ods}`, podatki };
     }
     const vrstice = dela.map((x) => `${imeOsebe(x.p)} ${razpon(x.od, x.do)}`);
     const naGlas = dela.slice(0, 6).map((x) => `${x.p.ime} ${razponZaGovor(izMinut(x.od), izMinut(x.do))}`);
     return {
-      sporocilo: `${cap(kdaj)} dela${dela.length > 1 ? 'jo' : ''}:\n${vrstice.join('\n')}${ods}`,
-      govor: `${cap(kdaj)} ${dela.length === 1 ? 'dela' : dela.length === 2 ? 'delata' : 'delajo'} ${naGlas.join(', ')}.${dela.length > 6 ? ' Ostali so na zaslonu.' : ''}${ods}`,
+      sporocilo: `${jt('{kdaj} {n|dela|delajo|delajo|delajo}:', { kdaj: cap(kdaj), n: dela.length })}\n${vrstice.join('\n')}${ods}`,
+      govor: `${jt('{kdaj} {n|dela|delata|delajo|delajo} {osebe}.', { kdaj: cap(kdaj), n: dela.length, osebe: naGlas.join(', ') })}${dela.length > 6 ? ` ${jt('Ostali so na zaslonu.')}` : ''}${ods}`,
       podatki,
     };
   },
@@ -268,15 +276,15 @@ export const resursiDan: BralnoOrodje<{ datum: string | null; resurs: string | n
     const d = dan(datum, o);
     if (typeof d !== 'string') return d;
     const vsi = (await o.podatki.resursi()).filter((r) => r.aktivna);
-    if (vsi.length === 0) return { sporocilo: 'V salonu ni nastavljenih resursov.' };
+    if (vsi.length === 0) return { sporocilo: jt('V salonu ni nastavljenih resursov.') };
     let izbrani = vsi;
     if (resurs) {
       const izid = poisci(resurs, vsi, (r) => r.naziv.split(/\s+/));
-      if (izid.izid === 'nic') return { sporocilo: `Resursa »${resurs}« ne najdem.` };
+      if (izid.izid === 'nic') return { sporocilo: jt('Resursa »{resurs}« ne najdem.', { resurs }) };
       if (izid.izid === 'vec') {
         return {
-          sporocilo: `Kateri resurs? ${izid.kandidati.map((k) => k.vrednost.naziv).join(', ')}.`,
-          vprasanje: { besedilo: 'Kateri resurs?', moznosti: izid.kandidati.map((k) => ({ id: k.vrednost.id, oznaka: k.vrednost.naziv })) },
+          sporocilo: `${jt('Kateri resurs?')} ${izid.kandidati.map((k) => k.vrednost.naziv).join(', ')}.`,
+          vprasanje: { besedilo: jt('Kateri resurs?'), moznosti: izid.kandidati.map((k) => ({ id: k.vrednost.id, oznaka: k.vrednost.naziv })) },
         };
       }
       izbrani = [izid.najden];
@@ -299,18 +307,18 @@ export const resursiDan: BralnoOrodje<{ datum: string | null; resurs: string | n
     };
     const zasedeni = rezultat.filter((x) => x.zaseden.length > 0);
     if (zasedeni.length === 0) {
-      const kaj = izbrani.length === 1 ? `${izbrani[0].naziv} je ${kdaj} prost ves dan` : `${cap(kdaj)} ni noben resurs polno zaseden`;
+      const kaj = izbrani.length === 1 ? jt('{resurs} je {kdaj} prost ves dan', { resurs: izbrani[0].naziv, kdaj }) : jt('{kdaj} ni noben resurs polno zaseden', { kdaj: cap(kdaj) });
       return { sporocilo: `${cap(kaj)}.`, govor: `${cap(kaj)}.`, podatki };
     }
-    const vrstice = rezultat.map((x) => `${x.r.naziv}${x.r.kolicina > 1 ? ` (${x.r.kolicina})` : ''}: ${x.zaseden.length ? `zaseden ${x.zaseden.map(([a, b]) => razpon(a, b)).join(', ')}` : 'prost'}`);
+    const vrstice = rezultat.map((x) => `${x.r.naziv}${x.r.kolicina > 1 ? ` (${x.r.kolicina})` : ''}: ${x.zaseden.length ? jt('zaseden {casi}', { casi: x.zaseden.map(([a, b]) => razpon(a, b)).join(', ') }) : jt('prost')}`);
     const naGlas = zasedeni.slice(0, 3).map((x) => {
       const casi = x.zaseden.slice(0, 3).map(([a, b]) => razponZaGovor(izMinut(a), izMinut(b)));
-      return `${x.r.naziv} je zaseden ${casi.length > 1 ? `${casi.slice(0, -1).join(', ')} in ${casi.at(-1)}` : casi[0]}`;
+      return jt('{resurs} je zaseden {casi}', { resurs: x.r.naziv, casi: inSeznam(casi) });
     });
     const prosti = rezultat.length - zasedeni.length;
     return {
-      sporocilo: `Resursi ${kdaj}:\n${vrstice.join('\n')}`,
-      govor: `${cap(kdaj)}: ${naGlas.join('. ')}.${prosti > 0 && izbrani.length > 1 ? ' Ostali so prosti.' : ''}`,
+      sporocilo: `${jt('Resursi {kdaj}:', { kdaj })}\n${vrstice.join('\n')}`,
+      govor: `${cap(kdaj)}: ${naGlas.join('. ')}.${prosti > 0 && izbrani.length > 1 ? ` ${jt('Ostali so prosti.')}` : ''}`,
       podatki,
     };
   },

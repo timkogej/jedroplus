@@ -13,8 +13,11 @@ import { z } from 'zod';
 import type { Predogled, RezultatOrodja } from '../tipi';
 import { oznakaStranke, razresiStranko, ID_STRANKE } from './stranke';
 import type { PisalnoOrodje } from './tipi';
+import { jt, kt } from '../jeziki/t';
 
 const KATEGORIJE = ['barva', 'preferenca', 'opomba'] as const;
+/** Ključi prevodov imen kategorij (prikaz z jt). */
+export const IMENA_KATEGORIJ: Record<string, string> = { barva: kt('barva'), preferenca: kt('preferenca'), opomba: kt('opomba') };
 
 const ODTENEK = /^\d{1,2}([.,/]\d{1,2}){0,2}$/;
 
@@ -80,17 +83,17 @@ export const dodajZapisek: PisalnoOrodje<Vhod> = {
     if (p.cas_min !== null) podrobnosti.cas_min = p.cas_min;
 
     const vrstice = [
-      { oznaka: 'Stranka', vrednost: oznakaStranke(s, o.danes) },
-      { oznaka: 'Vrsta', vrednost: p.kategorija },
-      { oznaka: 'Zapisek', vrednost: p.besedilo },
+      { oznaka: jt('Stranka'), vrednost: oznakaStranke(s, o.danes) },
+      { oznaka: jt('Vrsta'), vrednost: jt(IMENA_KATEGORIJ[p.kategorija] ?? p.kategorija) },
+      { oznaka: jt('Zapisek'), vrednost: p.besedilo },
     ];
-    if (podrobnosti.odtenki) vrstice.push({ oznaka: 'Odtenki', vrednost: (podrobnosti.odtenki as string[]).join(' + ') });
-    if (p.gramov !== null) vrstice.push({ oznaka: 'Količina', vrednost: `${p.gramov} g` });
-    if (p.oksidant_pct !== null) vrstice.push({ oznaka: 'Oksidant', vrednost: `${p.oksidant_pct} %` });
-    if (p.cas_min !== null) vrstice.push({ oznaka: 'Čas', vrednost: `${p.cas_min} min` });
+    if (podrobnosti.odtenki) vrstice.push({ oznaka: jt('Odtenki'), vrednost: (podrobnosti.odtenki as string[]).join(' + ') });
+    if (p.gramov !== null) vrstice.push({ oznaka: jt('Količina'), vrednost: `${p.gramov} g` });
+    if (p.oksidant_pct !== null) vrstice.push({ oznaka: jt('Oksidant'), vrednost: `${p.oksidant_pct} %` });
+    if (p.cas_min !== null) vrstice.push({ oznaka: jt('Čas'), vrednost: `${p.cas_min} min` });
 
     return {
-      povzetek: `Dodam zapisek (${p.kategorija}) na kartico: ${`${s.ime} ${s.priimek}`.trim()}.`,
+      povzetek: jt('Dodam zapisek ({kategorija}) na kartico: {ime}.', { kategorija: jt(IMENA_KATEGORIJ[p.kategorija] ?? p.kategorija), ime: `${s.ime} ${s.priimek}`.trim() }),
       parametri: {
         idStranke: s.id,
         imeStranke: `${s.ime} ${s.priimek}`.trim(),
@@ -106,7 +109,7 @@ export const dodajZapisek: PisalnoOrodje<Vhod> = {
     const p = shranjeno.parse(parametri);
     // Znova preveri, da stranka obstaja in je vidna temu uporabniku (RLS).
     const s = await o.podatki.stranka(p.idStranke);
-    if (!s) return { sporocilo: 'Stranke ni več mogoče najti. Zapisek ni bil dodan.', neuspeh: true };
+    if (!s) return { sporocilo: jt('Stranke ni več mogoče najti. Zapisek ni bil dodan.'), neuspeh: true };
     const { id } = await o.podatki.dodajZapisek({
       podjetje: o.k.podjetje,
       idStranke: p.idStranke,
@@ -116,6 +119,6 @@ export const dodajZapisek: PisalnoOrodje<Vhod> = {
       ukazId: o.ukazId,
       avtorIme: o.k.email,
     });
-    return { sporocilo: `Zapisek je dodan na kartico ${p.imeStranke}.`, podatki: { zapisek_id: id, stranka_id: p.idStranke } };
+    return { sporocilo: jt('Zapisek je dodan na kartico {ime}.', { ime: p.imeStranke }), podatki: { zapisek_id: id, stranka_id: p.idStranke } };
   },
 };

@@ -7,12 +7,21 @@
 //     scripts/glas-meritve/konec-govora.mjs, 13. 11. 2026);
 //   * ali je govor med asistentovim govorom prava prekinitev ali lasten odmev;
 //   * kratki lokalni odzivi ("hvala, to je vse").
+//
+// Besede so v jeziku pogovora (jezikOdjemalca); slovenske množice so tu, drugi jeziki
+// v jezikOdjemalca.ts.
+
+import { BESEDE, besedila, jezikOdjemalca, type BesedeJezika } from './jezikOdjemalca';
 
 const brezLocil = (s: string) =>
   s
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
+    // "don't", "d'accordo", "potvrđujem", "schließen" → kot v seznamih besed
+    .replace(/['’`]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/ß/g, 'ss')
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
@@ -32,10 +41,10 @@ export const CAKANJE = {
 } as const;
 
 /** Mašila: same po sebi niso izjava. ("mhm" ni mašilo — pomeni "ja".) */
-const MASILA = new Set(['uh', 'uhm', 'uhh', 'ehm', 'em', 'eem', 'eee', 'ee', 'aaa', 'aa', 'hm', 'hmm', 'mmm', 'mm', 'njah', 'pac', 'no']);
+const MASILA_SL = new Set(['uh', 'uhm', 'uhh', 'ehm', 'em', 'eem', 'eee', 'ee', 'aaa', 'aa', 'hm', 'hmm', 'mmm', 'mm', 'njah', 'pac', 'no']);
 
 /** Besede, za katerimi stavek ne more biti končan (predlogi, vezniki, nedokončane besedne zveze). */
-const NEDOKONCANE = new Set([
+const NEDOKONCANE_SL = new Set([
   // predlogi
   'ob', 'za', 'pri', 'na', 'v', 'vo', 'z', 's', 'k', 'h', 'od', 'do', 'po', 'pod', 'nad', 'med', 'pred', 'cez', 'brez', 'proti', 'okoli', 'okrog', 'zaradi', 'iz',
   // vezniki
@@ -43,8 +52,40 @@ const NEDOKONCANE = new Set([
   // nedokončane zveze ("ob pol", "nov termin za", "termin ob")
   'pol', 'cetrt', 'nov', 'novo', 'novi', 'nova', 'moj', 'moja', 'njen', 'njegov', 'zapisi', 'vpisi', 'prestavi', 'dodaj', 'odpri',
   // mašila
-  ...MASILA,
+  ...MASILA_SL,
 ]);
+
+type Mnozice = { [K in keyof BesedeJezika]: Set<string> };
+const SL: Omit<Mnozice, 'da' | 'ne'> = {
+  masila: MASILA_SL,
+  nedokoncane: NEDOKONCANE_SL,
+  konec: new Set<string>(),
+  zahvala: new Set<string>(),
+  ponovi: new Set<string>(),
+  pocasneje: new Set<string>(),
+  prekini: new Set<string>(),
+};
+const MNOZICE = new Map<string, Omit<Mnozice, 'da' | 'ne'>>();
+/** Množice besed za jezik pogovora (slovenske so zgoraj in spodaj, nespremenjene). */
+function m(): Omit<Mnozice, 'da' | 'ne'> {
+  const j = jezikOdjemalca();
+  if (j === 'sl') return SL;
+  let x = MNOZICE.get(j);
+  if (!x) {
+    const b = BESEDE[j];
+    x = {
+      masila: new Set(b.masila),
+      nedokoncane: new Set([...b.nedokoncane, ...b.masila]),
+      konec: new Set(b.konec),
+      zahvala: new Set(b.zahvala),
+      ponovi: new Set(b.ponovi),
+      pocasneje: new Set(b.pocasneje),
+      prekini: new Set(b.prekini),
+    };
+    MNOZICE.set(j, x);
+  }
+  return x;
+}
 
 /**
  * Koliko časa po Soniox <end> še čakamo na nadaljevanje. `surovo` je prepis z
@@ -53,19 +94,21 @@ const NEDOKONCANE = new Set([
 export function cakanjePoKoncu(surovo: string): number {
   const b = besede(surovo);
   if (b.length === 0) return CAKANJE.samoMasilo;
-  if (b.every((x) => MASILA.has(x))) return CAKANJE.samoMasilo;
+  const { masila, nedokoncane } = m();
+  if (b.every((x) => masila.has(x))) return CAKANJE.samoMasilo;
   const s = surovo.trim();
   // Vejica, pomišljaj ali tri pike na koncu: misel ni končana.
   if (/[,;:\-–—…]$/.test(s) || /\.\.\.$/.test(s)) return CAKANJE.nedokoncano;
   const zadnja = b[b.length - 1];
-  if (NEDOKONCANE.has(zadnja)) return CAKANJE.nedokoncano;
+  if (nedokoncane.has(zadnja)) return CAKANJE.nedokoncano;
   if (b.length <= 3) return CAKANJE.kratko;
   return CAKANJE.obicajno;
 }
 
 /** Ali novo slišano besedilo (med razmišljanjem) pomeni, da uporabnik nadaljuje svojo izjavo. */
 export function jeNadaljevanje(slisano: string): boolean {
-  const b = besede(slisano).filter((x) => !MASILA.has(x) && x.length >= 2);
+  const { masila } = m();
+  const b = besede(slisano).filter((x) => !masila.has(x) && x.length >= 2);
   return b.length > 0;
 }
 
@@ -81,11 +124,12 @@ export function besedeGovora(govor: string): Set<string> {
 
 /** Besede iz `slisano`, ki NISO odmev asistentovega govora in niso mašila. */
 export function tujeBesede(slisano: string, govor: Set<string>): string[] {
-  return besede(slisano).filter((b) => !MASILA.has(b) && !govor.has(koren(b)));
+  const { masila } = m();
+  return besede(slisano).filter((b) => !masila.has(b) && !govor.has(koren(b)));
 }
 
 /** Ena beseda je dovolj za prekinitev, če je ena od teh (in je ni v asistentovem govoru). */
-const PREKINI_Z_ENO = new Set([
+const PREKINI_Z_ENO_SL = new Set([
   'stop', 'stoj', 'cakaj', 'pocakaj', 'pocakajte', 'nehaj', 'utihni', 'dovolj', 'hej', 'halo', 'moment', 'ne', 'ja', 'shrani', 'preklici', 'zapri',
   'stani', 'wait', 'nein', 'basta', 'aspetta',
 ]);
@@ -114,7 +158,7 @@ export function jePrekinitev(o: { slisano: string; govor: Set<string>; glasnost:
   if (o.glasnost < (o.prag ?? PRAG_PREKINITVE)) return false;
   const tuje = tujeBesede(o.slisano, o.govor);
   if (tuje.length >= 2) return true;
-  return tuje.length === 1 && PREKINI_Z_ENO.has(tuje[0]);
+  return tuje.length === 1 && (PREKINI_Z_ENO_SL.has(tuje[0]) || m().prekini.has(tuje[0]));
 }
 
 /** Po prekinitvi: z začetka odstrani besede, ki so bile odmev asistentovega govora. */
@@ -123,7 +167,7 @@ export function odstraniOdmev(slisano: string, govor: Set<string>): string {
   let i = 0;
   while (i < deli.length) {
     const b = brezLocil(deli[i]);
-    if (b && !govor.has(koren(b)) && !MASILA.has(b)) break;
+    if (b && !govor.has(koren(b)) && !m().masila.has(b)) break;
     i++;
   }
   return deli.slice(i).join(' ');
@@ -131,21 +175,21 @@ export function odstraniOdmev(slisano: string, govor: Set<string>): string {
 
 // ───────────────────────────── lokalni odzivi ─────────────────────────────
 
-const KONEC_POGOVORA = new Set([
+const KONEC_POGOVORA_SL = new Set([
   'hvala to je vse', 'to je vse', 'to je to', 'to bo vse', 'hvala to bo vse', 'hvala lepa to je vse', 'hvala ti to je vse', 'hvala to je to',
   'to je vse hvala', 'konec', 'koncaj', 'koncaj pogovor', 'konec pogovora', 'nasvidenje', 'na svidenje', 'adijo', 'hvala adijo', 'hvala nasvidenje',
   'nic vec', 'hvala nic vec', 'ni vec', 'lahko nehas', 'adio', 'cao', 'hvala cao', 'hvala lep dan', 'ok hvala to je vse', 'okej hvala to je vse',
   'thats all', 'thank you thats all', 'das wars', 'danke das wars', 'to je sve', 'hvala to je sve', 'e tutto', 'grazie e tutto',
 ]);
 
-const ZAHVALA = new Set(['hvala', 'hvala lepa', 'hvala ti', 'hvala vam', 'super hvala', 'ok hvala', 'okej hvala', 'v redu hvala', 'odlicno hvala', 'thanks', 'thank you', 'danke', 'grazie']);
+const ZAHVALA_SL = new Set(['hvala', 'hvala lepa', 'hvala ti', 'hvala vam', 'super hvala', 'ok hvala', 'okej hvala', 'v redu hvala', 'odlicno hvala', 'thanks', 'thank you', 'danke', 'grazie']);
 
-const PONOVI = new Set([
+const PONOVI_SL = new Set([
   'ponovi', 'ponovi prosim', 'prosim ponovi', 'lahko ponovis', 'ponovi se enkrat', 'se enkrat', 'se enkrat prosim', 'povej se enkrat',
   'kaj si rekla', 'kaj si rekel', 'kaj si rekla prosim', 'nisem slisal', 'nisem slisala', 'nisem razumel', 'nisem razumela', 'ponovite',
   'ponovite prosim', 'kako prosim', 'kaj prosim', 'pardon', 'repeat', 'say again', 'wie bitte',
 ]);
-const POCASNEJE = new Set([
+const POCASNEJE_SL = new Set([
   'pocasneje', 'pocasneje prosim', 'bolj pocasi', 'pocasi', 'malo pocasneje', 'govori pocasneje', 'govori pocasi', 'lahko pocasneje',
   'povej pocasneje', 'ponovi pocasneje', 'ponovi pocasi', 'se enkrat pocasneje', 'pocasneje ponovi', 'slower', 'langsamer',
 ]);
@@ -159,10 +203,13 @@ export const NAJNIZJA_HITROST = 0.75;
  */
 export function lokalniOdziv(izjava: string): { vrsta: 'konec' | 'zahvala' | 'ponovi' | 'pocasneje'; govor: string } | null {
   const s = brezLocil(izjava);
-  if (KONEC_POGOVORA.has(s)) return { vrsta: 'konec', govor: 'Prav. Lep dan.' };
-  if (ZAHVALA.has(s)) return { vrsta: 'zahvala', govor: 'Prosim.' };
-  if (POCASNEJE.has(s)) return { vrsta: 'pocasneje', govor: '' };
-  if (PONOVI.has(s)) return { vrsta: 'ponovi', govor: '' };
+  const x = m();
+  const B = besedila();
+  // Slovenske množice že vsebujejo nekaj tujih fraz ("thats all", "danke"), zato veljajo vedno.
+  if (KONEC_POGOVORA_SL.has(s) || x.konec.has(s)) return { vrsta: 'konec', govor: B.konec };
+  if (ZAHVALA_SL.has(s) || x.zahvala.has(s)) return { vrsta: 'zahvala', govor: B.zahvala };
+  if (POCASNEJE_SL.has(s) || x.pocasneje.has(s)) return { vrsta: 'pocasneje', govor: '' };
+  if (PONOVI_SL.has(s) || x.ponovi.has(s)) return { vrsta: 'ponovi', govor: '' };
   return null;
 }
 
@@ -174,8 +221,13 @@ export function pocasneje(hitrost: number): number {
 /** Napaka za glas: samo prvi stavek, brez "Nič ni bilo spremenjeno." (to je na zaslonu). */
 export function napakaZaGovor(sporocilo: string): string {
   const prvi = sporocilo.split(/(?<=[.!?])\s+/)[0]?.trim() ?? '';
-  return prvi.replace(/\s*\(\d+\)\s*$/, '') || 'Nekaj ni šlo.';
+  return prvi.replace(/\s*\(\d+\)\s*$/, '') || besedila().nekajNiSlo;
 }
 
 /** Kratki namigi, ko odgovor zamuja (izmenjujejo se, da ne zvenijo kot posnetek). */
 export const NAMIGI_CAKANJA = ['Moment.', 'Samo trenutek.', 'Preverim.'];
+
+/** Namigi čakanja v jeziku pogovora. */
+export function namigiCakanja(): string[] {
+  return besedila().namigi;
+}

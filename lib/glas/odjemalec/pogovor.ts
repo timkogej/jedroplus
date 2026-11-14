@@ -27,11 +27,12 @@ import {
   jePrekinitev,
   lokalniOdziv,
   pocasneje,
-  NAMIGI_CAKANJA,
+  namigiCakanja,
   napakaZaGovor,
   odstraniOdmev,
   rms,
 } from './tok';
+import { besedila, nastaviJezikOdjemalca } from './jezikOdjemalca';
 
 export type StanjePogovora = 'mirovanje' | 'povezujem' | 'poslusam' | 'razmisljam' | 'govorim';
 
@@ -140,14 +141,8 @@ const GLASNOST_OKVIRJEV = 6;
 const NAJVEC_OBNOV_STT = 2;
 const TTS_HZ = 24000;
 
-const SPOROCILA = {
-  mikrofon: 'Dostop do mikrofona ni dovoljen. Dovolite mikrofon za to stran v nastavitvah brskalnika.',
-  brezMikrofona: 'Ta brskalnik ne podpira snemanja zvoka.',
-  povezava: 'Povezava ni uspela. Nič ni bilo spremenjeno. Poskusite znova.',
-  razpoznava: 'Razpoznava govora se je prekinila. Tapnite gumb za nov pogovor.',
-  casovna: 'Asistent se ni odzval pravočasno. Nič ni bilo spremenjeno.',
-  nerazumljiv: 'Neveljaven odgovor strežnika. Nič ni bilo spremenjeno.',
-};
+/** Sporočila napak v jeziku pogovora (jezikOdjemalca). */
+const sporocila = () => besedila();
 
 export class Pogovor {
   private s: StanjePogovora = 'mirovanje';
@@ -265,7 +260,7 @@ export class Pogovor {
     const AC: typeof AudioContext | undefined =
       typeof window !== 'undefined' ? (window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext) : undefined;
     if (!AC || !navigator.mediaDevices?.getUserMedia) {
-      this.koncaj(SPOROCILA.brezMikrofona);
+      this.koncaj(sporocila().brezMikrofona);
       return;
     }
     this.izhod = new AC();
@@ -283,7 +278,7 @@ export class Pogovor {
         navigator.mediaDevices
           .getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } })
           .catch((e: unknown) => {
-            throw new NapakaPogovora(e instanceof DOMException && e.name === 'NotAllowedError' ? SPOROCILA.mikrofon : SPOROCILA.brezMikrofona);
+            throw new NapakaPogovora(e instanceof DOMException && e.name === 'NotAllowedError' ? sporocila().mikrofon : sporocila().brezMikrofona);
           }),
         this.vhod.audioWorklet.addModule('/glas/mikrofon-worklet.js'),
       ]);
@@ -313,7 +308,7 @@ export class Pogovor {
       if (seja.opozorilo) this.d.napaka(seja.opozorilo);
     } catch (e) {
       // Uporabnik je medtem sam končal: brez sporočila o napaki.
-      if (this.aktiven) this.koncaj(e instanceof NapakaPogovora ? e.message : SPOROCILA.povezava);
+      if (this.aktiven) this.koncaj(e instanceof NapakaPogovora ? e.message : sporocila().povezava);
     }
   }
 
@@ -397,11 +392,11 @@ export class Pogovor {
     try {
       r = await fetch('/api/glas/seja', { method: 'POST', cache: 'no-store' });
     } catch {
-      throw new NapakaPogovora(SPOROCILA.povezava);
+      throw new NapakaPogovora(sporocila().povezava);
     }
     const j = (await r.json().catch(() => null)) as Seja | null;
-    if (!j) throw new NapakaPogovora(SPOROCILA.nerazumljiv);
-    if (!j.ok) throw new NapakaPogovora(j.sporocilo ?? SPOROCILA.povezava);
+    if (!j) throw new NapakaPogovora(sporocila().nerazumljiv);
+    if (!j.ok) throw new NapakaPogovora(j.sporocilo ?? sporocila().povezava);
     this.zaloga = { seja: j, cas: Date.now(), ttsCas: Date.now() };
     this.pripravaNeuspelaDo = 0;
     return j;
@@ -422,10 +417,11 @@ export class Pogovor {
   }
 
   private odpriStt(seja: Seja): Promise<void> {
+    nastaviJezikOdjemalca(seja.jezik);
     return new Promise((resolve, reject) => {
       const ws = new WebSocket(seja.stt.url);
       ws.binaryType = 'arraybuffer';
-      const t = setTimeout(() => reject(new NapakaPogovora(SPOROCILA.povezava)), 6000);
+      const t = setTimeout(() => reject(new NapakaPogovora(sporocila().povezava)), 6000);
       ws.onopen = () => {
         clearTimeout(t);
         ws.send(
@@ -457,7 +453,7 @@ export class Pogovor {
       ws.onmessage = (e) => this.sttSporocilo(e.data);
       ws.onerror = () => {
         clearTimeout(t);
-        reject(new NapakaPogovora(SPOROCILA.povezava));
+        reject(new NapakaPogovora(sporocila().povezava));
       };
       ws.onclose = () => {
         if (this.stt === ws && this.aktiven) void this.obnoviStt();
@@ -481,7 +477,7 @@ export class Pogovor {
       /* že zaprta */
     }
     if (this.obnoveStt.length >= NAJVEC_OBNOV_STT) {
-      this.koncaj(SPOROCILA.razpoznava);
+      this.koncaj(sporocila().razpoznava);
       return;
     }
     this.obnoveStt.push(zdaj);
@@ -493,7 +489,7 @@ export class Pogovor {
       if (!this.seja) this.seja = seja;
       await this.odpriStt(seja);
     } catch {
-      if (this.aktiven) this.koncaj(SPOROCILA.razpoznava);
+      if (this.aktiven) this.koncaj(sporocila().razpoznava);
     }
   }
 
@@ -694,7 +690,7 @@ export class Pogovor {
       if (kratko && (kratko.vrsta === 'ponovi' || kratko.vrsta === 'pocasneje')) {
         // Brez strežnika in AI: zadnji odgovor znova (po "počasneje" počasneje).
         if (kratko.vrsta === 'pocasneje' && this.seja) this.hitrostGovora = pocasneje(this.hitrostGovora ?? this.seja.tts.hitrost);
-        const besedilo = this.zadnjiGovor || 'Nimam česa ponoviti.';
+        const besedilo = this.zadnjiGovor || besedila().nimamPonoviti;
         this.d.obvestilo?.(besedilo);
         await this.povej(besedilo, performance.now(), undefined, false);
         return;
@@ -728,7 +724,7 @@ export class Pogovor {
     const tOdgovor = performance.now();
     if (!odgovor.ok) {
       this.vprasanje = null;
-      const sporocilo = odgovor.sporocilo ?? SPOROCILA.povezava;
+      const sporocilo = odgovor.sporocilo ?? sporocila().povezava;
       this.d.napaka(sporocilo);
       // Kratko in posluša naprej (pogovor se ne zapre).
       await this.povej(napakaZaGovor(sporocilo), tOdgovor);
@@ -747,7 +743,7 @@ export class Pogovor {
     this.nastavi('razmisljam');
     this.predlog = null;
     const r = await this.zahtevaj<{ ok: boolean; sporocilo?: string }>('/api/glas/potrdi', { predlog: p.id, zeton: p.zeton });
-    const sporocilo = r.sporocilo ?? (r.ok ? 'Shranjeno.' : 'Ni uspelo. Nič ni bilo spremenjeno.');
+    const sporocilo = r.sporocilo ?? (r.ok ? besedila().shranjeno : besedila().niUspelo);
     this.d.potrditev({ ok: r.ok, sporocilo });
     await this.povej(r.ok ? sporocilo : napakaZaGovor(sporocilo), performance.now());
   }
@@ -755,8 +751,8 @@ export class Pogovor {
   private async zavrni(p: PredlogOdjemalec) {
     this.predlog = null;
     void this.zahtevaj('/api/glas/zavrni', { predlog: p.id });
-    this.d.potrditev({ ok: true, sporocilo: 'Preklicano. Nič ni bilo spremenjeno.' });
-    await this.povej('Prav, preklicano.', performance.now());
+    this.d.potrditev({ ok: true, sporocilo: besedila().preklicanoZaslon });
+    await this.povej(besedila().preklicanoGovor, performance.now());
   }
 
   private async zahtevaj<T extends { ok: boolean; sporocilo?: string; koda?: string }>(url: string, telo: unknown): Promise<T> {
@@ -776,12 +772,12 @@ export class Pogovor {
         signal: ctrl.signal,
       });
       const j = (await r.json().catch(() => null)) as T | null;
-      if (!j) return { ok: false, sporocilo: `${SPOROCILA.nerazumljiv} (${r.status})` } as T;
+      if (!j) return { ok: false, sporocilo: `${sporocila().nerazumljiv} (${r.status})` } as T;
       return j;
     } catch (e) {
       const prekinjeno = e instanceof DOMException && e.name === 'AbortError';
       if (prekinjeno && !casovna) return { ok: false, koda: 'preklicano' } as T;
-      return { ok: false, sporocilo: prekinjeno ? SPOROCILA.casovna : SPOROCILA.povezava } as T;
+      return { ok: false, sporocilo: prekinjeno ? sporocila().casovna : sporocila().povezava } as T;
     } finally {
       clearTimeout(t);
       if (this.zahteva === ctrl) this.zahteva = null;
@@ -970,7 +966,7 @@ export class Pogovor {
     if (this.namigiZahtevani || !this.tts || this.tts.readyState !== 1 || !this.seja) return;
     this.namigiZahtevani = true;
     const seja = this.seja;
-    NAMIGI_CAKANJA.forEach((besedilo, i) => {
+    namigiCakanja().forEach((besedilo, i) => {
       const id = `n${i}${Math.random().toString(36).slice(2, 6)}`;
       this.namigiPriprava.set(id, []);
       this.tts!.send(

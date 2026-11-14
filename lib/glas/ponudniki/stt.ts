@@ -8,8 +8,8 @@ import { NapakaPonudnika, fetchSPonovitvijo } from './skupno';
 
 export interface SttZahteva {
   zvok: Blob;
-  /** ISO 639-1 */
-  jezik: 'sl';
+  /** ISO 639-1 (jezik pogovora Asistent+) */
+  jezik: 'sl' | 'en' | 'de' | 'it' | 'hr';
   /** Imena strank/storitev/oseb in strokovni izrazi (≤100). */
   namigi: string[];
 }

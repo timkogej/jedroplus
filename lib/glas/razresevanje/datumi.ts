@@ -9,6 +9,8 @@
 // petek 14. 11."), da uporabnik takoj opazi napačno razumljen dan.
 
 import { brezSumnikov, besedaVStevilo } from './besedilo';
+import { trenutniJezik } from '../jeziki/jezik';
+import { opisDatumaTuj } from '../jeziki/koledar';
 
 export const DNEVI = ['ponedeljek', 'torek', 'sreda', 'četrtek', 'petek', 'sobota', 'nedelja'] as const;
 const DNEVI_KLJUC = ['ponedeljek', 'torek', 'sred', 'cetrtek', 'petek', 'sobot', 'nedelj'];
@@ -57,8 +59,10 @@ export function razlikaDni(od: string, doo: string): number {
 /** "petek, 14. 11." ali "danes, petek, 14. 11." */
 export function opisDatuma(datum: string, danes: string): string {
   const [, m, d] = datum.split('-').map(Number);
-  const osnova = `${DNEVI[danVTednu(datum)]}, ${d}. ${m}.`;
   const r = razlikaDni(danes, datum);
+  const j = trenutniJezik();
+  if (j !== 'sl') return opisDatumaTuj(j, d, m, danVTednu(datum), r);
+  const osnova = `${DNEVI[danVTednu(datum)]}, ${d}. ${m}.`;
   if (r === 0) return `danes, ${osnova}`;
   if (r === 1) return `jutri, ${osnova}`;
   if (r === -1) return `včeraj, ${osnova}`;
@@ -242,4 +246,37 @@ export function vMinute(ura: string): number {
 
 export function izMinut(min: number): string {
   return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
+}
+
+// Izrazi v drugih jezikih Asistent+ (en, de, it, hr). Model naj datume v teh jezikih
+// poda kot YYYY-MM-DD; to je samo varovalo za najpogostejše besede.
+const TUJE_RELATIVNO: [RegExp, number][] = [
+  [/\b(day after tomorrow|ubermorgen|dopodomani|prekosutra)\b/, 2],
+  [/\b(today|heute|oggi|danas)\b/, 0],
+  [/\b(tomorrow|morgen|domani|sutra)\b/, 1],
+  [/\b(yesterday|gestern|ieri|jucer)\b/, -1],
+];
+const TUJI_DNEVI: RegExp[] = [
+  /\b(monday|montag|lunedi|ponedjeljak)\b/,
+  /\b(tuesday|dienstag|martedi|utorak)\b/,
+  /\b(wednesday|mittwoch|mercoledi|srijed[au])\b/,
+  /\b(thursday|donnerstag|giovedi|cetvrtak)\b/,
+  /\b(friday|freitag|venerdi|petak)\b/,
+  /\b(saturday|samstag|sabato|subot[au])\b/,
+  /\b(sunday|sonntag|domenica|nedjelj[au])\b/,
+];
+
+/** Datum iz angleškega, nemškega, italijanskega ali hrvaškega izraza (danes/jutri/dan v tednu) ali null. */
+export function razberiDatumTuj(besedilo: string, danes: string): string | null {
+  const b = besedilo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  for (const [re, dni] of TUJE_RELATIVNO) if (re.test(b)) return dodajDni(danes, dni);
+  for (let i = 0; i < TUJI_DNEVI.length; i++) {
+    if (TUJI_DNEVI[i].test(b)) {
+      let r = (i - danVTednu(danes) + 7) % 7;
+      if (r === 0) r = 7;
+      if (/\b(next|nachsten|naechsten|prossim|sljedec)/.test(b) && danVTednu(danes) < i) r += 7;
+      return dodajDni(danes, r);
+    }
+  }
+  return null;
 }

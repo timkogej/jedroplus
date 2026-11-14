@@ -16,7 +16,7 @@ export const KVOTA_PRO = 1000;
 /** Jeziki, ki jih je mogoče izbrati; `JEZIKI_NA_VOLJO` že delujejo, ostali so "kmalu". */
 export const JEZIKI_ASISTENTA = ['sl', 'en', 'de', 'it', 'hr'] as const;
 export type JezikAsistenta = (typeof JEZIKI_ASISTENTA)[number];
-export const JEZIKI_NA_VOLJO: readonly JezikAsistenta[] = ['sl'];
+export const JEZIKI_NA_VOLJO: readonly JezikAsistenta[] = ['sl', 'en', 'de', 'it', 'hr'];
 
 export function jeJezikAsistenta(x: unknown): x is JezikAsistenta {
   return typeof x === 'string' && (JEZIKI_ASISTENTA as readonly string[]).includes(x);

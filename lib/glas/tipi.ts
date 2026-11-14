@@ -5,6 +5,7 @@
 // zato so tu samo opisi oblik, brez odvisnosti.
 
 import type { StaffPermissions } from '@/types/roles';
+import type { JezikAsistenta } from './paket';
 
 export type Vloga = 'owner' | 'admin' | 'staff';
 
@@ -24,6 +25,8 @@ export interface Kontekst {
   casovniPas: string;
   /** Trenutni čas (vbrizgan zaradi testov). */
   zdaj: Date;
+  /** Jezik pogovora Asistent+ (stran AI); brez = slovenščina. */
+  jezik?: JezikAsistenta;
 }
 
 export type Pravica =

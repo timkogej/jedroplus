@@ -4,6 +4,8 @@
 // sestavljanje izjave iz Soniox žetonov, prepoznava "ja/ne" za potrditev,
 // izbira med možnostmi po imenu, pretvorba zvoka v 16 kHz PCM.
 
+import { BESEDE, jezikOdjemalca } from './jezikOdjemalca';
+
 /** Žeton sprotnega Soniox STT (podmnožica polj, ki jih rabimo). */
 export interface SonioxZeton {
   text: string;
@@ -62,12 +64,29 @@ const brezLocil = (s: string) =>
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
+    // "don't", "d'accordo", "potvrđujem", "schließen" → kot v seznamih besed
+    .replace(/['’`]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/ß/g, 'ss')
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
-const DA = new Set(['ja', 'jap', 'ja ja', 'ja prosim', 'potrdi', 'potrdim', 'potrjujem', 'seveda', 'lahko', 'v redu', 'ok', 'okej', 'ja potrdi', 'ja lahko', 'ja shrani', 'shrani', 'ja v redu', 'kar', 'ja kar']);
-const NE = new Set(['ne', 'nee', 'ne hvala', 'preklici', 'prekliči', 'stop', 'ne ne', 'pusti', 'ni treba', 'ne zapisi', 'ne shrani', 'odpovej']);
+const DA_SL = new Set(['ja', 'jap', 'ja ja', 'ja prosim', 'potrdi', 'potrdim', 'potrjujem', 'seveda', 'lahko', 'v redu', 'ok', 'okej', 'ja potrdi', 'ja lahko', 'ja shrani', 'shrani', 'ja v redu', 'kar', 'ja kar']);
+const NE_SL = new Set(['ne', 'nee', 'ne hvala', 'preklici', 'prekliči', 'stop', 'ne ne', 'pusti', 'ni treba', 'ne zapisi', 'ne shrani', 'odpovej']);
+
+// Drugi jeziki (jezik pogovora iz seje); množice se zgradijo enkrat.
+const ZA_JEZIK = new Map<string, { da: Set<string>; ne: Set<string> }>();
+function dane(): { da: Set<string>; ne: Set<string> } {
+  const j = jezikOdjemalca();
+  if (j === 'sl') return { da: DA_SL, ne: NE_SL };
+  let m = ZA_JEZIK.get(j);
+  if (!m) {
+    m = { da: new Set(BESEDE[j].da), ne: new Set(BESEDE[j].ne) };
+    ZA_JEZIK.set(j, m);
+  }
+  return m;
+}
 
 /**
  * Ali je izjava kratka potrditev ("ja", "potrdi"). Samo cela kratka izjava:
@@ -75,12 +94,14 @@ const NE = new Set(['ne', 'nee', 'ne hvala', 'preklici', 'prekliči', 'stop', 'n
  */
 export function jePotrditev(izjava: string): boolean {
   const s = brezLocil(izjava);
-  return DA.has(s) || DA.has(s.replace(/ hvala$/, ''));
+  const { da } = dane();
+  return da.has(s) || da.has(s.replace(/ (hvala|thanks|thank you|danke|grazie)$/, ''));
 }
 
 export function jeZavrnitev(izjava: string): boolean {
   const s = brezLocil(izjava);
-  return NE.has(s) || NE.has(brezLocil(s));
+  const { ne } = dane();
+  return ne.has(s) || ne.has(brezLocil(s));
 }
 
 /** Uporabnik je izgovoril ime ene od možnosti ("Ano Novak") → ta možnost; sicer null. */

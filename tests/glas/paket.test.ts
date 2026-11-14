@@ -42,9 +42,8 @@ describe('paket za Asistent+', () => {
 });
 
 describe('jezik pogovora', () => {
-  it('slovenščina deluje; jeziki "kmalu" in neveljavni padejo na slovenščino', () => {
-    expect(jezikZaPogovor('sl')).toBe('sl');
-    expect(jezikZaPogovor('de')).toBe('sl');
+  it('vsi jeziki delujejo; neveljavni padejo na slovenščino', () => {
+    for (const j of ['sl', 'en', 'de', 'it', 'hr']) expect(jezikZaPogovor(j)).toBe(j);
     expect(jezikZaPogovor(undefined)).toBe('sl');
     expect(jezikZaPogovor('xx')).toBe('sl');
   });

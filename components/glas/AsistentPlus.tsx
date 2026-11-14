@@ -25,6 +25,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { besedila } from '@/lib/glas/odjemalec/jezikOdjemalca';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { DOGODEK_NASTAVITVE_ASISTENTA } from '@/lib/glas/odjemalec/nastavitve';
 import { Pogovor, type OdgovorOdjemalec, type StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
@@ -64,24 +65,7 @@ const GLASOVNO_OKNO_MS = 1500;
 /** Po ročni oddaji preverjamo napake v obrazcu toliko časa. */
 const PREVERJAJ_ROCNO_MS = 12_000;
 
-// Izgovorjeni izidi: glas asistenta je slovenski (Soniox Nina, jezik seje "sl").
-const GOVOR = {
-  shranjeno: 'Shranjeno.',
-  poslano: 'Poslano.',
-  zaprto: 'Prav, zaprto. Nič ni shranjeno.',
-  neObvescam: 'Prav, stranke ne obveščam.',
-  niShranjeno: 'Še ni shranjeno.',
-  preveri: 'Obrazec še ni shranjen. Poglejte ga, prosim.',
-};
-/** Uspeh po vrsti obrazca (trenutek potrditve). */
-const USPEH: Record<string, string> = {
-  nov_termin: 'Super, termin je zapisan.',
-  prestavi_termin: 'Super, termin je prestavljen.',
-  uredi_termin: 'Super, termin je posodobljen.',
-  uredi_stranko: 'Super, podatki stranke so posodobljeni.',
-  odsotnost: 'Super, odsotnost je zapisana.',
-  nova_stranka: 'Super, stranka je dodana.',
-};
+// Izgovorjeni izidi so v jeziku pogovora (jezikOdjemalca, nastavi ga seja).
 
 type OdprtObrazec = { el: HTMLElement | null; vprasanje?: string };
 
@@ -243,7 +227,7 @@ export function AsistentPlus() {
           return { caka: true };
         }
         posljiUkazObrazcu('preklici');
-        const govor = o.vprasanje ? GOVOR.neObvescam : GOVOR.zaprto;
+        const govor = o.vprasanje ? besedila().neObvescam : besedila().zaprto;
         return { govor };
       },
     });
@@ -289,7 +273,7 @@ export function AsistentPlus() {
       if (rocnoPreverjanje.current) clearInterval(rocnoPreverjanje.current);
       rocnoPreverjanje.current = null;
       if (shranjujeOd.current && Date.now() - shranjujeOd.current < SHRANI_OKNO_MS) {
-        const besedilo = bil?.vprasanje ? GOVOR.poslano : (USPEH[zadnjiObrazec.current?.vrsta ?? ''] ?? GOVOR.shranjeno);
+        const besedilo = bil?.vprasanje ? besedila().poslano : ((besedila().uspeh as Record<string, string>)[zadnjiObrazec.current?.vrsta ?? ''] ?? besedila().shranjeno);
         najavi(besedilo, 'uspeh');
         setUspeh((u) => ({ kljuc: (u?.kljuc ?? 0) + 1, besedilo }));
       }
@@ -299,7 +283,7 @@ export function AsistentPlus() {
       const d = (e as CustomEvent<IzidObrazca>).detail;
       if (!shranjujeOd.current || !d) return;
       shranjujeOd.current = 0;
-      najavi(d.napaka ? `${GOVOR.niShranjeno} ${d.napaka}` : GOVOR.preveri, 'napaka');
+      najavi(d.napaka ? `${besedila().niShranjeno} ${d.napaka}` : besedila().preveri, 'napaka');
     };
     window.addEventListener(DOGODEK_STANJE, ob);
     window.addEventListener(DOGODEK_IZID, izid);
@@ -360,7 +344,7 @@ export function AsistentPlus() {
         if (napaka) {
           ustavi();
           shranjujeOd.current = 0;
-          if (pogovor.current?.aktiven) najavi(`${GOVOR.niShranjeno} ${napaka}`, 'napaka');
+          if (pogovor.current?.aktiven) najavi(`${besedila().niShranjeno} ${napaka}`, 'napaka');
         } else if (Date.now() - zacetek > PREVERJAJ_ROCNO_MS) {
           ustavi();
           shranjujeOd.current = 0;

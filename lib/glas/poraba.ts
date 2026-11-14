@@ -4,6 +4,8 @@
 // Menjava cene = ena vrstica tukaj. Cene STT so OCENE — preveri pri ponudniku,
 // preden se zanesemo nanje (docs/glasovni-asistent-nacrt.md §7).
 
+import { jt } from './jeziki/t';
+
 export interface PorabaUkaza {
   sttPonudnik: string | null;
   sttSekunde: number;
@@ -88,10 +90,10 @@ export function sestejPorabo(a: PorabaUkaza, b: Partial<PorabaUkaza>): PorabaUka
 export function opozoriloKvote(porabljeno: number, kvota: number): string | null {
   if (kvota <= 0) return null;
   if (porabljeno >= kvota) {
-    return `Mesečna kvota glasovnih ukazov je porabljena (${porabljeno}/${kvota}). Nova se začne 1. v mesecu.`;
+    return jt('Mesečna kvota glasovnih ukazov je porabljena ({porabljeno}/{kvota}). Nova se začne 1. v mesecu.', { porabljeno, kvota });
   }
   if (porabljeno >= Math.ceil(kvota * 0.8)) {
-    return `Porabljenih je ${porabljeno} od ${kvota} glasovnih ukazov ta mesec.`;
+    return jt('Porabljenih je {porabljeno} od {kvota} glasovnih ukazov ta mesec.', { porabljeno, kvota });
   }
   return null;
 }

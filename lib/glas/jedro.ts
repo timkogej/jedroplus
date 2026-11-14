@@ -12,6 +12,8 @@
 //   * kvota se rezervira pred plačljivim ponudnikom in vrne ob napaki ponudnika;
 //   * vsak ukaz ima zapisan izid, porabo in strošek; revizija brez osebnih podatkov.
 
+import { IME_JEZIKA, zJezikom, type Jezik } from './jeziki/jezik';
+import { jt, kt } from './jeziki/t';
 import { preberiKonfiguracijo, type GlasKonfiguracija } from './konfiguracija';
 import { hitraPot } from './hitraPot';
 import { brezKontaktov, brezRazmisleka, vprasanjeZaGovor, zaGovor } from './govor';
@@ -93,9 +95,9 @@ export type OdgovorUkaza =
   | { ok: false; koda: string; sporocilo: string; http: number; ukazId?: string };
 
 const SPOROCILA_KVOTE: Record<string, { sporocilo: string; http: number }> = {
-  izklopljeno: { sporocilo: 'Glasovni asistent za to podjetje ni vklopljen.', http: 403 },
-  uporabnik_izklopljen: { sporocilo: 'Glasovni asistent je za vaš račun izklopljen.', http: 403 },
-  prehitro: { sporocilo: 'Preveč ukazov v kratkem času. Počakajte minuto.', http: 429 },
+  izklopljeno: { sporocilo: kt('Glasovni asistent za to podjetje ni vklopljen.'), http: 403 },
+  uporabnik_izklopljen: { sporocilo: kt('Glasovni asistent je za vaš račun izklopljen.'), http: 403 },
+  prehitro: { sporocilo: kt('Preveč ukazov v kratkem času. Počakajte minuto.'), http: 429 },
 };
 
 // Stabilen sistemski poziv (predpomnjen). Spremenljivi podatki gredo v uporabniško sporočilo.
@@ -121,6 +123,22 @@ Pravila:
 - "Aktivna stranka" in "Aktiven termin" v uvodu sta tisto, o čemer se pogovarjamo. "Ta stranka", "ona", "on", "njen", "njegov", "ji", "mu", "jo", "njej", "termin", "ta termin" pomeni aktivno stranko oziroma aktiven termin: orodje pokliči s stranka_id in termin_id iz uvoda (stranka = njeno ime), ne sprašuj, o kom ali katerem terminu govori. Ko uporabnik imenuje drugo stranko (tudi popravek "ne, za Ano Novak"), takoj pokliči orodje z novim imenom in stranka_id null.
 - Kadar odgovarjaš sam (brez orodja), govori kot prijazna, hitra receptorka: en ali dva kratka, naravna stavka. Nikoli ne daj navodil za gumbe ali zaslon ("pritisnite", "preverite in shranite", "v obrazcu izberite").`;
 
+/**
+ * Sistemski poziv za jezik pogovora. Slovenščina je nespremenjen SISTEM (predpomnjen);
+ * drugi jeziki dobijo navodilo za jezik odgovora in obliko datumov za orodja.
+ */
+export function sistemZaJezik(jezik: Jezik | undefined): string {
+  if (!jezik || jezik === 'sl') return SISTEM;
+  const ime = IME_JEZIKA[jezik];
+  return `${SISTEM.replace('v slovenščini, brez oblikovanja', `v jeziku ${ime.lastno}, brez oblikovanja`)}
+
+JEZIK POGOVORA: ${ime.sl} (${ime.lastno}).
+- Uporabnik govori ${ime.lastno}. Vsak tvoj odgovor in vprašanje je samo v jeziku ${ime.lastno}, nikoli v slovenščini, tudi če so podatki iz orodij ali primeri zgoraj slovenski.
+- Imena strank, zaposlenih, storitev in lokacij ohrani točno tako, kot so zapisana (ne prevajaj jih). V parametre orodij jih zapiši v osnovni obliki.
+- Datume orodjem podaj VEDNO kot YYYY-MM-DD (izračunaj jih iz današnjega datuma in dneva v uvodu), ure kot HH:MM v 24-urnem zapisu. Relativne izraze ("tomorrow", "next Friday", "in six weeks", "morgen", "domani", "sutra") pretvori sam. Pri "kot_zadnjic" in "čez X tednov" podaj izračunan datum.
+- Primeri ukazov zgoraj so slovenski; enako velja za iste ukaze v jeziku ${ime.lastno} (npr. "book Anna Novak" = "zapiši nov termin za Anno Novak").`;
+}
+
 const PRAZEN = /\p{L}{2,}/u;
 
 /**
@@ -144,7 +162,12 @@ export function uskladiVhod(shema: JsonShema, vhod: unknown): unknown {
   return izhod;
 }
 
-export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorUkaza> {
+/** Ukaz v jeziku pogovora podjetja (vsa besedila, datumi in ure v tem jeziku). */
+export function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorUkaza> {
+  return zJezikom(v.k.jezik, () => obdelajUkazVJeziku(v, d));
+}
+
+async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorUkaza> {
   const konf = d.konf ?? preberiKonfiguracijo();
   const ura = d.ura ?? Date.now;
   const t0 = ura();
@@ -153,10 +176,10 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
 
   if (!imaPravico(k, 'glas.uporaba')) {
     await d.shramba.revizija({ podjetje: k.podjetje, userId: k.userId, dogodek: 'ni_pravice', orodje: null });
-    return { ok: false, koda: 'ni_pravice', sporocilo: 'Za glasovnega asistenta nimate pravice.', http: 403 };
+    return { ok: false, koda: 'ni_pravice', sporocilo: jt('Za glasovnega asistenta nimate pravice.'), http: 403 };
   }
   if (!v.zvok && !v.besedilo?.trim()) {
-    return { ok: false, koda: 'prazno', sporocilo: 'Ni posnetka ali besedila.', http: 400 };
+    return { ok: false, koda: 'prazno', sporocilo: jt('Ni posnetka ali besedila.'), http: 400 };
   }
 
   const rez = await d.shramba.rezervirajUkaz(k.podjetje, k.userId, v.vhod);
@@ -167,11 +190,12 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       return {
         ok: false,
         koda: 'kvota',
-        sporocilo: opozoriloKvote(rez.porabljeno ?? 0, rez.kvota ?? 0) ?? 'Mesečna kvota je porabljena.',
+        sporocilo: opozoriloKvote(rez.porabljeno ?? 0, rez.kvota ?? 0) ?? jt('Mesečna kvota je porabljena.'),
         http: 402,
       };
     }
-    const s = SPOROCILA_KVOTE[rez.koda] ?? { sporocilo: 'Ukaza ni mogoče obdelati.', http: 403 };
+    const sk = SPOROCILA_KVOTE[rez.koda];
+    const s = sk ? { ...sk, sporocilo: jt(sk.sporocilo) } : { sporocilo: jt('Ukaza ni mogoče obdelati.'), http: 403 };
     return { ok: false, koda: rez.koda, ...s };
   }
   const ukazId = rez.ukazId;
@@ -235,7 +259,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       const t = ura();
       const namigi = await zberiNamige(d.podatki, zdaj.datum, konf.najvecNamigov).catch(() => [] as string[]);
       casi.namigi = ura() - t;
-      const s = await stt.prepisi({ zvok: v.zvok, jezik: 'sl', namigi });
+      const s = await stt.prepisi({ zvok: v.zvok, jezik: k.jezik ?? 'sl', namigi });
       casi.stt = ura() - t - casi.namigi;
       poraba = sestejPorabo(poraba, { sttPonudnik: stt.ime, sttSekunde: s.sekunde, sttZNamigi: s.zNamigi });
       prepis = s.besedilo;
@@ -251,7 +275,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
 
     if (!PRAZEN.test(prepis)) {
       await zakljuci({ status: 'napaka', napaka_koda: 'nerazumljivo' }, true);
-      return { ok: false, koda: 'nerazumljivo', sporocilo: 'Nisem razumel. Ponovite, prosim.', http: 422, ukazId };
+      return { ok: false, koda: 'nerazumljivo', sporocilo: jt('Nisem razumel. Ponovite, prosim.'), http: 422, ukazId };
     }
 
     // 2. Hitra pot (brez LLM) — samo branje in samo, če je orodje dovoljeno
@@ -262,7 +286,8 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     // Izbrana možnost je stranka (dva Tima): postane aktivna. ID preveri RLS.
     if (v.izbira && (await d.podatki.stranka(v.izbira.id).catch(() => null))) fokus = { stranka_id: v.izbira.id };
 
-    const hitro = v.izbira ? null : hitraPot(prepis);
+    // Hitra pot pozna samo slovenske stavke.
+    const hitro = v.izbira || (k.jezik && k.jezik !== 'sl') ? null : hitraPot(prepis);
     const hitroOrodje = hitro ? dovoljena.find((o) => o.ime === hitro.orodje && o.razred === 'branje') : undefined;
     if (hitro && hitroOrodje && hitroOrodje.razred === 'branje') {
       const t = ura();
@@ -298,7 +323,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     for (let krog = 0; krog < konf.najvecKrogovLlm; krog++) {
       const t = ura();
       const o = await llm.pogovor({
-        sistem: SISTEM,
+        sistem: sistemZaJezik(k.jezik),
         orodja: dovoljena.map((x) => ({ ime: x.ime, opis: x.opis, shema: x.shema, strogo: x.razred !== 'branje' })),
         sporocila,
         najvecIzhoda: 600,
@@ -312,9 +337,9 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
         llmIzhod: o.poraba.izhod,
       });
 
-      if (o.konec === 'zavrnitev') return await koncaj({ status: 'odgovor', odgovor: 'Tega ne morem narediti.' });
+      if (o.konec === 'zavrnitev') return await koncaj({ status: 'odgovor', odgovor: jt('Tega ne morem narediti.') });
       if (o.klici.length === 0) {
-        const odgovor = brezRazmisleka(o.besedilo || 'V redu.');
+        const odgovor = brezRazmisleka(o.besedilo || jt('V redu.'));
         const status = zadnjeVprasanje || /\?\s*$/.test(odgovor) ? 'vprasanje' : 'odgovor';
         if (zasebni.length) {
           return await koncaj({
@@ -394,7 +419,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     }
     return await koncaj({
       status: zadnjeVprasanje ? 'vprasanje' : 'odgovor',
-      odgovor: zadnjeVprasanje?.besedilo ?? 'Ukaza nisem uspel dokončati. Poskusite krajše.',
+      odgovor: zadnjeVprasanje?.besedilo ?? jt('Ukaza nisem uspel dokončati. Poskusite krajše.'),
       vprasanje: zadnjeVprasanje,
     });
   } catch (e) {
@@ -406,15 +431,15 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
         koda,
         sporocilo:
           koda === 'stt_ni_na_voljo'
-            ? 'Razpoznava govora trenutno ne deluje. Nič ni bilo spremenjeno. Poskusite znova čez trenutek.'
-            : 'Asistent trenutno ne deluje. Nič ni bilo spremenjeno. Poskusite znova čez trenutek.',
+            ? jt('Razpoznava govora trenutno ne deluje. Nič ni bilo spremenjeno. Poskusite znova čez trenutek.')
+            : jt('Asistent trenutno ne deluje. Nič ni bilo spremenjeno. Poskusite znova čez trenutek.'),
         http: 503,
         ukazId,
       };
     }
     await zakljuci({ status: 'napaka', napaka_koda: 'notranja' }, true);
     console.error(JSON.stringify({ glas: 'napaka', ukaz: ukazId, vrsta: e instanceof Error ? e.name : 'neznano' }));
-    return { ok: false, koda: 'notranja', sporocilo: 'Prišlo je do napake. Nič ni bilo spremenjeno.', http: 500, ukazId };
+    return { ok: false, koda: 'notranja', sporocilo: jt('Prišlo je do napake. Nič ni bilo spremenjeno.'), http: 500, ukazId };
   }
 
   async function koncaj(r: {
@@ -432,7 +457,7 @@ export async function obdelajUkaz(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     // Datum na koncu stavka ("13. 11." + ".") ne sme dati dvojne pike.
     r = { ...r, odgovor: r.odgovor.replace(/(\d\.)\.(?!\.)/g, '$1') };
     let govor = r.govor ?? zaGovor(r.odgovor);
-    if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} Potrdim?`;
+    if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} ${jt('Potrdim?')}`;
     else if (r.vprasanje?.moznosti?.length && !r.govor) govor = vprasanjeZaGovor(r.vprasanje);
     if (v.glas) poraba = sestejPorabo(poraba, { ttsPonudnik: v.glas.ponudnik, ttsZnaki: govor.length });
     let zvok: { mime: string; base64: string } | null = null;
@@ -672,16 +697,23 @@ const HTTP_POTRDITVE: Record<KodaPotrditve, number> = {
   ni_najden: 404, poteklo: 410, zavrnjeno: 410, izvaja: 409, napaka: 422, ni_pravice: 403, spremenjeno: 409, neznano_orodje: 422,
 };
 
-export async function potrdiPredlog(
+export function potrdiPredlog(
+  v: { k: Kontekst; predlogId: string; zeton: string },
+  d: Pick<Odvisnosti, 'shramba' | 'podatki' | 'orodja' | 'ura'>
+): Promise<OdgovorPotrditve> {
+  return zJezikom(v.k.jezik, () => potrdiPredlogVJeziku(v, d));
+}
+
+async function potrdiPredlogVJeziku(
   v: { k: Kontekst; predlogId: string; zeton: string },
   d: Pick<Odvisnosti, 'shramba' | 'podatki' | 'orodja' | 'ura'>
 ): Promise<OdgovorPotrditve> {
   const { k } = v;
   const ura = d.ura ?? Date.now;
-  const napaka = (koda: KodaPotrditve): OdgovorPotrditve => ({ ok: false, koda, sporocilo: SPOROCILA_POTRDITVE[koda], http: HTTP_POTRDITVE[koda] });
+  const napaka = (koda: KodaPotrditve): OdgovorPotrditve => ({ ok: false, koda, sporocilo: jt(SPOROCILA_POTRDITVE[koda]), http: HTTP_POTRDITVE[koda] });
 
   if (!imaPravico(k, 'glas.uporaba')) {
-    return { ok: false, koda: 'ni_pravice_glas', sporocilo: 'Za glasovnega asistenta nimate pravice.', http: 403 };
+    return { ok: false, koda: 'ni_pravice_glas', sporocilo: jt('Za glasovnega asistenta nimate pravice.'), http: 403 };
   }
   if (!/^[A-Za-z0-9_-]{20,100}$/.test(v.zeton)) return napaka('ni_najden');
 
@@ -690,7 +722,7 @@ export async function potrdiPredlog(
     if (z.koda === 'izvedeno') {
       // Idempotenca: ponovni klic vrne isti rezultat, nič se ne izvede znova.
       const r = (z.rezultat ?? {}) as { sporocilo?: string };
-      return { ok: true, sporocilo: r.sporocilo ?? 'Že izvedeno.', rezultat: z.rezultat, ponovljeno: true };
+      return { ok: true, sporocilo: r.sporocilo ?? jt('Že izvedeno.'), rezultat: z.rezultat, ponovljeno: true };
     }
     return napaka(z.koda);
   }

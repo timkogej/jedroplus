@@ -5,6 +5,7 @@
 // pred izvedbo, da se ne izvede nekaj drugega, kot je bilo prikazano.
 
 import { createHash, randomBytes } from 'node:crypto';
+import { kt } from './jeziki/t';
 
 export function novZeton(): string {
   return randomBytes(32).toString('base64url');
@@ -44,13 +45,14 @@ export type KodaPotrditve =
   | 'spremenjeno'
   | 'neznano_orodje';
 
+/** Ključi prevodov (jt() ob uporabi v jedru). */
 export const SPOROCILA_POTRDITVE: Record<KodaPotrditve, string> = {
-  ni_najden: 'Predloga ni mogoče najti.',
-  poteklo: 'Predlog je potekel. Ponovite ukaz.',
-  zavrnjeno: 'Predlog je bil preklican.',
-  izvaja: 'Predlog se že izvaja.',
-  napaka: 'Izvedba ni uspela. Nič ni bilo spremenjeno.',
-  ni_pravice: 'Za to dejanje nimate pravice.',
-  spremenjeno: 'Predlog ni več veljaven. Ponovite ukaz.',
-  neznano_orodje: 'To dejanje ni na voljo.',
+  ni_najden: kt('Predloga ni mogoče najti.'),
+  poteklo: kt('Predlog je potekel. Ponovite ukaz.'),
+  zavrnjeno: kt('Predlog je bil preklican.'),
+  izvaja: kt('Predlog se že izvaja.'),
+  napaka: kt('Izvedba ni uspela. Nič ni bilo spremenjeno.'),
+  ni_pravice: kt('Za to dejanje nimate pravice.'),
+  spremenjeno: kt('Predlog ni več veljaven. Ponovite ukaz.'),
+  neznano_orodje: kt('To dejanje ni na voljo.'),
 };

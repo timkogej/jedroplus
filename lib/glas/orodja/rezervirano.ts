@@ -15,8 +15,9 @@
 
 import { z } from 'zod';
 import type { PisalnoOrodje } from './tipi';
+import { jt } from '../jeziki/t';
 
-const NEIZVEDENO = async () => ({ sporocilo: 'To dejanje še ni na voljo.' });
+const NEIZVEDENO = async () => ({ sporocilo: jt('To dejanje še ni na voljo.') });
 
 function rezervirano<P>(ime: string, opis: string, pravica: PisalnoOrodje<P>['pravica'], shema: PisalnoOrodje<P>['shema'], vhod: z.ZodType<P>): PisalnoOrodje<P> {
   return {
