@@ -34,6 +34,8 @@ export interface KontekstPogovora {
   stranka_id?: string;
   termin_id?: string;
   termin_datum?: string;
+  /** Zadnja luknja iz kandidati_za_luknjo (za »pošlji vsem«, »pošlji ji predlog«). */
+  luknja?: { datum: string; od: string; oseba_id: string };
 }
 
 export interface PrejsnjiUkaz {
@@ -53,6 +55,11 @@ export function preberiKontekst(x: unknown): KontekstPogovora | null {
     termin_datum: typeof o.termin_datum === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.termin_datum) ? o.termin_datum : undefined,
   };
   if (!k.termin_id) delete k.termin_datum;
+  const l = o.luknja as Record<string, unknown> | undefined;
+  if (l && typeof l === 'object' && typeof l.datum === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(l.datum)
+    && typeof l.od === 'string' && /^\d{2}:\d{2}$/.test(l.od) && id(l.oseba_id)) {
+    k.luknja = { datum: l.datum, od: l.od, oseba_id: id(l.oseba_id)! };
+  }
   for (const kljuc of Object.keys(k) as (keyof KontekstPogovora)[]) if (k[kljuc] === undefined) delete k[kljuc];
   return Object.keys(k).length ? k : null;
 }

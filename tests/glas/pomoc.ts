@@ -51,6 +51,77 @@ export interface Salon {
   analitika?: { termini: Record<string, unknown>[]; storitve: Record<string, unknown>[]; osebe: Record<string, unknown>[] };
 }
 
+
+export function terminZ5(id: string, datum: string, od: string, doo: string, osebaId: string, idStranke: string, storitev: string, status: TerminPovzetek['status'] = 'completed'): TerminPovzetek {
+  return { id, vrstica: `v-${id}`, idStranke, stranka: idStranke, datum, zacetek: od, konec: doo, storitev, osebaId, oseba: osebaId === 'o1' ? 'Tina' : 'Urška', status, lokacijaId: null };
+}
+
+/** Salon za zapolnitev luknje (petek 13. 11., Tina prosta 10.30–16.00); tests/glas/zapolnitev.test.ts. */
+export function salonZapolnitev(): Salon {
+  const t = terminZ5;
+  const LUKNJA_DAN = '2026-11-13';
+  return {
+    ime: 'Salon Z',
+    stranke: [
+      { id: '501', ime: 'Mateja', priimek: 'Kos', zadnjaInterakcija: null },
+      { id: '502', ime: 'Ana', priimek: 'Novak', zadnjaInterakcija: null },
+      { id: '503', ime: 'Nina', priimek: 'Bela', zadnjaInterakcija: null },
+      { id: '504', ime: 'Petra', priimek: 'Neprihod', zadnjaInterakcija: null },
+      { id: '505', ime: 'Eva', priimek: 'Naprej', zadnjaInterakcija: null },
+      { id: '506', ime: 'Maja', priimek: 'Brez', zadnjaInterakcija: null },
+      { id: '507', ime: 'Lara', priimek: 'Zasedena', zadnjaInterakcija: null },
+      { id: '508', ime: 'Zala', priimek: 'Jutro', zadnjaInterakcija: null },
+    ],
+    storitve: [
+      { id: 's1', naziv: 'Barvanje', trajanjeMin: 90, aktivna: true },
+      { id: 's2', naziv: 'Striženje', trajanjeMin: 30, aktivna: true },
+    ],
+    osebe: [
+      { id: 'o1', ime: 'Tina', priimek: 'Kos', aktivna: true, urnik: null, imaUrnikPodjetja: true, opravljaVse: true, storitve: [] },
+      { id: 'o2', ime: 'Urška', priimek: 'Bele', aktivna: true, urnik: null, imaUrnikPodjetja: true, opravljaVse: true, storitve: [] },
+    ],
+    termini: [
+      // Tina na dan luknje: 9.00–10.30 zasedeno, nato prosto do 16.00.
+      t('z1', LUKNJA_DAN, '09:00', '10:30', 'o1', '508', 'Barvanje', 'scheduled'),
+      // Mateja: kasnejši termin pri Tini (gre v luknjo) → skupina 1.
+      t('m1', '2026-11-20', '10:00', '11:00', 'o1', '501', 'Striženje', 'scheduled'),
+      // Ana: barvanje vsakih 42 dni, zadnjič 1. 10. → 43 dni do luknje (1,02 ×) → skupina 2.
+      t('a1', '2026-06-12', '14:00', '15:30', 'o2', '502', 'Barvanje'),
+      t('a2', '2026-07-24', '14:00', '15:30', 'o2', '502', 'Barvanje'),
+      t('a3', '2026-09-04', '14:00', '15:30', 'o2', '502', 'Barvanje'),
+      t('a4', '2026-10-01', '14:00', '15:30', 'o2', '502', 'Barvanje'),
+      // Nina: 2-krat pri Tini ob 10h → skupina 3.
+      t('n1', '2026-03-10', '10:00', '10:30', 'o1', '503', 'Striženje'),
+      t('n2', '2026-08-10', '11:00', '11:30', 'o1', '503', 'Pramenski'),
+      // Petra: navada, a 2 neprihoda v letu → izločena.
+      t('p1', '2026-04-10', '10:00', '10:30', 'o1', '504', 'Striženje'),
+      t('p2', '2026-06-10', '10:00', '10:30', 'o1', '504', 'Striženje'),
+      t('p3', '2026-09-10', '10:00', '10:30', 'o1', '504', 'Striženje', 'no_show'),
+      t('p4', '2026-10-10', '10:00', '10:30', 'o1', '504', 'Striženje', 'no_show'),
+      // Eva: ritem bi ustrezal, a ima prihodnji termin (pri Urški) → izločena.
+      t('e1', '2026-08-01', '10:00', '10:30', 'o1', '505', 'Striženje'),
+      t('e2', '2026-09-01', '10:00', '10:30', 'o1', '505', 'Striženje'),
+      t('e3', '2026-10-01', '10:00', '10:30', 'o1', '505', 'Striženje'),
+      t('e4', '2026-12-01', '10:00', '10:30', 'o2', '505', 'Striženje', 'scheduled'),
+      // Maja: kasnejši termin pri Tini, a brez telefona → ni na seznamu.
+      t('j1', '2026-11-25', '12:00', '12:30', 'o1', '506', 'Striženje', 'scheduled'),
+      // Lara: navada pri Tini, a na dan luknje ima termin ob 11h (prekriva) → izločena.
+      t('l1', '2026-05-10', '10:00', '10:30', 'o1', '507', 'Striženje'),
+      t('l2', '2026-07-10', '10:00', '10:30', 'o1', '507', 'Striženje'),
+      t('l3', LUKNJA_DAN, '11:00', '11:30', 'o2', '507', 'Striženje', 'scheduled'),
+    ],
+    podrobnosti: {
+      '501': { telefon: '041 111 501', marketing: null },
+      '502': { telefon: '041 111 502', marketing: true, jezik: 'slo' },
+      '503': { telefon: '041 111 503', marketing: false },
+      '504': { telefon: '041 111 504', marketing: true },
+      '505': { telefon: '041 111 505', marketing: true },
+      '507': { telefon: '041 111 507', marketing: true },
+      '508': { telefon: '041 111 508', marketing: true },
+    },
+  };
+}
+
 export const SALONI: Record<string, Salon> = {
   A1: {
     stranke: [
@@ -130,6 +201,8 @@ export const SALONI: Record<string, Salon> = {
   },
 };
 
+SALONI.Z5 = salonZapolnitev();
+
 function t(
   id: string, datum: string, zacetek: string, konec: string, osebaId: string, stranka: string, storitev: string,
   idStranke: string, status: TerminPovzetek['status'] = 'scheduled'
@@ -148,6 +221,9 @@ export function podatkiPomnilnik(podjetje: string, zapiski: NovZapisek[] = []): 
     async termini(od, doo, m) {
       const r = s.termini.filter((x) => x.datum >= od && x.datum <= doo).sort((a, b) => a.datum.localeCompare(b.datum));
       return m?.padajoce ? r.reverse() : r;
+    },
+    async zgodovinaTerminov(od, doo) {
+      return s.termini.filter((x) => x.datum >= od && x.datum <= doo);
     },
     async zadnjiTermin(id, pred) {
       return s.termini.filter((x) => x.idStranke === id && x.datum < pred && x.status !== 'cancelled').sort((a, b) => b.datum.localeCompare(a.datum))[0] ?? null;
@@ -224,6 +300,7 @@ export function kontekst(p: Partial<Kontekst> = {}): Kontekst {
 export const NASTAVITVE: Record<string, NastavitvePomnilnik> = {
   A1: { vklopljeno: true, kvota: 400, naMinuto: 10 },
   B2: { vklopljeno: true, kvota: 400, naMinuto: 10 },
+  Z5: { vklopljeno: true, kvota: 400, naMinuto: 10 },
 };
 
 /** Odvisnosti z lažnimi ponudniki; ura se da premikati (`ura.zdaj += …`). */

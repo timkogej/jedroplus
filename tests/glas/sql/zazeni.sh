@@ -21,4 +21,5 @@ psql_v < supabase/migrations/1793600000_glas_kontekst.sql
 psql_v < tests/glas/sql/preizkus.sql
 psql_v < supabase/migrations/1793700000_glas_sporocila.sql
 psql_v < supabase/migrations/1793700000_glas_sporocila.sql
+psql_v < supabase/migrations/1793700001_glas_sporocila_ponudba.sql
 psql_v < tests/glas/sql/preizkus_sporocila.sql

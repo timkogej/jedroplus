@@ -19,7 +19,7 @@ import { zJezikom } from '../jeziki/jezik';
 import { jt, kt } from '../jeziki/t';
 import type { Predogled, RezultatOrodja, TerminPovzetek } from '../tipi';
 import { NAJVEC_EMAIL, NAJVEC_SMS, ocistiSms, preveriBesedilo, skritEmail, skritTelefon, zPodpisom } from '../sporocila/besedilo';
-import { OMEJITEV_NA_PODJETJE, OMEJITEV_NA_STRANKO, type Kanal } from '../sporocila/tipi';
+import { OMEJITEV_NA_PODJETJE, OMEJITEV_NA_STRANKO, type IzidPosiljanja, type Kanal } from '../sporocila/tipi';
 import { datumIzParametra } from './branje';
 import { samoSvojeUrejanje } from './obrazci';
 import { razresiStranko, ID_STRANKE } from './stranke';
@@ -102,7 +102,7 @@ async function izberiTermin(
   return { termin: izbor[0] };
 }
 
-function zavrnitevBesedila(besedilo: string): RezultatOrodja | null {
+export function zavrnitevBesedila(besedilo: string): RezultatOrodja | null {
   const r = preveriBesedilo(besedilo);
   if (r === 'ponudba') return { sporocilo: jt('Sporočilo o terminu ne sme vsebovati ponudb, cen ali povezav. Ni poslano.') };
   if (r === 'telefon') return { sporocilo: jt('Sporočilo ne sme vsebovati telefonskih številk. Ni poslano.') };
@@ -210,30 +210,43 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
     const rez = await o.sporocila.rezerviraj({
       podjetje: o.k.podjetje, userId: o.k.userId, ukazId: o.ukazId, idStranke: p.idStranke, idTermina: p.idTermina, kanal: p.kanal, dolzina: p.besedilo.length,
     });
-    if (!rez.ok) {
-      return ni(rez.koda === 'stranka'
-        ? jt('Tej stranki so danes prek asistenta že poslana {n} sporočila (dnevna omejitev). Ni poslano.', { n: OMEJITEV_NA_STRANKO })
-        : jt('Dosežena je dnevna omejitev sporočil prek asistenta ({n}). Ni poslano.', { n: OMEJITEV_NA_PODJETJE }));
-    }
+    if (!rez.ok) return ni(omejitevSporocil(rez.koda));
 
     const izid = await o.sporocila.poslji({
       id: rez.id, podjetje: o.k.podjetje, kanal: p.kanal, prejemnik, besedilo: p.besedilo, zadeva: p.zadeva,
       imeSalona: await o.podatki.imePodjetja(), jezik: p.jezik, idStranke: p.idStranke, idTermina: p.idTermina,
     });
-    const podatki = { sporocilo_id: rez.id, termin_id: p.idTermina, stranka_id: p.idStranke, kanal: p.kanal };
-    switch (izid.status) {
-      case 'poslano':
-        return { sporocilo: p.kanal === 'sms' ? jt('SMS je poslan.') : jt('E-pošta je poslana.'), podatki };
-      case 'kvota':
-        return ni(jt('Mesečni SMS-i so porabljeni. Sporočilo ni bilo poslano.'));
-      case 'blokirano':
-        return ni(jt('SMS-ov v državo te številke ne pošiljamo. Sporočilo ni bilo poslano.'));
-      case 'neznano':
-        return ni(jt('Ne vem, ali je bilo poslano. Preverite dnevnik SMS, preden pošljete znova.'));
-      default:
-        return ni(izid.razlog === 'sms_disabled'
-          ? jt('SMS-i v vašem paketu niso vklopljeni. Sporočilo ni bilo poslano.')
-          : jt('Sporočilo ni bilo poslano. Poskusite znova čez trenutek.'));
-    }
+    return izidPosiljanja(izid, p.kanal, { sporocilo_id: rez.id, termin_id: p.idTermina, stranka_id: p.idStranke, kanal: p.kanal });
   },
 };
+
+/** Dnevna omejitev sporočil prek asistenta je dosežena. */
+export function omejitevSporocil(koda: 'stranka' | 'podjetje'): string {
+  return koda === 'stranka'
+    ? jt('Tej stranki so danes prek asistenta že poslana {n} sporočila (dnevna omejitev). Ni poslano.', { n: OMEJITEV_NA_STRANKO })
+    : jt('Dosežena je dnevna omejitev sporočil prek asistenta ({n}). Ni poslano.', { n: OMEJITEV_NA_PODJETJE });
+}
+
+/** Izid pošiljanja (n8n) → odgovor uporabniku. */
+export function izidPosiljanja(izid: IzidPosiljanja, kanal: Kanal, podatki: Record<string, unknown>): RezultatOrodja {
+  const ni = (sporocilo: string): RezultatOrodja => ({ sporocilo, neuspeh: true });
+  switch (izid.status) {
+    case 'poslano':
+      return { sporocilo: kanal === 'sms' ? jt('SMS je poslan.') : jt('E-pošta je poslana.'), podatki };
+    case 'kvota':
+      return ni(jt('Mesečni SMS-i so porabljeni. Sporočilo ni bilo poslano.'));
+    case 'blokirano':
+      return ni(jt('SMS-ov v državo te številke ne pošiljamo. Sporočilo ni bilo poslano.'));
+    case 'neznano':
+      return ni(jt('Ne vem, ali je bilo poslano. Preverite dnevnik SMS, preden pošljete znova.'));
+    default:
+      return ni(izid.razlog === 'sms_disabled'
+        ? jt('SMS-i v vašem paketu niso vklopljeni. Sporočilo ni bilo poslano.')
+        : jt('Sporočilo ni bilo poslano. Poskusite znova čez trenutek.'));
+  }
+}
+
+/** Ime jezika za navodilo modelu (»Stranka prejema sporočila v jeziku: …«). */
+export function imeJezika(j: Jezik): string {
+  return jt(IME_JEZIKA[j]);
+}

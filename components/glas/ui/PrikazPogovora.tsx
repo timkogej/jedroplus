@@ -186,6 +186,24 @@ function Kartice({
     );
   }
   const akcije = (zadnji?.akcije ?? []).filter((a) => /^(tel|mailto):/.test(a.href));
+  if (zadnji?.status !== 'predlog' && akcije.some((a) => a.oznaka)) {
+    // Več strank (kandidati za luknjo): seznam klicev z imeni; klic začne uporabnik.
+    return (
+      <div className="ap-vstop mt-6 flex w-full max-w-[420px] flex-col gap-2" style={{ animationDelay: '120ms' }}>
+        {akcije.map((a) => (
+          <a
+            key={a.href}
+            href={a.href}
+            className="ap-steklo flex h-12 items-center gap-3 rounded-2xl px-4 text-left text-[15px] font-semibold text-label transition-transform active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-violet)] md:h-11 md:text-sm"
+          >
+            <Phone size={17} weight="fill" className="shrink-0" aria-hidden />
+            <span className="min-w-0 flex-1 truncate">{a.oznaka}</span>
+            <span className="shrink-0 text-[13px] font-medium text-label-secondary">{t('poklici')}</span>
+          </a>
+        ))}
+      </div>
+    );
+  }
   if (zadnji?.status !== 'predlog' && akcije.length) {
     // Samo povezava: klic ali pošto začne uporabnik s pritiskom, asistent nikoli sam.
     return (

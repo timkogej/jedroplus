@@ -162,6 +162,28 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
       return ((data ?? []) as Vrstica[]).map(vTermin);
     },
 
+    async zgodovinaTerminov(od, doo) {
+      // Po straneh (PostgREST vrne največ 1000 vrstic naenkrat); stabilen vrstni red po id.
+      const STRAN = 1000;
+      const vse: TerminPovzetek[] = [];
+      for (let i = 0; i < 20; i++) {
+        const { data, error } = await seja
+          .from('Termini')
+          .select(STOLPCI_TERMINA)
+          .eq('ID podjetja', podjetje)
+          .gte('Datum', od)
+          .lte('Datum', doo)
+          .is('deleted_at', null)
+          .order('id', { ascending: true })
+          .range(i * STRAN, i * STRAN + STRAN - 1);
+        if (error) throw new Error(`zgodovina terminov: ${error.code ?? 'napaka'}`);
+        const vrstice = (data ?? []) as Vrstica[];
+        vse.push(...vrstice.map(vTermin));
+        if (vrstice.length < STRAN) break;
+      }
+      return vse;
+    },
+
     async zadnjiTermin(idStranke, predDatumom) {
       const { data, error } = await seja
         .from('Termini')

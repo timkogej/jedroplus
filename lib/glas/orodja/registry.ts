@@ -15,6 +15,7 @@ import { kdoDela, naslednjaStranka, prosteLuknjeOrodje, resursiDan } from './pre
 import { povzetekDneva } from './povzetek';
 import { stevilkeSalona } from './stevilke';
 import { sporociStranki } from './sporocila';
+import { kandidatiZaLuknjo, ponudiProstiTermin } from './zapolnitev';
 import { odpriStran, pomocAplikacija } from './pomoc';
 import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, urediStranko, urediTermin, vpisiOdsotnost } from './obrazci';
 
@@ -25,6 +26,8 @@ export const VSA_ORODJA: readonly Orodje[] = [
   povzetekDneva,
   stevilkeSalona,
   sporociStranki,
+  kandidatiZaLuknjo,
+  ponudiProstiTermin,
   prviProsti,
   naslednjaStranka,
   prosteLuknjeOrodje,

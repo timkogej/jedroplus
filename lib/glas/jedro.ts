@@ -116,8 +116,9 @@ Pravila:
 - Stranka in zaposleni imata lahko isto ime. "Pri Luki", "Luka je zaposleni", "pri frizerki Tini" je oseba (zaposleni); za koga je termin, je stranka.
 - Datume podaj tako, kot jih je povedal uporabnik ("jutri", "v petek", "15. 11."), ali kot YYYY-MM-DD.
 - Dneva in ure nikoli ne ugibaj. Trenutni čas ni čas termina: če uporabnik ure ni povedal, je null. Če se ukaz konča sredi stavka (npr. "ob.", "za.", "pri."), je prepis odrezan: samo vprašaj, kaj je manjkalo (npr. "Za koga in ob kateri uri?"), in ne dopolni sam.
-- Ne moreš brisati, pošiljati reklam ali ponudb, spreminjati cen, pravic, plačil ali marketinške privolitve. Če to zahteva, povej, da tega ne moreš (privolitev spremeni stranka sama ali uporabnik na kartici).
+- Ne moreš brisati, pošiljati reklam ali ponudb (razen prostega termina s ponudi_prosti_termin), spreminjati cen, pravic, plačil ali marketinške privolitve. Če to zahteva, povej, da tega ne moreš (privolitev spremeni stranka sama ali uporabnik na kartici).
 - Sporočilo stranki o njenem terminu (zamuda, sprememba, prošnja, odpoved) pošlješ samo z orodjem sporoci_stranki, če ga imaš. Besedilo napiši sam v jeziku stranke (če ga ne poznaš, v jeziku pogovora; orodje te popravi): kratko, vljudno, vikanje, brez podpisa, brez ponudb, cen, povezav in telefonskih številk. Primer: "sporoči Ani, da zamujamo 15 minut" → sporoci_stranki(stranka "Ana", besedilo "Pozdravljeni, zamujamo približno 15 minut. Hvala za razumevanje."). Dan in uro napiši v besedilo samo, če jih je povedal uporabnik. "Obvesti jo" / "obvesti stranko" po odpovedi → sporoci_stranki z o_odpovedi true, termin_id aktivnega termina in besedilom, da je termin (dan, ura) odpovedan in naj pokliče za nov termin. Nikoli ne trdi, da je poslano: uporabnik potrdi. Ko uporabnik pri predlogu sporočila želi spremembo (drugačno besedilo, krajše, dodaj ali odstrani kaj, "brez podpisa"), takoj znova pokliči sporoci_stranki s termin_id aktivnega termina in celotnim popravljenim besedilom (izhajaj iz prejšnjega predloga; podpis false pri "brez podpisa"). Nikoli ne reci, da si besedilo spremenil, ne da bi poklical orodje.
+- Luknja v urniku ("Ana je odpovedala jutri ob desetih, kdo bi lahko prišel?", "koga naj pokličem za luknjo ob dvanajstih?") → kandidati_za_luknjo. Za stranko s kasnejšim terminom (skupina kasnejsi_termin) na "pošlji ji predlog" pokliči sporoci_stranki s termin_id in termin_datum njenega termina ter besedilom, da se je sprostil termin (dan, ura luknje) in ali bi svojega prestavili nanj; naj pokliče ali odgovori. Ostalim kandidatom prosti termin ponudiš samo z ponudi_prosti_termin in samo, če je sms_dovoljen true; sicer povej, da nimajo privolitve in jih lahko pokliče. "Pošlji vsem" pomeni samo kandidate s sms_dovoljen true, vsakemu posebej s svojo potrditvijo (začni s prvim). Seznam kandidatov v prejšnjem odgovoru je pravi (dalo ga je orodje); pri nadaljevanju uporabi Aktivno luknjo (dan, ura, oseba) in Aktiven termin iz uvoda in ne sprašuj znova za uro. Nikoli ne obljubi popusta.
 - Recepture barve: odtenke zapiši kot "6.3", "7.1"; gramažo, oksidant (%) in čas (min) kot števila. Ne dodajaj ničesar, česar uporabnik ni rekel.
 - Za vprašanja, kako se kaj naredi v aplikaciji, uporabi pomoc_aplikacija; za "odpri", "pojdi na", "pokaži stran" uporabi odpri_stran. Navodil za aplikacijo si ne izmišljuj.
 - Številke salona (zaslužek, prihodki, statistika, primerjave obdobij) dobiš samo z orodjem stevilke_salona, če ga imaš; nikoli jih ne izračunaj ali ugibaj sam in jih ne ponavljaj (so na zaslonu). Če orodja nimaš, povej, da številke vidi samo lastnik.
@@ -217,6 +218,10 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     const datum = typeof p.termin_datum === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(p.termin_datum) ? p.termin_datum : null;
     if (stranka && stranka !== fokus?.stranka_id) fokus = { stranka_id: stranka };
     if (termin && datum) fokus = { ...(fokus ?? {}), termin_id: termin, termin_datum: datum };
+    const l = p.luknja as Record<string, unknown> | undefined;
+    if (l && typeof l.datum === 'string' && typeof l.od === 'string' && id(l.oseba_id)) {
+      fokus = { ...(fokus ?? {}), luknja: { datum: l.datum, od: l.od, oseba_id: id(l.oseba_id)! } };
+    }
   };
   const zakljuci = async (z: Partial<ZakljucekUkaza>, vrniKvoto = false) => {
     casi.skupaj = ura() - t0;
@@ -506,12 +511,15 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
   }
 }
 
-/** Samo tel: in mailto: brez parametrov, največ dva gumba. */
+/** Samo tel: in mailto: brez parametrov; največ dva gumba ali do 5 klicev z imeni. */
 function varneAkcije(a: AkcijaStranke[] | undefined): AkcijaStranke[] | undefined {
   const ok = (a ?? []).filter(
     (x) => (x.vrsta === 'klic' && /^tel:\+?\d{6,15}$/.test(x.href)) || (x.vrsta === 'pisi' && /^mailto:[^\s?&#/:]+@[^\s?&#/:]+$/.test(x.href))
   );
-  const enkrat = ok.filter((x, i) => ok.findIndex((y) => y.vrsta === x.vrsta) === i);
+  // Gumbi z imenom stranke (kandidati za luknjo): do 5 klicev; sicer en klic in ena pošta.
+  const oznaceni = ok.filter((x) => x.vrsta === 'klic' && x.oznaka).map((x) => ({ ...x, oznaka: x.oznaka!.slice(0, 60) }));
+  if (oznaceni.length) return oznaceni.filter((x, i) => oznaceni.findIndex((y) => y.href === x.href) === i).slice(0, 5);
+  const enkrat = ok.filter((x, i) => ok.findIndex((y) => y.vrsta === x.vrsta) === i).map(({ vrsta, href }) => ({ vrsta, href }));
   return enkrat.length ? enkrat : undefined;
 }
 
@@ -571,10 +579,11 @@ export async function opisFokusa(
   podatki: PodatkiSalona,
   danes: string
 ): Promise<{ fokus: KontekstPogovora | null; besedilo: string }> {
-  if (!fokus?.stranka_id && !fokus?.termin_id) return { fokus: null, besedilo: '' };
-  const [s, termini] = await Promise.all([
+  if (!fokus?.stranka_id && !fokus?.termin_id && !fokus?.luknja) return { fokus: null, besedilo: '' };
+  const [s, termini, osebe] = await Promise.all([
     fokus.stranka_id ? podatki.stranka(fokus.stranka_id).catch(() => null) : null,
     fokus.termin_id && fokus.termin_datum ? podatki.termini(fokus.termin_datum, fokus.termin_datum).catch(() => []) : [],
+    fokus.luknja ? podatki.osebe().catch(() => []) : [],
   ]);
   const t = termini.find((x) => x.id === fokus.termin_id && (!s || x.idStranke === s.id)) ?? null;
   const nov: KontekstPogovora = {};
@@ -588,7 +597,12 @@ export async function opisFokusa(
     nov.termin_datum = t.datum;
     besedilo += `\nAktiven termin: ${opisDatuma(t.datum, danes)} ob ${t.zacetek}${t.storitev ? `, ${t.storitev}` : ''}${t.oseba ? `, ${t.oseba}` : ''}${s ? '' : `, ${t.stranka}`} (ID ${t.id}).`;
   }
-  return { fokus: nov.stranka_id || nov.termin_id ? nov : null, besedilo };
+  const oseba = fokus.luknja ? osebe.find((x) => x.id === fokus.luknja!.oseba_id) : undefined;
+  if (fokus.luknja && oseba && fokus.luknja.datum >= danes) {
+    nov.luknja = fokus.luknja;
+    besedilo += `\nAktivna luknja (iz kandidati_za_luknjo): ${opisDatuma(fokus.luknja.datum, danes)} (${fokus.luknja.datum}) ob ${fokus.luknja.od}, ${oseba.ime}.`;
+  }
+  return { fokus: nov.stranka_id || nov.termin_id || nov.luknja ? nov : null, besedilo };
 }
 
 /** Koliko dni nazaj iščemo nedavne stranke za namige. */

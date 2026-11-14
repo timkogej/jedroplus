@@ -20,20 +20,20 @@ const razpon = (a: number, b: number) => `${izMinut(a)}–${izMinut(b)}`;
 const imeOsebe = (p: OsebaPovzetek) => `${p.ime} ${p.priimek}`.trim();
 
 /** Ali uporabnik gleda samo svoje termine; null + napaka, če mora, a ni povezan z zaposlenim. */
-function svojiAliNapaka(o: OkoljeOrodja, zelja: boolean | null): { svoji: boolean } | { napaka: RezultatOrodja } {
+export function svojiAliNapaka(o: OkoljeOrodja, zelja: boolean | null): { svoji: boolean } | { napaka: RezultatOrodja } {
   const vsili = samoSvojiTermini(o.k);
   if (vsili && !o.k.osebaId) return { napaka: { sporocilo: jt('Vaš račun ni povezan z zaposlenim, zato ne vidim vaših terminov.') } };
   return { svoji: Boolean(o.k.osebaId) && (vsili || (zelja ?? true)) };
 }
 
 /** Datum iz parametra; null = danes. Napačen izraz → napaka za uporabnika. */
-function dan(datum: string | null, o: OkoljeOrodja): string | RezultatOrodja {
+export function dan(datum: string | null, o: OkoljeOrodja): string | RezultatOrodja {
   const d = datumIzParametra(datum, o.danes) ?? (datum ? null : o.danes);
   return d ?? { sporocilo: jt('Datuma »{datum}« ne razumem. Povejte npr. »jutri« ali »v petek«.', { datum }) };
 }
 
 /** Zaposleni po imenu (ali vsi aktivni). */
-function izberiOsebe(
+export function izberiOsebe(
   oseba: string | null,
   osebe: OsebaPovzetek[],
   o: OkoljeOrodja

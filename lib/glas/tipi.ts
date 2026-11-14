@@ -83,6 +83,8 @@ export interface AkcijaStranke {
   vrsta: 'klic' | 'pisi';
   /** tel:+38641… ali mailto:… */
   href: string;
+  /** Ime stranke na gumbu, ko je gumbov več (kandidati za luknjo). */
+  oznaka?: string;
 }
 
 /** Podatki s kartice stranke za glasovni odgovor. Telefon, e-pošta in opombe ne gredo modelu AI. */
@@ -130,6 +132,8 @@ export interface PodatkiSalona {
    * `padajoce`: najnovejši najprej (pri omejitvi se odrežejo najstarejši).
    */
   termini(od: string, doo: string, moznosti?: { padajoce?: boolean }): Promise<TerminPovzetek[]>;
+  /** Vsi neizbrisani termini v obdobju (po straneh, za ritem obiskov; brez omejitve 2000). */
+  zgodovinaTerminov(od: string, doo: string): Promise<TerminPovzetek[]>;
   /** Zadnji zaključen/pretekli termin stranke. */
   zadnjiTermin(idStranke: string, predDatumom: string): Promise<TerminPovzetek | null>;
   naslednjiTermin(idStranke: string, odDatuma: string): Promise<TerminPovzetek | null>;

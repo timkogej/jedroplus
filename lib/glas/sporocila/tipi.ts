@@ -28,7 +28,8 @@ export interface ZahtevaPosiljanja {
   imeSalona: string;
   jezik: 'sl' | 'en' | 'de' | 'it' | 'hr';
   idStranke: string;
-  idTermina: string;
+  /** null = ponudba prostega termina (samo s privolitvijo), ne o terminu stranke. */
+  idTermina: string | null;
 }
 
 /**
@@ -41,7 +42,7 @@ export type IzidPosiljanja =
 
 export interface PosiljateljSporocil {
   rezerviraj(p: {
-    podjetje: string; userId: string; ukazId: string | null; idStranke: string; idTermina: string; kanal: Kanal; dolzina: number;
+    podjetje: string; userId: string; ukazId: string | null; idStranke: string; idTermina: string | null; kanal: Kanal; dolzina: number;
   }): Promise<RezervacijaSporocila>;
   poslji(z: ZahtevaPosiljanja): Promise<IzidPosiljanja>;
 }

@@ -47,3 +47,7 @@ select set_config('request.jwt.claim.sub', '33333333-3333-3333-3333-333333333333
 select pg_temp.mora((select bool_and(company_id = 'BBBBBB') from glas_sporocila), 'lastnik B ne vidi A');
 reset role;
 \echo SPOROČILA: VSI SQL PREIZKUSI USPEŠNI
+
+-- 1793700001: ponudba prostega termina brez termina (id_termina null), ista omejitev
+select pg_temp.mora((jp_glas_rezerviraj_sporocilo('CCCCCC', '11111111-1111-1111-1111-111111111111', null, '3000001', null, 'sms', 60, 3, 5)->>'ok')::boolean, 'ponudba brez termina');
+select pg_temp.mora((select id_termina is null from glas_sporocila where company_id = 'CCCCCC'), 'id_termina je null');

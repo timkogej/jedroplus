@@ -71,11 +71,14 @@ const POGOVORI: {
   { ukazi: ['Sporoči Mateji, da jutri zamujamo kakšnih 15 minut.'], konec: {}, odgovor: { 0: /SMS za Mateja Kova[čc]i[čc]: ».*15/ }, ne: { 0: /jutri danes|danes jutri/i } },
   // Popravek odprtega predloga: model mora znova poklicati orodje (ne samo reči, da je spremenil).
   { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Brez podpisa na koncu.'], konec: {}, odgovor: { 1: /SMS za Mateja Kova[čc]i[čc]: ».*15 minut/ }, ne: { 1: /Salon Lepota/ } },
-  { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Dodaj še, da se opravičujemo.'], konec: {}, odgovor: { 1: /SMS za Mateja Kova[čc]i[čc]: ».*opravic/i } },
+  { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Dodaj še, da se opravičujemo.'], konec: {}, odgovor: { 1: /SMS za Mateja Kova[čc]i[čc]: ».*(opravic|oprost)/i } },
   { ukazi: ['Sporoči Ani Novak, da danes zamujamo deset minut.'], konec: {}, odgovor: { 0: /SMS za Ana Novak: ».*(late|minutes)/i } },
   // Povzetek dneva (model, ne hitra pot) in številke za lastnika (samo zaslon).
   { ukazi: ['Kako bo izgledal ponedeljek, kaj vse imamo?'], konec: {}, odgovor: { 0: /termin/i } },
-  { ukazi: ['Koliko smo zaslužili ta mesec v primerjavi s prejšnjim?'], konec: {}, odgovor: { 0: /Zaslužek po ceniku/ } },
+  { ukazi: ['Koliko smo zaslužili ta mesec v primerjavi s prejšnjim?'], konec: {}, odgovor: { 0: /Zaslužek po ceniku/ } },  // Zapolnitev luknje (salon Z5: Tina jutri prosta od 10.30; Mateja ima kasnejši termin, Ana privolitev, Nina ne).
+  { podjetje: 'Z5', ukazi: ['Stranka je odpovedala jutri ob pol enajstih pri Tini. Koga naj pokličem?'], konec: {}, odgovor: { 0: /Mateja Kos[\s\S]*Ana Novak[\s\S]*Nina Bela/ } },
+  { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji Mateji predlog.'], konec: {}, odgovor: { 1: /SMS za Mateja Kos: ».*(prestav|sprostil|prost)/i } },
+  { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji vsem SMS.'], konec: {}, odgovor: { 1: /SMS za (Mateja Kos|Ana Novak)|privolit/i }, ne: { 1: /SMS za Nina|popust/i } },
 ];
 
 describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {

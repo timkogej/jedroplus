@@ -493,9 +493,9 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 |---|---|---|
 | 1 | Jutranji povzetek (`povzetek_dneva`) | narejeno, testi; brez migracije |
 | 2 | Številke za lastnika (`stevilke_salona`) + Analitika na skupnem izračunu (`lib/analytics/izracun.ts`) | narejeno, testi; brez migracije |
-| 3 | Sporoči stranki (`sporoci_stranki`) | koda in testi narejeni; čaka migracijo, n8n tok in ključ (spodaj) |
-| 4a | Zapolnitev luknje | ni začeto |
-| 5 | Osebni opomniki | ni začeto (potrebuje pg_cron) |
+| 3 | Sporoči stranki (`sporoci_stranki`) | narejeno; migracija, n8n tok in ključ nastavljeni, Tim preizkusil SMS |
+| 4a | Zapolnitev luknje (`kandidati_za_luknjo`, `ponudi_prosti_termin`) | koda in testi narejeni; čaka migracijo `1793700001` (spodaj) |
+| 5 | Osebni opomniki | ni začeto (potrebuje pg_cron; migracija bo `1793700002`) |
 | 6 | Ponavljajoči termini | ni začeto |
 
 ### Spremembe na strani Analitika (O4)
@@ -542,3 +542,29 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 - SES vozlišče za e-pošto stranki: poverilnica in pošiljatelj sta prepisana iz bookinga, a nista preizkušena.
 - `companies.name` za podpis bere uporabnikova seja. Če RLS zaposlenemu tega ne dovoli, je podpis prazen; n8n pri e-pošti vzame ime sam.
 - Jezik sporočila je jezik s kartice stranke (brez → slovenščina); »Jezik pošiljanja« podjetja se ne upošteva.
+
+### Zapolnitev luknje (4a): kaj je narejeno
+
+- `kandidati_za_luknjo` (`lib/glas/orodja/zapolnitev.ts`, izbor v `lib/glas/zapolnitev/kandidati.ts`):
+  - luknja iz dneva, ure in osebe; več možnih lukenj ali oseb → vprašanje; ob uri ni luknje → »najprej odpovejte termin v koledarju«;
+  - do 5 strank: kasnejši termin pri isti osebi v 30 dneh, ki gre v luknjo → zapadle po ritmu (vsaj 3 obiski iste storitve, 1,0–1,5 × mediana razmika, brez prihodnjega termina) → navada (vsaj 2-krat v letu pri tej osebi ±90 min);
+  - izločeni: prekrivajoč termin na ta dan, ≥ 2 neprihoda v letu, brez telefona; zaposleni s »samo svoji« vidi samo svojo luknjo in svoje termine;
+  - zgodovina 18 mesecev po straneh (`zgodovinaTerminov`), brez omejitve 2000 vrstic;
+  - model dobi imena, razloge in `sms_dovoljen`, telefon gre samo v gumbe »Pokliči« z imeni (do 5).
+- Kasnejši termin: »pošlji ji predlog« → `sporoci_stranki` o njenem terminu (storitveno, brez privolitve).
+- `ponudi_prosti_termin`: SMS (brez telefona e-pošta) o prostem terminu **samo** pri `marketing_consent = true` (O9):
+  - brez popusta, cen, povezav (isti filter kot 3), podpis salona, potrditev »Pošljem?«;
+  - ob potrditvi znova preveri privolitev, da je čas še prost, pravico in kontakt;
+  - šteje v isto omejitev 3/30 na dan in SMS kvoto; v `glas_sporocila` z `id_termina = null`.
+- Brez sprememb n8n (tok že sprejme prazen `termin_id`).
+
+### Kaj mora narediti Tim (4a)
+
+1. Pognati migracijo `supabase/migrations/1793700001_glas_sporocila_ponudba.sql` (`id_termina` sme biti prazen). Brez nje `ponudi_prosti_termin` ob potrditvi pade v SQL (nič se ne pošlje); kandidati delajo tudi brez nje.
+
+### Nepreizkušeno (4a)
+
+- Kandidati na pravih podatkih (ali ritem in navada najdeta smiselne stranke; hitrost branja 18 mesecev terminov).
+- `ponudi_prosti_termin` zares (SMS brez termina skozi n8n in `message_outbox`).
+- Gumbi »Pokliči« z imeni na telefonu.
+

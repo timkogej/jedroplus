@@ -63,7 +63,7 @@ export interface OdgovorOdjemalec {
   /** Obrazec, ki naj se odpre izpolnjen (shraniObrazec pred premikom na `pojdi`). */
   obrazec?: { vrsta: VrstaObrazca; polja: Record<string, string> };
   /** Gumba Pokliči / Piši. Uporabnik ju pritisne sam; nič se ne sproži samo. */
-  akcije?: { vrsta: 'klic' | 'pisi'; href: string }[];
+  akcije?: { vrsta: 'klic' | 'pisi'; href: string; oznaka?: string }[];
   opozorilo?: string | null;
   sporocilo?: string;
   koda?: string;
