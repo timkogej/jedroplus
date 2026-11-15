@@ -12,7 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CalendarBlank, CaretLeft, CaretRight, ListChecks, MagnifyingGlass, X } from '@phosphor-icons/react';
 import { JedroLogo } from '@/components/brand/JedroLogo';
-import { AsistentVmesnik } from '@/components/glas/ui/AsistentVmesnik';
+import { AsistentVmesnik, OBLIKA_PRIVZETA } from '@/components/glas/ui/AsistentVmesnik';
 import { useListObrazca } from '@/components/glas/ui/useOkvirObrazca';
 import { AsistentOrb } from '@/components/glas/ui/AsistentOrb';
 import { PlusOrb } from '@/components/glas/ui/PlusOrb';
@@ -55,7 +55,7 @@ export function GlasDizajn() {
   const [okno, setOkno] = useState<Okno | null>(null);
   const [cist, setCist] = useState(false);
   const [toast, setToast] = useState(false);
-  const [oblika, setOblika] = useState<OblikaOrba>('mehak');
+  const [oblika, setOblika] = useState<OblikaOrba>(OBLIKA_PRIVZETA);
   const [primerjava, setPrimerjava] = useState(false);
   const [formEl, setFormEl] = useState<HTMLFormElement | null>(null);
   const [polja, setPolja] = useState({ stranka: 'Ana Novak', storitev: 'pedikura', zaposleni: 'maja', datum: '2026-11-14', ura: '10:00' });
