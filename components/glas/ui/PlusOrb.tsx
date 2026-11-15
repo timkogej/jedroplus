@@ -46,6 +46,8 @@ const MIRNO = 0.0015;
 const TOGOST_GOR = 170;
 const TOGOST_DOL = 120;
 const DUSENJE = 0.42;
+/** Uspeh: mirnejša vzmet (komaj opazen preskok), brez migetanja krakov. */
+const DUSENJE_USPEH = 0.78;
 /** Preskok čez krog: plus se za trenutek še malo poveča (delež prekoračitve). */
 const PRESKOK_POVECAVA = 0.5;
 /** Preskok nazaj čez plus: kraki se za trenutek iztegnejo. */
@@ -150,7 +152,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
         p.hitrost = 0;
       } else {
         const togost = cilj > p.napih ? TOGOST_GOR : TOGOST_DOL;
-        p.hitrost += (togost * (cilj - p.napih) - 2 * Math.sqrt(togost) * DUSENJE * p.hitrost) * dt;
+        p.hitrost += (togost * (cilj - p.napih) - 2 * Math.sqrt(togost) * (uspesno ? DUSENJE_USPEH : DUSENJE) * p.hitrost) * dt;
         p.napih += p.hitrost * dt;
       }
       p.miska += (p.ciljMiska - p.miska) * 0.18;
@@ -158,7 +160,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
       // Kraki: vsak diha zase (glas), val po vrsti (razmišljam), miška (vsi malo ven).
       const m = 0.06 * p.miska;
       const r: Kraki = { gor: m, desno: m, dol: m, levo: m };
-      if (!manjGibanja) {
+      if (!manjGibanja && !uspesno) {
         if (stanje === 'govorim' || stanje === 'poslusam') {
           const a = n.nesimetrija * nivo * (stanje === 'poslusam' ? 1.2 : 1);
           r.gor += a * (0.5 + 0.5 * Math.sin(c * 5.1 + 0.3));

@@ -429,11 +429,11 @@
   position: absolute;
   inset: 0;
   filter: blur(7px);
-  opacity: calc(0.55 + var(--ap-nivo) * 0.45);
+  opacity: calc(0.32 + var(--ap-nivo) * 0.3);
   transition: opacity 400ms ease;
 }
 .ap-koren[data-stanje='mirovanje'] .ap-obris__sij {
-  opacity: 0.45;
+  opacity: 0.3;
 }
 .ap-koren[data-stanje='mirovanje'] .ap-obris__sij .ap-obris__barve {
   animation-play-state: paused;
@@ -455,6 +455,25 @@
 }
 .ap-orb--obris .ap-orb__halo {
   inset: -18%;
+  /* Obris: zadržan sij (rob je že sam svetel). */
+  opacity: calc(0.22 + var(--ap-nivo) * 0.3);
+  transform: scale(calc(0.86 + var(--ap-nivo) * 0.24));
+}
+/* Obris: barve po robu tečejo počasi in mirno. */
+.ap-orb--obris .ap-obris__pospesek {
+  animation-duration: 7s;
+}
+.ap-orb--obris .ap-obris__barve {
+  animation-duration: 16s;
+}
+/* Uspeh: mir — barve obstanejo, val je nežen. */
+.ap-orb--obris[data-uspeh] .ap-obris__pospesek {
+  animation-play-state: paused;
+}
+.ap-orb--obris .ap-orb__val--uspeh {
+  box-shadow:
+    0 0 0 2px rgb(124 120 250 / 0.35),
+    0 0 18px 3px rgb(53 227 219 / 0.2);
 }
 
 /* ─────────────────────── tančica (zamegljeno ozadje) ─────────────────────── */
