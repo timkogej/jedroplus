@@ -16,7 +16,7 @@
  *             levem kotu lista, kratek napis desno od njega.
  */
 
-import { useRef, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { CheckCircle, MicrophoneSlash, WarningCircle } from '@phosphor-icons/react';
 import type { OdgovorOdjemalec, StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import { polozajKrogca, type NacinKrogca, type Okno, type Polozaj, type Pravokotnik } from '@/lib/glas/odjemalec/polozaj';
@@ -34,16 +34,31 @@ import './asistent.css';
 /** Pas obvestil (toast: bottom-6 right-6, ~48 px visok): orb v mirovanju je nad njim. */
 const NAD_OBVESTILI = 92;
 
+/** Med drsenjem je v kotu viden le ta delež orba (ostalo je za desnim robom). */
+const VIDNO_OB_UMIKU = 0.42;
+/** Koliko časa po zadnjem drsenju se orb vrne iz umika. */
+const UMIK_MS = 900;
+
 /**
  * Položaj orba za vsak način (sredina in obrazec iz polozajKrogca; večji orb na sredini).
  * kompakten: na sredini je kartica (možnosti, predlog), orb se zmanjša in umakne gor.
+ * umaknjen: v kotu med drsenjem orb zdrsne napol čez desni rob.
  */
-export function polozajOrba(nacin: NacinKrogca, okno: Okno, panel: Pravokotnik | null, kompakten = false): Polozaj {
+export function polozajOrba(
+  nacin: NacinKrogca,
+  okno: Okno,
+  panel: Pravokotnik | null,
+  kompakten = false,
+  umaknjen = false,
+  plus = false,
+): Polozaj {
   const siroko = okno.w >= 640;
   if (nacin === 'kot') {
-    const v = siroko ? 52 : 48;
-    const rob = siroko ? 24 : 14;
-    return { x: okno.w - v - rob, y: okno.h - v - okno.spodaj - NAD_OBVESTILI, velikost: v };
+    // Plus stoji na steklenem krogu (PlusOrb), zato je v kotu malo večji kot krog.
+    const v = plus ? (siroko ? 58 : 54) : siroko ? 52 : 48;
+    const rob = plus ? (siroko ? 22 : 12) : siroko ? 24 : 14;
+    const x = umaknjen ? okno.w - Math.round(v * VIDNO_OB_UMIKU) : okno.w - v - rob;
+    return { x, y: okno.h - v - okno.spodaj - NAD_OBVESTILI, velikost: v };
   }
   const p = polozajKrogca(nacin, okno, panel);
   if (nacin !== 'sredina') return p;
@@ -91,7 +106,10 @@ export function AsistentVmesnik(p: AsistentVmesnikProps) {
   useOkvirObrazca(p.obrazecEl, nacin === 'obrazec', p.onPoslano);
 
   const aktiven = stanje !== 'mirovanje';
-  const poz = polozajOrba(nacin, okno, panel, nacin === 'sredina' && imaKartico(p.zadnji));
+  // Umik med drsenjem: samo v kotu in ko ob orbu ni napisa (napaka, uspeh).
+  const plus = oblika !== 'krog';
+  const umaknjen = useUmikObDrsenju(plus && nacin === 'kot' && !aktiven && !p.napis && !p.uspeh);
+  const poz = polozajOrba(nacin, okno, panel, nacin === 'sredina' && imaKartico(p.zadnji), umaknjen, plus);
   const oznaka = aktiven ? t(stanje) : t('odpri');
   const zadnjiOdgovor = [...p.vrstice].reverse().find((v) => v.kdo !== 'jaz');
 
@@ -169,6 +187,30 @@ export function AsistentVmesnik(p: AsistentVmesnikProps) {
       )}
     </div>
   );
+}
+
+/**
+ * Ali naj se orb v kotu umakne čez rob: true med drsenjem (katerikoli element na
+ * strani) in še UMIK_MS po njem. Brez zank: samo poslušalec drsenja (passive).
+ */
+function useUmikObDrsenju(vklopljen: boolean): boolean {
+  const [umaknjen, setUmaknjen] = useState(false);
+  useEffect(() => {
+    if (!vklopljen) return;
+    let casovnik = 0;
+    const ob = () => {
+      setUmaknjen(true);
+      window.clearTimeout(casovnik);
+      casovnik = window.setTimeout(() => setUmaknjen(false), UMIK_MS);
+    };
+    document.addEventListener('scroll', ob, { capture: true, passive: true });
+    return () => {
+      document.removeEventListener('scroll', ob, { capture: true });
+      window.clearTimeout(casovnik);
+      setUmaknjen(false);
+    };
+  }, [vklopljen]);
+  return vklopljen && umaknjen;
 }
 
 /** Ob obrazcu: kratek napis desno od orba (nad listom, ne čez polja ne čez X). */

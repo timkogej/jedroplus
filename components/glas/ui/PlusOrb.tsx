@@ -48,6 +48,8 @@ const TOGOST_DOL = 120;
 const DUSENJE = 0.42;
 /** Uspeh: mirnejša vzmet (komaj opazen preskok), brez migetanja krakov. */
 const DUSENJE_USPEH = 0.78;
+/** V kotu (mirovanje) stoji plus na steklenem krogu in je pomanjšan na ta delež (enako v CSS). */
+const MERILO_KOT = 0.6;
 /** Preskok čez krog: plus se za trenutek še malo poveča (delež prekoračitve). */
 const PRESKOK_POVECAVA = 0.5;
 /** Preskok nazaj čez plus: kraki se za trenutek iztegnejo. */
@@ -109,8 +111,10 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
     let raf = 0;
     let zadnja = '';
 
-    // Pri majhnem orbu (kot) je rob obrisa malo debelejši, da je na beli podlagi viden.
-    const debelinaRoba = DEBELINA_OBRISA * Math.min(1.45, Math.max(1, 66 / velikost));
+    // Pri majhnem orbu (kot, kjer je plus še pomanjšan na podlagi) je rob obrisa
+    // malo debelejši, da je viden.
+    const vidna = stanje === 'mirovanje' ? velikost * MERILO_KOT : velikost;
+    const debelinaRoba = DEBELINA_OBRISA * Math.min(1.6, Math.max(1, 66 / vidna));
 
     const narisi = (napih: number, raztezki: Kraki) => {
       // Gumica: napih nad 1 = krog se še malo poveča, pod 0 = kraki se iztegnejo.
@@ -221,7 +225,10 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
       style={{ transform: `translate3d(${x}px, ${y}px, 0) scale(${s})` }}
     >
       <span className="ap-orb__pritisk" aria-hidden>
+        {/* Kot: steklen krog pod plusom (viden samo v mirovanju). */}
+        <span className="ap-plus__podlaga" />
         <span className="ap-orb__dih">
+          <span className="ap-plus__merilo">
           <span className="ap-orb__halo" />
           <span className="ap-plus__fokus" />
           {obris ? (
@@ -272,6 +279,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
           )}
           {vzig > 0 && <span key={`v${vzig}`} className="ap-orb__val" />}
           {uspesno && <span key={`u${uspeh}`} className="ap-orb__val ap-orb__val--uspeh" />}
+          </span>
         </span>
       </span>
     </button>
