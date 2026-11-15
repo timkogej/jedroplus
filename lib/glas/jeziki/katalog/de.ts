@@ -452,7 +452,7 @@ export const de: Katalog = {
   "Push obvestila niso vklopljena, opomnik boste videli samo v obvestilih aplikacije. Vklopite jih v Nastavitvah.": "Push-Benachrichtigungen sind nicht aktiviert, die Erinnerung sehen Sie nur in den Benachrichtigungen der App. Aktivieren Sie sie in den Einstellungen.",
   "Ta čas je že mimo.": "Diese Zeit ist schon vorbei.",
   "Ta čas je že mimo. Opomnik ni shranjen.": "Diese Zeit ist schon vorbei. Die Erinnerung wurde nicht gespeichert.",
-  "Takega opomnika ne najdem. Recite »kateri opomniki so mi ostali«.": "Diese Erinnerung finde ich nicht. Sagen Sie „welche Erinnerungen habe ich noch“.",
+  "Takega opomnika ne najdem med čakajočimi. Če je bil čas že mimo, je bil že poslan. Recite »kateri opomniki so mi ostali«.": "Diese Erinnerung finde ich unter den offenen nicht. Wenn die Zeit vorbei ist, wurde sie schon gesendet. Sagen Sie „welche Erinnerungen habe ich noch“.",
   "Tega opomnika ni več.": "Diese Erinnerung gibt es nicht mehr.",
   "Termina ni več. Opomnik ni shranjen.": "Den Termin gibt es nicht mehr. Die Erinnerung wurde nicht gespeichert.",
   "Vaši opomniki ({n}):": "Ihre Erinnerungen ({n}):",

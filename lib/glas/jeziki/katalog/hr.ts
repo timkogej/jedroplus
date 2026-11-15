@@ -454,7 +454,7 @@ export const hr: Katalog = {
   "Push obvestila niso vklopljena, opomnik boste videli samo v obvestilih aplikacije. Vklopite jih v Nastavitvah.": "Push obavijesti nisu uključene, podsjetnik ćete vidjeti samo u obavijestima aplikacije. Uključite ih u Postavkama.",
   "Ta čas je že mimo.": "To je vrijeme već prošlo.",
   "Ta čas je že mimo. Opomnik ni shranjen.": "To je vrijeme već prošlo. Podsjetnik nije spremljen.",
-  "Takega opomnika ne najdem. Recite »kateri opomniki so mi ostali«.": "Ne nalazim taj podsjetnik. Recite »koji su mi podsjetnici ostali«.",
+  "Takega opomnika ne najdem med čakajočimi. Če je bil čas že mimo, je bil že poslan. Recite »kateri opomniki so mi ostali«.": "Ne nalazim taj podsjetnik među aktivnima. Ako je vrijeme prošlo, već je poslan. Recite »koji su mi podsjetnici ostali«.",
   "Tega opomnika ni več.": "Tog podsjetnika više nema.",
   "Termina ni več. Opomnik ni shranjen.": "Termina više nema. Podsjetnik nije spremljen.",
   "Vaši opomniki ({n}):": "Vaši podsjetnici ({n}):",

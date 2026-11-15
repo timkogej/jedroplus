@@ -29,7 +29,7 @@ import type { SttPonudnik } from './ponudniki/stt';
 import type { TtsPonudnik } from './ponudniki/tts';
 import type { PosiljateljSporocil } from './sporocila/tipi';
 import type { ShrambaOpomnikov } from './opomniki/tipi';
-import type { KontekstPogovora, ShrambaGlasa, VhodUkaza, ZakljucekUkaza } from './shramba/tipi';
+import type { IzidPredloga, KontekstPogovora, ShrambaGlasa, VhodUkaza, ZakljucekUkaza } from './shramba/tipi';
 import type { AkcijaStranke, JsonShema, Kontekst, PodatkiSalona, Predogled, Prikaz, RezultatOrodja } from './tipi';
 
 export interface Odvisnosti {
@@ -326,7 +326,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     for (const prej of prejsnji) {
       if (!prej) continue;
       sporocila.push({ vloga: 'uporabnik', besedilo: `<ukaz>${prej.prepis.replace(/<\/?ukaz>/g, '')}</ukaz>` });
-      sporocila.push({ vloga: 'asistent', besedilo: prej.odgovor, klici: [] });
+      sporocila.push({ vloga: 'asistent', besedilo: `${prej.odgovor}${izidZaModel(prej.izid)}`, klici: [] });
     }
     const opis = await opisFokusa(fokus, d.podatki, zdaj.datum);
     fokus = opis.fokus;
@@ -519,6 +519,25 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       kvota: rez.ok ? rez.kvota : 0,
       zvok,
     };
+  }
+}
+
+/**
+ * Izid predloga za zgodovino modela (samo za model, zato brez prevoda): brez tega model ne ve, da je uporabnik predlog potrdil
+ * z »ja« (potrditev ni nov ukaz), in npr. »izbriši ta opomnik« zavrne kot »ni shranjen«.
+ */
+export function izidZaModel(izid: IzidPredloga | null | undefined): string {
+  if (!izid) return '';
+  const idji = Object.entries(izid.idji).map(([k, v]) => `${k}: ${v}`).join(', ');
+  switch (izid.status) {
+    case 'izvedeno':
+      return `\n[Uporabnik je potrdil.${izid.sporocilo ? ` ${izid.sporocilo}` : ''}${idji ? ` (${idji})` : ''}]`;
+    case 'zavrnjeno':
+      return `\n[Uporabnik je preklical. Nič ni shranjeno.]`;
+    case 'napaka':
+      return `\n[Ni uspelo.${izid.sporocilo ? ` ${izid.sporocilo}` : ''}]`;
+    default:
+      return `\n[Še ni potrjeno.]`;
   }
 }
 

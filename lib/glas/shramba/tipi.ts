@@ -42,6 +42,30 @@ export interface PrejsnjiUkaz {
   prepis: string;
   odgovor: string;
   kontekst: KontekstPogovora | null;
+  /** Kaj se je zgodilo s predlogom tega ukaza (potrjen z »ja«, preklican …); brez = ni bilo predloga. */
+  izid?: IzidPredloga | null;
+}
+
+export interface IzidPredloga {
+  status: 'caka' | 'izvaja' | 'izvedeno' | 'napaka' | 'zavrnjeno' | 'poteklo';
+  /** rezultat.sporocilo potrditve (npr. »Opomnik je shranjen.«) */
+  sporocilo: string | null;
+  /** ID-ji iz rezultata (npr. opomnik_id), da se »ta opomnik« da najti. */
+  idji: Record<string, string>;
+}
+
+/** Iz rezultata potrditve vzame samo sporočilo in kratke ID-je. */
+export function preberiIzid(status: unknown, rezultat: unknown): IzidPredloga | null {
+  const statusi = ['caka', 'izvaja', 'izvedeno', 'napaka', 'zavrnjeno', 'poteklo'] as const;
+  if (!statusi.includes(status as (typeof statusi)[number])) return null;
+  const r = (rezultat && typeof rezultat === 'object' ? rezultat : {}) as { sporocilo?: unknown; podatki?: unknown };
+  const idji: Record<string, string> = {};
+  if (r.podatki && typeof r.podatki === 'object' && !Array.isArray(r.podatki)) {
+    for (const [k, v] of Object.entries(r.podatki as Record<string, unknown>)) {
+      if (/_id$/.test(k) && typeof v === 'string' && /^[\w-]{1,64}$/.test(v)) idji[k] = v;
+    }
+  }
+  return { status: status as IzidPredloga['status'], sporocilo: typeof r.sporocilo === 'string' ? r.sporocilo.slice(0, 300) : null, idji };
 }
 
 /** Iz zapisa v bazi vzame samo znana, kratka polja. */

@@ -452,7 +452,7 @@ export const it: Katalog = {
   "Push obvestila niso vklopljena, opomnik boste videli samo v obvestilih aplikacije. Vklopite jih v Nastavitvah.": "Le notifiche push non sono attive, vedrà il promemoria solo nelle notifiche dell'app. Le attivi nelle Impostazioni.",
   "Ta čas je že mimo.": "Quest'ora è già passata.",
   "Ta čas je že mimo. Opomnik ni shranjen.": "Quest'ora è già passata. Il promemoria non è stato salvato.",
-  "Takega opomnika ne najdem. Recite »kateri opomniki so mi ostali«.": "Non trovo questo promemoria. Dica «quali promemoria mi restano».",
+  "Takega opomnika ne najdem med čakajočimi. Če je bil čas že mimo, je bil že poslan. Recite »kateri opomniki so mi ostali«.": "Non trovo questo promemoria tra quelli in attesa. Se l'ora è passata, è già stato inviato. Dica «quali promemoria mi restano».",
   "Tega opomnika ni več.": "Questo promemoria non esiste più.",
   "Termina ni več. Opomnik ni shranjen.": "L'appuntamento non esiste più. Il promemoria non è stato salvato.",
   "Vaši opomniki ({n}):": "I suoi promemoria ({n}):",

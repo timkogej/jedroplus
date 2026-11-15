@@ -286,7 +286,7 @@ export const prekliciOpomnik: PisalnoOrodje<VhodIzbrisi> = {
     type: 'object',
     properties: {
       opis: { type: 'string', description: 'Kateri opomnik (besede iz njegovega besedila, npr. "dobavitelj").' },
-      opomnik_id: { type: 'string', description: 'opomnik_id iz moji_opomniki ali izbire, sicer "".' },
+      opomnik_id: { type: 'string', description: 'opomnik_id iz moji_opomniki, izbire ali prejšnjega odgovora ("ta opomnik" = pravkar nastavljeni), sicer "".' },
     },
     required: ['opis', 'opomnik_id'],
     additionalProperties: false,
@@ -299,7 +299,7 @@ export const prekliciOpomnik: PisalnoOrodje<VhodIzbrisi> = {
     const vsi = await o.opomniki.cakajoci(o.k.podjetje, o.k.userId);
     if (vsi.length === 0) return { sporocilo: jt('Nimate čakajočih opomnikov.') };
     const zadetki = p.opomnik_id ? vsi.filter((x) => x.id === p.opomnik_id) : vsi.length === 1 && !besede(p.opis).length ? vsi : ujemanjeOpomnikov(p.opis, vsi);
-    if (zadetki.length === 0) return { sporocilo: jt('Takega opomnika ne najdem. Recite »kateri opomniki so mi ostali«.') };
+    if (zadetki.length === 0) return { sporocilo: jt('Takega opomnika ne najdem med čakajočimi. Če je bil čas že mimo, je bil že poslan. Recite »kateri opomniki so mi ostali«.') };
     if (zadetki.length > 1) {
       return {
         sporocilo: jt('Kateri opomnik?'),

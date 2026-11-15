@@ -77,7 +77,8 @@ export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBes
             (kartica ima svoj namig, orb kaže kljukico): status skrijemo. */}
         {!(imaKartico(zadnji) || zadnja?.kdo === 'uspeh') || zaseden ? <Status stanje={stanje} t={t} /> : <span className="h-5" aria-hidden />}
 
-        {zgoraj && (
+        {/* S kartico je prostora malo: prejšnje izjave ne kažemo (sicer jo kartica potisne čez rob). */}
+        {zgoraj && !(imaKartico(zadnji) && !slisano) && (
           <p
             key={`z-${vrstice.length}-${zgoraj.besedilo.length}`}
             className="ap-vstop mt-4 line-clamp-2 max-w-[92%] text-[15px] leading-snug text-[#4c4c55]"
@@ -220,12 +221,15 @@ function Kartice({
     return (
       <div className="ap-kartica ap-vstop mt-6 w-full max-w-[420px] p-1.5 text-left" style={{ animationDelay: '120ms' }}>
         <div className="px-3.5 pb-1 pt-3">
-          <p className="flex items-center gap-2 text-[13px] font-semibold text-label-secondary">
-            <span className="ap-znak" aria-hidden />
-            {predlog.povzetek}
-          </p>
+          {/* Povzetek je že v glavni vrstici nad kartico: tu ga ne ponavljamo. */}
+          {predlog.podrobnosti.length === 0 && (
+            <p className="flex items-center gap-2 text-[13px] font-semibold text-label-secondary">
+              <span className="ap-znak" aria-hidden />
+              {predlog.povzetek}
+            </p>
+          )}
           {predlog.podrobnosti.length > 0 && (
-            <dl className="mt-2 divide-y divide-black/[0.06]">
+            <dl className="divide-y divide-black/[0.06]">
               {predlog.podrobnosti.map((d) => (
                 <div key={d.oznaka} className="flex items-baseline justify-between gap-4 py-2.5">
                   <dt className="shrink-0 text-[14px] text-label-secondary">{d.oznaka}</dt>

@@ -7,7 +7,7 @@
 import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ShrambaGlasa, ShranjenPredlog, ZacetekPotrditve, RezervacijaUkaza } from './tipi';
-import { preberiKontekst } from './tipi';
+import { preberiIzid, preberiKontekst } from './tipi';
 
 export function shrambaSupabase(admin: SupabaseClient): ShrambaGlasa {
   return {
@@ -41,12 +41,23 @@ export function shrambaSupabase(admin: SupabaseClient): ShrambaGlasa {
           .eq('company_id', podjetje)
           .gte('created_at', new Date(Date.now() - 5 * 60_000).toISOString())
           .maybeSingle();
+      // Predlog tega ukaza (če ga je bil): ali ga je uporabnik potrdil z »ja« — sicer model misli, da ni shranjeno.
+      const predlogP = admin
+        .from('glas_predlogi')
+        .select('status, rezultat')
+        .eq('ukaz_id', ukazId)
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       let { data, error } = await beri('prepis, odgovor, kontekst, created_at');
       // Dokler migracija 1793600000 ni zagnana, stolpca kontekst ni: zgodovina dela brez fokusa.
       if (error?.code === '42703') ({ data, error } = await beri('prepis, odgovor, created_at'));
       const r = data as { prepis?: unknown; odgovor?: unknown; kontekst?: unknown } | null;
       if (!r?.prepis || !r?.odgovor) return null;
-      return { prepis: String(r.prepis), odgovor: String(r.odgovor), kontekst: preberiKontekst(r.kontekst) };
+      const { data: pr } = await predlogP;
+      const izid = pr ? preberiIzid((pr as { status?: unknown }).status, (pr as { rezultat?: unknown }).rezultat) : null;
+      return { prepis: String(r.prepis), odgovor: String(r.odgovor), kontekst: preberiKontekst(r.kontekst), izid };
     },
 
     async ustvariPredlog(p) {

@@ -452,7 +452,7 @@ export const en: Katalog = {
   "Push obvestila niso vklopljena, opomnik boste videli samo v obvestilih aplikacije. Vklopite jih v Nastavitvah.": "Push notifications aren't enabled, so you'll only see the reminder in the app's notifications. Turn them on in Settings.",
   "Ta čas je že mimo.": "That time has already passed.",
   "Ta čas je že mimo. Opomnik ni shranjen.": "That time has already passed. The reminder wasn't saved.",
-  "Takega opomnika ne najdem. Recite »kateri opomniki so mi ostali«.": "I can't find that reminder. Say \"which reminders do I have left\".",
+  "Takega opomnika ne najdem med čakajočimi. Če je bil čas že mimo, je bil že poslan. Recite »kateri opomniki so mi ostali«.": "I can't find that reminder among the pending ones. If its time has passed, it was already sent. Say \"which reminders do I have left\".",
   "Tega opomnika ni več.": "That reminder no longer exists.",
   "Termina ni več. Opomnik ni shranjen.": "The appointment no longer exists. The reminder wasn't saved.",
   "Vaši opomniki ({n}):": "Your reminders ({n}):",

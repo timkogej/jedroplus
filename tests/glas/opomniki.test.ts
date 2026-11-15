@@ -137,7 +137,7 @@ describe('moji_opomniki in izbrisi_opomnik', () => {
   });
 
   it('jedro: predlog, potrditev shrani enkrat; orodja ima vsak z glasovnim asistentom', async () => {
-    const env = okolje({ llm: [{ klici: [{ id: 'k1', ime: 'nov_opomnik', vhod: vhod() }] }] });
+    const env = okolje({ llm: [{ klici: [{ id: 'k1', ime: 'nov_opomnik', vhod: vhod() }] }, { besedilo: 'V redu.' }] });
     const k = kontekst();
     const r = await obdelajUkaz({ k, vhod: 'besedilo', besedilo: 'Opomni me jutri ob devetih, da pokličem dobavitelja.' }, env.d);
     if (!r.ok || !r.predlog) throw new Error(JSON.stringify(r));
@@ -145,6 +145,11 @@ describe('moji_opomniki in izbrisi_opomnik', () => {
     const p = await potrdiPredlog({ k, predlogId: r.predlog.id, zeton: r.predlog.zeton }, env.d);
     expect(p).toMatchObject({ ok: true });
     expect(env.opomniki.vrstice).toHaveLength(1);
+    // »Izbriši ta opomnik«: model v zgodovini vidi, da je bil potrjen, in njegov ID.
+    await obdelajUkaz({ k, vhod: 'besedilo', besedilo: 'Izbriši ta opomnik.', prejsnjiUkazi: [r.ukazId] }, env.d);
+    const zgodovina = JSON.stringify(env.llm.zahteve.at(-1)?.sporocila);
+    expect(zgodovina).toContain('Uporabnik je potrdil. Opomnik je shranjen.');
+    expect(zgodovina).toContain(`opomnik_id: ${env.opomniki.vrstice[0].id}`);
     const ima = (x: Partial<Kontekst>) => orodjaZa(kontekst(x)).some((t) => t.ime === 'nov_opomnik');
     expect(ima({ vloga: 'staff', pravice: VSE_PRAVICE_STAFF })).toBe(true);
     expect(ima({ vloga: 'staff', pravice: { ...VSE_PRAVICE_STAFF, can_access_asistent_plus: false } })).toBe(false);
