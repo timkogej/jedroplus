@@ -30,7 +30,7 @@ import type { TtsPonudnik } from './ponudniki/tts';
 import type { PosiljateljSporocil } from './sporocila/tipi';
 import type { ShrambaOpomnikov } from './opomniki/tipi';
 import type { KontekstPogovora, ShrambaGlasa, VhodUkaza, ZakljucekUkaza } from './shramba/tipi';
-import type { AkcijaStranke, JsonShema, Kontekst, PodatkiSalona, Predogled, RezultatOrodja } from './tipi';
+import type { AkcijaStranke, JsonShema, Kontekst, PodatkiSalona, Predogled, Prikaz, RezultatOrodja } from './tipi';
 
 export interface Odvisnosti {
   /** Leni, ker ponudnik brez ključa vrže napako šele, ko ga res potrebujemo. */
@@ -93,6 +93,8 @@ export type OdgovorUkaza =
       obrazec?: RezultatOrodja['obrazec'];
       /** Gumbi Pokliči / Piši (tel:, mailto:). */
       akcije?: AkcijaStranke[];
+      /** Kartica za zaslon (ploščice, vrstice). */
+      prikaz?: Prikaz;
       opozorilo?: string | null;
       porabljeno: number;
       kvota: number;
@@ -313,7 +315,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       const status = r.vprasanje ? 'vprasanje' : 'odgovor';
       return await koncaj({
         status, odgovor: r.sporocilo, govor: r.govor, vprasanje: r.vprasanje, pojdi: r.pojdi, obrazec: r.obrazec,
-        dnevnik: r.zasebno?.dnevnik, akcije: r.akcije,
+        dnevnik: r.zasebno?.dnevnik, akcije: r.akcije, prikaz: r.prikaz,
       });
     }
 
@@ -362,6 +364,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
             govor: [...zasebni.map((x) => x.govor ?? zaGovor(x.sporocilo)), zaGovor(odgovor)].join(' '),
             dnevnik: [...zasebni.map((x) => x.zasebno?.dnevnik ?? ''), odgovor].join('\n'),
             akcije: zasebni.flatMap((x) => x.akcije ?? []),
+            prikaz: zadnjeVprasanje ? undefined : enPrikaz(zasebni),
             vprasanje: zadnjeVprasanje,
           });
         }
@@ -430,6 +433,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
           obrazec: vpr ? undefined : izbrani.find((x) => x.obrazec)?.obrazec,
           dnevnik: izbrani.some((x) => x.zasebno) ? izbrani.map((x) => x.zasebno?.dnevnik ?? x.sporocilo).join('\n') : undefined,
           akcije: vpr ? undefined : izbrani.flatMap((x) => x.akcije ?? []),
+          prikaz: vpr ? undefined : enPrikaz(izbrani),
         });
       }
       sporocila.push({ vloga: 'rezultati', rezultati });
@@ -470,6 +474,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     /** Besedilo za dnevnik in zgodovino (brez telefona, e-pošte, opomb). */
     dnevnik?: string;
     akcije?: AkcijaStranke[];
+    prikaz?: Prikaz;
   }): Promise<OdgovorUkaza> {
     // Datum na koncu stavka ("13. 11." + ".") ne sme dati dvojne pike.
     r = { ...r, odgovor: r.odgovor.replace(/(\d\.)\.(?!\.)/g, '$1') };
@@ -508,12 +513,39 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       pojdi: r.pojdi && /^\/[a-z0-9/_-]*(\?[a-z_]+=[\w%.-]+(&[a-z_]+=[\w%.-]+){0,3})?$/i.test(r.pojdi) ? r.pojdi : undefined,
       obrazec: r.pojdi && r.obrazec ? r.obrazec : undefined,
       akcije: varneAkcije(r.akcije),
+      prikaz: r.prikaz ? omejiPrikaz(r.prikaz) : undefined,
       opozorilo: opozoriloKvote(rez.ok ? rez.porabljeno : 0, rez.ok ? rez.kvota : 0),
       porabljeno: rez.ok ? rez.porabljeno : 0,
       kvota: rez.ok ? rez.kvota : 0,
       zvok,
     };
   }
+}
+
+/** Prikaz samo, če ga ima natanko en rezultat (dve kartici bi se prepletli). */
+function enPrikaz(r: RezultatOrodja[]): Prikaz | undefined {
+  const s = r.filter((x) => x.prikaz);
+  return s.length === 1 && r.length === 1 ? s[0].prikaz : undefined;
+}
+
+/** Varovalka velikosti kartice (besedila in število vrstic). */
+export function omejiPrikaz(p: Prikaz): Prikaz {
+  const b = (x: string | undefined, n: number) => (x === undefined ? undefined : x.slice(0, n));
+  return {
+    naslov: b(p.naslov, 120)!,
+    podnaslov: b(p.podnaslov, 160),
+    ploscice: p.ploscice?.slice(0, 6).map((x) => ({ oznaka: b(x.oznaka, 40)!, vrednost: b(x.vrednost, 30)!, sprememba: b(x.sprememba, 40), smer: x.smer })),
+    skupine: p.skupine?.slice(0, 6).map((g) => {
+      const vrstice = g.vrstice.slice(0, 40);
+      const se = (g.se ?? 0) + g.vrstice.length - vrstice.length;
+      return {
+        naslov: b(g.naslov, 60),
+        vrstice: vrstice.map((v) => ({ cas: b(v.cas, 30), glavno: b(v.glavno, 120)!, drugo: b(v.drugo, 200), ton: v.ton })),
+        ...(se > 0 ? { se } : {}),
+      };
+    }),
+    opomba: b(p.opomba, 300),
+  };
 }
 
 /** Samo tel: in mailto: brez parametrov; največ dva gumba ali do 5 klicev z imeni. */

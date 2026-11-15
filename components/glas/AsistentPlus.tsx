@@ -197,7 +197,8 @@ export function AsistentPlus() {
       },
       odgovor: (o) => {
         setZadnji(o);
-        if (o.odgovor) dodaj({ kdo: 'asistent', besedilo: o.odgovor });
+        // S kartico (številke, seznam) je v glavni vrstici samo kratek naslov.
+        if (o.prikaz?.naslov || o.odgovor) dodaj({ kdo: 'asistent', besedilo: o.prikaz?.naslov ?? o.odgovor! });
         premakni(o);
       },
       potrditev: (o) => {

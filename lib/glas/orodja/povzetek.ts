@@ -14,7 +14,7 @@ import { dodajDni, izMinut, opisDatuma, vMinute } from '../razresevanje/datumi';
 import { delovniBrezOdsotnosti, prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
 import { datumZaGovor, razponZaGovor, uraZaGovor } from '../govor';
 import type { OkoljeOrodja, BralnoOrodje } from './tipi';
-import type { Kontekst, OsebaPovzetek, RezultatOrodja, TerminPovzetek } from '../tipi';
+import type { Kontekst, OsebaPovzetek, Prikaz, RezultatOrodja, TerminPovzetek } from '../tipi';
 import { cap, datumIzParametra } from './branje';
 import { inSeznam, jt } from '../jeziki/t';
 
@@ -195,8 +195,27 @@ export function besediloPovzetka(p: PodatkiPovzetka, danes: string): RezultatOro
     p.zahteve ? `zahteve ${p.zahteve}` : '',
   ].filter(Boolean).join(', ');
 
+  const opozorila = [
+    p.neoznaceniVceraj ? jt('Včeraj {n} {n|termin ni označen|termina nista označena|termini niso označeni|terminov ni označenih}.', { n: p.neoznaceniVceraj }) : '',
+    p.zahteve ? jt('{n} {n|zahteva za rezervacijo čaka|zahtevi za rezervacijo čakata|zahteve za rezervacijo čakajo|zahtev za rezervacijo čaka}.', { n: p.zahteve }) : '',
+    p.odsotni.length ? jt('Odsotni: {osebe}.', { osebe: p.odsotni.join(', ') }) : '',
+  ].filter(Boolean);
+  const prikaz: Prikaz = {
+    naslov: p.terminov === 0 ? `${kdajZaslon}: ${jt('ni terminov.')}`.replace(/\.$/, '') : `${kdajZaslon}: ${jt('{n} {n|termin|termina|termini|terminov}', { n: p.terminov })}`,
+    podnaslov: p.terminov && p.zadnjiKonec ? `${p.prvi!.ura}–${p.zadnjiKonec}` : undefined,
+    skupine: [
+      ...(opozorila.length ? [{ vrstice: opozorila.map((x) => ({ glavno: x, ton: 'opozorilo' as const })) }] : []),
+      ...(termini.length
+        ? [{ naslov: jt('Termini'), vrstice: termini.map((t) => ({ cas: `${t.zacetek}${t.konec ? `–${t.konec}` : ''}`, glavno: t.stranka || jt('stranka'), drugo: [t.storitev, !p.svoji ? t.oseba : null].filter(Boolean).join(' · ') || undefined })) }]
+        : []),
+      ...(p.opombe.length ? [{ naslov: jt('Opombe strank'), vrstice: p.opombe.map((x) => ({ glavno: x.stranka, drugo: x.opomba })) }] : []),
+      ...(p.nove.length ? [{ naslov: jt('Nove stranke'), vrstice: p.nove.map((x) => ({ glavno: x })) }] : []),
+      ...(p.luknje.length ? [{ naslov: jt('Proste luknje'), vrstice: p.luknje.map((l) => ({ cas: `${l.od}–${l.do}`, glavno: l.oseba ?? jt('prosto') })) }] : []),
+    ],
+  };
   return {
     sporocilo: zaslon.join('\n'),
+    prikaz,
     govor: govor.join(' '),
     podatki: { datum: p.datum, terminov: p.terminov, nove: p.nove.length, opombe: p.opombe.length, luknje: p.luknje.length, odsotni: p.odsotni.length, neoznaceni_vceraj: p.neoznaceniVceraj, zahteve: p.zahteve },
     ...(p.opombe.length ? { zasebno: { dnevnik } } : {}),

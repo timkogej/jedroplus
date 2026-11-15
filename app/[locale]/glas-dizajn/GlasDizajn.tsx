@@ -22,7 +22,7 @@ import type { Vrstica } from '@/components/glas/ui/tipi';
 import type { OdgovorOdjemalec, StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import type { NacinKrogca, Okno } from '@/lib/glas/odjemalec/polozaj';
 
-const PRIZORI = ['mirovanje', 'povezujem', 'poslusam', 'razmisljam', 'govorim', 'moznosti', 'predlog', 'obrazec', 'shrani', 'uspeh', 'napaka'] as const;
+const PRIZORI = ['mirovanje', 'povezujem', 'poslusam', 'razmisljam', 'govorim', 'moznosti', 'predlog', 'obrazec', 'shrani', 'uspeh', 'napaka', 'stevilke', 'termini'] as const;
 type Prizor = (typeof PRIZORI)[number];
 
 const IZJAVA = 'Vpiši Ano Novak jutri ob desetih na pedikuro';
@@ -157,6 +157,60 @@ export function GlasDizajn() {
           stanje: 'govorim',
           vrstice: [{ kdo: 'jaz', besedilo: 'Ja' }, { kdo: 'uspeh', besedilo: 'Super, termin je zapisan.' }],
           uspeh: { kljuc: ++kljuc.current, besedilo: 'Super, termin je zapisan.' },
+        });
+      case 'stevilke':
+        return setSt({
+          ...ZACETNO,
+          stanje: 'poslusam',
+          vrstice: [{ kdo: 'jaz', besedilo: 'Koliko sem zaslužil ta mesec?' }, { kdo: 'asistent', besedilo: '1. 11.–15. 11. 2026' }],
+          zadnji: {
+            ok: true,
+            status: 'odgovor',
+            prikaz: {
+              naslov: '1. 11.–15. 11. 2026',
+              podnaslov: 'Primerjava z obdobjem 1. 10.–15. 10. 2026, do istega dne',
+              ploscice: [
+                { oznaka: 'Zaslužek po ceniku', vrednost: '3.240,00 €', sprememba: '+12 %', smer: 'gor' },
+                { oznaka: 'Opravljeni termini', vrednost: '86', sprememba: '−4 %', smer: 'dol' },
+                { oznaka: 'Neprihodi', vrednost: '3' },
+                { oznaka: 'Odpovedani', vrednost: '7' },
+              ],
+              skupine: [
+                { naslov: 'Najbolj prodajane storitve', vrstice: [{ glavno: 'Barvanje', drugo: '24× · 1.440,00 €' }, { glavno: 'Žensko striženje', drugo: '31× · 930,00 €' }, { glavno: 'Pedikura', drugo: '12× · 420,00 €' }] },
+                { naslov: 'Najbolj zasedeni', vrstice: [{ glavno: 'Tina', drugo: '41×' }, { glavno: 'Maja', drugo: '45×' }] },
+              ],
+              opomba: 'Po ceniku storitev, ne dejanska plačila. Šteti so zaključeni in že končani termini, ki niso odpovedani.',
+            },
+          },
+        });
+      case 'termini':
+        return setSt({
+          ...ZACETNO,
+          stanje: 'poslusam',
+          vrstice: [{ kdo: 'jaz', besedilo: 'Kaj imam danes?' }, { kdo: 'asistent', besedilo: 'Danes, sobota 15. 11.: 5 terminov' }],
+          zadnji: {
+            ok: true,
+            status: 'odgovor',
+            prikaz: {
+              naslov: 'Danes, sobota 15. 11.: 5 terminov',
+              podnaslov: '09:00–16:30',
+              skupine: [
+                { vrstice: [{ glavno: '1 zahteva za rezervacijo čaka.', ton: 'opozorilo' }] },
+                {
+                  naslov: 'Termini',
+                  vrstice: [
+                    { cas: '09:00–10:30', glavno: 'Mateja Kovačič', drugo: 'Barvanje' },
+                    { cas: '11:00–11:30', glavno: 'Ana Novak', drugo: 'Žensko striženje' },
+                    { cas: '12:00–13:00', glavno: 'Špela Žagar', drugo: 'Pedikura' },
+                    { cas: '14:00–15:00', glavno: 'Tim Zupančič', drugo: 'Moško striženje' },
+                    { cas: '15:30–16:30', glavno: 'Nina Bizjak', drugo: 'Manikura' },
+                  ],
+                },
+                { naslov: 'Opombe strank', vrstice: [{ glavno: 'Ana Novak', drugo: 'Alergična na amonijak.' }] },
+                { naslov: 'Proste luknje', vrstice: [{ cas: '13:00–14:00', glavno: 'Tina' }] },
+              ],
+            },
+          },
         });
       case 'napaka':
         return setSt({ ...ZACETNO, napis: 'Dostop do mikrofona ni dovoljen. Dovolite mikrofon za to stran v nastavitvah brskalnika.' });

@@ -77,6 +77,28 @@ export interface RezultatOrodja {
   zasebno?: { dnevnik: string };
   /** Gumbi na zaslonu (Pokliči, Piši). Nikoli se ne sprožijo sami. */
   akcije?: AkcijaStranke[];
+  /** Pregleden prikaz za zaslon (ploščice, vrstice) namesto dolgega besedila. */
+  prikaz?: Prikaz;
+}
+
+/**
+ * Kartica z odgovorom: kratek naslov, ploščice s številkami in skupine vrstic.
+ * Sporočilo ostane za zgodovino in model; vmesnik pokaže to, če obstaja.
+ */
+export interface Prikaz {
+  naslov: string;
+  podnaslov?: string;
+  ploscice?: { oznaka: string; vrednost: string; sprememba?: string; smer?: 'gor' | 'dol' | 'enako' }[];
+  skupine?: { naslov?: string; vrstice: VrsticaPrikaza[]; se?: number }[];
+  opomba?: string;
+}
+
+export interface VrsticaPrikaza {
+  /** Leva kolona, npr. "09:00–10:30" ali "jutri 9:00". */
+  cas?: string;
+  glavno: string;
+  drugo?: string;
+  ton?: 'opozorilo';
 }
 
 export interface AkcijaStranke {

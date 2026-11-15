@@ -486,4 +486,5 @@ export const hr: Katalog = {
   "vodstvo": "uprava",
   "{ime} ima že {n} opomnikov.": "{ime} već ima {n} podsjetnika.",
   "{ime} nima računa v aplikaciji, zato je ne morem opomniti.": "{ime} nema račun u aplikaciji, pa ga ne mogu podsjetiti.",
+  "prosto": "slobodno",
 };

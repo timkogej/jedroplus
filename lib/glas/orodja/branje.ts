@@ -164,6 +164,10 @@ export const koledarDan: BralnoOrodje<{ datum: string | null; samo_moji: boolean
     const dGovor = cap(datumZaGovor(dan, o.danes));
     return {
       sporocilo: `${jt('{datum}: {n} {n|termin|termina|termini|terminov}.', { datum: cap(opis), n })}\n${vrstice.join('\n')}`,
+      prikaz: {
+        naslov: jt('{datum}: {n} {n|termin|termina|termini|terminov}.', { datum: cap(opis), n }).replace(/\.$/, ''),
+        skupine: [{ vrstice: izbrani.map((t) => ({ cas: `${t.zacetek}${t.konec ? `–${t.konec}` : ''}`, glavno: t.stranka || jt('stranka'), drugo: [t.storitev, !svoji ? t.oseba : null].filter(Boolean).join(' · ') || undefined })) }],
+      },
       govor: `${svoji ? jt('{datum} imate {n} {n|termin|termina|termine|terminov}.', { datum: dGovor, n }) : jt('{datum} je {n} {n|termin|termina|termine|terminov}.', { datum: dGovor, n })} ${naGlas.join(' ')}${ostali > 0 ? ` ${jt('In še {n} {n|termin|termina|termini|terminov}, ki so na zaslonu.', { n: ostali })}` : ''}`,
       podatki: {
         datum: dan,

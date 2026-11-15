@@ -245,6 +245,10 @@ export const mojiOpomniki: BralnoOrodje<Record<string, never>> = {
       sporocilo: [jt('Vaši opomniki ({n}):', { n: vsi.length }), ...vsi.map((x) => `• ${vrstica(x, o)}`)].join('\n'),
       govor: `${jt('Imate {n} {n|opomnik|opomnika|opomnike|opomnikov}', { n: vsi.length })}: ${inSeznam(prvi)}.${vsi.length > 3 ? ` ${jt('Ostali so na zaslonu.')}` : ''}`,
       podatki: { opomniki: vsi.map((x) => ({ opomnik_id: x.id, besedilo: x.besedilo, ob: x.ob })) },
+      prikaz: {
+        naslov: jt('Vaši opomniki ({n}):', { n: vsi.length }).replace(/:$/, ''),
+        skupine: [{ vrstice: vsi.map((x) => ({ glavno: x.besedilo, drugo: x.ob ? kdajZaslon(new Date(x.ob), o) : jt('ob terminu stranke') })) }],
+      },
     };
   },
 };

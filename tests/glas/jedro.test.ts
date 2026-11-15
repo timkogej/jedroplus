@@ -1,7 +1,7 @@
 // Integracija jedra z lažnimi ponudniki: branje, predlog → potrditev,
 // idempotenca, potek, zavrnitev in varnost (injekcija, tuje podjetje, pravice).
 import { describe, expect, it } from 'vitest';
-import { obdelajUkaz, potrdiPredlog, zavrniPredlog, SISTEM } from '@/lib/glas/jedro';
+import { obdelajUkaz, omejiPrikaz, potrdiPredlog, zavrniPredlog, SISTEM } from '@/lib/glas/jedro';
 import { kontekst, klicZapiska, okolje, VSE_PRAVICE_STAFF, ZVOK } from './pomoc';
 
 async function predlog(env = okolje({ llm: [klicZapiska()] }), k = kontekst()) {
@@ -22,6 +22,18 @@ describe('branje se izvede takoj', () => {
       expect(r.odgovor).not.toContain('Ana Novak'); // Urškin termin
       expect(r.odgovor).not.toContain('Špela'); // odpovedan
     }
+  });
+
+  it('termini dneva pridejo tudi kot kartica (prikaz); kartica je omejena', async () => {
+    const { d } = okolje();
+    const r = await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: 'kaj imamo jutri' }, d);
+    if (!r.ok) throw new Error();
+    expect(r.prikaz?.naslov).toMatch(/^Jutri, petek, 13\. 11\.: \d termin/);
+    expect(r.prikaz?.skupine?.[0].vrstice).toContainEqual({ cas: '11:00–11:30', glavno: 'Ana Novak', drugo: 'Moško striženje · Urška' });
+    const velik = omejiPrikaz({ naslov: 'x'.repeat(500), skupine: [{ vrstice: Array.from({ length: 50 }, (_, i) => ({ glavno: String(i) })) }] });
+    expect(velik.naslov).toHaveLength(120);
+    expect(velik.skupine?.[0].vrstice).toHaveLength(40);
+    expect(velik.skupine?.[0].se).toBe(10);
   });
 
   it('"kaj imamo" pokaže vse termine salona', async () => {

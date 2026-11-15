@@ -14,8 +14,9 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowUp, CaretRight, Check, CheckCircle, EnvelopeSimple, Keyboard, Microphone, Phone, WarningCircle, X } from '@phosphor-icons/react';
+import { ArrowDown, ArrowUp, CaretRight, Check, CheckCircle, EnvelopeSimple, Keyboard, Microphone, Phone, WarningCircle, X } from '@phosphor-icons/react';
 import type { OdgovorOdjemalec, StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
+import type { Prikaz } from '@/lib/glas/tipi';
 import type { Moznost, Vrstica } from './tipi';
 
 /** Približna hitrost glasu (znakov na sekundo) za izpis po besedah. */
@@ -95,7 +96,11 @@ export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBes
 
 /** Ali je pod odgovorom kartica (možnosti ali predlog). */
 export function imaKartico(zadnji: OdgovorOdjemalec | null): boolean {
-  return Boolean(zadnji?.status === 'predlog' && zadnji.predlog) || Boolean(zadnji?.status === 'vprasanje' && zadnji.vprasanje?.moznosti?.length);
+  return (
+    Boolean(zadnji?.status === 'predlog' && zadnji.predlog) ||
+    Boolean(zadnji?.status === 'vprasanje' && zadnji.vprasanje?.moznosti?.length) ||
+    Boolean(zadnji?.status === 'odgovor' && zadnji.prikaz)
+  );
 }
 
 function Status({ stanje, t }: { stanje: StanjePogovora; t: (k: string) => string }) {
@@ -168,6 +173,7 @@ function Kartice({
   onPotrdi: () => void;
   onZavrni: () => void;
 }) {
+  if (zadnji?.status === 'odgovor' && zadnji.prikaz) return <KarticaPrikaza p={zadnji.prikaz} />;
   if (zadnji?.status === 'vprasanje' && zadnji.vprasanje?.moznosti?.length) {
     return <Moznosti moznosti={zadnji.vprasanje.moznosti} zaseden={zaseden} t={t} onIzberi={onIzberi} />;
   }
@@ -250,6 +256,69 @@ function Kartice({
     );
   }
   return null;
+}
+
+/**
+ * Odgovor kot kartica: številke v ploščicah, termini in seznami v vrsticah (čas levo).
+ * Naslov je že v glavni vrstici zgoraj, zato ga tu ne ponavljamo.
+ */
+function KarticaPrikaza({ p }: { p: Prikaz }) {
+  const ploscice = p.ploscice ?? [];
+  const skupine = (p.skupine ?? []).filter((g) => g.vrstice.length);
+  return (
+    <div className="ap-kartica ap-vstop mt-5 w-full max-w-[460px] px-4 pb-4 pt-3.5 text-left" style={{ animationDelay: '120ms' }}>
+      {p.podnaslov && <p className="tnum mb-2 text-[13px] font-medium text-label-secondary">{p.podnaslov}</p>}
+      {ploscice.length > 0 && (
+        <div className="grid grid-cols-2 gap-2">
+          {ploscice.map((x) => (
+            <div key={x.oznaka} className="rounded-2xl bg-black/[0.035] px-3.5 py-3">
+              <p className="truncate text-[12px] font-medium text-label-secondary">{x.oznaka}</p>
+              <p className="tnum mt-0.5 truncate text-[22px] font-semibold leading-tight tracking-[-0.015em] text-label">{x.vrednost}</p>
+              {x.sprememba && (
+                <p
+                  className={`tnum mt-1 flex items-center gap-1 truncate text-[12px] font-medium ${
+                    x.smer === 'gor' ? 'text-emerald-600' : x.smer === 'dol' ? 'text-red-500' : 'text-label-secondary'
+                  }`}
+                >
+                  {x.smer === 'gor' ? <ArrowUp size={11} weight="bold" aria-hidden /> : x.smer === 'dol' ? <ArrowDown size={11} weight="bold" aria-hidden /> : null}
+                  <span className="truncate">{x.sprememba}</span>
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {skupine.map((g, gi) => (
+        <section key={gi} className={ploscice.length || gi > 0 ? 'mt-4' : ''}>
+          {g.naslov && <h3 className="mb-1 text-[12px] font-semibold uppercase tracking-[0.04em] text-label-secondary">{g.naslov}</h3>}
+          <ul className="divide-y divide-black/[0.06]">
+            {g.vrstice.map((v, i) =>
+              // Kratka vrednost brez časa (»24× · 1.440 €«): v isti vrstici desno, kot tabela.
+              !v.cas && v.drugo && v.drugo.length <= 26 && !v.ton ? (
+                <li key={i} className="flex items-baseline justify-between gap-3 py-2">
+                  <span className="min-w-0 truncate text-[15px] font-semibold text-label">{v.glavno}</span>
+                  <span className="tnum shrink-0 text-[14px] text-label-secondary">{v.drugo}</span>
+                </li>
+              ) : (
+              <li key={i} className="flex items-baseline gap-3 py-2">
+                {v.cas && <span className="tnum w-[88px] shrink-0 text-[13px] font-medium text-label-secondary">{v.cas}</span>}
+                <span className="min-w-0 flex-1">
+                  <span className={`flex items-start gap-1.5 text-[15px] font-semibold leading-snug ${v.ton === 'opozorilo' ? 'text-[#b4570f]' : 'text-label'}`}>
+                    {v.ton === 'opozorilo' && <WarningCircle size={16} weight="fill" className="mt-[2px] shrink-0" aria-hidden />}
+                    <span className="min-w-0 break-words">{v.glavno}</span>
+                  </span>
+                  {v.drugo && <span className="mt-0.5 block break-words text-[13px] leading-snug text-label-secondary">{v.drugo}</span>}
+                </span>
+              </li>
+              )
+            )}
+          </ul>
+          {g.se ? <p className="tnum pt-1 text-[13px] text-label-secondary">+{g.se}</p> : null}
+        </section>
+      ))}
+      {p.opomba && <p className="mt-3 text-[12px] leading-snug text-label-secondary">{p.opomba}</p>}
+    </div>
+  );
 }
 
 /** Spodaj: tipkovnica (sekundarno) in konec pogovora. Nad tipkovnico na iPhonu. */

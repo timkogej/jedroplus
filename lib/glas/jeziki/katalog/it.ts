@@ -484,4 +484,5 @@ export const it: Katalog = {
   "vodstvo": "direzione",
   "{ime} ima že {n} opomnikov.": "{ime} ha già {n} promemoria.",
   "{ime} nima računa v aplikaciji, zato je ne morem opomniti.": "{ime} non ha un account nell'app, quindi non posso ricordarglielo.",
+  "prosto": "libero",
 };

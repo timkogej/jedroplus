@@ -18,6 +18,7 @@
 //   * Kar Soniox prepiše iz zvoka med govorom asistenta (+ kratek rep), ne gre v izjavo.
 // Ne zapisuje prepisov v konzolo (osebni podatki).
 
+import type { Prikaz } from '../tipi';
 import type { VrstaObrazca } from './predizpolnitev';
 import { izberiMoznost, jePotrditev, jeZavrnitev, pcmVFloat, SestavljalecIzjave, type SonioxZeton } from './besede';
 import {
@@ -64,6 +65,8 @@ export interface OdgovorOdjemalec {
   obrazec?: { vrsta: VrstaObrazca; polja: Record<string, string> };
   /** Gumba Pokliči / Piši. Uporabnik ju pritisne sam; nič se ne sproži samo. */
   akcije?: { vrsta: 'klic' | 'pisi'; href: string; oznaka?: string }[];
+  /** Kartica za zaslon (ploščice, vrstice); `odgovor` ostane celoten za zgodovino. */
+  prikaz?: Prikaz;
   opozorilo?: string | null;
   sporocilo?: string;
   koda?: string;

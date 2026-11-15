@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { izracunajObdobje, zgradiCenik, type IzracunObdobja } from '@/lib/analytics/izracun';
 import { dodajDni, danVTednu } from '../razresevanje/datumi';
 import { poisci } from '../razresevanje/imena';
-import type { RezultatOrodja } from '../tipi';
+import type { Prikaz, RezultatOrodja } from '../tipi';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 import { jt } from '../jeziki/t';
 import { trenutniJezik } from '../jeziki/jezik';
@@ -112,6 +112,11 @@ export function oznakaObdobja(od: string, doo: string): string {
   return `${dm(od)}–${dm(doo)} ${doo.slice(0, 4)}`;
 }
 
+function smer(zdaj: number, prej: number): 'gor' | 'dol' | 'enako' {
+  const p = prej > 0 ? Math.round(((zdaj - prej) / prej) * 100) : 0;
+  return p > 0 ? 'gor' : p < 0 ? 'dol' : 'enako';
+}
+
 function sprememba(zdaj: number, prej: number): string | null {
   if (prej <= 0) return null;
   const p = Math.round(((zdaj - prej) / prej) * 100);
@@ -142,8 +147,30 @@ export function besediloStevilk(r: IzracunObdobja, prej: IzracunObdobja | null, 
     );
   }
   vrstice.push(jt('Po ceniku storitev, ne dejanska plačila. Šteti so zaključeni in že končani termini, ki niso odpovedani.'));
+  const primerjava = (zdaj: number, p: number) => {
+    const x = prej ? sprememba(zdaj, p) : null;
+    return x ? { sprememba: x, smer: smer(zdaj, p) } : {};
+  };
+  const prikaz: Prikaz = {
+    naslov,
+    podnaslov: prej ? jt('Primerjava z obdobjem {obdobje}', { obdobje: `${oznakaObdobja(prej.od, prej.do)}${raz.tece ? `, ${jt('do istega dne')}` : ''}` }) : undefined,
+    ploscice: [
+      { oznaka: jt('Zaslužek po ceniku'), vrednost: evri(r.zasluzek), ...primerjava(r.zasluzek, prej?.zasluzek ?? 0) },
+      { oznaka: jt('Opravljeni termini'), vrednost: String(r.opravljeni), ...primerjava(r.opravljeni, prej?.opravljeni ?? 0) },
+      { oznaka: jt('Neprihodi'), vrednost: String(r.neprihodi) },
+      { oznaka: jt('Odpovedani'), vrednost: String(r.odpovedani) },
+    ],
+    skupine: [
+      ...(r.storitve.length
+        ? [{ naslov: jt('Najbolj prodajane storitve'), vrstice: r.storitve.slice(0, 5).map((x) => ({ glavno: x.naziv, drugo: `${x.stevilo}× · ${evri(x.znesek)}` })) }]
+        : []),
+      ...(r.osebe.length ? [{ naslov: jt('Najbolj zasedeni'), vrstice: r.osebe.slice(0, 5).map((x) => ({ glavno: x.ime, drugo: `${x.stevilo}×` })) }] : []),
+    ],
+    opomba: jt('Po ceniku storitev, ne dejanska plačila. Šteti so zaključeni in že končani termini, ki niso odpovedani.'),
+  };
   return {
     sporocilo: vrstice.join('\n'),
+    prikaz,
     govor: jt('Številke so na zaslonu.'),
     // Številke ne gredo v dnevnik ukazov in ne modelu (samo lastnik jih vidi na zaslonu).
     zasebno: { dnevnik: `stevilke ${raz.od}..${raz.do} (${kaj})` },
