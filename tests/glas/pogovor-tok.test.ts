@@ -271,6 +271,19 @@ describe('prekinitev z glasom', () => {
 });
 
 describe('lokalni odzivi in napake', () => {
+  it('med tipkanjem se pogovor ne zapre; ko neha tipkati, se po 30 s zapre', async () => {
+    const { p, stanja } = await zagnan();
+    await korak(5000);
+    p.tipkam();
+    await korak(15_000); // začetna tišina (12 s) je mimo, a tipka
+    expect(stanja.at(-1)).toBe('poslusam');
+    p.tipkam();
+    await korak(29_000);
+    expect(stanja.at(-1)).toBe('poslusam');
+    await korak(2_000);
+    expect(stanja.at(-1)).toBe('mirovanje');
+  });
+
   it('"hvala, to je vse" konča pogovor brez strežnika', async () => {
     const { stanja } = await zagnan();
     recem('Hvala, to je vse.', 0);

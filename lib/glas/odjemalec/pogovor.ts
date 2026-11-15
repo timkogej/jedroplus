@@ -126,6 +126,8 @@ export function tisinaZaBranje(zaslon: string, govor: string, osnova: number): n
   const neizreceno = Math.max(0, zaslon.replace(/\s+/g, ' ').length - govor.length);
   return Math.min(BRANJE_NAJVEC_MS, Math.max(osnova, osnova + neizreceno * BRANJE_MS_NA_ZNAK));
 }
+/** Po zadnji tipki se pogovor ne zapre vsaj toliko časa (uporabnik piše namesto govori). */
+export const TISINA_PO_TIPKANJU_MS = 30_000;
 /** Po "hvala" je pogovor verjetno končan: zapre se prej. */
 const TISINA_PO_ZAHVALI_MS = 4000;
 /** Zgodovina pogovora: zadnjih toliko ukazov, če je od zadnjega manj kot 5 minut (enako preverja strežnik). */
@@ -175,6 +177,8 @@ export class Pogovor {
   private ttsZiv: ReturnType<typeof setInterval> | null = null;
   private ttsObnova: ReturnType<typeof setInterval> | null = null;
   private tisina: ReturnType<typeof setTimeout> | null = null;
+  /** Čas zadnje tipke v polju za pisanje (0 = ne tipka). */
+  private zadnjeTipkanje = 0;
   private cakanje: ReturnType<typeof setTimeout> | null = null;
   private namigCasovnik: ReturnType<typeof setTimeout> | null = null;
   private lokalnoCasovnik: ReturnType<typeof setTimeout> | null = null;
@@ -343,6 +347,7 @@ export class Pogovor {
   async besedilo(t: string) {
     const b = t.trim();
     if (!b) return;
+    this.zadnjeTipkanje = 0;
     if (this.s === 'govorim') this.utisaj();
     this.tKonec = performance.now();
     await this.obdelaj(b);
@@ -673,10 +678,23 @@ export class Pogovor {
     this.medGovorom.pocisti();
     this.cakajoca = null;
     this.nastavi('poslusam');
+    this.nastaviTisino(tisinaMs);
+  }
+
+  private nastaviTisino(tisinaMs: number) {
     this.ustaviTisino();
     this.tisina = setTimeout(() => {
-      if (this.s === 'poslusam' && !this.cakajoca && !this.sestavljalec.trenutno) this.koncaj(null);
+      if (this.s !== 'poslusam' || this.cakajoca || this.sestavljalec.trenutno) return;
+      // Uporabnik piše: počakaj, dokler ne neha tipkati.
+      const tipka = TISINA_PO_TIPKANJU_MS - (Date.now() - this.zadnjeTipkanje);
+      if (this.zadnjeTipkanje && tipka > 0) return this.nastaviTisino(tipka);
+      this.koncaj(null);
     }, tisinaMs);
+  }
+
+  /** Vmesnik: tipka v polju za pisanje (ali odprto polje). Med tipkanjem se pogovor ne zapre. */
+  tipkam(aktivno = true) {
+    this.zadnjeTipkanje = aktivno ? Date.now() : 0;
   }
 
   private ustaviTisino() {

@@ -87,6 +87,7 @@ export interface AsistentVmesnikProps {
   onPripravi?: () => void;
   onKoncaj: () => void;
   onBesedilo: (x: string) => void;
+  onTipkam?: (aktivno: boolean) => void;
   onIzberi: (m: Moznost) => void;
   onPotrdi: () => void;
   onZavrni: () => void;
@@ -127,6 +128,7 @@ export function AsistentVmesnik(p: AsistentVmesnikProps) {
           vrh={poz.y + poz.velikost + 18}
           t={t}
           onBesedilo={p.onBesedilo}
+          onTipkam={p.onTipkam}
           onIzberi={p.onIzberi}
           onPotrdi={p.onPotrdi}
           onZavrni={p.onZavrni}

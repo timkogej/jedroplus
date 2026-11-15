@@ -31,6 +31,8 @@ export interface PrikazPogovoraProps {
   vrh: number;
   t: (k: string) => string;
   onBesedilo: (x: string) => void;
+  /** Uporabnik tipka v polju (ali ga zapre: false) — pogovor se medtem ne zapre. */
+  onTipkam?: (aktivno: boolean) => void;
   onIzberi: (m: Moznost) => void;
   onPotrdi: () => void;
   onZavrni: () => void;
@@ -39,7 +41,7 @@ export interface PrikazPogovoraProps {
   kljukicaVOrbu?: boolean;
 }
 
-export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBesedilo, onIzberi, onPotrdi, onZavrni, onKoncaj, kljukicaVOrbu = false }: PrikazPogovoraProps) {
+export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBesedilo, onTipkam, onIzberi, onPotrdi, onZavrni, onKoncaj, kljukicaVOrbu = false }: PrikazPogovoraProps) {
   const zaseden = stanje === 'povezujem' || stanje === 'razmisljam';
   const zadnja = vrstice[vrstice.length - 1];
   const predzadnja = vrstice[vrstice.length - 2];
@@ -89,7 +91,7 @@ export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBes
         <Kartice zadnji={zadnji} zaseden={zaseden} t={t} onIzberi={onIzberi} onPotrdi={onPotrdi} onZavrni={onZavrni} />
       </div>
 
-      <Kontrole zaseden={zaseden} t={t} onBesedilo={onBesedilo} onKoncaj={onKoncaj} />
+      <Kontrole zaseden={zaseden} t={t} onBesedilo={onBesedilo} onTipkam={onTipkam} onKoncaj={onKoncaj} />
     </div>
   );
 }
@@ -408,11 +410,13 @@ function Kontrole({
   zaseden,
   t,
   onBesedilo,
+  onTipkam,
   onKoncaj,
 }: {
   zaseden: boolean;
   t: (k: string) => string;
   onBesedilo: (x: string) => void;
+  onTipkam?: (aktivno: boolean) => void;
   onKoncaj: () => void;
 }) {
   const [pisem, setPisem] = useState(false);
@@ -422,6 +426,8 @@ function Kontrole({
 
   useEffect(() => {
     if (pisem) vnos.current?.focus();
+    onTipkam?.(pisem);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- samo ob odprtju/zaprtju polja
   }, [pisem]);
 
   const poslji = () => {
@@ -447,7 +453,11 @@ function Kontrole({
           <input
             ref={vnos}
             value={besedilo}
-            onChange={(e) => setBesedilo(e.target.value)}
+            onChange={(e) => {
+              setBesedilo(e.target.value);
+              onTipkam?.(true);
+            }}
+            onFocus={() => onTipkam?.(true)}
             onKeyDown={(e) => {
               // Esc v polju zapre samo vnos, ne pogovora.
               if (e.key === 'Escape') {

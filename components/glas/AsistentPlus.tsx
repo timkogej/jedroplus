@@ -404,6 +404,7 @@ export function AsistentPlus() {
       onPripravi={pripravi}
       onKoncaj={koncaj}
       onBesedilo={(x) => void pogovor.current?.besedilo(x)}
+      onTipkam={(x) => pogovor.current?.tipkam(x)}
       onIzberi={(m) => void pogovor.current?.izberi(m)}
       onPotrdi={() => void pogovor.current?.potrdiPredlog()}
       onZavrni={() => void pogovor.current?.zavrniPredlog()}
