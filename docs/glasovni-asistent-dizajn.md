@@ -33,7 +33,7 @@ Namesto kroga je asistent lahko **plus iz logotipa**, ki se ob glasu napihne pro
 | Govorim | Napihuje se z glasom asistenta, vsak krak diha zase; običajen govor malo, poudarki do kroga. |
 | Uspeh | Napihne se v krog s kljukico, nato nazaj v plus. |
 
-Različice: `logo` (razmerja logotipa), `mehak` (debelejši, berljiv v 48 px), `zele` (zaobljen, močno napihovanje), `obris` (svetleča steklena cevka v obliki plusa: daljni in bližnji sij, notranji odsev, oster rob z barvami in svetla nit; rob se ob glasu odebeli; razmišljanje = svetel komet kroži po robu, oblika počasi diha; barve se vrtijo z `@property` kota gradienta, v mirovanju zamegljene plasti mirujejo), `sij` (po zgledu »voice orb«: senčilnik WebGL brez knjižnic, `sijGl.ts`; svetel obroč s sijem navznoter, barve tečejo po robu, iskra kroži, šum rahlo vzvalovi rob; glas pospeši vrtenje in vzvaluje rob, razmišljanje = dve hitri iskri; slika teče le, ko teče pogon, v mirovanju stoji; brez WebGL nariše `obris`).
+Različice: `logo` (razmerja logotipa), `mehak` (debelejši, berljiv v 48 px), `zele` (zaobljen, močno napihovanje), `obris` (oblika žele, samo živ sijoč rob v slogu Siri, steklena notranjost; v mirovanju sij miruje, barve tečejo samo po tankem robu).
 
 Možnosti in predlog: steklena kartica z gradientnim robom; možnosti kot vrstice z inicialkami (tipke 1–9 izberejo na računalniku), predlog z naslovom, podrobnostmi in gumboma Prekliči/Potrdi; pod kartico namig za glas (`moznostiNamig`, `predlogNamig`). Izbira: `OBLIKA_PRIVZETA` v `AsistentVmesnik.tsx` (zdaj še `krog`). Primerjava: `/sl/glas-dizajn?primerjava=1`, posamezna: `?oblika=mehak`.
 

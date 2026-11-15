@@ -5,7 +5,7 @@
  * strežnika in prijave). Prizor se izbere s tipkami spodaj levo ali v naslovu:
  *   ?prizor=mirovanje|povezujem|poslusam|razmisljam|govorim|moznosti|predlog|obrazec|shrani|uspeh|napaka
  *   &cist=1  skrije tipke (za posnetke zaslona)   &toast=1  pokaže obvestilo spodaj desno
- *   &oblika=krog|logo|mehak|zele|obris|sij   &primerjava=1  vse oblike drug ob drugem (velike in v pravi velikosti)
+ *   &oblika=krog|logo|mehak|zele   &primerjava=1  vse oblike drug ob drugem (velike in v pravi velikosti)
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
