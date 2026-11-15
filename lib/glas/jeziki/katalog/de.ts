@@ -476,4 +476,12 @@ export const de: Katalog = {
   "{kdaj}: ne dela, predlog {predlog}": "{kdaj}: arbeitet nicht, Vorschlag {predlog}",
   "{kdaj}: zasedeno, v treh dneh ni prostega": "{kdaj}: belegt, innerhalb von drei Tagen nichts frei",
   "{kdaj}: ne dela, v treh dneh ni prostega": "{kdaj}: arbeitet nicht, innerhalb von drei Tagen nichts frei",
+  "Ostali so v obvestilih.": "Die übrigen finden Sie in den Benachrichtigungen.",
+  "Opomnik za {ime} je shranjen. Vidi in prekliče ga lahko samo {ime}.": "Erinnerung für {ime} gespeichert. Nur {ime} kann sie sehen und löschen.",
+  "Opomnik za {ime} {kdaj}: {besedilo}": "Erinnerung für {ime} {kdaj}: {besedilo}",
+  "Opomnim lahko samo vas. Sodelavce opomnita lastnik ali admin.": "Ich kann nur Sie erinnern. Kolleginnen und Kollegen erinnern der Inhaber oder ein Admin.",
+  "Za": "Für",
+  "vodstvo": "Leitung",
+  "{ime} ima že {n} opomnikov.": "{ime} hat bereits {n} Erinnerungen.",
+  "{ime} nima računa v aplikaciji, zato je ne morem opomniti.": "{ime} hat kein Konto in der App, daher kann ich sie nicht erinnern.",
 };

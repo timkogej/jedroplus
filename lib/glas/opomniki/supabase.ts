@@ -63,5 +63,17 @@ export function shrambaOpomnikov(admin: SupabaseClient): ShrambaOpomnikov {
       if (error) return true; // ne vemo: raje brez opozorila
       return (count ?? 0) > 0;
     },
+
+    async prejemnik(podjetjeUuid, idOsebe) {
+      const { data, error } = await admin
+        .from('company_members')
+        .select('user_id')
+        .eq('company_id', podjetjeUuid)
+        .eq('person_id', idOsebe)
+        .limit(2);
+      if (error) throw new Error(`prejemnik: ${error.code ?? 'napaka'}`);
+      // Dva računa na isti osebi: ne ugibamo.
+      return data && data.length === 1 && data[0].user_id ? String(data[0].user_id) : null;
+    },
   };
 }

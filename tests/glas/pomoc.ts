@@ -386,7 +386,7 @@ export function klicZapiska(vhod: Partial<Record<string, unknown>> = {}): Partia
 }
 
 /** Lažna shramba opomnikov (kot SQL: omejitev čakajočih, preklic samo svojih). */
-export function opomnikiLazni(push = true) {
+export function opomnikiLazni(push = true, clani: Record<string, string> = {}) {
   const vrstice: (NovOpomnik & { id: string; stanje: 'caka' | 'preklican' })[] = [];
   const s: ShrambaOpomnikov & { vrstice: typeof vrstice; push: boolean } = {
     vrstice,
@@ -412,6 +412,9 @@ export function opomnikiLazni(push = true) {
     },
     async imaPush() {
       return s.push;
+    },
+    async prejemnik(_podjetjeUuid, idOsebe) {
+      return clani[idOsebe] ?? null;
     },
   };
   return s;

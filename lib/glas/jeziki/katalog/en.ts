@@ -476,4 +476,12 @@ export const en: Katalog = {
   "{kdaj}: ne dela, predlog {predlog}": "{kdaj}: not working, suggested {predlog}",
   "{kdaj}: zasedeno, v treh dneh ni prostega": "{kdaj}: taken, nothing free within three days",
   "{kdaj}: ne dela, v treh dneh ni prostega": "{kdaj}: not working, nothing free within three days",
+  "Ostali so v obvestilih.": "The rest are in your notifications.",
+  "Opomnik za {ime} je shranjen. Vidi in prekliče ga lahko samo {ime}.": "Reminder for {ime} saved. Only {ime} can see and cancel it.",
+  "Opomnik za {ime} {kdaj}: {besedilo}": "Reminder for {ime} {kdaj}: {besedilo}",
+  "Opomnim lahko samo vas. Sodelavce opomnita lastnik ali admin.": "I can only remind you. Colleagues can be reminded by the owner or an admin.",
+  "Za": "For",
+  "vodstvo": "management",
+  "{ime} ima že {n} opomnikov.": "{ime} already has {n} reminders.",
+  "{ime} nima računa v aplikaciji, zato je ne morem opomniti.": "{ime} has no account in the app, so I can't remind them.",
 };

@@ -478,4 +478,12 @@ export const hr: Katalog = {
   "{kdaj}: ne dela, predlog {predlog}": "{kdaj}: ne radi, prijedlog {predlog}",
   "{kdaj}: zasedeno, v treh dneh ni prostega": "{kdaj}: zauzeto, u tri dana nema slobodnog",
   "{kdaj}: ne dela, v treh dneh ni prostega": "{kdaj}: ne radi, u tri dana nema slobodnog",
+  "Ostali so v obvestilih.": "Ostali su u obavijestima.",
+  "Opomnik za {ime} je shranjen. Vidi in prekliče ga lahko samo {ime}.": "Podsjetnik za {ime} je spremljen. Vidjeti i otkazati ga može samo {ime}.",
+  "Opomnik za {ime} {kdaj}: {besedilo}": "Podsjetnik za {ime} {kdaj}: {besedilo}",
+  "Opomnim lahko samo vas. Sodelavce opomnita lastnik ali admin.": "Mogu podsjetiti samo vas. Kolege podsjećaju vlasnik ili admin.",
+  "Za": "Za",
+  "vodstvo": "uprava",
+  "{ime} ima že {n} opomnikov.": "{ime} već ima {n} podsjetnika.",
+  "{ime} nima računa v aplikaciji, zato je ne morem opomniti.": "{ime} nema račun u aplikaciji, pa ga ne mogu podsjetiti.",
 };

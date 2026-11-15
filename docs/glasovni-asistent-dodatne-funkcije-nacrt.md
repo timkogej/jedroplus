@@ -596,7 +596,7 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 - Ali `notifications` sprejme zapis (stolpci, `dedupe_key` unikaten, omejitve na `type`/`entity_type`) — testirano na nadomestni tabeli.
 - Push na telefon (PWA) in prikaz v zvončku/Obvestilih (`entity_type 'glas_opomnik'` nima posebne ikone ali povezave).
 - `Termini."Datum"`/`"Čas"` v produkciji: tek ju bere kot besedilo (`left(…,10)::date`, `left(…,5)::time`).
-- Ni še: asistent ob odprtju ne pove neprebranih opomnikov (§5 »Neprebran opomnik«) in »opomni Tino« (v2).
+- Neprebrani opomniki ob odprtju in »opomni Tino«: narejeno v v2 (spodaj).
 
 ### Ponavljajoči termini (6): kaj je narejeno
 
@@ -615,7 +615,7 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 - Okno termina: vrstica **Serija 2/6** in v meniju **Odpovej ta in vse naslednje** → seznam prihodnjih odprtih terminov → potrditev → vsak odpovedan po isti poti kot en termin (`odpovejTermin`, izločen iz `handleCancelAppointment`; obvestilo stranki kot doslej).
 - Asistent+: `pripravi_serijo` (bralno orodje): razreši kot `pripravi_termin`, preveri vse datume, odpre obrazec z vklopljenim »Ponovi« (polje `ponovi=tedni:krat`) in pove težave. Po »ja« uporabnik vidi pregled in shrani z gumbom — asistent sam ne shrani ničesar.
 - Prevodi v 5 jezikih (koledar `messages/*/appointments.json` → `serija`, asistent katalogi), testi `tests/glas/serija.test.ts`, SQL test `tests/glas/sql/preizkus_serije.sql`, eval primeri.
-- Ni narejeno (v2): »Prestavi vse«, gumb »Ponovi« na obstoječem terminu, oznaka serije na kartici v mreži koledarja (zdaj samo v oknu termina).
+- v2 (»Prestavi vse«, »Ponovi«, oznaka v mreži): narejeno, spodaj.
 
 ### Kaj mora narediti Tim (6)
 
@@ -630,4 +630,24 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 - Ali n8n `NOV_TERMIN` ob 12 hitrih zaporednih klicih pošlje vseh 12 potrdil (SMS kvota!).
 - Termin, ki ga shranjevanje ni potrdilo v času čakanja (`writeUnconfirmed`), se šteje kot shranjen; če ga n8n ni zapisal, povezava serije zanj zavrne celo serijo (»povezava ni uspela«), termini pa ostanejo.
 - Neuspel termin, ki ga shraniš ob ponovnem poskusu, se poveže z ostalimi samo, če so v tistem trenutku vsi izbrani shranjeni.
+
+### v2 (15. 11.): kaj je narejeno
+
+- **Eval serije v tujih jezikih**: en, de, it, hr po 13/13.
+- **Oznaka serije v mreži koledarja**: kartica termina ima spodaj desno »↻ 2/6« (vsi pogledi).
+- **Ponovi na obstoječem terminu**: meni termina → »Ponovi« odpre obrazec za nov termin s stranko, storitvami, lokacijo in jezikom ter vklopljenim »Ponovi termin« (vsake 4 tedne, 4-krat), prvi datum čez 4 tedne. Shranjevanje gre po obstoječi poti serije (pregled datumov). Če termin še ni v seriji, se nova serija poveže skupaj z njim (izhodišče).
+- **Prestavi ta in vse naslednje** (meni termina v seriji):
+  1. nov dan in ura tega termina;
+  2. vsi naslednji odprti termini serije se zamaknejo za enako število dni in minut, vsak se preveri (brez samega sebe) → pregled kot pri novi seriji (predlogi, izklop, ročna sprememba);
+  3. »Prestavi N terminov« → vsak po isti poti kot ročna prestavitev (`prestaviTermin`, izločen iz `handleRescheduleAppointment`), tik pred tem še enkrat preverjen;
+  4. če ima podjetje vklopljena obvestila o prestavitvi: eno vprašanje s seznamom → obvestilo za vsak termin posebej (`posljiObvestiloPrestavitve`). Dva termina isti dan = dva SMS.
+- **Neprebrani opomniki ob odprtju asistenta**: `/api/glas/seja` vrne opomnike `glas_opomnik` zadnjih 12 ur, ki jih uporabnik še ni prebral; asistent jih pove (»Imate 2 opomnika: … Ostali so v obvestilih.«), če uporabnik ne govori, in jih označi kot prebrane (`/api/glas/opomniki/prebrano`, z uporabnikovo sejo, RLS).
+- **Opomni Tino**: `nov_opomnik` ima polje `za`. Samo lastnik in admin; zaposleni dobi »Opomnim lahko samo vas«. Sodelavec mora imeti račun (`company_members.person_id`), sicer asistent to pove. Potrditev pokaže »Opomnik za Tina Kos …«; ob potrditvi se vloga in prejemnik preverita znova. Besedilo dobi podpis (»naroči barve — Tim«). Opomnik vidi in prekliče samo prejemnik. Brez migracije.
+
+### Nepreizkušeno (v2)
+
+- Vse v brskalniku (koledar zahteva prijavo): oznaka na kartici (ali se ne prekriva z drugimi oznakami na kratkih terminih), »Ponovi«, »Prestavi ta in vse naslednje«, obvestila po prestavitvi.
+- Ali n8n `UREDI_TERMIN` ob več hitrih zaporednih prestavitvah zapiše vse.
+- Neprebrani opomniki: govor ob odprtju in označitev kot prebrano v produkcijski tabeli `notifications`.
+- »Opomni Tino« z resničnim drugim računom: push pride Tini, ne tebi; jezik obvestila je jezik pogovora tistega, ki je opomnik nastavil.
 

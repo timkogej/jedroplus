@@ -5,8 +5,9 @@
 //   moji_opomniki    »Kateri opomniki so mi ostali?«
 //   preklici_opomnik »Izbriši opomnik za dobavitelja.«
 //
-// Opomnik je vedno samo za uporabnika samega. Pred shranjevanjem asistent pove točen
-// čas (dan, datum, ura) in vpraša; shrani šele po potrditvi. Čas se računa v pasu podjetja.
+// Opomnik je za uporabnika samega; lastnik in admin lahko opomnita tudi sodelavca z
+// računom (»opomni Tino …«, v2). Pred shranjevanjem asistent pove točen čas (dan, datum,
+// ura) in komu; shrani šele po potrditvi. Čas se računa v pasu podjetja.
 
 import { z } from 'zod';
 import { imaPravico, samoSvojiTermini } from '../pravice';
@@ -17,9 +18,10 @@ import { trenutniJezik } from '../jeziki/jezik';
 import { inSeznam, jt } from '../jeziki/t';
 import { casVPasu, DELI_DNEVA, type DelDneva } from '../opomniki/cas';
 import { NAJVEC_OPOMNIKOV, type Opomnik } from '../opomniki/tipi';
-import type { Predogled, RezultatOrodja, TerminPovzetek } from '../tipi';
+import type { OsebaPovzetek, Predogled, RezultatOrodja, TerminPovzetek } from '../tipi';
 import { datumIzParametra } from './branje';
 import { uraIzParametra } from './obrazci';
+import { izberiOsebo, jeRezultat } from './obrazci';
 import { ID_STRANKE, razresiStranko } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja, PisalnoOrodje } from './tipi';
 
@@ -53,6 +55,7 @@ const vhodNov = z.object({
   stranka: prazno(80),
   stranka_id: z.union([z.literal(''), z.string().regex(ID_STRANKE)]).nullable().transform((s) => s || null),
   termin_id: prazno(40),
+  za: prazno(80),
 });
 type VhodNov = z.output<typeof vhodNov>;
 
@@ -62,7 +65,25 @@ const shranjenNov = z.object({
   idTermina: z.string().max(40).nullable(),
   datumTermina: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
   idStranke: z.string().regex(ID_STRANKE).nullable(),
+  /** Sodelavec ("ID osebe"); brez = uporabnik sam. */
+  zaOsebo: z.string().max(40).nullable().optional(),
 });
+
+const imeOsebe = (x: OsebaPovzetek) => `${x.ime} ${x.priimek}`.trim();
+const vodja = (o: OkoljeOrodja) => o.k.vloga === 'owner' || o.k.vloga === 'admin';
+
+/** Prejemnik opomnika: uporabnik sam ali sodelavec z računom (samo lastnik/admin). */
+async function prejemnik(o: OkoljeOrodja, za: string | null): Promise<{ userId: string; oseba: OsebaPovzetek | null } | RezultatOrodja> {
+  if (!za) return { userId: o.k.userId, oseba: null };
+  if (!vodja(o)) return { sporocilo: jt('Opomnim lahko samo vas. Sodelavce opomnita lastnik ali admin.') };
+  const x = izberiOsebo(za, await o.podatki.osebe());
+  if (jeRezultat(x)) return x;
+  if (x.id === o.k.osebaId) return { userId: o.k.userId, oseba: null };
+  const userId = await o.opomniki!.prejemnik(o.k.podjetjeUuid, x.id);
+  if (!userId) return { sporocilo: jt('{ime} nima računa v aplikaciji, zato je ne morem opomniti.', { ime: imeOsebe(x) }) };
+  if (userId === o.k.userId) return { userId, oseba: null };
+  return { userId, oseba: x };
+}
 
 /** Termin stranke, ob katerem opomnimo: izbran ali prvi prihodnji (60 dni). */
 async function terminStranke(o: OkoljeOrodja, p: VhodNov): Promise<{ t: TerminPovzetek; ime: string } | RezultatOrodja> {
@@ -85,7 +106,8 @@ async function terminStranke(o: OkoljeOrodja, p: VhodNov): Promise<{ t: TerminPo
 export const novOpomnik: PisalnoOrodje<VhodNov> = {
   ime: 'nov_opomnik',
   opis:
-    'Osebni opomnik za uporabnika (samo zanj, ne za sodelavce): "opomni me jutri ob devetih, da pokličem dobavitelja", "čez eno uro me opomni, naj preverim barvo", ' +
+    'Opomnik za uporabnika: "opomni me jutri ob devetih, da pokličem dobavitelja", "čez eno uro me opomni, naj preverim barvo", ' +
+    'ali za sodelavca (za = ime zaposlenega): "opomni Tino jutri ob desetih, naj naroči barve" (samo lastnik/admin). ' +
     '"ko pride Ana, me opomni, da ji povem za novo barvo" (ob_terminu true). Besedilo je kratko, kaj naj naredi (npr. "pokliči dobavitelja"). ' +
     'Čas: datum + ura, ali del_dneva brez ure, ali cez_minut ("čez pol ure" = 30). Shrani šele po potrditvi.',
   razred: 'pisanje',
@@ -103,8 +125,9 @@ export const novOpomnik: PisalnoOrodje<VhodNov> = {
       stranka: { type: 'string', description: 'Ime stranke pri ob_terminu, sicer "".' },
       stranka_id: { type: 'string', description: 'ID stranke, če je znan, sicer "".' },
       termin_id: { type: 'string', description: 'ID termina, če je izbran, sicer "".' },
+      za: { type: 'string', description: 'Ime sodelavca, ki ga opomnim ("opomni Tino"); "" = uporabnik sam.' },
     },
-    required: ['besedilo', 'datum', 'ura', 'del_dneva', 'cez_minut', 'ob_terminu', 'stranka', 'stranka_id', 'termin_id'],
+    required: ['besedilo', 'datum', 'ura', 'del_dneva', 'cez_minut', 'ob_terminu', 'stranka', 'stranka_id', 'termin_id', 'za'],
     additionalProperties: false,
   },
   vhod: vhodNov,
@@ -112,6 +135,8 @@ export const novOpomnik: PisalnoOrodje<VhodNov> = {
 
   async predogled(p, o): Promise<Predogled | RezultatOrodja> {
     if (!o.opomniki) return NI_NASTAVLJENO;
+    const komu = await prejemnik(o, p.za);
+    if (!('userId' in komu)) return komu;
     let ob: Date;
     let termin: { t: TerminPovzetek; ime: string } | null = null;
     if (p.ob_terminu) {
@@ -131,20 +156,27 @@ export const novOpomnik: PisalnoOrodje<VhodNov> = {
     }
     if (ob.getTime() <= o.k.zdaj.getTime()) return { sporocilo: jt('Ta čas je že mimo.') };
     if (ob.getTime() > o.k.zdaj.getTime() + NAJVEC_DNI_NAPREJ * 86_400_000) return { sporocilo: jt('Opomnik lahko nastavim največ eno leto vnaprej.') };
-    if ((await o.opomniki.cakajoci(o.k.podjetje, o.k.userId)).length >= NAJVEC_OPOMNIKOV) {
-      return { sporocilo: jt('Imate že {n} opomnikov. Najprej izbrišite kakšnega.', { n: NAJVEC_OPOMNIKOV }) };
+    if ((await o.opomniki.cakajoci(o.k.podjetje, komu.userId)).length >= NAJVEC_OPOMNIKOV) {
+      return komu.oseba
+        ? { sporocilo: jt('{ime} ima že {n} opomnikov.', { ime: imeOsebe(komu.oseba), n: NAJVEC_OPOMNIKOV }) }
+        : { sporocilo: jt('Imate že {n} opomnikov. Najprej izbrišite kakšnega.', { n: NAJVEC_OPOMNIKOV }) };
     }
     const kdaj = termin ? jt('ob terminu stranke {ime}, {kdaj}', { ime: termin.ime, kdaj: kdajZaslon(ob, o) }) : kdajZaslon(ob, o);
+    const zaKoga = komu.oseba ? [{ oznaka: jt('Za'), vrednost: imeOsebe(komu.oseba) }] : [];
     return {
-      povzetek: jt('Opomnik {kdaj}: {besedilo}', { kdaj, besedilo: p.besedilo }),
+      povzetek: komu.oseba
+        ? jt('Opomnik za {ime} {kdaj}: {besedilo}', { ime: imeOsebe(komu.oseba), kdaj, besedilo: p.besedilo })
+        : jt('Opomnik {kdaj}: {besedilo}', { kdaj, besedilo: p.besedilo }),
       parametri: {
         besedilo: p.besedilo,
         ob: ob.toISOString(),
         idTermina: termin?.t.id ?? null,
         datumTermina: termin?.t.datum ?? null,
         idStranke: termin ? (termin.t.idStranke ?? null) : null,
+        zaOsebo: komu.oseba?.id ?? null,
       },
       podrobnosti: [
+        ...zaKoga,
         { oznaka: jt('Kdaj'), vrednost: kdaj },
         { oznaka: jt('Opomnik'), vrednost: p.besedilo },
       ],
@@ -163,12 +195,28 @@ export const novOpomnik: PisalnoOrodje<VhodNov> = {
       ob = casVPasu(t.datum, t.zacetek, o.k.casovniPas);
     }
     if (ob.getTime() <= o.k.zdaj.getTime() - 60_000) return ni(jt('Ta čas je že mimo. Opomnik ni shranjen.'));
+    // Prejemnik znova ob potrditvi (vloga in račun se lahko vmes spremenita).
+    const komu = await prejemnik(o, p.zaOsebo ?? null);
+    if (!('userId' in komu)) return { ...komu, neuspeh: true };
+    let besedilo = p.besedilo;
+    if (komu.oseba) {
+      const jaz = o.k.osebaId ? (await o.podatki.osebe()).find((x) => x.id === o.k.osebaId) : null;
+      const od = jaz ? jaz.ime : jt('vodstvo');
+      besedilo = `${p.besedilo.slice(0, 300 - od.length - 3)} — ${od}`;
+    }
     const jezik = (JEZIKI as readonly string[]).includes(trenutniJezik()) ? (trenutniJezik() as (typeof JEZIKI)[number]) : 'sl';
     const r = await o.opomniki.dodaj({
-      podjetje: o.k.podjetje, podjetjeUuid: o.k.podjetjeUuid, userId: o.k.userId, besedilo: p.besedilo, ob: ob.toISOString(),
+      podjetje: o.k.podjetje, podjetjeUuid: o.k.podjetjeUuid, userId: komu.userId, besedilo, ob: ob.toISOString(),
       idTermina: p.idTermina, idStranke: p.idStranke, casovniPas: o.k.casovniPas, jezik, ukazId: o.ukazId,
     });
-    if (!r.ok) return ni(jt('Imate že {n} opomnikov. Najprej izbrišite kakšnega.', { n: NAJVEC_OPOMNIKOV }));
+    if (!r.ok) {
+      return ni(komu.oseba
+        ? jt('{ime} ima že {n} opomnikov.', { ime: imeOsebe(komu.oseba), n: NAJVEC_OPOMNIKOV })
+        : jt('Imate že {n} opomnikov. Najprej izbrišite kakšnega.', { n: NAJVEC_OPOMNIKOV }));
+    }
+    if (komu.oseba) {
+      return { sporocilo: jt('Opomnik za {ime} je shranjen. Vidi in prekliče ga lahko samo {ime}.', { ime: imeOsebe(komu.oseba) }), podatki: { opomnik_id: r.id } };
+    }
     const push = await o.opomniki.imaPush(o.k.podjetjeUuid, o.k.userId);
     const brezPusha = push ? '' : ` ${jt('Push obvestila niso vklopljena, opomnik boste videli samo v obvestilih aplikacije. Vklopite jih v Nastavitvah.')}`;
     return { sporocilo: `${jt('Opomnik je shranjen.')}${brezPusha}`, podatki: { opomnik_id: r.id } };

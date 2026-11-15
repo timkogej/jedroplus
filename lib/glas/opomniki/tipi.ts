@@ -37,4 +37,6 @@ export interface ShrambaOpomnikov {
   preklici(podjetje: string, userId: string, id: string): Promise<boolean>;
   /** Ali ima uporabnik vklopljena push obvestila na vsaj eni napravi. */
   imaPush(podjetjeUuid: string, userId: string): Promise<boolean>;
+  /** user_id člana podjetja, ki je povezan z osebo (company_members.person_id); null = brez računa. */
+  prejemnik(podjetjeUuid: string, idOsebe: string): Promise<string | null>;
 }

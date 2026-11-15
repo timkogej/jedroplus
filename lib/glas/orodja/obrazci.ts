@@ -71,7 +71,7 @@ function izberiStoritev(ime: string, storitve: StoritevPovzetek[]): StoritevPovz
   return izid.najden;
 }
 
-function izberiOsebo(ime: string, osebe: OsebaPovzetek[]): OsebaPovzetek | RezultatOrodja {
+export function izberiOsebo(ime: string, osebe: OsebaPovzetek[]): OsebaPovzetek | RezultatOrodja {
   const poId = osebe.find((p) => p.id === ime.trim() && p.aktivna);
   if (poId) return poId;
   const izid = poisci(ime, osebe.filter((p) => p.aktivna), (p) => [p.ime, p.priimek]);
@@ -85,7 +85,7 @@ function izberiOsebo(ime: string, osebe: OsebaPovzetek[]): OsebaPovzetek | Rezul
   return izid.najden;
 }
 
-const jeRezultat = (x: unknown): x is RezultatOrodja => typeof (x as RezultatOrodja)?.sporocilo === 'string';
+export const jeRezultat = (x: unknown): x is RezultatOrodja => typeof (x as RezultatOrodja)?.sporocilo === 'string';
 
 /**
  * Lokacija novega termina (samo pri podjetju z več lokacijami; sicer null).

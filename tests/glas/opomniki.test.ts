@@ -12,7 +12,7 @@ import { DANES, kontekst, okolje, opomnikiLazni, podatkiPomnilnik, SALONI, VSE_P
 type V = Parameters<typeof novOpomnik.predogled>[0];
 const vhod = (p: Partial<V> = {}): V => ({
   besedilo: 'pokliči dobavitelja', datum: 'jutri', ura: '9:00', del_dneva: null, cez_minut: null,
-  ob_terminu: false, stranka: null, stranka_id: null, termin_id: null, ...p,
+  ob_terminu: false, stranka: null, stranka_id: null, termin_id: null, za: null, ...p,
 });
 function o(k: Partial<Kontekst> = {}, opomniki = opomnikiLazni()): OkoljeOrodja & { opomniki: ReturnType<typeof opomnikiLazni> } {
   return { k: kontekst(k), podatki: podatkiPomnilnik('A1'), danes: DANES, uraZdaj: '10:00', ukazId: null, opomniki };
@@ -73,6 +73,29 @@ describe('nov_opomnik', () => {
     } finally {
       t1.status = 'scheduled';
     }
+  });
+
+  it('za sodelavca: samo lastnik/admin, oseba z računom, shrani za prejemnika s podpisom', async () => {
+    const env = o({}, opomnikiLazni(true, { o2: 'u-urska' }));
+    const p = kotPredlog(await novOpomnik.predogled(vhod({ besedilo: 'naroči barve', za: 'Urško' }), env));
+    expect(p.povzetek).toBe('Opomnik za Urška Bele jutri, petek, 13. 11. ob 09:00: naroči barve');
+    expect(p.parametri.zaOsebo).toBe('o2');
+    const r = await novOpomnik.potrdi(p.parametri, env);
+    expect(r.sporocilo).toBe('Opomnik za Urška Bele je shranjen. Vidi in prekliče ga lahko samo Urška Bele.');
+    expect(env.opomniki.vrstice[0]).toMatchObject({ userId: 'u-urska', besedilo: 'naroči barve — Tina' });
+    // Lastnikovi opomniki ostanejo ločeni.
+    expect(await env.opomniki.cakajoci('A1', 'u-lastnik')).toHaveLength(0);
+
+    // Sebe po imenu = navaden opomnik.
+    expect(kotPredlog(await novOpomnik.predogled(vhod({ za: 'Tina' }), env)).parametri.zaOsebo).toBeNull();
+    // Brez računa, neznana oseba.
+    expect(sporocilo(await novOpomnik.predogled(vhod({ za: 'Urška' }), o()))).toBe('Urška Bele nima računa v aplikaciji, zato je ne morem opomniti.');
+    expect(sporocilo(await novOpomnik.predogled(vhod({ za: 'Marjeta' }), env))).toMatch(/ne najdem/);
+    // Zaposleni ne sme opomniti sodelavca, niti s ponarejenimi parametri ob potrditvi.
+    const staff = o({ vloga: 'staff', userId: 'u-urska', osebaId: 'o2', pravice: VSE_PRAVICE_STAFF }, opomnikiLazni(true, { o1: 'u-lastnik' }));
+    expect(sporocilo(await novOpomnik.predogled(vhod({ za: 'Tina' }), staff))).toMatch(/^Opomnim lahko samo vas\./);
+    expect(await novOpomnik.potrdi({ ...p.parametri, zaOsebo: 'o1' }, staff)).toMatchObject({ neuspeh: true });
+    expect(staff.opomniki.vrstice).toHaveLength(0);
   });
 
   it('največ 50 čakajočih', async () => {
