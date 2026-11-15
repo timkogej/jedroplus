@@ -26,3 +26,6 @@ psql_v < tests/glas/sql/preizkus_sporocila.sql
 psql_v < supabase/migrations/1793700002_glas_opomniki.sql
 psql_v < supabase/migrations/1793700002_glas_opomniki.sql
 psql_v < tests/glas/sql/preizkus_opomniki.sql
+psql_v < supabase/migrations/1793700003_termini_serije.sql
+psql_v < supabase/migrations/1793700003_termini_serije.sql
+psql_v < tests/glas/sql/preizkus_serije.sql

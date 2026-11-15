@@ -52,8 +52,11 @@ interface AppointmentModalProps {
   mode: ModalMode;
   services: Storitev[];
   employees: Zaposleni[];
-  onSave: (data: AppointmentFormData) => Promise<void>;
+  /** Pri novem terminu z vklopljenim »Ponovi« še ritem serije (koledar preveri in shrani vse). */
+  onSave: (data: AppointmentFormData, ponovitev?: Ponovitev | null) => Promise<void>;
   isSaving?: boolean;
+  /** Pokaži izbiro »Ponovi termin« (samo nov termin). */
+  omogociPonovitev?: boolean;
   initialDate?: string;
   initialStartTime?: string;
   initialEmployeeId?: string;
@@ -75,8 +78,18 @@ interface AppointmentModalProps {
     lokacijaId?: string;
     datum?: string;
     cas?: string;
+    /** Serija (»vsakih šest tednov, šestkrat«): vklopi »Ponovi« z ritmom. */
+    ponovitev?: Ponovitev;
   } | null;
 }
+
+/** Ponavljajoči termin: vsakih N tednov, skupaj `krat` terminov (vključno s prvim). */
+export interface Ponovitev {
+  vsakihTednov: number;
+  krat: number;
+}
+export const RITMI_TEDNOV = [1, 2, 3, 4, 5, 6, 8, 10, 12] as const;
+export const NAJVEC_PONOVITEV = 12;
 
 export interface AppointmentFormData {
   id?: string;
@@ -176,6 +189,7 @@ function AppointmentModal({
   initialEmployeeId,
   lockEmployee = false,
   predizpolnitev = null,
+  omogociPonovitev = false,
 }: AppointmentModalProps) {
   const sheetDrag = useSheetDrag(onClose);
   // Asistent+: obrazec, odprt z glasom, sprejme »shrani« / »prekliči« (requestSubmit = gumb Shrani).
@@ -324,6 +338,8 @@ function AppointmentModal({
 
   // Ghost termin toggle state
   const [isGhostTermin, setIsGhostTermin] = useState(false);
+  // Ponavljajoči termin (samo nov termin)
+  const [ponovitev, setPonovitev] = useState<Ponovitev | null>(null);
 
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof AppointmentFormData, string>>>({});
@@ -479,6 +495,7 @@ function AppointmentModal({
     } else {
       setIsGhostTermin(false);
     }
+    setPonovitev(null);
   }, [appointment, mode, allEmployees, initialDate, initialStartTime, initialEmployeeId, personId, defaultLanguage, defaultCurrency]);
 
   // Track if end time was manually set by user
@@ -881,6 +898,7 @@ function AppointmentModal({
       if (p.lokacijaId) setFormData((prev) => ({ ...prev, lokacija_id: p.lokacijaId }));
       if (p.stranka) handleClientSelect(p.stranka);
       if (p.storitevId) handleServiceChange(p.storitevId, 1);
+      if (p.ponovitev && omogociPonovitev) setPonovitev(p.ponovitev);
     } else if (mode === 'edit') {
       // Isti upravljalci kot ročna izbira: lokacija počisti, česar tam ni; zaposleni preveri storitev.
       if (p.lokacijaId) handleLocationChange(p.lokacijaId);
@@ -1187,7 +1205,8 @@ function AppointmentModal({
 
     if (!validate()) return;
 
-    await onSave({ ...formData, belezi_termin: !isGhostTermin });
+    const serija = mode === 'create' && omogociPonovitev && !isGhostTermin ? ponovitev : null;
+    await onSave({ ...formData, belezi_termin: !isGhostTermin }, serija);
   };
 
   // Animation variants
@@ -2251,6 +2270,57 @@ function AppointmentModal({
                     <p className="text-xs text-amber-700">
                       {t('ghost.warning')}
                     </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Ponovi termin (serija) — samo nov termin; vsak termin se shrani posebej po isti poti */}
+            {!isViewMode && mode === 'create' && omogociPonovitev && !isGhostTermin && (
+              <div className={`${sectionClass} space-y-3`}>
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div id="serija-label" className="text-sm font-medium text-gray-900">{t('serija.title')}</div>
+                    <div className="text-[13px] text-gray-500">{t('serija.description')}</div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(ponovitev)}
+                    aria-labelledby="serija-label"
+                    onClick={() => setPonovitev((prev) => (prev ? null : { vsakihTednov: 4, krat: 4 }))}
+                    className={`${switchTrack} ${ponovitev ? 'bg-gray-900' : 'bg-gray-300'}`}
+                  >
+                    <span className={`${switchKnob(Boolean(ponovitev))}`} />
+                  </button>
+                </div>
+                {ponovitev && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-500">{t('serija.rhythm')}</span>
+                      <select
+                        value={ponovitev.vsakihTednov}
+                        onChange={(e) => setPonovitev((prev) => (prev ? { ...prev, vsakihTednov: Number(e.target.value) } : prev))}
+                        className={inputBaseClass}
+                      >
+                        {[...new Set<number>([...RITMI_TEDNOV, ponovitev.vsakihTednov])].sort((x, y) => x - y).map((n) => (
+                          <option key={n} value={n}>{t('serija.everyWeeks', { count: n })}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-500">{t('serija.count')}</span>
+                      <select
+                        value={ponovitev.krat}
+                        onChange={(e) => setPonovitev((prev) => (prev ? { ...prev, krat: Number(e.target.value) } : prev))}
+                        className={inputBaseClass}
+                      >
+                        {Array.from({ length: NAJVEC_PONOVITEV - 1 }, (_, i) => i + 2).map((n) => (
+                          <option key={n} value={n}>{t('serija.times', { count: n })}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <p className="col-span-2 text-xs text-gray-500">{t('serija.hint')}</p>
                   </div>
                 )}
               </div>

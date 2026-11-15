@@ -19,6 +19,7 @@ import { kandidatiZaLuknjo, ponudiProstiTermin } from './zapolnitev';
 import { prekliciOpomnik, mojiOpomniki, novOpomnik } from './opomniki';
 import { odpriStran, pomocAplikacija } from './pomoc';
 import { novaStranka, prestaviTermin, pripraviTermin, statusTermina, urediStranko, urediTermin, vpisiOdsotnost } from './obrazci';
+import { pripraviSerijo } from './serija';
 
 export const VSA_ORODJA: readonly Orodje[] = [
   iskanjeStranke,
@@ -44,6 +45,7 @@ export const VSA_ORODJA: readonly Orodje[] = [
   pomocAplikacija,
   odpriStran,
   pripraviTermin,
+  pripraviSerijo,
   prestaviTermin,
   urediTermin,
   urediStranko,

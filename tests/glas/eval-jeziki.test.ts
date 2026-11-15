@@ -19,6 +19,10 @@ const SLOVENSKO = /\b(shranim|jutri|ponedeljek|katero|katerega|prosim|zapisal[a]
 
 const NOV = { stranka: '102', storitev: 's1', dan: '2026-11-13', ura: '11:00' };
 const PRESTAVI = { idt: 't1', dan: '2026-11-16', ura: '12:00' };
+// Serija: vsakih šest tednov šestkrat; vsak torek do konca leta (7 torkov od 17. 11.); ritem naknadno.
+const SERIJA = { ...NOV, ponovi: '6:6' };
+const TORKI = { stranka: '102', dan: '2026-11-17', ura: '14:00', ponovi: '1:7' };
+const NAKNADNO = { ...NOV, ponovi: '8:5' };
 
 type Pogovor = { ukazi: string[]; konec: Record<string, string>; shrani?: boolean };
 const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
@@ -33,6 +37,9 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ["Text Ana Novak that we're running ten minutes late today."], konec: {} },
     { ukazi: ['Who could come in tomorrow at noon with Tina?'], konec: {} },
     { ukazi: ['Remind me tomorrow at 9 to call the supplier.'], konec: {} },
+    { ukazi: ['Book Ana Novak for Barvanje tomorrow at eleven, every six weeks, six times.'], konec: SERIJA },
+    { ukazi: ['Ana Novak comes every Tuesday at two for Barvanje until the end of the year.'], konec: TORKI },
+    { ukazi: ['Book Ana Novak tomorrow at eleven for Barvanje.', 'Make it repeat every eight weeks, five times.'], konec: NAKNADNO },
   ],
   de: [
     { ukazi: ['Trag Ana Novak morgen um elf Uhr für Barvanje ein.'], konec: NOV },
@@ -45,6 +52,9 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ["Schreib Ana Novak, dass wir heute zehn Minuten später dran sind."], konec: {} },
     { ukazi: ['Wer könnte morgen um zwölf zu Tina kommen?'], konec: {} },
     { ukazi: ['Erinnere mich morgen um 9, den Lieferanten anzurufen.'], konec: {} },
+    { ukazi: ['Trag Ana Novak morgen um elf für Barvanje ein, alle sechs Wochen, sechsmal.'], konec: SERIJA },
+    { ukazi: ['Ana Novak kommt bis Ende des Jahres jeden Dienstag um zwei zu Barvanje.'], konec: TORKI },
+    { ukazi: ['Trag Ana Novak morgen um elf Uhr für Barvanje ein.', 'Das soll sich alle acht Wochen wiederholen, fünfmal.'], konec: NAKNADNO },
   ],
   it: [
     { ukazi: ['Segna Ana Novak domani alle undici per Barvanje.'], konec: NOV },
@@ -57,6 +67,9 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ["Scrivi ad Ana Novak che oggi siamo in ritardo di dieci minuti."], konec: {} },
     { ukazi: ['Chi potrebbe venire domani a mezzogiorno da Tina?'], konec: {} },
     { ukazi: ['Ricordami domani alle 9 di chiamare il fornitore.'], konec: {} },
+    { ukazi: ['Segna Ana Novak domani alle undici per Barvanje, ogni sei settimane, sei volte.'], konec: SERIJA },
+    { ukazi: ['Ana Novak viene ogni martedì alle due per Barvanje fino alla fine dell’anno.'], konec: TORKI },
+    { ukazi: ['Segna Ana Novak domani alle undici per Barvanje.', 'Ripetilo ogni otto settimane, cinque volte.'], konec: NAKNADNO },
   ],
   hr: [
     { ukazi: ['Upiši Anu Novak sutra u jedanaest na Barvanje.'], konec: NOV },
@@ -69,6 +82,9 @@ const POGOVORI: Record<Exclude<JezikAsistenta, 'sl'>, Pogovor[]> = {
     { ukazi: ["Javi Ani Novak da danas kasnimo deset minuta."], konec: {} },
     { ukazi: ['Tko bi mogao doći sutra u podne kod Tine?'], konec: {} },
     { ukazi: ['Podsjeti me sutra u 9 da nazovem dobavljača.'], konec: {} },
+    { ukazi: ['Upiši Anu Novak sutra u jedanaest na Barvanje, svakih šest tjedana, šest puta.'], konec: SERIJA },
+    { ukazi: ['Ana Novak dolazi svaki utorak u dva na Barvanje do kraja godine.'], konec: TORKI },
+    { ukazi: ['Upiši Anu Novak sutra u jedanaest na Barvanje.', 'Neka se ponavlja svakih osam tjedana, pet puta.'], konec: NAKNADNO },
   ],
 };
 

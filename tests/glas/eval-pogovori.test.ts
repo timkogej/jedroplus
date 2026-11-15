@@ -83,6 +83,10 @@ const POGOVORI: {
   // Zapolnitev luknje (salon Z5: Tina jutri prosta od 10.30; Mateja ima kasnejši termin, Ana privolitev, Nina ne).
   { podjetje: 'Z5', ukazi: ['Stranka je odpovedala jutri ob pol enajstih pri Tini. Koga naj pokličem?'], konec: {}, odgovor: { 0: /Mateja Kos[\s\S]*Ana Novak[\s\S]*Nina Bela/ } },
   { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji Mateji predlog.'], konec: {}, odgovor: { 1: /SMS za Mateja Kos: ».*(prestav|sprostil|prost)/i } },
+  // Ponavljajoči termini (jutri je petek 13. 11.; Tina ima ob 9.00 Matejo do 10.30).
+  { ukazi: ['Vpiši Matejo na barvanje pri Tini vsakih šest tednov ob desetih, šestkrat, začni jutri.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-11-13', ura: '10:00', ponovi: '6:6' }, odgovor: { 0: /Serija: 6 terminov[\s\S]*(predlog|Težave)/ } },
+  { ukazi: ['Ana Novak bo do konca leta prihajala vsak torek ob dveh na moško striženje.'], konec: { stranka: '102', storitev: 's2', dan: '2026-11-17', ura: '14:00', ponovi: '1:7' } },
+  { ukazi: ['Vpiši Matejo jutri ob enajstih na barvanje.', 'Naj se ponavlja vsakih osem tednov, petkrat.'], konec: { stranka: '101', dan: '2026-11-13', ura: '11:00', ponovi: '8:5' } },
   { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji vsem SMS.'], konec: {}, odgovor: { 1: /SMS za (Mateja Kos|Ana Novak)|privolit/i }, ne: { 1: /SMS za Nina|popust/i } },
 ];
 

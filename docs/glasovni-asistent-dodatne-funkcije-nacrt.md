@@ -494,9 +494,9 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 | 1 | Jutranji povzetek (`povzetek_dneva`) | narejeno, testi; brez migracije |
 | 2 | Številke za lastnika (`stevilke_salona`) + Analitika na skupnem izračunu (`lib/analytics/izracun.ts`) | narejeno, testi; brez migracije |
 | 3 | Sporoči stranki (`sporoci_stranki`) | narejeno; migracija, n8n tok in ključ nastavljeni, Tim preizkusil SMS |
-| 4a | Zapolnitev luknje (`kandidati_za_luknjo`, `ponudi_prosti_termin`) | koda in testi narejeni; čaka migracijo `1793700001` (spodaj) |
-| 5 | Osebni opomniki (`nov_opomnik`, `moji_opomniki`, `preklici_opomnik`) | koda in testi narejeni; čaka pg_cron in migracijo `1793700002` (spodaj) |
-| 6 | Ponavljajoči termini | ni začeto |
+| 4a | Zapolnitev luknje (`kandidati_za_luknjo`, `ponudi_prosti_termin`) | koda in testi narejeni; migracija `1793700001` pognana |
+| 5 | Osebni opomniki (`nov_opomnik`, `moji_opomniki`, `preklici_opomnik`) | koda in testi narejeni; pg_cron in migracija `1793700002` pognana |
+| 6 | Ponavljajoči termini (`pripravi_serijo` + »Ponovi termin« v koledarju) | koda in testi narejeni; čaka migracijo `1793700003` (spodaj) |
 
 ### Spremembe na strani Analitika (O4)
 
@@ -597,4 +597,37 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 - Push na telefon (PWA) in prikaz v zvončku/Obvestilih (`entity_type 'glas_opomnik'` nima posebne ikone ali povezave).
 - `Termini."Datum"`/`"Čas"` v produkciji: tek ju bere kot besedilo (`left(…,10)::date`, `left(…,5)::time`).
 - Ni še: asistent ob odprtju ne pove neprebranih opomnikov (§5 »Neprebran opomnik«) in »opomni Tino« (v2).
+
+### Ponavljajoči termini (6): kaj je narejeno
+
+- Pravila serije v `lib/termini/serija.ts` (čiste funkcije):
+  - datumi: vsakih N tednov (1–26), N-krat ali do datuma, največ 12 terminov in eno leto;
+  - vsak datum: delovni čas osebe/podjetja, odsotnosti, prekrivanje (odpovedani in »ni prišel« ne zasedajo);
+  - zaseden ali dela prost dan → predlog najbližjega prostega časa (isti dan, nato ±1, ±2, ±3 dni; ne na dan drugega termina serije); sicer »težava«.
+- `lib/termini/preveriSerijoSalona.ts`: isto nad podatki salona z uporabnikovo sejo (RLS); termine bere po oknih ±3 dni okoli vsakega datuma (celo leto bi preseglo 2000 vrstic).
+- Koledar, brez glasu: obrazec za nov termin ima stikalo **Ponovi termin** (ritem 1–12 tednov, 2–12 terminov):
+  - Shrani → `/api/termini/serija/preveri` preveri vse datume → okno **Pregled serije** (✓ prosto, ⚠ predlog z razlogom, ✗ ni prostega); vsak datum lahko izklopiš ali spremeniš dan/uro;
+  - »Shrani N terminov« → vsak termin posebej po isti poti kot ročni (`zapisiTermin`, izločen iz `handleSaveAppointment`: n8n `NOV_TERMIN`, čakanje na zapis, resursi). Cena, popusti, opombe, jezik in lokacija so iz obrazca;
+  - tik pred vsakim shranjevanjem se datum preveri znova; zaseden medtem → ni shranjen, dobi nov predlog in ostane v pregledu (»Shranjenih 5 od 6«);
+  - stranka dobi potrdilo za vsak termin (O3, n8n nespremenjen); okno to pove vnaprej;
+  - nebeleženi termin (»ghost«) serije nima.
+- Povezava v serijo: `POST /api/termini/serija` → `jp_termini_serija_dodaj` (service role) preveri, da so vsi termini tega podjetja in niso že v drugi seriji.
+- Okno termina: vrstica **Serija 2/6** in v meniju **Odpovej ta in vse naslednje** → seznam prihodnjih odprtih terminov → potrditev → vsak odpovedan po isti poti kot en termin (`odpovejTermin`, izločen iz `handleCancelAppointment`; obvestilo stranki kot doslej).
+- Asistent+: `pripravi_serijo` (bralno orodje): razreši kot `pripravi_termin`, preveri vse datume, odpre obrazec z vklopljenim »Ponovi« (polje `ponovi=tedni:krat`) in pove težave. Po »ja« uporabnik vidi pregled in shrani z gumbom — asistent sam ne shrani ničesar.
+- Prevodi v 5 jezikih (koledar `messages/*/appointments.json` → `serija`, asistent katalogi), testi `tests/glas/serija.test.ts`, SQL test `tests/glas/sql/preizkus_serije.sql`, eval primeri.
+- Ni narejeno (v2): »Prestavi vse«, gumb »Ponovi« na obstoječem terminu, oznaka serije na kartici v mreži koledarja (zdaj samo v oknu termina).
+
+### Kaj mora narediti Tim (6)
+
+1. Pognati `supabase/migrations/1793700003_termini_serije.sql`.
+2. Preizkus v koledarju: nov termin → »Ponovi termin« vsake 4 tedne, 4-krat → pregled → spremeni en datum → Shrani; nato odpri enega od terminov (»Serija 2/4«) → »Odpovej ta in vse naslednje«.
+3. Preizkus z glasom: »Vpiši Matejo na barvanje vsakih šest tednov ob desetih, šestkrat.«
+
+### Nepreizkušeno (6)
+
+- Celoten tok v brskalniku (obrazec, pregled, zaporedno shranjevanje, povezava, odpoved serije) — koledar zahteva prijavo; preizkušeni so samo tipi, enote, SQL in build.
+- Koliko časa traja shranjevanje 12 terminov (vsak čaka na n8n in zapis v bazo, približno 1–3 s na termin).
+- Ali n8n `NOV_TERMIN` ob 12 hitrih zaporednih klicih pošlje vseh 12 potrdil (SMS kvota!).
+- Termin, ki ga shranjevanje ni potrdilo v času čakanja (`writeUnconfirmed`), se šteje kot shranjen; če ga n8n ni zapisal, povezava serije zanj zavrne celo serijo (»povezava ni uspela«), termini pa ostanejo.
+- Neuspel termin, ki ga shraniš ob ponovnem poskusu, se poveže z ostalimi samo, če so v tistem trenutku vsi izbrani shranjeni.
 

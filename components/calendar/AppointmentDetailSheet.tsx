@@ -105,6 +105,8 @@ export function AppointmentDetailModal({
   onCancel,
   onDelete,
   onOpenClientDetails,
+  serija,
+  onCancelSeries,
 }: {
   appointment: AppointmentWithDetails;
   services: Storitev[];
@@ -118,6 +120,10 @@ export function AppointmentDetailModal({
   onCancel?: (appointment: AppointmentWithDetails) => void;
   onDelete?: (appointment: AppointmentWithDetails) => void;
   onOpenClientDetails?: (appointment: AppointmentWithDetails) => void | Promise<void>;
+  /** Ponavljajoči termin: mesto v seriji (»serija 2/6«) in koliko jih je še pred stranko. */
+  serija?: { zap: number; skupaj: number; prihodnjih: number } | null;
+  /** Odpove ta in vse naslednje termine serije (vsak po isti poti kot en termin). */
+  onCancelSeries?: (appointment: AppointmentWithDetails) => void;
 }) {
   const t = useTranslations('appointments');
   const tCommon = useTranslations('common');
@@ -509,8 +515,13 @@ export function AppointmentDetailModal({
         )}
 
         {/* Podrobnosti — ID termina in ali se termin beleži */}
-        {(appointment.id_termina || appointment.belezi_termin === false) && (
+        {(appointment.id_termina || appointment.belezi_termin === false || serija) && (
           <SheetGroup label={t('calendarView.detailModal.fields.details')}>
+            {serija && (
+              <SheetRow label={t('serija.label')}>
+                <span className="tnum text-sm text-gray-700">{t('serija.position', { zap: serija.zap, skupaj: serija.skupaj })}</span>
+              </SheetRow>
+            )}
             {appointment.belezi_termin === false && (
               <SheetRow label={t('ghost.title')}>
                 <span className="flex min-w-0 items-center gap-2.5">
@@ -552,7 +563,7 @@ export function AppointmentDetailModal({
           </button>
         )}
 
-        {(onNoShow || onCancel || onDelete) && (
+        {(onNoShow || onCancel || onDelete || (onCancelSeries && serija && serija.prihodnjih > 1)) && (
           <div className="relative flex-shrink-0">
             <button
               type="button"
@@ -572,7 +583,7 @@ export function AppointmentDetailModal({
                   exit={{ opacity: 0, scale: 0.96, y: 4 }}
                   transition={{ duration: 0.16, ease: [0.32, 0.72, 0, 1] }}
                   style={{ transformOrigin: 'bottom right' }}
-                  className="absolute bottom-full right-0 z-50 mb-1.5 w-44 overflow-hidden rounded-xl border border-gray-100 bg-white/90 py-1 shadow-lg backdrop-blur-xl backdrop-saturate-150"
+                  className="absolute bottom-full right-0 z-50 mb-1.5 min-w-44 max-w-64 overflow-hidden rounded-xl border border-gray-100 bg-white/90 py-1 shadow-lg backdrop-blur-xl backdrop-saturate-150"
                 >
                   {onNoShow && (
                     <button
@@ -592,6 +603,16 @@ export function AppointmentDetailModal({
                     >
                       <XCircle className="h-4 w-4 text-gray-500" weight="regular" />
                       {t('calendarView.detailModal.actions.cancel')}
+                    </button>
+                  )}
+                  {onCancelSeries && serija && serija.prihodnjih > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => { onCancelSeries(appointment); setActionsMenuOpen(false); }}
+                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100"
+                    >
+                      <XCircle className="h-4 w-4 flex-shrink-0 text-gray-500" weight="regular" />
+                      {t('serija.cancelFuture', { count: serija.prihodnjih })}
                     </button>
                   )}
                   {onDelete && (
