@@ -39,6 +39,8 @@ Možnosti in predlog: steklena kartica z gradientnim robom; možnosti kot vrstic
 
 Oblika se računa v `requestAnimationFrame` samo med pogovorom in kratkimi prehodi; nato se zanka ustavi.
 
+Gumica: napihovanje je vzmet (dušenje 0,42), zato plus ob napihu za trenutek preskoči čez krog in ob vrnitvi rahlo iztegne krake. Ko je na sredini kartica (možnosti, predlog), se orb zmanjša (136 → 88 px) in prikaz se premakne gor; status »Poslušam/Govorim« se ob kartici in uspehu skrije. Ob uspehu je kljukica samo v orbu. Gumb ob napisu obrazca ustavi asistenta (ikona mikrofona, ne X). Primarni gumb v kartici ima isti gradient kot Shrani v aplikaciji.
+
 ## Plasti (z-index)
 
 aplikacija ≤ 56 · obrazci 60–100 · tančica 104 (ob obrazcu 59, pod listom) · sij roba 106 · prikaz 108 · orb 110.

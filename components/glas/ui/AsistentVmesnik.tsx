@@ -17,14 +17,14 @@
  */
 
 import { useRef, type CSSProperties } from 'react';
-import { X, CheckCircle, WarningCircle } from '@phosphor-icons/react';
+import { CheckCircle, MicrophoneSlash, WarningCircle } from '@phosphor-icons/react';
 import type { OdgovorOdjemalec, StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import { polozajKrogca, type NacinKrogca, type Okno, type Polozaj, type Pravokotnik } from '@/lib/glas/odjemalec/polozaj';
 import { AsistentOrb } from './AsistentOrb';
 import { PlusOrb } from './PlusOrb';
 import type { OblikaOrba } from './plusOblika';
 import { ObrobaZaslona } from './ObrobaZaslona';
-import { PrikazPogovora } from './PrikazPogovora';
+import { imaKartico, PrikazPogovora } from './PrikazPogovora';
 import { Tancica } from './Tancica';
 import { useNivoGlasu, type Glasnost } from './useNivoGlasu';
 import { useOkvirObrazca } from './useOkvirObrazca';
@@ -34,8 +34,11 @@ import './asistent.css';
 /** Pas obvestil (toast: bottom-6 right-6, ~48 px visok): orb v mirovanju je nad njim. */
 const NAD_OBVESTILI = 92;
 
-/** Položaj orba za vsak način (sredina in obrazec iz polozajKrogca; večji orb na sredini). */
-export function polozajOrba(nacin: NacinKrogca, okno: Okno, panel: Pravokotnik | null): Polozaj {
+/**
+ * Položaj orba za vsak način (sredina in obrazec iz polozajKrogca; večji orb na sredini).
+ * kompakten: na sredini je kartica (možnosti, predlog), orb se zmanjša in umakne gor.
+ */
+export function polozajOrba(nacin: NacinKrogca, okno: Okno, panel: Pravokotnik | null, kompakten = false): Polozaj {
   const siroko = okno.w >= 640;
   if (nacin === 'kot') {
     const v = siroko ? 52 : 48;
@@ -44,7 +47,7 @@ export function polozajOrba(nacin: NacinKrogca, okno: Okno, panel: Pravokotnik |
   }
   const p = polozajKrogca(nacin, okno, panel);
   if (nacin !== 'sredina') return p;
-  const v = siroko ? 136 : 112;
+  const v = kompakten ? (siroko ? 88 : 76) : siroko ? 136 : 112;
   const cy = p.y + p.velikost / 2;
   return { x: Math.round((okno.w - v) / 2), y: Math.round(Math.max(okno.zgoraj + 20, cy - v / 2)), velikost: v };
 }
@@ -88,7 +91,7 @@ export function AsistentVmesnik(p: AsistentVmesnikProps) {
   useOkvirObrazca(p.obrazecEl, nacin === 'obrazec', p.onPoslano);
 
   const aktiven = stanje !== 'mirovanje';
-  const poz = polozajOrba(nacin, okno, panel);
+  const poz = polozajOrba(nacin, okno, panel, nacin === 'sredina' && imaKartico(p.zadnji));
   const oznaka = aktiven ? t(stanje) : t('odpri');
   const zadnjiOdgovor = [...p.vrstice].reverse().find((v) => v.kdo !== 'jaz');
 
@@ -110,6 +113,7 @@ export function AsistentVmesnik(p: AsistentVmesnikProps) {
           onPotrdi={p.onPotrdi}
           onZavrni={p.onZavrni}
           onKoncaj={p.onKoncaj}
+          kljukicaVOrbu={p.uspeh != null}
         />
       )}
 
@@ -208,7 +212,8 @@ function NapisObrazca({
           aria-label={t('koncaj')}
           className="ap-steklo pointer-events-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-label-secondary"
         >
-          <X size={14} weight="bold" aria-hidden />
+          {/* Ne X: X na obrazcu zapre obrazec, ta gumb ustavi asistenta. */}
+          <MicrophoneSlash size={15} weight="bold" aria-hidden />
         </button>
       )}
     </div>

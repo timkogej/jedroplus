@@ -34,9 +34,11 @@ export interface PrikazPogovoraProps {
   onPotrdi: () => void;
   onZavrni: () => void;
   onKoncaj: () => void;
+  /** Orb že kaže kljukico (uspeh): v besedilu je ne ponavljamo. */
+  kljukicaVOrbu?: boolean;
 }
 
-export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBesedilo, onIzberi, onPotrdi, onZavrni, onKoncaj }: PrikazPogovoraProps) {
+export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBesedilo, onIzberi, onPotrdi, onZavrni, onKoncaj, kljukicaVOrbu = false }: PrikazPogovoraProps) {
   const zaseden = stanje === 'povezujem' || stanje === 'razmisljam';
   const zadnja = vrstice[vrstice.length - 1];
   const predzadnja = vrstice[vrstice.length - 2];
@@ -54,21 +56,23 @@ export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBes
     );
   } else if (zadnja) {
     zgoraj = predzadnja;
-    glavno = <Glavna key={`${vrstice.length}-${zadnja.besedilo.length}`} v={zadnja} stanje={stanje} zadnja />;
+    glavno = <Glavna key={`${vrstice.length}-${zadnja.besedilo.length}`} v={zadnja} stanje={stanje} zadnja kljukica={!kljukicaVOrbu} />;
   } else {
     glavno = <p className="text-[17px] font-normal leading-relaxed text-label-secondary md:text-lg">{t('pozdrav')}</p>;
   }
   const koncnaVrstica = zadnja ? `${zadnja.besedilo}` : '';
 
   return (
-    <div role="dialog" aria-label={t('naslov')} className="pointer-events-none fixed inset-x-0 bottom-0 z-[108] flex flex-col items-center px-4" style={{ top: vrh }}>
+    <div role="dialog" aria-label={t('naslov')} className="ap-prikaz pointer-events-none fixed inset-x-0 bottom-0 z-[108] flex flex-col items-center px-4" style={{ top: vrh }}>
       {/* Bralniki zaslona: zaključene izjave in odgovori. */}
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {koncnaVrstica}
       </p>
 
       <div className="pointer-events-auto flex w-full max-w-[560px] min-h-0 flex-1 flex-col items-center overflow-y-auto overscroll-contain pb-4 text-center">
-        <Status stanje={stanje} t={t} />
+        {/* Ko je na zaslonu kartica ali uspeh, »Poslušam«/»Govorim« ne pove nič novega
+            (kartica ima svoj namig, orb kaže kljukico): status skrijemo. */}
+        {!(imaKartico(zadnji) || zadnja?.kdo === 'uspeh') || zaseden ? <Status stanje={stanje} t={t} /> : <span className="h-5" aria-hidden />}
 
         {zgoraj && (
           <p
@@ -89,6 +93,11 @@ export function PrikazPogovora({ stanje, slisano, vrstice, zadnji, vrh, t, onBes
   );
 }
 
+/** Ali je pod odgovorom kartica (možnosti ali predlog). */
+export function imaKartico(zadnji: OdgovorOdjemalec | null): boolean {
+  return Boolean(zadnji?.status === 'predlog' && zadnji.predlog) || Boolean(zadnji?.status === 'vprasanje' && zadnji.vprasanje?.moznosti?.length);
+}
+
 function Status({ stanje, t }: { stanje: StanjePogovora; t: (k: string) => string }) {
   if (stanje === 'mirovanje') return null;
   return (
@@ -106,7 +115,7 @@ function Status({ stanje, t }: { stanje: StanjePogovora; t: (k: string) => strin
 }
 
 /** Glavna vrstica: uporabnikova izjava, odgovor (izpis po besedah), napaka ali uspeh. */
-function Glavna({ v, stanje, zadnja }: { v: Vrstica; stanje: StanjePogovora; zadnja: boolean }) {
+function Glavna({ v, stanje, zadnja, kljukica = true }: { v: Vrstica; stanje: StanjePogovora; zadnja: boolean; kljukica?: boolean }) {
   if (v.kdo === 'jaz') return <p className="ap-vstop text-label">{v.besedilo}</p>;
   if (v.kdo === 'napaka') {
     return (
@@ -119,7 +128,7 @@ function Glavna({ v, stanje, zadnja }: { v: Vrstica; stanje: StanjePogovora; zad
   if (v.kdo === 'uspeh') {
     return (
       <p className="ap-vstop inline-flex items-center justify-center gap-2 text-label">
-        <CheckCircle size={26} weight="fill" className="shrink-0 text-[#1fb8b0]" aria-hidden />
+        {kljukica && <CheckCircle size={26} weight="fill" className="shrink-0 text-[#1fb8b0]" aria-hidden />}
         <span>{v.besedilo}</span>
       </p>
     );

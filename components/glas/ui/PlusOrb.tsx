@@ -26,7 +26,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
-import { DEBELINA_OBRISA, NASTAVITVE, parametri, potPlusa, zamik, type Kraki, type RazlicicaPlusa } from './plusOblika';
+import { DEBELINA_OBRISA, NASTAVITVE, parametri, potPlusa, zamik, type Kraki, type ParametriPlusa, type RazlicicaPlusa } from './plusOblika';
 
 export interface PlusOrbProps {
   razlicica: RazlicicaPlusa;
@@ -42,6 +42,26 @@ export interface PlusOrbProps {
 
 const VZIG_MS = 820;
 const MIRNO = 0.0015;
+/** Vzmet gumice: togost (navzgor / navzdol) in dušenje (< 1 = rahlo preskoči in zaniha). */
+const TOGOST_GOR = 170;
+const TOGOST_DOL = 120;
+const DUSENJE = 0.42;
+/** Preskok čez krog: plus se za trenutek še malo poveča (delež prekoračitve). */
+const PRESKOK_POVECAVA = 0.5;
+/** Preskok nazaj čez plus: kraki se za trenutek iztegnejo. */
+const PRESKOK_KRAKI = 0.6;
+
+/** Oblika, povečana okoli središča (preskok gumice čez krog). */
+function povecaj(p: ParametriPlusa, f: number): ParametriPlusa {
+  if (f === 1) return p;
+  const k = p.kraki;
+  return {
+    kraki: { gor: k.gor * f, desno: k.desno * f, dol: k.dol * f, levo: k.levo * f },
+    debelina: p.debelina * f,
+    zaobljenost: p.zaobljenost * f,
+    mehcanje: p.mehcanje * f,
+  };
+}
 
 function obrezi(el: HTMLElement | null, pot: string) {
   if (!el) return;
@@ -64,7 +84,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
   const notranjost = useRef<HTMLSpanElement | null>(null);
   const obris = razlicica === 'obris';
   /** Stanje pogona med upodobitvami (brez ponovnega izrisa Reacta). */
-  const pogon = useRef({ napih: 0, miska: 0, ciljMiska: 0, vzigOd: -1e9, sprozi: () => {} });
+  const pogon = useRef({ napih: 0, hitrost: 0, cas: 0, miska: 0, ciljMiska: 0, vzigOd: -1e9, sprozi: () => {} });
 
   // Vžig: zabeleži začetek (pogon ga odigra).
   useEffect(() => {
@@ -87,8 +107,14 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
     let raf = 0;
     let zadnja = '';
 
+    // Pri majhnem orbu (kot) je rob obrisa malo debelejši, da je na beli podlagi viden.
+    const debelinaRoba = DEBELINA_OBRISA * Math.min(1.45, Math.max(1, 66 / velikost));
+
     const narisi = (napih: number, raztezki: Kraki) => {
-      const oblika = parametri(n, napih, raztezki);
+      // Gumica: napih nad 1 = krog se še malo poveča, pod 0 = kraki se iztegnejo.
+      const r = napih < 0 ? -napih * PRESKOK_KRAKI : 0;
+      const raz = r ? { gor: raztezki.gor + r, desno: raztezki.desno + r, dol: raztezki.dol + r, levo: raztezki.levo + r } : raztezki;
+      const oblika = povecaj(parametri(n, Math.min(1, Math.max(0, napih)), raz), napih > 1 ? 1 + (napih - 1) * PRESKOK_POVECAVA : 1);
       const d = potPlusa(oblika);
       if (d === zadnja) return;
       zadnja = d;
@@ -98,9 +124,9 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
         return;
       }
       // Obris: ostri obroč, širši obroč za sij, notranjost.
-      const notri = potPlusa(zamik(oblika, DEBELINA_OBRISA));
+      const notri = potPlusa(zamik(oblika, debelinaRoba));
       obrezi(el, `path(evenodd, "${d} ${notri}")`);
-      obrezi(sij.current, `path(evenodd, "${potPlusa(zamik(oblika, -3))} ${potPlusa(zamik(oblika, DEBELINA_OBRISA + 4))}")`);
+      obrezi(sij.current, `path(evenodd, "${potPlusa(zamik(oblika, -3))} ${potPlusa(zamik(oblika, debelinaRoba + 4))}")`);
       obrezi(notranjost.current, `path("${notri}")`);
     };
 
@@ -116,7 +142,17 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
       const krivulja = nivo ** 1.7;
       const glas = stanje === 'govorim' ? krivulja * n.napihGlas : stanje === 'poslusam' ? krivulja * n.napihGlas * 0.35 : 0;
       const cilj = Math.max(uspesno ? 1 : 0, vzigNapih, glas);
-      p.napih = manjGibanja ? cilj : p.napih + (cilj - p.napih) * (cilj > p.napih ? 0.34 : vzigNapih > 0 ? 0.3 : 0.1);
+      // Vzmet (gumica): rahlo preskoči cilj in zaniha nazaj.
+      const dt = Math.min(0.05, Math.max(0.001, (zdaj - p.cas) / 1000));
+      p.cas = zdaj;
+      if (manjGibanja) {
+        p.napih = cilj;
+        p.hitrost = 0;
+      } else {
+        const togost = cilj > p.napih ? TOGOST_GOR : TOGOST_DOL;
+        p.hitrost += (togost * (cilj - p.napih) - 2 * Math.sqrt(togost) * DUSENJE * p.hitrost) * dt;
+        p.napih += p.hitrost * dt;
+      }
       p.miska += (p.ciljMiska - p.miska) * 0.18;
 
       // Kraki: vsak diha zase (glas), val po vrsti (razmišljam), miška (vsi malo ven).
@@ -145,7 +181,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
       }
       narisi(p.napih, r);
 
-      const umirjeno = Math.abs(cilj - p.napih) < MIRNO && Math.abs(p.ciljMiska - p.miska) < MIRNO && vzigNapih === 0;
+      const umirjeno = Math.abs(cilj - p.napih) < MIRNO && Math.abs(p.hitrost) < 0.01 && Math.abs(p.ciljMiska - p.miska) < MIRNO && vzigNapih === 0;
       if (zivo || !umirjeno || uspesno) raf = requestAnimationFrame(korak);
     };
 
@@ -157,7 +193,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
       if (raf) cancelAnimationFrame(raf);
       p.sprozi = () => {};
     };
-  }, [razlicica, obris, stanje, uspesno]);
+  }, [razlicica, obris, stanje, uspesno, velikost]);
 
   const miska = (v: number) => {
     pogon.current.ciljMiska = v;
