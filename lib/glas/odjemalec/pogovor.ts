@@ -115,6 +115,14 @@ interface Seja {
 /** Po odgovoru posluša še toliko časa, nato se pogovor zapre. */
 const TISINA_PO_ODGOVORU_MS = 8000;
 const TISINA_NA_ZACETKU_MS = 12000;
+/** Branje: dolg odgovor samo na zaslonu (številke, seznami) — pogovor počaka, da ga uporabnik prebere. */
+const BRANJE_MS_NA_ZNAK = 60;
+const BRANJE_NAJVEC_MS = 90_000;
+/** Koliko časa po odgovoru poslušati: dalj, če je na zaslonu precej več, kot je bilo izrečeno. */
+export function tisinaZaBranje(zaslon: string, govor: string, osnova: number): number {
+  const neizreceno = Math.max(0, zaslon.replace(/\s+/g, ' ').length - govor.length);
+  return Math.min(BRANJE_NAJVEC_MS, Math.max(osnova, osnova + neizreceno * BRANJE_MS_NA_ZNAK));
+}
 /** Po "hvala" je pogovor verjetno končan: zapre se prej. */
 const TISINA_PO_ZAHVALI_MS = 4000;
 /** Zgodovina pogovora: zadnjih toliko ukazov, če je od zadnjega manj kot 5 minut (enako preverja strežnik). */
@@ -755,7 +763,8 @@ export class Pogovor {
     this.predlog = odgovor.status === 'predlog' ? (odgovor.predlog ?? null) : null;
     this.vprasanje = odgovor.status === 'vprasanje' ? (odgovor.vprasanje ?? null) : null;
     this.d.odgovor(odgovor);
-    await this.povej(odgovor.govor ?? odgovor.odgovor ?? '', tOdgovor);
+    const govor = odgovor.govor ?? odgovor.odgovor ?? '';
+    await this.povej(govor, tOdgovor, tisinaZaBranje(odgovor.odgovor ?? '', govor, this.tisinaPoOdgovoru));
   }
 
   private async potrdi(p: PredlogOdjemalec) {

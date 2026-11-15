@@ -8,7 +8,7 @@ import { jePredogled, type OkoljeOrodja } from '@/lib/glas/orodja/tipi';
 import { ocistiSms, preveriBesedilo, skritTelefon, zPodpisom } from '@/lib/glas/sporocila/besedilo';
 import { izidIzOdgovora, podpisi } from '@/lib/glas/sporocila/protokol';
 import type { Kontekst, PodatkiSalona, Predogled } from '@/lib/glas/tipi';
-import { DANES, kontekst, okolje, podatkiPomnilnik, posiljateljLazni, VSE_PRAVICE_STAFF } from './pomoc';
+import { DANES, kontekst, okolje, podatkiPomnilnik, posiljateljLazni, SALONI, VSE_PRAVICE_STAFF } from './pomoc';
 
 type Vhod = Parameters<typeof sporociStranki.predogled>[0];
 const vhod = (p: Partial<Vhod> = {}): Vhod => ({
@@ -109,6 +109,27 @@ describe('sporoci_stranki: predogled', () => {
   it('brez podpisa, če uporabnik tako reče', async () => {
     const p = kotPredlog(await predogled({ podpis: false }));
     expect(p.parametri.besedilo).toBe('Pozdravljeni, jutri zamujamo priblizno 15 minut.');
+  });
+
+  it('današnji že končan termin (tudi opravljen) da: »pozabili ste dežnik«', async () => {
+    const termini = SALONI.A1.termini;
+    const t8 = { ...termini.find((t) => t.id === 't5')!, id: 't8', idStranke: '101', stranka: 'Mateja Kovačič', zacetek: '08:00', konec: '09:00', status: 'completed' as const };
+    const t9 = { ...t8, id: 't9', zacetek: '09:00', konec: '09:30', status: 'scheduled' as const };
+    termini.push(t8);
+    try {
+      const x = o();
+      // Mateja ima tudi jutrišnji termin → vpraša, o katerem; današnji opravljen je med možnostmi.
+      expect(await predogled({ besedilo: 'Pozabili ste dežnik.' })).toMatchObject({ vprasanje: { moznosti: [{ id: 't8' }, { id: 't1' }] } });
+      const p = kotPredlog(await predogled({ termin_id: 't8', besedilo: 'Pozabili ste dežnik.' }, x));
+      expect(p.parametri).toMatchObject({ idStranke: '101', idTermina: 't8' });
+      expect((await sporociStranki.potrdi(p.parametri, x)).neuspeh).toBeFalsy();
+      termini.push(t9); // današnji pretekel, a še ne označen kot opravljen, tudi šteje
+      expect(await predogled({})).toMatchObject({ vprasanje: { moznosti: [{ id: 't8' }, { id: 't9' }, { id: 't1' }] } });
+    } finally {
+      termini.splice(termini.findIndex((t) => t.id === 't8'), 1);
+      const i = termini.findIndex((t) => t.id === 't9');
+      if (i >= 0) termini.splice(i, 1);
+    }
   });
 
   it('pretekel datum termina ne', async () => {

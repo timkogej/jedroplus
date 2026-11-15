@@ -380,3 +380,12 @@ describe('ponovi in počasneje (lokalno, brez strežnika)', () => {
     expect(besedila()).toContain('Nimam česa ponoviti.');
   });
 });
+
+describe('čas za branje', () => {
+  it('kratek odgovor: običajna tišina; dolg samo na zaslonu: dlje, največ 90 s', async () => {
+    const { tisinaZaBranje } = await import('@/lib/glas/odjemalec/pogovor');
+    expect(tisinaZaBranje('Termin je shranjen.', 'Termin je shranjen.', 8000)).toBe(8000);
+    expect(tisinaZaBranje('x'.repeat(320), 'Številke so na zaslonu.', 8000)).toBe(8000 + (320 - 23) * 60);
+    expect(tisinaZaBranje('x'.repeat(5000), '', 8000)).toBe(90_000);
+  });
+});

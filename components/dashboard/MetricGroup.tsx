@@ -2,6 +2,14 @@
 
 import { motion } from "motion/react";
 import type { IconProps } from "@phosphor-icons/react";
+import { useLocale } from "next-intl";
+import { intlLocale } from "@/lib/format";
+
+/** Sprememba v odstotkih: nad 10 % brez decimalk, sicer ena (273 %, 4,5 %). */
+function odstotek(v: number, locale: string): string {
+  const a = Math.abs(v);
+  return a.toLocaleString(intlLocale(locale), { maximumFractionDigits: a >= 10 ? 0 : 1 });
+}
 
 export interface Metric {
   label: string;
@@ -28,6 +36,7 @@ interface MetricGroupProps {
  * nikjer ne podvojijo, kar se pri border-jih na sosednjih celicah vedno zgodi.
  */
 export function MetricGroup({ metrics }: MetricGroupProps) {
+  const locale = useLocale();
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
@@ -82,7 +91,7 @@ export function MetricGroup({ metrics }: MetricGroupProps) {
                     }`}
                   >
                     {metric.trend.isPositive ? "↑" : "↓"}
-                    {Math.abs(metric.trend.value)}%
+                    {odstotek(metric.trend.value, locale)} %
                   </span>
                 )}
                 {metric.caption && (
