@@ -97,7 +97,7 @@ export interface AsistentVmesnikProps {
 }
 
 /** Oblika v aplikaciji (testna stran jo lahko preklaplja). */
-export const OBLIKA_PRIVZETA: OblikaOrba = 'krog';
+export const OBLIKA_PRIVZETA: OblikaOrba = 'obris';
 
 export function AsistentVmesnik(p: AsistentVmesnikProps) {
   const { stanje, nacin, okno, panel, t, oblika = OBLIKA_PRIVZETA } = p;

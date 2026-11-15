@@ -35,7 +35,7 @@ Namesto kroga je asistent lahko **plus iz logotipa**, ki se ob glasu napihne pro
 
 Različice: `logo` (razmerja logotipa), `mehak` (debelejši, berljiv v 48 px), `zele` (zaobljen, močno napihovanje), `obris` (oblika žele, samo živ sijoč rob v slogu Siri, steklena notranjost; v mirovanju sij miruje, barve tečejo samo po tankem robu).
 
-Možnosti in predlog: steklena kartica z gradientnim robom; možnosti kot vrstice z inicialkami (tipke 1–9 izberejo na računalniku), predlog z naslovom, podrobnostmi in gumboma Prekliči/Potrdi; pod kartico namig za glas (`moznostiNamig`, `predlogNamig`). Izbira: `OBLIKA_PRIVZETA` v `AsistentVmesnik.tsx` (zdaj še `krog`). Primerjava: `/sl/glas-dizajn?primerjava=1`, posamezna: `?oblika=mehak`.
+Možnosti in predlog: steklena kartica z gradientnim robom; možnosti kot vrstice z inicialkami (tipke 1–9 izberejo na računalniku), predlog z naslovom, podrobnostmi in gumboma Prekliči/Potrdi; pod kartico namig za glas (`moznostiNamig`, `predlogNamig`). Izbira: `OBLIKA_PRIVZETA` v `AsistentVmesnik.tsx` (zdaj `obris`). Primerjava: `/sl/glas-dizajn?primerjava=1`, posamezna: `?oblika=mehak`.
 
 Oblika se računa v `requestAnimationFrame` samo med pogovorom in kratkimi prehodi; nato se zanka ustavi.
 
