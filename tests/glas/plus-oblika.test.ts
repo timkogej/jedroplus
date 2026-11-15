@@ -1,6 +1,6 @@
 // Asistent+ v obliki plusa: geometrija (plus → krog).
 import { describe, expect, it } from 'vitest';
-import { NASTAVITVE, parametri, polmer, potPlusa } from '@/components/glas/ui/plusOblika';
+import { NASTAVITVE, parametri, polmer, potPlusa, zamik } from '@/components/glas/ui/plusOblika';
 
 describe('plus oblika', () => {
   for (const [ime, n] of Object.entries(NASTAVITVE)) {
@@ -32,5 +32,14 @@ describe('plus oblika', () => {
     const st = d.match(/-?\d+(\.\d+)?/g)!.map(Number);
     expect(Math.min(...st)).toBeGreaterThanOrEqual(0);
     expect(Math.max(...st)).toBeLessThanOrEqual(144);
+  });
+
+  it('obris: zamik navznoter je povsod za debelino roba ožji', () => {
+    const p = parametri(NASTAVITVE.obris, 0);
+    const z = zamik(p, 5);
+    expect(polmer(z, 0)).toBeCloseTo(polmer(p, 0) - 5, 5);
+    expect(polmer(z, Math.PI / 2)).toBeCloseTo(polmer(p, Math.PI / 2) - 5, 5);
+    const krog = parametri(NASTAVITVE.obris, 1);
+    expect(polmer(zamik(krog, 5), 1)).toBeCloseTo(NASTAVITVE.obris.krog - 5, 5);
   });
 });

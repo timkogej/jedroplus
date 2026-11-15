@@ -496,7 +496,7 @@ Skupaj približno **4 tedne**. 1 in 2 lahko začnem takoj (samo branje).
 | 3 | Sporoči stranki (`sporoci_stranki`) | narejeno; migracija, n8n tok in ključ nastavljeni, Tim preizkusil SMS |
 | 4a | Zapolnitev luknje (`kandidati_za_luknjo`, `ponudi_prosti_termin`) | koda in testi narejeni; migracija `1793700001` pognana |
 | 5 | Osebni opomniki (`nov_opomnik`, `moji_opomniki`, `preklici_opomnik`) | koda in testi narejeni; pg_cron in migracija `1793700002` pognana |
-| 6 | Ponavljajoči termini (`pripravi_serijo` + »Ponovi termin« v koledarju) | koda in testi narejeni; čaka migracijo `1793700003` (spodaj) |
+| 6 | Ponavljajoči termini (`pripravi_serijo` + »Ponovi termin« v koledarju) | koda in testi narejeni; migracija `1793700003` pognana; čaka preizkus v koledarju |
 
 ### Spremembe na strani Analitika (O4)
 

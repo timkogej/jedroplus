@@ -16,9 +16,9 @@
 export const OSNOVA = 144;
 const S = OSNOVA / 2;
 
-export type RazlicicaPlusa = 'logo' | 'mehak' | 'zele';
+export type RazlicicaPlusa = 'logo' | 'mehak' | 'zele' | 'obris';
 export type OblikaOrba = 'krog' | RazlicicaPlusa;
-export const OBLIKE: OblikaOrba[] = ['krog', 'logo', 'mehak', 'zele'];
+export const OBLIKE: OblikaOrba[] = ['krog', 'logo', 'mehak', 'zele', 'obris'];
 
 export interface NastavitevPlusa {
   /** Dolžina kraka od središča (mirovanje). */
@@ -44,7 +44,12 @@ export const NASTAVITVE: Record<RazlicicaPlusa, NastavitevPlusa> = {
   mehak: { krak: 62, debelina: 22, zaobljenost: 16, mehcanje: 12, krog: 56, napihGlas: 0.7, nesimetrija: 0.13 },
   // Žele: zaobljeni kraki, močno napihovanje, kraki dihajo vsak zase.
   zele: { krak: 60, debelina: 25, zaobljenost: 24, mehcanje: 18, krog: 58, napihGlas: 0.92, nesimetrija: 0.2 },
+  // Obris: oblika žele, narisan je samo živ, sijoč rob (notranjost je steklena).
+  obris: { krak: 60, debelina: 25, zaobljenost: 24, mehcanje: 18, krog: 58, napihGlas: 0.92, nesimetrija: 0.2 },
 };
+
+/** Debelina roba pri obrisu (v 144 px). */
+export const DEBELINA_OBRISA = 5.5;
 
 export interface Kraki {
   gor: number;
@@ -77,6 +82,20 @@ export function parametri(n: NastavitevPlusa, napih: number, raztezki: Kraki = {
     debelina,
     zaobljenost: Math.min(debelina, lerp(n.zaobljenost, n.krog, m)),
     mehcanje: n.mehcanje * (1 - m),
+  };
+}
+
+/**
+ * Oblika, zamaknjena navznoter (w > 0) ali navzven (w < 0): obe palici se zožita
+ * oz. razširita za w, zato je rob med obliko in zamikom povsod enako debel.
+ */
+export function zamik(p: ParametriPlusa, w: number): ParametriPlusa {
+  const m = (x: number) => Math.max(0.5, x - w);
+  return {
+    kraki: { gor: m(p.kraki.gor), desno: m(p.kraki.desno), dol: m(p.kraki.dol), levo: m(p.kraki.levo) },
+    debelina: m(p.debelina),
+    zaobljenost: Math.max(0, p.zaobljenost - w),
+    mehcanje: p.mehcanje,
   };
 }
 

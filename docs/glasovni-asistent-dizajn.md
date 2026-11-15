@@ -33,7 +33,7 @@ Namesto kroga je asistent lahko **plus iz logotipa**, ki se ob glasu napihne pro
 | Govorim | Napihuje se z glasom asistenta, vsak krak diha zase; običajen govor malo, poudarki do kroga. |
 | Uspeh | Napihne se v krog s kljukico, nato nazaj v plus. |
 
-Različice: `logo` (razmerja logotipa), `mehak` (debelejši, berljiv v 48 px), `zele` (zaobljen, močno napihovanje). Izbira: `OBLIKA_PRIVZETA` v `AsistentVmesnik.tsx` (zdaj še `krog`). Primerjava: `/sl/glas-dizajn?primerjava=1`, posamezna: `?oblika=mehak`.
+Različice: `logo` (razmerja logotipa), `mehak` (debelejši, berljiv v 48 px), `zele` (zaobljen, močno napihovanje), `obris` (oblika žele, samo živ sijoč rob v slogu Siri, steklena notranjost; v mirovanju sij miruje, barve tečejo samo po tankem robu). Izbira: `OBLIKA_PRIVZETA` v `AsistentVmesnik.tsx` (zdaj še `krog`). Primerjava: `/sl/glas-dizajn?primerjava=1`, posamezna: `?oblika=mehak`.
 
 Oblika se računa v `requestAnimationFrame` samo med pogovorom in kratkimi prehodi; nato se zanka ustavi.
 

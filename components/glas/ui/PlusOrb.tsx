@@ -19,11 +19,14 @@
  *   govorim    — plus se z glasom asistenta napihuje proti krogu, kraki vsak zase;
  *   uspeh      — napihne se v krog s kljukico, nato nazaj v plus.
  * Glasnost bere iz --ap-nivo na .ap-koren (useNivoGlasu).
+ *
+ * Različica "obris": narisan je samo rob (obroč med obliko in obliko, zamaknjeno
+ * navznoter; clip-path z evenodd), po njem tečejo barve, pod njim je mehak sij.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import type { StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
-import { NASTAVITVE, parametri, potPlusa, type Kraki, type RazlicicaPlusa } from './plusOblika';
+import { DEBELINA_OBRISA, NASTAVITVE, parametri, potPlusa, zamik, type Kraki, type RazlicicaPlusa } from './plusOblika';
 
 export interface PlusOrbProps {
   razlicica: RazlicicaPlusa;
@@ -40,6 +43,12 @@ export interface PlusOrbProps {
 const VZIG_MS = 820;
 const MIRNO = 0.0015;
 
+function obrezi(el: HTMLElement | null, pot: string) {
+  if (!el) return;
+  el.style.clipPath = pot;
+  el.style.setProperty('-webkit-clip-path', pot);
+}
+
 export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznaka, onClick, onPripravi }: PlusOrbProps) {
   const [prej, setPrej] = useState(stanje);
   const [vzig, setVzig] = useState(0);
@@ -51,6 +60,9 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
   const gumb = useRef<HTMLButtonElement | null>(null);
   const tel = useRef<HTMLSpanElement | null>(null);
   const rob = useRef<SVGPathElement | null>(null);
+  const sij = useRef<HTMLSpanElement | null>(null);
+  const notranjost = useRef<HTMLSpanElement | null>(null);
+  const obris = razlicica === 'obris';
   /** Stanje pogona med upodobitvami (brez ponovnega izrisa Reacta). */
   const pogon = useRef({ napih: 0, miska: 0, ciljMiska: 0, vzigOd: -1e9, sprozi: () => {} });
 
@@ -76,13 +88,20 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
     let zadnja = '';
 
     const narisi = (napih: number, raztezki: Kraki) => {
-      const d = potPlusa(parametri(n, napih, raztezki));
+      const oblika = parametri(n, napih, raztezki);
+      const d = potPlusa(oblika);
       if (d === zadnja) return;
       zadnja = d;
-      const pot = `path("${d}")`;
-      el.style.clipPath = pot;
-      el.style.setProperty('-webkit-clip-path', pot);
-      rob.current?.setAttribute('d', d);
+      if (!obris) {
+        obrezi(el, `path("${d}")`);
+        rob.current?.setAttribute('d', d);
+        return;
+      }
+      // Obris: ostri obroč, širši obroč za sij, notranjost.
+      const notri = potPlusa(zamik(oblika, DEBELINA_OBRISA));
+      obrezi(el, `path(evenodd, "${d} ${notri}")`);
+      obrezi(sij.current, `path(evenodd, "${potPlusa(zamik(oblika, -3))} ${potPlusa(zamik(oblika, DEBELINA_OBRISA + 4))}")`);
+      obrezi(notranjost.current, `path("${notri}")`);
     };
 
     const korak = (zdaj: number) => {
@@ -138,7 +157,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
       if (raf) cancelAnimationFrame(raf);
       p.sprozi = () => {};
     };
-  }, [razlicica, stanje, uspesno]);
+  }, [razlicica, obris, stanje, uspesno]);
 
   const miska = (v: number) => {
     pogon.current.ciljMiska = v;
@@ -150,7 +169,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
     <button
       ref={gumb}
       type="button"
-      className="ap-orb ap-orb--plus"
+      className={`ap-orb ap-orb--plus${obris ? ' ap-orb--obris' : ''}`}
       data-oblika={razlicica}
       onClick={onClick}
       onPointerEnter={(e) => {
@@ -167,29 +186,52 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
         <span className="ap-orb__dih">
           <span className="ap-orb__halo" />
           <span className="ap-plus__fokus" />
-          <span className="ap-plus__senca">
-            <span ref={tel} className="ap-orb__tel">
-              <span className="ap-orb__pospesek">
-                <span className="ap-orb__mehurcki">
-                  <span className="ap-orb__plast ap-orb__plast--1" />
-                  <span className="ap-orb__plast ap-orb__plast--2" />
-                  <span className="ap-orb__plast ap-orb__plast--3" />
+          {obris ? (
+            <>
+              <span ref={notranjost} className="ap-obris__notranjost" />
+              <span className="ap-obris__sij">
+                <span ref={sij} className="ap-obris__obroc">
+                  <span className="ap-obris__pospesek">
+                    <span className="ap-obris__barve" />
+                  </span>
                 </span>
               </span>
-              <span className="ap-orb__sijaj" />
-              <span className="ap-plus__lesk" />
-              <span className="ap-orb__zrno" />
+              <span ref={tel} className="ap-obris__obroc">
+                <span className="ap-obris__pospesek">
+                  <span className="ap-obris__barve" />
+                </span>
+              </span>
               <span className="ap-orb__jedro">
-                <span className="ap-orb__zar" />
                 <svg className="ap-orb__kljukica" viewBox="0 0 24 24" fill="none">
                   <path d="M5 12.5l4.6 4.5L19 7.5" stroke="#fff" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <svg className="ap-plus__rob" viewBox="0 0 144 144">
-                <path ref={rob} />
-              </svg>
+            </>
+          ) : (
+            <span className="ap-plus__senca">
+              <span ref={tel} className="ap-orb__tel">
+                <span className="ap-orb__pospesek">
+                  <span className="ap-orb__mehurcki">
+                    <span className="ap-orb__plast ap-orb__plast--1" />
+                    <span className="ap-orb__plast ap-orb__plast--2" />
+                    <span className="ap-orb__plast ap-orb__plast--3" />
+                  </span>
+                </span>
+                <span className="ap-orb__sijaj" />
+                <span className="ap-plus__lesk" />
+                <span className="ap-orb__zrno" />
+                <span className="ap-orb__jedro">
+                  <span className="ap-orb__zar" />
+                  <svg className="ap-orb__kljukica" viewBox="0 0 24 24" fill="none">
+                    <path d="M5 12.5l4.6 4.5L19 7.5" stroke="#fff" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <svg className="ap-plus__rob" viewBox="0 0 144 144">
+                  <path ref={rob} />
+                </svg>
+              </span>
             </span>
-          </span>
+          )}
           {vzig > 0 && <span key={`v${vzig}`} className="ap-orb__val" />}
           {uspesno && <span key={`u${uspeh}`} className="ap-orb__val ap-orb__val--uspeh" />}
         </span>

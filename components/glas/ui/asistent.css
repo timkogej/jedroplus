@@ -382,6 +382,72 @@
   transition-delay: 180ms;
 }
 
+/* ─────────────────────────── plus kot obris ─────────────────────────── */
+/* Samo živ rob (Siri): barve tečejo po obroču, pod njim mehak sij; notranjost je steklo. */
+
+.ap-obris__obroc {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ap-obris__pospesek {
+  position: absolute;
+  inset: -20%;
+  animation: ap-vrti 2.6s linear infinite;
+  animation-play-state: paused;
+}
+.ap-obris__barve {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #7c78fa,
+    #59aeea 18%,
+    #35e3db 34%,
+    #8fe9ff 44%,
+    #7c78fa 58%,
+    #d48cf5 72%,
+    #ff9ecf 80%,
+    #7c78fa 100%
+  );
+  animation: ap-vrti 9s linear infinite;
+}
+.ap-koren:not([data-stanje='mirovanje']) .ap-obris__pospesek {
+  animation-play-state: running;
+}
+.ap-koren[data-stanje='poslusam'] .ap-obris__pospesek,
+.ap-koren[data-stanje='govorim'] .ap-obris__pospesek {
+  animation-play-state: paused;
+}
+/* Sij: zamegljena kopija obroča; v mirovanju miruje (brez ponovnega zameglevanja). */
+.ap-obris__sij {
+  position: absolute;
+  inset: 0;
+  filter: blur(7px);
+  opacity: calc(0.55 + var(--ap-nivo) * 0.45);
+  transition: opacity 400ms ease;
+}
+.ap-koren[data-stanje='mirovanje'] .ap-obris__sij {
+  opacity: 0.45;
+}
+.ap-koren[data-stanje='mirovanje'] .ap-obris__sij .ap-obris__barve {
+  animation-play-state: paused;
+}
+.ap-obris__notranjost {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 36% 28%, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.55) 60%),
+    linear-gradient(135deg, rgb(124 120 250 / 0.12), rgb(53 227 219 / 0.12));
+}
+.ap-orb--obris .ap-orb__kljukica path {
+  stroke: #6a62f6;
+}
+.ap-orb--obris .ap-orb__halo {
+  inset: -18%;
+}
+
 /* ─────────────────────── tančica (zamegljeno ozadje) ─────────────────────── */
 
 .ap-tancica {
@@ -763,6 +829,8 @@
   .ap-orb__pospesek,
   .ap-orb__mehurcki,
   .ap-plus__lesk,
+  .ap-obris__barve,
+  .ap-obris__pospesek,
   .ap-rob__trak {
     animation: none !important;
   }
