@@ -517,6 +517,19 @@
   inset: -18%;
 }
 
+/* Sij: platno senčilnika (sijGl.ts), večje od 144 za sij okoli roba (OKVIR 200). */
+.ap-sij {
+  position: absolute;
+  left: -28px;
+  top: -28px;
+  width: 200px;
+  height: 200px;
+  pointer-events: none;
+}
+.ap-orb--sij .ap-orb__halo {
+  display: none;
+}
+
 /* ─────────────────────── tančica (zamegljeno ozadje) ─────────────────────── */
 
 .ap-tancica {

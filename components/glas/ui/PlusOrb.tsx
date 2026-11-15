@@ -30,6 +30,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
+import { ustvariSij, OKVIR, type Sij } from './sijGl';
 import { DEBELINA_OBRISA, NASTAVITVE, parametri, potPlusa, zamik, type Kraki, type RazlicicaPlusa } from './plusOblika';
 
 export interface PlusOrbProps {
@@ -76,9 +77,36 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
   const rob = useRef<SVGPathElement | null>(null);
   /** Plasti obrisa (obroči), ki jim pogon nastavlja obliko. */
   const plasti = useRef<Partial<Record<PlastObrisa, HTMLSpanElement | null>>>({});
-  const obris = razlicica === 'obris';
+  const platno = useRef<HTMLCanvasElement | null>(null);
+  const sijRef = useRef<Sij | null>(null);
+  /** WebGL ni na voljo: sij nariše CSS obris. */
+  const [brezGl, setBrezGl] = useState(false);
+  const sij = razlicica === 'sij' && !brezGl;
+  const obris = razlicica === 'obris' || (razlicica === 'sij' && brezGl);
+  const oblikaNastavitev = razlicica === 'sij' && brezGl ? 'obris' : razlicica;
   /** Stanje pogona med upodobitvami (brez ponovnega izrisa Reacta). */
   const pogon = useRef({ napih: 0, nivo: 0, miska: 0, ciljMiska: 0, vzigOd: -1e9, sprozi: () => {} });
+
+  // Sij: en WebGL kontekst za čas življenja platna.
+  useEffect(() => {
+    if (!sij || !platno.current) return;
+    const r = ustvariSij(platno.current);
+    if (!r) {
+      setBrezGl(true);
+      return;
+    }
+    sijRef.current = r;
+    pogon.current.sprozi();
+    return () => {
+      sijRef.current = null;
+      r.unici();
+    };
+  }, [sij]);
+
+  useEffect(() => {
+    sijRef.current?.velikost((velikost * OKVIR) / 144);
+    pogon.current.sprozi();
+  }, [velikost, sij]);
 
   // Vžig: zabeleži začetek (pogon ga odigra).
   useEffect(() => {
@@ -92,8 +120,8 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
 
   useEffect(() => {
     const el = tel.current;
-    if (!el) return;
-    const n = NASTAVITVE[razlicica];
+    if (!el && !sij) return;
+    const n = NASTAVITVE[oblikaNastavitev];
     const manjGibanja = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const koren = gumb.current?.closest<HTMLElement>('.ap-koren') ?? null;
     const p = pogon.current;
@@ -101,8 +129,14 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
     let raf = 0;
     let zadnja = '';
 
-    const narisi = (napih: number, raztezki: Kraki) => {
+    const narisi = (napih: number, raztezki: Kraki, cas: number) => {
       const oblika = parametri(n, napih, raztezki);
+      if (sij) {
+        // Senčilnik: čas teče le, dokler teče pogon (v mirovanju slika stoji).
+        sijRef.current?.izrisi({ oblika, cas, nivo: p.nivo, misli: stanje === 'razmisljam' && !manjGibanja ? 1 : 0, miska: p.miska });
+        return;
+      }
+      if (!el) return;
       const d = potPlusa(oblika);
       const kljuc = obris ? `${d}|${p.nivo.toFixed(2)}` : d;
       if (kljuc === zadnja) return;
@@ -145,7 +179,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
       const krivulja = nivo ** 1.7;
       const glas = stanje === 'govorim' ? krivulja * n.napihGlas : stanje === 'poslusam' ? krivulja * n.napihGlas * 0.35 : 0;
       // Razmišljanje (obris): oblika počasi diha.
-      const dih = misli && obris ? 0.07 + 0.05 * Math.sin(c * 2.3) : 0;
+      const dih = misli && (obris || sij) ? 0.07 + 0.05 * Math.sin(c * 2.3) : 0;
       const cilj = Math.max(uspesno ? 1 : 0, vzigNapih, glas, dih);
       p.napih = manjGibanja ? cilj : p.napih + (cilj - p.napih) * (cilj > p.napih ? 0.34 : vzigNapih > 0 ? 0.3 : 0.1);
       p.miska += (p.ciljMiska - p.miska) * 0.18;
@@ -160,7 +194,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
           r.desno += a * (0.5 + 0.5 * Math.sin(c * 6.7 + 2.1));
           r.dol += a * (0.5 + 0.5 * Math.sin(c * 4.3 + 4.2));
           r.levo += a * (0.5 + 0.5 * Math.sin(c * 7.9 + 1.0));
-        } else if (misli && obris) {
+        } else if (misli && (obris || sij)) {
           // Mehko zvijanje: val gre počasi okoli (brez sunkov).
           const val = (i: number) => 0.035 * Math.sin(c * 2.3 - (i * Math.PI) / 2);
           r.gor += val(0);
@@ -181,7 +215,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
           r.levo += s;
         }
       }
-      narisi(p.napih, r);
+      narisi(p.napih, r, c);
 
       const umirjeno = p.nivo === 0 && Math.abs(cilj - p.napih) < MIRNO && Math.abs(p.ciljMiska - p.miska) < MIRNO && vzigNapih === 0;
       if (zivo || !umirjeno || uspesno) raf = requestAnimationFrame(korak);
@@ -195,7 +229,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
       if (raf) cancelAnimationFrame(raf);
       p.sprozi = () => {};
     };
-  }, [razlicica, obris, stanje, uspesno]);
+  }, [oblikaNastavitev, obris, sij, stanje, uspesno]);
 
   const miska = (v: number) => {
     pogon.current.ciljMiska = v;
@@ -207,7 +241,7 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
     <button
       ref={gumb}
       type="button"
-      className={`ap-orb ap-orb--plus${obris ? ' ap-orb--obris' : ''}`}
+      className={`ap-orb ap-orb--plus${obris || sij ? ' ap-orb--obris' : ''}${sij ? ' ap-orb--sij' : ''}`}
       data-oblika={razlicica}
       onClick={onClick}
       onPointerEnter={(e) => {
@@ -224,7 +258,16 @@ export function PlusOrb({ razlicica, stanje, x, y, velikost, uspeh = null, oznak
         <span className="ap-orb__dih">
           <span className="ap-orb__halo" />
           <span className="ap-plus__fokus" />
-          {obris ? (
+          {sij ? (
+            <>
+              <canvas ref={platno} className="ap-sij" />
+              <span className="ap-orb__jedro">
+                <svg className="ap-orb__kljukica" viewBox="0 0 24 24" fill="none">
+                  <path d="M5 12.5l4.6 4.5L19 7.5" stroke="#fff" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </>
+          ) : obris ? (
             <>
               <span ref={(e) => void (plasti.current.notranjost = e)} className="ap-obris__notranjost" />
               <span className="ap-obris__plast ap-obris__plast--dalec">

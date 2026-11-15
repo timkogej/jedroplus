@@ -16,9 +16,9 @@
 export const OSNOVA = 144;
 const S = OSNOVA / 2;
 
-export type RazlicicaPlusa = 'logo' | 'mehak' | 'zele' | 'obris';
+export type RazlicicaPlusa = 'logo' | 'mehak' | 'zele' | 'obris' | 'sij';
 export type OblikaOrba = 'krog' | RazlicicaPlusa;
-export const OBLIKE: OblikaOrba[] = ['krog', 'logo', 'mehak', 'zele', 'obris'];
+export const OBLIKE: OblikaOrba[] = ['krog', 'logo', 'mehak', 'zele', 'obris', 'sij'];
 
 export interface NastavitevPlusa {
   /** Dolžina kraka od središča (mirovanje). */
@@ -47,6 +47,9 @@ export const NASTAVITVE: Record<RazlicicaPlusa, NastavitevPlusa> = {
   // Obris: žele z zaobljenimi konci, a bolj plus kot deteljica (manjše mehčanje
   // notranjih kotov, daljši kraki); narisan je samo živ, sijoč rob.
   obris: { krak: 62, debelina: 23, zaobljenost: 23, mehcanje: 9, krog: 57, napihGlas: 0.82, nesimetrija: 0.15 },
+  // Sij: svetel obroč s sijem navznoter (senčilnik, sijGl.ts); debelejši kraki, da
+  // je v njih prostor za sij.
+  sij: { krak: 62, debelina: 25, zaobljenost: 24, mehcanje: 10, krog: 57, napihGlas: 0.85, nesimetrija: 0.15 },
 };
 
 /** Debelina roba pri obrisu (v 144 px). */
