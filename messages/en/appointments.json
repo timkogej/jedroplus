@@ -537,6 +537,20 @@
     "cancelPartial": "{n} of {od} cancelled. Please check the calendar.",
     "cancelTitle": "{count, plural, =0 {No upcoming appointments} =1 {Cancel 1 appointment?} other {Cancel {count} appointments?}}",
     "cancelHint": "Each appointment is cancelled separately; the client is notified as for a single appointment.",
-    "cancelConfirm": "{count, plural, =1 {Cancel 1 appointment} other {Cancel {count} appointments}}"
+    "cancelConfirm": "{count, plural, =1 {Cancel 1 appointment} other {Cancel {count} appointments}}",
+    "repeat": "Repeat (series)",
+    "rescheduleFuture": "Reschedule this and all following",
+    "moveTitle": "Reschedule series",
+    "moveStep": "New day and time for this appointment. All following ones move by the same amount.",
+    "moveHint": "Each appointment is rescheduled separately, as a single one. I will ask about notifying the client at the end.",
+    "moveAll": "{count, plural, =0 {Reschedule} =1 {Reschedule 1 appointment} other {Reschedule {count} appointments}}",
+    "moved": "Rescheduled",
+    "movedAll": "{count, plural, =1 {1 appointment rescheduled.} other {{count} appointments rescheduled.}}",
+    "movePartial": "{n} of {od} rescheduled. The others stay in the review.",
+    "moveNone": "This series has no upcoming open appointments.",
+    "notifyTitle": "{count, plural, =1 {Notify the client about the change?} other {Notify the client about {count} changes?}}",
+    "notifyHint": "Each rescheduled appointment gets its own notification, as for a single one.",
+    "notifyConfirm": "{count, plural, =1 {Send notification} other {Send {count} notifications}}",
+    "notifyPartial": "{n} of {od} notifications sent."
   }
 }

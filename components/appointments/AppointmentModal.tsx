@@ -80,6 +80,8 @@ interface AppointmentModalProps {
     cas?: string;
     /** Serija (»vsakih šest tednov, šestkrat«): vklopi »Ponovi« z ritmom. */
     ponovitev?: Ponovitev;
+    /** Predizpolnitev iz koledarja (»Ponovi«), ne iz glasu: obrazec se ne javi asistentu. */
+    brezGlasu?: boolean;
   } | null;
 }
 
@@ -194,7 +196,7 @@ function AppointmentModal({
   const sheetDrag = useSheetDrag(onClose);
   // Asistent+: obrazec, odprt z glasom, sprejme »shrani« / »prekliči« (requestSubmit = gumb Shrani).
   const glasFormRef = useRef<HTMLFormElement | null>(null);
-  useGlasovniObrazec(isOpen && Boolean(predizpolnitev), glasFormRef, onClose);
+  useGlasovniObrazec(isOpen && Boolean(predizpolnitev) && !predizpolnitev?.brezGlasu, glasFormRef, onClose);
   const { money, locale } = useFormat();
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();

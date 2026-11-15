@@ -29,12 +29,15 @@ interface Props {
   isSaving: boolean;
   /** Med shranjevanjem: koliko je že shranjenih. */
   napredek?: { n: number; od: number } | null;
+  /** nov = nova serija (potrdila); prestavi = prestavitev obstoječih terminov serije. */
+  nacin?: 'nov' | 'prestavi';
 }
 
 const inputClass =
   'min-w-0 rounded-[10px] border border-gray-200 bg-white px-2.5 py-2 text-base text-gray-900 focus:border-[#7C78FA] focus:outline-none focus:ring-[3px] focus:ring-[#7C78FA]/25 sm:text-sm';
 
-export function SerijaPregledModal({ vrstice, onChange, onSave, onClose, isSaving, napredek }: Props) {
+export function SerijaPregledModal({ vrstice, onChange, onSave, onClose, isSaving, napredek, nacin = 'nov' }: Props) {
+  const prestavi = nacin === 'prestavi';
   const t = useTranslations('appointments.serija');
   const tCommon = useTranslations('common');
   const locale = useLocale();
@@ -50,7 +53,7 @@ export function SerijaPregledModal({ vrstice, onChange, onSave, onClose, isSavin
       <div className="relative z-[70]">
         <Sheet onClose={isSaving ? () => {} : onClose} maxWidth="sm:max-w-[520px]">
           <SheetHeader
-            title={t('reviewTitle')}
+            title={prestavi ? t('moveTitle') : t('reviewTitle')}
             subtitle={t('reviewSubtitle', { count: vrstice.length })}
             onClose={isSaving ? () => {} : onClose}
             closeLabel={tCommon('buttons.close')}
@@ -68,7 +71,7 @@ export function SerijaPregledModal({ vrstice, onChange, onSave, onClose, isSavin
                   <CheckCircle className="h-5 w-5 text-emerald-500" weight="regular" />
                 );
                 const opis = v.shranjen
-                  ? t('saved')
+                  ? prestavi ? t('moved') : t('saved')
                   : v.napaka
                   ? t('saveFailed')
                   : v.stanje === 'ok'
@@ -114,7 +117,7 @@ export function SerijaPregledModal({ vrstice, onChange, onSave, onClose, isSavin
                 );
               })}
             </ul>
-            <p className="mt-3 text-xs text-gray-500">{t('confirmations', { count: zaShranit })}</p>
+            <p className="mt-3 text-xs text-gray-500">{prestavi ? t('moveHint') : t('confirmations', { count: zaShranit })}</p>
           </SheetBody>
           <SheetFooter>
             <button
@@ -131,9 +134,134 @@ export function SerijaPregledModal({ vrstice, onChange, onSave, onClose, isSavin
               disabled={isSaving || zaShranit === 0}
               className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
-              {isSaving && napredek ? t('saving', { n: napredek.n, od: napredek.od }) : t('saveAll', { count: zaShranit })}
+              {isSaving && napredek ? t('saving', { n: napredek.n, od: napredek.od }) : prestavi ? t('moveAll', { count: zaShranit }) : t('saveAll', { count: zaShranit })}
             </button>
           </SheetFooter>
+        </Sheet>
+      </div>
+    </BodyPortal>
+  );
+}
+
+/** Potrditev s seznamom terminov (odpoved serije, obvestilo o prestavitvi). */
+export function SerijaSeznamModal({
+  termini,
+  naslov,
+  opis,
+  gumb,
+  nevaren = false,
+  onConfirm,
+  onClose,
+  isBusy,
+}: {
+  termini: { datum: string; cas_zacetek: string }[];
+  naslov: string;
+  opis: string;
+  gumb: string;
+  nevaren?: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+  isBusy: boolean;
+}) {
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const dan = (d: string) => {
+    const [y, m, dd] = d.split('-').map(Number);
+    return new Date(y, m - 1, dd).toLocaleDateString(intlLocale(locale), { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' });
+  };
+  return (
+    <BodyPortal>
+      <div className="relative z-[70]">
+        <Sheet onClose={isBusy ? () => {} : onClose}>
+          <SheetHeader title={naslov} onClose={isBusy ? () => {} : onClose} closeLabel={tCommon('buttons.close')} />
+          <SheetBody>
+            <ul className="space-y-1">
+              {termini.map((x, i) => (
+                <li key={i} className="tnum text-sm text-gray-700">{dan(x.datum)} · {x.cas_zacetek}</li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-gray-500">{opis}</p>
+          </SheetBody>
+          <SheetFooter>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isBusy}
+              className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 disabled:opacity-50"
+            >
+              {tCommon('buttons.back')}
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={isBusy || termini.length === 0}
+              className={`flex-1 rounded-xl px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50 ${nevaren ? 'bg-red-600' : 'bg-gradient-to-r from-violet-500 to-cyan-500'}`}
+            >
+              {gumb}
+            </button>
+          </SheetFooter>
+        </Sheet>
+      </div>
+    </BodyPortal>
+  );
+}
+
+/** Prestavitev serije, 1. korak: nov dan in ura tega termina; ostali se zamaknejo enako. */
+export function SerijaZamikModal({
+  datum,
+  ura,
+  onNext,
+  onClose,
+  isBusy,
+}: {
+  datum: string;
+  ura: string;
+  onNext: (datum: string, ura: string) => void;
+  onClose: () => void;
+  isBusy: boolean;
+}) {
+  const t = useTranslations('appointments.serija');
+  const tCommon = useTranslations('common');
+  return (
+    <BodyPortal>
+      <div className="relative z-[70]">
+        <Sheet onClose={isBusy ? () => {} : onClose}>
+          <SheetHeader title={t('moveTitle')} onClose={isBusy ? () => {} : onClose} closeLabel={tCommon('buttons.close')} />
+          <form
+            className="contents"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              const d = String(f.get('datum') ?? '');
+              const u = String(f.get('ura') ?? '');
+              if (/^\d{4}-\d{2}-\d{2}$/.test(d) && /^\d{2}:\d{2}$/.test(u)) onNext(d, u);
+            }}
+          >
+            <SheetBody>
+              <p className="mb-3 text-sm text-gray-600">{t('moveStep')}</p>
+              <div className="flex gap-2">
+                <input name="datum" type="date" defaultValue={datum} required className={`${inputClass} flex-1`} />
+                <input name="ura" type="time" step={300} defaultValue={ura} required className={`${inputClass} w-[6.5rem]`} />
+              </div>
+            </SheetBody>
+            <SheetFooter>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isBusy}
+                className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 disabled:opacity-50"
+              >
+                {tCommon('buttons.cancel')}
+              </button>
+              <button
+                type="submit"
+                disabled={isBusy}
+                className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                {tCommon('buttons.next')}
+              </button>
+            </SheetFooter>
+          </form>
         </Sheet>
       </div>
     </BodyPortal>
@@ -153,45 +281,16 @@ export function SerijaOdpovedModal({
   isBusy: boolean;
 }) {
   const t = useTranslations('appointments.serija');
-  const tCommon = useTranslations('common');
-  const locale = useLocale();
-  const dan = (d: string) => {
-    const [y, m, dd] = d.split('-').map(Number);
-    return new Date(y, m - 1, dd).toLocaleDateString(intlLocale(locale), { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' });
-  };
   return (
-    <BodyPortal>
-      <div className="relative z-[70]">
-        <Sheet onClose={isBusy ? () => {} : onClose}>
-          <SheetHeader title={t('cancelTitle', { count: termini.length })} onClose={isBusy ? () => {} : onClose} closeLabel={tCommon('buttons.close')} />
-          <SheetBody>
-            <ul className="space-y-1">
-              {termini.map((x, i) => (
-                <li key={i} className="tnum text-sm text-gray-700">{dan(x.datum)} · {x.cas_zacetek}</li>
-              ))}
-            </ul>
-            <p className="mt-3 text-xs text-gray-500">{t('cancelHint')}</p>
-          </SheetBody>
-          <SheetFooter>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isBusy}
-              className="flex-1 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 disabled:opacity-50"
-            >
-              {tCommon('buttons.back')}
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              disabled={isBusy || termini.length === 0}
-              className="flex-1 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              {t('cancelConfirm', { count: termini.length })}
-            </button>
-          </SheetFooter>
-        </Sheet>
-      </div>
-    </BodyPortal>
+    <SerijaSeznamModal
+      termini={termini}
+      naslov={t('cancelTitle', { count: termini.length })}
+      opis={t('cancelHint')}
+      gumb={t('cancelConfirm', { count: termini.length })}
+      nevaren
+      onConfirm={onConfirm}
+      onClose={onClose}
+      isBusy={isBusy}
+    />
   );
 }

@@ -537,6 +537,20 @@
     "cancelPartial": "Annullati {n} di {od}. Controlla il calendario.",
     "cancelTitle": "{count, plural, =0 {Nessun appuntamento futuro} =1 {Annullare 1 appuntamento?} other {Annullare {count} appuntamenti?}}",
     "cancelHint": "Ogni appuntamento viene annullato separatamente; il cliente riceve l’avviso come per un singolo appuntamento.",
-    "cancelConfirm": "{count, plural, =1 {Annulla 1 appuntamento} other {Annulla {count} appuntamenti}}"
+    "cancelConfirm": "{count, plural, =1 {Annulla 1 appuntamento} other {Annulla {count} appuntamenti}}",
+    "repeat": "Ripeti (serie)",
+    "rescheduleFuture": "Sposta questo e tutti i successivi",
+    "moveTitle": "Sposta serie",
+    "moveStep": "Nuovo giorno e ora di questo appuntamento. Tutti i successivi si spostano allo stesso modo.",
+    "moveHint": "Ogni appuntamento viene spostato separatamente, come uno singolo. Alla fine chiedo se avvisare il cliente.",
+    "moveAll": "{count, plural, =0 {Sposta} =1 {Sposta 1 appuntamento} other {Sposta {count} appuntamenti}}",
+    "moved": "Spostato",
+    "movedAll": "{count, plural, =1 {1 appuntamento spostato.} other {{count} appuntamenti spostati.}}",
+    "movePartial": "Spostati {n} di {od}. Gli altri restano nel controllo.",
+    "moveNone": "Questa serie non ha appuntamenti futuri aperti.",
+    "notifyTitle": "{count, plural, =1 {Avvisare il cliente dello spostamento?} other {Avvisare il cliente di {count} spostamenti?}}",
+    "notifyHint": "Per ogni appuntamento spostato parte un avviso separato, come per uno singolo.",
+    "notifyConfirm": "{count, plural, =1 {Invia avviso} other {Invia {count} avvisi}}",
+    "notifyPartial": "Inviati {n} di {od} avvisi."
   }
 }

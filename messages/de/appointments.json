@@ -537,6 +537,20 @@
     "cancelPartial": "{n} von {od} abgesagt. Bitte Kalender prüfen.",
     "cancelTitle": "{count, plural, =0 {Keine kommenden Termine} =1 {1 Termin absagen?} other {{count} Termine absagen?}}",
     "cancelHint": "Jeder Termin wird einzeln abgesagt; der Kunde wird wie bei einem einzelnen Termin benachrichtigt.",
-    "cancelConfirm": "{count, plural, =1 {1 Termin absagen} other {{count} Termine absagen}}"
+    "cancelConfirm": "{count, plural, =1 {1 Termin absagen} other {{count} Termine absagen}}",
+    "repeat": "Wiederholen (Serie)",
+    "rescheduleFuture": "Diesen und alle folgenden verschieben",
+    "moveTitle": "Serie verschieben",
+    "moveStep": "Neuer Tag und neue Uhrzeit für diesen Termin. Alle folgenden verschieben sich gleich.",
+    "moveHint": "Jeder Termin wird einzeln verschoben, wie ein einzelner Termin. Zur Benachrichtigung des Kunden frage ich am Ende.",
+    "moveAll": "{count, plural, =0 {Verschieben} =1 {1 Termin verschieben} other {{count} Termine verschieben}}",
+    "moved": "Verschoben",
+    "movedAll": "{count, plural, =1 {1 Termin verschoben.} other {{count} Termine verschoben.}}",
+    "movePartial": "{n} von {od} verschoben. Die übrigen bleiben in der Übersicht.",
+    "moveNone": "Diese Serie hat keine kommenden offenen Termine.",
+    "notifyTitle": "{count, plural, =1 {Kunden über die Verschiebung benachrichtigen?} other {Kunden über {count} Verschiebungen benachrichtigen?}}",
+    "notifyHint": "Für jeden verschobenen Termin geht eine eigene Benachrichtigung, wie bei einem einzelnen Termin.",
+    "notifyConfirm": "{count, plural, =1 {Benachrichtigung senden} other {{count} Benachrichtigungen senden}}",
+    "notifyPartial": "{n} von {od} Benachrichtigungen gesendet."
   }
 }

@@ -24,6 +24,8 @@ const Vhod = z.object({
   vsakihTednov: z.number().int().min(1).max(26),
   // 1 = samo ta datum (ponovno preverjanje tik pred shranjevanjem).
   krat: z.number().int().min(1).max(NAJVEC_TERMINOV),
+  // Prestavitev serije: termini, ki se premikajo, ne zasedajo.
+  brez: z.array(z.string().trim().min(1).max(40)).max(NAJVEC_TERMINOV).optional(),
 });
 
 const odziv = (status: number, koda: string) => NextResponse.json({ ok: false, koda }, { status });
@@ -53,6 +55,7 @@ export async function POST(req: NextRequest) {
       casovniPas: k.casovniPas,
       danes: zdaj.datum,
       uraZdaj: zdaj.ura,
+      brez: v.data.brez,
     });
     return NextResponse.json({ ok: true, datumi }, { headers: { 'Cache-Control': 'no-store' } });
   } catch {

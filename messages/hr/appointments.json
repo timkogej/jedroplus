@@ -537,6 +537,20 @@
     "cancelPartial": "Otkazano {n} od {od}. Provjerite kalendar.",
     "cancelTitle": "{count, plural, =0 {Nema budućih termina} one {Otkazati # termin?} few {Otkazati # termina?} other {Otkazati # termina?}}",
     "cancelHint": "Svaki termin se otkazuje zasebno; klijent dobiva obavijest kao za jedan termin.",
-    "cancelConfirm": "{count, plural, one {Otkaži # termin} few {Otkaži # termina} other {Otkaži # termina}}"
+    "cancelConfirm": "{count, plural, one {Otkaži # termin} few {Otkaži # termina} other {Otkaži # termina}}",
+    "repeat": "Ponovi (serija)",
+    "rescheduleFuture": "Premjesti ovaj i sve sljedeće",
+    "moveTitle": "Premjesti seriju",
+    "moveStep": "Novi dan i vrijeme ovog termina. Svi sljedeći pomiču se jednako.",
+    "moveHint": "Svaki termin se premješta zasebno, kao jedan termin. O obavijesti klijentu pitam na kraju.",
+    "moveAll": "{count, plural, =0 {Premjesti} one {Premjesti # termin} few {Premjesti # termina} other {Premjesti # termina}}",
+    "moved": "Premješteno",
+    "movedAll": "{count, plural, one {Premješten # termin.} few {Premještena # termina.} other {Premješteno # termina.}}",
+    "movePartial": "Premješteno {n} od {od}. Ostali ostaju u pregledu.",
+    "moveNone": "Ova serija nema budućih otvorenih termina.",
+    "notifyTitle": "{count, plural, one {Obavijestiti klijenta o premještanju?} other {Obavijestiti klijenta o # premještanja?}}",
+    "notifyHint": "Za svaki premješteni termin ide zasebna obavijest, kao za jedan termin.",
+    "notifyConfirm": "{count, plural, one {Pošalji obavijest} few {Pošalji # obavijesti} other {Pošalji # obavijesti}}",
+    "notifyPartial": "Poslano {n} od {od} obavijesti."
   }
 }

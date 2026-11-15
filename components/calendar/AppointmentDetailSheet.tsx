@@ -25,6 +25,8 @@ import {
   Plus,
   Tag,
   EyeSlash,
+  ArrowsClockwise,
+  CalendarBlank,
 } from '@phosphor-icons/react';
 import { useTranslations, useLocale } from 'next-intl';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
@@ -107,6 +109,8 @@ export function AppointmentDetailModal({
   onOpenClientDetails,
   serija,
   onCancelSeries,
+  onRescheduleSeries,
+  onRepeat,
 }: {
   appointment: AppointmentWithDetails;
   services: Storitev[];
@@ -124,6 +128,10 @@ export function AppointmentDetailModal({
   serija?: { zap: number; skupaj: number; prihodnjih: number } | null;
   /** Odpove ta in vse naslednje termine serije (vsak po isti poti kot en termin). */
   onCancelSeries?: (appointment: AppointmentWithDetails) => void;
+  /** Prestavi ta in vse naslednje termine serije za isti zamik. */
+  onRescheduleSeries?: (appointment: AppointmentWithDetails) => void;
+  /** Nov ponavljajoči termin po vzoru tega (obrazec z vklopljenim »Ponovi«). */
+  onRepeat?: (appointment: AppointmentWithDetails) => void;
 }) {
   const t = useTranslations('appointments');
   const tCommon = useTranslations('common');
@@ -563,7 +571,7 @@ export function AppointmentDetailModal({
           </button>
         )}
 
-        {(onNoShow || onCancel || onDelete || (onCancelSeries && serija && serija.prihodnjih > 1)) && (
+        {(onNoShow || onCancel || onDelete || onRepeat || (onCancelSeries && serija && serija.prihodnjih > 1)) && (
           <div className="relative flex-shrink-0">
             <button
               type="button"
@@ -603,6 +611,26 @@ export function AppointmentDetailModal({
                     >
                       <XCircle className="h-4 w-4 text-gray-500" weight="regular" />
                       {t('calendarView.detailModal.actions.cancel')}
+                    </button>
+                  )}
+                  {onRepeat && (
+                    <button
+                      type="button"
+                      onClick={() => { onRepeat(appointment); setActionsMenuOpen(false); }}
+                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100"
+                    >
+                      <ArrowsClockwise className="h-4 w-4 flex-shrink-0 text-gray-500" weight="regular" />
+                      {t('serija.repeat')}
+                    </button>
+                  )}
+                  {onRescheduleSeries && serija && serija.prihodnjih > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => { onRescheduleSeries(appointment); setActionsMenuOpen(false); }}
+                      className="mx-1 flex w-[calc(100%-0.5rem)] items-center gap-2.5 rounded-md px-3 py-1.5 text-left text-sm text-gray-700 transition-colors hover:bg-gray-100"
+                    >
+                      <CalendarBlank className="h-4 w-4 flex-shrink-0 text-gray-500" weight="regular" />
+                      {t('serija.rescheduleFuture')}
                     </button>
                   )}
                   {onCancelSeries && serija && serija.prihodnjih > 1 && (

@@ -17,6 +17,8 @@ export interface ZahtevaSerije {
   casovniPas: string;
   danes: string;
   uraZdaj?: string;
+  /** "ID termina", ki jih ne štejemo (pri prestavitvi serije: termini, ki se premikajo). */
+  brez?: string[];
 }
 
 export async function preveriSerijoSalona(podatki: PodatkiSalona, z: ZahtevaSerije): Promise<DatumSerije[]> {
@@ -36,7 +38,7 @@ export async function preveriSerijoSalona(podatki: PodatkiSalona, z: ZahtevaSeri
     trajanjeMin: z.trajanjeMin,
     osebaId: z.oseba.id,
     urnik: urnikOsebe(z.oseba, razcleniUrnik(urnikSurov)),
-    termini: termini.filter((t) => t.osebaId === z.oseba.id),
+    termini: termini.filter((t) => t.osebaId === z.oseba.id && !z.brez?.includes(t.id)),
     odsotnosti: odsotnosti.filter((x) => x.osebaId === null || x.osebaId === z.oseba.id),
     casovniPas: z.casovniPas,
     odDatuma: z.danes,
