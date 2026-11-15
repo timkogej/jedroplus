@@ -383,63 +383,132 @@
 }
 
 /* ─────────────────────────── plus kot obris ─────────────────────────── */
-/* Samo živ rob (Siri): barve tečejo po obroču, pod njim mehak sij; notranjost je steklo. */
+/*
+ * Svetleča steklena cevka v obliki plusa. Plasti (od spodaj):
+ *   notranjost (steklo) · daljni sij · notranji odsev · bližnji sij · oster rob · svetla nit.
+ * Barve tečejo z rotacijo že narisanega koničnega gradienta (transform). Zamegljene
+ * plasti v mirovanju mirujejo (se ne zameglijo vsak okvir znova).
+ */
 
+/*
+ * Barve se vrtijo z animacijo kota gradienta (@property), ne s transform: vrteč se
+ * element pod clip-path bi brskalnik izrisal v svoji plasti, rob maske pa včasih
+ * pusti tanko črto ob robu orba. Brez @property (starejši Safari) barve mirujejo.
+ */
+@property --ap-kot {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@property --ap-pospesek {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+@property --ap-komet {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
 .ap-obris__obroc {
   position: absolute;
   inset: 0;
-  overflow: hidden;
 }
 .ap-obris__pospesek {
   position: absolute;
-  inset: -20%;
-  animation: ap-vrti 2.6s linear infinite;
+  inset: 0;
+  animation: ap-pospesek 2.4s linear infinite;
   animation-play-state: paused;
 }
 .ap-obris__barve {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
   background: conic-gradient(
-    from 0deg,
+    from calc(20deg + var(--ap-kot) + var(--ap-pospesek)),
     #7c78fa,
-    #59aeea 18%,
-    #35e3db 34%,
-    #8fe9ff 44%,
-    #7c78fa 58%,
-    #d48cf5 72%,
-    #ff9ecf 80%,
-    #7c78fa 100%
+    #5b8cf2 12%,
+    #47b4ec 22%,
+    #35e3db 32%,
+    #9df0ff 38%,
+    #59aeea 48%,
+    #7c78fa 60%,
+    #b48cf8 70%,
+    #f29bd8 78%,
+    #a888fb 88%,
+    #7c78fa
   );
-  animation: ap-vrti 9s linear infinite;
+  animation: ap-kot 10s linear infinite;
 }
+/* Pogovor: barve tečejo hitreje (dodatno vrtenje, brez skoka). */
 .ap-koren:not([data-stanje='mirovanje']) .ap-obris__pospesek {
   animation-play-state: running;
 }
-.ap-koren[data-stanje='poslusam'] .ap-obris__pospesek,
-.ap-koren[data-stanje='govorim'] .ap-obris__pospesek {
-  animation-play-state: paused;
-}
-/* Sij: zamegljena kopija obroča; v mirovanju miruje (brez ponovnega zameglevanja). */
-.ap-obris__sij {
+
+/* Komet: svetla točka z repom, ki kroži po robu (samo ob razmišljanju in vžigu). */
+.ap-obris__komet {
   position: absolute;
   inset: 0;
-  filter: blur(7px);
-  opacity: calc(0.55 + var(--ap-nivo) * 0.45);
-  transition: opacity 400ms ease;
-}
-.ap-koren[data-stanje='mirovanje'] .ap-obris__sij {
-  opacity: 0.45;
-}
-.ap-koren[data-stanje='mirovanje'] .ap-obris__sij .ap-obris__barve {
+  background: conic-gradient(
+    from var(--ap-komet),
+    transparent 0deg,
+    transparent 250deg,
+    rgb(255 255 255 / 0.25) 300deg,
+    rgb(255 255 255 / 0.95) 352deg,
+    transparent 360deg
+  );
+  opacity: 0;
+  transition: opacity 360ms ease;
+  animation: ap-komet 1.35s cubic-bezier(0.45, 0.1, 0.55, 0.9) infinite;
   animation-play-state: paused;
 }
+.ap-koren[data-stanje='razmisljam'] .ap-obris__komet,
+.ap-koren[data-stanje='povezujem'] .ap-obris__komet {
+  opacity: 1;
+  animation-play-state: running;
+}
+
+.ap-obris__plast {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ap-obris__plast--dalec {
+  filter: blur(11px);
+  opacity: calc(0.32 + var(--ap-nivo) * 0.45);
+  transition: opacity 400ms ease;
+}
+.ap-obris__plast--blizu {
+  filter: blur(3.5px);
+  opacity: calc(0.7 + var(--ap-nivo) * 0.3);
+}
+.ap-obris__plast--odsev {
+  filter: blur(6px);
+  opacity: 0.32;
+}
+.ap-koren[data-stanje='mirovanje'] .ap-obris__plast .ap-obris__barve {
+  animation-play-state: paused;
+}
+.ap-koren[data-stanje='mirovanje'] .ap-obris__plast--dalec {
+  opacity: 0.22;
+}
+
+/* Svetla nit po sredini roba: odsev luči zgoraj levo (steklena cevka). */
+.ap-obris__nit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgb(255 255 255 / 0.95) 15%, rgb(255 255 255 / 0.35) 45%, rgb(255 255 255 / 0.06) 75%);
+  mix-blend-mode: soft-light;
+}
+
+/* Steklo: skoraj belo, rahlo obarvano, s svetlobo zgoraj levo in senco spodaj. */
 .ap-obris__notranjost {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 36% 28%, rgb(255 255 255 / 0.9), rgb(255 255 255 / 0.55) 60%),
-    linear-gradient(135deg, rgb(124 120 250 / 0.12), rgb(53 227 219 / 0.12));
+    radial-gradient(circle at 34% 26%, rgb(255 255 255 / 0.95), rgb(255 255 255 / 0.6) 55%, rgb(255 255 255 / 0.45)),
+    linear-gradient(135deg, rgb(124 120 250 / 0.16), rgb(53 227 219 / 0.16));
+  box-shadow: inset 0 -14px 24px rgb(60 70 180 / 0.12);
 }
 .ap-orb--obris .ap-orb__kljukica path {
   stroke: #6a62f6;
@@ -663,6 +732,132 @@
     0 10px 30px -12px rgb(40 30 120 / 0.28);
 }
 
+/* Kartice (možnosti, predlog): steklo z gradientnim robom v barvah obrisa. */
+.ap-kartica {
+  position: relative;
+  border-radius: 24px;
+  background: rgb(255 255 255 / 0.84);
+  -webkit-backdrop-filter: blur(20px) saturate(1.7);
+  backdrop-filter: blur(20px) saturate(1.7);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    0 2px 6px -2px rgb(40 30 120 / 0.1),
+    0 24px 56px -24px rgb(50 40 150 / 0.38);
+}
+.ap-kartica::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgb(124 120 250 / 0.6), rgb(255 255 255 / 0.5) 38%, rgb(255 255 255 / 0.5) 62%, rgb(53 227 219 / 0.55));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.ap-vrstica {
+  transition:
+    background-color 160ms ease,
+    transform 160ms var(--ap-ease);
+}
+@media (hover: hover) {
+  .ap-vrstica:hover:not(:disabled) {
+    background: rgb(124 120 250 / 0.07);
+  }
+}
+.ap-vrstica:active:not(:disabled) {
+  transform: scale(0.985);
+  background: rgb(124 120 250 / 0.1);
+}
+.ap-vrstica:focus-visible,
+.ap-gumb-glavni:focus-visible,
+.ap-gumb-drugi:focus-visible {
+  outline: 2px solid var(--brand-violet);
+  outline-offset: 2px;
+}
+/* Inicialke: belo steklo z gradientnim obročem (kot obris asistenta). */
+.ap-inicialke {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: #4b46c8;
+  background: linear-gradient(135deg, rgb(124 120 250 / 0.14), rgb(53 227 219 / 0.14)), #fff;
+}
+.ap-inicialke::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from 200deg, #7c78fa, #59aeea, #35e3db, #b48cf8, #7c78fa);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.ap-tipka {
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font: 600 12px/1 ui-sans-serif, system-ui, sans-serif;
+  color: var(--color-label-secondary, #6e6e73);
+  background: rgb(0 0 0 / 0.04);
+  box-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.08);
+}
+/* Majhen znak (plus v gradientu) pred naslovom predloga. */
+.ap-znak {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #7c78fa 25%, #35e3db 75%);
+  clip-path: polygon(38% 0, 62% 0, 62% 38%, 100% 38%, 100% 62%, 62% 62%, 62% 100%, 38% 100%, 38% 62%, 0 62%, 0 38%, 38% 38%);
+  border-radius: 2px;
+}
+.ap-gumb-glavni {
+  background: linear-gradient(135deg, #7c78fa, #5f9cf0 55%, #35d6d0);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    0 10px 24px -10px rgb(89 100 234 / 0.85);
+  transition:
+    transform 160ms var(--ap-ease),
+    filter 160ms ease;
+}
+@media (hover: hover) {
+  .ap-gumb-glavni:hover:not(:disabled) {
+    filter: brightness(1.06) saturate(1.08);
+  }
+}
+.ap-gumb-glavni:active:not(:disabled),
+.ap-gumb-drugi:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.ap-gumb-drugi {
+  background: rgb(0 0 0 / 0.045);
+  transition:
+    background-color 160ms ease,
+    transform 160ms var(--ap-ease);
+}
+@media (hover: hover) {
+  .ap-gumb-drugi:hover:not(:disabled) {
+    background: rgb(0 0 0 / 0.075);
+  }
+}
+
 /* ───────────────────────────── ključne slike ───────────────────────────── */
 
 @keyframes ap-vrti {
@@ -708,6 +903,21 @@
 @keyframes ap-kljukica {
   to {
     stroke-dashoffset: 0;
+  }
+}
+@keyframes ap-kot {
+  to {
+    --ap-kot: 360deg;
+  }
+}
+@keyframes ap-pospesek {
+  to {
+    --ap-pospesek: 360deg;
+  }
+}
+@keyframes ap-komet {
+  to {
+    --ap-komet: 360deg;
   }
 }
 @keyframes ap-lesk {
@@ -831,6 +1041,7 @@
   .ap-plus__lesk,
   .ap-obris__barve,
   .ap-obris__pospesek,
+  .ap-obris__komet,
   .ap-rob__trak {
     animation: none !important;
   }

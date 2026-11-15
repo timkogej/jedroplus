@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { ArrowUp, CaretRight, Check, CheckCircle, EnvelopeSimple, Keyboard, Phone, WarningCircle, X } from '@phosphor-icons/react';
+import { ArrowUp, CaretRight, Check, CheckCircle, EnvelopeSimple, Keyboard, Microphone, Phone, WarningCircle, X } from '@phosphor-icons/react';
 import type { OdgovorOdjemalec, StanjePogovora } from '@/lib/glas/odjemalec/pogovor';
 import type { Moznost, Vrstica } from './tipi';
 
@@ -160,30 +160,7 @@ function Kartice({
   onZavrni: () => void;
 }) {
   if (zadnji?.status === 'vprasanje' && zadnji.vprasanje?.moznosti?.length) {
-    return (
-      <div className="ap-vstop mt-6 flex w-full max-w-[420px] flex-col gap-2" style={{ animationDelay: '120ms' }}>
-        {zadnji.vprasanje.moznosti.map((m, i) => (
-          <button
-            key={m.id}
-            type="button"
-            disabled={zaseden}
-            onClick={() => onIzberi(m)}
-            className="ap-steklo ap-vstop group flex min-h-12 w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-[15px] font-medium text-label transition-transform duration-200 hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--brand-violet)] active:scale-[0.98] disabled:opacity-50 md:min-h-11"
-            style={{ animationDelay: `${160 + i * 70}ms` }}
-          >
-            <span
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-white"
-              style={{ background: 'var(--gradient-brand)' }}
-              aria-hidden
-            >
-              {i + 1}
-            </span>
-            <span className="min-w-0 flex-1">{m.oznaka}</span>
-            <CaretRight size={16} className="shrink-0 text-label-tertiary transition-transform group-hover:translate-x-0.5" aria-hidden />
-          </button>
-        ))}
-      </div>
-    );
+    return <Moznosti moznosti={zadnji.vprasanje.moznosti} zaseden={zaseden} t={t} onIzberi={onIzberi} />;
   }
   const akcije = (zadnji?.akcije ?? []).filter((a) => /^(tel|mailto):/.test(a.href));
   if (zadnji?.status !== 'predlog' && akcije.some((a) => a.oznaka)) {
@@ -222,38 +199,44 @@ function Kartice({
     );
   }
   if (zadnji?.status === 'predlog' && zadnji.predlog) {
+    const { predlog } = zadnji;
     return (
-      <div className="ap-steklo ap-vstop mt-6 w-full max-w-[420px] rounded-3xl p-4 text-left" style={{ animationDelay: '120ms' }}>
-        {zadnji.predlog.podrobnosti.length > 0 && (
-          <dl className="divide-y divide-black/[0.06] text-[15px]">
-            {zadnji.predlog.podrobnosti.map((d) => (
-              <div key={d.oznaka} className="flex justify-between gap-4 py-2">
-                <dt className="text-label-secondary">{d.oznaka}</dt>
-                <dd className="text-right font-medium text-label">{d.vrednost}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-        <div className="mt-3 flex gap-2">
+      <div className="ap-kartica ap-vstop mt-6 w-full max-w-[420px] p-1.5 text-left" style={{ animationDelay: '120ms' }}>
+        <div className="px-3.5 pb-1 pt-3">
+          <p className="flex items-center gap-2 text-[13px] font-semibold text-label-secondary">
+            <span className="ap-znak" aria-hidden />
+            {predlog.povzetek}
+          </p>
+          {predlog.podrobnosti.length > 0 && (
+            <dl className="mt-2 divide-y divide-black/[0.06]">
+              {predlog.podrobnosti.map((d) => (
+                <div key={d.oznaka} className="flex items-baseline justify-between gap-4 py-2.5">
+                  <dt className="shrink-0 text-[14px] text-label-secondary">{d.oznaka}</dt>
+                  <dd className="min-w-0 text-right text-[15px] font-semibold leading-snug text-label">{d.vrednost}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+        </div>
+        <div className="mt-1 flex gap-1.5">
           <button
             type="button"
             disabled={zaseden}
             onClick={onZavrni}
-            className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-black/[0.05] text-[15px] font-medium text-label transition-colors hover:bg-black/[0.08] disabled:opacity-50 md:h-10 md:text-sm"
+            className="ap-gumb-drugi flex h-12 flex-1 items-center justify-center gap-1.5 rounded-[18px] text-[15px] font-semibold text-label disabled:opacity-50 md:h-11"
           >
-            <X size={15} aria-hidden /> {t('preklici')}
+            <X size={15} weight="bold" aria-hidden /> {t('preklici')}
           </button>
           <button
             type="button"
             disabled={zaseden}
             onClick={onPotrdi}
-            className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl text-[15px] font-semibold text-white shadow-[0_8px_20px_-8px_rgb(89_100_234/0.7)] transition-transform active:scale-[0.98] disabled:opacity-50 md:h-10 md:text-sm"
-            style={{ background: 'linear-gradient(135deg, var(--brand-violet), var(--brand-blue) 60%, var(--brand-cyan))' }}
+            className="ap-gumb-glavni flex h-12 flex-1 items-center justify-center gap-1.5 rounded-[18px] text-[15px] font-semibold text-white disabled:opacity-50 md:h-11"
           >
-            <Check size={15} weight="bold" aria-hidden /> {t(zadnji.predlog.sporocil > 0 ? 'poslji' : 'potrdi')}
+            <Check size={15} weight="bold" aria-hidden /> {t(predlog.sporocil > 0 ? 'poslji' : 'potrdi')}
           </button>
         </div>
-        <p className="mt-2 text-center text-xs text-label-tertiary">{t('predlogNamig')}</p>
+        <Namig>{t('predlogNamig')}</Namig>
       </div>
     );
   }
@@ -261,6 +244,88 @@ function Kartice({
 }
 
 /** Spodaj: tipkovnica (sekundarno) in konec pogovora. Nad tipkovnico na iPhonu. */
+/** Možnosti (npr. dve istoimenski stranki): ena steklena kartica z vrsticami; tipke 1–9 izberejo. */
+function Moznosti({
+  moznosti,
+  zaseden,
+  t,
+  onIzberi,
+}: {
+  moznosti: Moznost[];
+  zaseden: boolean;
+  t: (k: string) => string;
+  onIzberi: (m: Moznost) => void;
+}) {
+  const izberi = useRef(onIzberi);
+  useEffect(() => {
+    izberi.current = onIzberi;
+  });
+  useEffect(() => {
+    if (zaseden) return;
+    const tipka = (e: KeyboardEvent) => {
+      const cilj = e.target as HTMLElement | null;
+      if (e.metaKey || e.ctrlKey || e.altKey || cilj?.closest('input, textarea, select, [contenteditable]')) return;
+      const i = Number(e.key) - 1;
+      if (Number.isInteger(i) && i >= 0 && i < moznosti.length) {
+        e.preventDefault();
+        izberi.current(moznosti[i]);
+      }
+    };
+    window.addEventListener('keydown', tipka);
+    return () => window.removeEventListener('keydown', tipka);
+  }, [moznosti, zaseden]);
+
+  return (
+    <div className="ap-kartica ap-vstop mt-6 w-full max-w-[420px] p-1.5" style={{ animationDelay: '120ms' }}>
+      <ul className="flex flex-col">
+        {moznosti.map((m, i) => {
+          const [ime, ...ostalo] = m.oznaka.split(' · ');
+          const podnapis = ostalo.join(' · ');
+          return (
+            <li key={m.id} className="ap-vstop" style={{ animationDelay: `${180 + i * 70}ms` }}>
+              {i > 0 && <div className="mx-3.5 h-px bg-black/[0.06]" aria-hidden />}
+              <button
+                type="button"
+                disabled={zaseden}
+                onClick={() => onIzberi(m)}
+                className="ap-vrstica group flex min-h-[60px] w-full items-center gap-3 rounded-[18px] px-3 py-2.5 text-left disabled:opacity-50 md:min-h-14"
+              >
+                <span className="ap-inicialke" aria-hidden>
+                  {inicialke(ime)}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[16px] font-semibold leading-tight text-label md:text-[15px]">{ime}</span>
+                  {podnapis && <span className="mt-0.5 block truncate text-[13px] tabular-nums text-label-secondary">{podnapis}</span>}
+                </span>
+                <kbd className="ap-tipka hidden md:inline-flex" aria-hidden>
+                  {i + 1}
+                </kbd>
+                <CaretRight size={16} weight="bold" className="shrink-0 text-label-tertiary transition-transform group-hover:translate-x-0.5" aria-hidden />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <Namig>{t('moznostiNamig')}</Namig>
+    </div>
+  );
+}
+
+function inicialke(ime: string): string {
+  const deli = ime.replace(/\([^)]*\)/g, '').trim().split(/\s+/).filter(Boolean);
+  return ((deli[0]?.[0] ?? '') + (deli.length > 1 ? deli[deli.length - 1][0] : '')).toUpperCase();
+}
+
+/** Namig pod kartico (glas): z ikono mikrofona. */
+function Namig({ children }: { children: ReactNode }) {
+  return (
+    <p className="flex items-center justify-center gap-1.5 px-3 pb-1.5 pt-2.5 text-[12.5px] text-label-secondary">
+      <Microphone size={13} weight="fill" className="text-[color:var(--brand-violet)]" aria-hidden />
+      {children}
+    </p>
+  );
+}
+
 function Kontrole({
   zaseden,
   t,

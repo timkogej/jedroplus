@@ -44,12 +44,13 @@ export const NASTAVITVE: Record<RazlicicaPlusa, NastavitevPlusa> = {
   mehak: { krak: 62, debelina: 22, zaobljenost: 16, mehcanje: 12, krog: 56, napihGlas: 0.7, nesimetrija: 0.13 },
   // Žele: zaobljeni kraki, močno napihovanje, kraki dihajo vsak zase.
   zele: { krak: 60, debelina: 25, zaobljenost: 24, mehcanje: 18, krog: 58, napihGlas: 0.92, nesimetrija: 0.2 },
-  // Obris: oblika žele, narisan je samo živ, sijoč rob (notranjost je steklena).
-  obris: { krak: 60, debelina: 25, zaobljenost: 24, mehcanje: 18, krog: 58, napihGlas: 0.92, nesimetrija: 0.2 },
+  // Obris: žele z zaobljenimi konci, a bolj plus kot deteljica (manjše mehčanje
+  // notranjih kotov, daljši kraki); narisan je samo živ, sijoč rob.
+  obris: { krak: 62, debelina: 23, zaobljenost: 23, mehcanje: 9, krog: 57, napihGlas: 0.82, nesimetrija: 0.15 },
 };
 
 /** Debelina roba pri obrisu (v 144 px). */
-export const DEBELINA_OBRISA = 5.5;
+export const DEBELINA_OBRISA = 5;
 
 export interface Kraki {
   gor: number;
