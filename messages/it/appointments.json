@@ -347,6 +347,18 @@
         "cancel": "Annulla appuntamento",
         "complete": "Completa",
         "moreOptions": "Altre opzioni"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Annullo questo appuntamento?",
+          "zakljuci": "Completo questo appuntamento?",
+          "ni_prisla": "Segno che la cliente non si è presentata?"
+        },
+        "uspeh": {
+          "odpovej": "L'appuntamento è annullato.",
+          "zakljuci": "L'appuntamento è completato.",
+          "ni_prisla": "Segnato come non presentata."
+        }
       }
     },
     "dayView": {

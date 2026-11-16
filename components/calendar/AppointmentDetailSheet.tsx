@@ -9,7 +9,7 @@
  * predolga.
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Copy,
@@ -29,6 +29,7 @@ import {
   CalendarBlank,
 } from '@phosphor-icons/react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Resurs } from '@/types/resursi';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
@@ -95,6 +96,9 @@ function solidServiceColor(value?: string | null): string {
   return value;
 }
 
+/** Dejanje, za katero je asistent odprl termin (status_termina). */
+export type GlasAkcija = 'odpovej' | 'zakljuci' | 'ni_prisla';
+
 export function AppointmentDetailModal({
   appointment,
   services,
@@ -111,6 +115,7 @@ export function AppointmentDetailModal({
   onCancelSeries,
   onRescheduleSeries,
   onRepeat,
+  glasAkcija,
 }: {
   appointment: AppointmentWithDetails;
   services: Storitev[];
@@ -132,12 +137,26 @@ export function AppointmentDetailModal({
   onRescheduleSeries?: (appointment: AppointmentWithDetails) => void;
   /** Nov ponavljajoči termin po vzoru tega (obrazec z vklopljenim »Ponovi«). */
   onRepeat?: (appointment: AppointmentWithDetails) => void;
+  /**
+   * Asistent+ je odprl termin za dejanje (»odpovej Matejo«): asistent vpraša »Odpovem?«,
+   * »ja« pritisne isti gumb kot dotik. Brez = list se na glas ne odziva.
+   */
+  glasAkcija?: GlasAkcija | null;
 }) {
   const t = useTranslations('appointments');
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const { money } = useFormat();
   const [actionsMenuOpen, setActionsMenuOpen] = useState(false);
+
+  // Asistent+: »ja« = isti gumb (onCancel / onComplete / onNoShow), list ostane viden.
+  const glasRef = useRef<HTMLDivElement>(null);
+  const glasDejanje = glasAkcija === 'odpovej' ? onCancel : glasAkcija === 'zakljuci' ? onComplete : glasAkcija === 'ni_prisla' ? onNoShow : undefined;
+  useGlasovniObrazec(Boolean(glasAkcija && glasDejanje), glasRef, onClose, {
+    potrdi: () => glasDejanje?.(appointment),
+    vprasanje: glasAkcija ? t(`calendarView.detailModal.glas.vprasanje.${glasAkcija}`) : undefined,
+    uspeh: glasAkcija ? t(`calendarView.detailModal.glas.uspeh.${glasAkcija}`) : undefined,
+  });
 
   const { companyId } = useCompany();
   const hasResursiProps = !!(activeResursi && terminResursiMap);
@@ -276,6 +295,7 @@ export function AppointmentDetailModal({
     // pod zgornjo in stransko vrstico.
     <BodyPortal>
     <Sheet onClose={onClose}>
+      <div ref={glasRef} aria-hidden />
       <SheetHeader
         title={appointment.stranka_ime || t('calendarView.detailModal.fields.unknownClient')}
         subtitle={formatModalDate(appointment.datum)}

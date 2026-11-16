@@ -347,6 +347,18 @@
         "cancel": "Odpoved",
         "complete": "Zaključi",
         "moreOptions": "Več možnosti"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Odpovem ta termin?",
+          "zakljuci": "Zaključim ta termin?",
+          "ni_prisla": "Označim, da stranka ni prišla?"
+        },
+        "uspeh": {
+          "odpovej": "Termin je odpovedan.",
+          "zakljuci": "Termin je zaključen.",
+          "ni_prisla": "Označeno, da ni prišla."
+        }
       }
     },
     "dayView": {

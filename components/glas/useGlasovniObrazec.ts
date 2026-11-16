@@ -17,7 +17,7 @@ export function useGlasovniObrazec(
   aktiven: boolean,
   el: RefObject<HTMLElement | null>,
   zapri: () => void,
-  moznosti?: { potrdi?: () => void; vprasanje?: string }
+  moznosti?: { potrdi?: () => void; vprasanje?: string; uspeh?: string }
 ): void {
   const zapriRef = useRef(zapri);
   const potrdiRef = useRef(moznosti?.potrdi);
@@ -26,10 +26,11 @@ export function useGlasovniObrazec(
     potrdiRef.current = moznosti?.potrdi;
   });
   const vprasanje = moznosti?.vprasanje;
+  const uspeh = moznosti?.uspeh;
 
   useEffect(() => {
     if (!aktiven) return;
-    javiStanjeObrazca({ odprt: true, el: el.current, vprasanje });
+    javiStanjeObrazca({ odprt: true, el: el.current, vprasanje, uspeh });
     let preverjanje: ReturnType<typeof setInterval> | null = null;
     const ustavi = () => {
       if (preverjanje) clearInterval(preverjanje);
@@ -65,5 +66,5 @@ export function useGlasovniObrazec(
       window.removeEventListener(DOGODEK_UKAZ, ob);
       javiStanjeObrazca(false);
     };
-  }, [aktiven, el, vprasanje]);
+  }, [aktiven, el, vprasanje, uspeh]);
 }

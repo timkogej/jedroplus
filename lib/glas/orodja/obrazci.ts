@@ -632,15 +632,15 @@ export const statusTermina: BralnoOrodje<z.infer<z.ZodObject<typeof zodTermina>>
     if ('odgovor' in izbran) return izbran.odgovor;
     const { termin: t, ime } = izbran;
     if (samoSvojeUrejanje(o.k) && t.osebaId !== o.k.osebaId) return { sporocilo: jt('Urejate lahko samo svoje termine.') };
-    const gumb = jt(AKCIJE[p.akcija]);
     return {
+      // List termina sam vpraša »Odpovem?« / »Zaključim?«; »ja« pritisne isti gumb (uporabnik potrdi).
       sporocilo:
-        jt('Termin {ime}, {kdaj}. V koledarju tapnite »{gumb}«.', { ime, kdaj: jt('{datum} ob {ura}', { datum: opisDatuma(t.datum, o.danes), ura: t.zacetek }), gumb }) +
+        jt('Termin {ime}, {kdaj}.', { ime, kdaj: jt('{datum} ob {ura}', { datum: opisDatuma(t.datum, o.danes), ura: t.zacetek }) }) +
         // Po odpovedi lahko stranko obvesti (sporoci_stranki preveri, da je termin res odpovedan v bazi).
         (p.akcija === 'odpovej' && o.sporocila && imaPravico(o.k, 'sporocila.stranke') ? ` ${jt('Ko odpoveste, recite »obvesti stranko«.')}` : ''),
-      govor: jt('Odpiram termin {ime}, {kdaj}. Tapnite {gumb}.', { ime, kdaj: `${datumZaGovor(t.datum, o.danes)} ${uraZaGovor(t.zacetek)}`, gumb }),
+      govor: jt('{ime}, {kdaj}.', { ime, kdaj: `${datumZaGovor(t.datum, o.danes)} ${uraZaGovor(t.zacetek)}` }),
       // Obstoječa povezava koledarja (obvestila): skoči na dan in odpre termin. ID termina ni oseben podatek.
-      pojdi: `/koledar?termin=${encodeURIComponent(t.id)}&datum=${t.datum}`,
+      pojdi: `/koledar?termin=${encodeURIComponent(t.id)}&datum=${t.datum}&glas_akcija=${p.akcija}`,
       podatki: { termin_id: t.id, termin_datum: t.datum, stranka_id: t.idStranke, akcija: p.akcija },
     };
   },

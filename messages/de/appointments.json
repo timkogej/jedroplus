@@ -347,6 +347,18 @@
         "cancel": "Stornieren",
         "complete": "Abschließen",
         "moreOptions": "Weitere Optionen"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Soll ich diesen Termin absagen?",
+          "zakljuci": "Soll ich diesen Termin abschließen?",
+          "ni_prisla": "Soll ich markieren, dass die Kundin nicht gekommen ist?"
+        },
+        "uspeh": {
+          "odpovej": "Der Termin ist abgesagt.",
+          "zakljuci": "Der Termin ist abgeschlossen.",
+          "ni_prisla": "Als nicht erschienen markiert."
+        }
       }
     },
     "dayView": {

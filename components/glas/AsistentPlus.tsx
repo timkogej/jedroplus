@@ -67,7 +67,7 @@ const PREVERJAJ_ROCNO_MS = 12_000;
 
 // Izgovorjeni izidi so v jeziku pogovora (jezikOdjemalca, nastavi ga seja).
 
-type OdprtObrazec = { el: HTMLElement | null; vprasanje?: string };
+type OdprtObrazec = { el: HTMLElement | null; vprasanje?: string; uspeh?: string };
 
 /** Varni robovi zaslona (iPhone) iz CSS env(). */
 function varniRobovi(): { zgoraj: number; spodaj: number } {
@@ -161,21 +161,44 @@ export function AsistentPlus() {
     [dodaj]
   );
 
+  // Samo odprtje strani (brez obrazca) počaka, da asistent stavek dokonča: nalaganje
+  // nove strani sicer prekine govor (Tim, 16. 11.). Obrazec se odpre takoj.
+  const cakaPojdi = useRef<{ pot: string; casovnik: ReturnType<typeof setTimeout> } | null>(null);
+  const pojdiZdaj = useCallback(
+    (pot: string) => {
+      const [cilj] = pot.split('?');
+      // Ista stran se ne naloži znova: namen pošljemo kot dogodek.
+      if (cilj === potRef.current) posljiPojdi(pot);
+      else router.push(pot);
+    },
+    [router]
+  );
+  const izpolniPojdi = useCallback(() => {
+    const c = cakaPojdi.current;
+    if (!c) return;
+    clearTimeout(c.casovnik);
+    cakaPojdi.current = null;
+    pojdiZdaj(c.pot);
+  }, [pojdiZdaj]);
+
   const premakni = useCallback(
     (o: OdgovorOdjemalec) => {
       if (!o.pojdi) return;
+      if (!o.obrazec && o.govor) {
+        if (cakaPojdi.current) clearTimeout(cakaPojdi.current.casovnik);
+        // Varovalka: če govora ni (izklopljen zvok), stran odpremo vseeno.
+        cakaPojdi.current = { pot: o.pojdi, casovnik: setTimeout(izpolniPojdi, 6000) };
+        return;
+      }
       if (o.obrazec) {
         shraniObrazec(o.obrazec);
         zadnjiObrazec.current = o.obrazec;
         // Obrazec je morda že odprt: naslednji ukaz ga dopolni.
         if (pogovor.current && obrazecRef.current && !obrazecRef.current.vprasanje) pogovor.current.kontekstObrazca = o.obrazec;
       }
-      const [cilj] = o.pojdi.split('?');
-      // Ista stran se ne naloži znova: namen pošljemo kot dogodek.
-      if (cilj === potRef.current) posljiPojdi(o.pojdi);
-      else router.push(o.pojdi);
+      pojdiZdaj(o.pojdi);
     },
-    [router]
+    [pojdiZdaj, izpolniPojdi]
   );
 
   useEffect(() => {
@@ -183,6 +206,7 @@ export function AsistentPlus() {
     pogovor.current = new Pogovor({
       stanje: (n) => {
         setS(n);
+        if (n !== 'govorim' && n !== 'razmisljam') izpolniPojdi();
         if (n !== 'poslusam') setSlisano('');
       },
       slisano: setSlisano,
@@ -245,7 +269,7 @@ export function AsistentPlus() {
       pogovor.current?.ustavi();
       pogovor.current = null;
     };
-  }, [na_voljo, dodaj, premakni]);
+  }, [na_voljo, dodaj, premakni, izpolniPojdi]);
 
   // Obrazec ali vprašanje, ki ga je odprl asistent, javi odprtje/zaprtje (useGlasovniObrazec).
   useEffect(() => {
@@ -253,7 +277,7 @@ export function AsistentPlus() {
       const d = (e as CustomEvent<StanjeObrazca>).detail ?? { odprt: false };
       const p = pogovor.current;
       if (d.odprt) {
-        const novo: OdprtObrazec = { el: d.el ?? null, vprasanje: d.vprasanje };
+        const novo: OdprtObrazec = { el: d.el ?? null, vprasanje: d.vprasanje, uspeh: d.uspeh };
         obrazecRef.current = novo;
         setObrazec(novo);
         if (p) {
@@ -274,7 +298,7 @@ export function AsistentPlus() {
       if (rocnoPreverjanje.current) clearInterval(rocnoPreverjanje.current);
       rocnoPreverjanje.current = null;
       if (shranjujeOd.current && Date.now() - shranjujeOd.current < SHRANI_OKNO_MS) {
-        const besedilo = bil?.vprasanje ? besedila().poslano : ((besedila().uspeh as Record<string, string>)[zadnjiObrazec.current?.vrsta ?? ''] ?? besedila().shranjeno);
+        const besedilo = bil?.vprasanje ? (bil.uspeh ?? besedila().poslano) : ((besedila().uspeh as Record<string, string>)[zadnjiObrazec.current?.vrsta ?? ''] ?? besedila().shranjeno);
         najavi(besedilo, 'uspeh');
         setUspeh((u) => ({ kljuc: (u?.kljuc ?? 0) + 1, besedilo }));
       }

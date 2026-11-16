@@ -77,7 +77,7 @@ import {
   buildBookingDeleteData,
   getCustomerAppointmentsCount,
 } from '@/lib/webhookPayloadBuilders';
-import { AppointmentDetailModal } from '@/components/calendar/AppointmentDetailSheet';
+import { AppointmentDetailModal, type GlasAkcija } from '@/components/calendar/AppointmentDetailSheet';
 import { SerijaOdpovedModal, SerijaPregledModal, SerijaSeznamModal, SerijaZamikModal, type VrsticaSerije } from '@/components/appointments/SerijaPregledModal';
 import { fetchPrihodnjiTerminiSerije, fetchSerijeTerminov, type ClanSerije } from '@/lib/supabase/serije';
 import type { DatumSerije } from '@/lib/termini/serija';
@@ -1305,6 +1305,12 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   // Klik na obvestilo (v aplikaciji ali push): /koledar?termin=OB-000063&datum=2026-10-21
   // skoči na ta dan in odpre termin, ko se naloži.
   const [pendingTerminId, setPendingTerminId] = useState<string | null>(null);
+  // Asistent+ (status_termina): &glas_akcija=odpovej → list termina vpraša »Odpovem?«.
+  const [glasAkcija, setGlasAkcija] = useState<{ termin: string; akcija: GlasAkcija } | null>(null);
+  // Ko se list zapre, vprašanje ne velja več (ročno odprt isti termin se na glas ne odziva).
+  useEffect(() => {
+    if (!selectedAppointment && !pendingTerminId) setGlasAkcija(null);
+  }, [selectedAppointment, pendingTerminId]);
   /** Vrne true, če je povezava vsebovala termin ali datum. */
   const preberiTerminIzPovezave = useCallback((params: URLSearchParams) => {
     const termin = params.get('termin');
@@ -1315,6 +1321,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
       setCurrentDate(new Date(y, m - 1, d));
     }
     if (termin) setPendingTerminId(termin);
+    const akcija = params.get('glas_akcija');
+    setGlasAkcija(termin && (akcija === 'odpovej' || akcija === 'zakljuci' || akcija === 'ni_prisla') ? { termin, akcija } : null);
     return true;
   }, []);
   useEffect(() => {
@@ -1322,6 +1330,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     if (!preberiTerminIzPovezave(params)) return;
     params.delete('termin');
     params.delete('datum');
+    params.delete('glas_akcija');
     const query = params.toString();
     window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
   }, [preberiTerminIzPovezave]);
@@ -2906,6 +2915,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
               onCancelSeries={aptEditable ? handleCancelSeries : undefined}
               onRescheduleSeries={aptEditable ? handleRescheduleSeries : undefined}
               onRepeat={canCreateAppointment && selectedAppointment.belezi_termin !== false ? handleRepeatAppointment : undefined}
+              glasAkcija={glasAkcija && (selectedAppointment.id_termina === glasAkcija.termin || selectedAppointment.id === glasAkcija.termin) ? glasAkcija.akcija : null}
             />
           );
         })()}

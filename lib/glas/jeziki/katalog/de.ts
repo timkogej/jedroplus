@@ -257,8 +257,6 @@ export const de: Katalog = {
   'Ni prišla': 'Nicht erschienen',
   'Zaključi': 'Abschließen',
   'Odpovej': 'Absagen',
-  'Termin {ime}, {kdaj}. V koledarju tapnite »{gumb}«.': 'Termin {ime}, {kdaj}. Tippen Sie im Kalender auf „{gumb}“.',
-  'Odpiram termin {ime}, {kdaj}. Tapnite {gumb}.': 'Ich öffne den Termin von {ime}, {kdaj}. Tippen Sie auf {gumb}.',
   'Konec mora biti po začetku.': 'Das Ende muss nach dem Beginn liegen.',
   'Za koga vpišem odsotnost?': 'Für wen soll ich die Abwesenheit eintragen?',
   'Odsotnost lahko vpišete samo zase.': 'Sie können Abwesenheit nur für sich selbst eintragen.',
@@ -486,4 +484,7 @@ export const de: Katalog = {
   "{ime} nima računa v aplikaciji, zato je ne morem opomniti.": "{ime} hat kein Konto in der App, daher kann ich sie nicht erinnern.",
   "prosto": "frei",
   "{ime} (naslednjič {datum})": "{ime} (nächster Termin {datum})",
+  "Termin {ime}, {kdaj}.": "Termin {ime}, {kdaj}.",
+  "{ime}, {kdaj}.": "{ime}, {kdaj}.",
+  "Zahteve za termin": "Terminanfragen",
 };

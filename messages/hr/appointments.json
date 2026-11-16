@@ -347,6 +347,18 @@
         "cancel": "Otkaži",
         "complete": "Završi",
         "moreOptions": "Više mogućnosti"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Da otkažem ovaj termin?",
+          "zakljuci": "Da završim ovaj termin?",
+          "ni_prisla": "Da označim da klijentica nije došla?"
+        },
+        "uspeh": {
+          "odpovej": "Termin je otkazan.",
+          "zakljuci": "Termin je završen.",
+          "ni_prisla": "Označeno da nije došla."
+        }
       }
     },
     "dayView": {

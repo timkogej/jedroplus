@@ -21,6 +21,8 @@ export const STRANI = {
   resursi: { pot: '/resursi', naziv: kt('Resursi') },
   opomniki: { pot: '/reminders', naziv: kt('Opomniki') },
   rezervacije: { pot: '/rezervacije', naziv: kt('Spletne rezervacije') },
+  // Povpraševanja (zahteve za termin) iz spletnega naročanja, ki čakajo na potrditev.
+  zahteve: { pot: '/rezervacije/zahteve', naziv: kt('Zahteve za termin') },
   komunikacija: { pot: '/komunikacija', naziv: kt('Komunikacija') },
   obvestila: { pot: '/obvestila', naziv: kt('Obvestila') },
   nastavitve: { pot: '/nastavitve', naziv: kt('Nastavitve') },
@@ -119,7 +121,7 @@ export const pomocAplikacija: BralnoOrodje<{ tema: Tema }> = {
 // ───────────────────────────────────────────────────────────────────────────
 export const odpriStran: BralnoOrodje<{ stran: Stran; stranka: string | null; stranka_id: string | null }> = {
   ime: 'odpri_stran',
-  opis: 'Odpre stran v aplikaciji ("odpri koledar", "pojdi na nastavitve"). Z imenom stranke odpre njeno kartico ("odpri kartico Ane Novak").',
+  opis: 'Odpre stran v aplikaciji ("odpri koledar", "pojdi na nastavitve", "pokaži povpraševanja" = zahteve). Z imenom stranke odpre njeno kartico ("odpri kartico Ane Novak").',
   razred: 'branje',
   pravica: 'glas.uporaba',
   omogoceno: true,

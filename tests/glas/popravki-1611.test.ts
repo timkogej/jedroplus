@@ -101,3 +101,13 @@ describe('fokus pogovora', () => {
     expect(env.shramba.ukazi.get(r2.ukazId!)?.zakljucen?.kontekst).toEqual({ stranka_id: '103' });
   });
 });
+
+describe('hitra pot', () => {
+  it('seznam opomnikov in povpraševanja brez modela', async () => {
+    const { hitraPot } = await import('@/lib/glas/hitraPot');
+    expect(hitraPot('Kateri opomniki so mi ostali?')).toEqual({ orodje: 'moji_opomniki', vhod: {} });
+    expect(hitraPot('Katere opomnike imam?')).toEqual({ orodje: 'moji_opomniki', vhod: {} });
+    expect(hitraPot('Moji opomniki')).toEqual({ orodje: 'moji_opomniki', vhod: {} });
+    expect(hitraPot('Pokaži povpraševanja')).toMatchObject({ orodje: 'odpri_stran', vhod: { stran: 'zahteve' } });
+  });
+});

@@ -347,6 +347,18 @@
         "cancel": "Cancel",
         "complete": "Complete",
         "moreOptions": "More options"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Cancel this appointment?",
+          "zakljuci": "Complete this appointment?",
+          "ni_prisla": "Mark the client as a no-show?"
+        },
+        "uspeh": {
+          "odpovej": "The appointment is cancelled.",
+          "zakljuci": "The appointment is completed.",
+          "ni_prisla": "Marked as a no-show."
+        }
       }
     },
     "dayView": {

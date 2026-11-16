@@ -257,8 +257,6 @@ export const it: Katalog = {
   'Ni prišla': 'Non presentata',
   'Zaključi': 'Completa',
   'Odpovej': 'Annulla',
-  'Termin {ime}, {kdaj}. V koledarju tapnite »{gumb}«.': 'Appuntamento {ime}, {kdaj}. Nel calendario tocchi «{gumb}».',
-  'Odpiram termin {ime}, {kdaj}. Tapnite {gumb}.': "Apro l'appuntamento di {ime}, {kdaj}. Tocchi {gumb}.",
   'Konec mora biti po začetku.': "La fine deve essere dopo l'inizio.",
   'Za koga vpišem odsotnost?': "Per chi inserisco l'assenza?",
   'Odsotnost lahko vpišete samo zase.': "Può inserire un'assenza solo per sé.",
@@ -486,4 +484,7 @@ export const it: Katalog = {
   "{ime} nima računa v aplikaciji, zato je ne morem opomniti.": "{ime} non ha un account nell'app, quindi non posso ricordarglielo.",
   "prosto": "libero",
   "{ime} (naslednjič {datum})": "{ime} (prossimo appuntamento {datum})",
+  "Termin {ime}, {kdaj}.": "Appuntamento {ime}, {kdaj}.",
+  "{ime}, {kdaj}.": "{ime}, {kdaj}.",
+  "Zahteve za termin": "Richieste di appuntamento",
 };

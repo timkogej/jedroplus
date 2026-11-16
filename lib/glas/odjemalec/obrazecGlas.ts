@@ -31,6 +31,8 @@ export interface StanjeObrazca {
   el?: HTMLElement | null;
   /** Vprašanje namesto obrazca (npr. "Obvestim stranko?"): asistent ga izgovori. */
   vprasanje?: string;
+  /** Kaj asistent reče, ko je vprašanje potrjeno (privzeto »Poslano.«). */
+  uspeh?: string;
 }
 
 /** Izid glasovnega "shrani", ko obrazec ostane odprt (zaprtje pomeni shranjeno). */

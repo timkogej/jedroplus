@@ -55,6 +55,12 @@ export function hitraPot(prepis: string): HitriKlic | null {
     b.match(new RegExp(`^(?:ali )?imam(?: ${DAN})? kaj prostega(?: ${DAN})?$`));
   if (p) return { orodje: 'proste_luknje', vhod: { datum: p[1] ?? p[2] ?? null, oseba: null, najmanj_min: null } };
 
+  // Osebni opomniki: vedno iz orodja (kartica), ne iz spomina modela (Tim, 16. 11.).
+  // "kateri opomniki so mi ostali", "katere opomnike imam", "moji opomniki"
+  if (/^(?:kateri (?:so )?(?:moji )?opomniki(?: so)?(?: mi)?(?: se| sploh)?(?: ostali| ostanejo)?|katere opomnike (?:imam|sem nastavil[a]?)|kaksne opomnike imam|moji opomniki|seznam (?:mojih )?opomnikov)$/.test(b)) {
+    return { orodje: 'moji_opomniki', vhod: {} };
+  }
+
   // "odpri koledar", "pojdi na stranke", "pokazi nastavitve"
   const o = b.match(/^(?:odpri|pojdi na|pokazi|prikazi)(?: stran)? (.+)$/);
   if (o && STRANI_PO_IMENU[o[1]]) return { orodje: 'odpri_stran', vhod: { stran: STRANI_PO_IMENU[o[1]], stranka: null, stranka_id: null } };
@@ -76,6 +82,10 @@ const STRANI_PO_IMENU: Record<string, string> = {
   opomniki: 'opomniki',
   rezervacije: 'rezervacije',
   'spletne rezervacije': 'rezervacije',
+  zahteve: 'zahteve',
+  'zahteve za termin': 'zahteve',
+  povprasevanja: 'zahteve',
+  'povprasevanja strank': 'zahteve',
   obvestila: 'obvestila',
   nastavitve: 'nastavitve',
   'nadzorno plosco': 'nadzorna_plosca',

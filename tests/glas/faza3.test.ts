@@ -84,8 +84,8 @@ describe('prestavi_termin', () => {
 describe('status_termina', () => {
   it('ni prišla: današnji termin, odpre obstoječo povezavo koledarja', async () => {
     const r = await statusTermina.izvedi({ stranka: 'Ana Novak', stranka_id: null, termin_id: null, datum_zdaj: null, akcija: 'ni_prisla' }, o());
-    expect(r.pojdi).toBe('/koledar?termin=t5&datum=2026-11-12');
-    expect(r.govor).toContain('Tapnite Ni prišla.');
+    expect(r.pojdi).toBe('/koledar?termin=t5&datum=2026-11-12&glas_akcija=ni_prisla');
+    expect(r.govor).not.toMatch(/tapnite/i);
   });
 });
 
@@ -125,7 +125,7 @@ describe('jedro', () => {
   it('status: pot z dvema parametroma gre skozi', async () => {
     const { d } = okolje({ llm: [{ klici: [{ id: 'a', ime: 'status_termina', vhod: { stranka: 'Ana Novak', stranka_id: null, termin_id: null, datum_zdaj: null, akcija: 'zakljuci' } }] }] });
     const r = await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: 'zaključi Ano Novak' }, d);
-    expect(r).toMatchObject({ ok: true, pojdi: '/koledar?termin=t5&datum=2026-11-12' });
+    expect(r).toMatchObject({ ok: true, pojdi: '/koledar?termin=t5&datum=2026-11-12&glas_akcija=zakljuci' });
   });
 
   it('brez pravice za ustvarjanje orodje ni ponujeno', async () => {
