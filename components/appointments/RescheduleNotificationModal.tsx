@@ -7,6 +7,8 @@ import type { AppointmentWithDetails } from '@/types/appointments';
 import { sheet } from '@/components/ui/sheetClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import { useRef } from 'react';
+import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 
 interface RescheduleNotificationModalProps {
   isOpen: boolean;
@@ -16,6 +18,11 @@ interface RescheduleNotificationModalProps {
   newDate: string;
   newTime: string;
   channel: 'sms' | 'email' | 'both';
+  /**
+   * Asistent+: prestavitev je bila odprta z glasom. Asistent vpraša »Obvestim stranko?«,
+   * »ja« pokliče isti onConfirm kot gumb Pošlji, »ne« isti onClose kot Preskoči.
+   */
+  glas?: boolean;
 }
 
 export function RescheduleNotificationModal({
@@ -26,9 +33,13 @@ export function RescheduleNotificationModal({
   newDate,
   newTime,
   channel,
+  glas = false,
 }: RescheduleNotificationModalProps) {
   const sheetDrag = useSheetDrag(onClose);
   const t = useTranslations('appointments.rescheduleNotify');
+  const glasPanelRef = useRef<HTMLDivElement | null>(null);
+  const kanal = channel === 'sms' ? 'po SMS' : channel === 'email' ? 'po e-pošti' : 'po SMS in e-pošti';
+  useGlasovniObrazec(isOpen && glas, glasPanelRef, onClose, { potrdi: onConfirm, vprasanje: `Obvestim stranko ${kanal}?` });
   const formattedDate = newDate.split('-').reverse().join('.');
   const clientName = [appointment.stranka_ime, appointment.stranka_priimek].filter(Boolean).join(' ');
 
@@ -44,6 +55,7 @@ export function RescheduleNotificationModal({
           onClick={onClose}
         >
           <motion.div
+            ref={glasPanelRef}
             initial={{ opacity: 0, scale: 0.95, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 16 }}

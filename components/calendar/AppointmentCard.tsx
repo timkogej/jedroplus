@@ -186,6 +186,7 @@ function AppointmentCard({
   hasResursi = false,
 }: AppointmentCardProps) {
   const tGhost = useTranslations('appointments.ghost');
+  const tSerija = useTranslations('appointments.serija');
   const isCompleted = ['completed', 'Zaključen', 'zaključen', 'no_show', 'Ni prišel'].includes(appointment.status || '');
   const isNoShow = appointment.status === 'no_show' || appointment.status === 'Ni prišel';
   // Ghost se pokaže samo tistim, ki smejo videti, kateri termini so ghost; drugi ga vidijo kot običajen termin.
@@ -356,6 +357,19 @@ function AppointmentCard({
       >
         👻
       </div>
+    );
+  };
+
+  // Ponavljajoči termin: »↻ 2/6« spodaj desno.
+  const SerijaOznaka = () => {
+    if (!appointment.serija_oznaka) return null;
+    return (
+      <span
+        className="tnum pointer-events-none absolute bottom-1 right-1 z-10 select-none rounded bg-black/15 px-1 text-[9px] font-semibold leading-[14px] text-white/95"
+        title={tSerija('label')}
+      >
+        ↻ {appointment.serija_oznaka}
+      </span>
     );
   };
 
@@ -615,6 +629,7 @@ function AppointmentCard({
         {hasResursi && (
           <span className="absolute bottom-1 left-1 text-[10px] leading-none select-none pointer-events-none z-10">📦</span>
         )}
+        <SerijaOznaka />
         <div className="px-2.5 py-1.5 h-full flex items-center gap-1.5" style={{ color: '#FFFFFF' }}>
           <SmartClientName
             fullName={appointment.stranka_ime}
@@ -671,6 +686,7 @@ function AppointmentCard({
         {hasResursi && (
           <span className="absolute bottom-1 left-1 text-[10px] leading-none select-none pointer-events-none z-10">📦</span>
         )}
+        <SerijaOznaka />
         <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
           {/* Row 1: client name + initials */}
           <div className="flex items-center gap-1.5 min-w-0">
@@ -731,6 +747,7 @@ function AppointmentCard({
       {hasResursi && (
         <span className="absolute bottom-1 left-1 text-[10px] leading-none select-none pointer-events-none z-10">📦</span>
       )}
+      <SerijaOznaka />
       <div className="px-2.5 pt-2.5 pb-1.5 h-full flex flex-col" style={{ color: '#FFFFFF' }}>
         {/* Row 1: client name + initials */}
         <div className="flex items-center gap-1.5 min-w-0">

@@ -1,13 +1,13 @@
 'use client';
 
-import { memo, useState, useEffect, useCallback, useMemo } from 'react';
+import { memo, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { BodyPortal } from '@/components/ui/BodyPortal';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { useFormat } from '@/hooks/useFormat';
 import { intlLocale } from '@/lib/format';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, CalendarBlank, Plus, Minus, Envelope, Phone, Tag, Warning } from '@phosphor-icons/react';
+import { X, Clock, CalendarBlank, Plus, Minus, Envelope, Phone, Tag, Warning, CaretDown } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import ClientSearch from './ClientSearch';
 import ClientModal from '@/components/clients/ClientModal';
@@ -43,6 +43,7 @@ import { checkStaffConflicts, type StaffConflict } from '@/lib/supabase/staffCon
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 import { waitForClient } from '@/lib/supabase/clients';
+import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 type ModalMode = 'view' | 'edit' | 'create';
 
 interface AppointmentModalProps {
@@ -52,13 +53,48 @@ interface AppointmentModalProps {
   mode: ModalMode;
   services: Storitev[];
   employees: Zaposleni[];
-  onSave: (data: AppointmentFormData) => Promise<void>;
+  /** Pri novem terminu z vklopljenim »Ponovi« še ritem serije (koledar preveri in shrani vse). */
+  onSave: (data: AppointmentFormData, ponovitev?: Ponovitev | null) => Promise<void>;
   isSaving?: boolean;
+  /** Pokaži izbiro »Ponovi termin« (samo nov termin). */
+  omogociPonovitev?: boolean;
   initialDate?: string;
   initialStartTime?: string;
   initialEmployeeId?: string;
   lockEmployee?: boolean;
+  /**
+   * Asistent+ (glas): obrazec odpre že izpolnjen. Pri novem terminu stranka in
+   * storitev, pri urejanju sprememba (storitev, zaposleni, jezik, opombe, lokacija,
+   * dan/ura). Opombe se dodajo obstoječim. Shrani uporabnik sam, po isti poti kot ročno.
+   */
+  predizpolnitev?: {
+    stranka?: Client | null;
+    storitevId?: string;
+    /** Druga in tretja storitev: zapolnita prvi prosti mesti. */
+    dodatneStoritve?: string[];
+    zaposleniId?: string;
+    jezik?: CommunicationLanguageCode;
+    opombe?: string;
+    interneOpombe?: string;
+    lokacijaId?: string;
+    datum?: string;
+    cas?: string;
+    /** Serija (»vsakih šest tednov, šestkrat«): vklopi »Ponovi« z ritmom. */
+    ponovitev?: Ponovitev;
+    /** Predizpolnitev iz koledarja (»Ponovi«), ne iz glasu: obrazec se ne javi asistentu. */
+    brezGlasu?: boolean;
+  } | null;
 }
+
+/** Ponavljajoči termin: vsakih N tednov, skupaj `krat` terminov (vključno s prvim). */
+export interface Ponovitev {
+  vsakihTednov: number;
+  krat: number;
+  /** Datumi (YYYY-MM-DD), ki jih je uporabnik izločil (asistent: »ta datum ne«); v pregledu so odkljukani. */
+  brez?: string[];
+}
+export const RITMI_TEDNOV = [1, 2, 3, 4, 5, 6, 8, 10, 12] as const;
+export const NAJVEC_PONOVITEV = 12;
 
 export interface AppointmentFormData {
   id?: string;
@@ -157,8 +193,13 @@ function AppointmentModal({
   initialStartTime,
   initialEmployeeId,
   lockEmployee = false,
+  predizpolnitev = null,
+  omogociPonovitev = false,
 }: AppointmentModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  // Asistent+: obrazec, odprt z glasom, sprejme »shrani« / »prekliči« (requestSubmit = gumb Shrani).
+  const glasFormRef = useRef<HTMLFormElement | null>(null);
+  useGlasovniObrazec(isOpen && Boolean(predizpolnitev) && !predizpolnitev?.brezGlasu, glasFormRef, onClose);
   const { money, locale } = useFormat();
   const t = useTranslations('appointments');
   const { companyId, companySettings } = useCompany();
@@ -222,6 +263,17 @@ function AppointmentModal({
     if (!isOpen || !multi || mode === 'view' || !soleLocationId) return;
     setFormData((prev) => (prev.lokacija_id === soleLocationId ? prev : { ...prev, lokacija_id: soleLocationId }));
   }, [isOpen, multi, mode, soleLocationId]);
+
+  // New appointment with a person who works at several locations, none of them the
+  // current one (e.g. the main location by default): move to one of theirs —
+  // the selected one in the header if it is theirs, else their first.
+  useEffect(() => {
+    if (!isOpen || !multi || mode !== 'create' || soleLocationId || !formData.lokacija_id) return;
+    if (pickableLocations.length === locations.length) return;
+    if (pickableLocations.some((l) => l.id === formData.lokacija_id)) return;
+    const target = pickableLocations.find((l) => l.id === selectedLocationId) ?? pickableLocations[0];
+    if (target) setFormData((prev) => ({ ...prev, lokacija_id: target.id }));
+  }, [isOpen, multi, mode, soleLocationId, formData.lokacija_id, pickableLocations, locations.length, selectedLocationId]);
 
   const employees = useMemo(
     () => !multi || !formData.lokacija_id
@@ -297,6 +349,8 @@ function AppointmentModal({
 
   // Ghost termin toggle state
   const [isGhostTermin, setIsGhostTermin] = useState(false);
+  // Ponavljajoči termin (samo nov termin)
+  const [ponovitev, setPonovitev] = useState<Ponovitev | null>(null);
 
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof AppointmentFormData, string>>>({});
@@ -458,6 +512,7 @@ function AppointmentModal({
     } else {
       setIsGhostTermin(false);
     }
+    setPonovitev(null);
   }, [appointment, mode, allEmployees, initialDate, initialStartTime, initialEmployeeId, personId, defaultLanguage, defaultCurrency]);
 
   // Track if end time was manually set by user
@@ -879,6 +934,65 @@ function AppointmentModal({
     setEndTimeManuallySet(false);
   }, [employees, canPerformService]);
 
+  // Asistent+: predizpolnitev se uporabi enkrat na odprtje (po osnovni inicializaciji zgoraj).
+  const uporabljenaPredizpolnitev = useRef<object | null>(null);
+  useEffect(() => {
+    if (!isOpen) {
+      uporabljenaPredizpolnitev.current = null;
+      return;
+    }
+    const p = predizpolnitev;
+    if (!p || uporabljenaPredizpolnitev.current === p) return;
+    uporabljenaPredizpolnitev.current = p;
+    if (mode === 'create') {
+      // Lokacijo je asistent že preveril (zaposleni tam dela, storitev je tam na voljo).
+      if (p.lokacijaId) setFormData((prev) => ({ ...prev, lokacija_id: p.lokacijaId }));
+      if (p.stranka) handleClientSelect(p.stranka);
+      if (p.storitevId) handleServiceChange(p.storitevId, 1);
+      if (p.ponovitev && omogociPonovitev) setPonovitev(p.ponovitev);
+    } else if (mode === 'edit') {
+      // Isti upravljalci kot ročna izbira: lokacija počisti, česar tam ni; zaposleni preveri storitev.
+      if (p.lokacijaId) handleLocationChange(p.lokacijaId);
+      if (p.zaposleniId) handleEmployeeChange(p.zaposleniId);
+      if (p.storitevId) handleServiceChange(p.storitevId, 1);
+      if (p.datum || p.cas) {
+        const vMin = (u: string) => {
+          const [h, m] = u.split(':').map(Number);
+          return h * 60 + (m || 0);
+        };
+        setFormData((prev) => {
+          const zacetek = p.cas || prev.cas_zacetek;
+          const trajanje = prev.cas_zacetek && prev.cas_konec ? Math.max(5, vMin(prev.cas_konec) - vMin(prev.cas_zacetek)) : 60;
+          const konec = Math.min(vMin(zacetek) + trajanje, 23 * 60 + 59);
+          return {
+            ...prev,
+            datum: p.datum || prev.datum,
+            cas_zacetek: zacetek,
+            cas_konec: `${String(Math.floor(konec / 60)).padStart(2, '0')}:${String(konec % 60).padStart(2, '0')}`,
+          };
+        });
+      }
+    }
+    // Oboje (nov in urejanje): dodatne storitve, jezik, opombe.
+    if (p.dodatneStoritve?.length) {
+      const zasedena = [formData.storitev_id_2, formData.storitev_id_3];
+      const prosta = ([2, 3] as const).filter((i) => !zasedena[i - 2]);
+      const nove = p.dodatneStoritve.filter((id) => ![formData.storitev_id, ...zasedena].includes(id));
+      nove.slice(0, prosta.length).forEach((id, i) => handleServiceChange(id, prosta[i]));
+      const skupaj = 1 + zasedena.filter(Boolean).length + Math.min(nove.length, prosta.length);
+      setServiceCount((prev) => Math.max(prev, Math.min(skupaj, 3)));
+    }
+    if (p.jezik) setFormData((prev) => ({ ...prev, language: p.jezik }));
+    const dodaj = (staro: string | undefined, novo: string) => {
+      const s0 = (staro ?? '').trim();
+      return s0.includes(novo) ? s0 : s0 ? `${s0}\n${novo}` : novo;
+    };
+    if (p.opombe) setFormData((prev) => ({ ...prev, opombe: dodaj(prev.opombe, p.opombe!) }));
+    if (p.interneOpombe) setFormData((prev) => ({ ...prev, internal_opombe: dodaj(prev.internal_opombe, p.interneOpombe!) }));
+    // handleClientSelect je navadna funkcija; predizpolnitev se uporabi samo ob spremembi.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, mode, predizpolnitev, handleServiceChange]);
+
   // Add another service selector (max 3)
   const handleAddService = useCallback(() => {
     if (serviceCount >= 3) return;
@@ -1136,6 +1250,8 @@ function AppointmentModal({
     return Object.keys(newErrors).length === 0;
   };
 
+  const serijaZaShranjevanje = () => (mode === 'create' && omogociPonovitev && !isGhostTermin ? ponovitev : null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === 'view') return;
@@ -1157,12 +1273,12 @@ function AppointmentModal({
       return;
     }
 
-    await onSave({ ...formData, belezi_termin: !isGhostTermin });
+    await onSave({ ...formData, belezi_termin: !isGhostTermin }, serijaZaShranjevanje());
   };
 
   const confirmSaveDespiteConflicts = async () => {
     setConflictDialog(null);
-    await onSave({ ...formData, belezi_termin: !isGhostTermin });
+    await onSave({ ...formData, belezi_termin: !isGhostTermin }, serijaZaShranjevanje());
   };
 
   // Animation variants
@@ -1312,7 +1428,7 @@ function AppointmentModal({
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
+          <form ref={glasFormRef} onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
             <div
               className="min-h-0 flex-1 touch-pan-y overflow-y-auto overflow-x-hidden overscroll-contain p-4 custom-scrollbar sm:p-5"
               style={{ WebkitOverflowScrolling: 'touch' }}
@@ -2240,6 +2356,63 @@ function AppointmentModal({
                     <p className="text-xs text-amber-700">
                       {t('ghost.warning')}
                     </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Ponovi termin (serija) — samo nov termin; vsak termin se shrani posebej po isti poti */}
+            {!isViewMode && mode === 'create' && omogociPonovitev && !isGhostTermin && (
+              <div className={`${sectionClass} space-y-3`}>
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div id="serija-label" className="text-sm font-medium text-gray-900">{t('serija.title')}</div>
+                    <div className="text-[13px] text-gray-500">{t('serija.description')}</div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={Boolean(ponovitev)}
+                    aria-labelledby="serija-label"
+                    onClick={() => setPonovitev((prev) => (prev ? null : { vsakihTednov: 4, krat: 4 }))}
+                    className={`${switchTrack} ${ponovitev ? 'bg-gray-900' : 'bg-gray-300'}`}
+                  >
+                    <span className={`${switchKnob(Boolean(ponovitev))}`} />
+                  </button>
+                </div>
+                {ponovitev && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-500">{t('serija.rhythm')}</span>
+                      <span className="relative block">
+                        <select
+                          value={ponovitev.vsakihTednov}
+                          onChange={(e) => setPonovitev((prev) => (prev ? { ...prev, vsakihTednov: Number(e.target.value) } : prev))}
+                          className={`${inputBaseClass} cursor-pointer appearance-none pr-9`}
+                        >
+                          {[...new Set<number>([...RITMI_TEDNOV, ponovitev.vsakihTednov])].sort((x, y) => x - y).map((n) => (
+                            <option key={n} value={n}>{t('serija.everyWeeks', { count: n })}</option>
+                          ))}
+                        </select>
+                        <CaretDown weight="bold" aria-hidden className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                      </span>
+                    </label>
+                    <label className="block">
+                      <span className="mb-1 block text-xs font-medium text-gray-500">{t('serija.count')}</span>
+                      <span className="relative block">
+                        <select
+                          value={ponovitev.krat}
+                          onChange={(e) => setPonovitev((prev) => (prev ? { ...prev, krat: Number(e.target.value) } : prev))}
+                          className={`${inputBaseClass} cursor-pointer appearance-none pr-9`}
+                        >
+                          {Array.from({ length: NAJVEC_PONOVITEV - 1 }, (_, i) => i + 2).map((n) => (
+                            <option key={n} value={n}>{t('serija.times', { count: n })}</option>
+                          ))}
+                        </select>
+                        <CaretDown weight="bold" aria-hidden className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                      </span>
+                    </label>
+                    <p className="col-span-2 text-xs text-gray-500">{t('serija.hint')}</p>
                   </div>
                 )}
               </div>

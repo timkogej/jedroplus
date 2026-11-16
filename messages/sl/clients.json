@@ -250,5 +250,13 @@
     "redeemed": "Nagrada je unovčena.",
     "loadError": "Točk ni bilo mogoče naložiti.",
     "redeemError": "Nagrade ni bilo mogoče unovčiti. Osvežite kartico in poskusite znova."
+  },
+  "zapiski": {
+    "title": "Zapiski",
+    "barva": "Barva",
+    "preferenca": "Preferenca",
+    "opomba": "Opomba",
+    "glas": "z glasom",
+    "loadError": "Zapiskov ni bilo mogoče naložiti."
   }
 }

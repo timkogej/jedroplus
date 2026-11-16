@@ -29,6 +29,7 @@ import { languageFromPhone, normalizePhone, phonePlaceholder } from '@/lib/phone
 import { smsAllowedFor } from '@/lib/sms';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 
 type ModalMode = 'create' | 'edit';
 
@@ -40,6 +41,11 @@ interface ClientModalProps {
   companyId: string;
   onSave: (data: ClientFormData) => Promise<void>;
   isSaving?: boolean;
+  /**
+   * Asistent+ (glas): nova stranka z že izpolnjenimi polji ali sprememba obstoječe
+   * (telefon, e-pošta, jezik; opombe se dodajo obstoječim). Shrani uporabnik sam.
+   */
+  predizpolnitev?: Partial<Pick<ClientFormData, 'ime' | 'priimek' | 'telefon' | 'email' | 'language' | 'opombe' | 'interne_opombe'>> | null;
 }
 
 // Normalize client type value from DB to form values
@@ -81,8 +87,12 @@ function ClientModal({
   companyId,
   onSave,
   isSaving = false,
+  predizpolnitev = null,
 }: ClientModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  // Asistent+: obrazec, odprt z glasom, sprejme »shrani« / »prekliči« (requestSubmit = gumb Shrani).
+  const glasFormRef = useRef<HTMLFormElement | null>(null);
+  useGlasovniObrazec(isOpen && Boolean(predizpolnitev), glasFormRef, onClose);
   const t = useTranslations('clients');
   const { companySettings } = useCompany();
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
@@ -139,26 +149,29 @@ function ClientModal({
           ?? (client.tip_stranke as string)
           ?? '';
 
+        // Asistent+: sprememba prek glasu (predizpolnitev) prekrije le povedana polja.
+        const g = predizpolnitev;
+        const dodaj = (staro: string, novo?: string) => (!novo || staro.includes(novo) ? staro : staro.trim() ? `${staro.trim()}\n${novo}` : novo);
         setFormData({
           ime: client.ime || '',
           priimek: client.priimek || '',
           spol: normalizeGender(client.spol),
           tip_stranke: normalizeClientType(tipStranke),
-          language: normalizeCommunicationLanguage(client.language ?? clientRecord.language ?? clientRecord.Language, defaultLanguage),
-          email: client.email || '',
-          telefon: client.telefon || '',
-          opombe: opombe,
-          interne_opombe: interneOpombe,
+          language: g?.language ?? normalizeCommunicationLanguage(client.language ?? clientRecord.language ?? clientRecord.Language, defaultLanguage),
+          email: g?.email ?? (client.email || ''),
+          telefon: g?.telefon ?? (client.telefon || ''),
+          opombe: dodaj(opombe, g?.opombe),
+          interne_opombe: dodaj(interneOpombe, g?.interne_opombe),
         });
       } else {
         setFormData({
-          ime: '',
-          priimek: '',
+          ime: predizpolnitev?.ime ?? '',
+          priimek: predizpolnitev?.priimek ?? '',
           spol: '',
           tip_stranke: 'nova',
           language: defaultLanguage,
-          email: '',
-          telefon: '',
+          email: predizpolnitev?.email ?? '',
+          telefon: predizpolnitev?.telefon ?? '',
           opombe: '',
           interne_opombe: '',
         });
@@ -169,7 +182,7 @@ function ClientModal({
       setShowInternalNotes(mode === 'edit');
       setShowClientTypeSelect(false);
     }
-  }, [isOpen, mode, client, defaultLanguage]);
+  }, [isOpen, mode, client, defaultLanguage, predizpolnitev]);
 
   const getClientTypeLabel = useCallback((type: ClientType | '') => {
     if (type === 'vip') return t('modal.clientType.vip');
@@ -360,7 +373,7 @@ function ClientModal({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
+            <form ref={glasFormRef} onSubmit={handleSubmit} className="min-h-0 flex flex-1 flex-col">
               <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-5">
                 <div className="space-y-4">
                   {/* First name */}

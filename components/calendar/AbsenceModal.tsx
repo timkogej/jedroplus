@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, memo } from 'react';
+import { useState, useCallback, useEffect, memo, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl';
 import { sheet } from '@/components/ui/sheetClasses';
 import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { BodyPortal } from '@/components/ui/BodyPortal';
+import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 
 interface AbsenceModalProps {
   isOpen: boolean;
@@ -23,6 +24,8 @@ interface AbsenceModalProps {
   employees: (Zaposleni & { initials: string })[];
   onSave: (data: AbsenceFormData) => Promise<void>;
   isSaving?: boolean;
+  /** Asistent+ (glas): obrazec odpre že izpolnjen; shrani uporabnik sam. */
+  predizpolnitev?: Partial<AbsenceFormData> | null;
 }
 
 export interface AbsenceFormData {
@@ -66,8 +69,12 @@ function AbsenceModal({
   employees,
   onSave,
   isSaving = false,
+  predizpolnitev = null,
 }: AbsenceModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  // Asistent+: obrazec, odprt z glasom, sprejme »shrani« / »prekliči« (requestSubmit = gumb Shrani).
+  const glasFormRef = useRef<HTMLFormElement | null>(null);
+  useGlasovniObrazec(isOpen && Boolean(predizpolnitev), glasFormRef, onClose);
   const t = useTranslations('appointments');
 
   // Form state
@@ -155,6 +162,19 @@ function AbsenceModal({
     setErrors([]);
   }, []);
 
+  // Asistent+: ob odprtju z glasom izpolni polja (enkrat na odprtje).
+  useEffect(() => {
+    if (!isOpen || !predizpolnitev) return;
+    const p = predizpolnitev;
+    if (p.employeeId) setSelectedEmployeeId(p.employeeId);
+    if (p.singleDay !== undefined) setSingleDay(p.singleDay);
+    if (p.dateFrom) setDateFrom(p.dateFrom);
+    if (p.dateTo || p.dateFrom) setDateTo(p.dateTo || p.dateFrom!);
+    if (p.timeFrom) setTimeFrom(p.timeFrom);
+    if (p.timeTo) setTimeTo(p.timeTo);
+    if (p.reason) setReason(p.reason);
+  }, [isOpen, predizpolnitev]);
+
   // Animation variants
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -220,7 +240,7 @@ function AbsenceModal({
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className={`${sheet.body} overflow-x-hidden`}>
+            <form ref={glasFormRef} onSubmit={handleSubmit} className={`${sheet.body} overflow-x-hidden`}>
               {/* Errors */}
               {errors.length > 0 && (
                 <div className="rounded-xl bg-red-50 p-4">

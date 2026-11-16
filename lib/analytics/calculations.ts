@@ -1,4 +1,5 @@
-import { fetchTableRows } from '@/lib/companyScope';
+import { fetchTableRows, fetchTableRowsByDateRange } from '@/lib/companyScope';
+import { izracunajObdobje, zdajVPasuSalona, zgradiCenik, type Vrstica } from './izracun';
 import { TABLES } from '@/lib/data';
 import {
   DateRange,
@@ -170,11 +171,6 @@ function isNoShow(status: string): boolean {
 }
 
 // Check if appointment is pending/scheduled
-function isPending(status: string): boolean {
-  const s = status.toLowerCase();
-  return s.includes('načrtovan') || s.includes('potrjen') || s.includes('scheduled') || s.includes('confirmed') || s.includes('pending');
-}
-
 /**
  * Appointment rows, narrowed to one location when given (null = every location).
  * The database always sets a location on a row.
@@ -185,8 +181,28 @@ async function fetchBookingRows(companyId: string, limit: number, lokacijaId?: s
   return { ...res, data: res.data.filter((row) => row['lokacija_id'] === lokacijaId) };
 }
 
+/** "YYYY-MM-DD" lokalnega dneva. */
+const ymd = (d: Date) => formatDate(d, 'yyyy-MM-dd');
+const naslednjiDan = (d: Date) => ymd(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1));
+
 /**
- * Fetch and calculate analytics metrics
+ * Vrstice terminov za obdobje (po datumu, po straneh — ne prvih 5000 brez reda)
+ * in cenik. Lokacija: samo termini te lokacije (null = vse).
+ */
+async function naloziZaIzracun(companyId: string, od: Date, doo: Date, lokacijaId?: string | null) {
+  const [termini, storitve, osebe] = await Promise.all([
+    fetchTableRowsByDateRange<Vrstica>(TABLES.bookings, companyId, ['Datum', 'datum', 'date'], ymd(od), naslednjiDan(doo)),
+    fetchTableRows<Vrstica>(TABLES.services, companyId, 1000),
+    fetchTableRows<Vrstica>(TABLES.staff, companyId, 1000),
+  ]);
+  const vrstice = (termini.data ?? []).filter((r) => !lokacijaId || r['lokacija_id'] === lokacijaId);
+  return { vrstice, cenik: zgradiCenik(storitve.data ?? [], osebe.data ?? []) };
+}
+
+/**
+ * Fetch and calculate analytics metrics.
+ * Prihodki = zaključeni + že končani neodpovedani termini po ceniku (lib/analytics/izracun.ts,
+ * isti izračun kot Asistent+). Stopnja zaključenih ostane delež res zaključenih.
  */
 export async function fetchAnalyticsMetrics(
   companyId: string,
@@ -194,397 +210,98 @@ export async function fetchAnalyticsMetrics(
   previousRange?: DateRange,
   lokacijaId?: string | null
 ): Promise<AnalyticsMetrics> {
-  // Fetch appointments
-  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
+  const od = previousRange && previousRange.startDate < dateRange.startDate ? previousRange.startDate : dateRange.startDate;
+  const { vrstice, cenik } = await naloziZaIzracun(companyId, od, dateRange.endDate, lokacijaId);
+  const zdaj = zdajVPasuSalona(new Date());
+  const cur = izracunajObdobje(vrstice, cenik, { od: ymd(dateRange.startDate), do: ymd(dateRange.endDate), zdaj });
 
-  // Fetch services for pricing
-  const servicesResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.services,
-    companyId,
-    1000
-  );
-
-  // Build service price map
-  const servicePrices = new Map<string, number>();
-  for (const row of servicesResult.data ?? []) {
-    const id = String(row['ID storitve'] || row['id'] || row['ID_storitve'] || '');
-    const price = Number(row['cena'] || row['Cena'] || row['price'] || 0);
-    if (id) {
-      servicePrices.set(id, price);
-    }
-  }
-
-  // Exclude ghost termini (belezi_termin === false) from all analytics
-  const validAppointmentRows = (appointmentsResult.data ?? []).filter(
-    (a) => a['belezi_termin'] !== false
-  );
-
-  // Parse and filter appointments by date range
-  const appointments: ParsedAppointment[] = [];
-  const previousAppointments: ParsedAppointment[] = [];
-
-  for (const row of validAppointmentRows) {
-    const apt = parseAppointment(row);
-    if (!apt || !apt.datum) continue;
-
-    const aptDate = new Date(apt.datum);
-
-    // Add service price if not in appointment
-    if (apt.cena === 0 && apt.storitev_id) {
-      apt.cena = servicePrices.get(apt.storitev_id) || 0;
-    }
-
-    // Check current period
-    if (aptDate >= dateRange.startDate && aptDate <= dateRange.endDate) {
-      appointments.push(apt);
-    }
-
-    // Check previous period for comparison
-    if (previousRange && aptDate >= previousRange.startDate && aptDate <= previousRange.endDate) {
-      previousAppointments.push(apt);
-    }
-  }
-
-  // Calculate current period metrics
-  const completed = appointments.filter((a) => isCompleted(a.status));
-  const cancelled = appointments.filter((a) => isCancelled(a.status));
-
-  const totalRevenue = completed.reduce((sum, apt) => sum + apt.cena, 0);
-  const averageBookingValue = completed.length > 0 ? totalRevenue / completed.length : 0;
-  const completionRate = appointments.length > 0 ? (completed.length / appointments.length) * 100 : 0;
-
-  // Calculate occupancy (simplified - based on completed appointments per working hour)
   const totalWorkingMinutes = getDaysArray(dateRange.startDate, dateRange.endDate).length * 8 * 60; // 8 hours/day
-  const bookedMinutes = completed.length * 45; // Assume 45 min average
+  const bookedMinutes = cur.opravljeni * 45; // Assume 45 min average
   const occupancyRate = totalWorkingMinutes > 0 ? (bookedMinutes / totalWorkingMinutes) * 100 : 0;
 
-  // Calculate growth vs previous period
   let revenueGrowth = 0;
   let bookingGrowth = 0;
-
   if (previousRange) {
-    const prevCompleted = previousAppointments.filter((a) => isCompleted(a.status));
-    const prevRevenue = prevCompleted.reduce((sum, apt) => sum + apt.cena, 0);
-
-    if (prevRevenue > 0) {
-      revenueGrowth = ((totalRevenue - prevRevenue) / prevRevenue) * 100;
-    }
-    if (prevCompleted.length > 0) {
-      bookingGrowth = ((completed.length - prevCompleted.length) / prevCompleted.length) * 100;
-    }
+    const prev = izracunajObdobje(vrstice, cenik, { od: ymd(previousRange.startDate), do: ymd(previousRange.endDate), zdaj });
+    if (prev.zasluzek > 0) revenueGrowth = ((cur.zasluzek - prev.zasluzek) / prev.zasluzek) * 100;
+    if (prev.opravljeni > 0) bookingGrowth = ((cur.opravljeni - prev.opravljeni) / prev.opravljeni) * 100;
   }
 
   return {
-    totalRevenue,
-    averageBookingValue,
+    totalRevenue: cur.zasluzek,
+    averageBookingValue: cur.opravljeni > 0 ? cur.zasluzek / cur.opravljeni : 0,
     occupancyRate: Math.min(occupancyRate, 100),
-    completionRate,
-    totalAppointments: appointments.length,
-    completedAppointments: completed.length,
-    cancelledAppointments: cancelled.length,
+    completionRate: cur.termini > 0 ? (cur.zakljuceni / cur.termini) * 100 : 0,
+    totalAppointments: cur.termini,
+    completedAppointments: cur.zakljuceni,
+    cancelledAppointments: cur.odpovedani,
     revenueGrowth,
     bookingGrowth,
   };
 }
 
 /**
- * Fetch revenue and bookings chart data
+ * Fetch revenue and bookings chart data (opravljeni termini po dnevih).
  */
 export async function fetchRevenueChartData(
   companyId: string,
   dateRange: DateRange,
   lokacijaId?: string | null
 ): Promise<ChartDataPoint[]> {
-  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
-
-  const servicesResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.services,
-    companyId,
-    1000
-  );
-
-  // Build service price map
-  const servicePrices = new Map<string, number>();
-  for (const row of servicesResult.data ?? []) {
-    const id = String(row['ID storitve'] || row['id'] || row['ID_storitve'] || '');
-    const price = Number(row['cena'] || row['Cena'] || row['price'] || 0);
-    if (id) {
-      servicePrices.set(id, price);
-    }
-  }
-
-  const days = getDaysArray(dateRange.startDate, dateRange.endDate);
-
-  return days.map((day) => {
-    const dayStr = day.toISOString().split('T')[0];
-
-    const dayAppointments = (appointmentsResult.data ?? [])
-      .map(parseAppointment)
-      .filter((apt): apt is ParsedAppointment => {
-        if (!apt || !apt.datum) return false;
-        return apt.datum.startsWith(dayStr) && isCompleted(apt.status);
-      });
-
-    const revenue = dayAppointments.reduce((sum, apt) => {
-      const price = apt.cena || servicePrices.get(apt.storitev_id) || 0;
-      return sum + price;
-    }, 0);
-
+  const { vrstice, cenik } = await naloziZaIzracun(companyId, dateRange.startDate, dateRange.endDate, lokacijaId);
+  const zdaj = zdajVPasuSalona(new Date());
+  return getDaysArray(dateRange.startDate, dateRange.endDate).map((day) => {
+    const dan = ymd(day);
+    const r = izracunajObdobje(vrstice, cenik, { od: dan, do: dan, zdaj });
     return {
       date: formatDate(day),
       fullDate: formatDate(day, 'dd.MM.yyyy'),
-      prihodki: revenue,
-      termini: dayAppointments.length,
+      prihodki: r.zasluzek,
+      termini: r.opravljeni,
     };
   });
 }
 
 /**
- * Fetch appointments by service chart data
- * Only counts COMPLETED appointments (Status = "completed")
- * Links via "ID storitve" column in Termini to "id" column in Storitve
+ * Fetch appointments by service chart data (opravljeni termini; vsaka storitev
+ * termina — glavna, 2., 3., dodatna — šteje posebej).
  */
 export async function fetchServiceChartData(
   companyId: string,
   dateRange: DateRange,
   lokacijaId?: string | null
 ): Promise<ServiceChartData[]> {
-  console.log('[Analytics] Fetching service chart data for period:', {
-    start: dateRange.startDate.toISOString(),
-    end: dateRange.endDate.toISOString(),
-  });
-
-  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
-
-  const servicesResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.services,
-    companyId,
-    1000
-  );
-
-  // Build service info map using "id" column from Storitve table
-  const serviceInfo = new Map<string, { name: string; color: string; price: number }>();
-  for (const row of servicesResult.data ?? []) {
-    // Primary key is "id" in Storitve table
-    const id = String(row['id'] || '');
-    const name = String(row['naziv'] || row['Naziv'] || row['name'] || 'Neznana storitev');
-    const color = String(row['Barva'] || row['barva'] || row['color'] || '#8B5CF6');
-    const price = Number(row['cena'] || row['Cena'] || row['price'] || 0);
-    if (id) {
-      serviceInfo.set(id, { name, color, price });
-    }
-  }
-
-  console.log('[Analytics] Service info map:', Array.from(serviceInfo.entries()).slice(0, 5));
-
-  // Count appointments by service - ONLY COMPLETED appointments
-  const serviceCounts = new Map<string, { count: number; revenue: number }>();
-  let totalServiceOccurrences = 0;
-
-  for (const row of appointmentsResult.data ?? []) {
-    const apt = parseAppointment(row);
-    if (!apt || !apt.datum) continue;
-
-    const aptDate = new Date(apt.datum);
-    if (aptDate < dateRange.startDate || aptDate > dateRange.endDate) continue;
-
-    // CRITICAL: Only count COMPLETED appointments
-    if (!isCompleted(apt.status)) continue;
-
-    // Get price from Final cena if available
-    const finalPrice = Number(row['Final cena'] || 0);
-    const basePrice = apt.cena || 0;
-
-    // Count primary service using "ID storitve" column from Termini
-    const service1 = String(row['ID storitve'] || row['ID storitev'] || '');
-    if (service1) {
-      const existing = serviceCounts.get(service1) || { count: 0, revenue: 0 };
-      const price = finalPrice || basePrice || serviceInfo.get(service1)?.price || 0;
-      serviceCounts.set(service1, {
-        count: existing.count + 1,
-        revenue: existing.revenue + price,
-      });
-      totalServiceOccurrences++;
-    }
-
-    // Count second service (ID storitve 2) if exists
-    const service2 = String(row['ID storitve 2'] || '');
-    if (service2) {
-      const existing = serviceCounts.get(service2) || { count: 0, revenue: 0 };
-      const price = serviceInfo.get(service2)?.price || 0;
-      serviceCounts.set(service2, {
-        count: existing.count + 1,
-        revenue: existing.revenue + price,
-      });
-      totalServiceOccurrences++;
-    }
-
-    // Count third service (ID storitve 3) if exists
-    const service3 = String(row['ID storitve 3'] || '');
-    if (service3) {
-      const existing = serviceCounts.get(service3) || { count: 0, revenue: 0 };
-      const price = serviceInfo.get(service3)?.price || 0;
-      serviceCounts.set(service3, {
-        count: existing.count + 1,
-        revenue: existing.revenue + price,
-      });
-      totalServiceOccurrences++;
-    }
-
-    // Count add-on service if exists
-    const addOnService = String(row['add_on_storitev_id'] || row['add_on_service_id'] || '').trim();
-    if (addOnService && addOnService !== 'null') {
-      const existing = serviceCounts.get(addOnService) || { count: 0, revenue: 0 };
-      const price = serviceInfo.get(addOnService)?.price || 0;
-      serviceCounts.set(addOnService, {
-        count: existing.count + 1,
-        revenue: existing.revenue + price,
-      });
-      totalServiceOccurrences++;
-    }
-  }
-
-  console.log('[Analytics] Total completed service occurrences:', totalServiceOccurrences);
-  console.log('[Analytics] Unique services found:', serviceCounts.size);
-
-  // Convert to chart data with percentages
-  const data: ServiceChartData[] = [];
-  serviceCounts.forEach((counts, serviceId) => {
-    const info = serviceInfo.get(serviceId);
-    const percentage = totalServiceOccurrences > 0
-      ? Number(((counts.count / totalServiceOccurrences) * 100).toFixed(1))
-      : 0;
-
-    data.push({
-      name: info?.name || 'Neznana storitev',
-      value: counts.count,
-      color: info?.color || '#8B5CF6',
-      revenue: counts.revenue,
-      percentage,
-    });
-  });
-
-  const sortedData = data.sort((a, b) => b.value - a.value);
-  console.log('[Analytics] Service chart data:', sortedData.slice(0, 5));
-
-  return sortedData;
+  const { vrstice, cenik } = await naloziZaIzracun(companyId, dateRange.startDate, dateRange.endDate, lokacijaId);
+  const r = izracunajObdobje(vrstice, cenik, { od: ymd(dateRange.startDate), do: ymd(dateRange.endDate), zdaj: zdajVPasuSalona(new Date()) });
+  const vseh = r.storitve.reduce((n, s) => n + s.stevilo, 0);
+  return r.storitve.map((s) => ({
+    name: s.naziv,
+    value: s.stevilo,
+    color: s.barva,
+    revenue: s.znesek,
+    percentage: vseh > 0 ? Number(((s.stevilo / vseh) * 100).toFixed(1)) : 0,
+  }));
 }
 
 /**
- * Fetch appointments by employee chart data
- * Only counts COMPLETED appointments (Status = "completed")
- * Links via "ID osebe" column in Termini to "id" column in Osebe
+ * Fetch appointments by employee chart data (opravljeni termini).
  */
 export async function fetchEmployeeChartData(
   companyId: string,
   dateRange: DateRange,
   lokacijaId?: string | null
 ): Promise<EmployeeChartData[]> {
-  console.log('[Analytics] Fetching employee chart data for period:', {
-    start: dateRange.startDate.toISOString(),
-    end: dateRange.endDate.toISOString(),
-  });
-
-  const appointmentsResult = await fetchBookingRows(companyId, 5000, lokacijaId);
-
-  const employeesResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.staff,
-    companyId,
-    1000
-  );
-
-  const servicesResult = await fetchTableRows<Record<string, unknown>>(
-    TABLES.services,
-    companyId,
-    1000
-  );
-
-  // Build employee info map using "id" column from Osebe table
-  const employeeInfo = new Map<string, { name: string; color: string }>();
-  for (const row of employeesResult.data ?? []) {
-    // Primary key is "id" in Osebe table
-    const id = String(row['id'] || '');
-    const ime = String(row['ime'] || row['Ime'] || '');
-    const priimek = String(row['priimek'] || row['Priimek'] || '');
-    const color = String(row['Barva'] || row['barva'] || row['color'] || '#8B5CF6');
-    if (id) {
-      employeeInfo.set(id, {
-        name: `${ime} ${priimek}`.trim() || 'Neznan zaposleni',
-        color,
-      });
-    }
-  }
-
-  console.log('[Analytics] Employee info map:', Array.from(employeeInfo.entries()).slice(0, 5));
-
-  // Build service price map using "id" column from Storitve
-  const servicePrices = new Map<string, number>();
-  for (const row of servicesResult.data ?? []) {
-    const id = String(row['id'] || '');
-    const price = Number(row['cena'] || row['Cena'] || row['price'] || 0);
-    if (id) {
-      servicePrices.set(id, price);
-    }
-  }
-
-  // Count appointments by employee - ONLY COMPLETED
-  // Uses "ID osebe" column from Termini table
-  const employeeCounts = new Map<string, { count: number; revenue: number }>();
-  let totalCompletedAppointments = 0;
-
-  for (const row of appointmentsResult.data ?? []) {
-    const apt = parseAppointment(row);
-    if (!apt || !apt.datum) continue;
-
-    const aptDate = new Date(apt.datum);
-    if (aptDate < dateRange.startDate || aptDate > dateRange.endDate) continue;
-
-    // CRITICAL: Only count COMPLETED appointments for employee stats
-    if (!isCompleted(apt.status)) continue;
-
-    // Get employee ID from "ID osebe" column in Termini (try multiple variations)
-    const employeeId = String(row['ID osebe'] || row['ID Osebe'] || row['ID osebja'] || row['assigned_person_id'] || row['oseba_id'] || row['person_id'] || apt.zaposleni_id || '');
-    if (!employeeId) continue;
-
-    // Get price from Final cena if available
-    const finalPrice = Number(row['Final cena'] || 0);
-    const serviceId = String(row['ID storitve'] || row['ID storitev'] || apt.storitev_id || '');
-    const basePrice = apt.cena || servicePrices.get(serviceId) || 0;
-
-    const existing = employeeCounts.get(employeeId) || { count: 0, revenue: 0 };
-    employeeCounts.set(employeeId, {
-      count: existing.count + 1,
-      revenue: existing.revenue + (finalPrice || basePrice),
-    });
-    totalCompletedAppointments++;
-  }
-
-  console.log('[Analytics] Total completed appointments:', totalCompletedAppointments);
-  console.log('[Analytics] Unique employees found:', employeeCounts.size);
-
-  // Convert to chart data with colors and percentages
-  const data: EmployeeChartData[] = [];
-  employeeCounts.forEach((counts, employeeId) => {
-    const info = employeeInfo.get(employeeId);
-    const fullName = info?.name || 'Neznan zaposleni';
-    const percentage = totalCompletedAppointments > 0
-      ? Number(((counts.count / totalCompletedAppointments) * 100).toFixed(1))
-      : 0;
-
-    data.push({
-      name: fullName.length > 15 ? fullName.substring(0, 15) + '...' : fullName,
-      fullName,
-      termini: counts.count,
-      prihodki: counts.revenue,
-      color: info?.color || '#8B5CF6',
-      percentage,
-    });
-  });
-
-  const sortedData = data.sort((a, b) => b.termini - a.termini);
-  console.log('[Analytics] Employee chart data:', sortedData.slice(0, 5));
-
-  return sortedData;
+  const { vrstice, cenik } = await naloziZaIzracun(companyId, dateRange.startDate, dateRange.endDate, lokacijaId);
+  const r = izracunajObdobje(vrstice, cenik, { od: ymd(dateRange.startDate), do: ymd(dateRange.endDate), zdaj: zdajVPasuSalona(new Date()) });
+  const vseh = r.osebe.reduce((n, o) => n + o.stevilo, 0);
+  return r.osebe.map((o) => ({
+    name: o.ime.length > 15 ? `${o.ime.substring(0, 15)}...` : o.ime,
+    fullName: o.ime,
+    termini: o.stevilo,
+    prihodki: o.znesek,
+    color: o.barva,
+    percentage: vseh > 0 ? Number(((o.stevilo / vseh) * 100).toFixed(1)) : 0,
+  }));
 }
 
 // Parse "HH:MM" or "HH:MM:SS" to total minutes from midnight. Returns -1 on failure.

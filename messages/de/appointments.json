@@ -361,6 +361,18 @@
         "cancel": "Stornieren",
         "complete": "Abschließen",
         "moreOptions": "Weitere Optionen"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Soll ich diesen Termin absagen?",
+          "zakljuci": "Soll ich diesen Termin abschließen?",
+          "ni_prisla": "Soll ich markieren, dass die Kundin nicht gekommen ist?"
+        },
+        "uspeh": {
+          "odpovej": "Der Termin ist abgesagt.",
+          "zakljuci": "Der Termin ist abgeschlossen.",
+          "ni_prisla": "Als nicht erschienen markiert."
+        }
       }
     },
     "dayView": {
@@ -518,5 +530,53 @@
   "bulk": {
     "done": "{count, plural, one {# Termin abgeschlossen} other {# Termine abgeschlossen}}",
     "partial": "Abgeschlossen: {completed}. {failed} Termine konnten nicht abgeschlossen werden und bleiben offen."
+  },
+  "serija": {
+    "title": "Termin wiederholen",
+    "description": "Gleiche Leistung im festen Rhythmus, jeder Termin einzeln.",
+    "rhythm": "Rhythmus",
+    "everyWeeks": "{count, plural, =1 {jede Woche} other {alle {count} Wochen}}",
+    "count": "Insgesamt",
+    "times": "{count, plural, other {{count} Termine}}",
+    "hint": "Vor dem Speichern werden alle Daten geprüft. Der Kunde erhält für jeden Termin eine Bestätigung.",
+    "label": "Serie",
+    "position": "{zap}/{skupaj}",
+    "cancelFuture": "Diesen und alle folgenden absagen",
+    "reviewTitle": "Serie prüfen",
+    "reviewSubtitle": "{count, plural, =1 {1 Termin} other {{count} Termine}}",
+    "saved": "Gespeichert",
+    "saveFailed": "Nicht gespeichert. Zeit prüfen und erneut versuchen.",
+    "free": "Frei",
+    "movedBusy": "Vorschlag: {datum} um {ura} ist belegt ({kdo}).",
+    "movedOff": "Vorschlag: {datum} um {ura} außerhalb der Arbeitszeit.",
+    "problemBusy": "Belegt, innerhalb von drei Tagen keine freie Zeit. Anderes Datum wählen.",
+    "problemOff": "Außerhalb der Arbeitszeit, innerhalb von drei Tagen keine freie Zeit. Anderes Datum wählen.",
+    "include": "{datum} einbeziehen",
+    "confirmations": "{count, plural, =0 {Keine Termine ausgewählt.} =1 {Der Kunde erhält 1 Bestätigung.} other {Der Kunde erhält {count} Bestätigungen.}}",
+    "saving": "Speichere {n}/{od} …",
+    "saveAll": "{count, plural, =0 {Speichern} =1 {1 Termin speichern} other {{count} Termine speichern}}",
+    "checkError": "Die Daten der Serie konnten nicht geprüft werden. Bitte erneut versuchen.",
+    "savedAll": "{count, plural, =1 {1 Termin gespeichert.} other {{count} Termine gespeichert.}}",
+    "linkError": "Die Termine sind gespeichert, die Verknüpfung zur Serie ist fehlgeschlagen.",
+    "partial": "{n} von {od} gespeichert. Nicht gespeicherte bleiben in der Übersicht.",
+    "cancelledAll": "{count, plural, =1 {1 Termin abgesagt.} other {{count} Termine abgesagt.}}",
+    "cancelPartial": "{n} von {od} abgesagt. Bitte Kalender prüfen.",
+    "cancelTitle": "{count, plural, =0 {Keine kommenden Termine} =1 {1 Termin absagen?} other {{count} Termine absagen?}}",
+    "cancelHint": "Jeder Termin wird einzeln abgesagt; der Kunde wird wie bei einem einzelnen Termin benachrichtigt.",
+    "cancelConfirm": "{count, plural, =1 {1 Termin absagen} other {{count} Termine absagen}}",
+    "repeat": "Wiederholen (Serie)",
+    "rescheduleFuture": "Diesen und alle folgenden verschieben",
+    "moveTitle": "Serie verschieben",
+    "moveStep": "Neuer Tag und neue Uhrzeit für diesen Termin. Alle folgenden verschieben sich gleich.",
+    "moveHint": "Jeder Termin wird einzeln verschoben, wie ein einzelner Termin. Zur Benachrichtigung des Kunden frage ich am Ende.",
+    "moveAll": "{count, plural, =0 {Verschieben} =1 {1 Termin verschieben} other {{count} Termine verschieben}}",
+    "moved": "Verschoben",
+    "movedAll": "{count, plural, =1 {1 Termin verschoben.} other {{count} Termine verschoben.}}",
+    "movePartial": "{n} von {od} verschoben. Die übrigen bleiben in der Übersicht.",
+    "moveNone": "Diese Serie hat keine kommenden offenen Termine.",
+    "notifyTitle": "{count, plural, =1 {Kunden über die Verschiebung benachrichtigen?} other {Kunden über {count} Verschiebungen benachrichtigen?}}",
+    "notifyHint": "Für jeden verschobenen Termin geht eine eigene Benachrichtigung, wie bei einem einzelnen Termin.",
+    "notifyConfirm": "{count, plural, =1 {Benachrichtigung senden} other {{count} Benachrichtigungen senden}}",
+    "notifyPartial": "{n} von {od} Benachrichtigungen gesendet."
   }
 }

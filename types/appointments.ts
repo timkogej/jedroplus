@@ -90,6 +90,8 @@ export interface AppointmentWithDetails {
   /** Location of the appointment ("Termini".lokacija_id); the database fills in the main one when missing. */
   lokacija_id?: string | null;
   belezi_termin?: boolean; // false = ghost termin (excluded from analytics/history)
+  /** Ponavljajoči termin: mesto v seriji (»2/6«); samo za prikaz v koledarju. */
+  serija_oznaka?: string;
   deleted_at?: string | null; // set when ghost termin is soft-deleted after completion
   id_termina?: string; // text "ID termina" column value (e.g. "T-12345678"), distinct from bigint `id`
   // Service details

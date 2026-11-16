@@ -361,6 +361,18 @@
         "cancel": "Annulla appuntamento",
         "complete": "Completa",
         "moreOptions": "Altre opzioni"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Annullo questo appuntamento?",
+          "zakljuci": "Completo questo appuntamento?",
+          "ni_prisla": "Segno che la cliente non si è presentata?"
+        },
+        "uspeh": {
+          "odpovej": "L'appuntamento è annullato.",
+          "zakljuci": "L'appuntamento è completato.",
+          "ni_prisla": "Segnato come non presentata."
+        }
       }
     },
     "dayView": {
@@ -518,5 +530,53 @@
   "bulk": {
     "done": "{count, plural, one {# appuntamento chiuso} other {# appuntamenti chiusi}}",
     "partial": "Chiusi: {completed}. {failed} appuntamenti non sono stati chiusi e restano aperti."
+  },
+  "serija": {
+    "title": "Ripeti appuntamento",
+    "description": "Stesso servizio con un ritmo regolare, ogni appuntamento separato.",
+    "rhythm": "Ritmo",
+    "everyWeeks": "{count, plural, =1 {ogni settimana} other {ogni {count} settimane}}",
+    "count": "Totale",
+    "times": "{count, plural, other {{count} appuntamenti}}",
+    "hint": "Prima di salvare vengono controllate tutte le date. Il cliente riceve una conferma per ogni appuntamento.",
+    "label": "Serie",
+    "position": "{zap}/{skupaj}",
+    "cancelFuture": "Annulla questo e tutti i successivi",
+    "reviewTitle": "Controllo serie",
+    "reviewSubtitle": "{count, plural, =1 {1 appuntamento} other {{count} appuntamenti}}",
+    "saved": "Salvato",
+    "saveFailed": "Non salvato. Controlla l’orario e riprova.",
+    "free": "Libero",
+    "movedBusy": "Proposta: {datum} alle {ura} è occupato ({kdo}).",
+    "movedOff": "Proposta: {datum} alle {ura} fuori orario.",
+    "problemBusy": "Occupato, nessun orario libero entro tre giorni. Scegli un’altra data.",
+    "problemOff": "Fuori orario, nessun orario libero entro tre giorni. Scegli un’altra data.",
+    "include": "Includi {datum}",
+    "confirmations": "{count, plural, =0 {Nessun appuntamento selezionato.} =1 {Il cliente riceve 1 conferma.} other {Il cliente riceve {count} conferme.}}",
+    "saving": "Salvataggio {n}/{od} …",
+    "saveAll": "{count, plural, =0 {Salva} =1 {Salva 1 appuntamento} other {Salva {count} appuntamenti}}",
+    "checkError": "Impossibile controllare le date della serie. Riprova.",
+    "savedAll": "{count, plural, =1 {1 appuntamento salvato.} other {{count} appuntamenti salvati.}}",
+    "linkError": "Gli appuntamenti sono salvati, ma il collegamento alla serie non è riuscito.",
+    "partial": "Salvati {n} di {od}. Quelli non salvati restano nel controllo.",
+    "cancelledAll": "{count, plural, =1 {1 appuntamento annullato.} other {{count} appuntamenti annullati.}}",
+    "cancelPartial": "Annullati {n} di {od}. Controlla il calendario.",
+    "cancelTitle": "{count, plural, =0 {Nessun appuntamento futuro} =1 {Annullare 1 appuntamento?} other {Annullare {count} appuntamenti?}}",
+    "cancelHint": "Ogni appuntamento viene annullato separatamente; il cliente riceve l’avviso come per un singolo appuntamento.",
+    "cancelConfirm": "{count, plural, =1 {Annulla 1 appuntamento} other {Annulla {count} appuntamenti}}",
+    "repeat": "Ripeti (serie)",
+    "rescheduleFuture": "Sposta questo e tutti i successivi",
+    "moveTitle": "Sposta serie",
+    "moveStep": "Nuovo giorno e ora di questo appuntamento. Tutti i successivi si spostano allo stesso modo.",
+    "moveHint": "Ogni appuntamento viene spostato separatamente, come uno singolo. Alla fine chiedo se avvisare il cliente.",
+    "moveAll": "{count, plural, =0 {Sposta} =1 {Sposta 1 appuntamento} other {Sposta {count} appuntamenti}}",
+    "moved": "Spostato",
+    "movedAll": "{count, plural, =1 {1 appuntamento spostato.} other {{count} appuntamenti spostati.}}",
+    "movePartial": "Spostati {n} di {od}. Gli altri restano nel controllo.",
+    "moveNone": "Questa serie non ha appuntamenti futuri aperti.",
+    "notifyTitle": "{count, plural, =1 {Avvisare il cliente dello spostamento?} other {Avvisare il cliente di {count} spostamenti?}}",
+    "notifyHint": "Per ogni appuntamento spostato parte un avviso separato, come per uno singolo.",
+    "notifyConfirm": "{count, plural, =1 {Invia avviso} other {Invia {count} avvisi}}",
+    "notifyPartial": "Inviati {n} di {od} avvisi."
   }
 }

@@ -7,6 +7,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { PwaBoot } from '@/components/pwa/PwaBoot';
+import { AsistentPlus } from '@/components/glas/AsistentPlus';
 
 // Apple naprave dobijo pravo SF Pro prek -apple-system v --font-sans
 // (app/globals.css); Inter je fallback za vse ostale platforme.
@@ -97,6 +98,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages} locale={locale}>
           <Providers>{children}</Providers>
           <PwaBoot />
+          <AsistentPlus />
         </NextIntlClientProvider>
       </body>
     </html>
