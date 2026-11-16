@@ -100,15 +100,26 @@ async function najdiLuknjo(
     zadetki = vse.flatMap((x) => x.luknje.filter(([a, b]) => b - a >= 30).map(([a, b]) => ({ p: x.p, od: a, do: b })));
     if (zadetki.length === 0) return { sporocilo: jt('{kdaj} ni prostih lukenj.', { kdaj: cap(kdaj) }) };
   }
-  // Več lukenj ali oseb: uporabnik izbere (model pokliče znova z uro in osebo).
+  // Zaposlenega določi asistent sam (Tim, 16. 11.): po zaposlenem nikoli ne sprašuje.
+  // Zaposleni: njegova luknja. Lastnik/admin: iščemo pri vseh, prednost imajo prave luknje
+  // (oseba ima ta dan termine) pred povsem prostim dnem.
   const jaz = zadetki.filter((z) => z.p.id === o.k.osebaId);
-  if (zadetki.length > 1 && o.k.vloga === 'staff' && jaz.length === 1) zadetki = jaz;
+  if (zadetki.length > 1 && o.k.vloga === 'staff' && jaz.length > 0) zadetki = jaz;
+  if (zadetki.length > 1 && !p.oseba) {
+    const zTermini = new Set((await o.podatki.termini(d, d)).filter(aktiven).map((t) => t.osebaId));
+    const prave = zadetki.filter((z) => zTermini.has(z.p.id));
+    if (prave.length > 0) zadetki = prave;
+  }
+  // Z uro: najožja luknja (odpovedan termin med drugimi), brez vprašanja.
+  if (zadetki.length > 1 && ura) zadetki = [[...zadetki].sort((a, b) => a.do - a.od - (b.do - b.od))[0]];
   if (zadetki.length > 1) {
+    // Brez ure: vprašamo samo za čas; oseba je del možnosti, ne vprašanje.
     const vec = new Set(zadetki.map((z) => z.p.id)).size > 1;
+    zadetki.sort((a, b) => a.od - b.od);
     return {
-      sporocilo: jt('Katero luknjo {kdaj}?', { kdaj }),
+      sporocilo: jt('Ob kateri uri je luknja {kdaj}?', { kdaj }),
       vprasanje: {
-        besedilo: jt('Katero luknjo?'),
+        besedilo: jt('Ob kateri uri?'),
         moznosti: zadetki.slice(0, 6).map((z) => ({ id: `${z.p.id}@${izMinut(z.od)}`, oznaka: `${vec ? `${imeOsebe(z.p)}, ` : ''}${izMinut(z.od)}–${izMinut(z.do)}` })),
       },
     };

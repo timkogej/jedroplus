@@ -406,8 +406,6 @@ export const de: Katalog = {
   // Zapolnitev luknje
   "Besedilo je predolgo za en SMS ({n} znakov s podpisom, največ {m}). Skrajšaj ga in pokliči ponudi_prosti_termin znova.": "Der Text ist zu lang für eine SMS ({n} Zeichen mit Signatur, max. {m}). Kürze ihn und rufe ponudi_prosti_termin erneut auf.",
   "Kandidati za {kdaj} {okno} pri {oseba:mestnik}:": "Kandidaten für {kdaj} {okno} bei {oseba}:",
-  "Katero luknjo {kdaj}?": "Welche Lücke {kdaj}?",
-  "Katero luknjo?": "Welche Lücke?",
   "Predlagam {imena}. Razlogi in gumbi za klic so na zaslonu.": "Ich schlage {imena} vor. Gründe und Anruf-Tasten sind auf dem Bildschirm.",
   "Predlog za prestavitev termina lahko pošljem: {imena}.": "Einen Vorschlag zum Verschieben des Termins kann ich senden an: {imena}.",
   "Privolitev": "Einwilligung",
@@ -474,7 +472,6 @@ export const de: Katalog = {
   "{kdaj}: ne dela, predlog {predlog}": "{kdaj}: arbeitet nicht, Vorschlag {predlog}",
   "{kdaj}: zasedeno, v treh dneh ni prostega": "{kdaj}: belegt, innerhalb von drei Tagen nichts frei",
   "{kdaj}: ne dela, v treh dneh ni prostega": "{kdaj}: arbeitet nicht, innerhalb von drei Tagen nichts frei",
-  "Ostali so v obvestilih.": "Die übrigen finden Sie in den Benachrichtigungen.",
   "Opomnik za {ime} je shranjen. Vidi in prekliče ga lahko samo {ime}.": "Erinnerung für {ime} gespeichert. Nur {ime} kann sie sehen und löschen.",
   "Opomnik za {ime} {kdaj}: {besedilo}": "Erinnerung für {ime} {kdaj}: {besedilo}",
   "Opomnim lahko samo vas. Sodelavce opomnita lastnik ali admin.": "Ich kann nur Sie erinnern. Kolleginnen und Kollegen erinnern der Inhaber oder ein Admin.",
@@ -493,4 +490,5 @@ export const de: Katalog = {
   "Ne vem, pri kom je termin {ime}.": "Ich weiß nicht, bei wem der Termin von {ime} ist.",
   "Pred terminom {ime} ({kdaj}) ni proste luknje.": "Vor dem Termin von {ime} ({kdaj}) gibt es keine freie Lücke.",
   "Po terminu {ime} ({kdaj}) ni proste luknje.": "Nach dem Termin von {ime} ({kdaj}) gibt es keine freie Lücke.",
+  "Ob kateri uri je luknja {kdaj}?": "Um wie viel Uhr ist die Lücke {kdaj}?",
 };

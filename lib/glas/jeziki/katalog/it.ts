@@ -406,8 +406,6 @@ export const it: Katalog = {
   // Zapolnitev luknje
   "Besedilo je predolgo za en SMS ({n} znakov s podpisom, največ {m}). Skrajšaj ga in pokliči ponudi_prosti_termin znova.": "Il testo è troppo lungo per un SMS ({n} caratteri con firma, max {m}). Accorcialo e richiama ponudi_prosti_termin.",
   "Kandidati za {kdaj} {okno} pri {oseba:mestnik}:": "Candidati per {kdaj} {okno} con {oseba}:",
-  "Katero luknjo {kdaj}?": "Quale buco {kdaj}?",
-  "Katero luknjo?": "Quale buco?",
   "Predlagam {imena}. Razlogi in gumbi za klic so na zaslonu.": "Propongo {imena}. Motivi e pulsanti per chiamare sono sullo schermo.",
   "Predlog za prestavitev termina lahko pošljem: {imena}.": "Posso inviare una proposta di spostamento dell'appuntamento a: {imena}.",
   "Privolitev": "Consenso",
@@ -474,7 +472,6 @@ export const it: Katalog = {
   "{kdaj}: ne dela, predlog {predlog}": "{kdaj}: non lavora, proposta {predlog}",
   "{kdaj}: zasedeno, v treh dneh ni prostega": "{kdaj}: occupato, niente di libero entro tre giorni",
   "{kdaj}: ne dela, v treh dneh ni prostega": "{kdaj}: non lavora, niente di libero entro tre giorni",
-  "Ostali so v obvestilih.": "Gli altri sono nelle notifiche.",
   "Opomnik za {ime} je shranjen. Vidi in prekliče ga lahko samo {ime}.": "Promemoria per {ime} salvato. Solo {ime} può vederlo e annullarlo.",
   "Opomnik za {ime} {kdaj}: {besedilo}": "Promemoria per {ime} {kdaj}: {besedilo}",
   "Opomnim lahko samo vas. Sodelavce opomnita lastnik ali admin.": "Posso ricordare solo a lei. Ai colleghi possono farlo il titolare o un admin.",
@@ -493,4 +490,5 @@ export const it: Katalog = {
   "Ne vem, pri kom je termin {ime}.": "Non so con chi è l'appuntamento di {ime}.",
   "Pred terminom {ime} ({kdaj}) ni proste luknje.": "Prima dell'appuntamento di {ime} ({kdaj}) non c'è un buco libero.",
   "Po terminu {ime} ({kdaj}) ni proste luknje.": "Dopo l'appuntamento di {ime} ({kdaj}) non c'è un buco libero.",
+  "Ob kateri uri je luknja {kdaj}?": "A che ora è il buco {kdaj}?",
 };

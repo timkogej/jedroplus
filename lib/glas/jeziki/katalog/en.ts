@@ -406,8 +406,6 @@ export const en: Katalog = {
   // Zapolnitev luknje
   "Besedilo je predolgo za en SMS ({n} znakov s podpisom, največ {m}). Skrajšaj ga in pokliči ponudi_prosti_termin znova.": "The text is too long for one SMS ({n} characters with signature, max {m}). Shorten it and call ponudi_prosti_termin again.",
   "Kandidati za {kdaj} {okno} pri {oseba:mestnik}:": "Candidates for {kdaj} {okno} with {oseba}:",
-  "Katero luknjo {kdaj}?": "Which gap {kdaj}?",
-  "Katero luknjo?": "Which gap?",
   "Predlagam {imena}. Razlogi in gumbi za klic so na zaslonu.": "I suggest {imena}. Reasons and call buttons are on the screen.",
   "Predlog za prestavitev termina lahko pošljem: {imena}.": "I can send a proposal to move the appointment to: {imena}.",
   "Privolitev": "Consent",
@@ -474,7 +472,6 @@ export const en: Katalog = {
   "{kdaj}: ne dela, predlog {predlog}": "{kdaj}: not working, suggested {predlog}",
   "{kdaj}: zasedeno, v treh dneh ni prostega": "{kdaj}: taken, nothing free within three days",
   "{kdaj}: ne dela, v treh dneh ni prostega": "{kdaj}: not working, nothing free within three days",
-  "Ostali so v obvestilih.": "The rest are in your notifications.",
   "Opomnik za {ime} je shranjen. Vidi in prekliče ga lahko samo {ime}.": "Reminder for {ime} saved. Only {ime} can see and cancel it.",
   "Opomnik za {ime} {kdaj}: {besedilo}": "Reminder for {ime} {kdaj}: {besedilo}",
   "Opomnim lahko samo vas. Sodelavce opomnita lastnik ali admin.": "I can only remind you. Colleagues can be reminded by the owner or an admin.",
@@ -493,4 +490,5 @@ export const en: Katalog = {
   "Ne vem, pri kom je termin {ime}.": "I don't know who the appointment for {ime} is with.",
   "Pred terminom {ime} ({kdaj}) ni proste luknje.": "There is no free gap before {ime}'s appointment ({kdaj}).",
   "Po terminu {ime} ({kdaj}) ni proste luknje.": "There is no free gap after {ime}'s appointment ({kdaj}).",
+  "Ob kateri uri je luknja {kdaj}?": "At what time is the gap {kdaj}?",
 };

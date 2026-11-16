@@ -109,8 +109,6 @@ interface Seja {
   stt: { url: string; kljuc: string; model: string; namigi: string[]; najdaljsiKonecMs: number };
   tts: { url: string; kljuc: string; model: string; glas: string; hitrost: number };
   opozorilo?: string | null;
-  /** Neprebrani osebni opomniki: asistent jih pove ob odprtju, nato se označijo kot prebrani. */
-  opomniki?: { ids: string[]; govor: string | null } | null;
   /** Veljavnost ključev v sekundah (strežnik; privzeto 60). */
   veljaS?: number;
 }
@@ -322,8 +320,8 @@ export class Pogovor {
       void this.odpriTts(seja);
       const veljaMs = (seja.veljaS ?? 60) * 1000;
       this.ttsObnova = setInterval(() => void this.obnoviTtsKljuc(), Math.max(30_000, veljaMs - SEJA_REZERVA_MS));
+      // Neprebranih opomnikov ob odprtju ne govori več (Tim, 16. 11.): pridejo kot push in obvestilo.
       if (seja.opozorilo) this.d.napaka(seja.opozorilo);
-      else if (seja.opomniki?.govor) void this.povejOpomnike(seja.opomniki.ids, seja.opomniki.govor);
     } catch (e) {
       // Uporabnik je medtem sam končal: brez sporočila o napaki.
       if (this.aktiven) this.koncaj(e instanceof NapakaPogovora ? e.message : sporocila().povezava);
@@ -366,22 +364,6 @@ export class Pogovor {
 
   async zavrniPredlog() {
     if (this.predlog) await this.zavrni(this.predlog);
-  }
-
-  /**
-   * Neprebrani opomniki ob odprtju: povej (če uporabnik ravno ne govori), nato označi kot prebrane.
-   * Seja je pripravljena vnaprej in se lahko uporabi znova, zato jih po prvem branju počistimo.
-   */
-  private async povejOpomnike(ids: string[], govor: string) {
-    if (!this.aktiven || (this.s === 'poslusam' && (this.cakajoca || this.sestavljalec.trenutno))) return;
-    // Isti predmet je tudi v zalogi (primerjava po identiteti): spremenimo ga, ne zamenjamo.
-    if (this.seja) this.seja.opomniki = null;
-    void fetch('/api/glas/opomniki/prebrano', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids }),
-    }).catch(() => {});
-    await this.povejObvestilo(govor, TISINA_PO_ODGOVORU_MS);
   }
 
   /**

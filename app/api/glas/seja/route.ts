@@ -22,7 +22,6 @@ import { SONIOX, zacasniKljuc } from '@/lib/glas/ponudniki/soniox';
 import { zdajVPasu } from '@/lib/glas/razresevanje/datumi';
 import { jezikZaPogovor } from '@/lib/glas/paket';
 import { kontekstIzSeje, preberiJson } from '@/lib/glas/streznik';
-import { govorOpomnikov, neprebraniOpomniki } from '@/lib/glas/opomniki/neprebrani';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -63,8 +62,6 @@ export async function POST(req: NextRequest) {
     : Promise.all([zacasniKljuc('transcribe_websocket', KLJUC_VELJA_S), zacasniKljuc('tts_rt', KLJUC_VELJA_S)] as const);
   kljuci.catch(() => {}); // obravnavano spodaj; brez nerešene zavrnitve ob zgodnjem izhodu
   const namigiP = samoTts ? Promise.resolve([] as string[]) : zberiNamige(odvisnosti.podatki, danes, 100).catch(() => [] as string[]);
-  // Neprebrani osebni opomniki (zadnjih 12 ur): asistent jih pove ob odprtju.
-  const opomnikiP = samoTts ? Promise.resolve([]) : neprebraniOpomniki(seja, k.userId, k.podjetjeUuid).catch(() => []);
   const [{ data: nast }, { data: poraba }, { data: uporabnik }] = await Promise.all([
     // '*': stolpec jezik pride z migracijo 1793600001; pred njo poizvedba ne sme pasti.
     seja.from('glas_nastavitve_podjetja').select('*').eq('company_id', k.podjetje).maybeSingle(),
@@ -82,7 +79,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const [[stt, tts], namigi, opomniki] = await Promise.all([kljuci, namigiP, opomnikiP]);
+    const [[stt, tts], namigi] = await Promise.all([kljuci, namigiP]);
     if (samoTts || !stt) {
       return NextResponse.json({ ok: true, tts: { kljuc: tts.kljuc } }, { headers: { 'Cache-Control': 'no-store' } });
     }
@@ -97,9 +94,6 @@ export async function POST(req: NextRequest) {
         kvota,
         porabljeno,
         opozorilo: opozoriloKvote(porabljeno, kvota),
-        opomniki: opomniki.length
-          ? { ids: opomniki.map((o) => o.id), govor: govorOpomnikov(opomniki, jezikZaPogovor((nast as { jezik?: unknown }).jezik)) }
-          : null,
       },
       { headers: { 'Cache-Control': 'no-store' } }
     );

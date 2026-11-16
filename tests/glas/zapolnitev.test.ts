@@ -82,9 +82,12 @@ describe('kandidati_za_luknjo', () => {
     expect(r.govor).toContain('Mateja ima kasnejši termin');
   });
 
-  it('brez osebe in ob isti uri prosti dve osebi → vprašanje', async () => {
+  it('brez osebe: zaposlenega določi sam (najožja luknja ob uri); brez ure vpraša samo za čas', async () => {
     const r = await kandidatiZaLuknjo.izvedi(vhod({ oseba: null }), o());
-    expect(r.vprasanje?.moznosti?.map((m) => m.oznaka)).toEqual(['Tina Kos, 10:30–16:00', 'Urška Bele, 10:30–11:00']);
+    expect(r.vprasanje).toBeUndefined();
+    expect(r.sporocilo).toMatch(/10:30–11:00 pri Urški/);
+    const brezUre = await kandidatiZaLuknjo.izvedi(vhod({ oseba: null, ura: null }), o());
+    expect(brezUre.vprasanje?.besedilo).toBe('Ob kateri uri?');
   });
 
   it('luknja pred terminom stranke (»v petek pred Laro«) pri njeni osebi', async () => {

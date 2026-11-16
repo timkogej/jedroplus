@@ -542,8 +542,8 @@ export function AppointmentDetailModal({
           </SheetGroup>
         )}
 
-        {/* Podrobnosti — ID termina in ali se termin beleži */}
-        {(appointment.id_termina || appointment.belezi_termin === false || serija) && (
+        {/* Podrobnosti — serija in ali se termin beleži (ID termina ni prikazan, Tim 16. 11.) */}
+        {(appointment.belezi_termin === false || serija) && (
           <SheetGroup label={t('calendarView.detailModal.fields.details')}>
             {serija && (
               <SheetRow label={t('serija.label')}>
@@ -557,12 +557,6 @@ export function AppointmentDetailModal({
                   <span className="text-sm text-gray-700">{t('ghost.badge')}</span>
                 </span>
               </SheetRow>
-            )}
-            {appointment.id_termina && (
-              <SheetRow
-                label={t('calendarView.detailModal.fields.appointmentId')}
-                value={<span className="tnum font-mono text-[13px] text-gray-500">{appointment.id_termina}</span>}
-              />
             )}
           </SheetGroup>
         )}
