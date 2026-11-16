@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { rateLimit } from '@/lib/rateLimit';
 import { imaPravico, samoSvojiTermini } from '@/lib/glas/pravice';
 import { zdajVPasu } from '@/lib/glas/razresevanje/datumi';
+import { imaZgodnjiDostop } from '@/lib/zgodnjiDostop';
 import { kontekstIzSeje, preberiJson } from '@/lib/glas/streznik';
 import { preveriSerijoSalona } from '@/lib/termini/preveriSerijoSalona';
 import { NAJVEC_TERMINOV } from '@/lib/termini/serija';
@@ -40,6 +41,8 @@ export async function POST(req: NextRequest) {
   if (!kont.ok) return kont.odziv;
   const { k, odvisnosti } = kont;
   if (!imaPravico(k, 'termini.ustvarjanje')) return odziv(403, 'ni_pravice');
+  // Ponavljajoči termini: zgodnji dostop (lib/zgodnjiDostop).
+  if (!imaZgodnjiDostop(k.podjetje)) return odziv(403, 'ni_pravice');
   // Koledar pošlje »ref« ("ID osebe") ali Osebe.id; ključ za termine je Osebe.id.
   const oseba = (await odvisnosti.podatki.osebe()).find((o) => o.id === v.data.oseba || o.sifra === v.data.oseba);
   if (!oseba) return odziv(404, 'ni_osebe');

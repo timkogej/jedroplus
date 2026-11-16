@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { imaZgodnjiDostop } from '@/lib/zgodnjiDostop';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   ChartBar,
@@ -27,6 +28,7 @@ import {
   CaretDown,
   Cube,
   Sparkle,
+  Phone,
 } from '@phosphor-icons/react';
 import { useSidebar } from './sidebar-context';
 import { JedroLogo, JedroMark } from '@/components/brand/JedroLogo';
@@ -300,7 +302,19 @@ export function Sidebar() {
   const { role, permissions } = useRolePermissions();
 
   const isFree = planCode === 'FREE';
-  const baseNavigationSections = isFree ? buildNavigationSectionsFree(t) : buildNavigationSectionsPaid(t);
+  const { companyId } = useCompany();
+  const zgodnji = imaZgodnjiDostop(companyId);
+  // Stran »AI asistenti« (Asistent+) samo z zgodnjim dostopom; ostali vidijo Receptionist+ kot prej.
+  const baseNavigationSections = (isFree ? buildNavigationSectionsFree(t) : buildNavigationSectionsPaid(t)).map((sekcija) =>
+    zgodnji
+      ? sekcija
+      : {
+          ...sekcija,
+          items: sekcija.items.map((item) =>
+            item.href === '/ai' ? { ...item, name: t('sidebar.items.receptionistPlus'), href: '/receptionist-plus', icon: Phone } : item
+          ),
+        }
+  );
 
   // Free accounts with a one-time reminder quota can open Opomniki.
   const { usage: billingUsage } = useBillingUsage();

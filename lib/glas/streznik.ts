@@ -10,6 +10,7 @@
 import 'server-only';
 import { NextResponse } from 'next/server';
 import { jezikZaPogovor, paketDovoliGlas, paketPodjetja } from './paket';
+import { imaZgodnjiDostop } from '@/lib/zgodnjiDostop';
 import { createClient } from '@supabase/supabase-js';
 import { createServerSupabaseClient } from '@/lib/supabaseServer';
 import { fetchCompanyRegionServer } from '@/lib/region.server';
@@ -96,7 +97,8 @@ export async function kontekstIzSeje(): Promise<IzidKonteksta> {
     sporocila: posiljateljN8n(admin),
     opomniki: shrambaOpomnikov(admin),
   };
-  return { ok: true, k, odvisnosti, glasVPaketu };
+  // Zgodnji dostop: Asistent+ samo izbranim podjetjem, dokler ga Tim ne preizkusi (lib/zgodnjiDostop).
+  return { ok: true, k, odvisnosti, glasVPaketu: glasVPaketu && imaZgodnjiDostop(besedilniId) };
 }
 
 /** Telo JSON z omejeno velikostjo (zaščita pred velikimi zahtevki). */

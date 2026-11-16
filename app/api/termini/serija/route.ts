@@ -9,6 +9,7 @@ import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { rateLimit } from '@/lib/rateLimit';
 import { imaPravico } from '@/lib/glas/pravice';
+import { imaZgodnjiDostop } from '@/lib/zgodnjiDostop';
 import { kontekstIzSeje, preberiJson } from '@/lib/glas/streznik';
 import { NAJVEC_TERMINOV } from '@/lib/termini/serija';
 
@@ -32,6 +33,8 @@ export async function POST(req: NextRequest) {
   if (!kont.ok) return kont.odziv;
   const { k } = kont;
   if (!imaPravico(k, 'termini.ustvarjanje')) return odziv(403, 'ni_pravice');
+  // Ponavljajoči termini: zgodnji dostop (lib/zgodnjiDostop).
+  if (!imaZgodnjiDostop(k.podjetje)) return odziv(403, 'ni_pravice');
 
   const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { autoRefreshToken: false, persistSession: false },

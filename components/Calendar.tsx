@@ -86,6 +86,7 @@ import { pickFirst } from '@/lib/dashboardHelpers';
 import { supabase } from '@/lib/supabaseClient';
 import { logZgodovina } from '@/lib/supabase/zgodovina';
 import { useCompany } from '@/app/company-context';
+import { imaZgodnjiDostop } from '@/lib/zgodnjiDostop';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
@@ -155,6 +156,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const { matchesLocation, personAtSelected, serviceAtSelected, selectedLocationId } = useLocationScope();
   const locale = useLocale();
   const { companySettings } = useCompany();
+  // Ponavljajoči termini (Ponovi, serija) samo z zgodnjim dostopom (lib/zgodnjiDostop).
+  const serijeVklopljene = imaZgodnjiDostop(companyId);
   const { user } = useAuth();
   const { role, personId: rolePersonId, permissions } = useRolePermissions();
 
@@ -2914,9 +2917,9 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                 const clan = selectedAppointment.id_termina ? serijeTerminov.get(selectedAppointment.id_termina) : undefined;
                 return clan ? { zap: clan.zap, skupaj: clan.termini.length, prihodnjih: clan.termini.length - clan.zap + 1 } : null;
               })()}
-              onCancelSeries={aptEditable ? handleCancelSeries : undefined}
-              onRescheduleSeries={aptEditable ? handleRescheduleSeries : undefined}
-              onRepeat={canCreateAppointment && selectedAppointment.belezi_termin !== false ? handleRepeatAppointment : undefined}
+              onCancelSeries={aptEditable && serijeVklopljene ? handleCancelSeries : undefined}
+              onRescheduleSeries={aptEditable && serijeVklopljene ? handleRescheduleSeries : undefined}
+              onRepeat={serijeVklopljene && canCreateAppointment && selectedAppointment.belezi_termin !== false ? handleRepeatAppointment : undefined}
               glasAkcija={glasAkcija && (selectedAppointment.id_termina === glasAkcija.termin || selectedAppointment.id === glasAkcija.termin) ? glasAkcija.akcija : null}
             />
           );
@@ -2945,7 +2948,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : glasOsebaId}
         lockEmployee={role === 'staff' && Boolean(rolePersonId)}
         predizpolnitev={glasPredizpolnitev}
-        omogociPonovitev={canCreateAppointment}
+        omogociPonovitev={canCreateAppointment && serijeVklopljene}
       />
 
       {serija && (

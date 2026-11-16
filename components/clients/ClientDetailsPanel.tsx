@@ -34,6 +34,7 @@ import ClientInitialsBadge from './ClientInitialsBadge';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
 import LoyaltyClientCard from './LoyaltyClientCard';
 import ZapiskiStranke from './ZapiskiStranke';
+import { imaZgodnjiDostop } from '@/lib/zgodnjiDostop';
 
 interface ClientDetailsPanelProps {
   isOpen: boolean;
@@ -398,7 +399,7 @@ function ClientDetailsPanel({
               })()}
 
               {/* Zapiski (Asistent+): recepture, preference, opombe */}
-              <ZapiskiStranke companyId={companyId} clientId={client.id} />
+              {imaZgodnjiDostop(companyId) && <ZapiskiStranke companyId={companyId} clientId={client.id} />}
 
               {/* Statistika — povzetek z lasnimi črtami */}
               <section>
