@@ -142,11 +142,13 @@
     },
     "resourceConflict": {
       "busyTitle": "Risorsa occupata",
-      "unavailableTitle": "Risorsa non disponibile",
+      "unavailableTitle": "Risorsa non disponibile secondo l'orario",
       "checkTitle": "Verifica la disponibilità della risorsa",
       "unavailableAt": "{name}: non disponibile in questo orario",
       "capacity": "{name}: {used}/{max} posti occupati",
-      "saveAnyway": "Puoi comunque salvare l'appuntamento."
+      "saveAnyway": "Puoi comunque salvare l'appuntamento.",
+      "outsideHours": "{name}: non disponibile a quest'ora (orario della risorsa: {hours})",
+      "dayOff": "{name}: non disponibile in questo giorno secondo l'orario della risorsa"
     },
     "addNotes": "Aggiungi note per il cliente",
     "staffConflict": {

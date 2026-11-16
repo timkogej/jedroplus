@@ -161,6 +161,17 @@ function isTimeInResourceSchedule(
   });
 }
 
+/** Delovni čas resursa na dan datuma, npr. "08:00–20:00"; prazen niz, če ta dan ne dela. */
+function describeResourceDay(urnik: UrnikData | IzmenicenUrnik, datum: string): string {
+  const dayMap: Record<number, keyof UrnikData> = {
+    0: 'Nedelja', 1: 'Ponedeljek', 2: 'Torek', 3: 'Sreda', 4: 'Četrtek', 5: 'Petek', 6: 'Sobota',
+  };
+  const date = parseDateKey(datum);
+  const day = getUrnikZaDan(urnik, date)[dayMap[date.getDay()]] as unknown;
+  if (!day || typeof day !== 'object' || !isEnabledValue((day as Record<string, unknown>).enabled)) return '';
+  return getIntervals(day).map((i) => `${i.start}–${i.end}`).join(', ');
+}
+
 function isBlockingAppointment(row: Record<string, unknown>): boolean {
   const status = String(row['Status'] ?? '').trim().toLowerCase();
   return !['cancelled', 'canceled', 'odpovedan', 'odpovedano'].includes(status);
@@ -736,6 +747,8 @@ export interface ResourceConflict {
   trenutnoZasedeno: number;
   maxKapaciteta: number;
   tip: 'zaseden' | 'urnik';
+  /** Samo pri tip 'urnik': delovni čas resursa na ta dan ("08:00–20:00"); prazno = ta dan resurs ne dela. */
+  urnikUre?: string;
 }
 
 export async function checkResourceConflicts(
@@ -826,6 +839,7 @@ export async function checkResourceConflicts(
           trenutnoZasedeno: 0,
           maxKapaciteta: resourceCapacity(r),
           tip: 'urnik',
+          urnikUre: describeResourceDay(urnik, datum),
         });
         continue;
       }

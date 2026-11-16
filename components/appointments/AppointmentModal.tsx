@@ -303,6 +303,10 @@ function AppointmentModal({
   const [resourceConflicts, setResourceConflicts] = useState<ResourceConflict[]>([]);
   // Resource row-ids this appointment already occupies — suppressed from conflict warnings in edit mode
   const [ownResursIds, setOwnResursIds] = useState<Set<number>>(new Set());
+  const resourceScheduleLine = (c: ResourceConflict) =>
+    c.urnikUre
+      ? t('modal.resourceConflict.outsideHours', { name: c.naziv, hours: c.urnikUre })
+      : t('modal.resourceConflict.dayOff', { name: c.naziv });
   const resourceConflictTitle = useMemo(() => {
     if (resourceConflicts.length === 0) return '';
     if (resourceConflicts.every((c) => c.tip === 'zaseden')) return t('modal.resourceConflict.busyTitle');
@@ -2263,7 +2267,7 @@ function AppointmentModal({
                         {resourceConflicts.map((c) => (
                           <p key={c.resursId} className="mt-0.5 text-sm text-red-700">
                             {c.tip === 'urnik'
-                              ? t('modal.resourceConflict.unavailableAt', { name: c.naziv })
+                              ? resourceScheduleLine(c)
                               : t('modal.resourceConflict.capacity', { name: c.naziv, used: c.trenutnoZasedeno, max: c.maxKapaciteta })
                             }
                           </p>
@@ -2304,7 +2308,7 @@ function AppointmentModal({
                       {conflictDialog.resources.map((c) => (
                         <li key={`r${c.resursId}`}>
                           {c.tip === 'urnik'
-                            ? t('modal.resourceConflict.unavailableAt', { name: c.naziv })
+                            ? resourceScheduleLine(c)
                             : t('modal.resourceConflict.capacity', { name: c.naziv, used: c.trenutnoZasedeno, max: c.maxKapaciteta })}
                         </li>
                       ))}

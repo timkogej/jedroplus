@@ -142,11 +142,13 @@
     },
     "resourceConflict": {
       "busyTitle": "Ressource belegt",
-      "unavailableTitle": "Ressource nicht verfügbar",
+      "unavailableTitle": "Ressource laut Plan nicht verfügbar",
       "checkTitle": "Verfügbarkeit der Ressource prüfen",
       "unavailableAt": "{name}: zu dieser Zeit nicht verfügbar",
       "capacity": "{name}: {used}/{max} Plätze belegt",
-      "saveAnyway": "Sie können den Termin trotzdem speichern."
+      "saveAnyway": "Sie können den Termin trotzdem speichern.",
+      "outsideHours": "{name}: zu dieser Zeit nicht verfügbar (Zeiten der Ressource: {hours})",
+      "dayOff": "{name}: an diesem Tag laut Ressourcenplan nicht verfügbar"
     },
     "addNotes": "Notizen für den Kunden hinzufügen",
     "staffConflict": {
