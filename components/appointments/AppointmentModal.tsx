@@ -164,7 +164,7 @@ function AppointmentModal({
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
   const { currency: defaultCurrency } = useCompanyRegion();
   const { user } = useAuth();
-  const { personId, role, permissions } = useRolePermissions();
+  const { personId, role, permissions, canSeeGhost } = useRolePermissions();
   useModalScrollLock(isOpen);
 
   // Inline client creation state
@@ -2130,8 +2130,9 @@ function AppointmentModal({
               />
             )}
 
-            {/* Ghost termin toggle — owner/admin always see it, staff only if permission granted */}
-            {!isViewMode && (role === 'owner' || role === 'admin' || (role === 'staff' && (permissions?.can_create_ghost_termin ?? false))) && (
+            {/* Ghost termin toggle — owner/admin always may create, staff only with permission. A termin that is
+                already ghost is only shown as ghost (and editable) to those who may see ghosts. */}
+            {!isViewMode && (role === 'owner' || role === 'admin' || (role === 'staff' && (permissions?.can_create_ghost_termin ?? false))) && (mode !== 'edit' || canSeeGhost) && (
               <div className={`${sectionClass} space-y-2`}>
                 <div className="flex items-center justify-between gap-4">
                   <div>

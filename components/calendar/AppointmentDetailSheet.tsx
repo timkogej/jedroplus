@@ -27,6 +27,7 @@ import {
   EyeSlash,
 } from '@phosphor-icons/react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useRolePermissions } from '@/app/role-permission-context';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Resurs } from '@/types/resursi';
 import CommunicationLanguageFlag from '@/components/shared/CommunicationLanguageFlag';
@@ -119,6 +120,7 @@ export function AppointmentDetailModal({
   onDelete?: (appointment: AppointmentWithDetails) => void;
   onOpenClientDetails?: (appointment: AppointmentWithDetails) => void | Promise<void>;
 }) {
+  const { canSeeGhost } = useRolePermissions();
   const t = useTranslations('appointments');
   const tCommon = useTranslations('common');
   const locale = useLocale();
@@ -509,9 +511,9 @@ export function AppointmentDetailModal({
         )}
 
         {/* Podrobnosti — ID termina in ali se termin beleži */}
-        {(appointment.id_termina || appointment.belezi_termin === false) && (
+        {(appointment.id_termina || (canSeeGhost && appointment.belezi_termin === false)) && (
           <SheetGroup label={t('calendarView.detailModal.fields.details')}>
-            {appointment.belezi_termin === false && (
+            {canSeeGhost && appointment.belezi_termin === false && (
               <SheetRow label={t('ghost.title')}>
                 <span className="flex min-w-0 items-center gap-2.5">
                   <EyeSlash className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />

@@ -261,7 +261,8 @@
         "can_manage_rezervacije": "Upravljanje Rezervacijama",
         "can_access_lost_leads": "Pristup izgubljenim klijentima",
         "can_manage_lost_leads": "Upravljanje izgubljenim klijentima",
-        "can_create_ghost_termin": "Može izraditi nezabilježene termine (ne ulaze u analitiku)"
+        "can_create_ghost_termin": "Može izraditi nezabilježene termine (ne ulaze u analitiku)",
+        "can_view_ghost_termini": "Vidi koji su termini ghost (ostali ih vide kao uobičajene)"
       }
     },
     "invite": {

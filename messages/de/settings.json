@@ -261,7 +261,8 @@
         "can_manage_rezervacije": "Buchungen verwalten",
         "can_access_lost_leads": "Zugriff auf verlorene Kunden",
         "can_manage_lost_leads": "Verlorene Kunden verwalten",
-        "can_create_ghost_termin": "Darf nicht erfasste Termine anlegen (zählen nicht in den Auswertungen)"
+        "can_create_ghost_termin": "Darf nicht erfasste Termine anlegen (zählen nicht in den Auswertungen)",
+        "can_view_ghost_termini": "Sieht, welche Termine Ghost-Termine sind (andere sehen sie als normale Termine)"
       }
     },
     "invite": {

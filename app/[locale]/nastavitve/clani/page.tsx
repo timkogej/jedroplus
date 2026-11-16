@@ -73,6 +73,8 @@ interface StaffPermissions {
   can_view_zgodovina: boolean;
   // Ghost termini
   can_create_ghost_termin: boolean;
+  can_view_ghost_termini: boolean;
+  past_appointments_days?: number | null;
 }
 
 // ─── Permission config ────────────────────────────────────────────────────────
@@ -91,6 +93,7 @@ const permissionSections: {
       { key: 'can_create_appointments' },
       { key: 'can_delete_appointments' },
       { key: 'can_create_ghost_termin' },
+      { key: 'can_view_ghost_termini' },
     ],
   },
   {
@@ -340,9 +343,12 @@ export default function ClaniPage() {
     setSaveError(false);
 
     // Build the full permissions payload (exclude id & company_id from permission keys)
+    // Ključi, ki jih n8n ne pozna, se shranijo prek lastne poti (/api/staff-permissions/privacy).
+    const DIRECT_KEYS: (keyof StaffPermissions)[] = ['can_view_ghost_termini'];
     const permissionData: Record<string, boolean> = {};
     for (const section of permissionSections) {
       for (const { key } of section.keys) {
+        if (DIRECT_KEYS.includes(key)) continue;
         permissionData[key] = permissions[key] as boolean;
       }
     }
@@ -360,7 +366,21 @@ export default function ClaniPage() {
       },
     });
 
+    let directOk = true;
     if (result.ok) {
+      try {
+        const resp = await fetch('/api/staff-permissions/privacy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ can_view_ghost_termini: permissions.can_view_ghost_termini === true }),
+        });
+        directOk = resp.ok;
+      } catch {
+        directOk = false;
+      }
+    }
+
+    if (result.ok && directOk) {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } else {

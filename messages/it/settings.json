@@ -261,7 +261,8 @@
         "can_manage_rezervacije": "Gestione delle Prenotazioni",
         "can_access_lost_leads": "Accesso ai clienti persi",
         "can_manage_lost_leads": "Gestione dei clienti persi",
-        "can_create_ghost_termin": "Può creare appuntamenti non registrati (esclusi dalle analisi)"
+        "can_create_ghost_termin": "Può creare appuntamenti non registrati (esclusi dalle analisi)",
+        "can_view_ghost_termini": "Vede quali appuntamenti sono ghost (gli altri li vedono come normali)"
       }
     },
     "invite": {

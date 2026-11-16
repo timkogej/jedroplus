@@ -40,4 +40,8 @@ export interface StaffPermissions {
   can_view_zgodovina: boolean;
   // Ghost termini
   can_create_ghost_termin: boolean;
+  /** Ali oseba (poleg lastnika) vidi, kateri termini so ghost. Privzeto ne. */
+  can_view_ghost_termini: boolean;
+  /** Koliko dni nazaj vidi pretekle termine: null = vse, 0 = nobenih. */
+  past_appointments_days: number | null;
 }

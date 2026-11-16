@@ -261,7 +261,8 @@
         "can_manage_rezervacije": "Manage Reservations",
         "can_access_lost_leads": "Access to Lost Leads",
         "can_manage_lost_leads": "Manage Lost Leads",
-        "can_create_ghost_termin": "Can create unrecorded appointments (not counted in analytics)"
+        "can_create_ghost_termin": "Can create unrecorded appointments (not counted in analytics)",
+        "can_view_ghost_termini": "Can see which appointments are ghost (others see them as normal)"
       }
     },
     "invite": {
