@@ -233,7 +233,13 @@ export interface StoritevPovzetek {
 }
 
 export interface OsebaPovzetek {
-  id: string; // "ID osebe" — enako kot Termini."ID Osebe"
+  /**
+   * Osebe.id (številčni) — enako kot Termini."ID Osebe", absences.employee_id in
+   * company_members.person_id. (Preverjeno na bazi 16. 11.: vsi termini.)
+   */
+  id: string;
+  /** Osebe."ID osebe" (besedilni) — samo Osebe_Lokacije in »ref« v koledarju. */
+  sifra?: string;
   ime: string;
   priimek: string;
   aktivna: boolean;

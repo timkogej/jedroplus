@@ -3,8 +3,9 @@
 // »Sporoči Ani, da zamujamo 15 minut.« (docs/glasovni-asistent-dodatne-funkcije-nacrt.md, §3)
 //
 // Pravila, ki jih model ne more obiti (vse preveri strežnik, ob predlogu IN ob potrditvi):
-//   * sporočilo je vedno vezano na termin stranke (danes, tudi že opravljen, ali v 30 dneh; tudi odpovedan),
-//     zato je storitveno sporočilo in ne marketing;
+//   * sporočilo je vedno vezano na termin stranke (zadnjih 7 dni, danes ali v 30 dneh; odpovedan samo
+//     današnji ali prihodnji), zato je storitveno sporočilo in ne marketing; ob več terminih orodje
+//     samo vzame najbližjega (ne sprašuje);
 //   * besedilo s ponudbo, ceno, povezavo ali telefonsko številko se zavrne;
 //   * telefon in e-naslov prebere strežnik z uporabnikovo sejo (RLS); model ju ne vidi;
 //   * podpis salona doda strežnik; SMS je en sam (160 znakov brez šumnikov);
@@ -62,7 +63,38 @@ export function jezikStranke(koda: string | null): Jezik {
   return IZ_KODE[normalizeCommunicationLanguage(koda, 'slo')] ?? 'sl';
 }
 
-/** Termin, o katerem govori sporočilo: aktiven (prednost) ali odpovedan, danes ali v 30 dneh. */
+/** Koliko dni nazaj šteje opravljen termin (»pozabili ste dežnik«, »pozabila je račun«). */
+const DNI_NAZAJ = 7;
+
+/**
+ * Ali je termin lahko podlaga za sporočilo: prihodnji ali današnji (aktiven, opravljen ali
+ * odpovedan) ali nedavni (zadnjih 7 dni), ki se je zgodil. Odpovedan pretekli in neprihod ne.
+ */
+export function terminZaSporocilo(t: TerminPovzetek, danes: string): boolean {
+  if (t.datum >= danes) return aktiven(t) || t.status === 'cancelled' || t.status === 'completed';
+  return t.datum >= dodajDni(danes, -DNI_NAZAJ) && (aktiven(t) || t.status === 'completed');
+}
+
+/**
+ * Najbolj smiseln termin brez vprašanja (Tim, 16. 11.: »itak je ista oseba«):
+ * današnji (že začet ima prednost: sporočilo je največkrat o obisku, ki je bil),
+ * sicer najbližji prihodnji, sicer zadnji nedavni.
+ */
+export function najblizjiTermin(termini: TerminPovzetek[], danes: string, uraZdaj: string): TerminPovzetek | null {
+  const zdaj = vMinute(uraZdaj);
+  const danasnji = termini.filter((t) => t.datum === danes);
+  if (danasnji.length) {
+    const zacet = danasnji.filter((t) => vMinute(t.zacetek) <= zdaj);
+    return zacet.length ? zacet[zacet.length - 1] : danasnji[0];
+  }
+  return termini.find((t) => t.datum > danes) ?? [...termini].reverse().find((t) => t.datum < danes) ?? null;
+}
+
+/**
+ * Termin, o katerem govori sporočilo. Ne sprašuje: če je več terminov, vzame najbližjega
+ * (povedan dan ima prednost; če tisti dan termina ni, velja najbližji — dan v besedilu
+ * je pogosto vsebina sporočila, ne dan termina: »jutri naj parkira pri Lidlu«).
+ */
 async function izberiTermin(
   o: OkoljeOrodja,
   s: StrankaPovzetek,
@@ -70,36 +102,38 @@ async function izberiTermin(
   p: Pick<Vhod, 'termin_id' | 'datum_termina' | 'o_odpovedi'>
 ): Promise<{ termin: TerminPovzetek } | { odgovor: RezultatOrodja }> {
   const dan = p.datum_termina ? datumIzParametra(p.datum_termina, o.danes) : null;
-  const od = dan ?? o.danes;
-  const doo = dan ?? dodajDni(o.danes, DNI_NAPREJ);
-  if (od < o.danes) return { odgovor: { sporocilo: jt('Sporočilo lahko pošljem samo o današnjem ali prihodnjem terminu.') } };
-  let termini = (await o.podatki.termini(od, doo))
-    // Današnji že opravljen termin šteje (»pozabili ste dežnik«, Tim 15. 11.); pretekli dnevi ne.
-    .filter((t) => terminJeStranke(t, s) && (aktiven(t) || t.status === 'cancelled' || (t.status === 'completed' && t.datum === o.danes)))
+  const od = dodajDni(o.danes, -DNI_NAZAJ);
+  const doo = dodajDni(o.danes, DNI_NAPREJ);
+  let termini = (await o.podatki.termini(dan && dan < od ? dan : od, dan && dan > doo ? dan : doo))
+    .filter((t) => terminJeStranke(t, s) && terminZaSporocilo(t, o.danes))
     .sort((a, b) => a.datum.localeCompare(b.datum) || vMinute(a.zacetek) - vMinute(b.zacetek));
-  if (p.termin_id) termini = termini.filter((t) => t.id === p.termin_id);
-  // Obvestilo o odpovedi samo za termin, ki je v bazi res odpovedan; sicer prednost aktivnim in današnjim opravljenim.
-  const veljaven = (t: TerminPovzetek) => aktiven(t) || t.status === 'completed';
-  const izbor = p.o_odpovedi ? termini.filter((t) => t.status === 'cancelled') : termini.some(veljaven) ? termini.filter(veljaven) : termini;
-  if (p.o_odpovedi && izbor.length === 0 && termini.length > 0) {
-    return { odgovor: { sporocilo: jt('Termin še ni odpovedan. Najprej ga odpovejte v koledarju, nato recite »obvesti stranko«.') } };
+  if (p.termin_id && termini.some((t) => t.id === p.termin_id)) termini = termini.filter((t) => t.id === p.termin_id);
+
+  if (p.o_odpovedi) {
+    // Obvestilo o odpovedi samo za termin, ki je v bazi res odpovedan.
+    const odpovedani = termini.filter((t) => t.status === 'cancelled');
+    if (odpovedani.length === 0) {
+      return termini.length > 0
+        ? { odgovor: { sporocilo: jt('Termin še ni odpovedan. Najprej ga odpovejte v koledarju, nato recite »obvesti stranko«.') } }
+        : { odgovor: { sporocilo: jt('{ime} nima odpovedanega termina.', { ime }) } };
+    }
+    const naDan = dan ? odpovedani.filter((t) => t.datum === dan) : [];
+    return { termin: (naDan.length ? naDan : odpovedani)[0] };
   }
-  if (izbor.length === 0) {
-    return { odgovor: { sporocilo: jt('Sporočilo lahko pošljem samo o terminu. {ime} nima termina v naslednjih {n} dneh.', { ime, n: DNI_NAPREJ }) } };
-  }
-  if (izbor.length > 1) {
+
+  // Odpovedan termin je podlaga samo, če drugega ni (»sporoči ji, da …« po odpovedi).
+  const veljavni = termini.filter((t) => t.status !== 'cancelled');
+  const izbor = veljavni.length ? veljavni : termini;
+  const naDan = dan ? izbor.filter((t) => t.datum === dan) : [];
+  const t = najblizjiTermin(naDan.length ? naDan : izbor, o.danes, o.uraZdaj);
+  if (!t) {
     return {
       odgovor: {
-        sporocilo: jt('{ime} ima več terminov. O katerem?', { ime }),
-        podatki: { stranka_id: s.id },
-        vprasanje: {
-          besedilo: jt('Kateri termin?'),
-          moznosti: izbor.slice(0, 5).map((t) => ({ id: t.id, oznaka: `${jt('{datum} ob {ura}', { datum: opisDatuma(t.datum, o.danes), ura: t.zacetek })}${t.storitev ? `, ${t.storitev}` : ''}` })),
-        },
+        sporocilo: jt('{ime} nima termina med zadnjimi {nazaj} dnevi in naslednjimi {n} dnevi. Sporočilo lahko pošljem samo v zvezi s terminom.', { ime, nazaj: DNI_NAZAJ, n: DNI_NAPREJ }),
       },
     };
   }
-  return { termin: izbor[0] };
+  return { termin: t };
 }
 
 export function zavrnitevBesedila(besedilo: string): RezultatOrodja | null {
@@ -117,7 +151,8 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
   opis:
     'Pošlje stranki kratko sporočilo o njenem terminu (SMS, brez telefona e-pošta): zamuda, sprememba, prošnja, odpoved ("sporoči Ani, da zamujamo 15 minut"). ' +
     'Besedilo napiši sam v jeziku stranke: kratko, vljudno, vikanje, brez podpisa, brez ponudb, cen, povezav in telefonskih številk. ' +
-    'Orodje najde termin, doda podpis salona in pokaže predogled; pošlje se šele po potrditvi uporabnika. ' +
+    'Orodje samo najde termin stranke (današnji, tudi že minuli, prihodnji ali iz zadnjih 7 dni) — pokliči ga takoj, nikoli sam ne sklepaj, da stranka nima termina. ' +
+    'Doda podpis salona in pokaže predogled; pošlje se šele po potrditvi uporabnika. ' +
     'Popravek odprtega predloga (drugo besedilo, krajše, brez podpisa): pokliči znova z istim termin_id in popravljenimi polji.',
   razred: 'sporocila',
   pravica: 'sporocila.stranke',
@@ -127,8 +162,8 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
     properties: {
       stranka: { type: 'string', description: 'Ime stranke, kot je bilo izgovorjeno.' },
       stranka_id: { type: ['string', 'null'], description: 'ID stranke iz uvoda ali prejšnjega iskanja, sicer null.' },
-      termin_id: { type: ['string', 'null'], description: 'ID termina, če ga je uporabnik izbral ali gre za aktiven termin, sicer null.' },
-      datum_termina: { type: ['string', 'null'], description: 'Datum termina YYYY-MM-DD, če ga je uporabnik povedal, sicer null.' },
+      termin_id: { type: ['string', 'null'], description: 'ID termina, če ga je uporabnik izbral ali gre za aktiven termin te stranke, sicer null (orodje samo vzame najbližji termin).' },
+      datum_termina: { type: ['string', 'null'], description: 'Dan TERMINA, samo če ga uporabnik izrecno poimenuje ("o terminu v sredo"). Dan v vsebini sporočila ("jutri naj parkira pri Lidlu") ni dan termina: null.' },
       besedilo: { type: 'string', description: 'Besedilo sporočila stranki (en SMS, do ~120 znakov), brez podpisa.' },
       jezik_besedila: { type: 'string', enum: [...JEZIKI], description: 'Jezik, v katerem je napisano besedilo.' },
       o_odpovedi: { type: 'boolean', description: 'true, če sporočilo pove, da je termin odpovedan (obvestilo po odpovedi).' },
@@ -180,10 +215,13 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
     const vrstice = [
       { oznaka: jt('Prejemnik'), vrednost: `${ime}, ${kanal === 'sms' ? skritTelefon(kartica!.telefon!) : skritEmail(kartica!.email!)}` },
       { oznaka: jt('Termin'), vrednost: t.status === 'cancelled' ? `${kdaj} (${jt('odpovedan')})` : kdaj },
-      { oznaka: jt('Kanal'), vrednost: kanal === 'sms' ? `SMS · ${besedilo.length}/${NAJVEC_SMS}` : jt('e-pošta (ni telefona)') },
+      { oznaka: jt('Kanal'), vrednost: kanal === 'sms' ? `SMS · ${besedilo.length}/${NAJVEC_SMS} · ${jt('brez šumnikov')}` : jt('e-pošta (ni telefona)') },
     ];
     return {
-      povzetek: kanal === 'sms' ? jt('SMS za {ime}: »{besedilo}«', { ime, besedilo }) : jt('E-pošta za {ime}: »{besedilo}«', { ime, besedilo }),
+      // Na zaslonu in v govoru s šumniki (»opazamo« bere kot tipkarsko napako); ven gre `besedilo` brez njih.
+      povzetek: kanal === 'sms'
+        ? jt('SMS — {ime}: »{besedilo}«', { ime, besedilo: zPodpisom(p.besedilo, podpis) })
+        : jt('E-pošta — {ime}: »{besedilo}«', { ime, besedilo }),
       parametri: { idStranke: s.id, imeStranke: ime, idTermina: t.id, datumTermina: t.datum, kanal, besedilo, zadeva, jezik, oOdpovedi: p.o_odpovedi },
       podrobnosti: vrstice,
       sporocil: 1,
@@ -199,7 +237,7 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
     const s = await o.podatki.stranka(p.idStranke);
     if (!s) return ni(jt('Stranke ni več mogoče najti. Sporočilo ni bilo poslano.'));
     const t = (await o.podatki.termini(p.datumTermina, p.datumTermina)).find((x) => x.id === p.idTermina && (!x.idStranke || x.idStranke === p.idStranke));
-    if (!t || !(aktiven(t) || t.status === 'cancelled' || (t.status === 'completed' && t.datum === o.danes))) return ni(jt('Termina ni več. Sporočilo ni bilo poslano.'));
+    if (!t || !terminZaSporocilo(t, o.danes)) return ni(jt('Termina ni več. Sporočilo ni bilo poslano.'));
     if (p.oOdpovedi && t.status !== 'cancelled') return ni(jt('Termin ni odpovedan. Sporočilo ni bilo poslano.'));
     if (nePrisvojem(o, t)) return ni(jt('Sporočila lahko pošiljate samo strankam svojih terminov.'));
     if (preveriBesedilo(p.besedilo)) return ni(jt('Sporočilo o terminu ne sme vsebovati ponudb, cen ali povezav. Ni poslano.'));

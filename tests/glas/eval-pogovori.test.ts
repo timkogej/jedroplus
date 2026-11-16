@@ -68,11 +68,11 @@ const POGOVORI: {
   // Isto kot zadnjič.
   { ukazi: ['Zapiši Matejo isto kot zadnjič čez šest tednov.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-12-24' } },
   // Sporoči stranki: predlog SMS (pošlje šele potrditev). Ana prejema v angleščini → model napiše znova.
-  { ukazi: ['Sporoči Mateji, da jutri zamujamo kakšnih 15 minut.'], konec: {}, odgovor: { 0: /SMS za Mateja Kova[čc]i[čc]: ».*15/ }, ne: { 0: /jutri danes|danes jutri/i } },
+  { ukazi: ['Sporoči Mateji, da jutri zamujamo kakšnih 15 minut.'], konec: {}, odgovor: { 0: /SMS — Mateja Kova[čc]i[čc]: ».*15/ }, ne: { 0: /jutri danes|danes jutri/i } },
   // Popravek odprtega predloga: model mora znova poklicati orodje (ne samo reči, da je spremenil).
-  { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Brez podpisa na koncu.'], konec: {}, odgovor: { 1: /SMS za Mateja Kova[čc]i[čc]: ».*15 minut/ }, ne: { 1: /Salon Lepota/ } },
-  { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Dodaj še, da se opravičujemo.'], konec: {}, odgovor: { 1: /SMS za Mateja Kova[čc]i[čc]: ».*(opravic|oprost)/i } },
-  { ukazi: ['Sporoči Ani Novak, da danes zamujamo deset minut.'], konec: {}, odgovor: { 0: /SMS za Ana Novak: ».*(late|minutes)/i } },
+  { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Brez podpisa na koncu.'], konec: {}, odgovor: { 1: /SMS — Mateja Kova[čc]i[čc]: ».*15 minut/ }, ne: { 1: /Salon Lepota/ } },
+  { ukazi: ['Sporoči Mateji, da jutri zamujamo 15 minut.', 'Dodaj še, da se opravičujemo.'], konec: {}, odgovor: { 1: /SMS — Mateja Kova[čc]i[čc]: ».*(opravi[čc]|oprost)/i } },
+  { ukazi: ['Sporoči Ani Novak, da danes zamujamo deset minut.'], konec: {}, odgovor: { 0: /SMS — Ana Novak: ».*(late|minutes)/i } },
   // Povzetek dneva (model, ne hitra pot) in številke za lastnika (samo zaslon).
   { ukazi: ['Kako bo izgledal ponedeljek, kaj vse imamo?'], konec: {}, odgovor: { 0: /termin/i } },
   { ukazi: ['Koliko smo zaslužili ta mesec v primerjavi s prejšnjim?'], konec: {}, odgovor: { 0: /Zaslužek po ceniku/ } },  // Osebni opomniki (zdaj je četrtek 12. 11. ob 10.00).
@@ -82,12 +82,17 @@ const POGOVORI: {
   { ukazi: ['V petek popoldne me opomni, da naročim barve.'], konec: {}, odgovor: { 0: /Opomnik .*petek ob 14:00/ } },
   // Zapolnitev luknje (salon Z5: Tina jutri prosta od 10.30; Mateja ima kasnejši termin, Ana privolitev, Nina ne).
   { podjetje: 'Z5', ukazi: ['Stranka je odpovedala jutri ob pol enajstih pri Tini. Koga naj pokličem?'], konec: {}, odgovor: { 0: /Mateja Kos[\s\S]*Ana Novak[\s\S]*Nina Bela/ } },
-  { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji Mateji predlog.'], konec: {}, odgovor: { 1: /SMS za Mateja Kos: ».*(prestav|sprostil|prost)/i } },
+  { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji Mateji predlog.'], konec: {}, odgovor: { 1: /SMS — Mateja Kos: ».*(prestav|sprostil|prost)/i } },
   // Ponavljajoči termini (jutri je petek 13. 11.; Tina ima ob 9.00 Matejo do 10.30).
   { ukazi: ['Vpiši Matejo na barvanje pri Tini vsakih šest tednov ob desetih, šestkrat, začni jutri.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-11-13', ura: '10:00', ponovi: '6:6' }, odgovor: { 0: /Serija: 6 terminov[\s\S]*(predlog|Težave)/ } },
   { ukazi: ['Ana Novak bo do konca leta prihajala vsak torek ob dveh na moško striženje.'], konec: { stranka: '102', storitev: 's2', dan: '2026-11-17', ura: '14:00', ponovi: '1:7' } },
   { ukazi: ['Vpiši Matejo jutri ob enajstih na barvanje.', 'Naj se ponavlja vsakih osem tednov, petkrat.'], konec: { stranka: '101', dan: '2026-11-13', ura: '11:00', ponovi: '8:5' } },
-  { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji vsem SMS.'], konec: {}, odgovor: { 1: /SMS za (Mateja Kos|Ana Novak)|privolit/i }, ne: { 1: /SMS za Nina|popust/i } },
+  // Tim, 16. 11. (2. krog): sporočilo brez vprašanja o terminu in brez »nima termina« na pamet.
+  { ukazi: ['Sporoči Mateji, da je pozabila dežnik.'], konec: {}, odgovor: { 0: /SMS — Mateja Kova[čc]i[čc]: ».*de[žz]nik/i }, ne: { 0: /nima termina|kateri termin|hvala za razumevanje/i } },
+  { ukazi: ['Sporoči Ani Novak, da naj v sredo parkira pri Lidlu.'], konec: {}, odgovor: { 0: /SMS — Ana Novak: ».*(Lidl|park)/i }, ne: { 0: /nima termina|kateri termin/i } },
+  // Ponovi termin: storitev, zaposleni in ura iz zadnjega termina, prvi en teden po njem.
+  { ukazi: ['Ponovi Matejin termin za naslednje tri tedne, enako kot zadnjič.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', ura: '09:00', ponovi: '1:3' } },
+  { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji vsem SMS.'], konec: {}, odgovor: { 1: /SMS — (Mateja Kos|Ana Novak)|privolit/i }, ne: { 1: /SMS — Nina|popust/i } },
 ];
 
 describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {

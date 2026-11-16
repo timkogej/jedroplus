@@ -30,6 +30,11 @@ export function hitraPot(prepis: string): HitriKlic | null {
     return { orodje: 'koledar_dan', vhod: { datum: dan, samo_moji: oseba } };
   }
 
+  // Preteklik (Tim, 16. 11.: model je odgovoril na pamet in omenil samo en termin):
+  // "kaj sem imel danes", "kaj vse sem imela danes katere termine", "koga smo imeli danes"
+  const pr = b.match(new RegExp(`^(?:kaj(?: vse)?|katere termine|koga(?: vse)?) (sem|smo) (?:imel|imela|imeli)(?: ${DAN})?(?: (?:katere termine|na sporedu|na urniku))?$`));
+  if (pr) return { orodje: 'koledar_dan', vhod: { datum: pr[2] ?? null, samo_moji: pr[1] === 'sem' } };
+
   // "kaj me danes caka", "kaj me caka jutri", "povzetek dneva", "kako izgleda moj dan"
   const pz =
     b.match(new RegExp(`^kaj (me|nas)(?: ${DAN})? caka(?: ${DAN})?$`)) ??

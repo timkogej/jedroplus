@@ -72,7 +72,7 @@ describe('prestavi_termin', () => {
   it('izbran termin: nov dan, ista ura; opozori na odsotnost', async () => {
     const r = await prestaviTermin.izvedi({ stranka: 'Ana Novak', stranka_id: null, termin_id: 't2', datum_zdaj: null, nov_datum: 'v ponedeljek', nova_ura: null }, o());
     expect(r.obrazec).toEqual({ vrsta: 'prestavi_termin', polja: { idt: 't2', dan_prej: '2026-11-13', dan: '2026-11-16', ura: '11:00' } });
-    expect(r.sporocilo).toContain('Urška takrat po urniku ne dela ali je odsotna');
+    expect(r.sporocilo).toContain('pri Urški takrat ni delovnega časa ali je vpisana odsotnost');
   });
 
   it('zaposleni "samo svoji" ne prestavlja tujih', async () => {

@@ -94,15 +94,25 @@ describe('pripravi_serijo', () => {
     expect((await pripraviSerijo.izvedi(p({ brez_datumov: ['2026-12-24'] }), o())).sporocilo).toMatch(/^Tega datuma ni v seriji/);
   });
 
-  it('do datuma, vsak teden, manjkajoča ura, brez števila', async () => {
-    const r = await pripraviSerijo.izvedi(p({ vsakih_tednov: 1, stevilo: null, do_datuma: '2026-12-31', datum: '2026-12-01', ura: null }), o());
+  it('do datuma, vsak teden, ura in zaposleni iz zadnjega termina, brez števila', async () => {
+    // Tim, 16. 11.: serija je »isto kot«: storitev, zaposleni in ura iz zadnjega termina, brez vprašanj.
+    const r = await pripraviSerijo.izvedi(p({ vsakih_tednov: 1, stevilo: null, do_datuma: '2026-12-31', datum: '2026-12-01', ura: null, storitev: null, oseba: null, kot_zadnjic: false }), o());
     expect(r.obrazec?.polja.ponovi).toBe('1:5');
     expect(r.sporocilo).toContain('Serija: 5 terminov, vsak teden.');
-    expect(r.sporocilo).toContain('Datume preverim, ko bodo izpolnjeni dan, ura in zaposleni.');
+    expect(r.sporocilo).toContain('ob 09:00, Barvanje, pri Tini');
+    expect(r.sporocilo).not.toContain('Manjka');
     expect((await pripraviSerijo.izvedi(p({ stevilo: null }), o())).sporocilo).toBe('Kolikokrat ali do kdaj naj ponovim?');
     const vec = await pripraviSerijo.izvedi(p({ vsakih_tednov: 1, stevilo: 20 }), o());
     expect(vec.obrazec?.polja.ponovi).toBe('1:12');
     expect(vec.sporocilo).toContain('Največ 12 terminov naenkrat.');
+  });
+
+  it('»ponovi termin za tri tedne« brez dneva: prvi en ritem po zadnjem terminu, ne danes', async () => {
+    const r = await pripraviSerijo.izvedi(p({ vsakih_tednov: 1, stevilo: 3, do_datuma: null, datum: null, ura: null, storitev: null, oseba: null }), o());
+    expect(r.obrazec?.polja).toMatchObject({ dan: '2026-11-17', storitev: expect.any(String), oseba: expect.any(String) });
+    // Model pošlje »danes«/dan vzorca: prvi termin ni vzorec sam.
+    const vzorec = await pripraviSerijo.izvedi(p({ vsakih_tednov: 2, stevilo: 3, do_datuma: null, datum: '2026-10-20', ura: null }), o());
+    expect(vzorec.obrazec?.polja.dan).not.toBe('2026-10-20');
   });
 
   it('pravice: brez ustvarjanja terminov orodja ni; »samo svoji« ne vpiše za drugega', async () => {

@@ -103,7 +103,7 @@ describe('kartica_stranke in zadnja_barva', () => {
     const r = await karticaStranke.izvedi({ stranka: 'Mateja', stranka_id: null }, o());
     expect(r.sporocilo).toContain('Zadnjič: torek, 20. 10.');
     expect(r.sporocilo).toContain('Interne opombe: Alergija na amonijak');
-    expect(r.govor).toContain('Naslednjič pride jutri, v petek ob devetih.');
+    expect(r.govor).toContain('Naslednji termin je jutri, v petek ob devetih.');
     expect(r.govor).toContain('Zadnji zapisek: Ima rada kratke konice.');
   });
 

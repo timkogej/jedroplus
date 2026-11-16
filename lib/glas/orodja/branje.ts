@@ -11,7 +11,7 @@ import { poisci } from '../razresevanje/imena';
 import { prviProstiTermin, razcleniUrnik } from '../razresevanje/urnik';
 import type { TerminPovzetek } from '../tipi';
 import { datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
-import { oznakaStranke, razresiStranko, terminiStrank, ID_STRANKE } from './stranke';
+import { oznakaStranke, razresiStranko, terminiStrank, zadnjiInNaslednji, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 import { jt } from '../jeziki/t';
 
@@ -96,21 +96,32 @@ export const zadnjiObisk: BralnoOrodje<{ stranka: string; stranka_id: string | n
     const r = await razresiStranko(stranka, stranka_id, o);
     if ('odgovor' in r) return r.odgovor;
     const s = r.stranka;
-    const [zadnji, naslednji] = await Promise.all([
-      o.podatki.zadnjiTermin(s.id, o.danes),
-      o.podatki.naslednjiTermin(s.id, o.danes),
-    ]);
+    // Po trenutni uri: današnji termin, ki je že minil, je zadnji (ne »naslednjič danes«).
+    const { zadnji, naslednji } = await zadnjiInNaslednji(o, s);
     const ime = `${s.ime} ${s.priimek}`.trim();
+    // Brez glagola v pretekliku (»je bila«): spola stranke ne poznamo (Tim, 16. 11.: »Damjan je bila«).
+    const danes = (t: { datum: string }) => t.datum === o.danes;
     const deli: string[] = [];
-    if (zadnji) deli.push(jt('{ime} je bila zadnjič {datum} ({storitev}).', { ime, datum: opisDatuma(zadnji.datum, o.danes), storitev: zadnji.storitev || jt('termin') }));
-    else if (s.zadnjaInterakcija) deli.push(jt('{ime}: zadnja interakcija {datum}.', { ime, datum: opisDatuma(s.zadnjaInterakcija, o.danes) }));
+    if (zadnji) {
+      deli.push(danes(zadnji)
+        ? jt('{ime}: zadnji obisk danes ob {ura} ({storitev}).', { ime, ura: zadnji.zacetek, storitev: zadnji.storitev || jt('termin') })
+        : jt('{ime}: zadnji obisk {datum} ({storitev}).', { ime, datum: opisDatuma(zadnji.datum, o.danes), storitev: zadnji.storitev || jt('termin') }));
+    } else if (s.zadnjaInterakcija) deli.push(jt('{ime}: zadnja interakcija {datum}.', { ime, datum: opisDatuma(s.zadnjaInterakcija, o.danes) }));
     else deli.push(jt('{ime} še nima preteklega termina.', { ime }));
-    if (naslednji) deli.push(jt('Naslednjič: {datum} ob {ura}.', { datum: opisDatuma(naslednji.datum, o.danes), ura: naslednji.zacetek }));
+    deli.push(naslednji
+      ? jt('Naslednji termin: {datum} ob {ura}.', { datum: opisDatuma(naslednji.datum, o.danes), ura: naslednji.zacetek })
+      : jt('Naslednjega termina še ni.'));
     const govor: string[] = [];
-    if (zadnji) govor.push(jt('{ime} je bila zadnjič {datum}', { ime, datum: datumZaGovor(zadnji.datum, o.danes) }) + `${zadnji.storitev ? `, ${zadnji.storitev}` : ''}.`);
-    else if (s.zadnjaInterakcija) govor.push(jt('{ime} še nima termina, zadnja interakcija je bila {datum}.', { ime, datum: datumZaGovor(s.zadnjaInterakcija, o.danes) }));
+    if (zadnji) {
+      const storitev = zadnji.storitev ? `, ${zadnji.storitev}` : '';
+      govor.push(danes(zadnji)
+        ? `${jt('{ime}, zadnji obisk danes {ura}', { ime, ura: uraZaGovor(zadnji.zacetek) })}${storitev}.`
+        : `${jt('{ime}, zadnji obisk {datum}', { ime, datum: datumZaGovor(zadnji.datum, o.danes) })}${storitev}.`);
+    } else if (s.zadnjaInterakcija) govor.push(jt('{ime} še nima termina, zadnja interakcija je bila {datum}.', { ime, datum: datumZaGovor(s.zadnjaInterakcija, o.danes) }));
     else govor.push(jt('{ime} še nima preteklega termina.', { ime }));
-    if (naslednji) govor.push(jt('Naslednjič pride {datum} {ura}.', { datum: datumZaGovor(naslednji.datum, o.danes), ura: uraZaGovor(naslednji.zacetek) }));
+    govor.push(naslednji
+      ? jt('Naslednji termin je {datum} {ura}.', { datum: datumZaGovor(naslednji.datum, o.danes), ura: uraZaGovor(naslednji.zacetek) })
+      : jt('Naslednjega termina še ni.'));
     return {
       sporocilo: deli.join(' '),
       govor: govor.join(' '),
@@ -164,18 +175,39 @@ export const koledarDan: BralnoOrodje<{ datum: string | null; samo_moji: boolean
       (t) => `${t.zacetek}${t.konec ? `–${t.konec}` : ''} ${t.stranka || jt('stranka')}${t.storitev ? `, ${t.storitev}` : ''}${!svoji && t.oseba ? ` (${t.oseba})` : ''}`
     );
     const n = izbrani.length;
-    const naGlas = izbrani.slice(0, NAJVEC_NA_GLAS).map(
-      (t) => `${cap(uraZaGovor(t.zacetek))} ${t.stranka || jt('stranka')}${t.storitev ? `, ${t.storitev}` : ''}${!svoji && t.oseba ? `, ${t.oseba}` : ''}.`
-    );
-    const ostali = n - naGlas.length;
+    const vrsticaGovor = (t: TerminPovzetek) => `${cap(uraZaGovor(t.zacetek))} ${t.stranka || jt('stranka')}${t.storitev ? `, ${t.storitev}` : ''}${!svoji && t.oseba ? `, ${t.oseba}` : ''}.`;
+    // Danes: kar je že končano, je v pretekliku (Tim, 16. 11.: ob 19h »danes imate termin ob 11h«).
+    const konec = (t: TerminPovzetek) => vMinute(t.konec || t.zacetek);
+    const minuli = dan === o.danes ? izbrani.filter((t) => konec(t) <= vMinute(o.uraZdaj)) : dan < o.danes ? izbrani : [];
+    const prihodnji = izbrani.filter((t) => !minuli.includes(t));
     const dGovor = cap(datumZaGovor(dan, o.danes));
+    let govor: string;
+    if (minuli.length === 0) {
+      const naGlas = izbrani.slice(0, NAJVEC_NA_GLAS).map(vrsticaGovor);
+      const ostali = n - naGlas.length;
+      govor = `${svoji ? jt('{datum} imate {n} {n|termin|termina|termine|terminov}.', { datum: dGovor, n }) : jt('{datum} je {n} {n|termin|termina|termine|terminov}.', { datum: dGovor, n })} ${naGlas.join(' ')}${ostali > 0 ? ` ${jt('In še {n} {n|termin|termina|termini|terminov}, ki so na zaslonu.', { n: ostali })}` : ''}`;
+    } else {
+      const m = minuli.length;
+      const glavaMinulih = svoji
+        ? jt('{datum} ste imeli {n} {n|termin|termina|termine|terminov}.', { datum: dGovor, n: m })
+        : jt('{datum} {n|je bil|sta bila|so bili|je bilo} {n} {n|termin|termina|termini|terminov}.', { datum: dGovor, n: m });
+      const naGlasMinuli = minuli.slice(0, NAJVEC_NA_GLAS).map(vrsticaGovor);
+      const naGlasNaprej = prihodnji.slice(0, Math.max(0, NAJVEC_NA_GLAS - naGlasMinuli.length)).map(vrsticaGovor);
+      const ostali = n - naGlasMinuli.length - naGlasNaprej.length;
+      const naprej = prihodnji.length
+        ? ` ${jt('Še na vrsti {n|je|sta|so|je} {n} {n|termin|termina|termini|terminov}.', { n: prihodnji.length })} ${naGlasNaprej.join(' ')}`
+        : ` ${svoji ? jt('Drugih terminov danes nimate.') : jt('Drugih terminov danes ni.')}`;
+      govor = `${glavaMinulih} ${naGlasMinuli.join(' ')}${dan === o.danes ? naprej : ''}${ostali > 0 ? ` ${jt('In še {n} {n|termin|termina|termini|terminov}, ki so na zaslonu.', { n: ostali })}` : ''}`;
+    }
+    const glava = jt('{datum}: {n} {n|termin|termina|termini|terminov}.', { datum: cap(opis), n });
+    const zeMimo = dan === o.danes && minuli.length ? ` ${jt('Že mimo: {n}.', { n: minuli.length })}` : '';
     return {
-      sporocilo: `${jt('{datum}: {n} {n|termin|termina|termini|terminov}.', { datum: cap(opis), n })}\n${vrstice.join('\n')}`,
+      sporocilo: `${glava}${zeMimo}\n${vrstice.join('\n')}`,
       prikaz: {
-        naslov: jt('{datum}: {n} {n|termin|termina|termini|terminov}.', { datum: cap(opis), n }).replace(/\.$/, ''),
-        skupine: [{ vrstice: izbrani.map((t) => ({ cas: `${t.zacetek}${t.konec ? `–${t.konec}` : ''}`, glavno: t.stranka || jt('stranka'), drugo: [t.storitev, !svoji ? t.oseba : null].filter(Boolean).join(' · ') || undefined })) }],
+        naslov: glava.replace(/\.$/, ''),
+        skupine: [{ vrstice: izbrani.map((t) => ({ cas: `${t.zacetek}${t.konec ? `–${t.konec}` : ''}`, glavno: t.stranka || jt('stranka'), drugo: [t.storitev, !svoji ? t.oseba : null, dan === o.danes && minuli.includes(t) ? jt('mimo') : null].filter(Boolean).join(' · ') || undefined })) }],
       },
-      govor: `${svoji ? jt('{datum} imate {n} {n|termin|termina|termine|terminov}.', { datum: dGovor, n }) : jt('{datum} je {n} {n|termin|termina|termine|terminov}.', { datum: dGovor, n })} ${naGlas.join(' ')}${ostali > 0 ? ` ${jt('In še {n} {n|termin|termina|termini|terminov}, ki so na zaslonu.', { n: ostali })}` : ''}`,
+      govor,
       podatki: {
         datum: dan,
         termini: izbrani.map((t) => ({ id: t.id, od: t.zacetek, do: t.konec, stranka: t.stranka, storitev: t.storitev, oseba: t.oseba })),

@@ -37,7 +37,9 @@ describe('en krog LLM', () => {
     expect(r).toMatchObject({ ok: true, status: 'odgovor' });
     if (!r.ok) return;
     expect(r.odgovor).toContain('Mateja Kovačič');
-    expect(r.govor).toContain('Naslednjič pride jutri, v petek ob devetih');
+    expect(r.govor).toContain('Naslednji termin je jutri, v petek ob devetih');
+    // Spola stranke ne ugibamo (»Damjan je bila«).
+    expect(r.govor).not.toMatch(/je bila|je bil /);
     expect(r.govor).not.toMatch(/\d{1,2}:\d{2}/);
   });
 

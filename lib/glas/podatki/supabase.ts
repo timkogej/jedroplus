@@ -133,11 +133,13 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
     async osebe(): Promise<OsebaPovzetek[]> {
       const { data, error } = await seja
         .from('Osebe')
-        .select('"ID osebe",Ime,Priimek,Status,Urnik,Storitve,"Ali opravlja vse","Ali ima urnik podjetja"')
+        .select('id,"ID osebe",Ime,Priimek,Status,Urnik,Storitve,"Ali opravlja vse","Ali ima urnik podjetja"')
         .eq('ID podjetja', podjetje);
       if (error) throw new Error(`osebe: ${error.code ?? 'napaka'}`);
       return ((data ?? []) as Vrstica[]).map((r) => ({
-        id: niz(r['ID osebe']),
+        // Termini, odsotnosti in člani kažejo na Osebe.id, ne na "ID osebe".
+        id: niz(r['id']),
+        sifra: niz(r['ID osebe']),
         ime: niz(r['Ime']),
         priimek: niz(r['Priimek']),
         aktivna: aktivna(r['Status']),
@@ -225,18 +227,11 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
         .lte('start_at', `${doo}T23:59:59Z`)
         .gte('end_at', `${od}T00:00:00Z`);
       if (error) return []; // odsotnosti so dodatek; brez njih je odgovor še vedno okviren
-      // absences.employee_id je Osebe.id (bigint); termini uporabljajo "ID osebe".
-      // Preslikamo v orodju ni mogoče brez dodatnega branja, zato tukaj:
-      const ids = [...new Set(((data ?? []) as Vrstica[]).map((r) => niz(r.employee_id)).filter(Boolean))];
-      const preslikava = new Map<string, string>();
-      if (ids.length) {
-        const { data: osebe } = await seja.from('Osebe').select('id,"ID osebe"').eq('ID podjetja', podjetje).in('id', ids);
-        for (const o of (osebe ?? []) as Vrstica[]) preslikava.set(niz(o.id), niz(o['ID osebe']));
-      }
+      // absences.employee_id je Osebe.id — isto kot Termini."ID Osebe" in OsebaPovzetek.id.
       return ((data ?? []) as Vrstica[])
         .filter((r) => !/zavrn|reject|cancel|preklic/i.test(niz(r.status)))
         .map((r) => ({
-          osebaId: r.employee_id ? preslikava.get(niz(r.employee_id)) ?? `id:${niz(r.employee_id)}` : null,
+          osebaId: r.employee_id ? niz(r.employee_id) : null,
           zacetek: niz(r.start_at),
           konec: niz(r.end_at),
         }));
@@ -455,11 +450,15 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
         })
       );
       const seznam = vse.filter((_, i) => dostop[i]);
-      const [po, ps] = await Promise.all([
+      const [po, ps, os] = await Promise.all([
         seja.from('Osebe_Lokacije').select('"ID osebe",lokacija_id').eq('ID podjetja', podjetje),
         seja.from('Storitve_Lokacije').select('"ID storitve",lokacija_id').eq('ID podjetja', podjetje),
+        seja.from('Osebe').select('id,"ID osebe"').eq('ID podjetja', podjetje),
       ]);
-      if (po.error || ps.error) throw new Error(`lokacije povezave: ${(po.error ?? ps.error)?.code ?? 'napaka'}`);
+      if (po.error || ps.error || os.error) throw new Error(`lokacije povezave: ${(po.error ?? ps.error ?? os.error)?.code ?? 'napaka'}`);
+      // Osebe_Lokacije hrani "ID osebe"; orodja ključ osebe poznajo kot Osebe.id.
+      const vId = new Map(((os.data ?? []) as Vrstica[]).map((r) => [niz(r['ID osebe']), niz(r['id'])]));
+      const osebeLok = ((po.data ?? []) as Vrstica[]).map((r) => ({ ...r, oseba: vId.get(niz(r['ID osebe'])) ?? niz(r['ID osebe']) }));
       const zdruzi = (vrstice: Vrstica[], stolpec: string) => {
         const out: Record<string, string[]> = {};
         for (const r of vrstice) (out[niz(r[stolpec])] ??= []).push(niz(r.lokacija_id));
@@ -467,7 +466,7 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
       };
       return {
         seznam,
-        osebe: zdruzi((po.data ?? []) as Vrstica[], 'ID osebe'),
+        osebe: zdruzi(osebeLok, 'oseba'),
         storitve: zdruzi((ps.data ?? []) as Vrstica[], 'ID storitve'),
       };
     },

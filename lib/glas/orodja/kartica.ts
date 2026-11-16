@@ -12,7 +12,7 @@ import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
 import { dodajDni, opisDatuma } from '../razresevanje/datumi';
 import type { AkcijaStranke, ZapisekPovzetek } from '../tipi';
 
-import { razresiStranko, ID_STRANKE } from './stranke';
+import { razresiStranko, zadnjiInNaslednji, ID_STRANKE } from './stranke';
 import type { BralnoOrodje } from './tipi';
 import { jt, kt } from '../jeziki/t';
 
@@ -63,9 +63,9 @@ export const karticaStranke: BralnoOrodje<z.infer<typeof vhodStranke>> = {
     const r = await razresiStranko(stranka, stranka_id, o);
     if ('odgovor' in r) return r.odgovor;
     const s = r.stranka;
-    const [zadnji, naslednji, zapiski, opombe] = await Promise.all([
-      o.podatki.zadnjiTermin(s.id, o.danes),
-      o.podatki.naslednjiTermin(s.id, o.danes),
+    const [{ zadnji, naslednji }, zapiski, opombe] = await Promise.all([
+      // Po trenutni uri: današnji minuli termin je zadnji, ne naslednji.
+      zadnjiInNaslednji(o, s),
       o.podatki.zapiskiStranke(s.id, 3),
       o.podatki.interneOpombe(s.id),
     ]);
@@ -74,16 +74,21 @@ export const karticaStranke: BralnoOrodje<z.infer<typeof vhodStranke>> = {
     const govor: string[] = [];
     if (zadnji) {
       zaslon.push(jt('Zadnjič: {datum}', { datum: opisDatuma(zadnji.datum, o.danes) }) + `${zadnji.storitev ? `, ${zadnji.storitev}` : ''}${zadnji.oseba ? ` (${zadnji.oseba})` : ''}`);
-      govor.push(jt('{ime} je bila zadnjič {datum}', { ime, datum: datumZaGovor(zadnji.datum, o.danes) }) + `${zadnji.storitev ? `, ${zadnji.storitev}` : ''}.`);
+      // Brez »je bila«: spola stranke ne poznamo.
+      govor.push(
+        (zadnji.datum === o.danes
+          ? jt('{ime}, zadnji obisk danes {ura}', { ime, ura: uraZaGovor(zadnji.zacetek) })
+          : jt('{ime}, zadnji obisk {datum}', { ime, datum: datumZaGovor(zadnji.datum, o.danes) })) + `${zadnji.storitev ? `, ${zadnji.storitev}` : ''}.`
+      );
     } else {
       zaslon.push(jt('Še brez preteklega termina'));
       govor.push(jt('{ime} še nima preteklega termina.', { ime }));
     }
     if (naslednji) {
       zaslon.push(jt('Naslednjič: {datum} ob {ura}', { datum: opisDatuma(naslednji.datum, o.danes), ura: naslednji.zacetek }) + `${naslednji.storitev ? `, ${naslednji.storitev}` : ''}`);
-      govor.push(jt('Naslednjič pride {datum} {ura}.', { datum: datumZaGovor(naslednji.datum, o.danes), ura: uraZaGovor(naslednji.zacetek) }));
+      govor.push(jt('Naslednji termin je {datum} {ura}.', { datum: datumZaGovor(naslednji.datum, o.danes), ura: uraZaGovor(naslednji.zacetek) }));
     } else {
-      govor.push(jt('Naslednjega termina nima.'));
+      govor.push(jt('Naslednjega termina še ni.'));
     }
     for (const z of zapiski) {
       const rec = recepturaBesedilo(z.podrobnosti);
@@ -228,7 +233,7 @@ export const podatkiStranke: BralnoOrodje<z.infer<typeof vhodPodatkov>> = {
     const zelja = new Set<PoljeStranke>(polja?.length ? polja : POLJA_STRANKE);
     const [p, naslednji] = await Promise.all([
       o.podatki.podrobnostiStranke(s.id, o.danes),
-      zelja.has('naslednji') ? o.podatki.naslednjiTermin(s.id, o.danes) : Promise.resolve(null),
+      zelja.has('naslednji') ? zadnjiInNaslednji(o, s).then((x) => x.naslednji) : Promise.resolve(null),
     ]);
     if (!p) return { sporocilo: jt('Te stranke ne najdem.') };
 
@@ -330,7 +335,7 @@ export const podatkiStranke: BralnoOrodje<z.infer<typeof vhodPodatkov>> = {
         ? jt('Naslednji termin: {datum} ob {ura}', { datum: opisDatuma(naslednji.datum, o.danes), ura: naslednji.zacetek }) + `${naslednji.storitev ? `, ${naslednji.storitev}` : ''}`
         : jt('Naslednji termin: ni');
       zaslon.push(t);
-      govor.push(naslednji ? jt('Naslednjič pride {datum} {ura}.', { datum: datumZaGovor(naslednji.datum, o.danes), ura: uraZaGovor(naslednji.zacetek) }) : jt('Naslednjega termina nima.'));
+      govor.push(naslednji ? jt('Naslednji termin je {datum} {ura}.', { datum: datumZaGovor(naslednji.datum, o.danes), ura: uraZaGovor(naslednji.zacetek) }) : jt('Naslednjega termina še ni.'));
       dnevnik.push(t);
     }
     if (govor.length === 0) govor.push(jt('{ime}: nič od tega ni vpisano.', { ime }));

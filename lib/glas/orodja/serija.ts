@@ -18,6 +18,7 @@ import { datumiSerije, NAJVEC_TERMINOV, type DatumSerije } from '@/lib/termini/s
 import { preveriSerijoSalona } from '@/lib/termini/preveriSerijoSalona';
 import { datumIzParametra } from './branje';
 import { pripraviTermin } from './obrazci';
+import { razresiStranko, vzorcniTermin } from './stranke';
 import type { BralnoOrodje } from './tipi';
 
 type VhodTermina = Parameters<typeof pripraviTermin.izvedi>[0];
@@ -50,7 +51,7 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
     type: 'object',
     properties: {
       ...lastnostiTermina,
-      datum: { type: ['string', 'null'], description: 'Dan PRVEGA termina, ki ga je uporabnik izgovoril ("v torek", "jutri") ali YYYY-MM-DD; null, če ga ni povedal.' },
+      datum: { type: ['string', 'null'], description: 'Dan PRVEGA termina: povedan dan ("začni v torek", "prvi jutri") ali dan v tednu iz ritma ("vsak torek" → "v torek") ali YYYY-MM-DD. Brez dneva null (orodje vzame en ritem po današnjem ali zadnjem terminu stranke): "ponovi termin", "enako kot danes", "za naslednje tri tedne" → null.' },
       vsakih_tednov: { type: 'integer', minimum: 1, maximum: 26, description: 'Na koliko tednov: "vsak teden"/"vsak torek" = 1, "vsakih 14 dni" = 2, "vsakih šest tednov" = 6, "enkrat na mesec" = 4.' },
       stevilo: { type: ['integer', 'null'], description: 'Koliko terminov skupaj, vključno s prvim ("šestkrat" = 6; "za tri tedne", "naslednje tri tedne" = 3, prvi čez en teden); null, če je povedan končni datum.' },
       do_datuma: { type: ['string', 'null'], description: 'Zadnji možen dan ("do konca leta" → YYYY-12-31, "do marca") kot YYYY-MM-DD ali izraz; null, če je povedano število.' },
@@ -75,8 +76,28 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
     if (p.do_datuma && !doDatuma) return { sporocilo: jt('Datuma »{datum}« ne razumem.', { datum: p.do_datuma }) };
 
     const { vsakih_tednov, stevilo } = p;
+    // Serija je skoraj vedno »isto kot«: storitev, zaposleni (Tim, 16. 11.: »kar isti zaposleni«)
+    // in ura iz današnjega ali zadnjega termina stranke; kar uporabnik pove posebej, ima prednost.
+    // (Model pogosto pošlje kot_zadnjic false, ko uporabnik ne reče ničesar; zato vedno.)
+    const vhodTermina = { ...p, kot_zadnjic: true } as VhodTermina;
+    {
+      const rs = await razresiStranko(p.stranka, p.stranka_id, o);
+      const vz = 'stranka' in rs ? await vzorcniTermin(o, rs.stranka) : null;
+      if ('stranka' in rs && vz) {
+        vhodTermina.stranka_id = rs.stranka.id;
+        if (!p.ura) vhodTermina.ura = vz.zacetek;
+        // »Ponovi termin za naslednje tri tedne«: prvi je en ritem po vzorcu (ne danes).
+        // Prvi na dan vzorca (»ponovi današnji termin« → model pošlje »danes«) bi bil vzorec sam.
+        const povedan = p.datum ? datumIzParametra(p.datum, o.danes) : null;
+        if (!p.datum || povedan === vz.datum) {
+          let d = dodajDni(vz.datum, vsakih_tednov * 7);
+          while (d <= o.danes) d = dodajDni(d, vsakih_tednov * 7);
+          vhodTermina.datum = d;
+        }
+      }
+    }
     // Dodatna polja (ritem) pripravi_termin prezre.
-    const r = await pripraviTermin.izvedi(p as VhodTermina, o);
+    const r = await pripraviTermin.izvedi(vhodTermina, o);
     if (!r.obrazec) return r;
     const polja = r.obrazec.polja;
     const prvi = polja.dan ?? null;
@@ -122,7 +143,8 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
     // Izločeni datumi niso težava (se ne shranijo).
     const tezave = (preverjeno ?? []).filter((d) => d.stanje !== 'ok' && !brez.includes(d.zeleno?.datum ?? d.datum));
     const zadnji = datumi[datumi.length - 1];
-    const obdobje = prvi ? ` ${jt('Zadnji {datum}.', { datum: opisDatuma(zadnji, o.danes) })}` : '';
+    // »7. 12.« se že konča s piko: brez »7. 12..«.
+    const obdobje = prvi ? ` ${jt('Zadnji {datum}.', { datum: opisDatuma(zadnji, o.danes) }).replace(/\.\.$/, '.')}` : '';
     const stanje = !preverjeno
       ? ` ${jt('Datume preverim, ko bodo izpolnjeni dan, ura in zaposleni.')}`
       : tezave.length
@@ -137,7 +159,7 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
     const out: RezultatOrodja = {
       ...r,
       sporocilo: `${osnova} ${jt('Serija: {ritem}.', { ritem })}${izloceni}${obdobje}${meja}${stanje}${stanje.endsWith('\n') ? '' : ' '}${sklep}`.replace(/\n /g, '\n'),
-      govor: `${osnovaGovor} ${jt('Serija: {ritem}.', { ritem })}${izloceniGovor}${prvi ? ` ${jt('Zadnji {datum}.', { datum: datumZaGovor(zadnji, o.danes) })}` : ''}${meja}${stanjeGovor} ${sklep}`,
+      govor: `${osnovaGovor} ${jt('Serija: {ritem}.', { ritem })}${izloceniGovor}${prvi ? ` ${jt('Zadnji {datum}.', { datum: datumZaGovor(zadnji, o.danes) }).replace(/\.\.$/, '.')}` : ''}${meja}${stanjeGovor} ${sklep}`,
       obrazec: { vrsta: 'nov_termin', polja },
       podatki: {
         ...(r.podatki ?? {}),

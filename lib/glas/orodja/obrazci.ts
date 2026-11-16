@@ -17,7 +17,7 @@ import { prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
 import { datumZaGovor, emailZaGovor, povezavaKontakta, razponZaGovor, telefonZaGovor, telefonZaZaslon, uraZaGovor } from '../govor';
 import type { Kontekst, LokacijaPovzetek, OsebaPovzetek, RezultatOrodja, StoritevPovzetek, TerminPovzetek } from '../tipi';
 import { datumIzParametra } from './branje';
-import { razresiStranko, terminJeStranke, ID_STRANKE } from './stranke';
+import { razresiStranko, terminJeStranke, vzorcniTermin, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 import { inSeznam, jt, kt } from '../jeziki/t';
 
@@ -173,7 +173,7 @@ async function opozoriloZaCas(
       vMinute(t.zacetek) < zac + trajanje && (t.konec ? vMinute(t.konec) : vMinute(t.zacetek) + 60) > zac
   );
   if (prekriva) return jt('Pozor: {oseba} ima takrat že termin ({termin}).', { oseba: oseba.ime, termin: `${prekriva.zacetek}${prekriva.stranka ? `, ${prekriva.stranka}` : ''}` });
-  return jt('Pozor: {oseba} takrat po urniku ne dela ali je odsotna.', { oseba: oseba.ime });
+  return jt('Pozor: pri {oseba:mestnik} takrat ni delovnega časa ali je vpisana odsotnost.', { oseba: oseba.ime });
 }
 
 function govorPozor(pozor: string | null): string {
@@ -232,7 +232,7 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
       jezik: { type: ['string', 'null'], enum: [...JEZIKI_SPOROCIL, null], description: 'Jezik sporočil (slo, eng, de, it, hr), samo če ga je uporabnik povedal ("v angleščini"); sicer null = privzeti jezik stranke ali podjetja.' },
       opombe: { type: ['string', 'null'], description: 'Opomba termina, samo če jo je uporabnik narekoval; sicer null.' },
       interne_opombe: { type: ['string', 'null'], description: 'Interna opomba (samo za salon), samo če jo je uporabnik narekoval; sicer null.' },
-      kot_zadnjic: { type: ['boolean', 'null'], description: 'true za "isto kot zadnjič", "kot prejšnjič": storitev, zaposleni in lokacija iz zadnjega termina stranke (kar uporabnik pove posebej, ima prednost).' },
+      kot_zadnjic: { type: ['boolean', 'null'], description: 'true za "isto kot zadnjič", "kot prejšnjič", "enako kot danes", "ponovi termin": storitev, zaposleni in lokacija iz današnjega ali zadnjega termina stranke (kar uporabnik pove posebej, ima prednost).' },
     },
     required: ['stranka', 'stranka_id', 'storitev', 'oseba', 'datum', 'ura', 'lokacija', 'dodaj_storitve', 'jezik', 'opombe', 'interne_opombe', 'kot_zadnjic'],
     additionalProperties: false,
@@ -269,7 +269,7 @@ export const pripraviTermin: BralnoOrodje<VhodNov> = {
     const [storitve, osebe, zadnji] = await Promise.all([
       o.podatki.storitve(),
       o.podatki.osebe(),
-      p.kot_zadnjic ? o.podatki.zadnjiTermin(s.id, o.danes) : Promise.resolve(null),
+      p.kot_zadnjic ? vzorcniTermin(o, s) : Promise.resolve(null),
     ]);
     let storitev: StoritevPovzetek | null = null;
     // Neznana storitev ne ustavi obrazca: uporabnik jo izbere sam (več možnosti pa vpraša).

@@ -4,7 +4,7 @@
 // ugibamo: vrnemo vprašanje z možnostmi (ime + zadnji obisk, brez telefona).
 
 import { poisci } from '../razresevanje/imena';
-import { opisDatuma } from '../razresevanje/datumi';
+import { dodajDni, opisDatuma, vMinute } from '../razresevanje/datumi';
 import { brezSumnikov } from '../razresevanje/besedilo';
 import type { RezultatOrodja, StrankaPovzetek, TerminPovzetek } from '../tipi';
 import type { OkoljeOrodja } from './tipi';
@@ -35,14 +35,52 @@ export function oznakaStranke(s: StrankaPovzetek, danes: string, t?: TerminiStra
     : jt('{ime} (še brez obiska)', { ime });
 }
 
+/** Termin se je že začel (danes je ura mimo začetka) — za govor je pretekel, ne »naslednji«. */
+export function zeMinil(t: TerminPovzetek, danes: string, uraZdaj: string): boolean {
+  return t.datum < danes || (t.datum === danes && vMinute(t.zacetek) <= vMinute(uraZdaj));
+}
+
+/**
+ * Zadnji in naslednji termin glede na TRENUTNO uro (Tim, 16. 11.: ob 18.53 je termin ob 11.00
+ * zadnji, ne »naslednjič danes ob 11.00«). Baza loči samo po dnevu, današnje razdelimo po uri.
+ */
+export async function zadnjiInNaslednji(o: OkoljeOrodja, s: StrankaPovzetek, danasnji?: TerminPovzetek[]): Promise<TerminiStranke> {
+  const [zadnji, naslednji, dan] = await Promise.all([
+    o.podatki.zadnjiTermin(s.id, o.danes),
+    o.podatki.naslednjiTermin(s.id, o.danes),
+    danasnji ? Promise.resolve(danasnji) : o.podatki.termini(o.danes, o.danes),
+  ]);
+  const zacetek = (t: TerminPovzetek) => vMinute(t.zacetek);
+  const moji = dan
+    .filter((t) => terminJeStranke(t, s) && t.status !== 'cancelled' && t.status !== 'no_show')
+    .sort((a, b) => zacetek(a) - zacetek(b));
+  const minuli = moji.filter((t) => zeMinil(t, o.danes, o.uraZdaj));
+  const prihajajoci = moji.filter((t) => !zeMinil(t, o.danes, o.uraZdaj) && (t.status === 'scheduled' || t.status === 'confirmed'));
+  let nasl = naslednji;
+  if (nasl && nasl.datum === o.danes) {
+    nasl = prihajajoci[0] ?? (await o.podatki.naslednjiTermin(s.id, dodajDni(o.danes, 1)));
+  }
+  return { zadnji: minuli[minuli.length - 1] ?? zadnji, naslednji: nasl };
+}
+
+/**
+ * Vzorec za »isto kot zadnjič / kot danes / ponovi termin«: današnji termin stranke (tudi
+ * kasneje danes; že začet ima prednost), sicer zadnji pretekli, sicer prvi prihodnji.
+ * Prej je veljal samo termin PRED današnjim dnem (Tim, 16. 11.: »enako kot je imel danes« → ni storitve).
+ */
+export async function vzorcniTermin(o: OkoljeOrodja, s: StrankaPovzetek): Promise<TerminPovzetek | null> {
+  const [dan, zadnji] = await Promise.all([o.podatki.termini(o.danes, o.danes), o.podatki.zadnjiTermin(s.id, o.danes)]);
+  const danes = dan
+    .filter((t) => terminJeStranke(t, s) && t.status !== 'cancelled' && t.status !== 'no_show')
+    .sort((a, b) => vMinute(a.zacetek) - vMinute(b.zacetek));
+  const zacet = danes.filter((t) => zeMinil(t, o.danes, o.uraZdaj));
+  return zacet[zacet.length - 1] ?? danes[0] ?? zadnji ?? (await o.podatki.naslednjiTermin(s.id, o.danes));
+}
+
 /** Zadnji in naslednji termin za nekaj strank hkrati (iskanje, izbira med istoimenskimi). */
 export async function terminiStrank(o: OkoljeOrodja, stranke: StrankaPovzetek[]): Promise<Map<string, TerminiStranke>> {
-  const pari = await Promise.all(
-    stranke.slice(0, 6).map(async (s) => {
-      const [zadnji, naslednji] = await Promise.all([o.podatki.zadnjiTermin(s.id, o.danes), o.podatki.naslednjiTermin(s.id, o.danes)]);
-      return [s.id, { zadnji, naslednji }] as const;
-    })
-  );
+  const danasnji = await o.podatki.termini(o.danes, o.danes);
+  const pari = await Promise.all(stranke.slice(0, 6).map(async (s) => [s.id, await zadnjiInNaslednji(o, s, danasnji)] as const));
   return new Map(pari);
 }
 

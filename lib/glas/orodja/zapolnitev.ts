@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { samoSvojiTermini } from '../pravice';
 import { dodajDni, izMinut, opisDatuma, vMinute } from '../razresevanje/datumi';
 import { prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
-import { datumZaGovor, povezavaKontakta, razponZaGovor } from '../govor';
+import { datumZaGovor, povezavaKontakta, razponZaGovor, uraZaGovor } from '../govor';
 import { zJezikom } from '../jeziki/jezik';
 import { inSeznam, jt } from '../jeziki/t';
 import type { AkcijaStranke, OsebaPovzetek, Predogled, RezultatOrodja, TerminPovzetek } from '../tipi';
@@ -97,7 +97,19 @@ async function najdiLuknjo(
       };
     }
   } else {
-    zadetki = vse.flatMap((x) => x.luknje.filter(([a, b]) => b - a >= 30).map(([a, b]) => ({ p: x.p, od: a, do: b })));
+    // Brez ure: luknja po odpovedanem terminu tega dne (Tim, 16. 11.: »kdo je kandidat za jutri«
+    // po odpovedi Aleksandra — asistent je spraševal, kdo je odpovedal, in ugibal napačno stranko).
+    const odpovedani = (await o.podatki.termini(d, d)).filter((t) => t.status === 'cancelled' && izbrane.some((x) => x.id === t.osebaId));
+    const poOdpovedi = odpovedani.flatMap((t) => {
+      const x = vse.find((v) => v.p.id === t.osebaId);
+      const u = vMinute(t.zacetek);
+      const l = x?.luknje.find(([a, b]) => a <= u && u < b);
+      return x && l ? [{ p: x.p, od: u, do: l[1] }] : [];
+    });
+    const enkratni = poOdpovedi.filter((z, i) => poOdpovedi.findIndex((y) => y.p.id === z.p.id && y.od === z.od) === i);
+    zadetki = enkratni.length
+      ? enkratni
+      : vse.flatMap((x) => x.luknje.filter(([a, b]) => b - a >= 30).map(([a, b]) => ({ p: x.p, od: a, do: b })));
     if (zadetki.length === 0) return { sporocilo: jt('{kdaj} ni prostih lukenj.', { kdaj: cap(kdaj) }) };
   }
   // Zaposlenega določi asistent sam (Tim, 16. 11.): po zaposlenem nikoli ne sprašuje.
@@ -110,7 +122,14 @@ async function najdiLuknjo(
     const prave = zadetki.filter((z) => zTermini.has(z.p.id));
     if (prave.length > 0) zadetki = prave;
   }
-  // Z uro: najožja luknja (odpovedan termin med drugimi), brez vprašanja.
+  // Z uro: prednost ima zaposleni, ki ima ob tej uri odpovedan termin (Tim, 16. 11.: »jutri ob 10«
+  // po odpovedi pri Luki je vzelo Gala); sicer najožja luknja, brez vprašanja.
+  if (zadetki.length > 1 && ura) {
+    const u = vMinute(ura);
+    const zOdpovedjo = new Set((await o.podatki.termini(d, d)).filter((t) => t.status === 'cancelled' && Math.abs(vMinute(t.zacetek) - u) <= 15).map((t) => t.osebaId));
+    const pravi = zadetki.filter((z) => zOdpovedjo.has(z.p.id));
+    if (pravi.length > 0) zadetki = pravi;
+  }
   if (zadetki.length > 1 && ura) zadetki = [[...zadetki].sort((a, b) => a.do - a.od - (b.do - b.od))[0]];
   if (zadetki.length > 1) {
     // Brez ure: vprašamo samo za čas; oseba je del možnosti, ne vprašanje.
@@ -187,7 +206,8 @@ export const kandidatiZaLuknjo: BralnoOrodje<VhodLuknje> = {
   ime: 'kandidati_za_luknjo',
   opis:
     'Kdo bi lahko prišel v prosti čas (luknjo): "Ana je odpovedala jutri ob desetih, kdo bi lahko prišel?", "danes imam luknjo ob dvanajstih, koga naj pokličem?", "kdo bi vzel prosto uro pri Tini v petek?". ' +
-    'Vrne do 5 strank z razlogom (kasnejši termin, ki bi ga prestavili; na vrsti po svojem ritmu; hodi k tej osebi ob tem času) in gumbe za klic. Termin mora biti v koledarju že odpovedan.',
+    'Vrne do 5 strank z razlogom (kasnejši termin, ki bi ga prestavili; na vrsti po svojem ritmu; hodi k tej osebi ob tem času) in gumbe za klic. ' +
+    'Odpovedan termin tega dne najde samo (brez ure vzame luknjo po odpovedi): nikoli ne sprašuj, kdo je odpovedal, in ne ugibaj stranke. Pokliči takoj z dnem (in uro, če je povedana).',
   razred: 'branje',
   pravica: 'termini.branje',
   omogoceno: true,
@@ -228,9 +248,17 @@ export const kandidatiZaLuknjo: BralnoOrodje<VhodLuknje> = {
       stranke: new Map(stranke.map((s) => [s.id, `${s.ime} ${s.priimek}`.trim()])),
     });
 
+    // Čigav termin je bil odpovedan (za uporabnika: da ve, da je asistent našel pravo luknjo).
+    const odpovedan = (await o.podatki.termini(l.datum, l.datum)).find(
+      (t) => t.status === 'cancelled' && t.osebaId === oseba.id && vMinute(t.zacetek) >= l.od && vMinute(t.zacetek) < l.do
+    );
+    const uvod = odpovedan ? `${jt('Po odpovedi: {ime}, {ura}.', { ime: odpovedan.stranka || jt('stranka'), ura: odpovedan.zacetek })} ` : '';
+    const uvodGovor = odpovedan ? `${jt('Po odpovedi: {ime}, {ura}.', { ime: odpovedan.stranka || jt('stranka'), ura: uraZaGovor(odpovedan.zacetek) })} ` : '';
+    // Stranka, ki je pravkar odpovedala, ni kandidatka za isto luknjo.
+    const brezOdpovedane = odpovedan?.idStranke ? kandidati.filter((k) => k.idStranke !== odpovedan.idStranke) : kandidati;
     // Samo stranke s telefonom (klic je glavno dejanje); kartica gre z uporabnikovo sejo.
     const izbrani: { k: Kandidat; telefon: string; sms: boolean }[] = [];
-    for (const k of kandidati) {
+    for (const k of brezOdpovedane) {
       if (izbrani.length >= NAJVEC_KANDIDATOV) break;
       const kartica = await o.podatki.podrobnostiStranke(k.idStranke, o.danes);
       if (!kartica?.telefon) continue;
@@ -244,8 +272,8 @@ export const kandidatiZaLuknjo: BralnoOrodje<VhodLuknje> = {
     const luknjaZaLlm = { datum: l.datum, od: izMinut(l.od), do: izMinut(l.do), oseba: imeOsebe(oseba), oseba_id: oseba.id };
     if (izbrani.length === 0) {
       return {
-        sporocilo: jt('Za {kdaj} {okno} pri {oseba:mestnik} ne najdem dobrih kandidatov.', { kdaj, okno, oseba: oseba.ime }),
-        govor: jt('Za {kdaj} {razpon} pri {oseba:mestnik} ne najdem dobrih kandidatov.', { kdaj, razpon: razponZaGovor(izMinut(l.od), izMinut(l.do)), oseba: oseba.ime }),
+        sporocilo: uvod + jt('Za {kdaj} {okno} pri {oseba:mestnik} ne najdem dobrih kandidatov.', { kdaj, okno, oseba: oseba.ime }),
+        govor: uvodGovor + jt('Za {kdaj} {razpon} pri {oseba:mestnik} ne najdem dobrih kandidatov.', { kdaj, razpon: razponZaGovor(izMinut(l.od), izMinut(l.do)), oseba: oseba.ime }),
         podatki: { luknja: luknjaZaLlm, kandidati: [] },
       };
     }
@@ -267,8 +295,8 @@ export const kandidatiZaLuknjo: BralnoOrodje<VhodLuknje> = {
       if (href) akcije.push({ vrsta: 'klic', href, oznaka: x.k.ime });
     }
     return {
-      sporocilo: [jt('Kandidati za {kdaj} {okno} pri {oseba:mestnik}:', { kdaj, okno, oseba: oseba.ime }), ...vrstice, ...opombe].join('\n'),
-      govor: `${jt('Predlagam {imena}. Razlogi in gumbi za klic so na zaslonu.', { imena: inSeznam(imena) })}${govorPrestavitev}`,
+      sporocilo: [uvod + jt('Kandidati za {kdaj} {okno} pri {oseba:mestnik}:', { kdaj, okno, oseba: oseba.ime }), ...vrstice, ...opombe].join('\n'),
+      govor: `${uvodGovor}${jt('Predlagam {imena}. Razlogi in gumbi za klic so na zaslonu.', { imena: inSeznam(imena) })}${govorPrestavitev}`,
       podatki: {
         luknja: luknjaZaLlm,
         // Fokus: »pošlji ji predlog« se nanaša na prvo stranko s kasnejšim terminom.
@@ -386,12 +414,15 @@ export const ponudiProstiTermin: PisalnoOrodje<VhodPonudbe> = {
       zadeva = zJezikom(jezik, () => jt('Prost termin'));
     }
     return {
-      povzetek: kanal === 'sms' ? jt('SMS za {ime}: »{besedilo}«', { ime, besedilo }) : jt('E-pošta za {ime}: »{besedilo}«', { ime, besedilo }),
+      // Na zaslonu in v govoru s šumniki (»opazamo« bere kot tipkarsko napako); ven gre `besedilo` brez njih.
+      povzetek: kanal === 'sms'
+        ? jt('SMS — {ime}: »{besedilo}«', { ime, besedilo: zPodpisom(p.besedilo, podpis) })
+        : jt('E-pošta — {ime}: »{besedilo}«', { ime, besedilo }),
       parametri: { idStranke: s.id, imeStranke: ime, datum: l.datum, ura, osebaId: oseba.id, kanal, besedilo, zadeva, jezik },
       podrobnosti: [
         { oznaka: jt('Prejemnik'), vrednost: `${ime}, ${kanal === 'sms' ? skritTelefon(kartica.telefon!) : skritEmail(kartica.email!)}` },
         { oznaka: jt('Prost termin'), vrednost: `${jt('{datum} ob {ura}', { datum: opisDatuma(l.datum, o.danes), ura })}, ${oseba.ime}` },
-        { oznaka: jt('Kanal'), vrednost: kanal === 'sms' ? `SMS · ${besedilo.length}/${NAJVEC_SMS}` : jt('e-pošta (ni telefona)') },
+        { oznaka: jt('Kanal'), vrednost: kanal === 'sms' ? `SMS · ${besedilo.length}/${NAJVEC_SMS} · ${jt('brez šumnikov')}` : jt('e-pošta (ni telefona)') },
         { oznaka: jt('Privolitev'), vrednost: jt('da') },
       ],
       sporocil: 1,

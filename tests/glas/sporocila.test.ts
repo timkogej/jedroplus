@@ -85,15 +85,19 @@ describe('sporoci_stranki: predogled', () => {
     expect(p.parametri).toMatchObject({ idStranke: '101', idTermina: 't1', kanal: 'sms', jezik: 'sl' });
     expect(p.parametri.besedilo).toBe('Pozdravljeni, jutri zamujamo priblizno 15 minut. Salon Lepota');
     expect(JSON.stringify(p.parametri)).not.toContain('234');
-    expect(p.povzetek).toContain('SMS za Mateja Kovačič');
+    // Na zaslonu in v govoru s šumniki; ven gre besedilo brez njih.
+    expect(p.povzetek).toBe('SMS — Mateja Kovačič: »Pozdravljeni, jutri zamujamo približno 15 minut. Salon Lepota«');
+    expect(p.podrobnosti?.find((v) => v.oznaka === 'Kanal')?.vrednost).toContain('brez šumnikov');
     expect(p.podrobnosti?.find((v) => v.oznaka === 'Prejemnik')?.vrednost).toBe('Mateja Kovačič, 041 … 567');
     expect(p.sporocil).toBe(1);
     expect(x.sporocila.poslana).toHaveLength(0);
   });
 
-  it('dva termina → vprašanje; jezik stranke (angleščina) → model napiše znova', async () => {
+  it('dva termina → brez vprašanja najbližji; jezik stranke (angleščina) → model napiše znova', async () => {
+    // Tim, 16. 11.: »itak je ista oseba« — pri sporočilu ne sprašuje, za kateri termin.
     const x = await predogled({ stranka: 'Ana Novak' });
-    expect(x).toMatchObject({ vprasanje: { moznosti: [{ id: 't5' }, { id: 't2' }] } });
+    expect(x).not.toHaveProperty('vprasanje');
+    expect('sporocilo' in x && x.sporocilo).toContain('angleščina');
     const y = await predogled({ stranka: 'Ana Novak', termin_id: 't5' });
     expect('sporocilo' in y && y.sporocilo).toContain('angleščina');
     const z = kotPredlog(await predogled({ stranka: 'Ana Novak', termin_id: 't5', besedilo: "Hi, we're running 15 minutes late.", jezik_besedila: 'en' }));
@@ -103,7 +107,7 @@ describe('sporoci_stranki: predogled', () => {
   it('ponudba, predolgo in brez termina', async () => {
     expect(await predogled({ besedilo: 'Jutri imamo 20 % popust!' })).toMatchObject({ sporocilo: expect.stringContaining('ponudb') });
     expect(await predogled({ besedilo: 'Pozdravljeni, '.repeat(12) })).toMatchObject({ sporocilo: expect.stringContaining('predolgo') });
-    expect(await predogled({ stranka: 'Ana Novinc' })).toMatchObject({ sporocilo: expect.stringContaining('samo o terminu') });
+    expect(await predogled({ stranka: 'Ana Novinc' })).toMatchObject({ sporocilo: expect.stringContaining('samo v zvezi s terminom') });
   });
 
   it('brez podpisa, če uporabnik tako reče', async () => {
@@ -118,13 +122,14 @@ describe('sporoci_stranki: predogled', () => {
     termini.push(t8);
     try {
       const x = o();
-      // Mateja ima tudi jutrišnji termin → vpraša, o katerem; današnji opravljen je med možnostmi.
-      expect(await predogled({ besedilo: 'Pozabili ste dežnik.' })).toMatchObject({ vprasanje: { moznosti: [{ id: 't8' }, { id: 't1' }] } });
-      const p = kotPredlog(await predogled({ termin_id: 't8', besedilo: 'Pozabili ste dežnik.' }, x));
+      // Mateja ima tudi jutrišnji termin: brez vprašanja velja današnji (dežnik je ostal danes).
+      const p = kotPredlog(await predogled({ besedilo: 'Pozabili ste dežnik.' }, x));
       expect(p.parametri).toMatchObject({ idStranke: '101', idTermina: 't8' });
       expect((await sporociStranki.potrdi(p.parametri, x)).neuspeh).toBeFalsy();
-      termini.push(t9); // današnji pretekel, a še ne označen kot opravljen, tudi šteje
-      expect(await predogled({})).toMatchObject({ vprasanje: { moznosti: [{ id: 't8' }, { id: 't9' }, { id: 't1' }] } });
+      termini.push(t9); // današnji pretekel, a še ne označen kot opravljen, tudi šteje: zadnji začeti
+      expect(kotPredlog(await predogled({})).parametri).toMatchObject({ idTermina: 't9' });
+      // Izrecno povedan dan termina ima prednost.
+      expect(kotPredlog(await predogled({ datum_termina: 'jutri' })).parametri).toMatchObject({ idTermina: 't1' });
     } finally {
       termini.splice(termini.findIndex((t) => t.id === 't8'), 1);
       const i = termini.findIndex((t) => t.id === 't9');
@@ -132,8 +137,29 @@ describe('sporoci_stranki: predogled', () => {
     }
   });
 
-  it('pretekel datum termina ne', async () => {
-    expect(await predogled({ datum_termina: '2026-10-20' })).toMatchObject({ sporocilo: expect.stringContaining('današnjem ali prihodnjem') });
+  it('dan brez termina (dan je vsebina sporočila, »v sredo naj parkira«) → najbližji termin', async () => {
+    expect(kotPredlog(await predogled({ datum_termina: '2026-10-20' })).parametri).toMatchObject({ idTermina: 't1' });
+    expect(kotPredlog(await predogled({ datum_termina: 'v ponedeljek' })).parametri).toMatchObject({ idTermina: 't1' });
+  });
+
+  it('nedavni opravljen termin (zadnjih 7 dni) šteje, starejši in odpovedan pretekli ne', async () => {
+    const termini = SALONI.A1.termini;
+    const base = termini.find((t) => t.id === 't1')!;
+    const vceraj = { ...base, id: 't20', idStranke: '777', stranka: 'Vida Včerajšnja', datum: '2026-11-11', status: 'completed' as const };
+    const star = { ...vceraj, id: 't21', datum: '2026-11-01' };
+    termini.push(vceraj, star);
+    const podatki: PodatkiSalona = {
+      ...podatkiPomnilnik('A1'),
+      stranke: async () => [...(await podatkiPomnilnik('A1').stranke()), { id: '777', ime: 'Vida', priimek: 'Včerajšnja', zadnjaInterakcija: null }],
+      podrobnostiStranke: async () => ({ telefon: '040 999 888', email: null, jezik: 'slo', opombe: null, interneOpombe: null, marketing: null, obiski: 1, neprihodi: 0 }),
+    };
+    try {
+      expect(kotPredlog(await predogled({ stranka: 'Vida', besedilo: 'Pozabili ste rokavice.' }, o({}, podatki))).parametri).toMatchObject({ idTermina: 't20' });
+      termini.splice(termini.findIndex((t) => t.id === 't20'), 1);
+      expect(await predogled({ stranka: 'Vida', besedilo: 'Pozabili ste rokavice.' }, o({}, podatki))).toMatchObject({ sporocilo: expect.stringContaining('nima termina') });
+    } finally {
+      for (const id of ['t20', 't21']) { const i = termini.findIndex((t) => t.id === id); if (i >= 0) termini.splice(i, 1); }
+    }
   });
 
   it('obvestilo o odpovedi samo za termin, ki je res odpovedan', async () => {

@@ -40,10 +40,10 @@ export async function POST(req: NextRequest) {
   if (!kont.ok) return kont.odziv;
   const { k, odvisnosti } = kont;
   if (!imaPravico(k, 'termini.ustvarjanje')) return odziv(403, 'ni_pravice');
-  if (samoSvojiTermini(k) && v.data.oseba !== k.osebaId) return odziv(403, 'ni_pravice');
-
-  const oseba = (await odvisnosti.podatki.osebe()).find((o) => o.id === v.data.oseba);
+  // Koledar pošlje »ref« ("ID osebe") ali Osebe.id; ključ za termine je Osebe.id.
+  const oseba = (await odvisnosti.podatki.osebe()).find((o) => o.id === v.data.oseba || o.sifra === v.data.oseba);
   if (!oseba) return odziv(404, 'ni_osebe');
+  if (samoSvojiTermini(k) && oseba.id !== k.osebaId) return odziv(403, 'ni_pravice');
   const zdaj = zdajVPasu(new Date(), k.casovniPas);
   try {
     const datumi = await preveriSerijoSalona(odvisnosti.podatki, {
