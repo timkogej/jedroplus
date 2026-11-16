@@ -87,6 +87,13 @@ describe('pripravi_serijo', () => {
     expect(r.pojdi).toBe('/koledar?glas=1');
   });
 
+  it('»ta datum ne«: izločen datum je odkljukan, šteje se manj terminov', async () => {
+    const r = await pripraviSerijo.izvedi(p({ brez_datumov: ['2026-12-25'] }), o());
+    expect(r.obrazec?.polja).toMatchObject({ ponovi: '6:6', ponovi_brez: '2026-12-25' });
+    expect(r.sporocilo).toContain('Serija: 5 terminov, vsakih 6 tednov. Brez: petek, 25. 12.');
+    expect((await pripraviSerijo.izvedi(p({ brez_datumov: ['2026-12-24'] }), o())).sporocilo).toMatch(/^Tega datuma ni v seriji/);
+  });
+
   it('do datuma, vsak teden, manjkajoča ura, brez števila', async () => {
     const r = await pripraviSerijo.izvedi(p({ vsakih_tednov: 1, stevilo: null, do_datuma: '2026-12-31', datum: '2026-12-01', ura: null }), o());
     expect(r.obrazec?.polja.ponovi).toBe('1:5');

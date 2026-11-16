@@ -487,4 +487,7 @@ export const en: Katalog = {
   "Termin {ime}, {kdaj}.": "Appointment {ime}, {kdaj}.",
   "{ime}, {kdaj}.": "{ime}, {kdaj}.",
   "Zahteve za termin": "Appointment requests",
+  "Tega datuma ni v seriji. Datumi: {datumi}.": "This date is not in the series. Dates: {datumi}.",
+  "Ostal bi samo en termin. Za en termin recite »vpiši«.": "Only one appointment would remain. For a single appointment say “book”.",
+  "Brez: {datumi}.": "Without: {datumi}.",
 };

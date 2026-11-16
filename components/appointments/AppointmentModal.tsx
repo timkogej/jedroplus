@@ -7,7 +7,7 @@ import { useSheetDrag } from '@/components/ui/useSheetDrag';
 import { useFormat } from '@/hooks/useFormat';
 import { intlLocale } from '@/lib/format';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, CalendarBlank, Plus, Minus, Envelope, Phone, Tag, Warning } from '@phosphor-icons/react';
+import { X, Clock, CalendarBlank, Plus, Minus, Envelope, Phone, Tag, Warning, CaretDown } from '@phosphor-icons/react';
 import { Select, SelectOption } from '@/components/ui/animated-select';
 import ClientSearch from './ClientSearch';
 import ClientModal from '@/components/clients/ClientModal';
@@ -89,6 +89,8 @@ interface AppointmentModalProps {
 export interface Ponovitev {
   vsakihTednov: number;
   krat: number;
+  /** Datumi (YYYY-MM-DD), ki jih je uporabnik izločil (asistent: »ta datum ne«); v pregledu so odkljukani. */
+  brez?: string[];
 }
 export const RITMI_TEDNOV = [1, 2, 3, 4, 5, 6, 8, 10, 12] as const;
 export const NAJVEC_PONOVITEV = 12;
@@ -2300,27 +2302,33 @@ function AppointmentModal({
                   <div className="grid grid-cols-2 gap-3">
                     <label className="block">
                       <span className="mb-1 block text-xs font-medium text-gray-500">{t('serija.rhythm')}</span>
-                      <select
-                        value={ponovitev.vsakihTednov}
-                        onChange={(e) => setPonovitev((prev) => (prev ? { ...prev, vsakihTednov: Number(e.target.value) } : prev))}
-                        className={inputBaseClass}
-                      >
-                        {[...new Set<number>([...RITMI_TEDNOV, ponovitev.vsakihTednov])].sort((x, y) => x - y).map((n) => (
-                          <option key={n} value={n}>{t('serija.everyWeeks', { count: n })}</option>
-                        ))}
-                      </select>
+                      <span className="relative block">
+                        <select
+                          value={ponovitev.vsakihTednov}
+                          onChange={(e) => setPonovitev((prev) => (prev ? { ...prev, vsakihTednov: Number(e.target.value) } : prev))}
+                          className={`${inputBaseClass} cursor-pointer appearance-none pr-9`}
+                        >
+                          {[...new Set<number>([...RITMI_TEDNOV, ponovitev.vsakihTednov])].sort((x, y) => x - y).map((n) => (
+                            <option key={n} value={n}>{t('serija.everyWeeks', { count: n })}</option>
+                          ))}
+                        </select>
+                        <CaretDown weight="bold" aria-hidden className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                      </span>
                     </label>
                     <label className="block">
                       <span className="mb-1 block text-xs font-medium text-gray-500">{t('serija.count')}</span>
-                      <select
-                        value={ponovitev.krat}
-                        onChange={(e) => setPonovitev((prev) => (prev ? { ...prev, krat: Number(e.target.value) } : prev))}
-                        className={inputBaseClass}
-                      >
-                        {Array.from({ length: NAJVEC_PONOVITEV - 1 }, (_, i) => i + 2).map((n) => (
-                          <option key={n} value={n}>{t('serija.times', { count: n })}</option>
-                        ))}
-                      </select>
+                      <span className="relative block">
+                        <select
+                          value={ponovitev.krat}
+                          onChange={(e) => setPonovitev((prev) => (prev ? { ...prev, krat: Number(e.target.value) } : prev))}
+                          className={`${inputBaseClass} cursor-pointer appearance-none pr-9`}
+                        >
+                          {Array.from({ length: NAJVEC_PONOVITEV - 1 }, (_, i) => i + 2).map((n) => (
+                            <option key={n} value={n}>{t('serija.times', { count: n })}</option>
+                          ))}
+                        </select>
+                        <CaretDown weight="bold" aria-hidden className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+                      </span>
                     </label>
                     <p className="col-span-2 text-xs text-gray-500">{t('serija.hint')}</p>
                   </div>

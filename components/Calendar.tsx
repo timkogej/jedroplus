@@ -1422,7 +1422,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
             if (!m) return undefined;
             const vsakihTednov = Number(m[1]);
             const krat = Number(m[2]);
-            return vsakihTednov >= 1 && vsakihTednov <= 26 && krat >= 2 && krat <= 12 ? { vsakihTednov, krat } : undefined;
+            const brez = (n.ponovi_brez ?? '').split(',').filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
+            return vsakihTednov >= 1 && vsakihTednov <= 26 && krat >= 2 && krat <= 12 ? { vsakihTednov, krat, ...(brez.length ? { brez } : {}) } : undefined;
           })(),
         });
         setNewAppointmentInitials({ date: dan, startTime: ura });
@@ -1756,7 +1757,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         ponovitev,
         povezana: false,
         izhodisce: ponoviIz ?? undefined,
-        vrstice: datumi.map((d) => ({ ...d, izbrana: d.stanje !== 'tezava' })),
+        // Datumi, ki jih je uporabnik izločil (»ta datum ne«), so v pregledu odkljukani.
+        vrstice: datumi.map((d) => ({ ...d, izbrana: d.stanje !== 'tezava' && !ponovitev.brez?.includes(d.zeleno?.datum ?? d.datum) })),
       });
     } finally {
       setIsSaving(false);

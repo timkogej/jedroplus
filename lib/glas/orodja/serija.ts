@@ -21,7 +21,7 @@ import { pripraviTermin } from './obrazci';
 import type { BralnoOrodje } from './tipi';
 
 type VhodTermina = Parameters<typeof pripraviTermin.izvedi>[0];
-type VhodSerije = VhodTermina & { vsakih_tednov: number; stevilo: number | null; do_datuma: string | null };
+type VhodSerije = VhodTermina & { vsakih_tednov: number; stevilo: number | null; do_datuma: string | null; brez_datumov?: string[] | null };
 
 const SHRANI = 'Shranim?';
 const lastnostiTermina = pripraviTermin.shema.properties as Record<string, unknown>;
@@ -52,8 +52,13 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
       ...lastnostiTermina,
       datum: { type: ['string', 'null'], description: 'Dan PRVEGA termina, ki ga je uporabnik izgovoril ("v torek", "jutri") ali YYYY-MM-DD; null, če ga ni povedal.' },
       vsakih_tednov: { type: 'integer', minimum: 1, maximum: 26, description: 'Na koliko tednov: "vsak teden"/"vsak torek" = 1, "vsakih 14 dni" = 2, "vsakih šest tednov" = 6, "enkrat na mesec" = 4.' },
-      stevilo: { type: ['integer', 'null'], description: 'Koliko terminov skupaj, vključno s prvim ("šestkrat" = 6); null, če je povedan končni datum.' },
+      stevilo: { type: ['integer', 'null'], description: 'Koliko terminov skupaj, vključno s prvim ("šestkrat" = 6; "za tri tedne", "naslednje tri tedne" = 3, prvi čez en teden); null, če je povedan končni datum.' },
       do_datuma: { type: ['string', 'null'], description: 'Zadnji možen dan ("do konca leta" → YYYY-12-31, "do marca") kot YYYY-MM-DD ali izraz; null, če je povedano število.' },
+      brez_datumov: {
+        type: ['array', 'null'],
+        items: { type: 'string' },
+        description: 'Datumi serije, ki jih uporabnik noče ("7. decembra ne", "brez tistega pred božičem") kot YYYY-MM-DD; ob popravku pošlji vse izločene; sicer null.',
+      },
     },
     required: [...(pripraviTermin.shema.required as string[]), 'vsakih_tednov', 'stevilo', 'do_datuma'],
     additionalProperties: false,
@@ -62,6 +67,7 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
     vsakih_tednov: z.number().int().min(1).max(26),
     stevilo: z.number().int().min(1).max(100).nullable(),
     do_datuma: z.string().max(60).nullable(),
+    brez_datumov: z.array(z.string().max(40)).max(12).nullable().optional(),
   }) as unknown as z.ZodType<VhodSerije>,
   async izvedi(p, o) {
     if (!p.stevilo && !p.do_datuma) return { sporocilo: jt('Kolikokrat ali do kdaj naj ponovim?') };
@@ -81,9 +87,18 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
     if (datumi.length < 2) return { sporocilo: jt('Do tega datuma je samo en termin. Za en termin recite »vpiši«.') };
     const omejeno = (stevilo ?? 0) > NAJVEC_TERMINOV || (doDatuma !== null && datumi.length === NAJVEC_TERMINOV && dodajDni(datumi[datumi.length - 1], vsakih_tednov * 7) <= doDatuma);
     polja.ponovi = `${vsakih_tednov}:${datumi.length}`;
+    // »Ta datum ne«: datum ostane v pregledu, a odkljukan (ne shrani se).
+    const brez = [...new Set((p.brez_datumov ?? []).map((d) => datumIzParametra(d, o.danes)).filter((d): d is string => !!d && datumi.includes(d)))];
+    if (p.brez_datumov?.length && brez.length === 0) {
+      return { sporocilo: jt('Tega datuma ni v seriji. Datumi: {datumi}.', { datumi: datumi.map((d) => opisDatuma(d, o.danes)).join('; ') }) };
+    }
+    if (brez.length >= datumi.length - 1) return { sporocilo: jt('Ostal bi samo en termin. Za en termin recite »vpiši«.') };
+    if (brez.length) polja.ponovi_brez = brez.join(',');
 
     const tedni = vsakih_tednov === 1 ? jt('vsak teden') : jt('{t|vsak|vsaka|vsake|vsakih} {t} {t|teden|tedna|tedne|tednov}', { t: vsakih_tednov });
-    const ritem = `${jt('{n} {n|termin|termina|termini|terminov}', { n: datumi.length })}, ${tedni}`;
+    const ritem = `${jt('{n} {n|termin|termina|termini|terminov}', { n: datumi.length - brez.length })}, ${tedni}`;
+    const izloceni = brez.length ? ` ${jt('Brez: {datumi}.', { datumi: brez.map((d) => opisDatuma(d, o.danes)).join(', ') })}` : '';
+    const izloceniGovor = brez.length ? ` ${jt('Brez: {datumi}.', { datumi: brez.map((d) => datumZaGovor(d, o.danes)).join(', ') })}` : '';
     const meja = omejeno ? ` ${jt('Največ {n} terminov naenkrat.', { n: NAJVEC_TERMINOV })}` : '';
     const osnova = r.sporocilo.endsWith(` ${jt(SHRANI)}`) ? r.sporocilo.slice(0, -` ${jt(SHRANI)}`.length) : r.sporocilo;
     const osnovaGovor = r.govor && r.govor.endsWith(` ${jt(SHRANI)}`) ? r.govor.slice(0, -` ${jt(SHRANI)}`.length) : r.govor ?? osnova;
@@ -104,13 +119,14 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
         uraZdaj: o.uraZdaj,
       });
     }
-    const tezave = (preverjeno ?? []).filter((d) => d.stanje !== 'ok');
+    // Izločeni datumi niso težava (se ne shranijo).
+    const tezave = (preverjeno ?? []).filter((d) => d.stanje !== 'ok' && !brez.includes(d.zeleno?.datum ?? d.datum));
     const zadnji = datumi[datumi.length - 1];
     const obdobje = prvi ? ` ${jt('Zadnji {datum}.', { datum: opisDatuma(zadnji, o.danes) })}` : '';
     const stanje = !preverjeno
       ? ` ${jt('Datume preverim, ko bodo izpolnjeni dan, ura in zaposleni.')}`
       : tezave.length
-      ? ` ${jt('Prostih je {n} od {od}. Težave:', { n: preverjeno.length - tezave.length, od: preverjeno.length })}\n${tezave.map((d) => `• ${opisTezave(d, o.danes)}`).join('\n')}\n`
+      ? ` ${jt('Prostih je {n} od {od}. Težave:', { n: preverjeno.length - brez.length - tezave.length, od: preverjeno.length - brez.length })}\n${tezave.map((d) => `• ${opisTezave(d, o.danes)}`).join('\n')}\n`
       : ` ${jt('Vsi datumi so prosti.')}`;
     const stanjeGovor = !preverjeno
       ? ` ${jt('Datume preverim, ko bodo izpolnjeni dan, ura in zaposleni.')}`
@@ -120,12 +136,12 @@ export const pripraviSerijo: BralnoOrodje<VhodSerije> = {
 
     const out: RezultatOrodja = {
       ...r,
-      sporocilo: `${osnova} ${jt('Serija: {ritem}.', { ritem })}${obdobje}${meja}${stanje}${stanje.endsWith('\n') ? '' : ' '}${sklep}`.replace(/\n /g, '\n'),
-      govor: `${osnovaGovor} ${jt('Serija: {ritem}.', { ritem })}${prvi ? ` ${jt('Zadnji {datum}.', { datum: datumZaGovor(zadnji, o.danes) })}` : ''}${meja}${stanjeGovor} ${sklep}`,
+      sporocilo: `${osnova} ${jt('Serija: {ritem}.', { ritem })}${izloceni}${obdobje}${meja}${stanje}${stanje.endsWith('\n') ? '' : ' '}${sklep}`.replace(/\n /g, '\n'),
+      govor: `${osnovaGovor} ${jt('Serija: {ritem}.', { ritem })}${izloceniGovor}${prvi ? ` ${jt('Zadnji {datum}.', { datum: datumZaGovor(zadnji, o.danes) })}` : ''}${meja}${stanjeGovor} ${sklep}`,
       obrazec: { vrsta: 'nov_termin', polja },
       podatki: {
         ...(r.podatki ?? {}),
-        serija: { vsakih_tednov, stevilo: datumi.length, zadnji, prostih: preverjeno ? preverjeno.length - tezave.length : null },
+        serija: { vsakih_tednov, stevilo: datumi.length - brez.length, datumi, brez, zadnji, prostih: preverjeno ? preverjeno.length - brez.length - tezave.length : null },
       },
     };
     return out;
