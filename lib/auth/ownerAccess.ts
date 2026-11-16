@@ -40,3 +40,19 @@ export async function requireOwnerOrAdmin(
 
   return { textId, admin };
 }
+
+/**
+ * 403 response unless the user is the OWNER of the company (admins and staff are refused),
+ * or null when the owner may continue. For owner-only areas such as Receptionist+ and billing,
+ * whose pages are already closed to admins and staff in the UI.
+ */
+export async function forbiddenUnlessOwner(userId: string, companyUuid: string): Promise<NextResponse | null> {
+  const { data: member } = await adminClient()
+    .from('company_members')
+    .select('role')
+    .eq('user_id', userId)
+    .eq('company_id', companyUuid)
+    .maybeSingle();
+  if (member?.role === 'owner') return null;
+  return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
+}

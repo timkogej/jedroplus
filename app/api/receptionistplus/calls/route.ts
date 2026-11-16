@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { forbiddenUnlessOwner } from '@/lib/auth/ownerAccess';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -28,6 +29,9 @@ export async function GET(request: NextRequest) {
   if (!companyUuid) {
     return NextResponse.json({ ok: false, error: 'Company ni najdena' }, { status: 400 });
   }
+
+  const notOwner = await forbiddenUnlessOwner(user.id, companyUuid);
+  if (notOwner) return notOwner;
 
   const admin = adminClient();
   const { data: company } = await admin.from('companies').select('slug').eq('id', companyUuid).maybeSingle();

@@ -43,10 +43,30 @@ export async function POST(request: NextRequest) {
 
   const { uuid, textId } = await resolveUserCompany(access.user.id);
 
-  // The staff card must be in the caller's company.
   const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
+
+  // Linking a login to a staff card decides whose appointments the user sees ("own only"),
+  // so staff may do it only with the "view staff" permission (the same rule the dashboard shows).
+  const { data: member } = await admin
+    .from('company_members')
+    .select('role')
+    .eq('user_id', access.user.id)
+    .eq('company_id', uuid)
+    .maybeSingle();
+  if (member?.role === 'staff') {
+    const { data: perms } = await admin
+      .from('staff_role_permissions')
+      .select('can_view_staff')
+      .eq('company_id', uuid)
+      .maybeSingle();
+    if (perms?.can_view_staff !== true) {
+      return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
+    }
+  }
+
+  // The staff card must be in the caller's company.
   const { data: card } = await admin
     .from('Osebe')
     .select('id, "ID podjetja"')
@@ -54,6 +74,18 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   const cardCompany = (card as Record<string, unknown> | null)?.['ID podjetja'];
   if (!card || (cardCompany !== textId && cardCompany !== uuid)) {
+    return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
+  }
+
+  // A card already linked to someone else's login cannot be taken over.
+  const { data: taken } = await admin
+    .from('company_members')
+    .select('user_id')
+    .eq('company_id', uuid)
+    .eq('person_id', personId)
+    .neq('user_id', access.user.id)
+    .limit(1);
+  if (taken && taken.length > 0) {
     return NextResponse.json({ ok: false, error: 'Forbidden' }, { status: 403 });
   }
 

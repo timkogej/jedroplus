@@ -265,7 +265,7 @@ export default function ProtectedLayout({
 
       for (const { prefix, key } of routePermMap) {
         if (pathnameWithoutLocale === prefix || pathnameWithoutLocale.startsWith(prefix + '/')) {
-          if (p && p[key] === false) {
+          if (p && p[key] !== true) {
             return (
               <RoleAccessGate message={t('roleAccessGate.staffRestricted')} />
             );
