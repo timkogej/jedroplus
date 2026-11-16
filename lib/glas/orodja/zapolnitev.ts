@@ -26,7 +26,7 @@ import { cap } from './branje';
 import { samoSvojeUrejanje, uraIzParametra } from './obrazci';
 import { dan, izberiOsebe } from './pregled';
 import { imeJezika, izidPosiljanja, jezikStranke, omejitevSporocil, zavrnitevBesedila } from './sporocila';
-import { ID_STRANKE, razresiStranko } from './stranke';
+import { ID_STRANKE, razresiStranko, terminJeStranke } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja, PisalnoOrodje } from './tipi';
 
 const aktiven = (t: TerminPovzetek) => t.status !== 'cancelled' && t.status !== 'no_show';
@@ -36,6 +36,15 @@ const JEZIKI = ['sl', 'en', 'de', 'it', 'hr'] as const;
 const NAJMANJ_MIN = 15;
 
 type NajdenaLuknja = { luknja: Luknja; oseba: OsebaPovzetek };
+type VhodLuknje = {
+  datum: string | null;
+  ura: string | null;
+  oseba: string | null;
+  trajanje_min: number | null;
+  /** Luknja ob terminu stranke: »v sredo pred Anjo Novak«. */
+  ob_stranki?: string | null;
+  glede?: 'pred' | 'po' | null;
+};
 
 /** Proste luknje osebe na dan (od zdaj naprej, če je danes). */
 async function luknjeOseb(o: OkoljeOrodja, datum: string, osebe: OsebaPovzetek[]) {
@@ -57,8 +66,9 @@ async function luknjeOseb(o: OkoljeOrodja, datum: string, osebe: OsebaPovzetek[]
  */
 async function najdiLuknjo(
   o: OkoljeOrodja,
-  p: { datum: string | null; ura: string | null; oseba: string | null; trajanje_min: number | null }
+  p: VhodLuknje
 ): Promise<NajdenaLuknja | RezultatOrodja> {
+  if (p.ob_stranki) return luknjaObStranki(o, p);
   const d = dan(p.datum, o);
   if (typeof d !== 'string') return d;
   if (d < o.danes) return { sporocilo: jt('Luknje iščem samo za danes in naprej.') };
@@ -118,8 +128,51 @@ function razlog(k: Kandidat, o: OkoljeOrodja, oseba: string): string {
   return jt('{n}-krat v zadnjem letu pri {oseba:mestnik} ob tem času', { n: k.navada?.obiskov ?? 0, oseba });
 }
 
+/**
+ * Luknja tik pred ali po terminu stranke (»v sredo pred Anjo Novak«): termin stranke
+ * na ta dan (ali prvi naslednji), luknja pri isti osebi, ki se konča ob začetku termina
+ * (pred) oziroma začne ob koncu (po).
+ */
+async function luknjaObStranki(o: OkoljeOrodja, p: VhodLuknje): Promise<NajdenaLuknja | RezultatOrodja> {
+  const r = await razresiStranko(p.ob_stranki ?? '', null, o);
+  if ('odgovor' in r) return r.odgovor;
+  const s = r.stranka;
+  const ime = `${s.ime} ${s.priimek}`.trim();
+  const d = p.datum ? dan(p.datum, o) : null;
+  if (d !== null && typeof d !== 'string') return d;
+  const od = d ?? o.danes;
+  const termini = (await o.podatki.termini(od, d ?? dodajDni(o.danes, 14)))
+    .filter((t) => terminJeStranke(t, s) && aktiven(t) && t.status !== 'completed')
+    .filter((t) => !samoSvojiTermini(o.k) || t.osebaId === o.k.osebaId)
+    .sort((a, b) => a.datum.localeCompare(b.datum) || vMinute(a.zacetek) - vMinute(b.zacetek));
+  const t = termini[0];
+  if (!t) return { sporocilo: d ? jt('{ime} nima termina {datum}.', { ime, datum: opisDatuma(d, o.danes) }) : jt('{ime} nima prihodnjega termina.', { ime }) };
+  const oseba = (await o.podatki.osebe()).find((x) => x.id === t.osebaId);
+  if (!oseba) return { sporocilo: jt('Ne vem, pri kom je termin {ime}.', { ime }) };
+  const [x] = await luknjeOseb(o, t.datum, [oseba]);
+  const zacetek = vMinute(t.zacetek);
+  const konec = t.konec ? vMinute(t.konec) : zacetek;
+  const glede = p.glede ?? 'pred';
+  const najdena = x.luknje.find(([a, b]) => (glede === 'pred' ? Math.abs(b - zacetek) <= 5 : Math.abs(a - konec) <= 5));
+  const kdaj = jt('{datum} ob {ura}', { datum: opisDatuma(t.datum, o.danes), ura: t.zacetek });
+  if (!najdena) {
+    return {
+      sporocilo: glede === 'pred'
+        ? jt('Pred terminom {ime} ({kdaj}) ni proste luknje.', { ime, kdaj })
+        : jt('Po terminu {ime} ({kdaj}) ni proste luknje.', { ime, kdaj }),
+    };
+  }
+  const [a, b] = najdena;
+  const dolzina = p.trajanje_min ?? null;
+  // Pred terminom: luknja se konča ob začetku termina, zato pri omejeni dolžini štejemo nazaj.
+  const luknja = glede === 'pred'
+    ? { datum: t.datum, osebaId: oseba.id, od: dolzina ? Math.max(a, b - dolzina) : a, do: b }
+    : { datum: t.datum, osebaId: oseba.id, od: a, do: dolzina ? Math.min(b, a + dolzina) : b };
+  return { luknja, oseba };
+}
+
 // ───────────────────────────────────────────────────────────────────────────
-export const kandidatiZaLuknjo: BralnoOrodje<{ datum: string | null; ura: string | null; oseba: string | null; trajanje_min: number | null }> = {
+export const kandidatiZaLuknjo: BralnoOrodje<VhodLuknje> = {
   ime: 'kandidati_za_luknjo',
   opis:
     'Kdo bi lahko prišel v prosti čas (luknjo): "Ana je odpovedala jutri ob desetih, kdo bi lahko prišel?", "danes imam luknjo ob dvanajstih, koga naj pokličem?", "kdo bi vzel prosto uro pri Tini v petek?". ' +
@@ -134,8 +187,10 @@ export const kandidatiZaLuknjo: BralnoOrodje<{ datum: string | null; ura: string
       ura: { type: ['string', 'null'], description: 'Začetek luknje (HH:MM ali izraz); null = uporabnik ni povedal.' },
       oseba: { type: ['string', 'null'], description: 'Ime zaposlenega; null = ni povedal.' },
       trajanje_min: { type: ['integer', 'null'], description: 'Dolžina v minutah, če jo je povedal; sicer null (do konca luknje).' },
+      ob_stranki: { type: ['string', 'null'], description: 'Luknja ob terminu stranke ("pred Anjo Novak", "po Mateji"): ime stranke; potem ura in oseba nista potrebni. Sicer null.' },
+      glede: { type: ['string', 'null'], enum: ['pred', 'po', null], description: '"pred" ali "po" terminu stranke iz ob_stranki; sicer null.' },
     },
-    required: ['datum', 'ura', 'oseba', 'trajanje_min'],
+    required: ['datum', 'ura', 'oseba', 'trajanje_min', 'ob_stranki', 'glede'],
     additionalProperties: false,
   },
   vhod: z.object({
@@ -143,6 +198,8 @@ export const kandidatiZaLuknjo: BralnoOrodje<{ datum: string | null; ura: string
     ura: z.string().max(40).nullable(),
     oseba: z.string().max(80).nullable(),
     trajanje_min: z.number().int().min(10).max(600).nullable(),
+    ob_stranki: z.string().max(80).nullable().optional(),
+    glede: z.enum(['pred', 'po']).nullable().optional(),
   }),
   async izvedi(p, o) {
     const n = await najdiLuknjo(o, p);

@@ -490,4 +490,7 @@ export const it: Katalog = {
   "Tega datuma ni v seriji. Datumi: {datumi}.": "Questa data non è nella serie. Date: {datumi}.",
   "Ostal bi samo en termin. Za en termin recite »vpiši«.": "Resterebbe un solo appuntamento. Per un solo appuntamento dica «prenota».",
   "Brez: {datumi}.": "Senza: {datumi}.",
+  "Ne vem, pri kom je termin {ime}.": "Non so con chi è l'appuntamento di {ime}.",
+  "Pred terminom {ime} ({kdaj}) ni proste luknje.": "Prima dell'appuntamento di {ime} ({kdaj}) non c'è un buco libero.",
+  "Po terminu {ime} ({kdaj}) ni proste luknje.": "Dopo l'appuntamento di {ime} ({kdaj}) non c'è un buco libero.",
 };

@@ -18,7 +18,7 @@ beforeEach(salon);
 function o(k: Partial<Kontekst> = {}, sporocila = posiljateljLazni()): OkoljeOrodja & { sporocila: ReturnType<typeof posiljateljLazni> } {
   return { k: kontekst({ podjetje: 'Z5', ...k }), podatki: podatkiPomnilnik('Z5'), danes: DANES, uraZdaj: '10:00', ukazId: null, sporocila };
 }
-const vhod = (p: Partial<{ datum: string | null; ura: string | null; oseba: string | null; trajanje_min: number | null }> = {}) => ({
+const vhod = (p: Partial<{ datum: string | null; ura: string | null; oseba: string | null; trajanje_min: number | null; ob_stranki: string | null; glede: 'pred' | 'po' | null }> = {}) => ({
   datum: LUKNJA_DAN, ura: '10:30', oseba: 'Tina', trajanje_min: null, ...p,
 });
 type Kand = { stranka_id: string; ime: string; skupina: string; sms_dovoljen: boolean; termin_id?: string };
@@ -85,6 +85,14 @@ describe('kandidati_za_luknjo', () => {
   it('brez osebe in ob isti uri prosti dve osebi → vprašanje', async () => {
     const r = await kandidatiZaLuknjo.izvedi(vhod({ oseba: null }), o());
     expect(r.vprasanje?.moznosti?.map((m) => m.oznaka)).toEqual(['Tina Kos, 10:30–16:00', 'Urška Bele, 10:30–11:00']);
+  });
+
+  it('luknja pred terminom stranke (»v petek pred Laro«) pri njeni osebi', async () => {
+    const r = await kandidatiZaLuknjo.izvedi(vhod({ oseba: null, ura: null, ob_stranki: 'Lara', glede: 'pred' }), o());
+    expect(r.sporocilo).toMatch(/08:00–11:00 pri Urški/);
+    const po = await kandidatiZaLuknjo.izvedi(vhod({ oseba: null, ura: null, ob_stranki: 'Zala', glede: 'po' }), o());
+    expect(po.sporocilo).toMatch(/10:30–16:00 pri Tini/);
+    expect((await kandidatiZaLuknjo.izvedi(vhod({ datum: null, oseba: null, ura: null, ob_stranki: 'Nina Bela', glede: 'pred' }), o())).sporocilo).toBe('Nina Bela nima prihodnjega termina.');
   });
 
   it('ob uri ni luknje → najprej odpovej v koledarju', async () => {

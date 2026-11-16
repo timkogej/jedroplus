@@ -490,4 +490,7 @@ export const de: Katalog = {
   "Tega datuma ni v seriji. Datumi: {datumi}.": "Dieses Datum ist nicht in der Serie. Termine: {datumi}.",
   "Ostal bi samo en termin. Za en termin recite »vpiši«.": "Es bliebe nur ein Termin. Für einen einzelnen Termin sagen Sie „eintragen“.",
   "Brez: {datumi}.": "Ohne: {datumi}.",
+  "Ne vem, pri kom je termin {ime}.": "Ich weiß nicht, bei wem der Termin von {ime} ist.",
+  "Pred terminom {ime} ({kdaj}) ni proste luknje.": "Vor dem Termin von {ime} ({kdaj}) gibt es keine freie Lücke.",
+  "Po terminu {ime} ({kdaj}) ni proste luknje.": "Nach dem Termin von {ime} ({kdaj}) gibt es keine freie Lücke.",
 };
