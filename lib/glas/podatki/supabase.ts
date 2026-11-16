@@ -81,7 +81,8 @@ function vTermin(r: Vrstica): TerminPovzetek {
 
 const STOLPCI_TERMINA = 'id,"ID termina","ID stranke",Stranka,Datum,"Čas",Konec,Storitev,"ID Osebe",Oseba,Status,lokacija_id';
 
-export function podatkiSupabase(seja: SupabaseClient, podjetje: string): PodatkiSalona {
+/** `meja`: najstarejši datum, ki ga uporabnik sme videti (zaposleni z omejitvijo starih terminov). */
+export function podatkiSupabase(seja: SupabaseClient, podjetje: string, meja: string | null = null): PodatkiSalona {
   let strankeCache: Promise<StrankaPovzetek[]> | null = null;
 
   return {
@@ -290,7 +291,7 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
       // Imena stolpcev se med starimi in novimi bazami razlikujejo (kot lib/supabase/clients.ts).
       const [st, te] = await Promise.all([
         seja.from('Stranke').select('*').eq('ID Podjetja', podjetje).eq('ID stranke', idStranke).limit(1),
-        seja.from('Termini').select('Datum,Status').eq('ID podjetja', podjetje).eq('ID stranke', idStranke).is('deleted_at', null).limit(2000),
+        seja.from('Termini').select('Datum,Status').eq('ID podjetja', podjetje).eq('ID stranke', idStranke).is('deleted_at', null).gte('Datum', meja ?? '0001-01-01').limit(2000),
       ]);
       if (st.error) throw new Error(`podrobnosti stranke: ${st.error.code ?? 'napaka'}`);
       const r = (st.data ?? [])[0] as Vrstica | undefined;
@@ -370,6 +371,7 @@ export function podatkiSupabase(seja: SupabaseClient, podjetje: string): Podatki
           .select('"ID stranke",Status')
           .eq('ID podjetja', podjetje)
           .in('ID stranke', ids.slice(i, i + 200))
+          .gte('Datum', meja ?? '0001-01-01')
           .lt('Datum', predDatumom)
           .is('deleted_at', null)
           .limit(2000);

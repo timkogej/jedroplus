@@ -19,7 +19,7 @@ import { izberiStt } from './ponudniki/stt';
 import { izberiTts } from './ponudniki/tts';
 import { preberiKonfiguracijo } from './konfiguracija';
 import { podatkiSupabase } from './podatki/supabase';
-import { zOmejitvijoStarih } from './podatki/omejitev';
+import { mejaStarihTerminov, zOmejitvijoStarih } from './podatki/omejitev';
 import { shrambaSupabase } from './shramba/supabase';
 import { posiljateljN8n } from './sporocila/n8n';
 import { shrambaOpomnikov } from './opomniki/supabase';
@@ -92,7 +92,7 @@ export async function kontekstIzSeje(): Promise<IzidKonteksta> {
     llm: () => izberiLlm(konf),
     tts: () => izberiTts(konf),
     shramba: shrambaSupabase(admin),
-    podatki: zOmejitvijoStarih(podatkiSupabase(seja, besedilniId), k),
+    podatki: zOmejitvijoStarih(podatkiSupabase(seja, besedilniId, mejaStarihTerminov(k)), k),
     sporocila: posiljateljN8n(admin),
     opomniki: shrambaOpomnikov(admin),
   };
