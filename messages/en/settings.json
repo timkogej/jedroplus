@@ -263,6 +263,18 @@
         "can_manage_lost_leads": "Manage Lost Leads",
         "can_create_ghost_termin": "Can create unrecorded appointments (not counted in analytics)",
         "can_view_ghost_termini": "Can see which appointments are ghost (others see them as normal)"
+      },
+      "pastAppointments": {
+        "label": "Past appointments staff can see",
+        "hint": "Older appointments are hidden from staff (owner and admin see everything).",
+        "options": {
+          "all": "All",
+          "today": "Today onwards only",
+          "d1": "From yesterday",
+          "d7": "Last 7 days",
+          "d30": "Last 30 days",
+          "d90": "Last 90 days"
+        }
       }
     },
     "invite": {

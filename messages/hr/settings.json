@@ -263,6 +263,18 @@
         "can_manage_lost_leads": "Upravljanje izgubljenim klijentima",
         "can_create_ghost_termin": "Može izraditi nezabilježene termine (ne ulaze u analitiku)",
         "can_view_ghost_termini": "Vidi koji su termini ghost (ostali ih vide kao uobičajene)"
+      },
+      "pastAppointments": {
+        "label": "Prošli termini koje vidi zaposlenik",
+        "hint": "Stariji termini skriveni su od zaposlenika (vlasnik i admin vide sve).",
+        "options": {
+          "all": "Svi",
+          "today": "Samo od danas",
+          "d1": "Od jučer",
+          "d7": "Zadnjih 7 dana",
+          "d30": "Zadnjih 30 dana",
+          "d90": "Zadnjih 90 dana"
+        }
       }
     },
     "invite": {

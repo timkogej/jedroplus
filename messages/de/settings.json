@@ -263,6 +263,18 @@
         "can_manage_lost_leads": "Verlorene Kunden verwalten",
         "can_create_ghost_termin": "Darf nicht erfasste Termine anlegen (zählen nicht in den Auswertungen)",
         "can_view_ghost_termini": "Sieht, welche Termine Ghost-Termine sind (andere sehen sie als normale Termine)"
+      },
+      "pastAppointments": {
+        "label": "Vergangene Termine, die Mitarbeiter sehen",
+        "hint": "Ältere Termine sind für Mitarbeiter ausgeblendet (Inhaber und Admin sehen alles).",
+        "options": {
+          "all": "Alle",
+          "today": "Nur ab heute",
+          "d1": "Ab gestern",
+          "d7": "Letzte 7 Tage",
+          "d30": "Letzte 30 Tage",
+          "d90": "Letzte 90 Tage"
+        }
       }
     },
     "invite": {

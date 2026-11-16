@@ -263,6 +263,18 @@
         "can_manage_lost_leads": "Gestione dei clienti persi",
         "can_create_ghost_termin": "Può creare appuntamenti non registrati (esclusi dalle analisi)",
         "can_view_ghost_termini": "Vede quali appuntamenti sono ghost (gli altri li vedono come normali)"
+      },
+      "pastAppointments": {
+        "label": "Appuntamenti passati visibili al personale",
+        "hint": "Gli appuntamenti più vecchi sono nascosti al personale (titolare e admin vedono tutto).",
+        "options": {
+          "all": "Tutti",
+          "today": "Solo da oggi",
+          "d1": "Da ieri",
+          "d7": "Ultimi 7 giorni",
+          "d30": "Ultimi 30 giorni",
+          "d90": "Ultimi 90 giorni"
+        }
       }
     },
     "invite": {

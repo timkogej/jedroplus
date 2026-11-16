@@ -6,6 +6,8 @@ import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
 import type { AppointmentWithDetails, Storitev, Zaposleni } from '@/types/appointments';
 import { supabase } from '@/lib/supabaseClient';
 import { parseAnswers } from '@/lib/questionnaire';
+import { filterRowsByCutoff } from '@/lib/utils/pastCutoff';
+import { getMyPastCutoff } from '@/lib/supabase/myPastCutoff';
 
 // If the 'absences' table doesn't exist skip future queries to avoid repeated 400 errors.
 let absencesTableMissing = false;
@@ -341,7 +343,8 @@ export async function fetchAppointmentsForMonth(
       throw new Error(bookingsRes.error);
     }
 
-    const bookings = bookingsRes.data ?? [];
+    // Zaposleni z omejitvijo ne dobi starejših terminov (Nastavitve → Člani).
+    const bookings = filterRowsByCutoff(bookingsRes.data ?? [], await getMyPastCutoff());
     const services = servicesRes.data ?? [];
     const staff = staffRes.data ?? [];
     const clients = clientsRes.data ?? [];
@@ -803,7 +806,8 @@ export async function fetchAllAppointments(
       throw new Error(bookingsRes.error);
     }
 
-    const bookings = bookingsRes.data ?? [];
+    // Zaposleni z omejitvijo ne dobi starejših terminov (Nastavitve → Člani).
+    const bookings = filterRowsByCutoff(bookingsRes.data ?? [], await getMyPastCutoff());
     const services = servicesRes.data ?? [];
     const staff = staffRes.data ?? [];
     const clients = clientsRes.data ?? [];

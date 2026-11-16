@@ -37,6 +37,9 @@ import {
 import type { AppointmentWithDetails, Storitev, Zaposleni } from "@/types/appointments";
 import { parseAnswers } from '@/lib/questionnaire';
 import { getServerUser } from "@/lib/auth/serverUser";
+import { fetchCompanyRegionServer } from "@/lib/region.server";
+import { todayInTimeZone } from "@/lib/timezone";
+import { filterRowsByCutoff, pastCutoffKey } from "@/lib/utils/pastCutoff";
 
 type Row = Record<string, unknown>;
 type ServerClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
@@ -196,7 +199,7 @@ async function fetchBookingsFrom(
 async function resolveViewScope(
   supabase: ServerClient,
   userId: string
-): Promise<{ ownOnly: boolean; personId: string | null }> {
+): Promise<{ ownOnly: boolean; personId: string | null; pastDays: number | null }> {
   const { data: member } = await supabase
     .from("company_members")
     .select("role, person_id, company_id")
@@ -207,12 +210,12 @@ async function resolveViewScope(
   const personId = member?.person_id ? String(member.person_id) : null;
 
   if (role !== "staff" || !member?.company_id) {
-    return { ownOnly: false, personId };
+    return { ownOnly: false, personId, pastDays: null };
   }
 
   const { data: perms } = await supabase
     .from("staff_role_permissions")
-    .select("can_view_only_own_appointments, can_view_all_appointments")
+    .select("can_view_only_own_appointments, can_view_all_appointments, past_appointments_days")
     .eq("company_id", member.company_id)
     .maybeSingle();
 
@@ -220,7 +223,8 @@ async function resolveViewScope(
     perms?.can_view_only_own_appointments === true ||
     perms?.can_view_all_appointments === false;
 
-  return { ownOnly, personId };
+  const rawDays = (perms as { past_appointments_days?: number | null } | null)?.past_appointments_days;
+  return { ownOnly, personId, pastDays: typeof rawDays === "number" ? rawDays : null };
 }
 
 // Assembly ported from fetchAllAppointments (lib/supabase/appointments.ts). Same
@@ -428,7 +432,7 @@ export async function fetchAppointmentsDataServer(
   const user = await getServerUser();
   if (!user) return null;
 
-  const { ownOnly, personId } = await resolveViewScope(supabase, user.id);
+  const { ownOnly, personId, pastDays } = await resolveViewScope(supabase, user.id);
 
   // Default window: previous month → all future. An explicit earlier fromDate
   // (from the range-expansion server action) widens it into older history.
@@ -441,11 +445,15 @@ export async function fetchAppointmentsDataServer(
     fetchTableOnce(supabase, TABLES.clients, companyId),
   ]);
 
+  // Zaposleni z omejitvijo ne dobi starejših terminov (meja po času podjetja).
+  const region = await fetchCompanyRegionServer(supabase, companyId);
+  const cutoff = pastCutoffKey(pastDays, todayInTimeZone(region.timezone));
+
   // For view-own-only staff, restrict to their own person's appointments server-side.
   const ownOnlyPersonId = ownOnly && personId ? personId : null;
 
   return {
-    appointments: buildAppointments(bookings, services, staff, clients, ownOnlyPersonId),
+    appointments: buildAppointments(filterRowsByCutoff(bookings, cutoff), services, staff, clients, ownOnlyPersonId),
     services: buildServices(services),
     employees: buildEmployees(staff),
     ownOnly: !!ownOnlyPersonId,

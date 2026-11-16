@@ -372,7 +372,10 @@ export default function ClaniPage() {
         const resp = await fetch('/api/staff-permissions/privacy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ can_view_ghost_termini: permissions.can_view_ghost_termini === true }),
+          body: JSON.stringify({
+            can_view_ghost_termini: permissions.can_view_ghost_termini === true,
+            past_appointments_days: permissions.past_appointments_days ?? null,
+          }),
         });
         directOk = resp.ok;
       } catch {
@@ -589,6 +592,32 @@ export default function ClaniPage() {
                         </div>
                       );
                     })}
+                    {section.sectionKey === 'termini' && (
+                      <div className="flex flex-col gap-1.5 pt-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                        <div className="min-w-0">
+                          <span className="text-sm text-gray-900">{t('members.permissions.pastAppointments.label')}</span>
+                          <p className="text-xs text-gray-500">{t('members.permissions.pastAppointments.hint')}</p>
+                        </div>
+                        <select
+                          value={permissions.past_appointments_days == null ? 'all' : String(permissions.past_appointments_days)}
+                          disabled={saving}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setPermissions((prev) => prev ? { ...prev, past_appointments_days: v === 'all' ? null : Number(v) } : prev);
+                            setSaveSuccess(false);
+                            setSaveError(false);
+                          }}
+                          className="rounded-[10px] border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-400 focus:outline-none disabled:opacity-50"
+                        >
+                          <option value="all">{t('members.permissions.pastAppointments.options.all')}</option>
+                          <option value="0">{t('members.permissions.pastAppointments.options.today')}</option>
+                          <option value="1">{t('members.permissions.pastAppointments.options.d1')}</option>
+                          <option value="7">{t('members.permissions.pastAppointments.options.d7')}</option>
+                          <option value="30">{t('members.permissions.pastAppointments.options.d30')}</option>
+                          <option value="90">{t('members.permissions.pastAppointments.options.d90')}</option>
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
