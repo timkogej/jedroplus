@@ -17,12 +17,12 @@ import { normalizeCommunicationLanguage } from '@/lib/communicationLanguage';
 import { dodajDni, opisDatuma, vMinute } from '../razresevanje/datumi';
 import { zJezikom } from '../jeziki/jezik';
 import { jt, kt } from '../jeziki/t';
-import type { Predogled, RezultatOrodja, TerminPovzetek } from '../tipi';
+import type { Predogled, RezultatOrodja, StrankaPovzetek, TerminPovzetek } from '../tipi';
 import { NAJVEC_EMAIL, NAJVEC_SMS, ocistiSms, preveriBesedilo, skritEmail, skritTelefon, zPodpisom } from '../sporocila/besedilo';
 import { OMEJITEV_NA_PODJETJE, OMEJITEV_NA_STRANKO, type IzidPosiljanja, type Kanal } from '../sporocila/tipi';
 import { datumIzParametra } from './branje';
 import { samoSvojeUrejanje } from './obrazci';
-import { razresiStranko, ID_STRANKE } from './stranke';
+import { razresiStranko, terminJeStranke, ID_STRANKE } from './stranke';
 import type { OkoljeOrodja, PisalnoOrodje } from './tipi';
 
 const JEZIKI = ['sl', 'en', 'de', 'it', 'hr'] as const;
@@ -65,7 +65,7 @@ export function jezikStranke(koda: string | null): Jezik {
 /** Termin, o katerem govori sporočilo: aktiven (prednost) ali odpovedan, danes ali v 30 dneh. */
 async function izberiTermin(
   o: OkoljeOrodja,
-  idStranke: string,
+  s: StrankaPovzetek,
   ime: string,
   p: Pick<Vhod, 'termin_id' | 'datum_termina' | 'o_odpovedi'>
 ): Promise<{ termin: TerminPovzetek } | { odgovor: RezultatOrodja }> {
@@ -75,7 +75,7 @@ async function izberiTermin(
   if (od < o.danes) return { odgovor: { sporocilo: jt('Sporočilo lahko pošljem samo o današnjem ali prihodnjem terminu.') } };
   let termini = (await o.podatki.termini(od, doo))
     // Današnji že opravljen termin šteje (»pozabili ste dežnik«, Tim 15. 11.); pretekli dnevi ne.
-    .filter((t) => t.idStranke === idStranke && (aktiven(t) || t.status === 'cancelled' || (t.status === 'completed' && t.datum === o.danes)))
+    .filter((t) => terminJeStranke(t, s) && (aktiven(t) || t.status === 'cancelled' || (t.status === 'completed' && t.datum === o.danes)))
     .sort((a, b) => a.datum.localeCompare(b.datum) || vMinute(a.zacetek) - vMinute(b.zacetek));
   if (p.termin_id) termini = termini.filter((t) => t.id === p.termin_id);
   // Obvestilo o odpovedi samo za termin, ki je v bazi res odpovedan; sicer prednost aktivnim in današnjim opravljenim.
@@ -91,7 +91,7 @@ async function izberiTermin(
     return {
       odgovor: {
         sporocilo: jt('{ime} ima več terminov. O katerem?', { ime }),
-        podatki: { stranka_id: idStranke },
+        podatki: { stranka_id: s.id },
         vprasanje: {
           besedilo: jt('Kateri termin?'),
           moznosti: izbor.slice(0, 5).map((t) => ({ id: t.id, oznaka: `${jt('{datum} ob {ura}', { datum: opisDatuma(t.datum, o.danes), ura: t.zacetek })}${t.storitev ? `, ${t.storitev}` : ''}` })),
@@ -146,7 +146,7 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
     if ('odgovor' in r) return r.odgovor;
     const s = r.stranka;
     const ime = `${s.ime} ${s.priimek}`.trim();
-    const izbran = await izberiTermin(o, s.id, ime, p);
+    const izbran = await izberiTermin(o, s, ime, p);
     if ('odgovor' in izbran) return izbran.odgovor;
     const t = izbran.termin;
     if (nePrisvojem(o, t)) return { sporocilo: jt('Sporočila lahko pošiljate samo strankam svojih terminov.') };
@@ -198,7 +198,7 @@ export const sporociStranki: PisalnoOrodje<Vhod> = {
     // Vse znova z uporabnikovo sejo: stranka, termin, pravica do termina, kontakt.
     const s = await o.podatki.stranka(p.idStranke);
     if (!s) return ni(jt('Stranke ni več mogoče najti. Sporočilo ni bilo poslano.'));
-    const t = (await o.podatki.termini(p.datumTermina, p.datumTermina)).find((x) => x.id === p.idTermina && x.idStranke === p.idStranke);
+    const t = (await o.podatki.termini(p.datumTermina, p.datumTermina)).find((x) => x.id === p.idTermina && (!x.idStranke || x.idStranke === p.idStranke));
     if (!t || !(aktiven(t) || t.status === 'cancelled' || (t.status === 'completed' && t.datum === o.danes))) return ni(jt('Termina ni več. Sporočilo ni bilo poslano.'));
     if (p.oOdpovedi && t.status !== 'cancelled') return ni(jt('Termin ni odpovedan. Sporočilo ni bilo poslano.'));
     if (nePrisvojem(o, t)) return ni(jt('Sporočila lahko pošiljate samo strankam svojih terminov.'));

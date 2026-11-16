@@ -43,6 +43,8 @@ export function datumZaGovorTuj(j: Tuj, dan: number, mesec: number, danVTednu: n
   if (razlika === 1) return `${r.jutri}, ${kratko}`;
   if (razlika === -1) return `${r.vceraj}, ${kratko}`;
   if (razlika === 2) return `${r.pojutri}, ${kratko}`;
+  // Ta teden je dovolj dan; datum šele za naslednji teden in dlje (Tim, 16. 11.).
+  if (razlika > 2 && razlika < 7) return j === 'en' ? `on ${ime}` : j === 'de' ? `am ${ime}` : kratko;
   const m = MESECI[j][mesec - 1];
   switch (j) {
     case 'en':
@@ -68,9 +70,10 @@ export function opisDatumaTuj(j: Tuj, dan: number, mesec: number, danVTednu: num
           ? `${ime} ${dan}/${mesec}`
           : `${ime}, ${dan}. ${mesec}.`;
   const r = RELATIVNO[j];
-  if (razlika === 0) return `${r.danes}, ${osnova}`;
-  if (razlika === 1) return `${r.jutri}, ${osnova}`;
-  if (razlika === -1) return `${r.vceraj}, ${osnova}`;
+  if (razlika === 0) return r.danes;
+  if (razlika === 1) return `${r.jutri}, ${ime}`;
+  if (razlika === -1) return r.vceraj;
+  if (razlika > 1 && razlika < 7) return ime;
   return osnova;
 }
 

@@ -17,7 +17,7 @@ describe('branje se izvede takoj', () => {
     expect(llm.zahteve.length).toBe(0);
     expect(r).toMatchObject({ ok: true, status: 'odgovor' });
     if (r.ok) {
-      expect(r.odgovor).toMatch(/^Jutri, petek, 13\. 11\.: 1 termin/);
+      expect(r.odgovor).toMatch(/^Jutri, petek: 1 termin/);
       expect(r.odgovor).toContain('Mateja Kovačič');
       expect(r.odgovor).not.toContain('Ana Novak'); // Urškin termin
       expect(r.odgovor).not.toContain('Špela'); // odpovedan
@@ -28,7 +28,7 @@ describe('branje se izvede takoj', () => {
     const { d } = okolje();
     const r = await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: 'kaj imamo jutri' }, d);
     if (!r.ok) throw new Error();
-    expect(r.prikaz?.naslov).toMatch(/^Jutri, petek, 13\. 11\.: \d termin/);
+    expect(r.prikaz?.naslov).toMatch(/^Jutri, petek: \d termin/);
     expect(r.prikaz?.skupine?.[0].vrstice).toContainEqual({ cas: '11:00–11:30', glavno: 'Ana Novak', drugo: 'Moško striženje · Urška' });
     const velik = omejiPrikaz({ naslov: 'x'.repeat(500), skupine: [{ vrstice: Array.from({ length: 50 }, (_, i) => ({ glavno: String(i) })) }] });
     expect(velik.naslov).toHaveLength(120);

@@ -22,7 +22,7 @@ import type { OsebaPovzetek, Predogled, RezultatOrodja, TerminPovzetek } from '.
 import { datumIzParametra } from './branje';
 import { uraIzParametra } from './obrazci';
 import { izberiOsebo, jeRezultat } from './obrazci';
-import { ID_STRANKE, razresiStranko } from './stranke';
+import { ID_STRANKE, razresiStranko, terminJeStranke } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja, PisalnoOrodje } from './tipi';
 
 const DNI_TERMIN = 60;
@@ -94,7 +94,7 @@ async function terminStranke(o: OkoljeOrodja, p: VhodNov): Promise<{ t: TerminPo
   const ime = `${r.stranka.ime} ${r.stranka.priimek}`.trim();
   const zdaj = vMinute(o.uraZdaj);
   let termini = (await o.podatki.termini(o.danes, dodajDni(o.danes, DNI_TERMIN)))
-    .filter((t) => t.idStranke === r.stranka.id && aktiven(t))
+    .filter((t) => terminJeStranke(t, r.stranka) && aktiven(t))
     .filter((t) => t.datum > o.danes || vMinute(t.zacetek) > zdaj)
     .filter((t) => !samoSvojiTermini(o.k) || t.osebaId === o.k.osebaId)
     .sort((a, b) => a.datum.localeCompare(b.datum) || vMinute(a.zacetek) - vMinute(b.zacetek));

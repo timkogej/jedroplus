@@ -37,6 +37,8 @@ export function datumZaGovor(datum: string, danes: string): string {
   if (r === 1) return `jutri, ${dan}`;
   if (r === -1) return `včeraj, ${dan}`;
   if (r === 2) return `pojutrišnjem, ${dan}`;
+  // Ta teden je dovolj dan; datum šele za naslednji teden in dlje (Tim, 16. 11.).
+  if (r > 2 && r < 7) return dan;
   const [, m, d] = datum.split('-').map(Number);
   return `${dan}, ${d}. ${MESEC_RODILNIK[m - 1]}`;
 }
@@ -222,4 +224,77 @@ export function brezKontaktov(besedilo: string): string {
     .replace(/[^\s@,;]+@[^\s@,;]+\.[a-z]{2,}/gi, '(e-pošta)')
     .replace(/[^\s@]+ afna [^\s@]+( pika [^\s@]+)+/gi, '(e-pošta)')
     .replace(/\+?\d[\d \-/]{5,}\d/g, (m) => (m.replace(/\D/g, '').length >= 7 ? '(telefon)' : m));
+}
+
+// ───────────────────────── uglajeno besedilo ─────────────────────────
+// Zadnji prehod nad vsakim odgovorom (zaslon in glas), po zgledu Receptionist+
+// (spoken_text.py): model kljub navodilom včasih napiše ID, "važi" ali "1 termin".
+
+const ID_V_BESEDILU = [
+  // "(ID: 12345)", "ID termina 98765", "id stranke AB-123456", "termin_id: …"
+  /\s*\(?\b(?:ID|Id|id)\b(?:\s+(?:termina|stranke|opomnika|osebe))?(?:\s*[:=]\s*|\s+)(?=[A-Za-z0-9-]*\d)[A-Za-z0-9][A-Za-z0-9-]{2,}\)?/g,
+  /\s*\(?\b(?:termin|stranka|opomnik|oseba|sporocilo)_id\s*[:=]\s*[A-Za-z0-9-]+\)?/g,
+  // UUID
+  /\s*\(?\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b\)?/gi,
+];
+
+/** Odstrani ID-je (termina, stranke, UUID) iz besedila za uporabnika. */
+export function brezIdjev(besedilo: string): string {
+  let s = besedilo;
+  for (const re of ID_V_BESEDILU) s = s.replace(re, '');
+  return s.replace(/\s+([.,;:!?])/g, '$1').replace(/\(\s*\)/g, '').replace(/\s{2,}/g, ' ').trim();
+}
+
+// Pogovorne besede, ki ne sodijo v vljuden salon (Receptionist+ R-CONCISE).
+const NEVLJUDNO_SL: [RegExp, string][] = [
+  [/\bvaži\b/gi, 'velja'],
+  [/\bokej\b|\bokay\b|\bok\b(?=[\s,.!?]|$)/gi, 'v redu'],
+  [/\bni panike\b[,.!]?\s*/gi, ''],
+  [/\bsuper\b[,.!]?\s*(?=\p{Lu})/gu, ''],
+  [/\bčao\b|\bživjo\b/gi, 'pozdravljeni'],
+];
+
+// Števnik pred samostalnikom za glas: "1 termin" bi Nina prebrala "ena termin".
+type Spol = 'm' | 'z' | 's';
+const SAMOSTALNIKI: Record<string, { spol: Spol; sklon: 'im' | 'to' | 'dv' | 'mn' }> = {
+  termin: { spol: 'm', sklon: 'im' }, opomnik: { spol: 'm', sklon: 'im' }, kandidat: { spol: 'm', sklon: 'im' },
+  termina: { spol: 'm', sklon: 'dv' }, opomnika: { spol: 'm', sklon: 'dv' }, kandidata: { spol: 'm', sklon: 'dv' },
+  termini: { spol: 'm', sklon: 'mn' }, opomniki: { spol: 'm', sklon: 'mn' }, kandidati: { spol: 'm', sklon: 'mn' },
+  termine: { spol: 'm', sklon: 'to' }, opomnike: { spol: 'm', sklon: 'to' }, kandidate: { spol: 'm', sklon: 'to' },
+  stranka: { spol: 'z', sklon: 'im' }, stranko: { spol: 'z', sklon: 'im' }, stranki: { spol: 'z', sklon: 'dv' }, stranke: { spol: 'z', sklon: 'mn' },
+  sporočilo: { spol: 's', sklon: 'im' }, sporočili: { spol: 's', sklon: 'dv' }, sporočila: { spol: 's', sklon: 'mn' },
+};
+const ENA: Record<Spol, string> = { m: 'en', z: 'ena', s: 'eno' };
+const DVA: Record<Spol, string> = { m: 'dva', z: 'dve', s: 'dve' };
+
+/** "Danes je 1 termin" → "Danes je en termin"; "je 2 termina" → "sta dva termina"; "je 3 termine" → "so trije termini". */
+export function stevilaZaGovor(besedilo: string): string {
+  return besedilo.replace(
+    /\b(?:(je|imate|ima|imamo) )?([1-4]) (\p{L}+)/gu,
+    (cel, glagol: string | undefined, n: string, sam: string) => {
+      const info = SAMOSTALNIKI[sam.toLowerCase()];
+      if (!info) return cel;
+      const st = Number(n);
+      const g = glagol ? `${glagol} ` : '';
+      if (st === 1) return `${g}${ENA[info.spol]} ${sam}`;
+      if (st === 2) return `${glagol === 'je' ? 'sta ' : g}${DVA[info.spol]} ${sam}`;
+      // 3 in 4: "je 3 termine" (tožilnik iz predloge) → "so trije termini"; "imate 3 termine" → "imate tri termine".
+      if (glagol === 'je' && info.spol === 'm') return `so ${st === 3 ? 'trije' : 'štirje'} ${sam.replace(/e$/, 'i')}`;
+      if (glagol === 'je') return `so ${st === 3 ? 'tri' : 'štiri'} ${sam}`;
+      return `${g}${st === 3 ? 'tri' : 'štiri'} ${sam}`;
+    }
+  );
+}
+
+/** Besedilo za zaslon: brez ID-jev in pogovornih besed. */
+export function uglajenoBesedilo(besedilo: string): string {
+  let s = brezIdjev(besedilo);
+  if (trenutniJezik() === 'sl') for (const [re, z] of NEVLJUDNO_SL) s = s.replace(re, z);
+  return s.replace(/^\p{Ll}/u, (c) => c.toUpperCase());
+}
+
+/** Besedilo za glas: kot za zaslon, plus števniki z besedo. */
+export function uglajenGovor(besedilo: string): string {
+  const s = uglajenoBesedilo(besedilo);
+  return trenutniJezik() === 'sl' ? stevilaZaGovor(s) : s;
 }

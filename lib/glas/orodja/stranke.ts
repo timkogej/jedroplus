@@ -5,7 +5,8 @@
 
 import { poisci } from '../razresevanje/imena';
 import { opisDatuma } from '../razresevanje/datumi';
-import type { RezultatOrodja, StrankaPovzetek } from '../tipi';
+import { brezSumnikov } from '../razresevanje/besedilo';
+import type { RezultatOrodja, StrankaPovzetek, TerminPovzetek } from '../tipi';
 import type { OkoljeOrodja } from './tipi';
 import { jt } from '../jeziki/t';
 
@@ -15,12 +16,46 @@ import { jt } from '../jeziki/t';
  */
 export const ID_STRANKE = /^[A-Za-z0-9][A-Za-z0-9-]{0,23}$/;
 
-export function oznakaStranke(s: StrankaPovzetek, danes: string): string {
+/** Zadnji in naslednji termin stranke iz koledarja (ne iz zastarele »Zadnje interakcije«). */
+export interface TerminiStranke {
+  zadnji: TerminPovzetek | null;
+  naslednji: TerminPovzetek | null;
+}
+
+export function oznakaStranke(s: StrankaPovzetek, danes: string, t?: TerminiStranke): string {
   const ime = `${s.ime} ${s.priimek}`.trim() || jt('stranka {id}', { id: s.id });
+  if (t) {
+    // Naslednji termin je za uporabnika najbolj prepoznaven (»Ana, ki pride jutri«).
+    if (t.naslednji) return jt('{ime} (naslednjič {datum})', { ime, datum: opisDatuma(t.naslednji.datum, danes) });
+    if (t.zadnji) return jt('{ime} (zadnjič {datum})', { ime, datum: opisDatuma(t.zadnji.datum, danes) });
+  }
   // Pri istoimenskih strankah mora biti razlika vidna tudi brez obiska.
   return s.zadnjaInterakcija
     ? jt('{ime} (zadnjič {datum})', { ime, datum: opisDatuma(s.zadnjaInterakcija, danes) })
     : jt('{ime} (še brez obiska)', { ime });
+}
+
+/** Zadnji in naslednji termin za nekaj strank hkrati (iskanje, izbira med istoimenskimi). */
+export async function terminiStrank(o: OkoljeOrodja, stranke: StrankaPovzetek[]): Promise<Map<string, TerminiStranke>> {
+  const pari = await Promise.all(
+    stranke.slice(0, 6).map(async (s) => {
+      const [zadnji, naslednji] = await Promise.all([o.podatki.zadnjiTermin(s.id, o.danes), o.podatki.naslednjiTermin(s.id, o.danes)]);
+      return [s.id, { zadnji, naslednji }] as const;
+    })
+  );
+  return new Map(pari);
+}
+
+const polnoIme = (x: string) => brezSumnikov(x).replace(/[^a-z ]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' ');
+
+/**
+ * Ali je termin od te stranke: po ID-ju, ali (termin brez ID stranke, npr. star
+ * ali vnesen ročno) po enakem imenu in priimku. Termin, vezan na drugo stranko, ni njen.
+ */
+export function terminJeStranke(t: TerminPovzetek, s: StrankaPovzetek): boolean {
+  if (t.idStranke) return t.idStranke === s.id;
+  const ime = polnoIme(`${s.ime} ${s.priimek}`);
+  return ime.includes(' ') && polnoIme(t.stranka) === ime;
 }
 
 export type RazresenaStranka = { stranka: StrankaPovzetek } | { odgovor: RezultatOrodja };
@@ -30,6 +65,13 @@ export async function razresiStranko(
   idStranke: string | null,
   o: OkoljeOrodja
 ): Promise<RazresenaStranka> {
+  const r = await razresi(poizvedba, idStranke, o);
+  // O tej stranki se pogovarjamo naprej, tudi če orodje potem ne uspe.
+  if ('stranka' in r) o.razresena = r.stranka.id;
+  return r;
+}
+
+async function razresi(poizvedba: string, idStranke: string | null, o: OkoljeOrodja): Promise<RazresenaStranka> {
   if (idStranke) {
     // Preverjeno z uporabnikovo sejo (RLS): tuj ID vrne null.
     const s = await o.podatki.stranka(idStranke);
@@ -50,13 +92,20 @@ export async function razresiStranko(
   return vecStrank(poizvedba, izid.kandidati.map((k) => k.vrednost), o);
 }
 
-function vecStrank(poizvedba: string, kandidati: StrankaPovzetek[], o: OkoljeOrodja): RazresenaStranka {
+async function vecStrank(poizvedba: string, kandidati: StrankaPovzetek[], o: OkoljeOrodja): Promise<RazresenaStranka> {
+  const termini = await terminiStrank(o, kandidati);
+  // Dvojnik iste stranke (isto ime in priimek): velja zapis, ki ima prihodnji termin, če je tak en sam.
+  const imena = new Set(kandidati.map((k) => polnoIme(`${k.ime} ${k.priimek}`)));
+  if (imena.size === 1 && [...imena][0].includes(' ')) {
+    const sTerminom = kandidati.filter((k) => termini.get(k.id)?.naslednji);
+    if (sTerminom.length === 1) return { stranka: sTerminom[0] };
+  }
   return {
     odgovor: {
       sporocilo: jt('Najdenih je več strank za »{ime}«. Katero imate v mislih?', { ime: poizvedba }),
       vprasanje: {
         besedilo: jt('Katero stranko?'),
-        moznosti: kandidati.map((k) => ({ id: k.id, oznaka: oznakaStranke(k, o.danes) })),
+        moznosti: kandidati.map((k) => ({ id: k.id, oznaka: oznakaStranke(k, o.danes, termini.get(k.id)) })),
       },
       podatki: kandidati.map((k) => ({ id: k.id, ime: k.ime, priimek: k.priimek })),
     },

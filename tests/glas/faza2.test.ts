@@ -75,7 +75,7 @@ describe('proste_luknje', () => {
 describe('kdo_dela', () => {
   it('odsotni so našteti posebej', async () => {
     const r = await kdoDela.izvedi({ datum: '2026-11-16' }, o());
-    expect(r.govor).toBe('V ponedeljek, 16. novembra dela Tina od osmih do štirih. Odsotni: Urška.');
+    expect(r.govor).toBe('V ponedeljek dela Tina od osmih do štirih. Odsotni: Urška.');
   });
 
   it('ob sobotah nihče', async () => {

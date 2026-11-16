@@ -38,7 +38,7 @@ describe('čas v pasu podjetja', () => {
 describe('nov_opomnik', () => {
   it('jutri ob devetih: točen čas pred shranjevanjem', async () => {
     const p = kotPredlog(await novOpomnik.predogled(vhod(), o()));
-    expect(p.povzetek).toMatch(/^Opomnik jutri, petek, 13\. 11\. ob 09:00: pokliči dobavitelja$/);
+    expect(p.povzetek).toMatch(/^Opomnik jutri, petek ob 09:00: pokliči dobavitelja$/);
     expect(p.parametri.ob).toBe('2026-11-13T08:00:00.000Z');
   });
 
@@ -78,7 +78,7 @@ describe('nov_opomnik', () => {
   it('za sodelavca: samo lastnik/admin, oseba z računom, shrani za prejemnika s podpisom', async () => {
     const env = o({}, opomnikiLazni(true, { o2: 'u-urska' }));
     const p = kotPredlog(await novOpomnik.predogled(vhod({ besedilo: 'naroči barve', za: 'Urško' }), env));
-    expect(p.povzetek).toBe('Opomnik za Urška Bele jutri, petek, 13. 11. ob 09:00: naroči barve');
+    expect(p.povzetek).toBe('Opomnik za Urška Bele jutri, petek ob 09:00: naroči barve');
     expect(p.parametri.zaOsebo).toBe('o2');
     const r = await novOpomnik.potrdi(p.parametri, env);
     expect(r.sporocilo).toBe('Opomnik za Urška Bele je shranjen. Vidi in prekliče ga lahko samo Urška Bele.');
@@ -117,7 +117,7 @@ describe('moji_opomniki in izbrisi_opomnik', () => {
   it('seznam po času; prazno', async () => {
     expect(sporocilo(await mojiOpomniki.izvedi({}, o()))).toBe('Nimate čakajočih opomnikov.');
     const r = await mojiOpomniki.izvedi({}, await dva());
-    expect(r.sporocilo).toBe('Vaši opomniki (2):\n• jutri, petek, 13. 11. ob 09:00 — pokliči dobavitelja\n• ponedeljek, 16. 11. ob 08:30 — naroči barve');
+    expect(r.sporocilo).toBe('Vaši opomniki (2):\n• jutri, petek ob 09:00 — pokliči dobavitelja\n• ponedeljek ob 08:30 — naroči barve');
     expect(r.govor).toMatch(/^Imate 2 opomnika: /);
   });
 

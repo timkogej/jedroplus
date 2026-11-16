@@ -17,7 +17,7 @@ import { prosteLuknje, razcleniUrnik, urnikOsebe } from '../razresevanje/urnik';
 import { datumZaGovor, emailZaGovor, povezavaKontakta, razponZaGovor, telefonZaGovor, telefonZaZaslon, uraZaGovor } from '../govor';
 import type { Kontekst, LokacijaPovzetek, OsebaPovzetek, RezultatOrodja, StoritevPovzetek, TerminPovzetek } from '../tipi';
 import { datumIzParametra } from './branje';
-import { razresiStranko, ID_STRANKE } from './stranke';
+import { razresiStranko, terminJeStranke, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 import { inSeznam, jt, kt } from '../jeziki/t';
 
@@ -373,7 +373,7 @@ async function izberiTermin(
   const od = dan ?? (odDanes ? o.danes : dodajDni(o.danes, -1));
   const doo = dan ?? dodajDni(o.danes, 120);
   let termini = (await o.podatki.termini(od, doo))
-    .filter((t) => t.idStranke === s.id && aktiven(t))
+    .filter((t) => terminJeStranke(t, s) && aktiven(t))
     .sort((a, b) => a.datum.localeCompare(b.datum) || vMinute(a.zacetek) - vMinute(b.zacetek));
   if (p.termin_id) termini = termini.filter((t) => t.id === p.termin_id);
   if (termini.length === 0) {

@@ -16,11 +16,11 @@ import { IME_JEZIKA, zJezikom, type Jezik } from './jeziki/jezik';
 import { jt, kt } from './jeziki/t';
 import { preberiKonfiguracijo, type GlasKonfiguracija } from './konfiguracija';
 import { hitraPot } from './hitraPot';
-import { brezKontaktov, brezRazmisleka, vprasanjeZaGovor, zaGovor } from './govor';
+import { brezKontaktov, brezRazmisleka, uglajenGovor, uglajenoBesedilo, vprasanjeZaGovor, zaGovor } from './govor';
 import { imaPravico } from './pravice';
 import { hashParametrov, hashZetona, novZeton, SPOROCILA_POTRDITVE, type KodaPotrditve } from './potrditev';
 import { PRAZNA_PORABA, opozoriloKvote, sestejPorabo, strosekMikroUsd, type PorabaUkaza } from './poraba';
-import { opisDatuma, zdajVPasu } from './razresevanje/datumi';
+import { opisDatuma, polniDatum, zdajVPasu } from './razresevanje/datumi';
 import { orodjaZa, poImenu, VSA_ORODJA } from './orodja/registry';
 import { jePredogled, zaLlm, type OkoljeOrodja, type Orodje } from './orodja/tipi';
 import type { LlmPonudnik, LlmSporocilo } from './ponudniki/llm';
@@ -133,7 +133,14 @@ Pravila:
 - Odgovor bo izgovorjen: celi stavki, brez seznamov, oklepajev in okrajšav. Pred klicem orodja ne piši ničesar. Ne razlagaj svojega razmišljanja ("zato vprašam", "ukaz se konča"): povej samo vprašanje ali odgovor.
 - Vsak nov podatek za termin, prestavitev, odsotnost ali stranko, tudi ena sama beseda ("pedikura", "pri Luki", "ob desetih", "za ponedeljek"), pomeni takojšen klic orodja z vsemi podatki, ne vprašanja. Orodje odpre ali posodobi obrazec in samo vpraša, kaj še manjka, ali "Shranim?".
 - "Aktivna stranka" in "Aktiven termin" v uvodu sta tisto, o čemer se pogovarjamo. "Ta stranka", "ona", "on", "njen", "njegov", "ji", "mu", "jo", "njej", "termin", "ta termin" pomeni aktivno stranko oziroma aktiven termin: orodje pokliči s stranka_id in termin_id iz uvoda (stranka = njeno ime), ne sprašuj, o kom ali katerem terminu govori. Ko uporabnik imenuje drugo stranko (tudi popravek "ne, za Ano Novak"), takoj pokliči orodje z novim imenom in stranka_id null.
-- Kadar odgovarjaš sam (brez orodja), govori kot prijazna, hitra receptorka: en ali dva kratka, naravna stavka. Nikoli ne daj navodil za gumbe ali zaslon ("pritisnite", "preverite in shranite", "v obrazcu izberite").`;
+- Kadar odgovarjaš sam (brez orodja), govori kot prijazna, hitra receptorka: en ali dva kratka, naravna stavka. Nikoli ne daj navodil za gumbe ali zaslon ("pritisnite", "tapnite", "preverite in shranite", "v obrazcu izberite").
+- Si ženskega spola: "našla sem", "preverila", "nastavila", nikoli "našel", "preveril". Vedno vikanje, vljudno in spoštljivo. Nikoli pogovorno: "važi", "okej", "ok", "ni panike", "super", "čao", "kul". Sredi dela ne pozdravljaj in ne reci "nasvidenje".
+- ID-ji (termina, stranke, opomnika, osebe) so samo za orodja: nikoli jih ne izgovori in ne napiši.
+- Števila pred samostalniki sklanjaj pravilno: en termin, dva termina, trije termini, pet terminov; ena stranka, dve stranki.
+- Dneve v svojem odgovoru povej na kratko: "danes", "jutri", za ta teden samo dan ("v petek"); datum dodaj samo za naslednji teden in dlje.
+- Ali ima stranka termin, pove samo orodje. Nikoli sam ne sklepaj, da stranke ni ali da nima termina (tudi ne iz iskanja ali zadnjega obiska). Ne sprašuj, ali je nekdo stranka: ime takoj podaj orodju (sporoci_stranki, nov_opomnik, prestavi_termin …), ki poišče stranko in termin. Sporočila brez termina ni mogoče poslati: tega nikoli ne ponudi.
+- Ko uporabnik omeni drugo stranko, se pogovor nadaljuje o njej; prejšnje stranke ne omenjaj več, razen če jo uporabnik omeni znova.
+- "Analitika", "statistika", "kako gre salonu", "kakšen je promet" → takoj stevilke_salona za ta mesec (če ga imaš). Ne naštevaj, kaj vse lahko poveš.`;
 
 /**
  * Sistemski poziv za jezik pogovora. Slovenščina je nespremenjen SISTEM (predpomnjen);
@@ -230,6 +237,14 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       fokus = { ...(fokus ?? {}), luknja: { datum: l.datum, od: l.od, oseba_id: id(l.oseba_id)! } };
     }
   };
+  /** Fokus iz rezultata orodja; brez stranka_id velja stranka, ki jo je orodje razrešilo. */
+  const fokusIzOrodja = (r: RezultatOrodja) => {
+    const p = r.podatki as Record<string, unknown> | undefined;
+    const imaStranko = !!p && !Array.isArray(p) && typeof p.stranka_id === 'string';
+    if (!imaStranko && okolje.razresena) posodobiFokus({ sporocilo: '', podatki: { stranka_id: okolje.razresena } });
+    posodobiFokus(r);
+    okolje.razresena = undefined;
+  };
   const zakljuci = async (z: Partial<ZakljucekUkaza>, vrniKvoto = false) => {
     casi.skupaj = ura() - t0;
     const zapis: ZakljucekUkaza = {
@@ -309,7 +324,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
       const t = ura();
       const vhod = hitroOrodje.vhod.parse(hitro.vhod);
       const r = await hitroOrodje.izvedi(vhod, okolje);
-      posodobiFokus(r);
+      fokusIzOrodja(r);
       casi.orodja = ura() - t;
       uporabljena.push(hitroOrodje.ime);
       const status = r.vprasanje ? 'vprasanje' : 'odgovor';
@@ -397,7 +412,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
         const t2 = ura();
         if (orodje.razred === 'branje') {
           const r = await orodje.izvedi(vhod.data, okolje);
-          posodobiFokus(r);
+          fokusIzOrodja(r);
           if (r.zasebno) zasebni.push(r);
           if (r.vprasanje) zadnjeVprasanje = r.vprasanje;
           rezultati.push({ id: klic.id, vsebina: zaLlm(r) });
@@ -415,6 +430,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
             const predlog = await ustvariPredlog(d, konf, k, ukazId, orodje, p, ura);
             return await koncaj({ status: 'predlog', odgovor: p.povzetek, predlog });
           }
+          fokusIzOrodja(p);
           if (p.vprasanje) zadnjeVprasanje = p.vprasanje;
           rezultati.push({ id: klic.id, vsebina: zaLlm(p) });
           vsiKoncni = false;
@@ -478,9 +494,12 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
   }): Promise<OdgovorUkaza> {
     // Datum na koncu stavka ("13. 11." + ".") ne sme dati dvojne pike.
     r = { ...r, odgovor: r.odgovor.replace(/(\d\.)\.(?!\.)/g, '$1') };
+    // Brez ID-jev in pogovornih besed; predlog (besedilo SMS) ostane točno tak, kot bo poslan.
+    if (r.status !== 'predlog') r = { ...r, odgovor: uglajenoBesedilo(r.odgovor) };
     let govor = r.govor ?? zaGovor(r.odgovor);
     if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} ${r.predlog?.sporocil ? jt('Pošljem?') : jt('Potrdim?')}`;
     else if (r.vprasanje?.moznosti?.length && !r.govor) govor = vprasanjeZaGovor(r.vprasanje);
+    govor = uglajenGovor(govor);
     if (v.glas) poraba = sestejPorabo(poraba, { ttsPonudnik: v.glas.ponudnik, ttsZnaki: govor.length });
     let zvok: { mime: string; base64: string } | null = null;
     if (konf.tts !== 'brez') {
@@ -625,7 +644,7 @@ function uvodUkaza(
         Object.entries(obrazec.polja).map(([a, b]) => `${a}=${b}`).join(', ') || 'nič'
       }). Če uporabnik doda ali spremeni podatek, takoj znova pokliči ${orodjeObrazca} z vsemi podatki (prejšnji in novi); obrazec se posodobi.`
     : '';
-  return `Danes je ${opisDatuma(zdaj.datum, zdaj.datum)} (${zdaj.datum}); trenutni čas ${zdaj.ura} (samo za izraze, kot je "čez eno uro", nikoli kot ura termina). Uporabnik: ${vloga}${k.osebaId ? ', ima svoj koledar' : ''}.${fokus}${izbor}${odprt}\n<ukaz>${prepis.replace(/<\/?ukaz>/g, '')}</ukaz>`;
+  return `Danes je ${polniDatum(zdaj.datum)} (${zdaj.datum}); trenutni čas ${zdaj.ura} (samo za izraze, kot je "čez eno uro", nikoli kot ura termina). Uporabnik: ${vloga}${k.osebaId ? ', ima svoj koledar' : ''}.${fokus}${izbor}${odprt}\n<ukaz>${prepis.replace(/<\/?ukaz>/g, '')}</ukaz>`;
 }
 
 /**
@@ -643,7 +662,7 @@ export async function opisFokusa(
     fokus.termin_id && fokus.termin_datum ? podatki.termini(fokus.termin_datum, fokus.termin_datum).catch(() => []) : [],
     fokus.luknja ? podatki.osebe().catch(() => []) : [],
   ]);
-  const t = termini.find((x) => x.id === fokus.termin_id && (!s || x.idStranke === s.id)) ?? null;
+  const t = termini.find((x) => x.id === fokus.termin_id && (!s || !x.idStranke || x.idStranke === s.id)) ?? null;
   const nov: KontekstPogovora = {};
   let besedilo = '';
   if (s) {

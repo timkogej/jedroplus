@@ -56,17 +56,25 @@ export function razlikaDni(od: string, doo: string): number {
   return Math.round((vUtc(doo) - vUtc(od)) / 86_400_000);
 }
 
-/** "petek, 14. 11." ali "danes, petek, 14. 11." */
+/** "danes", "jutri, torek", "petek" (ta teden) ali "ponedeljek, 23. 11." (dlje). */
 export function opisDatuma(datum: string, danes: string): string {
   const [, m, d] = datum.split('-').map(Number);
   const r = razlikaDni(danes, datum);
   const j = trenutniJezik();
   if (j !== 'sl') return opisDatumaTuj(j, d, m, danVTednu(datum), r);
-  const osnova = `${DNEVI[danVTednu(datum)]}, ${d}. ${m}.`;
-  if (r === 0) return `danes, ${osnova}`;
-  if (r === 1) return `jutri, ${osnova}`;
-  if (r === -1) return `včeraj, ${osnova}`;
-  return osnova;
+  const dan = DNEVI[danVTednu(datum)];
+  // Ta teden je dovolj dan; datum šele za naslednji teden in dlje (Tim, 16. 11.).
+  if (r === 0) return 'danes';
+  if (r === 1) return `jutri, ${dan}`;
+  if (r === -1) return 'včeraj';
+  if (r > 1 && r < 7) return dan;
+  return `${dan}, ${d}. ${m}.`;
+}
+
+/** Dan v tednu in datum, vedno slovensko (samo za model): "ponedeljek, 16. 11.". */
+export function polniDatum(datum: string): string {
+  const [, m, d] = datum.split('-').map(Number);
+  return `${DNEVI[danVTednu(datum)]}, ${d}. ${m}.`;
 }
 
 export interface RazbranDatum {

@@ -11,7 +11,7 @@ import { poisci } from '../razresevanje/imena';
 import { prviProstiTermin, razcleniUrnik } from '../razresevanje/urnik';
 import type { TerminPovzetek } from '../tipi';
 import { datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
-import { oznakaStranke, razresiStranko, ID_STRANKE } from './stranke';
+import { oznakaStranke, razresiStranko, terminiStrank, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 import { jt } from '../jeziki/t';
 
@@ -32,7 +32,7 @@ function odprt(t: TerminPovzetek) {
 // ───────────────────────────────────────────────────────────────────────────
 export const iskanjeStranke: BralnoOrodje<{ ime: string }> = {
   ime: 'iskanje_stranke',
-  opis: 'Poišče stranko po imenu in/ali priimku (dovoli sklone, napake prepisa). Vrne do 5 kandidatov z ID-jem in zadnjim obiskom.',
+  opis: 'Poišče stranko po imenu in/ali priimku (dovoli sklone, napake prepisa). Vrne do 5 kandidatov z naslednjim in zadnjim terminom iz koledarja. Samo za iskanje: za sporočilo, opomnik ali termin takoj pokliči ustrezno orodje, ki termin poišče samo.',
   razred: 'branje',
   koncno: false,
   pravica: 'stranke.branje',
@@ -48,21 +48,28 @@ export const iskanjeStranke: BralnoOrodje<{ ime: string }> = {
     const vse = await o.podatki.stranke();
     const izid = poisci(ime, vse, (s) => [s.ime, s.priimek]);
     if (izid.izid === 'nic') return { sporocilo: jt('Stranke »{ime}« ne najdem.', { ime }), podatki: [] };
-    const seznam = izid.kandidati.map((k) => ({
-      id: k.vrednost.id,
-      ime: k.vrednost.ime,
-      priimek: k.vrednost.priimek,
-      zadnjic: k.vrednost.zadnjaInterakcija,
+    const najdene = izid.izid === 'enolicno' ? [izid.najden] : izid.kandidati.map((k) => k.vrednost);
+    // Termini iz koledarja (ne »Zadnja interakcija«): model iz tega ve, ali ima stranka termin.
+    const termini = await terminiStrank(o, najdene);
+    const terminZaModel = (t: TerminPovzetek | null | undefined) =>
+      t ? { termin_id: t.id, datum: t.datum, ura: t.zacetek, storitev: t.storitev, status: t.status } : null;
+    const seznam = najdene.map((s) => ({
+      id: s.id,
+      ime: s.ime,
+      priimek: s.priimek,
+      naslednji_termin: terminZaModel(termini.get(s.id)?.naslednji),
+      zadnji_termin: terminZaModel(termini.get(s.id)?.zadnji),
     }));
     if (izid.izid === 'enolicno') {
-      return { sporocilo: jt('Najdena: {stranka}.', { stranka: oznakaStranke(izid.najden, o.danes) }), podatki: seznam.slice(0, 1) };
+      o.razresena = izid.najden.id;
+      return { sporocilo: jt('Najdena: {stranka}.', { stranka: oznakaStranke(izid.najden, o.danes, termini.get(izid.najden.id)) }), podatki: seznam };
     }
     return {
       sporocilo: jt('Več strank ustreza »{ime}«.', { ime }),
       podatki: seznam,
       vprasanje: {
         besedilo: jt('Katero stranko?'),
-        moznosti: izid.kandidati.map((k) => ({ id: k.vrednost.id, oznaka: oznakaStranke(k.vrednost, o.danes) })),
+        moznosti: najdene.map((s) => ({ id: s.id, oznaka: oznakaStranke(s, o.danes, termini.get(s.id)) })),
       },
     };
   },

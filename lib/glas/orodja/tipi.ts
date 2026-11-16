@@ -19,6 +19,11 @@ export interface OkoljeOrodja {
   sporocila?: PosiljateljSporocil;
   /** Osebni opomniki (nov_opomnik, moji_opomniki, preklici_opomnik); brez = niso nastavljeni. */
   opomniki?: ShrambaOpomnikov;
+  /**
+   * Stranka, ki jo je orodje razrešilo (razresiStranko, enolično iskanje), tudi če
+   * orodje potem ne uspe ("nima termina"). Jedro jo uporabi za fokus pogovora.
+   */
+  razresena?: string;
 }
 
 interface OsnovaOrodja<P> {

@@ -94,17 +94,17 @@ describe('datumi, ure in števke po jezikih', () => {
   it('slovenščina nespremenjena', () => {
     expect(datumZaGovor('2026-11-15', danes)).toBe('jutri, v nedeljo');
     expect(uraZaGovor('14:30')).toBe('ob pól treh');
-    expect(opisDatuma('2026-11-16', danes)).toBe('ponedeljek, 16. 11.');
+    expect(opisDatuma('2026-11-16', danes)).toBe('ponedeljek');
   });
 
   it('angleščina', () => {
     expect(v('en', () => datumZaGovor('2026-11-15', danes))).toBe('tomorrow, Sunday');
-    expect(v('en', () => datumZaGovor('2026-11-18', danes))).toBe('on Wednesday, November 18');
+    expect(v('en', () => datumZaGovor('2026-11-18', danes))).toBe('on Wednesday');
     expect(v('en', () => uraZaGovor('14:30'))).toBe('at 2:30 pm');
     expect(v('en', () => uraZaGovor('09:00'))).toBe('at 9 am');
     expect(v('en', () => razponZaGovor('09:00', '10:30'))).toBe('from 9 am to 10:30 am');
     expect(v('en', () => trajanjeZaGovor(90))).toBe('an hour and a half');
-    expect(v('en', () => opisDatuma('2026-11-16', danes))).toBe('Monday, 16 Nov');
+    expect(v('en', () => opisDatuma('2026-11-16', danes))).toBe('Monday');
     expect(v('en', () => telefonZaGovor('041234567'))).toBe('zero four one, two three four, five six seven');
     expect(v('en', () => emailZaGovor('a.b@x.si'))).toBe('a dot b at x dot si');
     expect(v('en', () => zaGovor('Next: Monday at 10:30.'))).toBe('Next: Monday at 10:30 am.');
@@ -112,12 +112,12 @@ describe('datumi, ure in števke po jezikih', () => {
   });
 
   it('nemščina, italijanščina, hrvaščina', () => {
-    expect(v('de', () => datumZaGovor('2026-11-18', danes))).toBe('am Mittwoch, 18. November');
+    expect(v('de', () => datumZaGovor('2026-11-18', danes))).toBe('am Mittwoch');
     expect(v('de', () => uraZaGovor('14:30'))).toBe('um 14 Uhr 30');
     expect(v('it', () => uraZaGovor('14:30'))).toBe('alle 14 e mezza');
     expect(v('it', () => uraZaGovor('13:00'))).toBe('alle 13');
     expect(v('it', () => datumZaGovor('2026-11-15', danes))).toBe('domani, domenica');
-    expect(v('hr', () => datumZaGovor('2026-11-18', danes))).toBe('u srijedu, 18. studenoga');
+    expect(v('hr', () => datumZaGovor('2026-11-18', danes))).toBe('u srijedu');
     expect(v('hr', () => uraZaGovor('09:15'))).toBe('u 9 i 15');
   });
 

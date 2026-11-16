@@ -18,7 +18,7 @@ describe('govor', () => {
     expect(datumZaGovor('2026-11-12', DANES)).toBe('danes');
     expect(datumZaGovor('2026-11-13', DANES)).toBe('jutri, v petek');
     expect(datumZaGovor('2026-11-14', DANES)).toBe('pojutrišnjem, v soboto');
-    expect(datumZaGovor('2026-11-18', DANES)).toBe('v sredo, 18. novembra');
+    expect(datumZaGovor('2026-11-18', DANES)).toBe('v sredo');
   });
 
   it('besedilo za zaslon → govor', () => {
@@ -65,7 +65,7 @@ describe('en krog LLM', () => {
     const { d } = okolje({ llm: [{ klici: [{ id: 'a', ime: 'koledar_dan', vhod: { datum: 'jutri', samo_moji: false } }] }] });
     const r = await obdelajUkaz({ k: kontekst(), vhod: 'besedilo', besedilo: 'kdo pride jutri' }, d);
     if (!r.ok) throw new Error(r.sporocilo);
-    expect(r.govor).toBe('Jutri, v petek je 2 termina. Ob devetih Mateja Kovačič, Barvanje, Tina. Ob enajstih Ana Novak, Moško striženje, Urška.');
+    expect(r.govor).toBe('Jutri, v petek sta dva termina. Ob devetih Mateja Kovačič, Barvanje, Tina. Ob enajstih Ana Novak, Moško striženje, Urška.');
   });
 
   it('predlog: govor vpraša za potrditev, nič ni zapisano', async () => {

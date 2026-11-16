@@ -93,7 +93,7 @@ describe('povzetek_dneva', () => {
 
   it('prazen dan', async () => {
     const r = await povzetekDneva.izvedi({ datum: '2026-11-17', samo_moji: null }, o());
-    expect(r.govor).toMatch(/^V torek, 17\. novembra nimate terminov\./);
+    expect(r.govor).toMatch(/^V torek nimate terminov\./);
   });
 
   it('nerazumljiv datum', async () => {
@@ -132,7 +132,7 @@ describe('hitra pot povzetka', () => {
     const { d, llm } = okolje({ stt: ['Kaj me danes čaka?'] });
     const r = await obdelajUkaz({ k: kontekst(), vhod: 'aplikacija', besedilo: 'Kaj me danes čaka?' }, d);
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.govor).toContain('Danes imate 1 termin');
+    if (r.ok) expect(r.govor).toContain('Danes imate en termin');
     expect(llm.zahteve.length).toBe(0);
   });
 });

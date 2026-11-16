@@ -81,7 +81,7 @@ describe('pripravi_serijo', () => {
     const r = await pripraviSerijo.izvedi(p(), o());
     expect(r.obrazec).toEqual({ vrsta: 'nov_termin', polja: expect.objectContaining({ stranka: '101', storitev: 's1', oseba: 'o1', dan: '2026-11-13', ura: '10:00', ponovi: '6:6' }) });
     expect(r.sporocilo).toContain('Serija: 6 terminov, vsakih 6 tednov.');
-    expect(r.sporocilo).toMatch(/Prostih je 5 od 6\. Težave:\n• jutri, petek, 13\. 11\.: zasedeno \(09:00, Mateja Kovačič\), predlog jutri, petek, 13\. 11\. ob 10:30/);
+    expect(r.sporocilo).toMatch(/Prostih je 5 od 6\. Težave:\n• jutri, petek: zasedeno \(09:00, Mateja Kovačič\), predlog jutri, petek ob 10:30/);
     expect(r.sporocilo).toMatch(/Shranim\? Pred shranjevanjem boste videli vse datume\.$/);
     expect(r.govor).toMatch(/1 datum ni prost, predloge vidite na zaslonu\./);
     expect(r.pojdi).toBe('/koledar?glas=1');

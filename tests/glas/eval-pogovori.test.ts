@@ -79,7 +79,7 @@ const POGOVORI: {
   { ukazi: ['Opomni me jutri ob devetih, da pokličem dobavitelja.'], konec: {}, odgovor: { 0: /Opomnik jutri.*09:00.*dobavitelj/i } },
   { ukazi: ['Čez pol ure me opomni, naj preverim barvo.'], konec: {}, odgovor: { 0: /^Opomnik .*10:30.*barv/i } },
   { ukazi: ['Ko pride Mateja, me opomni, da ji povem za novo barvo.'], konec: {}, odgovor: { 0: /ob terminu stranke Mateja Kova[čc]i[čc].*barv/i } },
-  { ukazi: ['V petek popoldne me opomni, da naročim barve.'], konec: {}, odgovor: { 0: /Opomnik .*13\. 11\. ob 14:00/ } },
+  { ukazi: ['V petek popoldne me opomni, da naročim barve.'], konec: {}, odgovor: { 0: /Opomnik .*petek ob 14:00/ } },
   // Zapolnitev luknje (salon Z5: Tina jutri prosta od 10.30; Mateja ima kasnejši termin, Ana privolitev, Nina ne).
   { podjetje: 'Z5', ukazi: ['Stranka je odpovedala jutri ob pol enajstih pri Tini. Koga naj pokličem?'], konec: {}, odgovor: { 0: /Mateja Kos[\s\S]*Ana Novak[\s\S]*Nina Bela/ } },
   { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji Mateji predlog.'], konec: {}, odgovor: { 1: /SMS za Mateja Kos: ».*(prestav|sprostil|prost)/i } },

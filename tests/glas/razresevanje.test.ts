@@ -77,8 +77,8 @@ describe('datumi (danes je četrtek 12. 11. 2026)', () => {
   });
 
   it('opis datuma za odgovor', () => {
-    expect(opisDatuma('2026-11-13', DANES)).toBe('jutri, petek, 13. 11.');
-    expect(opisDatuma('2026-11-12', DANES)).toBe('danes, četrtek, 12. 11.');
+    expect(opisDatuma('2026-11-13', DANES)).toBe('jutri, petek');
+    expect(opisDatuma('2026-11-12', DANES)).toBe('danes');
   });
 
   it('čas v pasu salona (zimski čas)', () => {
