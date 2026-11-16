@@ -147,6 +147,18 @@
       "unavailableAt": "{name}: non disponibile in questo orario",
       "capacity": "{name}: {used}/{max} posti occupati",
       "saveAnyway": "Puoi comunque salvare l'appuntamento."
+    },
+    "addNotes": "Aggiungi note per il cliente",
+    "staffConflict": {
+      "title": "Questo collaboratore ha già un appuntamento in questo orario",
+      "line": "{time} · {client} ({service})"
+    },
+    "conflictDialog": {
+      "title": "L'appuntamento si sovrappone",
+      "body": "Verifica di voler davvero salvare l'appuntamento in questo orario.",
+      "back": "Indietro",
+      "saveAnyway": "Salva comunque",
+      "saveHint": "Puoi comunque salvare: prima ti verrà chiesta una conferma."
     }
   },
   "table": {

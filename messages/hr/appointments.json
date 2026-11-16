@@ -147,6 +147,18 @@
       "unavailableAt": "{name}: nije dostupno u to vrijeme",
       "capacity": "{name}: zauzeto {used}/{max} mjesta",
       "saveAnyway": "Termin ipak možete spremiti."
+    },
+    "addNotes": "Dodaj bilješke za klijenta",
+    "staffConflict": {
+      "title": "Zaposlenik u ovo vrijeme već ima drugi termin",
+      "line": "{time} · {client} ({service})"
+    },
+    "conflictDialog": {
+      "title": "Termin se preklapa",
+      "body": "Provjerite želite li stvarno spremiti termin u ovo vrijeme.",
+      "back": "Natrag",
+      "saveAnyway": "Svejedno spremi",
+      "saveHint": "Termin možete svejedno spremiti — prije toga tražit ćemo potvrdu."
     }
   },
   "table": {

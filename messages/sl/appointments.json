@@ -147,6 +147,18 @@
       "unavailableAt": "{name}: ni na voljo ob tem času",
       "capacity": "{name}: {used}/{max} mest zasedenih",
       "saveAnyway": "Termin lahko vseeno shranite."
+    },
+    "addNotes": "Dodaj opombe za stranko",
+    "staffConflict": {
+      "title": "Zaposleni ima v tem času že drug termin",
+      "line": "{time} · {client} ({service})"
+    },
+    "conflictDialog": {
+      "title": "Termin se prekriva",
+      "body": "Preverite, ali res želite shraniti termin ob tem času.",
+      "back": "Nazaj",
+      "saveAnyway": "Vseeno shrani",
+      "saveHint": "Termin lahko vseeno shranite — prej boste vprašani za potrditev."
     }
   },
   "table": {

@@ -838,14 +838,19 @@ export async function checkResourceConflicts(
   if (schedulePassedIds.length > 0 && overlappingIds.length > 0) {
     const { data: usedResursi } = await supabase
       .from(TABLE_TERMINI_RESURSI)
-      .select('resurs_id')
+      .select('resurs_id, termin_id')
       .eq('ID podjetja', companyId)
       .in('termin_id', overlappingIds)
       .in('resurs_id', schedulePassedIds);
 
+    // En termin zasede resurs enkrat: podvojena vrstica (termin, resurs) ne sme šteti dvakrat.
+    const seen = new Set<string>();
     const usageMap = new Map<number, number>();
     for (const row of (usedResursi ?? []) as Record<string, unknown>[]) {
       const rid = Number(row['resurs_id']);
+      const key = `${row['termin_id']}:${rid}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
       usageMap.set(rid, (usageMap.get(rid) ?? 0) + 1);
     }
 

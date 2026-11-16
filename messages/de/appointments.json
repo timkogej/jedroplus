@@ -147,6 +147,18 @@
       "unavailableAt": "{name}: zu dieser Zeit nicht verfügbar",
       "capacity": "{name}: {used}/{max} Plätze belegt",
       "saveAnyway": "Sie können den Termin trotzdem speichern."
+    },
+    "addNotes": "Notizen für den Kunden hinzufügen",
+    "staffConflict": {
+      "title": "Dieser Mitarbeiter hat zu dieser Zeit bereits einen Termin",
+      "line": "{time} · {client} ({service})"
+    },
+    "conflictDialog": {
+      "title": "Der Termin überschneidet sich",
+      "body": "Prüfen Sie, ob Sie den Termin wirklich zu dieser Zeit speichern möchten.",
+      "back": "Zurück",
+      "saveAnyway": "Trotzdem speichern",
+      "saveHint": "Sie können trotzdem speichern – vorher wird um Bestätigung gebeten."
     }
   },
   "table": {
