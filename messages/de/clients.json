@@ -250,5 +250,13 @@
     "redeemed": "Prämie eingelöst.",
     "loadError": "Treuepunkte konnten nicht geladen werden.",
     "redeemError": "Prämie konnte nicht eingelöst werden. Aktualisieren Sie die Karte und versuchen Sie es erneut."
+  },
+  "zapiski": {
+    "title": "Notizen",
+    "barva": "Farbe",
+    "preferenca": "Vorliebe",
+    "opomba": "Notiz",
+    "glas": "per Sprache",
+    "loadError": "Notizen konnten nicht geladen werden."
   }
 }

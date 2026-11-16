@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useLocale, useTranslations } from 'next-intl';
 import { readRow, waitForRowChanged, waitForRowDeleted, type RowKey } from '@/lib/confirmWrite';
 import { intlLocale } from '@/lib/format';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Users,
@@ -26,10 +26,12 @@ import { useAuth } from '@/app/auth-context';
 import { useRolePermissions } from '@/app/role-permission-context';
 import DisabledActionModal from '@/components/DisabledActionModal';
 import type { Client, ClientFormData, ClientStats } from '@/types/clients';
+import type { CommunicationLanguageCode } from '@/lib/communicationLanguage';
 import {
   fetchClientsWithCount,
   deriveClientStats,
   waitForClient,
+  getClientById,
 } from '@/lib/supabase/clients';
 import { callN8nAction, type N8nErrorCode } from '@/src/lib/n8nClient';
 import {
@@ -40,12 +42,15 @@ import {
 } from '@/lib/webhookPayloadBuilders';
 import { getNextClientId } from '@/src/lib/idGenerators';
 import { getCompanyColumnForTable } from '@/lib/companyScope';
+import { vzemiObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
+import { DOGODEK_POJDI } from '@/lib/glas/odjemalec/obrazecGlas';
 import { TABLES } from '@/lib/data';
 
 // Components
 import ClientTable from '@/components/clients/ClientTable';
 import { MetricGroup } from '@/components/dashboard';
 import ClientModal from '@/components/clients/ClientModal';
+type ClientModalPredizpolnitev = React.ComponentProps<typeof ClientModal>['predizpolnitev'];
 import ClientDetailsPanel from '@/components/clients/ClientDetailsPanel';
 import DeleteClientModal from '@/components/clients/DeleteClientModal';
 import { GradientSpinner } from '@/components/ui/GradientSpinner';
@@ -329,6 +334,7 @@ export default function ClientsClient({
   const closeModal = useCallback(() => {
     setModalOpen(false);
     setSelectedClient(null);
+    setGlasStranka(null);
   }, []);
 
   // Open create modal
@@ -351,6 +357,90 @@ export default function ClientsClient({
     setDetailsClient(client);
     setDetailsOpen(true);
   }, []);
+
+  // ?glas=1 + obrazec v sessionStorage (Asistent+) odpre obrazec nove stranke že
+  // izpolnjen; shrani uporabnik sam (ista pot kot ročno). Podatki niso v URL-ju.
+  const searchParams = useSearchParams();
+  const [glasStranka, setGlasStranka] = useState<ClientModalPredizpolnitev>(null);
+  const glasNova = searchParams.get('glas') === '1';
+  const odpriGlasStranko = useCallback(() => {
+    if (!canCreateClient && !canEditClient) return;
+    const obrazec = vzemiObrazec(['nova_stranka', 'uredi_stranko']);
+    if (!obrazec) return;
+    const v = (k: string, najvec = 120) => (obrazec.polja[k] ?? '').trim().slice(0, najvec) || undefined;
+    if (obrazec.vrsta === 'uredi_stranko') {
+      // Sprememba obstoječe stranke: isti obrazec za urejanje kot ročno, shrani uporabnik.
+      const id = v('id');
+      if (!id || !canEditClient || !companyId) return;
+      const jezik = v('jezik');
+      const prekrij: ClientModalPredizpolnitev = {
+        telefon: v('telefon'),
+        email: v('email'),
+        language: jezik && ['slo', 'eng', 'de', 'it', 'hr'].includes(jezik) ? (jezik as CommunicationLanguageCode) : undefined,
+        opombe: v('opombe', 300),
+        interne_opombe: v('interne', 300),
+      };
+      const odpri = (c: Client) => {
+        setGlasStranka(prekrij);
+        setSelectedClient(c);
+        setModalMode('edit');
+        setModalOpen(true);
+        setDetailsOpen(false);
+      };
+      const znana = clients.find((c) => c.id === id);
+      if (znana) odpri(znana);
+      else void getClientById(companyId, id).then((r) => r.data && odpri(r.data));
+      return;
+    }
+    if (!canCreateClient) return;
+    setGlasStranka({ ime: v('ime'), priimek: v('priimek'), telefon: v('telefon'), email: v('email') });
+    setSelectedClient(null);
+    setModalMode('create');
+    setModalOpen(true);
+  }, [canCreateClient, canEditClient, clients, companyId]);
+  useEffect(() => {
+    if (!glasNova || (!canCreateClient && !canEditClient)) return;
+    window.history.replaceState(null, '', window.location.pathname);
+    odpriGlasStranko();
+    // Samo ob prihodu s takšno povezavo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [glasNova]);
+
+  // ?stranka=ID (npr. iz Asistent+ "odpri kartico Ane Novak") odpre kartico enkrat.
+  // Plavajoči asistent na že odprti strani pošlje isto kot dogodek (stran se ne naloži znova).
+  const [strankaIzDogodka, setStrankaIzDogodka] = useState<string | null>(null);
+  const strankaIzPovezave = strankaIzDogodka ?? searchParams.get('stranka');
+  const odprtaIzPovezave = useRef<string | null>(null);
+  useEffect(() => {
+    const ob = (e: Event) => {
+      const pot = (e as CustomEvent<{ pot?: string }>).detail?.pot ?? '';
+      const [pod, query = ''] = pot.split('?');
+      if (pod !== '/clients') return;
+      const params = new URLSearchParams(query);
+      if (params.get('glas')) odpriGlasStranko();
+      const id = params.get('stranka');
+      if (id) {
+        odprtaIzPovezave.current = null;
+        setStrankaIzDogodka(id);
+      }
+    };
+    window.addEventListener(DOGODEK_POJDI, ob);
+    return () => window.removeEventListener(DOGODEK_POJDI, ob);
+  }, [odpriGlasStranko]);
+  useEffect(() => {
+    if (!strankaIzPovezave || !companyId || !canViewClient || odprtaIzPovezave.current === strankaIzPovezave) return;
+    const najdena = clients.find((c) => c.id === strankaIzPovezave);
+    if (najdena) {
+      odprtaIzPovezave.current = strankaIzPovezave;
+      openDetailsPanel(najdena);
+      return;
+    }
+    if (isLoading) return;
+    odprtaIzPovezave.current = strankaIzPovezave;
+    getClientById(companyId, strankaIzPovezave).then((r) => {
+      if (r.data) openDetailsPanel(r.data);
+    });
+  }, [strankaIzPovezave, companyId, canViewClient, clients, isLoading, openDetailsPanel]);
 
   // Close details panel
   const closeDetailsPanel = useCallback(() => {
@@ -870,6 +960,7 @@ export default function ClientsClient({
         companyId={companyId}
         onSave={handleSaveClient}
         isSaving={isSaving}
+        predizpolnitev={glasStranka}
       />
 
       {/* Details Panel */}

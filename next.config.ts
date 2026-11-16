@@ -22,8 +22,9 @@ const securityHeaders = [
     value: "max-age=63072000; includeSubDomains; preload",
   },
   {
+    // Mikrofon samo za lastno stran (glasovni asistent Asistent+), nikoli za vdelane strani.
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    value: "camera=(), microphone=(self), geolocation=(), interest-cohort=()",
   },
   {
     key: "Content-Security-Policy",
@@ -33,7 +34,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.supabase.in",
       "font-src 'self' https://fonts.gstatic.com data:",
-      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://n8n.jedroplus.com https://tikej.app.n8n.cloud wss://*.supabase.co",
+      // Soniox: sprotna razpoznava in glas asistenta (brskalnik s kratkotrajnim ključem).
+      "connect-src 'self' https://*.supabase.co https://*.supabase.in https://n8n.jedroplus.com https://tikej.app.n8n.cloud wss://*.supabase.co wss://stt-rt.soniox.com wss://tts-rt.soniox.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

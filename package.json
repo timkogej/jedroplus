@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "brand": "node scripts/build-brand.mjs"
+    "brand": "node scripts/build-brand.mjs",
+    "test": "vitest run",
+    "test:glas-sql": "bash tests/glas/sql/zazeni.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.131.0",
@@ -44,6 +46,7 @@
     "eslint-config-next": "15.5.9",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

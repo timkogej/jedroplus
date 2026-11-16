@@ -90,6 +90,7 @@ export function AppBar() {
     '/promotions': t('appbar.breadcrumbs.promotions'),
     '/komunikacija': t('appbar.breadcrumbs.communication'),
     '/receptionist-plus': t('appbar.breadcrumbs.receptionistPlus'),
+    '/ai': t('appbar.breadcrumbs.ai'),
     '/qr-koda': t('appbar.breadcrumbs.qrCode'),
     '/promotions/discounts': t('appbar.breadcrumbs.discounts'),
     '/promotions/happy-hours': t('appbar.breadcrumbs.happyHours'),

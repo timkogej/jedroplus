@@ -27,7 +27,9 @@ import WeekView from './calendar/WeekView';
 import DayView from './calendar/DayView';
 import MonthView from './calendar/MonthView';
 import TwoDayView from './calendar/TwoDayView';
-import AppointmentModal, { type AppointmentFormData } from './appointments/AppointmentModal';
+import AppointmentModal, { type AppointmentFormData, type Ponovitev } from './appointments/AppointmentModal';
+type AppointmentModalPredizpolnitev = React.ComponentProps<typeof AppointmentModal>['predizpolnitev'];
+import type { CommunicationLanguageCode } from '@/lib/communicationLanguage';
 import { RescheduleNotificationModal } from './appointments/RescheduleNotificationModal';
 import DeleteConfirmation from './appointments/DeleteConfirmation';
 import AbsenceModal, { type AbsenceFormData } from './calendar/AbsenceModal';
@@ -43,6 +45,8 @@ import {
   type Absence,
 } from '@/lib/supabase/appointments';
 import { getClientById } from '@/lib/supabase/clients';
+import { vzemiObrazec } from '@/lib/glas/odjemalec/predizpolnitev';
+import { DOGODEK_POJDI } from '@/lib/glas/odjemalec/obrazecGlas';
 import { fetchEvents, sendEventWebhook } from '@/lib/supabase/events';
 import { fetchTerminIdsWithResursi, fetchTerminResursiMap, fetchActiveResursi, syncResursiZaTermin, sprostiResurseTermina } from '@/lib/supabase/resursi';
 import type { Resurs } from '@/types/resursi';
@@ -73,12 +77,16 @@ import {
   buildBookingDeleteData,
   getCustomerAppointmentsCount,
 } from '@/lib/webhookPayloadBuilders';
-import { AppointmentDetailModal } from '@/components/calendar/AppointmentDetailSheet';
+import { AppointmentDetailModal, type GlasAkcija } from '@/components/calendar/AppointmentDetailSheet';
+import { SerijaOdpovedModal, SerijaPregledModal, SerijaSeznamModal, SerijaZamikModal, type VrsticaSerije } from '@/components/appointments/SerijaPregledModal';
+import { fetchPrihodnjiTerminiSerije, fetchSerijeTerminov, type ClanSerije } from '@/lib/supabase/serije';
+import type { DatumSerije } from '@/lib/termini/serija';
 import { generateUnique8DigitId } from '@/lib/utils/uniqueIdGenerator';
 import { pickFirst } from '@/lib/dashboardHelpers';
 import { supabase } from '@/lib/supabaseClient';
 import { logZgodovina } from '@/lib/supabase/zgodovina';
 import { useCompany } from '@/app/company-context';
+import { imaZgodnjiDostop } from '@/lib/zgodnjiDostop';
 import { useAuth } from '@/app/auth-context';
 import { loadCompanyRow } from '@/lib/settingsStore';
 import { useRolePermissions } from '@/app/role-permission-context';
@@ -113,12 +121,43 @@ interface CalendarProps {
 // A calendar event row by its id.
 const eventKey = (id: string | number): RowKey => ({ table: 'events', column: 'id', value: id });
 
+
+/** Ponavljajoči termin: trajanje iz obrazca (min. 5 min) in pretvorbe ure. */
+function minuteSerije(u: string): number {
+  const [h, m] = u.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+function uraIzMinutSerije(n: number): string {
+  return `${String(Math.floor(n / 60)).padStart(2, '0')}:${String(n % 60).padStart(2, '0')}`;
+}
+function dodajDniSerije(datum: string, dni: number): string {
+  const [y, m, d] = datum.split('-').map(Number);
+  const x = new Date(Date.UTC(y, m - 1, d + dni));
+  return x.toISOString().slice(0, 10);
+}
+function razlikaDniSerije(od: string, doo: string): number {
+  const v = (s: string) => {
+    const [y, m, d] = s.split('-').map(Number);
+    return Date.UTC(y, m - 1, d);
+  };
+  return Math.round((v(doo) - v(od)) / 86_400_000);
+}
+function danesLokalno(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function trajanjeTermina(d: Pick<AppointmentFormData, 'cas_zacetek' | 'cas_konec'>): number {
+  return Math.max(5, minuteSerije(d.cas_konec) - minuteSerije(d.cas_zacetek));
+}
+
 function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) {
   const t = useTranslations('appointments');
   const tCommon = useTranslations('common');
   const { matchesLocation, personAtSelected, serviceAtSelected, selectedLocationId } = useLocationScope();
   const locale = useLocale();
   const { companySettings } = useCompany();
+  // Ponavljajoči termini (Ponovi, serija) samo z zgodnjim dostopom (lib/zgodnjiDostop).
+  const serijeVklopljene = imaZgodnjiDostop(companyId);
   const { user } = useAuth();
   const { role, personId: rolePersonId, permissions } = useRolePermissions();
 
@@ -247,6 +286,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     newEndTime?: string;
     channel: 'sms' | 'email' | 'both';
     source: 'edit' | 'drag_drop';
+    /** Asistent+: prestavitev je bila odprta z glasom (vprašanje se da odgovoriti z glasom). */
+    glas?: boolean;
   } | null>(null);
 
   // Action feedback
@@ -694,6 +735,8 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     [events, selectedLocationId]
   );
 
+  // Ponavljajoči termini: "ID termina" → mesto v seriji (oznaka »2/6« na kartici in v oknu termina).
+  const [serijeTerminov, setSerijeTerminov] = useState<Map<string, ClanSerije>>(() => new Map());
   const filteredAppointments = useMemo(() => {
     // Always exclude cancelled appointments and soft-deleted ghost termini
     let filtered = appointments.filter(
@@ -729,6 +772,13 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
 
     return filtered;
   }, [appointments, selectedEmployeeId, selectedServiceId, selectedResursId, terminResursiMap, searchQuery, staffViewOwnOnly, rolePersonId, matchesLocation]);
+  const terminiZOznako = useMemo(() => {
+    if (!serijeTerminov.size) return filteredAppointments;
+    return filteredAppointments.map((a) => {
+      const clan = a.id_termina ? serijeTerminov.get(a.id_termina) : undefined;
+      return clan ? { ...a, serija_oznaka: `${clan.zap}/${clan.termini.length}` } : a;
+    });
+  }, [filteredAppointments, serijeTerminov]);
 
   // Filter absences by selected employee (same logic as appointments)
   const filteredAbsences = useMemo(() => {
@@ -1102,11 +1152,9 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     }
   }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t, tCommon]);
 
-  const handleCancelAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
-    setSelectedAppointment(null); // Close detail modal first (like Termini)
-    setIsDeleting(true);
-    setActionError(null);
-
+  // Odpoved enega termina po obstoječi poti (n8n: status, obvestilo stranki). true = potrjeno v bazi.
+  // Skupno za gumb Odpovej in »Odpovej vse prihodnje« pri seriji.
+  const odpovejTermin = useCallback(async (appointment: AppointmentWithDetails): Promise<boolean> => {
     try {
       const result = await callN8nAction(
         buildPayload(
@@ -1129,23 +1177,30 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         )
       );
 
-      if (!result.ok) {
-        throw new Error(t('errors.cancelError'));
-      }
+      if (!result.ok) return false;
+      return await waitForRowValue(terminById(appointment.id), 'Status', 'cancelled');
+    } catch {
+      return false;
+    }
+  }, [companyId, actor, companyPayload, buildPayload]);
 
-      if (await waitForRowValue(terminById(appointment.id), 'Status', 'cancelled')) {
+  const handleCancelAppointment = useCallback(async (appointment: AppointmentWithDetails) => {
+    setSelectedAppointment(null); // Close detail modal first (like Termini)
+    setIsDeleting(true);
+    setActionError(null);
+
+    try {
+      if (await odpovejTermin(appointment)) {
         setSuccessMessage(t('toast.cancelled'));
         setTimeout(() => setSuccessMessage(null), 3000);
       } else {
-        setActionError(tCommon('errors.writeUnconfirmed'));
+        setActionError(t('errors.cancelError'));
       }
       await loadAppointments();
-    } catch (err) {
-      setActionError(t('errors.cancelError'));
     } finally {
       setIsDeleting(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, t, tCommon]);
+  }, [odpovejTermin, loadAppointments, t]);
 
   // Delete handler - opens DeleteConfirmation dialog (identical to Termini)
   const handleDeleteAppointment = useCallback((appointment: AppointmentWithDetails) => {
@@ -1253,21 +1308,35 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   // Klik na obvestilo (v aplikaciji ali push): /koledar?termin=OB-000063&datum=2026-10-21
   // skoči na ta dan in odpre termin, ko se naloži.
   const [pendingTerminId, setPendingTerminId] = useState<string | null>(null);
+  // Asistent+ (status_termina): &glas_akcija=odpovej → list termina vpraša »Odpovem?«.
+  const [glasAkcija, setGlasAkcija] = useState<{ termin: string; akcija: GlasAkcija } | null>(null);
+  // Ko se list zapre, vprašanje ne velja več (ročno odprt isti termin se na glas ne odziva).
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    if (!selectedAppointment && !pendingTerminId) setGlasAkcija(null);
+  }, [selectedAppointment, pendingTerminId]);
+  /** Vrne true, če je povezava vsebovala termin ali datum. */
+  const preberiTerminIzPovezave = useCallback((params: URLSearchParams) => {
     const termin = params.get('termin');
     const datum = params.get('datum');
-    if (!termin && !datum) return;
+    if (!termin && !datum) return false;
     if (datum && /^\d{4}-\d{2}-\d{2}$/.test(datum)) {
       const [y, m, d] = datum.split('-').map(Number);
       setCurrentDate(new Date(y, m - 1, d));
     }
     if (termin) setPendingTerminId(termin);
+    const akcija = params.get('glas_akcija');
+    setGlasAkcija(termin && (akcija === 'odpovej' || akcija === 'zakljuci' || akcija === 'ni_prisla') ? { termin, akcija } : null);
+    return true;
+  }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!preberiTerminIzPovezave(params)) return;
     params.delete('termin');
     params.delete('datum');
+    params.delete('glas_akcija');
     const query = params.toString();
     window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
-  }, []);
+  }, [preberiTerminIzPovezave]);
   useEffect(() => {
     if (!pendingTerminId) return;
     const match = appointments.find((a) => a.id_termina === pendingTerminId || a.id === pendingTerminId);
@@ -1280,6 +1349,142 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     const timer = window.setTimeout(() => setPendingTerminId(null), 10_000);
     return () => window.clearTimeout(timer);
   }, [pendingTerminId, appointments]);
+
+  // Asistent+ (glas): /koledar?glas=1 + obrazec v sessionStorage (lib/glas/odjemalec/predizpolnitev)
+  // odpre obstoječi obrazec že izpolnjen. Nič se ne shrani samo: uporabnik pregleda in pritisne Shrani,
+  // shrani pa ista koda kot pri ročnem vnosu (potrdilo, resursi, obvestilo o prestavitvi).
+  const [glasNamen, setGlasNamen] = useState<Record<string, string> | null>(null);
+  const [glasPredizpolnitev, setGlasPredizpolnitev] = useState<AppointmentModalPredizpolnitev>(null);
+  const [glasOsebaId, setGlasOsebaId] = useState<string | undefined>(undefined);
+  const [glasOdsotnost, setGlasOdsotnost] = useState<Partial<AbsenceFormData> | null>(null);
+  const preberiGlasObrazec = useCallback(() => {
+    const obrazec = vzemiObrazec(['nov_termin', 'prestavi_termin', 'uredi_termin', 'odsotnost']);
+    if (!obrazec) return;
+    const vrsta = { nov_termin: 'nov', prestavi_termin: 'prestavi', uredi_termin: 'uredi' } as Record<string, string>;
+    const namen: Record<string, string> = { ...obrazec.polja, glas: vrsta[obrazec.vrsta] ?? 'odsotnost' };
+    const dan = namen.dan_prej ?? namen.dan;
+    if (dan && /^\d{4}-\d{2}-\d{2}$/.test(dan)) {
+      const [y, m, d] = dan.split('-').map(Number);
+      setCurrentDate(new Date(y, m - 1, d));
+    }
+    setGlasNamen(namen);
+  }, []);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.get('glas')) return;
+    params.delete('glas');
+    const query = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+    preberiGlasObrazec();
+  }, [preberiGlasObrazec]);
+  // Plavajoči asistent na že odprtem koledarju: stran se ne naloži znova, zato
+  // namen pride kot dogodek (lib/glas/odjemalec/obrazecGlas).
+  useEffect(() => {
+    const ob = (e: Event) => {
+      const pot = (e as CustomEvent<{ pot?: string }>).detail?.pot ?? '';
+      const [pod, query = ''] = pot.split('?');
+      if (pod !== '/koledar') return;
+      const params = new URLSearchParams(query);
+      if (params.get('glas')) preberiGlasObrazec();
+      preberiTerminIzPovezave(params);
+    };
+    window.addEventListener(DOGODEK_POJDI, ob);
+    return () => window.removeEventListener(DOGODEK_POJDI, ob);
+  }, [preberiGlasObrazec, preberiTerminIzPovezave]);
+  useEffect(() => {
+    if (!glasNamen || !companyId) return;
+    const n = glasNamen;
+    const dan = n.dan && /^\d{4}-\d{2}-\d{2}$/.test(n.dan) ? n.dan : undefined;
+    const ura = n.ura && /^\d{2}:\d{2}$/.test(n.ura) ? n.ura : undefined;
+    const zaposleni = (ref?: string) => (ref ? employees.find((e) => e.ref === ref || e.id === ref)?.id : undefined);
+    if (n.glas === 'nov') {
+      if (!canCreateAppointment) return setGlasNamen(null);
+      if (n.oseba && employees.length === 0) return; // počakaj na zaposlene
+      const storitev = n.storitev ? services.find((x) => x.ref === n.storitev || x.id === n.storitev)?.id : undefined;
+      if ((n.storitev || n.dodaj1) && services.length === 0) return; // počakaj na storitve
+      setGlasNamen(null);
+      void (async () => {
+        const stranka = n.stranka ? (await getClientById(companyId, n.stranka)).data : null;
+        setGlasOsebaId(zaposleni(n.oseba));
+        const lokacijaId = n.lokacija && /^[0-9a-f-]{36}$/i.test(n.lokacija) ? n.lokacija : undefined;
+        const dodatne = [n.dodaj1, n.dodaj2]
+          .map((ref) => (ref ? services.find((x) => x.ref === ref || x.id === ref)?.id : undefined))
+          .filter((x): x is string => Boolean(x));
+        const jezik = n.jezik && ['slo', 'eng', 'de', 'it', 'hr'].includes(n.jezik) ? (n.jezik as CommunicationLanguageCode) : undefined;
+        setGlasPredizpolnitev({
+          stranka,
+          storitevId: storitev,
+          lokacijaId,
+          dodatneStoritve: dodatne,
+          jezik,
+          opombe: n.opombe?.slice(0, 300),
+          interneOpombe: n.interne?.slice(0, 300),
+          // Serija iz asistenta (pripravi_serijo): »tedni:krat«, npr. »6:6«.
+          ponovitev: (() => {
+            const m = /^(\d{1,2}):(\d{1,2})$/.exec(n.ponovi ?? '');
+            if (!m) return undefined;
+            const vsakihTednov = Number(m[1]);
+            const krat = Number(m[2]);
+            const brez = (n.ponovi_brez ?? '').split(',').filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d));
+            return vsakihTednov >= 1 && vsakihTednov <= 26 && krat >= 2 && krat <= 12 ? { vsakihTednov, krat, ...(brez.length ? { brez } : {}) } : undefined;
+          })(),
+        });
+        setNewAppointmentInitials({ date: dan, startTime: ura });
+        setEditingAppointment(null);
+        setModalMode('create');
+        setIsModalOpen(true);
+      })();
+    } else if ((n.glas === 'prestavi' || n.glas === 'uredi') && n.idt) {
+      const termin = appointments.find((a) => a.id_termina === n.idt || a.id === n.idt);
+      if (!termin) return; // počakaj, da se termini dneva naložijo (spodaj časovna omejitev)
+      if (n.glas === 'uredi' && (n.oseba || n.storitev || n.dodaj1) && (employees.length === 0 || services.length === 0)) return;
+      setGlasNamen(null);
+      if (!canEditAppointment(termin)) return;
+      const storitevId = (ref?: string) => (ref ? services.find((x) => x.ref === ref || x.id === ref)?.id : undefined);
+      const jezik = n.jezik && ['slo', 'eng', 'de', 'it', 'hr'].includes(n.jezik) ? (n.jezik as CommunicationLanguageCode) : undefined;
+      setGlasPredizpolnitev({
+        datum: dan,
+        cas: ura,
+        ...(n.glas === 'uredi'
+          ? {
+              storitevId: storitevId(n.storitev),
+              dodatneStoritve: [storitevId(n.dodaj1), storitevId(n.dodaj2)].filter((x): x is string => Boolean(x)),
+              zaposleniId: zaposleni(n.oseba),
+              jezik,
+              opombe: n.opombe?.slice(0, 300),
+              interneOpombe: n.interne?.slice(0, 300),
+              lokacijaId: n.lokacija && /^[0-9a-f-]{36}$/i.test(n.lokacija) ? n.lokacija : undefined,
+            }
+          : {}),
+      });
+      setEditingAppointment(termin);
+      setModalMode('edit');
+      setIsModalOpen(true);
+    } else if (n.glas === 'odsotnost') {
+      if (n.oseba && employees.length === 0) return;
+      setGlasNamen(null);
+      const doDan = n.do_dan && /^\d{4}-\d{2}-\d{2}$/.test(n.do_dan) ? n.do_dan : dan;
+      const doUra = n.do_ura && /^\d{2}:\d{2}$/.test(n.do_ura) ? n.do_ura : undefined;
+      setGlasOdsotnost({
+        employeeId: zaposleni(n.oseba),
+        dateFrom: dan,
+        dateTo: doDan,
+        singleDay: Boolean(ura && doUra),
+        timeFrom: ura,
+        timeTo: doUra,
+        reason: n.razlog?.slice(0, 200),
+      });
+      setIsAbsenceModalOpen(true);
+    } else {
+      setGlasNamen(null);
+    }
+  }, [glasNamen, companyId, appointments, services, employees, canCreateAppointment, canEditAppointment]);
+  useEffect(() => {
+    if (!glasNamen) return;
+    // Termin ni viden ali ga ni več: ne čakamo v nedogled.
+    const timer = window.setTimeout(() => setGlasNamen(null), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [glasNamen]);
 
   // First visit: a short guided tour of the calendar.
   const tour = useOptionalTour();
@@ -1295,17 +1500,17 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingAppointment(null);
+    setGlasPredizpolnitev(null);
+    setGlasOsebaId(undefined);
   }, []);
 
-  const handleSaveAppointment = useCallback(async (data: AppointmentFormData) => {
-    if (!companyId) {
-      setActionError(t('calendarView.errors.companyNotSelected'));
-      return;
-    }
-    setIsSaving(true);
-    setActionError(null);
-
-    try {
+  // En termin po obstoječi poti (n8n, čakanje na zapis, resursi). Skupno za obrazec in serijo.
+  // Vrže napako, če n8n zahtevka ne sprejme.
+  const zapisiTermin = useCallback(async (
+    data: AppointmentFormData,
+    moznosti: { osvezi?: boolean } = {}
+  ): Promise<{ potrjen: boolean; idTermina?: string }> => {
+      if (!companyId) throw new Error('company');
       const isNewAppointment = !data.id;
       const event = isNewAppointment ? 'NOV_TERMIN' : 'POSODOBITEV_TERMINA';
 
@@ -1490,7 +1695,221 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         if (mapResult.data) setTerminResursiMap(mapResult.data);
       }
 
-      await loadAppointments();
+      if (moznosti.osvezi !== false) await loadAppointments();
+      return { potrjen: confirmed, idTermina: textTerminId };
+  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, t]);
+
+  // ── Ponavljajoči termin (serija) ──────────────────────────────────────────
+  // Obrazec z vklopljenim »Ponovi« → strežnik preveri vse datume → pregled → vsak termin
+  // se shrani posebej po poti zgoraj (zapisiTermin), tik pred tem se datum preveri znova.
+  // Na koncu se shranjeni povežejo v serijo (/api/termini/serija).
+  const [serija, setSerija] = useState<{
+    data: AppointmentFormData;
+    ponovitev: Ponovitev;
+    vrstice: VrsticaSerije[];
+    povezana: boolean;
+    /** »Ponovi« na obstoječem terminu: ta termin je prvi v seriji. */
+    izhodisce?: { idTermina: string; datum: string; ura: string };
+  } | null>(null);
+  const [serijaNapredek, setSerijaNapredek] = useState<{ n: number; od: number } | null>(null);
+  // »Ponovi« na obstoječem terminu: izhodišče, dokler je obrazec odprt.
+  const [ponoviIz, setPonoviIz] = useState<{ idTermina: string; datum: string; ura: string } | null>(null);
+  useEffect(() => {
+    if (!isModalOpen) setPonoviIz(null);
+  }, [isModalOpen]);
+
+  const preveriDatumeSerije = useCallback(async (
+    data: Pick<AppointmentFormData, 'zaposleni_id' | 'datum' | 'cas_zacetek' | 'cas_konec'>,
+    vsakihTednov: number,
+    krat: number,
+    brez?: string[]
+  ): Promise<DatumSerije[] | null> => {
+    const oseba = employees.find((e) => e.id === data.zaposleni_id);
+    try {
+      const res = await fetch('/api/termini/serija/preveri', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          oseba: oseba?.ref ?? data.zaposleni_id,
+          datum: data.datum,
+          ura: data.cas_zacetek.slice(0, 5),
+          trajanje: trajanjeTermina(data),
+          vsakihTednov,
+          krat,
+          ...(brez?.length ? { brez } : {}),
+        }),
+      });
+      const j = (await res.json().catch(() => null)) as { ok?: boolean; datumi?: DatumSerije[] } | null;
+      return res.ok && j?.ok && Array.isArray(j.datumi) ? j.datumi : null;
+    } catch {
+      return null;
+    }
+  }, [employees]);
+
+  const zacniSerijo = useCallback(async (data: AppointmentFormData, ponovitev: Ponovitev) => {
+    setIsSaving(true);
+    setActionError(null);
+    try {
+      const datumi = await preveriDatumeSerije(data, ponovitev.vsakihTednov, ponovitev.krat);
+      if (!datumi?.length) {
+        setActionError(t('serija.checkError'));
+        return;
+      }
+      setSerija({
+        data,
+        ponovitev,
+        povezana: false,
+        izhodisce: ponoviIz ?? undefined,
+        // Datumi, ki jih je uporabnik izločil (»ta datum ne«), so v pregledu odkljukani.
+        vrstice: datumi.map((d) => ({ ...d, izbrana: d.stanje !== 'tezava' && !ponovitev.brez?.includes(d.zeleno?.datum ?? d.datum) })),
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [preveriDatumeSerije, ponoviIz, t]);
+
+  const poveziSerijo = useCallback(async (
+    vrstice: VrsticaSerije[],
+    vsakihTednov: number,
+    izhodisce?: { idTermina: string; datum: string; ura: string }
+  ) => {
+    const termini = [...vrstice.filter((v) => v.shranjen && v.idTermina), ...(izhodisce && vrstice.some((v) => v.shranjen) ? [izhodisce] : [])]
+      .sort((a, b) => (a.datum + a.ura).localeCompare(b.datum + b.ura))
+      .map((v) => v.idTermina!);
+    if (termini.length < 2) return true;
+    try {
+      const res = await fetch('/api/termini/serija', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ termini, vsakihTednov }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const shraniSerijo = useCallback(async () => {
+    if (!serija) return;
+    const { data, ponovitev } = serija;
+    const vrstice = [...serija.vrstice];
+    const naVrsti = vrstice.map((v, i) => ({ v, i })).filter(({ v }) => v.izbrana && !v.shranjen);
+    if (!naVrsti.length) return;
+    const trajanje = trajanjeTermina(data);
+    setIsSaving(true);
+    setActionError(null);
+    let nepotrjenih = 0;
+    let n = 0;
+    for (const { v, i } of naVrsti) {
+      setSerijaNapredek({ n, od: naVrsti.length });
+      const termin: AppointmentFormData = {
+        ...data,
+        id: undefined,
+        datum: v.datum,
+        cas_zacetek: v.ura,
+        cas_konec: uraIzMinutSerije(Math.min(minuteSerije(v.ura) + trajanje, 23 * 60 + 59)),
+      };
+      // Tik pred shranjevanjem znova: medtem je lahko kdo zasedel ta čas.
+      const zdaj = await preveriDatumeSerije(termin, ponovitev.vsakihTednov, 1);
+      const prvi = zdaj?.[0];
+      if (!prvi || prvi.stanje !== 'ok' || prvi.datum !== v.datum || prvi.ura !== v.ura) {
+        vrstice[i] = prvi ? { ...prvi, izbrana: false, napaka: true } : { ...v, napaka: true };
+        setSerija((prej) => (prej ? { ...prej, vrstice: [...vrstice] } : prej));
+        continue;
+      }
+      try {
+        const r = await zapisiTermin(termin, { osvezi: false });
+        if (!r.potrjen) nepotrjenih++;
+        vrstice[i] = { ...v, shranjen: true, napaka: false, idTermina: r.idTermina };
+        n++;
+      } catch {
+        vrstice[i] = { ...v, napaka: true };
+      }
+      setSerija((prej) => (prej ? { ...prej, vrstice: [...vrstice] } : prej));
+    }
+    setSerijaNapredek(null);
+    await loadAppointments();
+    const shranjenih = vrstice.filter((v) => v.shranjen).length;
+    const ostane = vrstice.some((v) => v.napaka && !v.shranjen);
+    setIsSaving(false);
+    if (!ostane) {
+      const povezana = await poveziSerijo(vrstice, ponovitev.vsakihTednov, serija.izhodisce);
+      setSerija(null);
+      handleCloseModal();
+      setSuccessMessage(t('serija.savedAll', { count: shranjenih }));
+      setTimeout(() => setSuccessMessage(null), 4000);
+      if (!povezana) setActionError(t('serija.linkError'));
+      else if (nepotrjenih) setActionError(tCommon('errors.writeUnconfirmed'));
+    } else {
+      setActionError(t('serija.partial', { n: shranjenih, od: vrstice.filter((v) => v.izbrana || v.shranjen || v.napaka).length }));
+    }
+  }, [serija, preveriDatumeSerije, zapisiTermin, loadAppointments, poveziSerijo, handleCloseModal, t, tCommon]);
+
+  const zapriSerijo = useCallback(async () => {
+    if (!serija) return;
+    const shranjenih = serija.vrstice.filter((v) => v.shranjen).length;
+    if (shranjenih > 0) {
+      // Kar je shranjeno, ostane; povežemo, nato zapremo tudi obrazec.
+      if (!serija.povezana && !(await poveziSerijo(serija.vrstice, serija.ponovitev.vsakihTednov, serija.izhodisce))) setActionError(t('serija.linkError'));
+      handleCloseModal();
+    }
+    setSerija(null);
+  }, [serija, poveziSerijo, handleCloseModal, t]);
+
+  // Serije v koledarju (»serija 2/6«) in »Odpovej vse prihodnje«.
+  useEffect(() => {
+    if (!companyId) return;
+    let prekinjeno = false;
+    fetchSerijeTerminov(companyId).then((m) => {
+      if (!prekinjeno) setSerijeTerminov(m);
+    });
+    return () => {
+      prekinjeno = true;
+    };
+  }, [companyId, appointments]);
+  const [odpovedSerije, setOdpovedSerije] = useState<AppointmentWithDetails[] | null>(null);
+  const [odpovedujem, setOdpovedujem] = useState(false);
+  const handleCancelSeries = useCallback(async (apt: AppointmentWithDetails) => {
+    const clan = apt.id_termina ? serijeTerminov.get(apt.id_termina) : undefined;
+    if (!clan || !companyId) return;
+    const prihodnji = await fetchPrihodnjiTerminiSerije(companyId, clan.termini.slice(clan.zap - 1), danesLokalno());
+    setSelectedAppointment(null);
+    setOdpovedSerije(prihodnji);
+  }, [serijeTerminov, companyId]);
+  const potrdiOdpovedSerije = useCallback(async () => {
+    if (!odpovedSerije) return;
+    setOdpovedujem(true);
+    setActionError(null);
+    let uspelih = 0;
+    for (const apt of odpovedSerije) {
+      if (await odpovejTermin(apt)) uspelih++;
+    }
+    await loadAppointments();
+    setOdpovedujem(false);
+    setOdpovedSerije(null);
+    if (uspelih === odpovedSerije.length) {
+      setSuccessMessage(t('serija.cancelledAll', { count: uspelih }));
+      setTimeout(() => setSuccessMessage(null), 4000);
+    } else {
+      setActionError(t('serija.cancelPartial', { n: uspelih, od: odpovedSerije.length }));
+    }
+  }, [odpovedSerije, odpovejTermin, loadAppointments, t]);
+
+  const handleSaveAppointment = useCallback(async (data: AppointmentFormData, ponovitev?: Ponovitev | null) => {
+    if (!companyId) {
+      setActionError(t('calendarView.errors.companyNotSelected'));
+      return;
+    }
+    if (ponovitev && !data.id) {
+      await zacniSerijo(data, ponovitev);
+      return;
+    }
+    setIsSaving(true);
+    setActionError(null);
+
+    try {
+      const isNewAppointment = !data.id;
+      const { potrjen } = await zapisiTermin(data);
 
       if (!isNewAppointment && editingAppointment && companySettings?.obvestilo_prestavitev_omogoceno === true) {
         const normalizedEditingDatum = editingAppointment.datum?.substring(0, 10) ?? '';
@@ -1507,18 +1926,19 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
             newEndTime: data.cas_konec,
             channel,
             source: 'edit',
+            glas: Boolean(glasPredizpolnitev),
           });
         }
       }
 
       handleCloseModal();
-      if (!confirmed) setActionError(tCommon('errors.writeUnconfirmed'));
+      if (!potrjen) setActionError(tCommon('errors.writeUnconfirmed'));
     } catch (err) {
       setActionError(t('errors.saveError'));
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, services, employees, buildPayload, loadAppointments, handleCloseModal, editingAppointment, companySettings, t, tCommon]);
+  }, [companyId, zapisiTermin, zacniSerijo, handleCloseModal, editingAppointment, companySettings, t, tCommon, glasPredizpolnitev]);
 
   // Drag-and-drop reschedule: callback from WeekView/DayView
   const handleAppointmentDropped = useCallback((
@@ -1531,20 +1951,16 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
   }, []);
 
   // Send POSODOBITEV_TERMINA identical to handleSaveAppointment but using embedded appointment data
-  const handleRescheduleAppointment = useCallback(async (
+  // Prestavitev enega termina po obstoječi poti (n8n POSODOBITEV_TERMINA, čakanje na spremembo).
+  // true = sprememba potrjena v bazi. Vrže napako, če n8n zahtevka ne sprejme.
+  // Skupno za vlečenje in »Prestavi ta in vse naslednje« pri seriji.
+  const prestaviTermin = useCallback(async (
     appointment: AppointmentWithDetails,
     newDate: string,
     newStartTime: string,
     newEndTime: string
-  ) => {
-    if (!companyId) {
-      setActionError(t('calendarView.errors.reschedule'));
-      return;
-    }
-    setIsSaving(true);
-    setActionError(null);
-
-    try {
+  ): Promise<boolean> => {
+      if (!companyId) throw new Error('company');
       const selectedService = appointment.storitev;
       const selectedService2 = appointment.storitev_2 || null;
       const selectedService3 = appointment.storitev_3 || null;
@@ -1624,7 +2040,24 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
 
       // A move always changes date or time, so a row that stays the same
       // means the save did not go through.
-      const moved = await waitForRowChanged(terminById(appointment.id), before);
+      return await waitForRowChanged(terminById(appointment.id), before);
+  }, [companyId, actor, companyPayload, buildPayload, t]);
+
+  const handleRescheduleAppointment = useCallback(async (
+    appointment: AppointmentWithDetails,
+    newDate: string,
+    newStartTime: string,
+    newEndTime: string
+  ) => {
+    if (!companyId) {
+      setActionError(t('calendarView.errors.reschedule'));
+      return;
+    }
+    setIsSaving(true);
+    setActionError(null);
+
+    try {
+      const moved = await prestaviTermin(appointment, newDate, newStartTime, newEndTime);
       if (moved) {
         setSuccessMessage(t('calendarView.toast.appointmentRescheduled'));
         setTimeout(() => setSuccessMessage(null), 3000);
@@ -1650,7 +2083,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     } finally {
       setIsSaving(false);
     }
-  }, [companyId, actor, companyPayload, buildPayload, loadAppointments, companySettings, t, tCommon]);
+  }, [companyId, prestaviTermin, loadAppointments, companySettings, t, tCommon]);
 
   const handleConfirmReschedule = useCallback(async () => {
     if (!rescheduleConfirm) return;
@@ -1659,9 +2092,10 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
     await handleRescheduleAppointment(appointment, newDate, newStartTime, newEndTime);
   }, [rescheduleConfirm, handleRescheduleAppointment]);
 
-  const handleSendRescheduleNotification = useCallback(async () => {
-    if (!rescheduleNotifyTarget) return;
-    const { appointment, newDate, newTime, newEndTime, channel, source } = rescheduleNotifyTarget;
+  // Obvestilo stranki o prestavitvi (n8n PRESTAVITEV_TERMINA_OBVESTILO + zgodovina). true = sprejeto.
+  // Skupno za eno prestavitev in prestavitev serije.
+  const posljiObvestiloPrestavitve = useCallback(async (target: NonNullable<typeof rescheduleNotifyTarget>): Promise<boolean> => {
+    const { appointment, newDate, newTime, newEndTime, channel, source } = target;
 
     const posalji_sms = channel === 'sms' || channel === 'both';
     const posalji_email = channel === 'email' || channel === 'both';
@@ -1837,12 +2271,163 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
           idStranke: appointment.stranka_id,
         }).catch(() => {/* ignore logging errors */});
       }
-
-      setRescheduleNotifyTarget(null);
-    } catch (err) {
-      setActionError(t('calendarView.errors.reschedule'));
+      return true;
+    } catch {
+      return false;
     }
-  }, [rescheduleNotifyTarget, companyId, companySettings, actor, role, companyPayload, buildPayload, t]);
+  }, [companyId, companySettings, actor, role, companyPayload, buildPayload, t]);
+
+  const handleSendRescheduleNotification = useCallback(async () => {
+    if (!rescheduleNotifyTarget) return;
+    if (await posljiObvestiloPrestavitve(rescheduleNotifyTarget)) setRescheduleNotifyTarget(null);
+    else setActionError(t('calendarView.errors.reschedule'));
+  }, [rescheduleNotifyTarget, posljiObvestiloPrestavitve, t]);
+
+  // »Ponovi« na obstoječem terminu: obrazec za nov termin s stranko, storitvami, zaposlenim,
+  // lokacijo in jezikom tega termina, čez 4 tedne, z vklopljenim »Ponovi«. Shrani se kot vsaka serija;
+  // ta termin postane prvi v seriji (če še ni v drugi).
+  const handleRepeatAppointment = useCallback(async (apt: AppointmentWithDetails) => {
+    if (!companyId) return;
+    setSelectedAppointment(null);
+    const stranka = apt.stranka_id ? (await getClientById(companyId, String(apt.stranka_id))).data : null;
+    const datum = apt.datum.slice(0, 10);
+    const ura = apt.cas_zacetek.slice(0, 5);
+    setGlasOsebaId(apt.zaposleni_id ? String(apt.zaposleni_id) : apt.zaposleni?.id);
+    setGlasPredizpolnitev({
+      stranka,
+      storitevId: apt.storitev_id ? String(apt.storitev_id) : apt.storitev?.id,
+      dodatneStoritve: [apt.storitev_id_2, apt.storitev_id_3].filter((x): x is string => Boolean(x)).map(String),
+      lokacijaId: apt.lokacija_id ?? undefined,
+      jezik: apt.language,
+      ponovitev: { vsakihTednov: 4, krat: 4 },
+      brezGlasu: true,
+    });
+    setPonoviIz(apt.id_termina && !serijeTerminov.has(apt.id_termina) ? { idTermina: apt.id_termina, datum, ura } : null);
+    setNewAppointmentInitials({ date: dodajDniSerije(datum, 28), startTime: ura });
+    setEditingAppointment(null);
+    setModalMode('create');
+    setIsModalOpen(true);
+  }, [companyId, serijeTerminov]);
+
+  // »Prestavi ta in vse naslednje«: nov dan/ura tega termina → vsi naslednji za isti zamik →
+  // preverjanje (termini serije ne zasedajo) → pregled → vsak prestavljen po isti poti kot en termin.
+  // Obvestilo stranki: eno vprašanje za vse (če ima podjetje obvestila o prestavitvi vklopljena).
+  const [prestavitevSerije, setPrestavitevSerije] = useState<{
+    korak: 'zamik' | 'pregled';
+    clani: AppointmentWithDetails[];
+    vrstice: VrsticaSerije[];
+  } | null>(null);
+  const [obvestilaSerije, setObvestilaSerije] = useState<NonNullable<typeof rescheduleNotifyTarget>[] | null>(null);
+  const [posiljamObvestila, setPosiljamObvestila] = useState(false);
+
+  const handleRescheduleSeries = useCallback(async (apt: AppointmentWithDetails) => {
+    const clan = apt.id_termina ? serijeTerminov.get(apt.id_termina) : undefined;
+    if (!clan || !companyId) return;
+    const prihodnji = await fetchPrihodnjiTerminiSerije(companyId, clan.termini.slice(clan.zap - 1), danesLokalno());
+    // Polni podatki (storitve, zaposleni, cena) za prestavitev po obstoječi poti: po mesecih.
+    const meseci = [...new Set(prihodnji.map((x) => x.datum.slice(0, 7)))];
+    const polni = new Map<string, AppointmentWithDetails>();
+    for (const r of await Promise.all(meseci.map((m) => fetchAppointmentsForMonth(companyId, Number(m.slice(0, 4)), Number(m.slice(5, 7)) - 1)))) {
+      for (const a of r.data ?? []) if (a.id_termina) polni.set(a.id_termina, a);
+    }
+    const clani = prihodnji.map((x) => (x.id_termina ? polni.get(x.id_termina) : undefined)).filter((x): x is AppointmentWithDetails => Boolean(x));
+    setSelectedAppointment(null);
+    if (!clani.length) {
+      setActionError(t('serija.moveNone'));
+      return;
+    }
+    setPrestavitevSerije({ korak: 'zamik', clani, vrstice: [] });
+  }, [serijeTerminov, companyId, t]);
+
+  const naprejPrestavitev = useCallback(async (datum: string, ura: string) => {
+    if (!prestavitevSerije) return;
+    const { clani } = prestavitevSerije;
+    const prvi = clani[0];
+    const zamikDni = razlikaDniSerije(prvi.datum.slice(0, 10), datum);
+    const zamikMin = minuteSerije(ura) - minuteSerije(prvi.cas_zacetek.slice(0, 5));
+    const brez = clani.map((c) => c.id_termina!).filter(Boolean);
+    setIsSaving(true);
+    try {
+      const vrstice = await Promise.all(clani.map(async (c): Promise<VrsticaSerije> => {
+        const trajanje = trajanjeTermina({ cas_zacetek: c.cas_zacetek.slice(0, 5), cas_konec: c.cas_konec.slice(0, 5) });
+        const nd = dodajDniSerije(c.datum.slice(0, 10), zamikDni);
+        const nu = uraIzMinutSerije(Math.min(Math.max(minuteSerije(c.cas_zacetek.slice(0, 5)) + zamikMin, 0), 23 * 60 + 59 - trajanje));
+        const r = (await preveriDatumeSerije(
+          { zaposleni_id: String(c.zaposleni_id ?? c.zaposleni?.id ?? ''), datum: nd, cas_zacetek: nu, cas_konec: uraIzMinutSerije(minuteSerije(nu) + trajanje) },
+          1, 1, brez
+        ))?.[0];
+        if (!r) return { datum: nd, ura: nu, stanje: 'tezava', zeleno: { datum: nd, ura: nu }, izbrana: false, napaka: true, idTermina: c.id_termina };
+        return { ...r, izbrana: r.stanje !== 'tezava', idTermina: c.id_termina };
+      }));
+      setPrestavitevSerije({ korak: 'pregled', clani, vrstice });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [prestavitevSerije, preveriDatumeSerije]);
+
+  const shraniPrestavitev = useCallback(async () => {
+    if (!prestavitevSerije) return;
+    const { clani } = prestavitevSerije;
+    const vrstice = [...prestavitevSerije.vrstice];
+    const naVrsti = vrstice.map((v, i) => ({ v, i })).filter(({ v }) => v.izbrana && !v.shranjen);
+    if (!naVrsti.length) return;
+    const brez = clani.map((c) => c.id_termina!).filter(Boolean);
+    const rawChannel = companySettings?.obvestilo_prestavitev_channel ?? companySettings?.channel ?? companySettings?.chanel_pred ?? 'email';
+    const channel = rawChannel === 'sms' || rawChannel === 'both' ? rawChannel : 'email';
+    const obvestila: NonNullable<typeof rescheduleNotifyTarget>[] = [];
+    setIsSaving(true);
+    setActionError(null);
+    let n = 0;
+    for (const { v, i } of naVrsti) {
+      setSerijaNapredek({ n, od: naVrsti.length });
+      const c = clani.find((x) => x.id_termina === v.idTermina);
+      if (!c) continue;
+      const trajanje = trajanjeTermina({ cas_zacetek: c.cas_zacetek.slice(0, 5), cas_konec: c.cas_konec.slice(0, 5) });
+      const konec = uraIzMinutSerije(Math.min(minuteSerije(v.ura) + trajanje, 23 * 60 + 59));
+      const zdaj = (await preveriDatumeSerije(
+        { zaposleni_id: String(c.zaposleni_id ?? c.zaposleni?.id ?? ''), datum: v.datum, cas_zacetek: v.ura, cas_konec: konec },
+        1, 1, brez
+      ))?.[0];
+      if (!zdaj || zdaj.stanje !== 'ok' || zdaj.datum !== v.datum || zdaj.ura !== v.ura) {
+        vrstice[i] = zdaj ? { ...zdaj, izbrana: false, napaka: true, idTermina: v.idTermina } : { ...v, napaka: true };
+      } else {
+        try {
+          await prestaviTermin(c, v.datum, v.ura, konec);
+          vrstice[i] = { ...v, shranjen: true, napaka: false };
+          obvestila.push({ appointment: c, newDate: v.datum, newTime: v.ura, newEndTime: konec, channel, source: 'edit' });
+          n++;
+        } catch {
+          vrstice[i] = { ...v, napaka: true };
+        }
+      }
+      setPrestavitevSerije((prej) => (prej ? { ...prej, vrstice: [...vrstice] } : prej));
+    }
+    setSerijaNapredek(null);
+    await loadAppointments();
+    setIsSaving(false);
+    const ostane = vrstice.some((v) => v.napaka && !v.shranjen);
+    if (ostane) {
+      setActionError(t('serija.movePartial', { n: vrstice.filter((v) => v.shranjen).length, od: vrstice.length }));
+    } else {
+      setPrestavitevSerije(null);
+      setSuccessMessage(t('serija.movedAll', { count: vrstice.filter((v) => v.shranjen).length }));
+      setTimeout(() => setSuccessMessage(null), 4000);
+    }
+    if (obvestila.length && companySettings?.obvestilo_prestavitev_omogoceno === true) {
+      setObvestilaSerije((prej) => [...(prej ?? []), ...obvestila]);
+    }
+  }, [prestavitevSerije, companySettings, preveriDatumeSerije, prestaviTermin, loadAppointments, t]);
+
+  const potrdiObvestilaSerije = useCallback(async () => {
+    if (!obvestilaSerije) return;
+    setPosiljamObvestila(true);
+    let ok = 0;
+    for (const o of obvestilaSerije) if (await posljiObvestiloPrestavitve(o)) ok++;
+    setPosiljamObvestila(false);
+    setObvestilaSerije(null);
+    if (ok < obvestilaSerije.length) setActionError(t('serija.notifyPartial', { n: ok, od: obvestilaSerije.length }));
+  }, [obvestilaSerije, posljiObvestiloPrestavitve, t]);
+
 
   // Handle absence modal
   const handleOpenAbsenceModal = useCallback(() => {
@@ -1851,6 +2436,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
 
   const handleCloseAbsenceModal = useCallback(() => {
     setIsAbsenceModalOpen(false);
+    setGlasOdsotnost(null);
   }, []);
 
   // Sidebar toggle handler
@@ -2160,7 +2746,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
               {currentView === 'week' && (
                 <WeekView
                   currentDate={currentDate}
-                  appointments={filteredAppointments}
+                  appointments={terminiZOznako}
                   absences={filteredAbsences}
                   events={visibleEvents}
                   services={services}
@@ -2199,7 +2785,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                   >
                     <DayView
                       currentDate={currentDate}
-                      appointments={filteredAppointments}
+                      appointments={terminiZOznako}
                       absences={filteredAbsences}
                       events={visibleEvents}
                       services={services}
@@ -2220,7 +2806,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
               {currentView === 'month' && (
                 <MonthView
                   currentDate={currentDate}
-                  appointments={filteredAppointments}
+                  appointments={terminiZOznako}
                   absences={filteredAbsences}
                   events={visibleEvents}
                   services={services}
@@ -2257,7 +2843,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
                     >
                       <TwoDayView
                         currentDate={currentDate}
-                        appointments={filteredAppointments}
+                        appointments={terminiZOznako}
                         absences={filteredAbsences}
                         events={visibleEvents}
                         services={services}
@@ -2327,6 +2913,14 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
               onCancel={aptEditable ? handleCancelAppointment : undefined}
               onDelete={aptEditable && canDeleteAppointment ? handleDeleteAppointment : undefined}
               onOpenClientDetails={handleOpenClientDetails}
+              serija={(() => {
+                const clan = selectedAppointment.id_termina ? serijeTerminov.get(selectedAppointment.id_termina) : undefined;
+                return clan ? { zap: clan.zap, skupaj: clan.termini.length, prihodnjih: clan.termini.length - clan.zap + 1 } : null;
+              })()}
+              onCancelSeries={aptEditable && serijeVklopljene ? handleCancelSeries : undefined}
+              onRescheduleSeries={aptEditable && serijeVklopljene ? handleRescheduleSeries : undefined}
+              onRepeat={serijeVklopljene && canCreateAppointment && selectedAppointment.belezi_termin !== false ? handleRepeatAppointment : undefined}
+              glasAkcija={glasAkcija && (selectedAppointment.id_termina === glasAkcija.termin || selectedAppointment.id === glasAkcija.termin) ? glasAkcija.akcija : null}
             />
           );
         })()}
@@ -2351,9 +2945,65 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         isSaving={isSaving}
         initialDate={newAppointmentInitials.date}
         initialStartTime={newAppointmentInitials.startTime}
-        initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : undefined}
+        initialEmployeeId={role === 'staff' && rolePersonId ? rolePersonId : glasOsebaId}
         lockEmployee={role === 'staff' && Boolean(rolePersonId)}
+        predizpolnitev={glasPredizpolnitev}
+        omogociPonovitev={canCreateAppointment && serijeVklopljene}
       />
+
+      {serija && (
+        <SerijaPregledModal
+          vrstice={serija.vrstice}
+          onChange={(i, sprememba) =>
+            setSerija((prej) => (prej ? { ...prej, vrstice: prej.vrstice.map((v, j) => (j === i ? { ...v, ...sprememba } : v)) } : prej))
+          }
+          onSave={shraniSerijo}
+          onClose={zapriSerijo}
+          isSaving={isSaving}
+          napredek={serijaNapredek}
+        />
+      )}
+      {prestavitevSerije?.korak === 'zamik' && (
+        <SerijaZamikModal
+          datum={prestavitevSerije.clani[0].datum.slice(0, 10)}
+          ura={prestavitevSerije.clani[0].cas_zacetek.slice(0, 5)}
+          onNext={naprejPrestavitev}
+          onClose={() => setPrestavitevSerije(null)}
+          isBusy={isSaving}
+        />
+      )}
+      {prestavitevSerije?.korak === 'pregled' && (
+        <SerijaPregledModal
+          nacin="prestavi"
+          vrstice={prestavitevSerije.vrstice}
+          onChange={(i, sprememba) =>
+            setPrestavitevSerije((prej) => (prej ? { ...prej, vrstice: prej.vrstice.map((v, j) => (j === i ? { ...v, ...sprememba } : v)) } : prej))
+          }
+          onSave={shraniPrestavitev}
+          onClose={() => setPrestavitevSerije(null)}
+          isSaving={isSaving}
+          napredek={serijaNapredek}
+        />
+      )}
+      {obvestilaSerije && !prestavitevSerije && (
+        <SerijaSeznamModal
+          termini={obvestilaSerije.map((o) => ({ datum: o.newDate, cas_zacetek: o.newTime }))}
+          naslov={t('serija.notifyTitle', { count: obvestilaSerije.length })}
+          opis={t('serija.notifyHint')}
+          gumb={t('serija.notifyConfirm', { count: obvestilaSerije.length })}
+          onConfirm={potrdiObvestilaSerije}
+          onClose={() => setObvestilaSerije(null)}
+          isBusy={posiljamObvestila}
+        />
+      )}
+      {odpovedSerije && (
+        <SerijaOdpovedModal
+          termini={odpovedSerije}
+          onConfirm={potrdiOdpovedSerije}
+          onClose={() => setOdpovedSerije(null)}
+          isBusy={odpovedujem}
+        />
+      )}
 
       {/* Absence modal */}
       <AbsenceModal
@@ -2362,6 +3012,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
         employees={visibleEmployees}
         onSave={handleSaveAbsence}
         isSaving={isSaving}
+        predizpolnitev={glasOdsotnost}
       />
 
       {/* Absence detail modal */}
@@ -2735,6 +3386,7 @@ function Calendar({ companyId, initialEmployeeId, initialData }: CalendarProps) 
           newDate={rescheduleNotifyTarget.newDate}
           newTime={rescheduleNotifyTarget.newTime}
           channel={rescheduleNotifyTarget.channel}
+          glas={rescheduleNotifyTarget.glas}
         />
       )}
 

@@ -347,6 +347,18 @@
         "cancel": "Odpoved",
         "complete": "Zaključi",
         "moreOptions": "Več možnosti"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Odpovem ta termin?",
+          "zakljuci": "Zaključim ta termin?",
+          "ni_prisla": "Označim, da stranka ni prišla?"
+        },
+        "uspeh": {
+          "odpovej": "Termin je odpovedan.",
+          "zakljuci": "Termin je zaključen.",
+          "ni_prisla": "Označeno, da ni prišla."
+        }
       }
     },
     "dayView": {
@@ -504,5 +516,53 @@
   "bulk": {
     "done": "{count, plural, one {# termin zaključen} two {# termina zaključena} few {# termini zaključeni} other {# terminov zaključenih}}",
     "partial": "Zaključenih: {completed}. Pri {failed} terminih sporočila ni bilo mogoče poslati, zato ostanejo odprti."
+  },
+  "serija": {
+    "title": "Ponovi termin",
+    "description": "Ista storitev v enakem ritmu, vsak termin posebej.",
+    "rhythm": "Ritem",
+    "everyWeeks": "{count, plural, =1 {vsak teden} =2 {vsaka 2 tedna} few {vsake {count} tedne} other {vsakih {count} tednov}}",
+    "count": "Skupaj",
+    "times": "{count, plural, =2 {2 termina} few {{count} termini} other {{count} terminov}}",
+    "hint": "Pred shranjevanjem preverim vse datume. Stranka dobi potrdilo za vsak termin.",
+    "label": "Serija",
+    "position": "{zap}/{skupaj}",
+    "cancelFuture": "Odpovej ta in vse naslednje",
+    "reviewTitle": "Pregled serije",
+    "reviewSubtitle": "{count, plural, =1 {1 termin} =2 {2 termina} few {{count} termini} other {{count} terminov}}",
+    "saved": "Shranjeno",
+    "saveFailed": "Ni shranjeno. Preverite čas in poskusite znova.",
+    "free": "Prosto",
+    "movedBusy": "Predlog: {datum} ob {ura} je zasedeno ({kdo}).",
+    "movedOff": "Predlog: {datum} ob {ura} ne dela.",
+    "problemBusy": "Zasedeno, v treh dneh ni prostega časa. Izberite drug datum.",
+    "problemOff": "Ne dela, v treh dneh ni prostega časa. Izberite drug datum.",
+    "include": "Vključi {datum}",
+    "confirmations": "{count, plural, =0 {Ni izbranih terminov.} =1 {Stranka dobi 1 potrdilo.} =2 {Stranka dobi 2 potrdili.} few {Stranka dobi {count} potrdila.} other {Stranka dobi {count} potrdil.}}",
+    "saving": "Shranjujem {n}/{od} …",
+    "saveAll": "{count, plural, =0 {Shrani} =1 {Shrani 1 termin} =2 {Shrani 2 termina} few {Shrani {count} termine} other {Shrani {count} terminov}}",
+    "checkError": "Datumov serije ni bilo mogoče preveriti. Poskusite znova.",
+    "savedAll": "{count, plural, =1 {Shranjen 1 termin.} =2 {Shranjena 2 termina.} few {Shranjeni {count} termini.} other {Shranjenih {count} terminov.}}",
+    "linkError": "Termini so shranjeni, povezava v serijo pa ni uspela.",
+    "partial": "Shranjenih {n} od {od}. Neshranjeni ostanejo v pregledu.",
+    "cancelledAll": "{count, plural, =1 {Odpovedan 1 termin.} =2 {Odpovedana 2 termina.} few {Odpovedani {count} termini.} other {Odpovedanih {count} terminov.}}",
+    "cancelPartial": "Odpovedanih {n} od {od}. Preverite koledar.",
+    "cancelTitle": "{count, plural, =0 {Ni prihodnjih terminov} =1 {Odpovem 1 termin?} =2 {Odpovem 2 termina?} few {Odpovem {count} termine?} other {Odpovem {count} terminov?}}",
+    "cancelHint": "Vsak termin se odpove posebej, stranka dobi obvestilo kot pri enem terminu.",
+    "cancelConfirm": "{count, plural, =1 {Odpovej 1 termin} =2 {Odpovej 2 termina} few {Odpovej {count} termine} other {Odpovej {count} terminov}}",
+    "repeat": "Ponovi (serija)",
+    "rescheduleFuture": "Prestavi ta in vse naslednje",
+    "moveTitle": "Prestavi serijo",
+    "moveStep": "Nov dan in ura tega termina. Vsi naslednji se premaknejo za enako.",
+    "moveHint": "Vsak termin se prestavi posebej, kot pri enem terminu. O obvestilu stranki vas vprašam na koncu.",
+    "moveAll": "{count, plural, =0 {Prestavi} =1 {Prestavi 1 termin} =2 {Prestavi 2 termina} few {Prestavi {count} termine} other {Prestavi {count} terminov}}",
+    "moved": "Prestavljeno",
+    "movedAll": "{count, plural, =1 {Prestavljen 1 termin.} =2 {Prestavljena 2 termina.} few {Prestavljeni {count} termini.} other {Prestavljenih {count} terminov.}}",
+    "movePartial": "Prestavljenih {n} od {od}. Neprestavljeni ostanejo v pregledu.",
+    "moveNone": "Ta serija nima prihodnjih odprtih terminov.",
+    "notifyTitle": "{count, plural, =1 {Obvestim stranko o prestavitvi?} other {Obvestim stranko o {count} prestavitvah?}}",
+    "notifyHint": "Za vsak prestavljen termin gre svoje obvestilo, kot pri prestavitvi enega termina.",
+    "notifyConfirm": "{count, plural, =1 {Pošlji obvestilo} =2 {Pošlji 2 obvestili} few {Pošlji {count} obvestila} other {Pošlji {count} obvestil}}",
+    "notifyPartial": "Poslanih {n} od {od} obvestil."
   }
 }

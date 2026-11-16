@@ -128,6 +128,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Match all routes except API, Next.js internals, static files, and images
-    '/((?!api|_next/static|_next/image|favicon.ico|apple-icon\\.png|icon\\.png|manifest\\.webmanifest|sw\\.js|offline\\.html|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)',
+    // (glas/mikrofon-worklet.js: AudioWorklet asistenta, mora biti dosegljiv brez jezika v poti)
+    '/((?!api|_next/static|_next/image|favicon.ico|apple-icon\\.png|icon\\.png|manifest\\.webmanifest|sw\\.js|offline\\.html|glas/mikrofon-worklet\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)',
   ],
 };

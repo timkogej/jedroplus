@@ -4,8 +4,20 @@
     {
       "name": "jedroplus-dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "glas-dev",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cat /Users/timkogej/dev/jedroplus/.env.local .env.glas > .env.local && chmod 600 .env.local && npx next dev -p 3002"
+      ],
+      "port": 3002
     }
   ]
 }

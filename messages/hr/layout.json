@@ -33,7 +33,8 @@
       "new": "Novo",
       "newAppointment": "Novi termin",
       "newClient": "Novi klijent",
-      "newService": "Nova usluga"
+      "newService": "Nova usluga",
+      "ai": "AI asistenti"
     },
     "tooltips": {
       "expand": "Proširi",
@@ -88,7 +89,8 @@
       "discounts": "Popusti",
       "happyHours": "Happy hour",
       "serviceAddOns": "Dodatne usluge",
-      "requests": "Zahtjevi"
+      "requests": "Zahtjevi",
+      "ai": "AI asistenti"
     }
   },
   "search": {
@@ -218,5 +220,67 @@
   },
   "meta": {
     "description": "Jedro+ – sustav za upravljanje terminima"
+  },
+  "asistent": {
+    "odpri": "Otvori Asistent+",
+    "naslov": "Asistent+",
+    "mirovanje": "Dodirnite i recite",
+    "povezujem": "Povezujem …",
+    "poslusam": "Slušam …",
+    "razmisljam": "Razmišljam …",
+    "govorim": "Govorim … dodirnite za prekid",
+    "obrazec": "Recite »spremi« ili »odustani«",
+    "shranjujem": "Spremam.",
+    "zaprto": "Zatvoreno. Ništa nije spremljeno.",
+    "shranjeno": "Spremljeno.",
+    "vpisi": "Ili napišite …",
+    "tipkovnica": "Upišite",
+    "poslji": "Pošalji",
+    "zapri": "Zatvori",
+    "koncaj": "Završi razgovor",
+    "potrdi": "Potvrdi",
+    "preklici": "Odustani",
+    "predlogNamig": "Recite »da« ili »ne«.",
+    "moznostiNamig": "Recite ime ili dodirnite.",
+    "poklici": "Nazovi",
+    "pisi": "Piši",
+    "pozdrav": "Što mogu učiniti? Na primjer: »Tko je sljedeći?« ili »Upiši Anu sutra u deset.«"
+  },
+  "aiStran": {
+    "naslov": "AI asistenti",
+    "podnaslov": "Asistent+ u aplikaciji i Receptionist+ na telefonu.",
+    "zavihki": {
+      "asistent": "Asistent+",
+      "receptionist": "Receptionist+"
+    },
+    "asistent": {
+      "opis": "Glasovni asistent u aplikaciji: upisuje i premješta termine, pronalazi klijente i odgovara na pitanja. Ništa se ne sprema dok ne potvrdite.",
+      "sekcija": "Asistent+",
+      "vklop": "Asistent+",
+      "vklopOpis": "Uključen za članove tvrtke.",
+      "izklopOpis": "Isključen za sve članove.",
+      "jezik": "Jezik asistenta",
+      "jezikOpis": "Na ovom jeziku asistent sluša i govori.",
+      "jezikiKmalu": "Uskoro i: {jeziki}.",
+      "poraba": "Potrošnja ovaj mjesec",
+      "porabaOpis": "Glasovne naredbe svih članova.",
+      "porabaVrednost": "{porabljeno} od {kvota} naredbi",
+      "clani": "Članovi",
+      "claniOpis": "Asistenta možete isključiti pojedinom članu.",
+      "pravicaZaposlenih": "Zaposlenici trebaju i dopuštenje Asistent+ u Postavke → Članovi → Dopuštenja.",
+      "samoPro": "Asistent+ je uključen u paket Pro.",
+      "samoProOpis": "Nadogradnjom na Pro možete ga uključiti za sve članove.",
+      "nadgradi": "Nadogradi na Pro",
+      "samoLastnik": "Postavke može mijenjati vlasnik ili admin.",
+      "jazIzklopljen": "Asistent+ je isključen za vaš račun.",
+      "shranjeno": "Spremljeno",
+      "napaka": "Spremanje nije uspjelo. Pokušajte ponovno.",
+      "napakaNalaganja": "Postavke nije bilo moguće učitati.",
+      "vloga": {
+        "owner": "Vlasnik",
+        "admin": "Admin",
+        "staff": "Zaposlenik"
+      }
+    }
   }
 }

@@ -347,6 +347,18 @@
         "cancel": "Otkaži",
         "complete": "Završi",
         "moreOptions": "Više mogućnosti"
+      },
+      "glas": {
+        "vprasanje": {
+          "odpovej": "Da otkažem ovaj termin?",
+          "zakljuci": "Da završim ovaj termin?",
+          "ni_prisla": "Da označim da klijentica nije došla?"
+        },
+        "uspeh": {
+          "odpovej": "Termin je otkazan.",
+          "zakljuci": "Termin je završen.",
+          "ni_prisla": "Označeno da nije došla."
+        }
       }
     },
     "dayView": {
@@ -504,5 +516,53 @@
   "bulk": {
     "done": "{count, plural, one {# termin zaključen} few {# termina zaključena} other {# termina zaključeno}}",
     "partial": "Zaključeno: {completed}. {failed} termina nije bilo moguće zaključiti pa ostaju otvoreni."
+  },
+  "serija": {
+    "title": "Ponovi termin",
+    "description": "Ista usluga u istom ritmu, svaki termin zasebno.",
+    "rhythm": "Ritam",
+    "everyWeeks": "{count, plural, =1 {svaki tjedan} few {svaka {count} tjedna} other {svakih {count} tjedana}}",
+    "count": "Ukupno",
+    "times": "{count, plural, few {{count} termina} other {{count} termina}}",
+    "hint": "Prije spremanja provjeravam sve datume. Klijent dobiva potvrdu za svaki termin.",
+    "label": "Serija",
+    "position": "{zap}/{skupaj}",
+    "cancelFuture": "Otkaži ovaj i sve sljedeće",
+    "reviewTitle": "Pregled serije",
+    "reviewSubtitle": "{count, plural, one {# termin} few {# termina} other {# termina}}",
+    "saved": "Spremljeno",
+    "saveFailed": "Nije spremljeno. Provjerite vrijeme i pokušajte ponovno.",
+    "free": "Slobodno",
+    "movedBusy": "Prijedlog: {datum} u {ura} je zauzeto ({kdo}).",
+    "movedOff": "Prijedlog: {datum} u {ura} ne radi.",
+    "problemBusy": "Zauzeto, u tri dana nema slobodnog vremena. Odaberite drugi datum.",
+    "problemOff": "Ne radi, u tri dana nema slobodnog vremena. Odaberite drugi datum.",
+    "include": "Uključi {datum}",
+    "confirmations": "{count, plural, =0 {Nema odabranih termina.} one {Klijent dobiva # potvrdu.} few {Klijent dobiva # potvrde.} other {Klijent dobiva # potvrda.}}",
+    "saving": "Spremam {n}/{od} …",
+    "saveAll": "{count, plural, =0 {Spremi} one {Spremi # termin} few {Spremi # termina} other {Spremi # termina}}",
+    "checkError": "Datume serije nije bilo moguće provjeriti. Pokušajte ponovno.",
+    "savedAll": "{count, plural, one {Spremljen # termin.} few {Spremljena # termina.} other {Spremljeno # termina.}}",
+    "linkError": "Termini su spremljeni, ali povezivanje u seriju nije uspjelo.",
+    "partial": "Spremljeno {n} od {od}. Nespremljeni ostaju u pregledu.",
+    "cancelledAll": "{count, plural, one {Otkazan # termin.} few {Otkazana # termina.} other {Otkazano # termina.}}",
+    "cancelPartial": "Otkazano {n} od {od}. Provjerite kalendar.",
+    "cancelTitle": "{count, plural, =0 {Nema budućih termina} one {Otkazati # termin?} few {Otkazati # termina?} other {Otkazati # termina?}}",
+    "cancelHint": "Svaki termin se otkazuje zasebno; klijent dobiva obavijest kao za jedan termin.",
+    "cancelConfirm": "{count, plural, one {Otkaži # termin} few {Otkaži # termina} other {Otkaži # termina}}",
+    "repeat": "Ponovi (serija)",
+    "rescheduleFuture": "Premjesti ovaj i sve sljedeće",
+    "moveTitle": "Premjesti seriju",
+    "moveStep": "Novi dan i vrijeme ovog termina. Svi sljedeći pomiču se jednako.",
+    "moveHint": "Svaki termin se premješta zasebno, kao jedan termin. O obavijesti klijentu pitam na kraju.",
+    "moveAll": "{count, plural, =0 {Premjesti} one {Premjesti # termin} few {Premjesti # termina} other {Premjesti # termina}}",
+    "moved": "Premješteno",
+    "movedAll": "{count, plural, one {Premješten # termin.} few {Premještena # termina.} other {Premješteno # termina.}}",
+    "movePartial": "Premješteno {n} od {od}. Ostali ostaju u pregledu.",
+    "moveNone": "Ova serija nema budućih otvorenih termina.",
+    "notifyTitle": "{count, plural, one {Obavijestiti klijenta o premještanju?} other {Obavijestiti klijenta o # premještanja?}}",
+    "notifyHint": "Za svaki premješteni termin ide zasebna obavijest, kao za jedan termin.",
+    "notifyConfirm": "{count, plural, one {Pošalji obavijest} few {Pošalji # obavijesti} other {Pošalji # obavijesti}}",
+    "notifyPartial": "Poslano {n} od {od} obavijesti."
   }
 }
