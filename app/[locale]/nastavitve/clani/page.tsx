@@ -8,6 +8,7 @@ import {
   Warning,
   CircleNotch,
   CheckCircle,
+  CaretDown,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { supabaseReadOnly } from '@/src/lib/supabaseReadOnly';
@@ -92,8 +93,6 @@ const permissionSections: {
       { key: 'can_edit_only_own_appointments' },
       { key: 'can_create_appointments' },
       { key: 'can_delete_appointments' },
-      { key: 'can_create_ghost_termin' },
-      { key: 'can_view_ghost_termini' },
     ],
   },
   {
@@ -129,6 +128,13 @@ const permissionSections: {
     ],
   },
   {
+    sectionKey: 'zasebnost',
+    keys: [
+      { key: 'can_create_ghost_termin' },
+      { key: 'can_view_ghost_termini' },
+    ],
+  },
+  {
     sectionKey: 'moduli',
     keys: [
       { key: 'can_access_asistent_plus' },
@@ -144,6 +150,47 @@ const permissionSections: {
     ],
   },
 ];
+
+// Hitre prednastavitve. Zajamejo samo osnovna področja; moduli in zasebnost
+// (ghost termini, stari termini) ostanejo, kot so, da jih predloga ne spremeni po nesreči.
+const PRESET_SECTIONS = ['termini', 'stranke', 'storitve', 'osebje', 'analitika'];
+type PresetId = 'minimal' | 'standard' | 'full';
+const PRESETS: Record<PresetId, Partial<Record<keyof StaffPermissions, boolean>>> = {
+  minimal: {
+    can_view_only_own_appointments: true,
+    can_edit_only_own_appointments: true,
+    can_create_appointments: true,
+    can_view_clients: true,
+  },
+  standard: {
+    can_view_all_appointments: true,
+    can_edit_only_own_appointments: true,
+    can_create_appointments: true,
+    can_view_clients: true,
+    can_edit_clients: true,
+    can_create_clients: true,
+    can_view_services: true,
+    can_view_staff: true,
+  },
+  full: {
+    can_view_all_appointments: true,
+    can_edit_all_appointments: true,
+    can_create_appointments: true,
+    can_delete_appointments: true,
+    can_view_clients: true,
+    can_edit_clients: true,
+    can_create_clients: true,
+    can_delete_clients: true,
+    can_view_services: true,
+    can_edit_services: true,
+    can_create_services: true,
+    can_delete_services: true,
+    can_view_staff: true,
+    can_edit_staff: true,
+    can_view_analytics: true,
+    can_view_zgodovina: true,
+  },
+};
 
 // ─── Role badge ───────────────────────────────────────────────────────────────
 
@@ -218,6 +265,8 @@ export default function ClaniPage() {
   const [error, setError] = useState(false);
   const { locations, multi } = useLocations();
   const [locAccess, setLocAccess] = useState<Record<string, string[]>>({});
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set(['termini']));
+  const [pendingPreset, setPendingPreset] = useState<PresetId | null>(null);
 
   // ── Fetch members + current user role ──
 
@@ -329,6 +378,30 @@ export default function ClaniPage() {
       if (opposite) next[opposite] = !value as never;
       return next;
     });
+    setSaveSuccess(false);
+    setSaveError(false);
+  };
+
+  const toggleSection = (key: string) =>
+    setOpenSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+
+  // Prednastavitev prepiše samo osnovna področja; shrani se šele s "Shrani".
+  const applyPreset = (id: PresetId) => {
+    setPermissions((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev } as Record<string, unknown>;
+      for (const section of permissionSections) {
+        if (!PRESET_SECTIONS.includes(section.sectionKey)) continue;
+        for (const { key } of section.keys) next[key] = PRESETS[id][key] === true;
+      }
+      return next as unknown as StaffPermissions;
+    });
+    setPendingPreset(null);
     setSaveSuccess(false);
     setSaveError(false);
   };
@@ -572,55 +645,113 @@ export default function ClaniPage() {
           </div>
         ) : (
           <>
+            {/* Prednastavitve */}
+            <div className="border-b border-gray-100 px-4 py-4">
+              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                {t('members.permissions.presets.title')}
+              </h3>
+              <p className="mt-0.5 text-xs text-gray-500">{t('members.permissions.presets.hint')}</p>
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {(['minimal', 'standard', 'full'] as PresetId[]).map((id) => (
+                  <button
+                    key={id}
+                    type="button"
+                    disabled={saving}
+                    onClick={() => setPendingPreset(id)}
+                    className={`rounded-[10px] border px-3 py-1.5 text-sm transition-colors disabled:opacity-50 ${
+                      pendingPreset === id
+                        ? 'border-gray-900 bg-gray-900 text-white'
+                        : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {t(`members.permissions.presets.${id}`)}
+                  </button>
+                ))}
+              </div>
+              {pendingPreset && (
+                <div role="alert" className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  <span>{t(`members.permissions.presets.${pendingPreset}Desc`)}</span>
+                  <span className="flex gap-2">
+                    <button type="button" onClick={() => setPendingPreset(null)} className="rounded-md px-2 py-1 font-medium hover:bg-amber-100">
+                      {t('members.permissions.presets.cancel')}
+                    </button>
+                    <button type="button" onClick={() => applyPreset(pendingPreset)} className="rounded-md bg-amber-600 px-2 py-1 font-medium text-white hover:bg-amber-700">
+                      {t('members.permissions.presets.apply')}
+                    </button>
+                  </span>
+                </div>
+              )}
+            </div>
+
             <div className="divide-y divide-gray-100">
-              {permissionSections.map((section) => (
-                <div key={section.sectionKey} className="px-4 py-4">
-                  <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-                    {t(`members.permissions.sections.${section.sectionKey}`)}
-                  </h3>
-                  <div className="space-y-3">
-                    {section.keys.map(({ key }) => {
-                      const value = permissions[key] as boolean;
-                      return (
-                        <div key={key} className="flex items-center justify-between gap-4">
-                          <span className="text-sm text-gray-900">{t(`members.permissions.labels.${key}`)}</span>
-                          <PermissionToggle
-                            value={value ?? false}
-                            onChange={(v) => handleToggle(key, v)}
-                            disabled={saving}
-                          />
-                        </div>
-                      );
-                    })}
-                    {section.sectionKey === 'termini' && (
-                      <div className="flex flex-col gap-1.5 pt-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                        <div className="min-w-0">
-                          <span className="text-sm text-gray-900">{t('members.permissions.pastAppointments.label')}</span>
-                          <p className="text-xs text-gray-500">{t('members.permissions.pastAppointments.hint')}</p>
-                        </div>
-                        <select
-                          value={permissions.past_appointments_days == null ? 'all' : String(permissions.past_appointments_days)}
-                          disabled={saving}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            setPermissions((prev) => prev ? { ...prev, past_appointments_days: v === 'all' ? null : Number(v) } : prev);
-                            setSaveSuccess(false);
-                            setSaveError(false);
-                          }}
-                          className="rounded-[10px] border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-400 focus:outline-none disabled:opacity-50"
-                        >
-                          <option value="all">{t('members.permissions.pastAppointments.options.all')}</option>
-                          <option value="0">{t('members.permissions.pastAppointments.options.today')}</option>
-                          <option value="1">{t('members.permissions.pastAppointments.options.d1')}</option>
-                          <option value="7">{t('members.permissions.pastAppointments.options.d7')}</option>
-                          <option value="30">{t('members.permissions.pastAppointments.options.d30')}</option>
-                          <option value="90">{t('members.permissions.pastAppointments.options.d90')}</option>
-                        </select>
+              {permissionSections.map((section) => {
+                const isOpen = openSections.has(section.sectionKey);
+                const onCount = section.keys.filter(({ key }) => permissions[key] === true).length;
+                return (
+                  <div key={section.sectionKey}>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(section.sectionKey)}
+                      aria-expanded={isOpen}
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left hover:bg-gray-50"
+                    >
+                      <span className="text-sm font-semibold text-gray-900">
+                        {t(`members.permissions.sections.${section.sectionKey}`)}
+                      </span>
+                      <span className="flex items-center gap-2 text-xs text-gray-500">
+                        <span className="tnum">{t('members.permissions.enabledCount', { on: onCount, total: section.keys.length })}</span>
+                        <CaretDown className={`h-3.5 w-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                      </span>
+                    </button>
+                    {isOpen && (
+                      <div className="space-y-3 px-4 pb-4">
+                        {section.sectionKey === 'zasebnost' && (
+                          <p className="text-xs text-gray-500">{t('members.permissions.privacyHint')}</p>
+                        )}
+                        {section.keys.map(({ key }) => {
+                          const value = permissions[key] as boolean;
+                          return (
+                            <div key={key} className="flex items-center justify-between gap-4">
+                              <span className="text-sm text-gray-900">{t(`members.permissions.labels.${key}`)}</span>
+                              <PermissionToggle
+                                value={value ?? false}
+                                onChange={(v) => handleToggle(key, v)}
+                                disabled={saving}
+                              />
+                            </div>
+                          );
+                        })}
+                        {section.sectionKey === 'zasebnost' && (
+                          <div className="flex flex-col gap-1.5 pt-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                            <div className="min-w-0">
+                              <span className="text-sm text-gray-900">{t('members.permissions.pastAppointments.label')}</span>
+                              <p className="text-xs text-gray-500">{t('members.permissions.pastAppointments.hint')}</p>
+                            </div>
+                            <select
+                              value={permissions.past_appointments_days == null ? 'all' : String(permissions.past_appointments_days)}
+                              disabled={saving}
+                              onChange={(e) => {
+                                const v = e.target.value;
+                                setPermissions((prev) => prev ? { ...prev, past_appointments_days: v === 'all' ? null : Number(v) } : prev);
+                                setSaveSuccess(false);
+                                setSaveError(false);
+                              }}
+                              className="rounded-[10px] border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-gray-400 focus:outline-none disabled:opacity-50"
+                            >
+                              <option value="all">{t('members.permissions.pastAppointments.options.all')}</option>
+                              <option value="0">{t('members.permissions.pastAppointments.options.today')}</option>
+                              <option value="1">{t('members.permissions.pastAppointments.options.d1')}</option>
+                              <option value="7">{t('members.permissions.pastAppointments.options.d7')}</option>
+                              <option value="30">{t('members.permissions.pastAppointments.options.d30')}</option>
+                              <option value="90">{t('members.permissions.pastAppointments.options.d90')}</option>
+                            </select>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Save footer */}

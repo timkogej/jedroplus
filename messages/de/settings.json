@@ -94,7 +94,9 @@
       "employeeCodeNote": "Zum Hinzufügen von Mitarbeitern. Mitarbeiter sehen nur ihre eigenen Arbeitszeiten und zugewiesenen Termine – ohne Zugriff auf Einstellungen, Auswertungen oder Daten anderer Mitarbeiter.",
       "slugLabel": "Kurzname des Unternehmens",
       "slugNote": "Die Endung in Buchungslinks und für den Chatbot auf Ihrer Website",
-      "disclaimer": "Geben Sie Codes nur an vertrauenswürdige Personen weiter. Administratoren haben vollen Zugriff; Mitarbeiter sehen nur ihre eigenen Termine."
+      "disclaimer": "Geben Sie Codes nur an vertrauenswürdige Personen weiter. Administratoren haben vollen Zugriff; Mitarbeiter sehen nur ihre eigenen Termine.",
+      "showCode": "Code anzeigen",
+      "hideCode": "Code verbergen"
     },
     "qr": {
       "title": "QR-Code zur Kundenregistrierung",
@@ -230,7 +232,8 @@
         "storitve": "Leistungen",
         "osebje": "Team",
         "analitika": "Auswertungen",
-        "moduli": "Module"
+        "moduli": "Module",
+        "zasebnost": "Datenschutz"
       },
       "labels": {
         "can_view_all_appointments": "Alle Termine des Unternehmens sehen",
@@ -275,6 +278,20 @@
           "d30": "Letzte 30 Tage",
           "d90": "Letzte 90 Tage"
         }
+      },
+      "enabledCount": "{on} von {total} aktiv",
+      "privacyHint": "Ghost-Termine und vergangene Termine sind sensibel. Mitarbeiter sehen sie nur, wenn es hier erlaubt ist.",
+      "presets": {
+        "title": "Schnellvorlagen",
+        "hint": "Überschreibt Termine, Kunden, Leistungen, Personal und Analytik. Module und Datenschutz bleiben unverändert. Wird erst mit \"Speichern\" gespeichert.",
+        "minimal": "Minimal",
+        "standard": "Standard",
+        "full": "Voll",
+        "minimalDesc": "Minimal: Mitarbeiter sehen und bearbeiten nur eigene Termine und sehen Kunden.",
+        "standardDesc": "Standard: sieht alle Termine, bearbeitet eigene, arbeitet mit Kunden, sieht Leistungen und Personal.",
+        "fullDesc": "Voll: Mitarbeiter dürfen fast alles außer Module und Datenschutz.",
+        "cancel": "Abbrechen",
+        "apply": "Anwenden"
       }
     },
     "invite": {

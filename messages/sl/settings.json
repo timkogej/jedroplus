@@ -94,7 +94,9 @@
       "employeeCodeNote": "Za dodajanje zaposlenih v vaše podjetje. Zaposleni vidi le svoj urnik in termine, ki so mu dodeljeni. Nima dostopa do nastavitev, analitike ali podatkov o drugih zaposlenih.",
       "slugLabel": "Slug podjetja",
       "slugNote": "Končnica, ki se uporablja pri booking linkih in pri chatbotu na spletni strani",
-      "disclaimer": "Kode delite le z zaupanja vrednimi osebami. Administrator ima polni dostop do sistema, zaposleni pa le do svojih terminov."
+      "disclaimer": "Kode delite le z zaupanja vrednimi osebami. Administrator ima polni dostop do sistema, zaposleni pa le do svojih terminov.",
+      "showCode": "Pokaži kodo",
+      "hideCode": "Skrij kodo"
     },
     "qr": {
       "title": "QR koda za registracijo strank",
@@ -230,7 +232,8 @@
         "storitve": "Storitve",
         "osebje": "Zaposleni",
         "analitika": "Analitika",
-        "moduli": "Moduli"
+        "moduli": "Moduli",
+        "zasebnost": "Zasebnost"
       },
       "labels": {
         "can_view_all_appointments": "Vidi vse termine podjetja",
@@ -275,6 +278,20 @@
           "d30": "Zadnjih 30 dni",
           "d90": "Zadnjih 90 dni"
         }
+      },
+      "enabledCount": "{on} od {total} vklopljeno",
+      "privacyHint": "Ghost termini in stari termini so občutljivi podatki. Zaposleni jih vidi samo, če je tukaj dovoljeno.",
+      "presets": {
+        "title": "Hitre prednastavitve",
+        "hint": "Prepiše termine, stranke, storitve, osebje in analitiko. Moduli in zasebnost ostanejo nespremenjeni. Shrani se šele s \"Shrani\".",
+        "minimal": "Minimalno",
+        "standard": "Standardno",
+        "full": "Polno",
+        "minimalDesc": "Minimalno: zaposleni vidi in ureja samo svoje termine ter vidi stranke.",
+        "standardDesc": "Standardno: vidi vse termine, ureja svoje, dela s strankami, vidi storitve in osebje.",
+        "fullDesc": "Polno: zaposleni lahko skoraj vse, razen modulov in zasebnosti.",
+        "cancel": "Prekliči",
+        "apply": "Uporabi"
       }
     },
     "invite": {
