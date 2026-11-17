@@ -7,7 +7,7 @@
 
 import { danVTednu, razlikaDni } from './razresevanje/datumi';
 import { trenutniJezik } from './jeziki/jezik';
-import { ALI, EMAIL_TUJE, PREDLOG_URE, STEVKE_TUJE, datumZaGovorTuj, razponZaGovorTuj, trajanjeZaGovorTuj, uraZaGovorTuj } from './jeziki/koledar';
+import { ALI, EMAIL_TUJE, PREDLOG_URE, STEVKE_TUJE, datumZaGovorTuj, imeDneva, razponZaGovorTuj, trajanjeZaGovorTuj, uraZaGovorTuj } from './jeziki/koledar';
 
 const OB: Record<number, string> = {
   1: 'enih', 2: 'dveh', 3: 'treh', 4: 'štirih', 5: 'petih', 6: 'šestih', 7: 'sedmih',
@@ -41,6 +41,12 @@ export function datumZaGovor(datum: string, danes: string): string {
   if (r > 2 && r < 7) return dan;
   const [, m, d] = datum.split('-').map(Number);
   return `${dan}, ${d}. ${MESEC_RODILNIK[m - 1]}`;
+}
+
+/** Samo dan v tednu za naštevanje (»v ponedeljek 3, v torek 2«): brez »jutri,« in datuma. */
+export function danZaGovor(datum: string): string {
+  const j = trenutniJezik();
+  return j === 'sl' ? `v ${DAN_TOZILNIK[danVTednu(datum)]}` : imeDneva(j, danVTednu(datum));
 }
 
 const h12 = (h: number) => h % 12 || 12;
@@ -293,8 +299,35 @@ export function uglajenoBesedilo(besedilo: string): string {
   return s.replace(/^\p{Ll}/u, (c) => c.toUpperCase());
 }
 
-/** Besedilo za glas: kot za zaslon, plus števniki z besedo. */
+/** Slovenska imena črk za črkovanje kratic. */
+const CRKE_SL: Record<string, string> = {
+  a: 'a', b: 'be', c: 'ce', č: 'če', d: 'de', e: 'e', f: 'ef', g: 'ge', h: 'ha', i: 'i', j: 'je', k: 'ka', l: 'el', m: 'em',
+  n: 'en', o: 'o', p: 'pe', q: 'ku', r: 'er', s: 'es', š: 'eš', t: 'te', u: 'u', v: 've', w: 'dvojni ve', x: 'iks', y: 'ipsilon', z: 'ze', ž: 'že',
+};
+const crkuj = (kratica: string) => [...kratica.toLowerCase()].filter((c) => CRKE_SL[c]).map((c) => CRKE_SL[c]).join(' ');
+/** Kratice, ki se berejo kot beseda (ne črkujemo). */
+const KOT_BESEDA = new Set(['OK', 'EU', 'NATO', 'PIN', 'IBAN']);
+
+/**
+ * Kratice na glas po črkah (Tim, 17. 11.: »JedroPlus d.o.o.« je bral grozno):
+ * »d.o.o.« → »de o o«, »s.p.« → »es pe«, »SMS« → »es em es«; »JedroPlus« → »Jedro plus«.
+ */
+export function kraticeZaGovor(besedilo: string): string {
+  return besedilo
+    .replace(/\bJedro ?(?:Plus|\+)(?=$|[^\p{L}])/giu, 'Jedro plus')
+    .replace(/(^|[^\p{L}])((?:[\p{L}]\.\s?){2,4})(?=$|[^\p{L}])/gu, (_, pred: string, k: string, i: number, ves: string) => {
+      // Kratica na koncu stavka: pika ostane (»… de o o. Pošljem?«).
+      const za = ves.slice(i + pred.length + k.length);
+      return `${pred}${crkuj(k)}${/^\s*($|\p{Lu})/u.test(za) ? '. ' : ' '}`;
+    })
+    .replace(/(^|[^\p{L}])(\p{Lu}{2,5})(?=$|[^\p{L}])/gu, (m, pred: string, k: string) => (KOT_BESEDA.has(k) ? m : `${pred}${crkuj(k)}`))
+    .replace(/ +([.,;:!?])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+/** Besedilo za glas: kot za zaslon, plus števniki z besedo in kratice po črkah. */
 export function uglajenGovor(besedilo: string): string {
   const s = uglajenoBesedilo(besedilo);
-  return trenutniJezik() === 'sl' ? stevilaZaGovor(s) : s;
+  return trenutniJezik() === 'sl' ? kraticeZaGovor(stevilaZaGovor(s)) : s;
 }

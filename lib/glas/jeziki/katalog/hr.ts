@@ -137,7 +137,6 @@ export const hr: Katalog = {
 
   // Koledar, prosti termini, urnik
   'Datuma »{datum}« ne razumem.': 'Ne razumijem datum {datum}.',
-  'Datuma »{datum}« ne razumem. Povejte npr. »jutri« ali »v petek«.': 'Ne razumijem datum {datum}. Recite npr. „sutra” ili „u petak”.',
   'Do kdaj? Datuma »{datum}« ne razumem.': 'Do kada? Ne razumijem datum {datum}.',
   'Ure »{ura}« ne razumem.': 'Ne razumijem vrijeme {ura}.',
   'Ure ne razumem.': 'Ne razumijem vrijeme.',
@@ -504,4 +503,16 @@ export const hr: Katalog = {
   "E-pošta — {ime}: »{besedilo}«": "E-pošta — {ime}: »{besedilo}«",
   "Po odpovedi: {ime}, {ura}.": "Nakon otkazivanja: {ime}, {ura}.",
   "Pozor: pri {oseba:mestnik} takrat ni delovnega časa ali je vpisana odsotnost.": "Pozor: {oseba} tada nema radno vrijeme ili je upisano odsustvo.",
+  "Datuma »{datum}« ne razumem. Povejte npr. »jutri«, »v petek« ali »ta teden«.": "Ne razumijem datum {datum}. Recite npr. „sutra”, „u petak” ili „ovaj tjedan”.",
+  "Ta teden": "Ovaj tjedan",
+  "Naslednji teden": "Sljedeći tjedan",
+  "Ta mesec": "Ovaj mjesec",
+  "Naslednji mesec": "Sljedeći mjesec",
+  "{obdobje}: ni terminov.": "{obdobje}: nema termina.",
+  "{obdobje} ni terminov.": "{obdobje} nema termina.",
+  "{obdobje}: {n} {n|termin|termina|termini|terminov}.": "{obdobje}: {n} {n|termin|termina|termina}.",
+  "{obdobje} imate {n} {n|termin|termina|termine|terminov}.": "{obdobje} imate {n} {n|termin|termina|termina}.",
+  "{obdobje} je {n} {n|termin|termina|termini|terminov}.": "{obdobje} {n|je|su|je} {n} {n|termin|termina|termina}.",
+  "Po dnevih so na zaslonu.": "Raspored po danima je na zaslonu.",
+  'Datuma »{datum}« ne razumem. Povejte npr. »jutri« ali »v petek«.': 'Ne razumijem datum {datum}. Recite npr. „sutra” ili „u petak”.',
 };

@@ -6,11 +6,12 @@
 
 import { z } from 'zod';
 import { samoSvojiTermini } from '../pravice';
-import { opisDatuma, razberiDatum, razberiDatumTuj, dodajDni, vMinute } from '../razresevanje/datumi';
+import { opisDatuma, razberiDatum, razberiDatumTuj, dodajDni, danVTednu, vMinute } from '../razresevanje/datumi';
+import { brezSumnikov } from '../razresevanje/besedilo';
 import { poisci } from '../razresevanje/imena';
 import { prviProstiTermin, razcleniUrnik } from '../razresevanje/urnik';
 import type { TerminPovzetek } from '../tipi';
-import { datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
+import { danZaGovor, datumZaGovor, NAJVEC_NA_GLAS, uraZaGovor } from '../govor';
 import { oznakaStranke, razresiStranko, terminiStrank, zadnjiInNaslednji, ID_STRANKE } from './stranke';
 import type { BralnoOrodje, OkoljeOrodja } from './tipi';
 import { jt } from '../jeziki/t';
@@ -27,6 +28,104 @@ export function datumIzParametra(v: string | null | undefined, danes: string): s
 
 function odprt(t: TerminPovzetek) {
   return t.status !== 'cancelled';
+}
+
+export type KljucObdobja = 'ta_teden' | 'naslednji_teden' | 'ta_mesec' | 'naslednji_mesec';
+
+/**
+ * Obdobje namesto dneva (Tim, 17. 11.: »koliko terminov imamo v tem tednu« → »ne razumem«).
+ * Teden = ponedeljek–nedelja, mesec = koledarski. Vsi jeziki asistenta.
+ */
+export function obdobjeIzIzraza(v: string | null | undefined, danes: string): { od: string; do: string; kljuc: KljucObdobja } | null {
+  if (!v) return null;
+  const b = brezSumnikov(v).toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim();
+  const pon = dodajDni(danes, -danVTednu(danes));
+  const [y, m] = danes.split('-').map(Number);
+  const mesec = (yy: number, mm: number) => {
+    const od = `${yy}-${String(mm).padStart(2, '0')}-01`;
+    const nasl = mm === 12 ? `${yy + 1}-01-01` : `${yy}-${String(mm + 1).padStart(2, '0')}-01`;
+    return { od, do: dodajDni(nasl, -1) };
+  };
+  if (/\b(naslednj|prihodnj|sledec|sljedec|iduc)\w* (teden|tednu|tjedan|tjednu)\b|\bnext week\b|\bnachste[nr]? woche\b|\bnaechste[nr]? woche\b|\bprossima settimana\b|\bsettimana prossima\b/.test(b)) {
+    return { od: dodajDni(pon, 7), do: dodajDni(pon, 13), kljuc: 'naslednji_teden' };
+  }
+  if (/\b(naslednj|prihodnj|sljedec|iduc)\w* (mesec|mesecu|mjesec|mjesecu)\b|\bnext month\b|\bnachste[nr]? monat\b|\bnaechste[nr]? monat\b|\bprossimo mese\b|\bmese prossimo\b/.test(b)) {
+    return { ...mesec(m === 12 ? y + 1 : y, m === 12 ? 1 : m + 1), kljuc: 'naslednji_mesec' };
+  }
+  if (/^(teden|tedna|tednu)$|\b(ta|tem|tega|ves|cel|celi|celem|v tem|ovaj|ovom|cijeli) ?(teden|tednu|tedna|tjedan|tjednu)\b|\bthis week\b|\bdiese[nr]? woche\b|\bquesta settimana\b/.test(b)) {
+    return { od: pon, do: dodajDni(pon, 6), kljuc: 'ta_teden' };
+  }
+  if (/^(mesec|mesecu)$|\b(ta|tem|tega|ves|cel|celi|celem|ovaj|ovom|cijeli) ?(mesec|mesecu|meseca|mjesec|mjesecu)\b|\bthis month\b|\bdiese[nr]? monat\b|\bquesto mese\b/.test(b)) {
+    return { ...mesec(y, m), kljuc: 'ta_mesec' };
+  }
+  return null;
+}
+
+const IME_OBDOBJA: Record<KljucObdobja, () => string> = {
+  ta_teden: () => jt('Ta teden'),
+  naslednji_teden: () => jt('Naslednji teden'),
+  ta_mesec: () => jt('Ta mesec'),
+  naslednji_mesec: () => jt('Naslednji mesec'),
+};
+
+/** Največ toliko vrstic na kartici obdobja (ostalo je v koledarju). */
+const NAJVEC_VRSTIC_OBDOBJA = 60;
+
+async function koledarObdobje(
+  obd: { od: string; do: string; kljuc: KljucObdobja },
+  svoji: boolean,
+  o: OkoljeOrodja
+) {
+  const ime = IME_OBDOBJA[obd.kljuc]();
+  const vsi = (await o.podatki.termini(obd.od, obd.do)).filter(odprt);
+  const izbrani = (svoji && o.k.osebaId ? vsi.filter((t) => t.osebaId === o.k.osebaId) : vsi).sort(
+    (a, b) => (a.datum === b.datum ? vMinute(a.zacetek) - vMinute(b.zacetek) : a.datum < b.datum ? -1 : 1)
+  );
+  const n = izbrani.length;
+  const podatki = { od: obd.od, do: obd.do, stevilo: n };
+  if (n === 0) {
+    return { sporocilo: jt('{obdobje}: ni terminov.', { obdobje: ime }), govor: jt('{obdobje} ni terminov.', { obdobje: ime }), podatki };
+  }
+  const poDnevih = new Map<string, TerminPovzetek[]>();
+  for (const t of izbrani) poDnevih.set(t.datum, [...(poDnevih.get(t.datum) ?? []), t]);
+  const glava = jt('{obdobje}: {n} {n|termin|termina|termini|terminov}.', { obdobje: ime, n });
+  const uvod = svoji
+    ? jt('{obdobje} imate {n} {n|termin|termina|termine|terminov}.', { obdobje: ime, n })
+    : jt('{obdobje} je {n} {n|termin|termina|termini|terminov}.', { obdobje: ime, n });
+  // Teden: po dnevih na glas (»danes 2, jutri 1, v petek 4«); mesec samo skupaj (dni je preveč).
+  const dnevi = [...poDnevih.entries()];
+  const poDnevihGovor = !obd.kljuc.endsWith('teden')
+    ? ` ${jt('Po dnevih so na zaslonu.')}`
+    : dnevi.length === 1
+      ? ` ${cap(danZaGovor(dnevi[0][0]))}.`
+      : ` ${cap(dnevi.map(([d, ts]) => `${danZaGovor(d)} ${ts.length}`).join(', '))}.`;
+  // Mesec: vedno z datumom (dva »ponedeljka« v istem seznamu ne smeta biti enaka).
+  const oznakaDne = (d: string) => {
+    const opis = cap(opisDatuma(d, o.danes));
+    if (obd.kljuc.endsWith('teden') || /\d/.test(opis)) return opis;
+    const [, mm, dd] = d.split('-').map(Number);
+    return `${opis} (${dd}. ${mm}.)`;
+  };
+  let ostane = NAJVEC_VRSTIC_OBDOBJA;
+  const skupine = dnevi.map(([d, ts]) => {
+    const pokazi = ts.slice(0, Math.max(0, ostane));
+    ostane -= pokazi.length;
+    return {
+      naslov: `${oznakaDne(d)} · ${ts.length}`,
+      vrstice: pokazi.map((t) => ({
+        cas: `${t.zacetek}${t.konec ? `–${t.konec}` : ''}`,
+        glavno: t.stranka || jt('stranka'),
+        drugo: [t.storitev, !svoji ? t.oseba : null].filter(Boolean).join(' · ') || undefined,
+      })),
+      se: ts.length > pokazi.length ? ts.length - pokazi.length : undefined,
+    };
+  });
+  return {
+    sporocilo: `${glava}\n${dnevi.map(([d, ts]) => `${oznakaDne(d)}: ${ts.length}`).join('\n')}`,
+    prikaz: { naslov: glava.replace(/\.$/, ''), skupine: skupine.filter((g) => g.vrstice.length > 0) },
+    govor: `${uvod}${poDnevihGovor}`,
+    podatki,
+  };
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -139,14 +238,14 @@ export const zadnjiObisk: BralnoOrodje<{ stranka: string; stranka_id: string | n
 // ───────────────────────────────────────────────────────────────────────────
 export const koledarDan: BralnoOrodje<{ datum: string | null; samo_moji: boolean | null }> = {
   ime: 'koledar_dan',
-  opis: 'Termini za en dan (npr. "kaj imam jutri"). Datum kot ISO ali izraz ("jutri", "v petek").',
+  opis: 'Termini za en dan ("kaj imam jutri") ali obdobje ("koliko terminov imamo ta teden", "naslednji teden", "ta mesec"). Datum kot ISO ali izraz ("jutri", "v petek", "ta teden").',
   razred: 'branje',
   pravica: 'termini.branje',
   omogoceno: true,
   shema: {
     type: 'object',
     properties: {
-      datum: { type: ['string', 'null'], description: 'Izraz uporabnika ali YYYY-MM-DD; null = danes.' },
+      datum: { type: ['string', 'null'], description: 'Izraz uporabnika ali YYYY-MM-DD; obdobje dobesedno ("ta teden", "naslednji teden", "ta mesec"); null = danes.' },
       samo_moji: { type: ['boolean', 'null'], description: 'true = samo termini uporabnika ("kaj imam"), false = vsi; null = privzeto.' },
     },
     required: ['datum', 'samo_moji'],
@@ -154,8 +253,15 @@ export const koledarDan: BralnoOrodje<{ datum: string | null; samo_moji: boolean
   },
   vhod: z.object({ datum: z.string().max(60).nullable(), samo_moji: z.boolean().nullable() }),
   async izvedi({ datum, samo_moji }, o) {
-    const dan = datumIzParametra(datum, o.danes) ?? (datum ? null : o.danes);
-    if (!dan) return { sporocilo: jt('Datuma »{datum}« ne razumem. Povejte npr. »jutri« ali »v petek«.', { datum }) };
+    // Obdobje pred dnevom: »naslednji teden« bi sicer postal ponedeljek naslednjega tedna.
+    const obdobje = obdobjeIzIzraza(datum, o.danes);
+    const dan = obdobje ? null : datumIzParametra(datum, o.danes) ?? (datum ? null : o.danes);
+    if (obdobje) {
+      const vsiliSvoje = samoSvojiTermini(o.k);
+      if (vsiliSvoje && !o.k.osebaId) return { sporocilo: jt('Vaš račun ni povezan z zaposlenim, zato ne vidim vaših terminov.') };
+      return koledarObdobje(obdobje, Boolean(o.k.osebaId) && (vsiliSvoje || (samo_moji ?? true)), o);
+    }
+    if (!dan) return { sporocilo: jt('Datuma »{datum}« ne razumem. Povejte npr. »jutri«, »v petek« ali »ta teden«.', { datum }) };
     // Zaposleni s pravico "samo svoji" vidi samo svoje, ne glede na želje LLM.
     const vsiliSvoje = samoSvojiTermini(o.k);
     if (vsiliSvoje && !o.k.osebaId) {

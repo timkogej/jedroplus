@@ -499,7 +499,7 @@ async function obdelajUkazVJeziku(v: VhodnUkaz, d: Odvisnosti): Promise<OdgovorU
     // Brez ID-jev in pogovornih besed; predlog (besedilo SMS) ostane točno tak, kot bo poslan.
     if (r.status !== 'predlog') r = { ...r, odgovor: uglajenoBesedilo(r.odgovor) };
     let govor = r.govor ?? zaGovor(r.odgovor);
-    if (r.status === 'predlog') govor = `${zaGovor(r.odgovor)} ${r.predlog?.sporocil ? jt('Pošljem?') : jt('Potrdim?')}`;
+    if (r.status === 'predlog') govor = `${zaGovor(r.odgovor).replace(/([^.!?…])$/u, '$1.')} ${r.predlog?.sporocil ? jt('Pošljem?') : jt('Potrdim?')}`;
     else if (r.vprasanje?.moznosti?.length && !r.govor) govor = vprasanjeZaGovor(r.vprasanje);
     govor = uglajenGovor(govor);
     if (v.glas) poraba = sestejPorabo(poraba, { ttsPonudnik: v.glas.ponudnik, ttsZnaki: govor.length });

@@ -75,6 +75,28 @@ const brezLocil = (s: string) =>
 const DA_SL = new Set(['ja', 'jap', 'ja ja', 'ja prosim', 'potrdi', 'potrdim', 'potrjujem', 'seveda', 'lahko', 'v redu', 'ok', 'okej', 'ja potrdi', 'ja lahko', 'ja shrani', 'shrani', 'ja v redu', 'kar', 'ja kar', 'da', 'da prosim', 'da potrdi', 'da shrani', 'poslji', 'ja poslji', 'da poslji', 'poslji ga', 'poslji jo', 'ja poslji ga', 'ja poslji jo', 'kar poslji', 'lahko poslji', 'ja lahko poslji', 'posljem', 'posljite', 'ja posljite', 'ja seveda', 'ja ok', 'ja okej', 'super', 'ja super', 'tocno', 'drzi', 'ja drzi', 'prav', 'ja ja ja', 'mhm', 'ja hvala', 'ja lahko ja', 'gremo', 'ja gremo', 'dajmo', 'ja dajmo', 'vredu', 'ja vredu']);
 const NE_SL = new Set(['ne', 'nee', 'ne hvala', 'preklici', 'prekliči', 'stop', 'ne ne', 'pusti', 'ni treba', 'ne zapisi', 'ne shrani', 'odpovej', 'ne poslji', 'ne posiljaj', 'ne posiljajte', 'ne posljite', 'nikar', 'ne ne ne', 'ne zdaj', 'ne se', 'ustavi', 'raje ne', 'ne bo treba', 'ne rabim', 'ne ne poslji', 'ne hvala ne', 'ne bomo', 'pozabi']);
 
+// Slovenščina po besedah (Tim, 17. 11.: »A ja, lahko, pošljem, ja.« in »Ja, shrani, super.« nista
+// bila potrditev). Potrditev = vsaka beseda je potrditvena ali mašilo, vsaj ena je prava potrditev
+// in nobena ni zanikanje. »Ja, ampak spremeni na 7.1« ima vsebino → ostane nov ukaz.
+const DA_BESEDE_SL = new Set(['ja', 'jap', 'jaa', 'jep', 'da', 'potrdi', 'potrdim', 'potrjujem', 'potrdite', 'seveda', 'lahko', 'ok', 'okej', 'okay', 'oke', 'vredu', 'uredu', 'shrani', 'shranite', 'shranim', 'poslji', 'posljite', 'posljem', 'posljes', 'super', 'odlicno', 'tocno', 'drzi', 'prav', 'mhm', 'gremo', 'dajmo', 'daj', 'dajte', 'tako', 'ustreza', 'velja', 'vpisi', 'vpisite', 'zapisi', 'zapisite', 'naredi', 'izvedi', 'perfektno', 'fajn', 'kul', 'sevede']);
+const MASILA_SL = new Set(['a', 'no', 'pa', 'e', 'ee', 'eee', 'em', 'am', 'hm', 'hmm', 'ah', 'aha', 'ga', 'jo', 'to', 'tako', 'kar', 'kr', 'prosim', 'hvala', 'lepo', 'zdaj', 'zdej', 'sedaj', 'v', 'redu', 'mi', 'ti', 'se', 'vse', 'samo', 'cisto', 'res', 'pac', 'ane']);
+const NE_BESEDE_SL = new Set(['ne', 'nee', 'nikar', 'stop', 'preklici', 'preklicite', 'pusti', 'pustite', 'ustavi', 'pozabi', 'odpovej', 'nocem', 'noceva', 'nocemo']);
+// Besede, ki smejo stati ob zanikanju (»ne, ne pošiljaj ga«, »ne, ni treba, hvala«).
+const OB_NE_SL = new Set(['poslji', 'posiljaj', 'posiljajte', 'posljite', 'shrani', 'shranjuj', 'zapisi', 'zapisuj', 'vpisi', 'ni', 'treba', 'rabim', 'rabimo', 'bo', 'bomo', 'raje', 'zdaj', 'zdej', 'se', 'tega', 'ga', 'jo', 'to', 'hvala', 'prosim', 'a', 'no', 'pa', 'e', 'ee', 'em', 'am', 'hm', 'ah', 'kar', 'potrebno']);
+
+function potrditevPoBesedah(s: string): boolean {
+  const b = s.split(' ').filter(Boolean);
+  if (b.length === 0 || b.length > 8) return false;
+  if (b.some((x) => NE_BESEDE_SL.has(x))) return false;
+  return b.every((x) => DA_BESEDE_SL.has(x) || MASILA_SL.has(x)) && b.some((x) => DA_BESEDE_SL.has(x));
+}
+
+function zavrnitevPoBesedah(s: string): boolean {
+  const b = s.split(' ').filter(Boolean);
+  if (b.length === 0 || b.length > 8) return false;
+  return b.some((x) => NE_BESEDE_SL.has(x)) && b.every((x) => NE_BESEDE_SL.has(x) || OB_NE_SL.has(x));
+}
+
 // Drugi jeziki (jezik pogovora iz seje); množice se zgradijo enkrat.
 const ZA_JEZIK = new Map<string, { da: Set<string>; ne: Set<string> }>();
 function dane(): { da: Set<string>; ne: Set<string> } {
@@ -97,14 +119,16 @@ export function jePotrditev(izjava: string): boolean {
   const { da } = dane();
   const brezHvala = s.replace(/ (hvala|thanks|thank you|danke|grazie)$/, '');
   // "Ja, pošlji ga" / "Ja, schick es": uvodni "ja" pred drugo potrditvijo.
-  return da.has(s) || da.has(brezHvala) || da.has(brezHvala.replace(/^(ja|da|yes|si|ok|okej|okay) /, ''));
+  if (da.has(s) || da.has(brezHvala) || da.has(brezHvala.replace(/^(ja|da|yes|si|ok|okej|okay) /, ''))) return true;
+  return jezikOdjemalca() === 'sl' && potrditevPoBesedah(s);
 }
 
 export function jeZavrnitev(izjava: string): boolean {
   const s = brezLocil(izjava);
   const { ne } = dane();
   // "Ne, ne pošiljaj" / "No, don't send": uvodni "ne" pred drugo zavrnitvijo.
-  return ne.has(s) || ne.has(s.replace(/^(ne|no|nein) /, ''));
+  if (ne.has(s) || ne.has(s.replace(/^(ne|no|nein) /, ''))) return true;
+  return jezikOdjemalca() === 'sl' && zavrnitevPoBesedah(s);
 }
 
 /** Uporabnik je izgovoril ime ene od možnosti ("Ano Novak") → ta možnost; sicer null. */
