@@ -93,6 +93,9 @@ const POGOVORI: {
   // Ponovi termin: storitev, zaposleni in ura iz zadnjega termina, prvi en teden po njem.
   { ukazi: ['Ponovi Matejin termin za naslednje tri tedne, enako kot zadnjič.'], konec: { stranka: '101', storitev: 's1', oseba: 'o1', ura: '09:00', ponovi: '1:3' } },
   { podjetje: 'Z5', ukazi: ['Kdo bi lahko prišel jutri ob pol enajstih k Tini?', 'Pošlji vsem SMS.'], konec: {}, odgovor: { 1: /SMS — (Mateja Kos|Ana Novak)|privolit/i }, ne: { 1: /SMS — Nina|popust/i } },
+  // Tim, 17. 11.: obdobje namesto dneva (mimo hitre poti, zato prek modela).
+  { ukazi: ['A mi lahko poveš, koliko terminov imamo ta teden?'], konec: {}, odgovor: { 0: /Ta teden/ }, ne: { 0: /ne razumem/i } },
+  { ukazi: ['Kako zasedeni smo naslednji teden?'], konec: {}, odgovor: { 0: /Naslednji teden/ }, ne: { 0: /ne razumem/i } },
 ];
 
 describe.skipIf(!VKLOP)('pogovori s pravim modelom', () => {

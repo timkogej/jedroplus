@@ -30,6 +30,17 @@ export function hitraPot(prepis: string): HitriKlic | null {
     return { orodje: 'koledar_dan', vhod: { datum: dan, samo_moji: oseba } };
   }
 
+  // Obdobje (Tim, 17. 11.): "koliko terminov imamo v tem tednu", "kaj imam naslednji teden", "koliko terminov ta mesec"
+  const OBD = '((?:v )?(?:ta|tem|naslednji|naslednjem|prihodnji|prihodnjem) (?:teden|tednu|mesec|mesecu))';
+  const ob =
+    b.match(new RegExp(`^(?:kaj|katere termine|koliko terminov|koliko imam terminov|koliko imamo terminov) (?:(imam|imamo) )?${OBD}(?: (imam|imamo))?(?: na (?:sporedu|urniku))?$`)) ??
+    b.match(new RegExp(`^${OBD} (?:kaj|koliko terminov) (imam|imamo)$`));
+  if (ob) {
+    const glagol = ob.slice(1).find((x) => x === 'imam' || x === 'imamo') ?? (/imam terminov/.test(b) ? 'imam' : /imamo terminov/.test(b) ? 'imamo' : null);
+    const obdobje = ob.slice(1).find((x) => x && x !== 'imam' && x !== 'imamo')!.replace(/^v /, '');
+    return { orodje: 'koledar_dan', vhod: { datum: obdobje, samo_moji: glagol === 'imam' ? true : glagol === 'imamo' ? false : null } };
+  }
+
   // Preteklik (Tim, 16. 11.: model je odgovoril na pamet in omenil samo en termin):
   // "kaj sem imel danes", "kaj vse sem imela danes katere termine", "koga smo imeli danes"
   const pr = b.match(new RegExp(`^(?:kaj(?: vse)?|katere termine|koga(?: vse)?) (sem|smo) (?:imel|imela|imeli)(?: ${DAN})?(?: (?:katere termine|na sporedu|na urniku))?$`));
