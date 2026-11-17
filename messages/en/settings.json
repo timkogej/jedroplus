@@ -94,7 +94,9 @@
       "employeeCodeNote": "For adding staff to your company. Staff can only view their own schedule and assigned appointments. They have no access to settings, analytics, or other staff data.",
       "slugLabel": "Company slug",
       "slugNote": "The suffix used in booking links and the chatbot on your website",
-      "disclaimer": "Share codes only with trusted people. Administrators have full system access; staff only have access to their own appointments."
+      "disclaimer": "Share codes only with trusted people. Administrators have full system access; staff only have access to their own appointments.",
+      "showCode": "Show code",
+      "hideCode": "Hide code"
     },
     "qr": {
       "title": "QR code for client sign-up",
@@ -230,7 +232,8 @@
         "storitve": "Services",
         "osebje": "Staff",
         "analitika": "Analytics",
-        "moduli": "Modules"
+        "moduli": "Modules",
+        "zasebnost": "Privacy"
       },
       "labels": {
         "can_view_all_appointments": "View all company appointments",
@@ -261,7 +264,34 @@
         "can_manage_rezervacije": "Manage Reservations",
         "can_access_lost_leads": "Access to Lost Leads",
         "can_manage_lost_leads": "Manage Lost Leads",
-        "can_create_ghost_termin": "Can create unrecorded appointments (not counted in analytics)"
+        "can_create_ghost_termin": "Can create unrecorded appointments (not counted in analytics)",
+        "can_view_ghost_termini": "Can see which appointments are ghost (others see them as normal)"
+      },
+      "pastAppointments": {
+        "label": "Past appointments staff can see",
+        "hint": "Older appointments are hidden from staff (owner and admin see everything).",
+        "options": {
+          "all": "All",
+          "today": "Today onwards only",
+          "d1": "From yesterday",
+          "d7": "Last 7 days",
+          "d30": "Last 30 days",
+          "d90": "Last 90 days"
+        }
+      },
+      "enabledCount": "{on} of {total} enabled",
+      "privacyHint": "Ghost appointments and past appointments are sensitive. Staff only see them if allowed here.",
+      "presets": {
+        "title": "Quick presets",
+        "hint": "Overwrites appointments, clients, services, staff and analytics. Modules and privacy stay unchanged. Saved only when you press \"Save\".",
+        "minimal": "Minimal",
+        "standard": "Standard",
+        "full": "Full",
+        "minimalDesc": "Minimal: staff see and edit only their own appointments and can view clients.",
+        "standardDesc": "Standard: sees all appointments, edits their own, works with clients, sees services and staff.",
+        "fullDesc": "Full: staff can do almost everything except modules and privacy.",
+        "cancel": "Cancel",
+        "apply": "Apply"
       }
     },
     "invite": {

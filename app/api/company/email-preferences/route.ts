@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { requireOwnerOrAdmin } from '@/lib/auth/ownerAccess';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -44,7 +45,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const company = await companyOf(request);
+  // Changing what the company receives from us: owner or admin only.
+  const company = await requireOwnerOrAdmin(request);
   if ('response' in company) return company.response;
 
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;

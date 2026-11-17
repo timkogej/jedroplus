@@ -20,6 +20,12 @@ interface RolePermissionContextValue {
   personId: string | null;
   /** Granular permissions — only populated when role === 'staff'. */
   permissions: StaffPermissions | null;
+  /**
+   * Ali sme uporabnik videti, kateri termini so ghost. Lastnik vedno; admin in
+   * zaposleni samo z dovoljenjem "can_view_ghost_termini". Vsi ostali vidijo
+   * ghost termin kot običajen termin.
+   */
+  canSeeGhost: boolean;
   loading: boolean;
 }
 
@@ -34,6 +40,7 @@ export function RolePermissionProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<MemberRole | null>(null);
   const [personId, setPersonId] = useState<string | null>(null);
   const [permissions, setPermissions] = useState<StaffPermissions | null>(null);
+  const [adminSeesGhost, setAdminSeesGhost] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,6 +48,7 @@ export function RolePermissionProvider({ children }: { children: ReactNode }) {
       setRole(null);
       setPersonId(null);
       setPermissions(null);
+      setAdminSeesGhost(false);
       setLoading(false);
       return;
     }
@@ -54,17 +62,30 @@ export function RolePermissionProvider({ children }: { children: ReactNode }) {
       if (userRole === 'staff' && companyUuid) {
         const perms = await getStaffPermissions(companyUuid);
         setPermissions(perms);
+        setAdminSeesGhost(false);
       } else {
         setPermissions(null);
+        // Admin nima polnih "staff" dovoljenj v kontekstu, ghost pa sledi isti nastavitvi.
+        if (userRole === 'admin' && companyUuid) {
+          const perms = await getStaffPermissions(companyUuid);
+          setAdminSeesGhost(perms?.can_view_ghost_termini === true);
+        } else {
+          setAdminSeesGhost(false);
+        }
       }
 
       setLoading(false);
     });
   }, [user?.id, companyUuid]);
 
+  const canSeeGhost =
+    role === 'owner' ||
+    (role === 'staff' && permissions?.can_view_ghost_termini === true) ||
+    (role === 'admin' && adminSeesGhost);
+
   const value = useMemo<RolePermissionContextValue>(
-    () => ({ role, personId, permissions, loading }),
-    [role, personId, permissions, loading]
+    () => ({ role, personId, permissions, canSeeGhost, loading }),
+    [role, personId, permissions, canSeeGhost, loading]
   );
 
   return (

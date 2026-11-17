@@ -142,11 +142,25 @@
     },
     "resourceConflict": {
       "busyTitle": "Resource busy",
-      "unavailableTitle": "Resource unavailable",
+      "unavailableTitle": "Resource unavailable per schedule",
       "checkTitle": "Check resource availability",
       "unavailableAt": "{name}: not available at this time",
       "capacity": "{name}: {used}/{max} places taken",
-      "saveAnyway": "You can still save the appointment."
+      "saveAnyway": "You can still save the appointment.",
+      "outsideHours": "{name}: not available at this time (resource hours: {hours})",
+      "dayOff": "{name}: not available on this day per the resource schedule"
+    },
+    "addNotes": "Add notes for the client",
+    "staffConflict": {
+      "title": "This staff member already has an appointment at this time",
+      "line": "{time} · {client} ({service})"
+    },
+    "conflictDialog": {
+      "title": "This appointment overlaps",
+      "body": "Check that you really want to save the appointment at this time.",
+      "back": "Go back",
+      "saveAnyway": "Save anyway",
+      "saveHint": "You can still save — you will be asked to confirm first."
     }
   },
   "table": {

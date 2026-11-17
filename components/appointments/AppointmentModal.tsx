@@ -39,6 +39,7 @@ import {
 import CommunicationLanguageControl from '@/components/shared/CommunicationLanguageControl';
 import { useTranslations } from 'next-intl';
 import { checkResourceConflicts, fetchResursIdsForTerminRow, type ResourceConflict } from '@/lib/supabase/resursi';
+import { checkStaffConflicts, type StaffConflict } from '@/lib/supabase/staffConflicts';
 
 import { switchTrack, switchKnob } from '@/components/ui/switchClasses';
 import { waitForClient } from '@/lib/supabase/clients';
@@ -205,7 +206,7 @@ function AppointmentModal({
   const defaultLanguage = getCompanyCommunicationLanguage(companySettings);
   const { currency: defaultCurrency } = useCompanyRegion();
   const { user } = useAuth();
-  const { personId, role, permissions } = useRolePermissions();
+  const { personId, role, permissions, canSeeGhost } = useRolePermissions();
   useModalScrollLock(isOpen);
 
   // Inline client creation state
@@ -339,6 +340,12 @@ function AppointmentModal({
 
   // Internal notes toggle state (for create mode only)
   const [showInternalNotes, setShowInternalNotes] = useState(false);
+  // Notes for the client: hidden behind a button when creating, like internal notes.
+  const [showClientNotes, setShowClientNotes] = useState(false);
+  // Conflicts (staff already booked / resource busy) awaiting the user's decision.
+  const [staffConflicts, setStaffConflicts] = useState<StaffConflict[]>([]);
+  const [conflictDialog, setConflictDialog] = useState<{ resources: ResourceConflict[]; staff: StaffConflict[] } | null>(null);
+  const [checkingConflicts, setCheckingConflicts] = useState(false);
 
   // Ghost termin toggle state
   const [isGhostTermin, setIsGhostTermin] = useState(false);
@@ -350,6 +357,10 @@ function AppointmentModal({
   const [resourceConflicts, setResourceConflicts] = useState<ResourceConflict[]>([]);
   // Resource row-ids this appointment already occupies — suppressed from conflict warnings in edit mode
   const [ownResursIds, setOwnResursIds] = useState<Set<number>>(new Set());
+  const resourceScheduleLine = (c: ResourceConflict) =>
+    c.urnikUre
+      ? t('modal.resourceConflict.outsideHours', { name: c.naziv, hours: c.urnikUre })
+      : t('modal.resourceConflict.dayOff', { name: c.naziv });
   const resourceConflictTitle = useMemo(() => {
     if (resourceConflicts.length === 0) return '';
     if (resourceConflicts.every((c) => c.tip === 'zaseden')) return t('modal.resourceConflict.busyTitle');
@@ -493,6 +504,8 @@ function AppointmentModal({
       // In create mode, hide internal notes by default
       setShowInternalNotes(false);
     }
+    setShowClientNotes(false);
+    setConflictDialog(null);
     // Initialize ghost termin flag
     if (appointment && (mode === 'edit' || mode === 'view')) {
       setIsGhostTermin(appointment.belezi_termin === false);
@@ -716,6 +729,40 @@ function AppointmentModal({
     });
     return () => { cancelled = true; };
   }, [mode, companyId, appointment]);
+
+  // One place that checks both kinds of conflicts (used live and again right before saving).
+  const runConflictChecks = useCallback(async () => {
+    const serviceIds = [formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3].filter(Boolean) as string[];
+    if (!companyId || !formData.datum || !formData.cas_zacetek || !formData.cas_konec) {
+      return { resources: [] as ResourceConflict[], staff: [] as StaffConflict[] };
+    }
+    const excludeId = mode === 'edit' && appointment?.id ? Number(appointment.id) : undefined;
+    const person = allEmployees.find((e) => e.id === formData.zaposleni_id);
+    const [res, staff] = await Promise.all([
+      serviceIds.length
+        ? checkResourceConflicts(companyId, serviceIds, formData.datum, formData.cas_zacetek, formData.cas_konec, excludeId, formData.lokacija_id)
+        : Promise.resolve({ conflicts: [] as ResourceConflict[], error: null }),
+      checkStaffConflicts(companyId, [formData.zaposleni_id, person?.ref], formData.datum, formData.cas_zacetek, formData.cas_konec, excludeId),
+    ]);
+    return {
+      resources: res.conflicts.filter((c) => !ownResursIds.has(c.resursId)),
+      staff: staff.conflicts,
+    };
+  }, [companyId, formData.storitev_id, formData.storitev_id_2, formData.storitev_id_3, formData.datum, formData.cas_zacetek, formData.cas_konec, formData.lokacija_id, formData.zaposleni_id, allEmployees, mode, appointment, ownResursIds]);
+
+  // Staff double-booking check — debounced, non-blocking
+  useEffect(() => {
+    if (!companyId || !formData.zaposleni_id || !formData.datum || !formData.cas_zacetek || !formData.cas_konec) {
+      setStaffConflicts([]);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const { staff } = await runConflictChecks();
+      if (!cancelled) setStaffConflicts(staff);
+    }, 400);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [companyId, formData.zaposleni_id, formData.datum, formData.cas_zacetek, formData.cas_konec, runConflictChecks]);
 
   // Resource conflict check — debounced, non-blocking
   useEffect(() => {
@@ -1203,14 +1250,35 @@ function AppointmentModal({
     return Object.keys(newErrors).length === 0;
   };
 
+  const serijaZaShranjevanje = () => (mode === 'create' && omogociPonovitev && !isGhostTermin ? ponovitev : null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === 'view') return;
 
     if (!validate()) return;
 
-    const serija = mode === 'create' && omogociPonovitev && !isGhostTermin ? ponovitev : null;
-    await onSave({ ...formData, belezi_termin: !isGhostTermin }, serija);
+    // Last check with fresh data. Conflicts do not block saving, but the user must confirm them.
+    setCheckingConflicts(true);
+    let found: { resources: ResourceConflict[]; staff: StaffConflict[] } = { resources: [], staff: [] };
+    try {
+      found = await runConflictChecks();
+    } catch {
+      /* if the check fails, saving must still work */
+    } finally {
+      setCheckingConflicts(false);
+    }
+    if (found.resources.length > 0 || found.staff.length > 0) {
+      setConflictDialog(found);
+      return;
+    }
+
+    await onSave({ ...formData, belezi_termin: !isGhostTermin }, serijaZaShranjevanje());
+  };
+
+  const confirmSaveDespiteConflicts = async () => {
+    setConflictDialog(null);
+    await onSave({ ...formData, belezi_termin: !isGhostTermin }, serijaZaShranjevanje());
   };
 
   // Animation variants
@@ -2151,7 +2219,19 @@ function AppointmentModal({
               </div>
             )}
 
-            {/* Notes */}
+            {/* Notes for the client — behind a button when creating, like internal notes */}
+            {mode === 'create' && !showClientNotes && !formData.opombe ? (
+              <motion.button
+                type="button"
+                onClick={() => setShowClientNotes(true)}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="flex w-full items-center gap-2 rounded-xl bg-white px-4 py-3 text-[#7C78FA] transition-colors hover:bg-gray-50"
+              >
+                <Plus className="h-4 w-4" weight="bold" />
+                <span className="text-sm font-medium">{t('modal.addNotes')}</span>
+              </motion.button>
+            ) : (
             <div className={sectionClass}>
               <label className={labelClass}>
                 {t('modal.fields.notes')}
@@ -2177,6 +2257,7 @@ function AppointmentModal({
                 </>
               )}
             </div>
+            )}
 
             {/* Internal Notes - Not sent to client */}
             {isViewMode ? (
@@ -2245,8 +2326,9 @@ function AppointmentModal({
               />
             )}
 
-            {/* Ghost termin toggle — owner/admin always see it, staff only if permission granted */}
-            {!isViewMode && (role === 'owner' || role === 'admin' || (role === 'staff' && (permissions?.can_create_ghost_termin ?? false))) && (
+            {/* Ghost termin toggle — owner/admin always may create, staff only with permission. A termin that is
+                already ghost is only shown as ghost (and editable) to those who may see ghosts. */}
+            {!isViewMode && (role === 'owner' || role === 'admin' || (role === 'staff' && (permissions?.can_create_ghost_termin ?? false))) && (mode !== 'edit' || canSeeGhost) && (
               <div className={`${sectionClass} space-y-2`}>
                 <div className="flex items-center justify-between gap-4">
                   <div>
@@ -2336,29 +2418,93 @@ function AppointmentModal({
               </div>
             )}
 
-            {/* Resource conflict warning */}
-            {!isViewMode && resourceConflicts.length > 0 && (
-              <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3">
-                <div className="flex items-start gap-2.5">
-                  <Warning weight="regular" className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-500" />
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-amber-800">
-                      {resourceConflictTitle}
-                    </p>
-                    {resourceConflicts.map((c) => (
-                      <p key={c.resursId} className="mt-0.5 text-xs text-amber-700">
-                        {c.tip === 'urnik'
-                          ? t('modal.resourceConflict.unavailableAt', { name: c.naziv })
-                          : t('modal.resourceConflict.capacity', { name: c.naziv, used: c.trenutnoZasedeno, max: c.maxKapaciteta })
-                        }
-                      </p>
-                    ))}
-                    <p className="mt-1 text-xs text-amber-600">
-                      {t('modal.resourceConflict.saveAnyway')}
-                    </p>
+            {/* Conflict warning — staff already booked / resource busy. Does not block saving; saving asks to confirm. */}
+            {!isViewMode && (resourceConflicts.length > 0 || staffConflicts.length > 0) && (
+              <div role="alert" className="rounded-xl border-2 border-red-300 bg-red-50 px-4 py-3.5">
+                <div className="flex items-start gap-3">
+                  <Warning weight="fill" className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
+                  <div className="flex-1 space-y-2">
+                    {staffConflicts.length > 0 && (
+                      <div>
+                        <p className="text-sm font-semibold text-red-800">{t('modal.staffConflict.title')}</p>
+                        {staffConflicts.map((c) => (
+                          <p key={c.terminId} className="mt-0.5 text-sm text-red-700">
+                            {t('modal.staffConflict.line', { time: `${c.casZacetek}–${c.casKonec}`, client: c.stranka || '—', service: c.storitev || '—' })}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {resourceConflicts.length > 0 && (
+                      <div>
+                        <p className="text-sm font-semibold text-red-800">{resourceConflictTitle}</p>
+                        {resourceConflicts.map((c) => (
+                          <p key={c.resursId} className="mt-0.5 text-sm text-red-700">
+                            {c.tip === 'urnik'
+                              ? resourceScheduleLine(c)
+                              : t('modal.resourceConflict.capacity', { name: c.naziv, used: c.trenutnoZasedeno, max: c.maxKapaciteta })
+                            }
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-xs text-red-600">{t('modal.conflictDialog.saveHint')}</p>
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Confirmation when saving despite conflicts */}
+            {conflictDialog && (
+              <BodyPortal>
+                <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/40 p-4" onClick={() => setConflictDialog(null)}>
+                  <div
+                    role="alertdialog"
+                    aria-modal="true"
+                    className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-red-50">
+                        <Warning weight="fill" className="h-5 w-5 text-red-500" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-base font-semibold text-gray-900">{t('modal.conflictDialog.title')}</h3>
+                        <p className="mt-1 text-sm text-gray-500">{t('modal.conflictDialog.body')}</p>
+                      </div>
+                    </div>
+                    <ul className="mt-4 space-y-1.5 rounded-xl bg-red-50 px-3.5 py-3 text-sm text-red-800">
+                      {conflictDialog.staff.map((c) => (
+                        <li key={`s${c.terminId}`}>
+                          {t('modal.staffConflict.line', { time: `${c.casZacetek}–${c.casKonec}`, client: c.stranka || '—', service: c.storitev || '—' })}
+                        </li>
+                      ))}
+                      {conflictDialog.resources.map((c) => (
+                        <li key={`r${c.resursId}`}>
+                          {c.tip === 'urnik'
+                            ? resourceScheduleLine(c)
+                            : t('modal.resourceConflict.capacity', { name: c.naziv, used: c.trenutnoZasedeno, max: c.maxKapaciteta })}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setConflictDialog(null)}
+                        className="rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                      >
+                        {t('modal.conflictDialog.back')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={confirmSaveDespiteConflicts}
+                        className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-red-700"
+                      >
+                        {t('modal.conflictDialog.saveAnyway')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </BodyPortal>
             )}
               </div>
             </div>
@@ -2376,7 +2522,7 @@ function AppointmentModal({
                 </motion.button>
                 <motion.button
                   type="submit"
-                  disabled={isSaving}
+                  disabled={isSaving || checkingConflicts}
                   whileTap={{ scale: isSaving ? 1 : 0.98 }}
                   className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-500 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
                 >

@@ -94,7 +94,9 @@
       "employeeCodeNote": "Za dodavanje zaposlenika u vašu tvrtku. Zaposlenik vidi samo svoj raspored i termine koji su mu dodijeljeni. Nema pristup postavkama, analitici ni podacima o drugim zaposlenicima.",
       "slugLabel": "Slug tvrtke",
       "slugNote": "Nastavak koji se koristi u poveznicama za rezervacije i u chatbotu na web-stranici",
-      "disclaimer": "Kodove dijelite samo s osobama od povjerenja. Administrator ima potpuni pristup sustavu, a zaposlenik samo svojim terminima."
+      "disclaimer": "Kodove dijelite samo s osobama od povjerenja. Administrator ima potpuni pristup sustavu, a zaposlenik samo svojim terminima.",
+      "showCode": "Prikaži kod",
+      "hideCode": "Sakrij kod"
     },
     "qr": {
       "title": "QR kod za registraciju klijenata",
@@ -230,7 +232,8 @@
         "storitve": "Usluge",
         "osebje": "Zaposlenici",
         "analitika": "Analitika",
-        "moduli": "Moduli"
+        "moduli": "Moduli",
+        "zasebnost": "Privatnost"
       },
       "labels": {
         "can_view_all_appointments": "Vidi sve termine tvrtke",
@@ -261,7 +264,34 @@
         "can_manage_rezervacije": "Upravljanje Rezervacijama",
         "can_access_lost_leads": "Pristup izgubljenim klijentima",
         "can_manage_lost_leads": "Upravljanje izgubljenim klijentima",
-        "can_create_ghost_termin": "Može izraditi nezabilježene termine (ne ulaze u analitiku)"
+        "can_create_ghost_termin": "Može izraditi nezabilježene termine (ne ulaze u analitiku)",
+        "can_view_ghost_termini": "Vidi koji su termini ghost (ostali ih vide kao uobičajene)"
+      },
+      "pastAppointments": {
+        "label": "Prošli termini koje vidi zaposlenik",
+        "hint": "Stariji termini skriveni su od zaposlenika (vlasnik i admin vide sve).",
+        "options": {
+          "all": "Svi",
+          "today": "Samo od danas",
+          "d1": "Od jučer",
+          "d7": "Zadnjih 7 dana",
+          "d30": "Zadnjih 30 dana",
+          "d90": "Zadnjih 90 dana"
+        }
+      },
+      "enabledCount": "{on} od {total} uključeno",
+      "privacyHint": "Ghost termini i prošli termini osjetljivi su podaci. Zaposlenik ih vidi samo ako je ovdje dopušteno.",
+      "presets": {
+        "title": "Brze predloške",
+        "hint": "Prepisuje termine, klijente, usluge, osoblje i analitiku. Moduli i privatnost ostaju nepromijenjeni. Sprema se tek s \"Spremi\".",
+        "minimal": "Minimalno",
+        "standard": "Standardno",
+        "full": "Potpuno",
+        "minimalDesc": "Minimalno: zaposlenik vidi i uređuje samo svoje termine te vidi klijente.",
+        "standardDesc": "Standardno: vidi sve termine, uređuje svoje, radi s klijentima, vidi usluge i osoblje.",
+        "fullDesc": "Potpuno: zaposlenik može gotovo sve osim modula i privatnosti.",
+        "cancel": "Odustani",
+        "apply": "Primijeni"
       }
     },
     "invite": {

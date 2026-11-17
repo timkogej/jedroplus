@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import { X, Plus } from '@phosphor-icons/react';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { formatTime, getGradientCSS } from '@/lib/utils/calendar';
 
 // Extract FIRST hex color from a gradient or return the hex color as-is
@@ -188,7 +189,9 @@ function AppointmentCard({
   const tSerija = useTranslations('appointments.serija');
   const isCompleted = ['completed', 'Zaključen', 'zaključen', 'no_show', 'Ni prišel'].includes(appointment.status || '');
   const isNoShow = appointment.status === 'no_show' || appointment.status === 'Ni prišel';
-  const isGhost = appointment.belezi_termin === false && !appointment.deleted_at;
+  // Ghost se pokaže samo tistim, ki smejo videti, kateri termini so ghost; drugi ga vidijo kot običajen termin.
+  const { canSeeGhost } = useRolePermissions();
+  const isGhost = canSeeGhost && appointment.belezi_termin === false && !appointment.deleted_at;
 
   const appointmentDuration = useMemo(() => {
     if (duration !== undefined) return duration;

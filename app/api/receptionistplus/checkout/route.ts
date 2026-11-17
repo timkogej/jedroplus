@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireCompanyAccess, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { forbiddenUnlessOwner } from '@/lib/auth/ownerAccess';
 import { stripe, RECEPTIONISTPLUS_PACKS, ReceptionistPlusPackKey } from '@/lib/receptionistPlusStripe';
 import { routing } from '@/i18n/routing';
 import type Stripe from 'stripe';
@@ -59,6 +60,9 @@ export async function POST(request: NextRequest) {
   if (!companyUuid) {
     return NextResponse.json({ ok: false, error: 'Company ni najdena' }, { status: 400 });
   }
+
+  const notOwner = await forbiddenUnlessOwner(user.id, companyUuid);
+  if (notOwner) return notOwner;
 
   const packConfig = RECEPTIONISTPLUS_PACKS[pack];
   if (!packConfig.priceId) {

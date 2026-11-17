@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { forbiddenUnlessOwner } from '@/lib/auth/ownerAccess';
 import {
   ASSISTANT_NAME_MAX_LENGTH,
   GREETING_MAX_LENGTH,
@@ -37,6 +38,9 @@ async function resolveCompanySlug(request: NextRequest) {
   if (!companyUuid) {
     return { error: NextResponse.json({ ok: false, error: 'Company ni najdena' }, { status: 400 }) };
   }
+
+  const notOwner = await forbiddenUnlessOwner(user.id, companyUuid);
+  if (notOwner) return { error: notOwner };
 
   const admin = adminClient();
   const { data: company } = await admin.from('companies').select('slug').eq('id', companyUuid).maybeSingle();

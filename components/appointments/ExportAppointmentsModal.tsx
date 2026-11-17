@@ -1,5 +1,6 @@
 'use client';
 
+import { useRolePermissions } from '@/app/role-permission-context';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -80,6 +81,7 @@ export default function ExportAppointmentsModal({
   appointments,
 }: ExportAppointmentsModalProps) {
   const sheetDrag = useSheetDrag(onClose);
+  const { canSeeGhost } = useRolePermissions();
   const t = useTranslations('appointments');
   const ts = useTranslations('appointments.status');
   const locale = useLocale();
@@ -133,10 +135,11 @@ export default function ExportAppointmentsModal({
       const d = new Date(a.datum);
       if (d < fromDate || d > toDate) return false;
       if (onlyCompleted && normalizeStatus(a.status || '') !== 'completed') return false;
-      if (excludeGhost && a.belezi_termin === false) return false;
+      // Kdor ne vidi ghost terminov, jih vidi kot običajne, zato jih izvoz ne izloči.
+      if (canSeeGhost && excludeGhost && a.belezi_termin === false) return false;
       return true;
     });
-  }, [appointments, from, to, onlyCompleted, excludeGhost, rangeValid]);
+  }, [appointments, from, to, onlyCompleted, excludeGhost, canSeeGhost, rangeValid]);
 
   const handleExport = useCallback(async () => {
     if (!rangeValid || filtered.length === 0 || isExporting) return;
@@ -352,7 +355,7 @@ export default function ExportAppointmentsModal({
                 </p>
                 <div className="divide-y divide-gray-100">
                   {switchRow(onlyCompleted, setOnlyCompleted, t('export.onlyCompleted'))}
-                  {switchRow(excludeGhost, setExcludeGhost, t('export.excludeGhost'))}
+                  {canSeeGhost && switchRow(excludeGhost, setExcludeGhost, t('export.excludeGhost'))}
                 </div>
               </div>
 

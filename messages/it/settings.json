@@ -94,7 +94,9 @@
       "employeeCodeNote": "Per aggiungere collaboratori alla tua attività. Il collaboratore vede solo il proprio orario e gli appuntamenti assegnati. Non ha accesso a impostazioni, analisi o dati di altri collaboratori.",
       "slugLabel": "Slug dell'attività",
       "slugNote": "Il suffisso usato nei link di prenotazione e nel chatbot sul sito web",
-      "disclaimer": "Condividi i codici solo con persone di fiducia. L'amministratore ha accesso completo al sistema, il collaboratore solo ai propri appuntamenti."
+      "disclaimer": "Condividi i codici solo con persone di fiducia. L'amministratore ha accesso completo al sistema, il collaboratore solo ai propri appuntamenti.",
+      "showCode": "Mostra codice",
+      "hideCode": "Nascondi codice"
     },
     "qr": {
       "title": "Codice QR per la registrazione dei clienti",
@@ -230,7 +232,8 @@
         "storitve": "Servizi",
         "osebje": "Collaboratori",
         "analitika": "Analisi",
-        "moduli": "Moduli"
+        "moduli": "Moduli",
+        "zasebnost": "Privacy"
       },
       "labels": {
         "can_view_all_appointments": "Vede tutti gli appuntamenti dell'attività",
@@ -261,7 +264,34 @@
         "can_manage_rezervacije": "Gestione delle Prenotazioni",
         "can_access_lost_leads": "Accesso ai clienti persi",
         "can_manage_lost_leads": "Gestione dei clienti persi",
-        "can_create_ghost_termin": "Può creare appuntamenti non registrati (esclusi dalle analisi)"
+        "can_create_ghost_termin": "Può creare appuntamenti non registrati (esclusi dalle analisi)",
+        "can_view_ghost_termini": "Vede quali appuntamenti sono ghost (gli altri li vedono come normali)"
+      },
+      "pastAppointments": {
+        "label": "Appuntamenti passati visibili al personale",
+        "hint": "Gli appuntamenti più vecchi sono nascosti al personale (titolare e admin vedono tutto).",
+        "options": {
+          "all": "Tutti",
+          "today": "Solo da oggi",
+          "d1": "Da ieri",
+          "d7": "Ultimi 7 giorni",
+          "d30": "Ultimi 30 giorni",
+          "d90": "Ultimi 90 giorni"
+        }
+      },
+      "enabledCount": "{on} di {total} attivi",
+      "privacyHint": "Gli appuntamenti ghost e quelli passati sono dati sensibili. I dipendenti li vedono solo se consentito qui.",
+      "presets": {
+        "title": "Preimpostazioni rapide",
+        "hint": "Sovrascrive appuntamenti, clienti, servizi, personale e analisi. Moduli e privacy restano invariati. Si salva solo con \"Salva\".",
+        "minimal": "Minimo",
+        "standard": "Standard",
+        "full": "Completo",
+        "minimalDesc": "Minimo: il dipendente vede e modifica solo i propri appuntamenti e vede i clienti.",
+        "standardDesc": "Standard: vede tutti gli appuntamenti, modifica i propri, lavora con i clienti, vede servizi e personale.",
+        "fullDesc": "Completo: il dipendente può fare quasi tutto tranne moduli e privacy.",
+        "cancel": "Annulla",
+        "apply": "Applica"
       }
     },
     "invite": {

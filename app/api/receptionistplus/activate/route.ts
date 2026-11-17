@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { authenticateRequest, resolveUserCompany } from '@/lib/auth/apiAuth';
+import { forbiddenUnlessOwner } from '@/lib/auth/ownerAccess';
 import { getCompanyCommunicationLanguage, toIsoLanguage } from '@/lib/communicationLanguage';
 import { isReceptionistLanguage } from '@/lib/receptionist';
 import { apiMessages } from '@/lib/api/apiMessages';
@@ -35,6 +36,9 @@ export async function POST(request: NextRequest) {
   if (!companyUuid) {
     return NextResponse.json({ ok: false, error: 'Company ni najdena' }, { status: 400 });
   }
+
+  const notOwner = await forbiddenUnlessOwner(user.id, companyUuid);
+  if (notOwner) return notOwner;
 
   const admin = adminClient();
 

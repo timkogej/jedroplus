@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { motion } from 'motion/react';
-import { CaretLeft, Copy, Check, Lock } from '@phosphor-icons/react';
+import { CaretLeft, Copy, Check, Lock, Eye, EyeSlash } from '@phosphor-icons/react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import PublicLanguageToggle from '@/components/shared/PublicLanguageToggle';
@@ -89,6 +89,8 @@ export default function GeneralSettingsPage() {
   const [marketingOptIn, setMarketingOptIn] = useState(false);
 
   const [copiedId, setCopiedId] = useState(false);
+  const [showAdminCode, setShowAdminCode] = useState(false);
+  const [showStaffCode, setShowStaffCode] = useState(false);
   const [copiedAdminCode, setCopiedAdminCode] = useState(false);
   const [copiedStaffCode, setCopiedStaffCode] = useState(false);
 
@@ -406,9 +408,18 @@ export default function GeneralSettingsPage() {
                 <p className="text-sm font-semibold text-gray-900 mb-0.5">{t('general.companyData.adminCodeLabel')}</p>
                 <p className="text-xs text-gray-500 mb-2">{t('general.companyData.adminCodeNote')}</p>
                 <div className="text-2xl font-bold gradient-text tracking-tight">
-                  {adminCode}
+                  {showAdminCode ? adminCode : '•'.repeat(Math.max(adminCode.length, 6))}
                 </div>
               </div>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowAdminCode((v) => !v)}
+                aria-label={showAdminCode ? t('general.companyData.hideCode') : t('general.companyData.showCode')}
+                aria-pressed={showAdminCode}
+                className="p-2 mr-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                {showAdminCode ? <EyeSlash className="w-4 h-4 text-gray-500" /> : <Eye className="w-4 h-4 text-gray-500" />}
+              </motion.button>
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => copyToClipboard(adminCode, 'adminCode')}
@@ -429,10 +440,20 @@ export default function GeneralSettingsPage() {
                 <p className="text-sm font-semibold text-gray-900 mb-0.5">{t('general.companyData.employeeCodeLabel')}</p>
                 <p className="text-xs text-gray-500 mb-2">{t('general.companyData.employeeCodeNote')}</p>
                 <div className="text-2xl font-bold gradient-text tracking-tight">
-                  {staffCode || '—'}
+                  {staffCode ? (showStaffCode ? staffCode : '•'.repeat(Math.max(staffCode.length, 6))) : '—'}
                 </div>
               </div>
               {staffCode && (
+                <>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowStaffCode((v) => !v)}
+                  aria-label={showStaffCode ? t('general.companyData.hideCode') : t('general.companyData.showCode')}
+                  aria-pressed={showStaffCode}
+                  className="p-2 mr-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  {showStaffCode ? <EyeSlash className="w-4 h-4 text-gray-500" /> : <Eye className="w-4 h-4 text-gray-500" />}
+                </motion.button>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => copyToClipboard(staffCode, 'staffCode')}
@@ -444,6 +465,7 @@ export default function GeneralSettingsPage() {
                     <Copy className="w-4 h-4 text-gray-500" />
                   )}
                 </motion.button>
+                </>
               )}
             </div>
 

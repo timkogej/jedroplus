@@ -29,6 +29,7 @@ import {
   CalendarBlank,
 } from '@phosphor-icons/react';
 import { useTranslations, useLocale } from 'next-intl';
+import { useRolePermissions } from '@/app/role-permission-context';
 import { useGlasovniObrazec } from '@/components/glas/useGlasovniObrazec';
 import type { AppointmentWithDetails, Storitev } from '@/types/appointments';
 import type { Resurs } from '@/types/resursi';
@@ -143,6 +144,7 @@ export function AppointmentDetailModal({
    */
   glasAkcija?: GlasAkcija | null;
 }) {
+  const { canSeeGhost } = useRolePermissions();
   const t = useTranslations('appointments');
   const tCommon = useTranslations('common');
   const locale = useLocale();
@@ -543,14 +545,14 @@ export function AppointmentDetailModal({
         )}
 
         {/* Podrobnosti — serija in ali se termin beleži (ID termina ni prikazan, Tim 16. 11.) */}
-        {(appointment.belezi_termin === false || serija) && (
+        {((canSeeGhost && appointment.belezi_termin === false) || serija) && (
           <SheetGroup label={t('calendarView.detailModal.fields.details')}>
             {serija && (
               <SheetRow label={t('serija.label')}>
                 <span className="tnum text-sm text-gray-700">{t('serija.position', { zap: serija.zap, skupaj: serija.skupaj })}</span>
               </SheetRow>
             )}
-            {appointment.belezi_termin === false && (
+            {canSeeGhost && appointment.belezi_termin === false && (
               <SheetRow label={t('ghost.title')}>
                 <span className="flex min-w-0 items-center gap-2.5">
                   <EyeSlash className="h-4 w-4 flex-shrink-0 text-gray-400" weight="regular" />

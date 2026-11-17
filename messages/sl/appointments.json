@@ -142,11 +142,25 @@
     },
     "resourceConflict": {
       "busyTitle": "Resurs zaseden",
-      "unavailableTitle": "Resurs ni na voljo",
+      "unavailableTitle": "Resurs ni na voljo po urniku",
       "checkTitle": "Preveri razpoložljivost resursa",
       "unavailableAt": "{name}: ni na voljo ob tem času",
       "capacity": "{name}: {used}/{max} mest zasedenih",
-      "saveAnyway": "Termin lahko vseeno shranite."
+      "saveAnyway": "Termin lahko vseeno shranite.",
+      "outsideHours": "{name}: ob tem času ne dela (delovni čas resursa: {hours})",
+      "dayOff": "{name}: ta dan po urniku resursa ne dela"
+    },
+    "addNotes": "Dodaj opombe za stranko",
+    "staffConflict": {
+      "title": "Zaposleni ima v tem času že drug termin",
+      "line": "{time} · {client} ({service})"
+    },
+    "conflictDialog": {
+      "title": "Termin se prekriva",
+      "body": "Preverite, ali res želite shraniti termin ob tem času.",
+      "back": "Nazaj",
+      "saveAnyway": "Vseeno shrani",
+      "saveHint": "Termin lahko vseeno shranite — prej boste vprašani za potrditev."
     }
   },
   "table": {
