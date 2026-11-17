@@ -289,6 +289,7 @@ export const VSE_PRAVICE_STAFF: StaffPermissions = {
   can_manage_chatbot_plus_settings: false, can_access_opomniki: false, can_manage_opomniki: false,
   can_access_rezervacije: false, can_manage_rezervacije: false, can_access_lost_leads: false,
   can_manage_lost_leads: false, can_view_zgodovina: false, can_create_ghost_termin: false,
+  can_view_ghost_termini: false, past_appointments_days: null,
 };
 
 export function kontekst(p: Partial<Kontekst> = {}): Kontekst {
